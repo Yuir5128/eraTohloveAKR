@@ -4,15 +4,15 @@
 ;-------------------------------------------------
 SELECTCASE SELECTCOM
 	;경구속, 약, 술, 이동계(야외플레이 이외), 촉수소환/송환, 촉수구욕는 줄어들지 않는다.
-	CASE 131 TO 134, 300 TO 306, 310, 312, 313, 315, 316, 319, 323, 340, 350
-	;데이트
+	CASE 131 TO 134,300 TO 306,310,312,313,315,316,319,323,340,350
+	;デート
 	CASE 207
 		TFLAG:74 -= 20
 	;가구로한다, 기다리거나가사, 노래연습, 비디오감상, 윤간
-	CASE 150, 203, 204, 205, 311, 322
+	CASE 150,203,204,205,311,322
 		TFLAG:74 -= 5
 	;섹스계는-3. 뽑지 않는 플래그가 있는 경우는-1
-	CASE 100 TO 106, 110 TO 116, 181, 260 TO 265, 270, 271, 405, 406, 430, 431, 440, 441, 507 TO 515, 517 TO 526
+	CASE 100 TO 106,110 TO 116,181,260 TO 265,270,271,405,406,430,431,440,441,507 TO 515,517 TO 526
 		IF TFLAG:60
 			TFLAG:74 -= 1
 		ELSE
@@ -27,14 +27,14 @@ ENDSELECT
 ;-------------------------------------------------
 SELECTCASE SELECTCOM
 	;고문/낙인/한쪽팔절단/한쪽다리절단/발치
-	CASE 151, 156, 390 TO 392
+	CASE 151,156,390 TO 392
 		;조교자에 대해서복종함락, 도M이외
-		SIF !TALENT:복종 && !TALENT:예속 && TALENT:마조!= 2
+		SIF !TALENT:복종 && !TALENT:예속 && TALENT:마조 != 2
 			CFLAG:10 += 5
 	;식분시킨다/식분한다
-	CASE 185, 286
+	CASE 185,286
 		;식분경험 30 미만으로마조가 아닌지, 도M가 아니다
-		SIF (EXP:식분경험 < 30 && !TALENT:마조) || TALENT:마조!= 2
+		SIF (EXP:식분경험 < 30 && !TALENT:마조) || TALENT:마조 != 2
 			CFLAG:10 += 3
 	;촉수계
 	CASE 340 TO 370
@@ -53,23 +53,23 @@ ENDSELECT
 ;원래뇨의가 없는 경우는 오르지 않아
 IF BASE:뇨의 >= 60
 	SELECTCASE SELECTCOM
-		;C·P·V계 커맨드
-		CASE 20 TO 44, 404
+		;Ｃ・Ｐ・Ｖ系コマンド
+		CASE 20 TO 44,404
 			BASE:뇨의 += 5
 		;U계 커맨드
 		CASE 60 TO 61
 			BASE:뇨의 += 30
 		;충격을 주는 커맨드(경도)
 		;스팽킹, 젖스팽킹, 촛불, 가구로한다
-		CASE 140, 141, 144, 150
+		CASE 140,141,144,150
 			BASE:뇨의 += 3
 		;충격을 주는 커맨드(중증)
 		;A섹스계, 채찍, 바늘, 삼각목마, 고문, 목조르기, 낙인
-		CASE 110 TO 116, 142, 143, 145, 151, 155, 156, 404
+		CASE 110 TO 116,142,143,145,151,155,156,404
 			BASE:뇨의 += 10
 		;직접 공격
 		;발로 밟는다, 배빵
-		CASE 153, 154
+		CASE 153,154
 			BASE:뇨의 += 50
 	ENDSELECT
 ENDIF
@@ -80,19 +80,19 @@ ENDIF
 IF BASE:변의 >= 60
 	SELECTCASE SELECTCOM
 		;A계 커맨드
-		CASE 50 TO 56, 404
+		CASE 50 TO 56,404
 			BASE:변의 += 5
 		;충격을 주는 커맨드(경도)
 		;스팽킹, 젖스팽킹, 촛불, 가구로한다
-		CASE 140, 141, 144, 150
+		CASE 140,141,144,150
 			BASE:변의 += 3
 		;충격을 주는 커맨드(중증)
 		;A섹스계, 채찍, 바늘, 삼각목마, 고문, 목조르기, 낙인
-		CASE 110 TO 116, 142, 143, 145, 151, 155, 156, 404
+		CASE 110 TO 116,142,143,145,151,155,156,404
 			BASE:변의 += 10
 		;직접 공격
 		;발로 밟는다, 배빵
-		CASE 153, 154
+		CASE 153,154
 			BASE:변의 += 50
 	ENDSELECT
 ENDIF
@@ -104,22 +104,22 @@ ENDIF
 IF BASE:구역질 >= 60
 	SELECTCASE SELECTCOM
 		;입를 사용하는 커맨드
-		CASE 1, 71, 75, 77, 222, 224, 407, 411, 412, 420, 516
+		CASE 1,71,75,77,222,224,407,411,412,420,516
 			BASE:구역질 += 5
 		;섹스계, A섹스계
-		CASE 100 TO 106, 110 TO 116, 260 TO 265, 405, 406, 430, 431, 507 TO 515, 517 TO 527
+		CASE 100 TO 106,110 TO 116,260 TO 265,405,406,430,431,507 TO 515,517 TO 527
 			BASE:구역질 += 10
 		;충격을 주는 커맨드(경도)
-		;스팽킹, 젖스팽킹, 촛불, 가구로한다
-		CASE 140, 141, 144, 150
+		;스팽킹、젖스팽킹、촛불、가구로한다
+		CASE 140,141,144,150
 			BASE:구역질 += 5
 		;충격을 주는 커맨드(중증)
-		;이마라치오, 채찍, 바늘, 삼각목마, 고문, 목조르기, 낙인
-		CASE 72, 110 TO 116, 142, 143, 145, 151, 155, 156, 404
+		;イマラチオ、채찍、바늘、삼각목마、拷問、목조르기、낙인
+		CASE 72,110 TO 116,142,143,145,151,155,156,404
 			BASE:구역질 += 10
 		;직접 공격
 		;발로 밟는다, 배빵
-		CASE 153, 154
+		CASE 153,154
 			BASE:구역질 += 50
 	ENDSELECT
 ENDIF
@@ -235,27 +235,27 @@ LOCAL:1 = SOURCE:쾌C
 
 ;ABL:욕망를 본다
 SIF ABL:욕망 == 0
-	TIMES LOCAL:1, 0.50
+	TIMES LOCAL:1 , 0.50
 SIF ABL:욕망 == 1
-	TIMES LOCAL:1, 0.60
+	TIMES LOCAL:1 , 0.60
 SIF ABL:욕망 == 2
-	TIMES LOCAL:1, 0.70
+	TIMES LOCAL:1 , 0.70
 SIF ABL:욕망 == 3
-	TIMES LOCAL:1, 0.80
+	TIMES LOCAL:1 , 0.80
 SIF ABL:욕망 == 4
-	TIMES LOCAL:1, 0.90
+	TIMES LOCAL:1 , 0.90
 SIF ABL:욕망 == 5
-	TIMES LOCAL:1, 1.00
+	TIMES LOCAL:1 , 1.00
 SIF ABL:욕망 == 6
-	TIMES LOCAL:1, 1.05
+	TIMES LOCAL:1 , 1.05
 SIF ABL:욕망 == 7
-	TIMES LOCAL:1, 1.10
+	TIMES LOCAL:1 , 1.10
 SIF ABL:욕망 == 8
-	TIMES LOCAL:1, 1.15
+	TIMES LOCAL:1 , 1.15
 SIF ABL:욕망 == 9
-	TIMES LOCAL:1, 1.20
+	TIMES LOCAL:1 , 1.20
 SIF ABL:욕망 >= 10
-	TIMES LOCAL:1, 1.40
+	TIMES LOCAL:1 , 1.40
 
 UP:쾌C += LOCAL
 UP:욕정 += LOCAL:1
@@ -341,32 +341,32 @@ LOCAL:1 = SOURCE:쾌V
 
 ;ABL:욕망를 본다
 SIF ABL:욕망 == 0
-	TIMES LOCAL:1, 0.50
+	TIMES LOCAL:1 , 0.50
 SIF ABL:욕망 == 1
-	TIMES LOCAL:1, 0.60
+	TIMES LOCAL:1 , 0.60
 SIF ABL:욕망 == 2
-	TIMES LOCAL:1, 0.70
+	TIMES LOCAL:1 , 0.70
 SIF ABL:욕망 == 3
-	TIMES LOCAL:1, 0.80
+	TIMES LOCAL:1 , 0.80
 SIF ABL:욕망 == 4
-	TIMES LOCAL:1, 0.90
+	TIMES LOCAL:1 , 0.90
 SIF ABL:욕망 == 5
-	TIMES LOCAL:1, 1.00
+	TIMES LOCAL:1 , 1.00
 SIF ABL:욕망 == 6
-	TIMES LOCAL:1, 1.05
+	TIMES LOCAL:1 , 1.05
 SIF ABL:욕망 == 7
-	TIMES LOCAL:1, 1.10
+	TIMES LOCAL:1 , 1.10
 SIF ABL:욕망 == 8
-	TIMES LOCAL:1, 1.15
+	TIMES LOCAL:1 , 1.15
 SIF ABL:욕망 == 9
-	TIMES LOCAL:1, 1.20
+	TIMES LOCAL:1 , 1.20
 SIF ABL:욕망 >= 10
-	TIMES LOCAL:1, 1.40
+	TIMES LOCAL:1 , 1.40
 
 ;소인체형
 IF TALENT:소인체형
 	TIMES LOCAL , 0.80
-	TIMES LOCAL:1, 1.20
+	TIMES LOCAL:1 , 1.20
 	UP:습득 += LOCAL:1/2
 ENDIF
 
@@ -685,7 +685,7 @@ ENDIF
 ;꽐라플레이
 IF TEQUIP:꽐라플레이
 	;사케 혹은 사케·맥주를 마신알콜쓰레기
-	IF TFLAG:76 == 3 || (TALENT:알콜쓰레기 && TFLAG:76!= 1)
+	IF TFLAG:76 == 3 || (TALENT:알콜쓰레기 && TFLAG:76 != 1)
 		TIMES UP:쾌C , 0.50
 		TIMES UP:쾌V , 0.50
 		TIMES UP:쾌A , 0.50
@@ -898,27 +898,27 @@ LOCAL:1 = SOURCE:애정
 
 ;욕망를 본다
 SIF ABL:욕망 == 0
-	TIMES LOCAL:1, 0.00
+	TIMES LOCAL:1 , 0.00
 SIF ABL:욕망 == 1
-	TIMES LOCAL:1, 0.40
+	TIMES LOCAL:1 , 0.40
 SIF ABL:욕망 == 2
-	TIMES LOCAL:1, 0.80
+	TIMES LOCAL:1 , 0.80
 SIF ABL:욕망 == 3
-	TIMES LOCAL:1, 1.20
+	TIMES LOCAL:1 , 1.20
 SIF ABL:욕망 == 4
-	TIMES LOCAL:1, 1.60
+	TIMES LOCAL:1 , 1.60
 SIF ABL:욕망 == 5
-	TIMES LOCAL:1, 2.00
+	TIMES LOCAL:1 , 2.00
 SIF ABL:욕망 == 6
-	TIMES LOCAL:1, 2.40
+	TIMES LOCAL:1 , 2.40
 SIF ABL:욕망 == 7
-	TIMES LOCAL:1, 2.80
+	TIMES LOCAL:1 , 2.80
 SIF ABL:욕망 == 8
-	TIMES LOCAL:1, 3.20
+	TIMES LOCAL:1 , 3.20
 SIF ABL:욕망 == 9
-	TIMES LOCAL:1, 3.60
+	TIMES LOCAL:1 , 3.60
 SIF ABL:욕망 >= 10
-	TIMES LOCAL:1, 5.00
+	TIMES LOCAL:1 , 5.00
 
 UP:순종 += LOCAL
 UP:욕정 += LOCAL:1
@@ -1039,45 +1039,45 @@ LOCAL:2 = SOURCE:통증/20
 
 ;마조끼
 SIF ABL:마조끼 == 0
-	TIMES LOCAL:1, 0.00
+	TIMES LOCAL:1 , 0.00
 SIF ABL:마조끼 == 1
-	TIMES LOCAL:1, 0.10
+	TIMES LOCAL:1 , 0.10
 SIF ABL:마조끼 == 2
-	TIMES LOCAL:1, 0.20
+	TIMES LOCAL:1 , 0.20
 SIF ABL:마조끼 == 3
-	TIMES LOCAL:1, 0.30
+	TIMES LOCAL:1 , 0.30
 SIF ABL:마조끼 == 4
-	TIMES LOCAL:1, 0.45
+	TIMES LOCAL:1 , 0.45
 SIF ABL:마조끼 == 5
-	TIMES LOCAL:1, 0.60
+	TIMES LOCAL:1 , 0.60
 SIF ABL:마조끼 == 6
-	TIMES LOCAL:1, 0.75
+	TIMES LOCAL:1 , 0.75
 SIF ABL:마조끼 == 7
-	TIMES LOCAL:1, 0.90
+	TIMES LOCAL:1 , 0.90
 SIF ABL:마조끼 == 8
-	TIMES LOCAL:1, 1.20
+	TIMES LOCAL:1 , 1.20
 SIF ABL:마조끼 == 9
-	TIMES LOCAL:1, 1.50
+	TIMES LOCAL:1 , 1.50
 SIF ABL:마조끼 >= 10
-	TIMES LOCAL:1, 3.00
+	TIMES LOCAL:1 , 3.00
 
 ;소인체형
 IF TALENT:소인체형
 	TIMES LOCAL , 2.00
-	TIMES LOCAL:1, 0.75
+	TIMES LOCAL:1 , 0.75
 ENDIF
 
 ;조교자가【새드, 도S】
 SELECTCASE TALENT:PLAYER:새드
 	CASE 1
-		TIMES LOCAL:1, 1.50
+		TIMES LOCAL:1 , 1.50
 	CASE 2
-		TIMES LOCAL:1, 2.50
+		TIMES LOCAL:1 , 2.50
 ENDSELECT
 
 ;겁쟁이
 SIF TALENT:겁쟁이
-	TIMES LOCAL:2, 2.00
+	TIMES LOCAL:2 , 2.00
 
 ;마조끼가 있으면 PALAM:욕정도 오른다
 ;그 때 조교자가【새드】라면 효과적
@@ -1128,37 +1128,37 @@ LOCAL:1 = SOURCE:중독충족
 ;욕망
 IF ABL:욕망 == 0
 	TIMES LOCAL , 0.40
-	TIMES LOCAL:1, 0.50
+	TIMES LOCAL:1 , 0.50
 ELSEIF ABL:욕망 == 1
 	TIMES LOCAL , 0.60
-	TIMES LOCAL:1, 0.70
+	TIMES LOCAL:1 , 0.70
 ELSEIF ABL:욕망 == 2
 	TIMES LOCAL , 0.80
-	TIMES LOCAL:1, 0.90
+	TIMES LOCAL:1 , 0.90
 ELSEIF ABL:욕망 == 3
 	TIMES LOCAL , 1.00
-	TIMES LOCAL:1, 1.10
+	TIMES LOCAL:1 , 1.10
 ELSEIF ABL:욕망 == 4
 	TIMES LOCAL , 1.20
-	TIMES LOCAL:1, 1.30
+	TIMES LOCAL:1 , 1.30
 ELSEIF ABL:욕망 == 5
 	TIMES LOCAL , 1.40
-	TIMES LOCAL:1, 1.50
+	TIMES LOCAL:1 , 1.50
 ELSEIF ABL:욕망 == 6
 	TIMES LOCAL , 1.60
-	TIMES LOCAL:1, 1.70
+	TIMES LOCAL:1 , 1.70
 ELSEIF ABL:욕망 == 7
 	TIMES LOCAL , 1.80
-	TIMES LOCAL:1, 1.90
+	TIMES LOCAL:1 , 1.90
 ELSEIF ABL:욕망 == 8
 	TIMES LOCAL , 2.00
-	TIMES LOCAL:1, 2.10
+	TIMES LOCAL:1 , 2.10
 ELSEIF ABL:욕망 == 9
 	TIMES LOCAL , 2.20
-	TIMES LOCAL:1, 2.30
+	TIMES LOCAL:1 , 2.30
 ELSEIF ABL:욕망 >= 10
 	TIMES LOCAL , 2.50
-	TIMES LOCAL:1, 2.70
+	TIMES LOCAL:1 , 2.70
 ENDIF
 
 UP:순종 += LOCAL
@@ -1241,9 +1241,9 @@ UP:순종 += LOCAL
 ;-------------------------------------------------
 ;부끄럼쟁이와수치심없음는 여기서 처리
 SIF TALENT:부끄럼쟁이
-	TIMES SOURCE:노출, 2.00
+	TIMES SOURCE:노출 , 2.00
 SIF TALENT:수치심없음
-	TIMES SOURCE:노출, 0.50
+	TIMES SOURCE:노출 , 0.50
 
 ;윤활업의 50%를노출의 소스에 가세한다
 ;다만액체추가의 소스의 만큼은 당긴다
@@ -1281,15 +1281,15 @@ LOCAL:1 = SOURCE:노출
 ;PALAM:수치를 본다
 ;부끄러움을 느끼면 느낄수록 너무 부끄럽지 않게 된다
 IF PALAM:수치 < PALAMLV:1
-	TIMES LOCAL:1, 1.00
+	TIMES LOCAL:1 , 1.00
 ELSEIF PALAM:수치 < PALAMLV:2
-	TIMES LOCAL:1, 0.90
+	TIMES LOCAL:1 , 0.90
 ELSEIF PALAM:수치 < PALAMLV:3
-	TIMES LOCAL:1, 0.80
+	TIMES LOCAL:1 , 0.80
 ELSEIF PALAM:수치 < PALAMLV:4
-	TIMES LOCAL:1, 0.70
+	TIMES LOCAL:1 , 0.70
 ELSEIF PALAM:수치 >= PALAMLV:4
-	TIMES LOCAL:1, 0.60
+	TIMES LOCAL:1 , 0.60
 ENDIF
 
 
@@ -1443,9 +1443,9 @@ UP:억울 += LOCAL
 ;-------------------------------------------------
 ;호기심와보수적는 여기서 처리
 SIF TALENT:호기심
-	TIMES SOURCE:일탈, 0.80
+	TIMES SOURCE:일탈 , 0.80
 SIF TALENT:보수적
-	TIMES SOURCE:일탈, 2.00
+	TIMES SOURCE:일탈 , 2.00
 
 LOCAL = SOURCE:일탈
 
@@ -1586,48 +1586,48 @@ UP:반감 += LOCAL
 ;-------------------------------------------------
 ;미약
 IF TEQUIP:미약
-	TIMES UP:순종, 1.20
-	TIMES UP:욕정, 2.00
-	TIMES UP:굴복, 1.20
-	TIMES UP:불쾌, 0.75
+	TIMES UP:순종 , 1.20
+	TIMES UP:욕정 , 2.00
+	TIMES UP:굴복 , 1.20
+	TIMES UP:불쾌 , 0.75
 ENDIF
 
 ;가려움증약
 IF ZUIKI(TARGET)
-	TIMES UP:순종, 1.20
-	TIMES UP:욕정, 2.00
-	TIMES UP:굴복, 1.20
-	TIMES UP:불쾌, 0.75
+	TIMES UP:순종 , 1.20
+	TIMES UP:욕정 , 2.00
+	TIMES UP:굴복 , 1.20
+	TIMES UP:불쾌 , 0.75
 ENDIF
 
 ;이뇨제
 IF TEQUIP:이뇨제
-	TIMES UP:순종, 0.80
-	TIMES UP:욕정, 0.80
-	TIMES UP:수치, 1.20
-	TIMES UP:반감, 1.50
-	TIMES UP:불쾌, 1.20
+	TIMES UP:순종 , 0.80
+	TIMES UP:욕정 , 0.80
+	TIMES UP:수치 , 1.20
+	TIMES UP:반감 , 1.50
+	TIMES UP:불쾌 , 1.20
 ENDIF
 
 ;꽐라플레이
 IF TEQUIP:꽐라플레이
-	;사케 혹은 사케·맥주를 마신알콜쓰레기
-	IF TFLAG:76 == 3 || (TALENT:알콜쓰레기 && TFLAG:76!= 1)
-		TIMES UP:굴복, 0.50
-		TIMES UP:습득, 0.50
-		TIMES UP:불쾌, 0.50
+	;사케　もしくは　사케・맥주を飲んだ알콜쓰레기
+	IF TFLAG:76 == 3 || (TALENT:알콜쓰레기 && TFLAG:76 != 1)
+		TIMES UP:굴복 , 0.50
+		TIMES UP:습득 , 0.50
+		TIMES UP:불쾌 , 0.50
 	;맥주
 	ELSEIF TFLAG:76 == 2
-		TIMES UP:굴복, 0.70
-		TIMES UP:습득, 0.70
-		TIMES UP:불쾌, 0.70
+		TIMES UP:굴복 , 0.70
+		TIMES UP:습득 , 0.70
+		TIMES UP:불쾌 , 0.70
 	;감주
 	ELSE
 		;술꾼를 가지지 않는다
 		IF !TALENT:술꾼
-			TIMES UP:굴복, 0.90
-			TIMES UP:습득, 0.90
-			TIMES UP:불쾌, 0.90
+			TIMES UP:굴복 , 0.90
+			TIMES UP:습득 , 0.90
+			TIMES UP:불쾌 , 0.90
 		ENDIF
 	ENDIF
 ENDIF
@@ -1637,63 +1637,63 @@ ENDIF
 ;-------------------------------------------------
 ;연모
 IF TALENT:연모 && ASSIPLAY == 0
-	TIMES UP:순종, 1.50
-	TIMES UP:굴복, 2.00
-	TIMES UP:반감, 0.50
-	TIMES UP:불쾌, 0.50
+	TIMES UP:순종 , 1.50
+	TIMES UP:굴복 , 2.00
+	TIMES UP:반감 , 0.50
+	TIMES UP:불쾌 , 0.50
 ELSEIF TALENT:연모 && ASSIPLAY > 0
-	TIMES UP:순종, 0.80
-	TIMES UP:반감, 1.20
-	TIMES UP:불쾌, 1.20
+	TIMES UP:순종 , 0.80
+	TIMES UP:반감 , 1.20
+	TIMES UP:불쾌 , 1.20
 ENDIF
 
 ;음란
 IF TALENT:음란
-	TIMES UP:순종, 1.20
-	TIMES UP:굴복, 1.20
-	TIMES UP:반감, 0.80
-	TIMES UP:불쾌, 0.80
-	TIMES UP:억울, 0.40
+	TIMES UP:순종 , 1.20
+	TIMES UP:굴복 , 1.20
+	TIMES UP:반감 , 0.80
+	TIMES UP:불쾌 , 0.80
+	TIMES UP:억울 , 0.40
 ENDIF
 
 ;복종
 IF TALENT:복종
-	TIMES UP:순종, 0.50
-	TIMES UP:굴복, 2.00
-	TIMES UP:공포, 1.50
-	TIMES UP:반감, 0.50
+	TIMES UP:순종 , 0.50
+	TIMES UP:굴복 , 2.00
+	TIMES UP:공포 , 1.50
+	TIMES UP:반감 , 0.50
 ENDIF
 
 ;친애
 IF TALENT:친애 && ASSIPLAY == 0
-	TIMES UP:순종, 2.00
-	TIMES UP:굴복, 3.00
-	TIMES UP:반감, 0.20
-	TIMES UP:불쾌, 0.20
-	TIMES UP:억울, 0.50
+	TIMES UP:순종 , 2.00
+	TIMES UP:굴복 , 3.00
+	TIMES UP:반감 , 0.20
+	TIMES UP:불쾌 , 0.20
+	TIMES UP:억울 , 0.50
 ELSEIF TALENT:친애 && ASSIPLAY > 0
-	TIMES UP:순종, 0.80
-	TIMES UP:반감, 1.20
-	TIMES UP:불쾌, 1.20
+	TIMES UP:순종 , 0.80
+	TIMES UP:반감 , 1.20
+	TIMES UP:불쾌 , 1.20
 ENDIF
 
 ;창부
 IF TALENT:창부
-	TIMES UP:순종, 1.50
-	TIMES UP:굴복, 1.50
-	TIMES UP:반감, 0.60
-	TIMES UP:불쾌, 0.60
-	TIMES UP:억울, 0.30
+	TIMES UP:순종 , 1.50
+	TIMES UP:굴복 , 1.50
+	TIMES UP:반감 , 0.60
+	TIMES UP:불쾌 , 0.60
+	TIMES UP:억울 , 0.30
 ENDIF
 
 ;예속
 IF TALENT:예속
-	TIMES UP:순종, 0.20
-	TIMES UP:굴복, 2.50
-	TIMES UP:공포, 3.00
-	TIMES UP:반감, 0.25
-	TIMES UP:불쾌, 0.25
-	TIMES UP:억울, 0.25
+	TIMES UP:순종 , 0.20
+	TIMES UP:굴복 , 2.50
+	TIMES UP:공포 , 3.00
+	TIMES UP:반감 , 0.25
+	TIMES UP:불쾌 , 0.25
+	TIMES UP:억울 , 0.25
 ENDIF
 
 ;-------------------------------------------------
@@ -1701,255 +1701,255 @@ ENDIF
 ;-------------------------------------------------
 ;겁쟁이
 IF TALENT:겁쟁이
-	TIMES UP:공포, 1.20
-	TIMES UP:반감, 1.20
+	TIMES UP:공포 , 1.20
+	TIMES UP:반감 , 1.20
 ENDIF
 
 ;반항적(복종, 예속로 무효)
 IF TALENT:반항적 && (TALENT:복종 == 0 && TALENT:예속 == 0)
-	TIMES UP:순종, 0.80
-	TIMES UP:굴복, 0.80
-	TIMES UP:반감, 1.20
+	TIMES UP:순종 , 0.80
+	TIMES UP:굴복 , 0.80
+	TIMES UP:반감 , 1.20
 ENDIF
 ;꿋꿋함
 IF TALENT:꿋꿋함
-	TIMES UP:순종, 0.80
-	TIMES UP:욕정, 0.80
-	TIMES UP:굴복, 0.80
-	TIMES UP:공포, 0.80
-	TIMES UP:반감, 1.20
-	TIMES UP:억울, 1.20
+	TIMES UP:순종 , 0.80
+	TIMES UP:욕정 , 0.80
+	TIMES UP:굴복 , 0.80
+	TIMES UP:공포 , 0.80
+	TIMES UP:반감 , 1.20
+	TIMES UP:억울 , 1.20
 ENDIF
 ;솔직함
 IF TALENT:솔직함
-	TIMES UP:순종, 1.20
-	TIMES UP:반감, 0.80
+	TIMES UP:순종 , 1.20
+	TIMES UP:반감 , 0.80
 ENDIF
 ;얌전함
 IF TALENT:얌전함
-	TIMES UP:순종, 0.80
-	TIMES UP:반감, 0.80
+	TIMES UP:순종 , 0.80
+	TIMES UP:반감 , 0.80
 ENDIF
 ;프라이드높음
 IF TALENT:프라이드높음
-	TIMES UP:굴복, 0.80
-	TIMES UP:공포, 0.80
-	TIMES UP:반감, 1.20
+	TIMES UP:굴복 , 0.80
+	TIMES UP:공포 , 0.80
+	TIMES UP:반감 , 1.20
 ENDIF
 ;건방짐
 IF TALENT:건방짐
-	TIMES UP:순종, 0.80
-	TIMES UP:굴복, 0.80
-	TIMES UP:반감, 1.20
+	TIMES UP:순종 , 0.80
+	TIMES UP:굴복 , 0.80
+	TIMES UP:반감 , 1.20
 ENDIF
 ;프라이드낮음
 IF TALENT:프라이드낮음
-	TIMES UP:굴복, 1.20
-	TIMES UP:공포, 1.20
-	TIMES UP:반감, 0.80
+	TIMES UP:굴복 , 1.20
+	TIMES UP:공포 , 1.20
+	TIMES UP:반감 , 0.80
 ENDIF
 ;츤데레
 IF TALENT:츤데레
 	;함락 소질이 있는 경우와 없는 경우로 변화한다
 	IF TALENT:연모 || TALENT:음란 || TALENT:복종 || TALENT:친애 || TALENT:창부 || TALENT:예속
-		TIMES UP:순종, 1.20
-		TIMES UP:굴복, 1.20
-		TIMES UP:반감, 0.80
+		TIMES UP:순종 , 1.20
+		TIMES UP:굴복 , 1.20
+		TIMES UP:반감 , 0.80
 	ELSE
-		TIMES UP:순종, 0.80
-		TIMES UP:굴복, 0.80
-		TIMES UP:반감, 1.20
+		TIMES UP:순종 , 0.80
+		TIMES UP:굴복 , 0.80
+		TIMES UP:반감 , 1.20
 	ENDIF
 ENDIF
 
 ;위압(함락 하고 있으면 무효)
 IF TALENT:위압 && !TALENT:연모 && !TALENT:친애 && !TALENT:음란 && !TALENT:창부 && !TALENT:복종 && !TALENT:예속
-	TIMES UP:굴복, 0.80
-	TIMES UP:공포, 0.80
-	TIMES UP:반감, 1.20
+	TIMES UP:굴복 , 0.80
+	TIMES UP:공포 , 0.80
+	TIMES UP:반감 , 1.20
 ENDIF
 
 ;자제심
 IF TALENT:자제심
-	TIMES UP:굴복, 0.80
-	TIMES UP:공포, 0.80
-	TIMES UP:반감, 1.20
+	TIMES UP:굴복 , 0.80
+	TIMES UP:공포 , 0.80
+	TIMES UP:반감 , 1.20
 ENDIF
 ;무관심
 IF TALENT:무관심
-	TIMES UP:순종, 0.80
-	TIMES UP:욕정, 0.80
-	TIMES UP:굴복, 0.80
-	TIMES UP:공포, 0.80
-	TIMES UP:반감, 0.80
+	TIMES UP:순종 , 0.80
+	TIMES UP:욕정 , 0.80
+	TIMES UP:굴복 , 0.80
+	TIMES UP:공포 , 0.80
+	TIMES UP:반감 , 0.80
 ENDIF
 ;감정부족
 IF TALENT:감정부족
-	TIMES UP:순종, 0.80
-	TIMES UP:욕정, 0.80
-	TIMES UP:굴복, 0.80
-	TIMES UP:수치, 0.80
-	TIMES UP:공포, 0.80
-	TIMES UP:반감, 0.80
-	TIMES UP:불쾌, 0.80
-	TIMES UP:억울, 0.80
+	TIMES UP:순종 , 0.80
+	TIMES UP:욕정 , 0.80
+	TIMES UP:굴복 , 0.80
+	TIMES UP:수치 , 0.80
+	TIMES UP:공포 , 0.80
+	TIMES UP:반감 , 0.80
+	TIMES UP:불쾌 , 0.80
+	TIMES UP:억울 , 0.80
 ENDIF
 ;호기심
 SIF TALENT:호기심
-	TIMES UP:습득, 1.20
+	TIMES UP:습득 , 1.20
 ;보수적
 SIF TALENT:보수적
-	TIMES UP:습득, 0.80
+	TIMES UP:습득 , 0.80
 ;낙관적
 SIF TALENT:낙관적
-	TIMES UP:억울, 0.80
+	TIMES UP:억울 , 0.80
 ;비관적
 SIF TALENT:비관적
-	TIMES UP:억울, 1.20
+	TIMES UP:억울 , 1.20
 ;눈에띄고싶음
 SIF TALENT:눈에띄고싶음
-	TIMES UP:순종, 1.20
+	TIMES UP:순종 , 1.20
 
 ;억압
 IF TALENT:억압
-	TIMES UP:욕정, 0.80
-	TIMES UP:반감, 1.20
-	TIMES UP:억울, 1.20
+	TIMES UP:욕정 , 0.80
+	TIMES UP:반감 , 1.20
+	TIMES UP:억울 , 1.20
 ENDIF
 ;해방
 IF TALENT:해방
-	TIMES UP:욕정, 1.20
-	TIMES UP:굴복, 1.20
+	TIMES UP:욕정 , 1.20
+	TIMES UP:굴복 , 1.20
 ENDIF
 ;저항
 IF TALENT:저항
-	TIMES UP:순종, 0.80
-	TIMES UP:반감, 1.20
-	TIMES UP:억울, 1.20
+	TIMES UP:순종 , 0.80
+	TIMES UP:반감 , 1.20
+	TIMES UP:억울 , 1.20
 ENDIF
 
 ;고통에강함
 SIF TALENT:고통에강함
-	TIMES UP:고통, 1.20
+	TIMES UP:고통 , 1.20
 ;고통에약함
 SIF TALENT:고통에약함
-	TIMES UP:고통, 0.80
+	TIMES UP:고통 , 0.80
 
 ;습득빠름
 SIF TALENT:습득빠름
-	TIMES UP:습득, 1.20
+	TIMES UP:습득 , 1.20
 ;습득느림
 SIF TALENT:습득느림
-	TIMES UP:습득, 0.80
+	TIMES UP:습득 , 0.80
 
 ;헌신적
 SIF TALENT:헌신적
-	TIMES UP:굴복, 1.20
+	TIMES UP:굴복 , 1.20
 
 ;쾌감에솔직
 SIF TALENT:쾌감에솔직
-	TIMES UP:욕정, 1.20
-;쾌감을부정(음란, 창부로 무효)
+	TIMES UP:욕정 , 1.20
+;쾌감을부정（음란、창부で無効）
 SIF TALENT:쾌감을부정 && (TALENT:음란 == 0 && TALENT:창부 == 0)
-	TIMES UP:욕정, 0.80
+	TIMES UP:욕정 , 0.80
 ;즉각함락
 IF TALENT:즉각함락
-	TIMES UP:순종, 2.00
-	TIMES UP:욕정, 2.00
-	TIMES UP:굴복, 2.00
-	TIMES UP:습득, 2.00
-	TIMES UP:수치, 2.00
-	TIMES UP:공포, 2.00
-	TIMES UP:반감, 0.50
-	TIMES UP:불쾌, 0.50
-	TIMES UP:억울, 0.50
+	TIMES UP:순종 , 2.00
+	TIMES UP:욕정 , 2.00
+	TIMES UP:굴복 , 2.00
+	TIMES UP:습득 , 2.00
+	TIMES UP:수치 , 2.00
+	TIMES UP:공포 , 2.00
+	TIMES UP:반감 , 0.50
+	TIMES UP:불쾌 , 0.50
+	TIMES UP:억울 , 0.50
 ENDIF
 ;자위광
 SIF TALENT:자위광
-	TIMES UP:욕정, 1.20
+	TIMES UP:욕정 , 1.20
 ;음란구멍
 SIF TALENT:음란구멍
-	TIMES UP:순종, 1.20
+	TIMES UP:순종 , 1.20
 ;항문광
 SIF TALENT:항문광
-	TIMES UP:굴복, 1.20
+	TIMES UP:굴복 , 1.20
 ;음란가슴
 SIF TALENT:음란가슴
-	TIMES UP:수치, 1.20
+	TIMES UP:수치 , 1.20
 ;섹스광
 IF TALENT:섹스광 && (SEXPLAY(TARGET) || SELECTCOM == 430 || SELECTCOM == 431 || SELECTCOM == 405 || SELECTCOM == 406)
-	TIMES UP:순종, 1.20
-	TIMES UP:욕정, 1.20
-	TIMES UP:굴복, 1.20
-	TIMES UP:수치, 1.20
+	TIMES UP:순종 , 1.20
+	TIMES UP:욕정 , 1.20
+	TIMES UP:굴복 , 1.20
+	TIMES UP:수치 , 1.20
 ENDIF
 
 ;도착적
 IF TALENT:도착적
-	TIMES UP:굴복, 1.20
-	TIMES UP:수치, 1.20
+	TIMES UP:굴복 , 1.20
+	TIMES UP:수치 , 1.20
 ENDIF
 
 ;새드, 도S
 SELECTCASE TALENT:새드
 	CASE 1
-		TIMES UP:굴복, 0.90
-		TIMES UP:공포, 0.90
+		TIMES UP:굴복 , 0.90
+		TIMES UP:공포 , 0.90
 	CASE 2
-		TIMES UP:굴복, 0.80
-		TIMES UP:공포, 0.80
+		TIMES UP:굴복 , 0.80
+		TIMES UP:공포 , 0.80
 ENDSELECT
 
 ;마조, 도M
 SELECTCASE TALENT:마조
 	CASE 1
-		TIMES UP:굴복, 1.10
-		TIMES UP:공포, 1.10
-		TIMES UP:억울, 0.90
+		TIMES UP:굴복 , 1.10
+		TIMES UP:공포 , 1.10
+		TIMES UP:억울 , 0.90
 	CASE 2
-		TIMES UP:굴복, 1.20
-		TIMES UP:공포, 1.20
-		TIMES UP:억울, 0.80
+		TIMES UP:굴복 , 1.20
+		TIMES UP:공포 , 1.20
+		TIMES UP:억울 , 0.80
 ENDSELECT
 
 ;맹신
 IF TALENT:맹신
-	TIMES UP:굴복, 1.20
-	TIMES UP:반감, 0.80
+	TIMES UP:굴복 , 1.20
+	TIMES UP:반감 , 0.80
 ENDIF
 
 ;포경
 SIF TALENT:포경
-	TIMES UP:불쾌, 1.20
+	TIMES UP:불쾌 , 1.20
 	
 ;경험풍부
 IF TALENT:경험풍부
 	IF ABL:PLAYER:기교 > 8
-		TIMES UP:수치, 1.20
-		TIMES UP:공포, 1.20
-		TIMES UP:반감, 1.20
-		TIMES UP:억울, 1.20
+		TIMES UP:수치 , 1.20
+		TIMES UP:공포 , 1.20
+		TIMES UP:반감 , 1.20
+		TIMES UP:억울 , 1.20
 	ELSEIF ABL:PLAYER:기교 < 3
-		TIMES UP:수치, 0.20
-		TIMES UP:공포, 0.20
-		TIMES UP:반감, 0.20
-		TIMES UP:억울, 0.20
-		TIMES UP:18, 2.00
+		TIMES UP:수치 , 0.20
+		TIMES UP:공포 , 0.20
+		TIMES UP:반감 , 0.20
+		TIMES UP:억울 , 0.20
+		TIMES UP:18 , 2.00
 	ELSEIF ABL:PLAYER:기교 < 5
-		TIMES UP:수치, 0.50
-		TIMES UP:공포, 0.50
-		TIMES UP:반감, 0.50
-		TIMES UP:억울, 0.50
-		TIMES UP:18, 1.50
+		TIMES UP:수치 , 0.50
+		TIMES UP:공포 , 0.50
+		TIMES UP:반감 , 0.50
+		TIMES UP:억울 , 0.50
+		TIMES UP:18 , 1.50
 	ENDIF
 ENDIF
 
 ;발정기
 IF TALENT:발정기
-	TIMES UP:윤활, 1.50
-	TIMES UP:욕정, 2.00
-	TIMES UP:굴복, 1.20
-	TIMES UP:고통, 0.80
+	TIMES UP:윤활 , 1.50
+	TIMES UP:욕정 , 2.00
+	TIMES UP:굴복 , 1.20
+	TIMES UP:고통 , 0.80
 	;미함락이라면
 	IF !TALENT:연모 && !TALENT:친애 && !TALENT:음란 && !TALENT:창부 && !TALENT:복종 && !TALENT:예속
 		TIMES UP:억울, 1.20
@@ -1961,50 +1961,50 @@ ENDIF
 ;-------------------------------------------------
 ;고통각인
 IF MARK:고통각인 == 3
-	TIMES UP:고통, 1.30
-	TIMES UP:공포, 1.30
+	TIMES UP:고통 , 1.30
+	TIMES UP:공포 , 1.30
 ELSEIF MARK:고통각인 == 2
-	TIMES UP:고통, 1.20
-	TIMES UP:공포, 1.20
+	TIMES UP:고통 , 1.20
+	TIMES UP:공포 , 1.20
 ELSEIF MARK:고통각인 == 1
-	TIMES UP:고통, 1.10
-	TIMES UP:공포, 1.10
+	TIMES UP:고통 , 1.10
+	TIMES UP:공포 , 1.10
 ENDIF
 
 ;쾌락각인
 IF MARK:쾌락각인 == 3
-	TIMES UP:욕정, 1.30
-	TIMES UP:습득, 1.30
+	TIMES UP:욕정 , 1.30
+	TIMES UP:습득 , 1.30
 ELSEIF MARK:쾌락각인 == 2
-	TIMES UP:욕정, 1.20
-	TIMES UP:습득, 1.20
+	TIMES UP:욕정 , 1.20
+	TIMES UP:습득 , 1.20
 ELSEIF MARK:쾌락각인 == 1
-	TIMES UP:욕정, 1.10
-	TIMES UP:습득, 1.10
+	TIMES UP:욕정 , 1.10
+	TIMES UP:습득 , 1.10
 ENDIF
 
 ;굴복각인
 IF MARK:굴복각인 == 3
-	TIMES UP:순종, 1.30
-	TIMES UP:굴복, 1.30
+	TIMES UP:순종 , 1.30
+	TIMES UP:굴복 , 1.30
 ELSEIF MARK:굴복각인 == 2
-	TIMES UP:순종, 1.20
-	TIMES UP:굴복, 1.20
+	TIMES UP:순종 , 1.20
+	TIMES UP:굴복 , 1.20
 ELSEIF MARK:굴복각인 == 1
-	TIMES UP:순종, 1.10
-	TIMES UP:굴복, 1.10
+	TIMES UP:순종 , 1.10
+	TIMES UP:굴복 , 1.10
 ENDIF
 
 ;반발각인
 IF MARK:반발각인 >= 3
-	TIMES UP:순종, 0.10
-	TIMES UP:반감, 1.30
+	TIMES UP:순종 , 0.10
+	TIMES UP:반감 , 1.30
 ELSEIF MARK:반발각인 == 2
-	TIMES UP:순종, 0.40
-	TIMES UP:반감, 1.20
+	TIMES UP:순종 , 0.40
+	TIMES UP:반감 , 1.20
 ELSEIF MARK:반발각인 == 1
-	TIMES UP:순종, 0.60
-	TIMES UP:반감, 1.10
+	TIMES UP:순종 , 0.60
+	TIMES UP:반감 , 1.10
 ENDIF
 
 ;-------------------------------------------------
@@ -2012,43 +2012,43 @@ ENDIF
 ;-------------------------------------------------
 ;EASY
 IF FLAG:4 == 1
-	TIMES UP:윤활, 1.60
-	TIMES UP:순종, 1.60
-	TIMES UP:욕정, 1.60
-	TIMES UP:굴복, 1.60
-	TIMES UP:습득, 1.60
-	TIMES UP:수치, 1.60
-	TIMES UP:고통, 1.60
-	TIMES UP:공포, 1.60
-	TIMES UP:반감, 0.80
-	TIMES UP:불쾌, 0.80
-	TIMES UP:억울, 0.80
+	TIMES UP:윤활 , 1.60
+	TIMES UP:순종 , 1.60
+	TIMES UP:욕정 , 1.60
+	TIMES UP:굴복 , 1.60
+	TIMES UP:습득 , 1.60
+	TIMES UP:수치 , 1.60
+	TIMES UP:고통 , 1.60
+	TIMES UP:공포 , 1.60
+	TIMES UP:반감 , 0.80
+	TIMES UP:불쾌 , 0.80
+	TIMES UP:억울 , 0.80
 ;NORMAL
 ELSEIF FLAG:4 == 2
-	TIMES UP:윤활, 1.20
-	TIMES UP:순종, 1.20
-	TIMES UP:욕정, 1.20
-	TIMES UP:굴복, 1.20
-	TIMES UP:습득, 1.20
-	TIMES UP:수치, 1.20
-	TIMES UP:고통, 1.20
-	TIMES UP:공포, 1.20
-	TIMES UP:반감, 1.20
-	TIMES UP:불쾌, 1.20
-	TIMES UP:억울, 1.20
+	TIMES UP:윤활 , 1.20
+	TIMES UP:순종 , 1.20
+	TIMES UP:욕정 , 1.20
+	TIMES UP:굴복 , 1.20
+	TIMES UP:습득 , 1.20
+	TIMES UP:수치 , 1.20
+	TIMES UP:고통 , 1.20
+	TIMES UP:공포 , 1.20
+	TIMES UP:반감 , 1.20
+	TIMES UP:불쾌 , 1.20
+	TIMES UP:억울 , 1.20
 ;HARD
 ELSEIF FLAG:4 == 3
-	TIMES UP:윤활, 0.80
-	TIMES UP:순종, 0.80
-	TIMES UP:욕정, 0.80
-	TIMES UP:굴복, 0.80
-	TIMES UP:습득, 0.80
-	TIMES UP:수치, 0.80
-	TIMES UP:고통, 0.80
-	TIMES UP:공포, 0.80
-	TIMES UP:반감, 1.60
-	TIMES UP:불쾌, 1.60
-	TIMES UP:억울, 1.60
+	TIMES UP:윤활 , 0.80
+	TIMES UP:순종 , 0.80
+	TIMES UP:욕정 , 0.80
+	TIMES UP:굴복 , 0.80
+	TIMES UP:습득 , 0.80
+	TIMES UP:수치 , 0.80
+	TIMES UP:고통 , 0.80
+	TIMES UP:공포 , 0.80
+	TIMES UP:반감 , 1.60
+	TIMES UP:불쾌 , 1.60
+	TIMES UP:억울 , 1.60
 ENDIF
 
 ;-------------------------------------------------
@@ -2076,7 +2076,7 @@ ELSEIF (TALENT:남자혐오 && MALE(PLAYER) && (TALENT:연모 == 0 && TALENT:친
 ELSE
 	LOCAL:2 = RELATION:R
 ENDIF
-IF LOCAL:2!= 0
+IF LOCAL:2 != 0
 	UP:욕정 *= LOCAL:2
 	UP:욕정 /= 100
 	UP:굴복 *= LOCAL:2
@@ -2155,12 +2155,12 @@ LOSEBASE:기력 += D
 ;-------------------------------------------------
 ;조교자가[위압]소유라고 피로 한다(상위 함락·붕괴·감정부족라면 무효)
 IF TALENT:PLAYER:위압 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속 && !TALENT:붕괴 && !TALENT:감정부족
-	TIMES LOSEBASE:체력, 1.10
-	TIMES LOSEBASE:기력, 1.10
+	TIMES LOSEBASE:체력 , 1.10
+	TIMES LOSEBASE:기력 , 1.10
 ENDIF
 IF ZUIKI(TARGET)
-	TIMES LOSEBASE:체력, 1.20
-	TIMES LOSEBASE:기력, 1.20
+	TIMES LOSEBASE:체력 , 1.20
+	TIMES LOSEBASE:기력 , 1.20
 ENDIF
 BASE:체력 -= LOSEBASE:체력
 IF BASE:체력 < 0
@@ -2310,7 +2310,7 @@ ELSEIF (TALENT:남자혐오 && MALE(PLAYER) && (TALENT:연모 == 0 && TALENT:친
 ELSE
 	LOCAL:2 = RELATION:R
 ENDIF
-SIF LOCAL:2!= 0
+SIF LOCAL:2 != 0
 	PRINTFORML ＜궁합{C/100}. {C%100}배＞
 
 ;같은 커맨드의 연속 실행

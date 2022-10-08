@@ -447,7 +447,7 @@ SIF !TEQUIP:착유기 && !TEQUIP:유두클립
 SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
 	RETURN 0
 
-;체력가 800 미만에서는 장착 불가능
+;체력이 800 미만에서는 장착 불가능
 SIF BASE:체력 < 800
 	RETURN 0
 
@@ -735,7 +735,7 @@ SIF !TEQUIP:음핵클립
 SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
 	RETURN 0
 
-;체력가 800 미만에서는 장착 불가능
+;체력이 800 미만에서는 장착 불가능
 SIF BASE:체력 < 800
 	RETURN 0
 
@@ -1169,7 +1169,7 @@ SIF !TEQUIP:바이브
 ;촉수산란중은 안돼
 SIF TEQUIP:촉수질내산란
 	RETURN 0
-;체력가 800 미만에서는 장착 불가능
+;체력이 800 미만에서는 장착 불가능
 SIF BASE:체력 < 800
 	RETURN 0
 
@@ -1459,7 +1459,7 @@ SIF !TEQUIP:애널바이브
 ;노예가공라면 안돼
 SIF TALENT:공
 	RETURN 0
-;체력가 800 미만에서는 장착 불가능
+;체력이 800 미만에서는 장착 불가능
 SIF BASE:체력 < 800
 	RETURN 0
 
@@ -1574,7 +1574,7 @@ ENDIF
 SIF EXP:U확장경험 < 5
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 장착 불가능
+;체력이 1000 미만/기력이 500 미만때는 장착 불가능
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 ;촉수조교중은 안돼
@@ -1613,7 +1613,7 @@ SIF (ITEM:카테터 == 0 || ITEM:전극플레이키트 == 0) && NOITEM == 0
 SIF !TEQUIP:카테터
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 장착 불가능
+;체력이 1000 미만/기력이 500 미만때는 장착 불가능
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -3204,7 +3204,7 @@ IF ASSIPLAY
 	RETURN 0
 ENDIF
 
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -3357,7 +3357,7 @@ SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
 SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -3455,7 +3455,7 @@ SIF TALENT:처녀 || TALENT:재생처녀
 CALL ARMSIZEJUDGE_MT
 SIF EXP:V경험 < A
 	RETURN 0
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -3519,7 +3519,7 @@ SIF TALENT:백버진
 CALL ARMSIZEJUDGE_MT
 SIF EXP:A경험 < A
 	RETURN 0
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -3584,7 +3584,7 @@ CALL ARMSIZEJUDGE_MT
 SIF EXP:V경험 < A || EXP:A경험 < A
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -6147,7 +6147,7 @@ SIF BIND_CHECK_A(2)
 SIF (ITEM:감주 == 0 && ITEM:맥주 == 0 && ITEM:사케 == 0) && NOITEM == 0
 	RETURN 0
 
-;체력가 1000 미만에서는 불가
+;체력이 1000 미만에서는 불가
 SIF BASE:체력 <  1000
 	RETURN 0
 
@@ -7072,7 +7072,7 @@ SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
 SIF BASE:변의 >= 60
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 ;백버진라면 안돼
@@ -7099,7 +7099,7 @@ SIF ITEM:진화의비법 == 0 && NOITEM == 0
 SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 RETURN 1
@@ -7123,7 +7123,7 @@ SIF ITEM:진화의비법 == 0 && NOITEM == 0
 SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 RETURN 1
@@ -7147,7 +7147,7 @@ SIF ITEM:진화의비법 == 0 && NOITEM == 0
 SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 RETURN 1
@@ -7214,7 +7214,7 @@ SIF !TALENT:PLAYER:금지된지식
 ;함락이 끝난 상태가 아니면 안돼
 SIF !KANRAKU(TARGET)
 	RETURN 0
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -7253,7 +7253,7 @@ SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
 ;함락이 끝난 상태가 아니면 안돼
 SIF !KANRAKU(TARGET)
 	RETURN 0
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -7288,7 +7288,7 @@ SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
 ;함락이 끝난 상태가 아니면 안돼
 SIF !KANRAKU(TARGET)
 	RETURN 0
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -7328,7 +7328,7 @@ SIF TALENT:양팔결손 || TALENT:달마
 SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -7391,7 +7391,7 @@ SIF TALENT:양다리결손 || TALENT:달마
 SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 
@@ -7454,7 +7454,7 @@ SIF TALENT:모두발치
 SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
 	RETURN 0
 
-;체력가 1000 미만/기력가 500 미만때는 안돼
+;체력이 1000 미만/기력이 500 미만때는 안돼
 SIF BASE:체력 < 1000 || BASE:기력 < 500
 	RETURN 0
 

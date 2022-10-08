@@ -199,8 +199,8 @@ IF ABL:A감각 >= 5 && EXP:A경험 >= 400 && EXP:절정경험 >= 200 && ((!TALEN
 	FLAG:(LOCAL:1) |= 4
 ENDIF
 
-;음란가슴：B감각5以上、분유경험+Ｂ사정경험150以上、절정경험200以上
-IF ABL:B감각 >= 5 && (EXP:분유경험+EXP:Ｂ사정경험 ) >= 150 && EXP:절정경험 >= 200 && ((!TALENT:자위광 && !TALENT:음란구멍 && !TALENT:항문광 && !TALENT:음란가슴 && !TALENT:섹스광) || (FLAG:(LOCAL:1) & 2 && !TALENT:음란가슴))
+;음란가슴：B감각5以上、분유경험+B사정경험150以上、절정경험200以上
+IF ABL:B감각 >= 5 && (EXP:분유경험+EXP:B사정경험 ) >= 150 && EXP:절정경험 >= 200 && ((!TALENT:자위광 && !TALENT:음란구멍 && !TALENT:항문광 && !TALENT:음란가슴 && !TALENT:섹스광) || (FLAG:(LOCAL:1) & 2 && !TALENT:음란가슴))
 	TFLAG:13 = 59
 	CALL KOJO_MESSAGE_EVENT
 	PRINTFORMW %NAME:TARGET%は【음란가슴】を得た

@@ -669,7 +669,7 @@ ELSEIF TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란
 ;배설시키지 않고 종료(배설):촉수관장도 여기 CFLAG:608
 ;--------------------------------------------------
 ;ELSEIF BASE:6 >= 60 && TEQUIP:확장벌룬
-;	;체력가 있어? 라면 좀 더 계속되는거야.
+;	;체력이 있어? 라면 좀 더 계속되는거야.
 ;	IF BASE:0 >= 500
 ;		IF TEQUIP:촉수
 ;			PRINTFORML %CALLNAME:TARGET%의후 구멍에서는,아직도 배설을 막으려고촉수가 꿈틀거리고 있다…
@@ -710,7 +710,7 @@ ELSEIF TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란
 ;밧줄＋기분이 좋은 도구인 채 종료(방치 플레이):촉수플레이중도 여기
 ;--------------------------------------------------
 ;ELSEIF TEQUIP:밧줄 && ALLCHECK(TARGET)
-;	;체력가 있으면 선택지
+;	;체력이 있으면 선택지
 ;	IF BASE:0 >= 500
 ;		IF TEQUIP:촉수
 ;			PRINTFORMW %CALLNAME%의 몸에는 아직도촉수가 감긴 채로,그 성감을 계속 자극하고 있다…
@@ -798,7 +798,7 @@ ELSEIF TEQUIP:에이프런 > 0
 				;하세베
 				ELSEIF NO:MASTER == 118
 						PRINTFORMW 『… 얼빠진 얼굴을 하고 있겠어』
-						PRINTFORMW 「응? 후후… 그렇지만,너도 아직발리나 있고일 것이다? … 엣치한 얼굴 하고 있는%UNICODE(0x2661)%」
+						PRINTFORMW 「응? 후후… 그렇지만,너도 아직부족해 있고일 것이다? … 엣치한 얼굴 하고 있는%UNICODE(0x2661)%」
 						PRINTFORML 킥킥이라든지들이야 섞임에 웃는%CALLNAME%에 초조를 느껴
 						PRINTFORMW %CALLNAME:PLAYER%는 가시지 않은 열에 몸을 맡겨,그\@ TALENT:작은체구? 작은 신체 # 신체 \@를 밀어 넘어뜨린다
 				;제약 기구

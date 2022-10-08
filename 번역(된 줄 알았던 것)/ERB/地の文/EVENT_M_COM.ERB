@@ -71,7 +71,7 @@ ELSE
 		IF MASTER == PLAYER
 			;주인의 함락 대상이 조수나 노예
 			IF MASTER_SEARCH2(MASTER,ASSI) || MASTER_SEARCH2(MASTER,TARGET)
-				PRINTFORML %CALLNAME:MASTER%는 %CALLNAME:ASSI%에 과시하도록(듯이)해%CALLNAME%의 입술을 탐냈다…
+				PRINTFORML %CALLNAME:MASTER%는 %CALLNAME:ASSI%에 과시하듯이해%CALLNAME%의 입술을 탐냈다…
 			ELSE
 				PRINTFORML %CALLNAME:ASSI%의 눈을 신경쓰는%CALLNAME%의 입술을 빼앗아,욕망대로 탐냈다…
 			ENDIF
@@ -171,7 +171,7 @@ IF TEQUIP:역조교
 	PRINTFORML 손가락을 주어,좌우에 펼쳐 과시해 왔다…
 ;통상 모드
 ELSE
-	PRINTFORML %CALLNAME%에,자신의 비부[秘部]를 넓혀 보이도록(듯이) 명령했다
+	PRINTFORML %CALLNAME%에,자신의 비부[秘部]를 넓혀 보이듯이 명령했다
 	
 	PRINTFORM %CALLNAME%는
 	;노출벽
@@ -215,34 +215,34 @@ ELSE
 	
 	;노출벽LV5 이상＋음란or창부
 	IF ABL:노출벽 >= 5 && (TALENT:음란 || TALENT:창부)
-		PRINTFORML 양손의 손가락을 음순에 걸어,질입 마다 %CALLNAME:PLAYER%에 과시하도록(듯이) 크게 펼쳤다
+		PRINTFORML 양손의 손가락을 음순에 걸어,질구 마다 %CALLNAME:PLAYER%에 과시하듯이 크게 펼쳤다
 		IF TFLAG:38  > 0
 			PRINTFORML 꿈틀거리는질내로부터는,조금 전사정 한 정액이,걸죽 야무지지 못하게 흘러넘쳐 왔다…
 		ELSE
 			PRINTFORML 부드러운 것 같은질내는,충분히 점액으로 젖어,이쪽을 권하는 것처럼,흠칫흠칫 꿈틀거리고 있다…
 		ENDIF
 	ELSEIF ABL:노출벽 >= 5
-		PRINTFORML 양손의 손가락을 음순에 걸어,질입 마다 %CALLNAME:PLAYER%에 과시하도록(듯이) 크게 펼쳤다
+		PRINTFORML 양손의 손가락을 음순에 걸어,질구 마다 %CALLNAME:PLAYER%에 과시하듯이 크게 펼쳤다
 		IF TFLAG:38 > 0
-			PRINTFORML 크게 펼칠 수 있었던 질입는,조금 전사정 한 정액을 흘려 보내고 있다…
+			PRINTFORML 크게 펼칠 수 있었던 질구는,조금 전사정 한 정액을 흘려 보내고 있다…
 		ELSE
-			PRINTFORML %CALLNAME%의손가질내부까지 펼쳐 보이면,질벽이 호흡하도록(듯이) 빠끔빠끔움직여,
-			PRINTFORML 다 퍼진 질입는,애액을 끝 없게 흘러넘치게 하고 있다…
+			PRINTFORML %CALLNAME%의손가질내부까지 펼쳐 보이면,질벽이 호흡하듯이 빠끔빠끔움직여,
+			PRINTFORML 다 퍼진 질구는,애액을 끝 없게 흘러넘치게 하고 있다…
 		ENDIF
 	ELSEIF ABL:노출벽 >= 3
-		PRINTFORML 양손의 손가락을 사용해 음순 뿐만이 아니라,질입도 동시에 펼쳤다
+		PRINTFORML 양손의 손가락을 사용해 음순 뿐만이 아니라,질구도 동시에 펼쳤다
 		IF TFLAG:38 > 0
-			PRINTFORM %CALLNAME%의손가 질입를 한층 더 좌우에 펼치면,
+			PRINTFORM %CALLNAME%의손가 질구를 한층 더 좌우에 펼치면,
 			PRINTFORML 펼쳐진들이입는,조금 전사정 한 정액을 흘려 보내고 있다…
 		ELSE
 			PRINTFORML 질내를 볼 수 있는 일에 느끼고 있는지,%CALLNAME%의 뺨은 은은하게 붉게 물들고 있다
 		ENDIF
 	ELSEIF ABL:노출벽 == 2
-		PRINTFORML 집게 손가락과 중지로 싸인을 만들도록(듯이),%CALLNAME:PLAYER%에 자신의 비밀스런 장소를 노출했다
+		PRINTFORML 집게 손가락과 중지로 싸인을 만들듯이,%CALLNAME:PLAYER%에 자신의 비밀스런 장소를 노출했다
 		IF TFLAG:38 > 0
-			PRINTFORML 드러내진 질입로부터는,조금 전사정 한 정액이,보글보글 흘러넘쳐 온다…
+			PRINTFORML 드러내진 질구로부터는,조금 전사정 한 정액이,보글보글 흘러넘쳐 온다…
 		ELSE
-			PRINTFORML 퍼진 여음[女陰]으로부터 이쪽을 들여다 보는 질입는,거두어야 할 물건을 기다려 바라는것 같이,애액에 젖어,추잡하게 꿈틀거리고 있다…
+			PRINTFORML 퍼진 여음[女陰]으로부터 이쪽을 들여다 보는 질구는,거두어야 할 물건을 기다려 바라는것 같이,애액에 젖어,추잡하게 꿈틀거리고 있다…
 		ENDIF
 	ELSEIF ABL:노출벽 == 1
 		IF TALENT:수치심없음
@@ -272,10 +272,10 @@ ENDIF
 IF TEQUIP:역조교
 	PRINTFORML %CALLNAME%는
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓히면,
@@ -286,10 +286,10 @@ IF TEQUIP:역조교
 ;통상 모드
 ELSE
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀 주어
@@ -333,7 +333,7 @@ SIF TEQUIP:비디오카메라
 	PRINT 비디오카메라의 앞에서
 ;노출벽LV3 이상
 SIF ABL:노출벽 >= 3
-	PRINT 과시하도록(듯이)해
+	PRINT 과시하듯이해
 
 ;착의 때
 IF TEQUIP:속옷（아래） || TEQUIP:하의
@@ -405,13 +405,13 @@ PRINTFORM %CALLNAME%는
 
 ;비디오카메라촬영중＋노출벽LV3 이상
 IF TEQUIP:비디오카메라 && ABL:노출벽 >= 3
-	PRINT 카메라에 과시하도록(듯이)해
+	PRINT 카메라에 과시하듯이해
 ;비디오카메라촬영중
 ELSEIF TEQUIP:비디오카메라
 	PRINT 카메라의 앞에서
 ;노출벽LV3 이상
 ELSEIF ABL:노출벽 >= 3
-	PRINT 과시하도록(듯이)해
+	PRINT 과시하듯이해
 ENDIF
 
 ;착의 때
@@ -468,10 +468,10 @@ ENDIF
 IF TEQUIP:역조교
 	PRINTFORML %CALLNAME%는
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓히면,
@@ -482,10 +482,10 @@ IF TEQUIP:역조교
 ;통상 모드
 ELSE
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀 주어
@@ -529,7 +529,7 @@ SIF TEQUIP:비디오카메라
 	PRINT 비디오카메라의 앞에서
 ;노출벽LV3 이상
 SIF ABL:노출벽 >= 3
-	PRINT 과시하도록(듯이)해
+	PRINT 과시하듯이해
 
 ;착의 때
 IF TEQUIP:속옷（아래） || TEQUIP:하의
@@ -570,7 +570,7 @@ ELSEIF TEQUIP:확장벌룬
 ELSEIF ABL:A감각 > 2
 	PRINTFORM 부드러운 엉덩이의 구멍을 만지작거리고 있다…
 ELSEIF ABL:A감각 > 1
-	PRINTFORM 엉덩이의 구멍이 좋은 곳을 찾도록(듯이) 손가락을 움직이고 있다…
+	PRINTFORM 엉덩이의 구멍이 좋은 곳을 찾듯이 손가락을 움직이고 있다…
 ELSE
 	PRINTFORM 슬슬 엉덩이의 구멍에 손가락을 넣었다…
 ENDIF
@@ -585,10 +585,10 @@ ENDIF
 IF TEQUIP:역조교
 	PRINTFORML %CALLNAME%는
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓히면,
@@ -599,10 +599,10 @@ IF TEQUIP:역조교
 ;통상 모드
 ELSE
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀 주어
@@ -646,7 +646,7 @@ SIF TEQUIP:비디오카메라
 	PRINT 비디오카메라의 앞에서
 ;노출벽LV3 이상
 SIF ABL:노출벽 >= 3
-	PRINT 과시하도록(듯이)해
+	PRINT 과시하듯이해
 
 ;착의 때
 IF TEQUIP:속옷（아래） || TEQUIP:하의
@@ -757,7 +757,7 @@ IF TEQUIP:역조교
 	
 ;통상 모드
 ELSE
-	PRINTFORML %CALLNAME%에,자신의 항문을 벌려 보이도록(듯이) 명령했다
+	PRINTFORML %CALLNAME%에,자신의 항문을 벌려 보이듯이 명령했다
 	
 	PRINTFORM %CALLNAME%는
 	;노출벽
@@ -804,14 +804,14 @@ ELSE
 	
 	;노출벽LV5 이상＋음란or창부
 	IF ABL:노출벽 >= 5 && (TALENT:음란 || TALENT:창부)
-		PRINTFORML 양손로 자신의 항문을 %CALLNAME:PLAYER%에 과시하도록(듯이) 크게 펼쳤다
+		PRINTFORML 양손로 자신의 항문을 %CALLNAME:PLAYER%에 과시하듯이 크게 펼쳤다
 		IF STAIN:장내 & 4
 			PRINTFORML 추잡하게 꿈틀거리는장내로부터는,야무지지 못하게 정액이 흘려 보내지고 있다…
 		ELSE
 			PRINTFORML 부드러운 것 같은장내는,충분히 점액으로 젖어,이쪽을 권하는 것처럼,흠칫흠칫 꿈틀거리고 있다…
 		ENDIF
 	ELSEIF ABL:노출벽 >= 5
-		PRINTFORML 양손로 자신의 항문을 %CALLNAME:PLAYER%에 과시하도록(듯이) 크게 펼쳤다
+		PRINTFORML 양손로 자신의 항문을 %CALLNAME:PLAYER%에 과시하듯이 크게 펼쳤다
 		IF STAIN:장내 & 4
 			PRINTFORML 추잡하게 꿈틀거리는장내로부터는,야무지지 못하게 정액이 흘러넘치고 있다…
 		ELSE
@@ -883,15 +883,15 @@ ENDIF
 
 ;착의 플레이
 IF TALENT:PLAYER:골드핑거 && (TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET))
-	PRINTFORM 가슴를 비비도록(듯이)애무 했다…
+	PRINTFORM 가슴를 비비듯이애무 했다…
 ;욕망의 PALAMLV3 이상＋
 ELSEIF PALAM:욕정 >= PALAMLV:3 && TEQUIP:착유기 == 0 && TEQUIP:니플캡 == 0
 	PRINTFORM 가슴의 첨단의,완전히 딱딱해진 돌기를 집어올렸다…
 ;작은체구
 ELSEIF TALENT:절벽
-	PRINTFORM 가슴를 상냥하게 어루만지도록(듯이) 접했다…
+	PRINTFORM 가슴를 상냥하게 어루만지듯이 접했다…
 ELSE
-	PRINTFORM 가슴를 비비도록(듯이)애무 했다…
+	PRINTFORM 가슴를 비비듯이애무 했다…
 ENDIF
 
 
@@ -933,7 +933,7 @@ ENDIF
 
 ;고문중
 IF TEQUIP:지하실
-	PRINTFORM 가슴를,잡도록(듯이) 강하게 주물렀다…
+	PRINTFORM 가슴를,잡듯이 강하게 주물렀다…
 ;모유체질
 ELSEIF TALENT:모유체질
 	;욕정의 PALAMLV3 이상＋연모or친애
@@ -949,7 +949,7 @@ ELSEIF TALENT:모유체질
 		;폭유
 		SIF TALENT:폭유
 			PRINT 그 거대한
-		PRINTFORML 모유가 방울져 떨어지는가슴를 강조하도록(듯이) 내밀어,
+		PRINTFORML 모유가 방울져 떨어지는가슴를 강조하듯이 내밀어,
 		PRINTFORM 보다 강한 자극을 요구했다…
 	;욕정의 PALAMLV3 이상
 	ELSEIF PALAM:욕정 > PALAMLV:3
@@ -971,7 +971,7 @@ ELSE
 		;폭유
 		SIF TALENT:폭유
 			PRINT 그 거대한
-		PRINTFORML 가슴를 강조하도록(듯이) 내밀어,
+		PRINTFORML 가슴를 강조하듯이 내밀어,
 		PRINTFORM 보다 강한애무를 요구했다…
 	;욕정의 PALAMLV3 이상
 	ELSEIF PALAM:욕정 > PALAMLV:3
@@ -1174,7 +1174,7 @@ ENDIF
 
 ;연모나친애＋욕정의 PALAMLV3 이상
 IF (TALENT:연모 || TALENT:친애) && PALAM:욕정 >= PALAMLV:3
-	PRINTFORML 가슴를 좁히도록(듯이)하면서
+	PRINTFORML 가슴를 좁히듯이하면서
 	PRINTFORM 그 첨단을 강하게 빨아 올리면,
 	PRINTFORM %CALLNAME%는 교성을 주면서도
 	;빈유
@@ -1194,7 +1194,7 @@ IF (TALENT:연모 || TALENT:친애) && PALAM:욕정 >= PALAMLV:3
 	PRINTFORM 쾌감으로 힘이 들어가 버리는지 강하게 껴안고 압박했다…
 ;음란나창부＋욕정의 PALAMLV3 이상
 ELSEIF (TALENT:음란 || TALENT:창부) && PALAM:욕정 >= PALAMLV:3
-	PRINTFORM 가슴를 좁히도록(듯이)하면서 그 첨단을 강하게 빨아 올리면,
+	PRINTFORM 가슴를 좁히듯이하면서 그 첨단을 강하게 빨아 올리면,
 	PRINTFORM %CALLNAME%는 교성을 줘
 	;빈유
 	SIF TALENT:빈유
@@ -1205,7 +1205,7 @@ ELSEIF (TALENT:음란 || TALENT:창부) && PALAM:욕정 >= PALAMLV:3
 	;폭유
 	SIF TALENT:폭유
 		PRINT 그 거대한
-	PRINTFORM 가슴를 강조하도록(듯이) 내밀어,
+	PRINTFORM 가슴를 강조하듯이 내밀어,
 	PRINTFORM %CALLNAME:PLAYER%의 얼굴에 강압했다…
 ;연모나친애
 ELSEIF (TALENT:연모 || TALENT:친애)
@@ -1267,10 +1267,10 @@ ELSEIF TEQUIP:속옷（아래） || TEQUIP:하의
 	ENDIF
 
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 위로부터
 	ENDIF
@@ -1321,10 +1321,10 @@ ELSEIF TEQUIP:속옷（아래） || TEQUIP:하의
 	ENDIF
 
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 위로부터
 	ENDIF
@@ -1373,10 +1373,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -1425,10 +1425,10 @@ ELSE
 		ENDIF
 		
 		;스타킹계
-		IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-			SIF TEQUIP:특수 2 == 5
+		IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+			SIF TEQUIP:특수2 == 5
 				PRINT 스타킹
-			SIF TEQUIP:특수 2 == 6
+			SIF TEQUIP:특수2 == 6
 				PRINT 타이츠
 			PRINT 위로부터
 		ENDIF
@@ -1445,7 +1445,7 @@ ELSE
 	IF TEQUIP:지하실
 		PRINTFORM 손톱을 세워 세게 긁어 돌렸다
 	ELSE
-		PRINTFORM 굴리도록(듯이)해 자극했다…
+		PRINTFORM 굴리듯이해 자극했다…
 	ENDIF
 ENDIF
 
@@ -1478,10 +1478,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -1508,10 +1508,10 @@ ENDIF
 PRINTFORM %CALLNAME:PLAYER%는
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -1560,10 +1560,10 @@ ELSEIF TEQUIP:속옷（아래） || TEQUIP:하의
 	ENDIF
 
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 위로부터
 	ENDIF
@@ -1617,10 +1617,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -1670,10 +1670,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -1734,10 +1734,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -1785,10 +1785,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -1825,10 +1825,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -1869,10 +1869,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -1916,17 +1916,17 @@ IF TEQUIP:속옷（아래）
 	A = 2
 	CALL CLOTHES_NAME(TARGET)
 	;스타킹계
-	SIF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 		PRINT 와
 ENDIF
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 ENDIF
-IF TEQUIP:속옷（아래） || TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+IF TEQUIP:속옷（아래） || TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 	PRINTFORM 위로부터%CALLNAME%의 비순[秘唇]에 물고 늘어져,핥아댔다…
 ELSE
 	PRINTFORM %CALLNAME%의 비순[秘唇]을 정중하게 빨고 풀어
@@ -1983,10 +1983,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -2052,10 +2052,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -2117,10 +2117,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -2148,10 +2148,10 @@ ENDIF
 PRINTFORM %CALLNAME:PLAYER%는
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 더욱 펴넓혀,
@@ -2196,17 +2196,17 @@ IF TEQUIP:속옷（아래） && !TEQUIP:정조대
 	A = 2
 	CALL CLOTHES_NAME(TARGET)
 	;스타킹계
-	SIF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 		PRINT 와
 ENDIF
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 ENDIF
-IF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+IF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 	PRINTFORM 위로부터%CALLNAME%의애널를 혀끝에서 핥아댔다…
 ELSE
 	PRINTFORM %CALLNAME%의
@@ -2249,10 +2249,10 @@ IF TEQUIP:애널바이브 || TEQUIP:애널비즈 || TEQUIP:확장벌룬 || TEQUI
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -2311,10 +2311,10 @@ ELSE
 	ENDIF
 
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -2354,10 +2354,10 @@ ELSE
 	ENDIF
 
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -2380,10 +2380,10 @@ IF TEQUIP:애널바이브
 	PRINTFORM %CALLNAME%의 아누스로부터애널바이브를 뽑았다…
 ELSE
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -2410,7 +2410,7 @@ ELSE
 				PRINT 녀
 			PRINT 의 귀에 잘 어울리는 짐승
 		ENDIF
-		PRINT 의 꼬리를 본떴다
+		PRINT 의 꼬리를 본뜬
 	ENDIF
 	
 	PRINTFORML 애널바이브를 꽂아넣었다…
@@ -2444,10 +2444,10 @@ ELSE
 	ENDIF
 
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 더욱 펴넓혀,
@@ -2464,10 +2464,10 @@ ENDIF
 ;-------------------------------------------------
 @MESSAGE_COM56
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 더욱 펴넓혀,
@@ -2476,7 +2476,7 @@ IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
 	ENDIF
 ENDIF
 
-PRINTFORM %CALLNAME%의애널바이브에 전극를 연결해,스윗치를 넣었다…
+PRINTFORM %CALLNAME%의 애널바이브에 전극를 연결해,스윗치를 넣었다…
 
 
 
@@ -2717,7 +2717,7 @@ ELSEIF TALENT:거유
 	PRINT 풍만한가슴로페니스를 감싸
 ;폭유
 ELSEIF TALENT:폭유
-	PRINT 너무 풍만할 정도의가슴로페니스를 숨기도록(듯이)해
+	PRINT 너무 풍만할 정도의가슴로페니스를 숨기듯이해
 ELSE
 	PRINT 가슴로페니스를 끼워
 ENDIF
@@ -2780,10 +2780,10 @@ ENDIF
 IF TEQUIP:역조교
 	PRINTFORM %CALLNAME%는
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 망타이츠
 		IF TFLAG:55
 			PRINTL 의 깨어진 부분을 더욱 펴넓히면
@@ -2849,7 +2849,7 @@ ELSE
 	PRINTFORM %CALLNAME%가 닫은 넓적다리의 사이에페니스를 끼워 넣어,
 	
 	SIF VAGINA(TARGET)
-		PRINT 비순[秘唇]을 쓸어올리도록(듯이)해
+		PRINT 비순[秘唇]을 쓸어올리듯이해
 	
 	PRINTFORM 페니스를 다뤘다…
 ENDIF
@@ -2906,7 +2906,7 @@ IF TEQUIP:신발 > 0
 	ENDIF
 	A = 9
 	CALL CLOTHES_NAME(TARGET)
-	PRINT 로 짓밟도록(듯이)
+	PRINT 로 짓밟듯이
 	;새드
 	IF ABL:새드끼 >= 5
 		PRINT 희희낙락 하고 있던인 체하며
@@ -2914,7 +2914,7 @@ IF TEQUIP:신발 > 0
 		PRINT 슬슬 쓸어올려
 	ENDIF
 ELSE
-	IF TEQUIP:특수 2
+	IF TEQUIP:특수2
 		A = 1
 		CALL CLOTHES_NAME(TARGET)
 		PRINT 에 휩싸여졌다
@@ -2986,18 +2986,18 @@ IF TEQUIP:속옷（아래） && !TEQUIP:정조대
 	A = 2
 	CALL CLOTHES_NAME(TARGET)
 	;스타킹계
-	SIF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 		PRINT 와
 ENDIF
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 ENDIF
 
-IF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+IF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 	PRINTFORM 위로부터,그 엉덩이에페니스를 문질렀다…
 ELSE
 	PRINTFORM 엉덩이의 균열에페니스를 문질렀다…
@@ -3011,16 +3011,16 @@ ENDIF
 PRINTFORM %CALLNAME%의
 ;빈유
 IF TALENT:빈유
-	PRINT 얇은가슴로,희미한 부푼 곳에 칠하도록(듯이)해
+	PRINT 얇은가슴로,희미한 부푼 곳에 칠하듯이해
 ;절벽
 ELSEIF TALENT:절벽
-	PRINT 대부분 평평한가슴로,켜 돌리도록(듯이)해
+	PRINT 대부분 평평한가슴로,켜 돌리듯이해
 ;거유
 ELSEIF TALENT:거유
-	PRINT 풍만한가슴로,파묻히게 한 찌르도록(듯이)해
+	PRINT 풍만한가슴로,파묻히게 한 찌르듯이해
 ;폭유
 ELSEIF TALENT:폭유
-	PRINT 너무 풍부한가슴로,들어가게 할 수 있는 묻도록(듯이)해
+	PRINT 너무 풍부한가슴로,들어가게 할 수 있는 묻듯이해
 ELSE
 	PRINT 가슴로
 ENDIF
@@ -3137,10 +3137,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -3213,7 +3213,7 @@ IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && P
 	ELSEIF PREVCOM == 100
 		PRINTFORM 질내로부터 앞지르는 일 없이%CALLNAME%의후로 돌아,다시 허리를 움직이기 시작했다…
 	ELSE
-		PRINTFORM 삽입한 채로%CALLNAME%를 재워 네발로 엎드림으로 해,다시 허리를 움직이기 시작했다…
+		PRINTFORM 삽입한 채로%CALLNAME%를 재워 네발로 엎드리게 해,다시 허리를 움직이기 시작했다…
 	ENDIF
 ELSE
 	PRINTFORM 후로부터%CALLNAME%의
@@ -3236,10 +3236,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -3262,7 +3262,7 @@ ELSE
 	ENDIF
 	;바이브 넣고 있을 뿐
 	SIF TEQUIP:바이브
-		PRINT 쑤셔 넣도록(듯이)해,
+		PRINT 쑤셔 넣듯이해,
 	;조교자가남자나반음반양나후타나리나쉬메일이다
 	IF PENIS(PLAYER)
 		;아이사이즈
@@ -3353,10 +3353,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -3414,7 +3414,7 @@ ENDIF
 IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 100 && PREVCOM <= 106
 	;전회의 커맨드가 이번과 같음
 	IF PREVCOM == 100
-		PRINTFORM %CALLNAME%를 키후로부터 껴안아,다시%CALLNAME%의 신체를 흔들기 시작했다…
+		PRINTFORM %CALLNAME%를 등 뒤로부터 껴안아,다시%CALLNAME%의 신체를 흔들기 시작했다…
 	;전회 커맨드가후배위나기승위
 	ELSEIF PREVCOM == 101 || PREVCOM == 106
 		PRINTFORM 질내로부터페니스를 앞지르는 일 없이%CALLNAME%를 등으로부터 껴안아,신체를 흔들기 시작했다…
@@ -3458,10 +3458,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓히면서
@@ -3498,7 +3498,7 @@ IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && P
 	IF PREVCOM == 104
 		;조교자에게 진짜의페니스가 있다
 		IF PENIS(PLAYER)
-			PRINTFORM %CALLNAME%의질내의 감촉을 맛보면서,다시 허리를 움직이기 시작했다…
+			PRINTFORM %CALLNAME%의 질내의 감촉을 맛보면서,다시 허리를 움직이기 시작했다…
 		;페니스밴드를 사용하고 있는 경우
 		ELSE
 			PRINTFORM %CALLNAME%의질내로부터 뽑지 않고,다시 허리를 움직이기 시작했다…
@@ -3535,10 +3535,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -3596,7 +3596,7 @@ ENDIF
 IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 100 && PREVCOM <= 106
 	;전회의 커맨드가 이번과 같음
 	IF PREVCOM == 105
-		PRINTFORM %CALLNAME%를 키후로부터 껴안아,다시 허리를 움직이기 시작했다…
+		PRINTFORM %CALLNAME%를 등 뒤로부터 껴안아,다시 허리를 움직이기 시작했다…
 	;전회 커맨드가후배위나기승위나배면좌위
 	ELSEIF PREVCOM == 101 || PREVCOM == 106 || PREVCOM == 103
 		PRINTFORM 삽입한 채로%CALLNAME%의 신체를 서게 해 신체를 흔들기 시작했다…
@@ -3630,10 +3630,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -3684,7 +3684,7 @@ ELSE
 	IF !TEQUIP:역조교
 		
 		;착의 때
-		SIF (BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3) || (TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6)
+		SIF (BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3) || (TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6)
 			PRINTFORM %CALLNAME%의
 		
 		;노출 가능한 옷이 있으면,우선노출 시킨다
@@ -3705,10 +3705,10 @@ ELSE
 		ENDIF
 		
 		;스타킹계
-		IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-			SIF TEQUIP:특수 2 == 5
+		IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+			SIF TEQUIP:특수2 == 5
 				PRINT 스타킹
-			SIF TEQUIP:특수 2 == 6
+			SIF TEQUIP:특수2 == 6
 				PRINT 타이츠
 			IF TFLAG:55
 				PRINTL 의 깨어진 부분을 더욱 펴넓혔다
@@ -3804,10 +3804,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -3887,7 +3887,7 @@ IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && P
 		PRINTFORM 장내로부터 앞지르는 일 없이%CALLNAME%의후로 돌아,다시 허리를 움직이기 시작했다…
 	;전회의 커맨드가대면좌위애널,배면좌위애널,기승위애널나대면입위애널나배면입위애널
 	ELSE
-		PRINTFORM 삽입한 채로%CALLNAME%를 재워 네발로 엎드림으로 해,다시 허리를 움직이기 시작했다…
+		PRINTFORM 삽입한 채로%CALLNAME%를 재워 네발로 엎드리게 해,다시 허리를 움직이기 시작했다…
 	ENDIF
 ELSE
 	PRINTFORM 후로부터%CALLNAME%의
@@ -3910,10 +3910,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -3944,7 +3944,7 @@ ELSE
 	PRINT 아누스에
 	;애널바이브애널비즈
 	SIF TEQUIP:애널바이브 || TEQUIP:애널비즈
-		PRINT 쑤셔 넣도록(듯이)해,
+		PRINT 쑤셔 넣듯이해,
 	
 	;조교자가남자나반음반양나후타나리나쉬메일이다
 	IF PENIS(PLAYER)
@@ -4038,10 +4038,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓히면서
@@ -4074,7 +4074,7 @@ ELSE
 	PRINT 아누스에
 	;애널바이브애널비즈
 	SIF TEQUIP:애널바이브 || TEQUIP:애널비즈
-		PRINT 쑤셔 넣도록(듯이)해,
+		PRINT 쑤셔 넣듯이해,
 	
 	;조교자가남자나반음반양나후타나리나쉬메일이다
 	IF PENIS(PLAYER)
@@ -4111,7 +4111,7 @@ ENDIF
 IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 110 && PREVCOM <= 116
 	;전회의 커맨드가 이번과 같음
 	IF PREVCOM == 113
-		PRINTFORM %CALLNAME%를 키후로부터 껴안아,다시%CALLNAME%의 신체를 흔들기 시작했다…
+		PRINTFORM %CALLNAME%를 등 뒤로부터 껴안아,다시%CALLNAME%의 신체를 흔들기 시작했다…
 	;전회 커맨드가후배위애널나기승위애널
 	ELSEIF PREVCOM == 111 || PREVCOM == 116
 		PRINTFORM 장내로부터
@@ -4162,10 +4162,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓히면서
@@ -4256,10 +4256,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -4292,7 +4292,7 @@ ELSE
 	PRINT 아누스에
 	;애널바이브애널비즈
 	SIF TEQUIP:애널바이브 || TEQUIP:애널비즈
-		PRINT 쑤셔 넣도록(듯이)해,
+		PRINT 쑤셔 넣듯이해,
 	
 	;조교자가남자나반음반양나후타나리나쉬메일이다
 	IF PENIS(PLAYER)
@@ -4330,7 +4330,7 @@ ENDIF
 IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 110 && PREVCOM <= 116
 	;전회의 커맨드가 이번과 같음
 	IF PREVCOM == 115
-		PRINTFORM %CALLNAME%를 키후로부터 껴안아,다시%CALLNAME%의 신체를 흔들기 시작했다…
+		PRINTFORM %CALLNAME%를 등 뒤로부터 껴안아,다시%CALLNAME%의 신체를 흔들기 시작했다…
 	;전회 커맨드가후배위애널나기승위애널나배면좌위애널
 	ELSEIF PREVCOM == 111 || PREVCOM == 116 || PREVCOM == 113
 		PRINTFORM 삽입한 채로%CALLNAME%의 신체를 서게 해 신체를 흔들기 시작했다…
@@ -4364,10 +4364,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -4400,7 +4400,7 @@ ELSE
 	PRINT 아누스에
 	;애널바이브애널비즈
 	SIF TEQUIP:애널바이브 || TEQUIP:애널비즈
-		PRINT 쑤셔 넣도록(듯이)해,
+		PRINT 쑤셔 넣듯이해,
 	
 	;조교자가남자나반음반양나후타나리나쉬메일이다
 	IF PENIS(PLAYER)
@@ -4472,10 +4472,10 @@ ELSE
 		ENDIF
 		
 		;스타킹계
-		IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-			SIF TEQUIP:특수 2 == 5
+		IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+			SIF TEQUIP:특수2 == 5
 				PRINT 스타킹
-			SIF TEQUIP:특수 2 == 6
+			SIF TEQUIP:특수2 == 6
 				PRINT 타이츠
 			IF TFLAG:55
 				PRINTL 의 깨어진 부분을 더욱 펴넓혔다
@@ -4600,10 +4600,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -4644,10 +4644,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -4699,7 +4699,7 @@ IF BOTTOMS(TARGET) >= 4
 	A = 4
 	CALL CLOTHES_NAME(TARGET)
 	PRINT 위로부터
-ELSEIF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+ELSEIF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 	A = 1
 	CALL CLOTHES_NAME(TARGET)
 	PRINT 위로부터
@@ -4780,7 +4780,7 @@ IF TFLAG:56 == 1
 		A = 4
 		CALL CLOTHES_NAME(TARGET)
 		PRINT 위로부터
-	ELSEIF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	ELSEIF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 		A = 1
 		CALL CLOTHES_NAME(TARGET)
 		PRINT 위로부터
@@ -4833,9 +4833,9 @@ ELSE
 	
 	PRINTFORML %CALLNAME%의 몸을 몇번이나 고정시켜두었다
 	
-	;전회 커맨드가촛불라고,납이 난다
+	;전회 커맨드가촛불라고,촛농이 난다
 	SIF PREVCOM == 144
-		PRINTL 채찍가 피부를 칠 때에,몸에 부착해 굳어지고 있던 납이 기분 좋게 튀어 흩어졌다…
+		PRINTL 채찍가 피부를 칠 때에,몸에 부착해 굳어지고 있던 촛농이 기분 좋게 튀어 흩어졌다…
 ENDIF
 
 
@@ -4846,15 +4846,15 @@ ENDIF
 PRINTFORM %CALLNAME:PLAYER%는
 ;조
 IF TFLAG:56 == 3 && TEQUIP:지하실
-	PRINTFORM %CALLNAME%의손를 취해,그 손가락과 손톱의 사이에 굵은바늘를 쑤셔 넣었다…
+	PRINTFORM %CALLNAME%의손를 취해,그 손가락과 손톱의 사이에 굵은바늘을 쑤셔 넣었다…
 ;성기
 ELSEIF TFLAG:56 == 1
 	PRINTFORM %CALLNAME%의 성기에
 	;조교자가바느질잘함나새드나지하실
 	IF TALENT:PLAYER:바느질잘함 || TALENT:PLAYER:새드 || TEQUIP:지하실
-		PRINT 가차 없이바늘를 찔렀다…
+		PRINT 가차 없이바늘을 찔렀다…
 	ELSE
-		PRINT 바늘를 꽂았다…
+		PRINT 바늘을 꽂았다…
 	ENDIF
 ;유두
 ELSEIF TFLAG:56 == 2
@@ -4863,23 +4863,23 @@ ELSEIF TFLAG:56 == 2
 	PRINTFORM %CALLNAME%의 유두에
 	;조교자가바느질잘함나새드나지하실
 	IF TALENT:PLAYER:바느질잘함 || TALENT:PLAYER:새드 || TEQUIP:지하실
-		PRINT 가차 없이바늘를 찔렀다…
+		PRINT 가차 없이바늘을 찔렀다…
 	ELSE
-		PRINT 바늘를 꽂았다…
+		PRINT 바늘을 꽂았다…
 	ENDIF
 ELSE
 	;팔이 없으면발에
 	IF TALENT:양팔결손
-		PRINTFORMW %CALLNAME%의발의,피부의 얇은 내퇴[內腿]를 노려바늘를 찔렀다…
+		PRINTFORMW %CALLNAME%의발의,피부의 얇은 내퇴[內腿]를 노려바늘을 찔렀다…
 	;발가 없으면 팔에
 	ELSEIF TALENT:양다리결손
-		PRINTFORMW %CALLNAME%의 팔을 잡아,바늘를 꽂았다…
+		PRINTFORMW %CALLNAME%의 팔을 잡아,바늘을 꽂았다…
 	;양쪽 모두 있으면 랜덤으로 팔
 	ELSEIF RAND:2 == 0
-		PRINTFORMW %CALLNAME%의 팔을 잡아,바늘를 꽂았다…
+		PRINTFORMW %CALLNAME%의 팔을 잡아,바늘을 꽂았다…
 	;양쪽 모두 있으면 랜덤으로발
 	ELSE
-		PRINTFORMW %CALLNAME%의발의,피부의 얇은 내퇴[內腿]를 노려바늘를 찔렀다…
+		PRINTFORMW %CALLNAME%의발의,피부의 얇은 내퇴[內腿]를 노려바늘을 찔렀다…
 	ENDIF
 ENDIF
 
@@ -4997,7 +4997,7 @@ IF RAND:4 == 0 && ITEM:저온초
 	ELSE
 		;손도발도 사용할 수 없으면 위에 둔다
 		IF TALENT:달마
-			PRINTFORM 재운%CALLNAME%의 위에촛불를 세워,촛대로서 보내게 했다…
+			PRINTFORM 눕힌 %CALLNAME%의 위에촛불를 세워,촛대로서 보내게 했다…
 		;손를 사용할 수 없으면발에
 		ELSEIF TALENT:양팔결손
 			PRINTFORM %CALLNAME%의발에촛불를 사이에 두게 해 촛대로서 보내게 했다…
@@ -5009,23 +5009,23 @@ IF RAND:4 == 0 && ITEM:저온초
 	ITEM:저온초 -= 1
 ELSEIF RAND:3 == 0
 	IF EXP:V경험 && VAGINA(TARGET)
-		PRINTFORM 굴곡위로 한%CALLNAME%의바기나에 꽃을 꽂아,화병에 진단했다…
+		PRINTFORM 굴곡위로 한%CALLNAME%의바기나에 꽃을 꽂아,화병으로 감상했다…
 	ELSEIF EXP:A경험
-		PRINTFORM 굴곡위로 한%CALLNAME%의애널에 꽃을 꽂아,화병에 진단했다…
+		PRINTFORM 굴곡위로 한%CALLNAME%의애널에 꽃을 꽂아,화병으로 감상했다…
 	ELSEIF EXP:U경험 && PENIS(TARGET)
-		PRINTFORM 앉게 한%CALLNAME%의페니스의 요도에 꽃을 꽂아 넣어,화병에 진단했다…
+		PRINTFORM 앉게 한%CALLNAME%의페니스의 요도에 꽃을 꽂아 넣어,화병으로 감상했다…
 	ELSE
-		PRINTFORM 앉게 한%CALLNAME%의 비밀스런 장소에 꽃을 꽂아,화병에 진단했다…
+		PRINTFORM 앉게 한%CALLNAME%의 비밀스런 장소에 꽃을 꽂아,화병으로 감상했다…
 	ENDIF
 ELSEIF RAND:2 == 0
-	PRINTFORM 네발로 엎드림으로 한%CALLNAME%를 테이블에 본지 얼마 안 되는,위에 티 세트를 두어 차를 즐겼다…
+	PRINTFORM 네발로 엎드리게 한%CALLNAME%를 테이블에 본지 얼마 안 되는,위에 티 세트를 두어 차를 즐겼다…
 ELSE
-	PRINTFORM 네발로 엎드림으로 한%CALLNAME%의 위에 걸터앉아,의자로서 보내게 했다…
+	PRINTFORM 네발로 엎드리게 한%CALLNAME%의 위에 걸터앉아,의자로서 보내게 했다…
 ENDIF
 PRINTL
 
 ;-------------------------------------------------
-;151,고문
+;151,고문 ;이건 왜 내용이 없지?
 ;-------------------------------------------------
 @MESSAGE_COM151
 
@@ -5098,13 +5098,13 @@ IF TALENT:낙인 && NO:MASTER != S
 	PRINTL [10] -   모두 자신의 표에 다시 붙인다
 ELSE
 	SIF (TALENT:낙인 & 1) == 0
-		PRINTL [1] -   상처를 붙인다
+		PRINTL [1] -   칼로 새긴다
 	SIF (TALENT:낙인 & 2) == 0
-		PRINTL [2] -   문신을 넣는다
+		PRINTL [2] -   문신을 새긴다
 	SIF (TALENT:낙인 & 4) == 0
-		PRINTL [3] -   소인을 누른다
+		PRINTL [3] -   인두로 지진다
 	SIF (TALENT:낙인 & 8) == 0
-		PRINTL [4] -   피어스를 연다
+		PRINTL [4] -   피어스를 끼운다
 ENDIF
 $INPUT_LOOP1
 INPUT
@@ -5113,12 +5113,12 @@ IF RESULT == 0
 	TFLAG:56 = 0
 ;덧쓰기
 ELSEIF RESULT == 20 && TALENT:낙인 && NO:MASTER != S
-	PRINTFORML %CSTR:1%가 남긴낙인를,모두 %CALLNAME:PLAYER%의 물건에 덧쓰기하기로 했다
+	PRINTFORML %CSTR:1%가 남긴낙인을 ,모두 %CALLNAME:PLAYER%의 물건에 덧쓰기하기로 했다
 	
 	;지금의 주인이연모·공포 대상
 	IF TALENT:연모 || TALENT:복종 || TALENT:친애 || TALENT:예속
 		PRINTFORML %CALLNAME%는 일찍이 맛본통증를 생각해 냈는지 일순간 기가 죽었지만,
-		PRINTFORML %CSTR:1%의낙인를 지울 수 있다면과 협력적이다…
+		PRINTFORML %CSTR:1%의낙인을 지울 수 있다면과 협력적이다…
 	;연모·공포 대상으로 밀린낙인이다
 	ELSEIF CFLAG:41 == S
 		PRINTFORML %CALLNAME%는,%CSTR:1%의 표를 지우고 싶지 않으면 울어 간원 했지만,
@@ -5144,11 +5144,11 @@ ELSEIF RESULT == 1 && (TALENT:낙인 & 1) == 0
 	PRINTFORM 나이프를 꺼내%CALLNAME%에 향하면
 	IF TALENT:연모 || TALENT:복종 || TALENT:친애 || TALENT:예속
 		PRINTFORML 무서워해 날뛰기 시작했지만,
-		PRINTFORML 소유물의 증거 그렇다고 해서 점잖고 %CALLNAME:MASTER%의 칼날을수 넣었다…
+		PRINTFORML 소유물의 증거라고 들으니 얌전하게 %CALLNAME:MASTER%의 칼날을 받아들였다…
 	;연모·공포 대상이 따로 있을 때저항＋
 	ELSEIF CFLAG:40
 		PRINTFORML 격렬하게 날뛰기 시작했지만,
-		PRINTFORML 무리하게 억누르고 몇차례 베어 붙이는 동안에저항는 그쳐 갔다…
+		PRINTFORML 무리하게 억누르고 몇차례 베어 붙이는 동안에 저항은 그쳐 갔다…
 	ELSE
 		PRINTFORML 무서워해 날뛰기 시작했지만,
 		IF PENIS(TARGET)
@@ -5156,34 +5156,34 @@ ELSEIF RESULT == 1 && (TALENT:낙인 & 1) == 0
 		ELSE
 			PRINT 목덜미에
 		ENDIF
-		PRINTFORML 칼날을 맞혀 위협하면저항를 단념해,점잖고 %CALLNAME:MASTER%의 칼날에 참고 있다…
+		PRINTFORML 칼날을 맞혀 위협하면 저항을 단념해,점잖고 %CALLNAME:MASTER%의 칼날에 참고 있다…
 	ENDIF
 	TFLAG:56 |= 1
 ;문신을 넣는다
 ELSEIF RESULT == 2 && (TALENT:낙인 & 4) == 0
 	IF TALENT:연모 || TALENT:복종 || TALENT:친애 || TALENT:예속
-		PRINTFORML %CALLNAME%는,%CALLNAME:MASTER%의 이름을 넣어 받을 수 있으니까와
-		PRINTFORML 바늘를 찔리는통증에 참고 있다
+		PRINTFORML %CALLNAME%는,%CALLNAME:MASTER%의 이름을 넣어 받을 수 있으니까 라며,
+		PRINTFORML 바늘을 찔리는통증에 참고 있다
 	ELSE
-		PRINTFORML 가르쳐 둔 약에저항를 그만둔%CALLNAME%를 재워,%CALLNAME:MASTER%의 이름을 새겨 넣었다
+		PRINTFORML 가르쳐 둔 약에저항을 그만둔%CALLNAME%를 재워,%CALLNAME:MASTER%의 이름을 새겨 넣었다
 	ENDIF
 	TFLAG:56 |= 2
 ;소인을 누른다
 ELSEIF RESULT == 3 && (TALENT:낙인 & 8) == 0
-	PRINTFORM 공포에 얼굴을 비뚤어지게 하고 그만두어 주도록(듯이) 간원 하는 %CALLNAME%
+	PRINTFORM 공포에 얼굴을 비뚤어지게 하고 그만두어 주듯이 간원 하는 %CALLNAME%
 	IF TALENT:연모 || TALENT:복종 || TALENT:친애 || TALENT:예속
-		PRINTL 를 소유물의 증거이니까와 설유해,
+		PRINTL 를 소유물의 증거이니까와 설득해,
 	ELSE
 		PRINTL 를 무리하게 억눌러,
 	ENDIF
-	PRINTFORML 충분히 가열한 구이만을 몸에 강압했다
+	PRINTFORML 충분히 가열한 인두를 몸에 강압했다
 	TFLAG:56 |= 4
 ;피어스를 연다
 ELSEIF RESULT == 4 && (TALENT:낙인 & 2) == 0
 	IF TALENT:연모 || TALENT:복종 || TALENT:친애 || TALENT:예속
 		PRINTFORML %CALLNAME%는,%CALLNAME:MASTER%의 표가 된다면과 몸에 구멍을 뚫을 수 있는통증에 참고 있다
 	ELSE
-		PRINTFORML 가르쳐 둔 약에저항를 그만둔%CALLNAME%를 재워,몸에 피어스를 열어 주었다
+		PRINTFORML 가르쳐 둔 약에저항을 그만둔%CALLNAME%를 재워,몸에 피어스를 열어 주었다
 	ENDIF
 	TFLAG:56 |= 8
 ELSE
@@ -5194,11 +5194,11 @@ ENDIF
 ;157,물고문
 ;-------------------------------------------------
 @MESSAGE_COM157
-PRINTFORM %CALLNAME%의 머리를 움켜잡음으로 해,
+PRINTFORM %CALLNAME%의 머리를 움켜잡고,
 IF TEQUIP:목욕탕
-	PRINTL 두로부터 욕조에 가라앉혀 주었다…
+	PRINTL 머리부터 욕조에 가라앉혀 주었다…
 ELSE
-	PRINTL 수를 친 대야에 가라앉혀 주었다…
+	PRINTL 물을 받아놓은 대야에 가라앉혀 주었다…
 ENDIF
 
 ;-------------------------------------------------
@@ -5206,7 +5206,7 @@ ENDIF
 ;-------------------------------------------------
 @MESSAGE_COM158
 SIF TEQUIP:밧줄
-	PRINT 속박되어 움직일 수 없다
+	PRINT 속박되어 움직일 수 없는
 PRINTFORM %CALLNAME%를 억눌러,그 체내를 마구 간질였다…
 
 ;-------------------------------------------------
@@ -5233,10 +5233,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -5284,10 +5284,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -5331,10 +5331,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -5415,10 +5415,10 @@ IF BOTTOMS(TARGET) >= 1 && BOTTOMS(TARGET) <= 3
 ENDIF
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -5444,7 +5444,7 @@ ELSEIF ABL:마조끼 >= 5
 	PRINTFORML %CALLNAME%는,배설감을 마음껏 맛보고 있다
 	PRINTFORM %CALLNAME%의 표정은 쾌감에 야무지지 못하게 느슨해져,그입
 	SIF VAGINA(TARGET)
-		PRINT 와 질입
+		PRINT 와 질구
 	PRINTFORM 로부터는 뚝뚝 군침을 방울져 떨어지게 하고 있다
 ENDIF
 
@@ -5475,10 +5475,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -5545,7 +5545,7 @@ ELSE
 			PRINTFORM %CALLNAME%를 작은아이와 같이 양발를 안아
 		PRINTFORM %CALLNAME:PLAYER%가
 		;하의류를 입고 있다
-		IF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || BOTTOMS(TARGET) >= 3 || TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+		IF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || BOTTOMS(TARGET) >= 3 || TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 			PRINT 착의인 채 흘림을 하는 듯
 		;야외에서,견이 붙이고 있다
 		ELSEIF TEQUIP:야외플레이 && TEQUIP:머리장식 == 2 && !TEQUIP:밧줄
@@ -5582,12 +5582,12 @@ ELSE
 	SIF TEQUIP:밧줄
 		PRINT 동작을 할 수 없는 채
 	;하의류를 입고 있다
-	IF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || BOTTOMS(TARGET) >= 3 || TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	IF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || BOTTOMS(TARGET) >= 3 || TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 		IF BOTTOMS(TARGET) == 3
 			PRINT 슈트
 		ELSEIF BOTTOMS(TARGET) >= 4
 			PRINT 바지
-		ELSEIF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+		ELSEIF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 			A = 1
 			CALL CLOTHES_NAME(TARGET)
 		ELSEIF TEQUIP:속옷（아래） && !TEQUIP:정조대
@@ -5631,7 +5631,7 @@ IF !TEQUIP:역조교
 	PRINTFORM %CALLNAME:PLAYER%가
 	
 	;하의류를 입고 있다
-	SIF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || BOTTOMS(TARGET) >= 3 || TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	SIF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || BOTTOMS(TARGET) >= 3 || TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 		PRINT 착의인 채 탈분을 하는 듯
 	PRINTFORM 명하면
 ENDIF
@@ -5661,12 +5661,12 @@ SIF TEQUIP:밧줄
 	PRINT 동작을 할 수 없는 채
 
 ;하의류를 입고 있다
-IF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || BOTTOMS(TARGET) >= 3 || TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+IF (TEQUIP:속옷（아래） && !TEQUIP:정조대) || BOTTOMS(TARGET) >= 3 || TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 	IF BOTTOMS(TARGET) == 3
 		PRINT 슈트
 	ELSEIF BOTTOMS(TARGET) >= 4
 		PRINT 바지
-	ELSEIF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	ELSEIF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 		A = 1
 		CALL CLOTHES_NAME(TARGET)
 	ELSEIF TEQUIP:속옷（아래） && !TEQUIP:정조대
@@ -5707,7 +5707,7 @@ IF TFLAG:66
 		ENDIF
 	ELSE
 		IF ABL:스캇중독 >= 2 || ABL:마조끼 >= 4 || ABL:순종 >= 5
-			PRINTFORML 마루의 오줌을 빨아 예쁘게 하도록(듯이) 명령하면,
+			PRINTFORML 마루의 오줌을 빨아 예쁘게 하듯이 명령하면,
 		ELSE
 			PRINTFORML %CALLNAME%의 머리를 잡아,오줌이 모인 마루에 강압했다
 		ENDIF
@@ -5796,7 +5796,7 @@ ELSE
 ENDIF
 
 ;-------------------------------------------------
-;185,식분시킨다
+;185,식분시킨다 ;위도 그렇고 이딴 커맨드는 왜 있어;;
 ;-------------------------------------------------
 @MESSAGE_COM185
 
@@ -5809,7 +5809,7 @@ IF TEQUIP:역조교
 	ENDIF
 ELSE
 	IF ABL:스캇중독 >= 2 || ABL:마조끼 >= 4 || ABL:순종 >= 5
-		PRINTFORML 마루의 물건을 먹어 예쁘게 하도록(듯이) 명령하면,
+		PRINTFORML 마루의 물건을 먹어 예쁘게 하듯이 명령하면,
 	ELSE
 		PRINTFORML %CALLNAME%의 머리를 잡아,마루의 편리하게 강압했다
 	ENDIF
@@ -5819,11 +5819,11 @@ PRINTFORM %CALLNAME%는
 IF ABL:스캇중독 >= 4
 	SIF ABL:스캇중독 >= 5
 		PRINTFORM 배설물의 악취와 쓴 맛에 황홀로 하면서,
-	PRINT 스스로 낸 변을 모두 먹고
+	PRINT 스스로 낸 변을 모두 먹
 	IF TEQUIP:야외플레이
-		PRINTL …
+		PRINTL 었다…
 	ELSE
-		PRINTL ,마루의 더러움까지 정중하게 빨아냈다…
+		PRINTL 고,마루의 더러움까지 정중하게 빨아냈다…
 	ENDIF
 ELSEIF ABL:스캇중독 == 3
 	IF ABL:마조끼 >= 5
@@ -5885,9 +5885,9 @@ SIF MONEY >= 25000
 SIF MONEY >= 150000
 	PRINTFORML [5] 고가의 물건(150000고슈금)
 
-;경장은 함락이 끝난 상태가 아니면 건네줄 수 없다
+;경장은 함락이 끝난 상태가 아니면 건네줄 수 없다 ;5000이던걸 게임과 같이 50000으로 수정. 옷보다 더 싸서...
 SIF MONEY >= 5000 && KANRAKU(TARGET)
-	PRINTFORML [10] 경장(5000고슈금)
+	PRINTFORML [10] 경장(50000고슈금)
 	
 ;----------------------------------
 ;특별한선물(eraheta로부터 인용)
@@ -5963,10 +5963,10 @@ ELSEIF RESULT == 5 && MONEY > 150000
 	TFLAG:17 = 6
 	MONEY -= 150000
 	
-ELSEIF RESULT == 10 && MONEY > 5000 && KANRAKU(TARGET)
+ELSEIF RESULT == 10 && MONEY > 50000 && KANRAKU(TARGET)
 	;경장을선물
 	TFLAG:17 = 11
-	MONEY -= 5000
+	MONEY -= 50000
 	;경장입손플래그를 온
 	CFLAG:614 = 1
 ;----------------------------------
@@ -6102,7 +6102,7 @@ PRINTFORM %CALLNAME:PLAYER%는%CALLNAME%에노래연습를 시켰다…
 ;206,선물시킨다
 ;-------------------------------------------------
 @MESSAGE_COM206
-PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%에,선물를 주도록(듯이) 말해 보았다
+PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%에,선물를 주듯이 말해 보았다
 IF TALENT:연모 || TALENT:음란 || TALENT:복종 || TALENT:친애 || TALENT:창부 || TALENT:예속
 	;연모,친애
 	IF TALENT:연모 || TALENT:친애
@@ -6135,7 +6135,7 @@ IF TALENT:연모 || TALENT:음란 || TALENT:복종 || TALENT:친애 || TALENT:�
 		ELSEIF ITEM:로터 == 1
 			PRINTL 새로운로터를선물 해 주었다
 		ELSE
-			PRINTL 선물는 스스로 부디이라고 말해,기대고 걸려 왔다
+			PRINTL 선물는 자신이라고 말하며,기대고 걸려 왔다
 		ENDIF
 		PRINTFORML 무엇인가,%CALLNAME%편이 기뻐하고 있는 것 같은 생각이 든다…
 	;복종,예속
@@ -6224,7 +6224,7 @@ PRINTFORML 애무 해 왔다…
 @MESSAGE_COM221
 ;역조교모드가 아니다
 SIF !TEQUIP:역조교
-	PRINTFORML %CALLNAME:PLAYER%는,%CALLNAME%에 스스로의가슴를 비비도록(듯이) 말했다
+	PRINTFORML %CALLNAME:PLAYER%는,%CALLNAME%에 스스로의가슴를 비비듯이 말했다
 
 PRINTFORM %CALLNAME%는,%CALLNAME:PLAYER%의
 ;남자나절벽
@@ -6530,7 +6530,7 @@ ELSE
 	IF TEQUIP:지하실
 		PRINTL 손톱을 세워 세게 긁어 돌려 왔다
 	ELSE
-		PRINTL 굴리도록(듯이)해 자극해 왔다…
+		PRINTL 굴리듯이해 자극해 왔다…
 	ENDIF
 ENDIF
 
@@ -6581,7 +6581,7 @@ ELSEIF TALENT:거유
 	PRINT 풍만한가슴로 감싸
 ;폭유
 ELSEIF TALENT:폭유
-	PRINT 너무 풍만할 정도의가슴로 숨기도록(듯이)해
+	PRINT 너무 풍만할 정도의가슴로 숨기듯이해
 ELSE
 	PRINT 가슴에서는씨로
 ENDIF
@@ -6650,10 +6650,10 @@ ELSEIF TEQUIP:속옷（아래） || TEQUIP:하의
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 위로부터
 	ENDIF
@@ -6698,7 +6698,7 @@ ENDIF
 @MESSAGE_COM243
 ;역조교모드
 SIF TEQUIP:역조교
-	PRINTFORM %CALLNAME%는가슴을비빈다를 하고 싶은 것 같다
+	PRINTFORM %CALLNAME%는 가슴을 맞대 비비고 싶은 것 같다
 
 ;수 넣는 경우만
 PRINTFORM %CALLNAME:PLAYER%과%CALLNAME%는 서로의가슴를 서로 비볐다…
@@ -6715,10 +6715,10 @@ SIF TEQUIP:역조교
 ;수 넣는 경우만
 
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -6747,7 +6747,7 @@ IF KANRAKU2(TARGET)
 	ELSE
 		PRINT 하면,
 	ENDIF
-	PRINT 페니스를 서로 관련되도록(듯이)
+	PRINT 페니스를 서로 관련되듯이
 ELSE
 	PRINT 서로의페니스를
 ENDIF
@@ -6789,10 +6789,10 @@ ELSEIF TEQUIP:속옷（아래） || TEQUIP:하의
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 위로부터
 	ENDIF
@@ -7005,7 +7005,7 @@ ELSE
 		ELSE
 			PRINTFORM ,%CALLNAME:PLAYER%의 귀에 잘 어울리는 짐승
 		ENDIF
-		PRINT 의 꼬리를 본떴다
+		PRINT 의 꼬리를 본뜬
 	ENDIF
 	PRINTFORML 애널바이브를 꽂아넣어 왔다…
 ENDIF
@@ -7080,16 +7080,16 @@ ELSE
 		ELSE
 			PRINTFORM %CALLNAME:PLAYER%는%CALLNAME%의 전에 엎드려 누우면
 			SIF ABL:PLAYER:욕망 > 3
-				PRINT 비밀의 틈[秘裂]을 과시하도록(듯이) 크고
+				PRINT 비밀의 틈[秘裂]을 과시하듯이 크고
 			PRINTFORML 가랑이를 열어,
 		ENDIF
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 를 찢어 꺼냈다
 	ENDIF
@@ -7165,7 +7165,7 @@ IF ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 26
 			PRINTFORM 질내로부터 앞지르는 일 없이 %CALLNAME:PLAYER%의후로 돌아,다시 허리를 움직여 왔다…
 		;전회의 커맨드가기승위한다
 		ELSE
-			PRINTFORM 삽입한 채로 %CALLNAME:PLAYER%를 재워 네발로 엎드림으로 해,다시 허리를 움직여 왔다…
+			PRINTFORM 삽입한 채로 %CALLNAME:PLAYER%를 재워 네발로 엎드리게 해,다시 허리를 움직여 왔다…
 		ENDIF
 	ELSE
 		IF PENIS(TARGET)
@@ -7189,10 +7189,10 @@ ELSE
 	PRINTFORM %CALLNAME%는
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 를 찢어 꺼냈다
 	ENDIF
@@ -7292,10 +7292,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 를 찢어 꺼냈다
 	ENDIF
@@ -7382,10 +7382,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 를 찢어 꺼냈다
 	ENDIF
@@ -7445,7 +7445,7 @@ IF ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 26
 			PRINTFORM 장내로부터 앞지르는 일 없이 %CALLNAME:PLAYER%의후로 돌아,다시 허리를 움직여 왔다…
 		;전회의 커맨드가기승위한다
 		ELSE
-			PRINTFORM 삽입한 채로 %CALLNAME:PLAYER%를 재워 네발로 엎드림으로 해,다시 허리를 움직여 왔다…
+			PRINTFORM 삽입한 채로 %CALLNAME:PLAYER%를 재워 네발로 엎드리게 해,다시 허리를 움직여 왔다…
 		ENDIF
 	ELSE
 		IF PENIS(TARGET)
@@ -7469,10 +7469,10 @@ ELSE
 	PRINTFORM %CALLNAME%는
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 를 찢어 꺼냈다
 	ENDIF
@@ -7562,10 +7562,10 @@ ELSE
 	ENDIF
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 를 찢어 꺼냈다
 	ENDIF
@@ -7762,10 +7762,10 @@ IF TALENT:새드 || ABL:새드끼 >= 3 || TEQUIP:역조교
 	PRINTFORM %CALLNAME:PLAYER%가입를 열면,%CALLNAME%는
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 를 찢어 꺼냈다
 	ENDIF
@@ -7794,10 +7794,10 @@ ELSE
 	PRINTFORM %CALLNAME:PLAYER%는
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINT 를 찢어 꺼냈다
 	ENDIF
@@ -7836,7 +7836,7 @@ IF TEQUIP:역조교
 ELSE
 	PRINTFORM %CALLNAME:PLAYER%는%CALLNAME%에
 	IF ABL:PLAYER:마조끼 >= 3 || TALENT:PLAYER:마조
-		PRINTFORML 자신의 일을 매도해 주도록(듯이) 간원 했다
+		PRINTFORML 자신의 일을 매도해 주듯이 간원 했다
 	ELSE
 		PRINTFORML 매도의 말을 말할 수 있어 보았다
 	ENDIF
@@ -7880,7 +7880,7 @@ IF TEQUIP:역조교
 	ELSE
 		PRINTFORM 발
 	ENDIF
-	PRINTFORML 를 빨도록(듯이) 말해졌다
+	PRINTFORML 를 빨듯이 말해졌다
 ENDIF
 
 ;수 넣는 경우만
@@ -7890,7 +7890,7 @@ IF TEQUIP:신발
 	A = 9
 	CALL CLOTHES_NAME(TARGET)
 	PRINT 를 신었다
-ELSEIF TEQUIP:특수 2
+ELSEIF TEQUIP:특수2
 	A = 1
 	CALL CLOTHES_NAME(TARGET)
 	PRINT 에 휩싸여졌다
@@ -7961,16 +7961,16 @@ IF TEQUIP:역조교
 		ENDIF
 	ELSE
 		PRINTFORML %CALLNAME:PLAYER%의 몸을 몇번이나 고정시켜두어 왔다
-		;전회 커맨드가촛불라고,납이 난다
+		;전회 커맨드가촛불라고,촛농이 난다
 		SIF PREVCOM == 292
-			PRINTFORML 채찍가 피부를 칠 때에,몸에 부착해 굳어지고 있던 납이 기분 좋게 튀어 흩어졌다…
+			PRINTFORML 채찍가 피부를 칠 때에,몸에 부착해 굳어지고 있던 촛농이 기분 좋게 튀어 흩어졌다…
 	ENDIF
 ELSE
 	;새드끼 5 이상
 	IF ABL:새드끼 >= 5
 		PRINTFORML %CALLNAME%는 명령을 듣자마자채찍를 강탈하면,%CALLNAME:PLAYER%의 피부에 새빨간 줄기를 기본도 새겨 갔다
 	ELSE
-		PRINTFORML %CALLNAME%에채찍를 건네주어,이것으로 쳐 주도록(듯이) 말했다…
+		PRINTFORML %CALLNAME%에채찍를 건네주어,이것으로 쳐 주듯이 말했다…
 	ENDIF
 ENDIF
 
@@ -7982,7 +7982,7 @@ ENDIF
 IF BASE:뇨의 > 0
 	;역조교모드
 	IF TEQUIP:역조교
-		PRINTFORML %CALLNAME%의 오줌을 마시도록(듯이) 명령되었다
+		PRINTFORML %CALLNAME%의 오줌을 마시듯이 명령되었다
 	ENDIF
 	
 	;수 넣는 경우만
@@ -8000,7 +8000,7 @@ IF BASE:뇨의 > 0
 ELSEIF TFLAG:66
 	;역조교모드
 	IF TEQUIP:역조교
-		PRINTFORML 마루의 오줌을 마시도록(듯이) 명령되었다
+		PRINTFORML 마루의 오줌을 마시듯이 명령되었다
 	ENDIF
 	
 	;수 넣는 경우만
@@ -8012,7 +8012,7 @@ ELSEIF TFLAG:66
 	ELSEIF TFLAG:66 & 4
 		PRINTFORM %CALLNAME:ASSI%
 	ENDIF
-	PRINTFORML 가 낸 오줌을,과시하도록(듯이) 목을 울려 다 마셨다…
+	PRINTFORML 가 낸 오줌을,과시하듯이 목을 울려 다 마셨다…
 ENDIF
 
 
@@ -8032,7 +8032,7 @@ IF TFLAG:56 == 1
 ELSE
 	;역조교모드
 	IF TEQUIP:역조교
-		PRINTFORML 마루의 변을 먹어 정리하도록(듯이) 명령되었다
+		PRINTFORML 마루의 변을 먹어 정리하듯이 명령되었다
 	ENDIF
 	
 	;수 넣는 경우만
@@ -8044,7 +8044,7 @@ ELSE
 	ELSEIF TFLAG:57 & 4
 		PRINTFORM %CALLNAME:ASSI%
 	ENDIF
-	PRINTFORML 가 낸 변을,과시하도록(듯이)입에 포함해,삼켰다…
+	PRINTFORML 가 낸 변을,과시하듯이입에 포함해,삼켰다…
 ENDIF
 
 
@@ -8064,7 +8064,7 @@ ELSE
 		;야외에서,견이 붙이고 있다
 		SIF TEQUIP:야외플레이 && TEQUIP:PLAYER:머리장식 == 2 && !TEQUIP:PLAYER:밧줄
 			PRINT 에,개와 같이 편발를 올려
-		PRINTFORML 방뇨하도록(듯이) 명해 왔다…
+		PRINTFORML 방뇨하듯이 명해 왔다…
 	ENDIF
 
 	PRINTFORM %CALLNAME:PLAYER%는 인내 할 수 없게 되어,
@@ -8103,7 +8103,7 @@ IF TEQUIP:역조교
 	;아기 포즈
 	SIF !TALENT:소인체형 && TALENT:PLAYER:소인체형
 		PRINTFORM %CALLNAME:PLAYER%를 작은아이와 같이 양발를 안아
-	PRINTFORM 탈분을 하도록(듯이) 명해 왔다…
+	PRINTFORM 탈분을 하듯이 명해 왔다…
 ENDIF
 
 SIF TEQUIP:PLAYER:밧줄
@@ -8170,7 +8170,7 @@ PRINTFORML 장내에 방뇨하기 시작했다…
 @MESSAGE_COM291
 ;조
 IF TFLAG:56 == 3 && TEQUIP:지하실
-	PRINTFORM 손가락과 손톱의 사이에,굵은바늘를 쑤셔 넣어졌다…
+	PRINTFORM 손가락과 손톱의 사이에,굵은바늘을 쑤셔 넣어졌다…
 ;성기
 ELSEIF TFLAG:56 == 1
 	PRINTFORM %CALLNAME:PLAYER%의 성기에
@@ -8178,7 +8178,7 @@ ELSEIF TFLAG:56 == 1
 	IF TALENT:바느질잘함 || TALENT:새드 || TEQUIP:지하실
 		PRINT 가차 없이,바늘가 찔렸다…
 	ELSE
-		PRINT 바늘를 꽂을 수 있었다…
+		PRINT 바늘을 꽂을 수 있었다…
 	ENDIF
 ;유두
 ELSEIF TFLAG:56 == 2
@@ -8189,21 +8189,21 @@ ELSEIF TFLAG:56 == 2
 	IF TALENT:바느질잘함 || TALENT:새드 || TEQUIP:지하실
 		PRINT 가차 없이,바늘가 찔렸다…
 	ELSE
-		PRINT 바늘를 꽂을 수 있었다…
+		PRINT 바늘을 꽂을 수 있었다…
 	ENDIF
 ELSE
 	;팔이 없으면발에
 	IF TALENT:양팔결손
-		PRINTFORMW %CALLNAME:PLAYER%의발의,피부의 얇은 내퇴[內腿]를 노려바늘를 꽂을 수 있었다…
+		PRINTFORMW %CALLNAME:PLAYER%의발의,피부의 얇은 내퇴[內腿]를 노려바늘을 꽂을 수 있었다…
 	;발가 없으면 팔에
 	ELSEIF TALENT:양다리결손
-		PRINTFORMW %CALLNAME:PLAYER%의 팔에,바늘를 꽂을 수 있었다…
+		PRINTFORMW %CALLNAME:PLAYER%의 팔에,바늘을 꽂을 수 있었다…
 	;양쪽 모두 있으면 랜덤으로 팔
 	ELSEIF !RAND:1
-		PRINTFORMW %CALLNAME:PLAYER%의 팔에,바늘를 꽂을 수 있었다…
+		PRINTFORMW %CALLNAME:PLAYER%의 팔에,바늘을 꽂을 수 있었다…
 	;양쪽 모두 있으면 랜덤으로발
 	ELSE
-		PRINTFORMW %CALLNAME:PLAYER%의발의,피부의 얇은 내퇴[內腿]를 노려바늘를 꽂을 수 있었다…
+		PRINTFORMW %CALLNAME:PLAYER%의발의,피부의 얇은 내퇴[內腿]를 노려바늘을 꽂을 수 있었다…
 	ENDIF
 ENDIF
 
@@ -8264,8 +8264,8 @@ ELSE
 	ENDIF
 ENDIF
 SIF TEQUIP:지하실
-	PRINT 화상 입을 것 같을 정도
-PRINTFORMW 열기납을 수…
+	PRINT 화상 입을 것 같을 정도로
+PRINTFORMW 뜨거운 촛농을 떨궜다…
 
 ;-------------------------------------------------
 ;293,삼각목마 시킨다
@@ -8289,38 +8289,38 @@ ENDIF
 @MESSAGE_COM294
 IF RAND:4 == 0 && ITEM:저온초
 	IF RAND:3 == 0 && EXP:PLAYER:V경험 >= 10 && !TALENT:PLAYER:처녀 && !TALENT:PLAYER:재생처녀
-		PRINTFORML 굴곡위로 된바기나에촛불를 꽂아넣어져 그대로 촛대로서 보내도록(듯이) 명해졌다…
+		PRINTFORML 굴곡위로 된바기나에촛불를 꽂아넣어져 그대로 촛대로서 보내듯이 명해졌다…
 	ELSEIF RAND:2 == 0 && EXP:PLAYER:A경험 >= 10
 		PRINTFORML 굴곡위로 한%CALLNAME%의 아누스에촛불를 꽂아넣어,촛대로서 보내게 했다…
 	ELSE
 		;손도발도 사용할 수 없으면 위에 둔다
 		IF TALENT:PLAYER:달마
-			PRINTL 엎드려 누운 몸 위에촛불를 실을 수 있어 그대로 촛대로서 보내도록(듯이) 명해졌다…
+			PRINTL 엎드려 누운 몸 위에촛불를 실을 수 있어 그대로 촛대로서 보내듯이 명해졌다…
 		;손를 사용할 수 없으면발에
 		ELSEIF TALENT:PLAYER:양팔결손
-			PRINTL 발에촛불를 끼여,그대로 촛대로서 보내도록(듯이) 명해졌다…
+			PRINTL 발에촛불를 끼여,그대로 촛대로서 보내듯이 명해졌다…
 		;손를 사용할 수 있으면손에
 		ELSE
-			PRINTL 손에촛불를 갖게해 그대로 촛대로서 보내도록(듯이) 명해졌다…
+			PRINTL 손에촛불를 갖게해 그대로 촛대로서 보내듯이 명해졌다…
 		ENDIF
 	ENDIF
 	ITEM:저온초 -= 1
 ELSEIF RAND:3 == 0
 	IF EXP:PLAYER:V경험 && VAGINA(PLAYER)
-		PRINTL 굴곡위로 된바기나에 꽃을 꽂을 수 있어 그대로 화병으로서 보내도록(듯이) 명해졌다…
+		PRINTL 굴곡위로 된바기나에 꽃을 꽂을 수 있어 그대로 화병으로서 보내듯이 명해졌다…
 	ELSEIF EXP:PLAYER:A경험
-		PRINTL 굴곡위로 된애널에 꽃을 꽂을 수 있어 그대로 화병으로서 보내도록(듯이) 명해졌다…
+		PRINTL 굴곡위로 된애널에 꽃을 꽂을 수 있어 그대로 화병으로서 보내듯이 명해졌다…
 	ELSEIF EXP:PLAYER:U경험 && PENIS(PLAYER)
-		PRINTL 요도에 꽃을 꽂아 넣을 수 있어 그대로 화병으로서 보내도록(듯이) 명해졌다…
+		PRINTL 요도에 꽃을 꽂아 넣을 수 있어 그대로 화병으로서 보내듯이 명해졌다…
 	ELSE
-		PRINTL 비밀스런 장소에 꽃을 꽂을 수 있어 그대로 화병으로서 보내도록(듯이) 명해졌다…
+		PRINTL 비밀스런 장소에 꽃을 꽂을 수 있어 그대로 화병으로서 보내듯이 명해졌다…
 	ENDIF
 ELSEIF RAND:2 == 0
-	PRINTFORML 네발로 엎드림으로 몰려 위에 티 세트를 늘어놓여졌다
-	PRINTFORML 그대로,당분간 테이블로서 보내도록(듯이) 명해졌다…
+	PRINTFORML 네발로 엎드리게 몰려 위에 티 세트를 늘어놓여졌다
+	PRINTFORML 그대로,당분간 테이블로서 보내듯이 명해졌다…
 ELSE
 	PRINTFORML %CALLNAME:PLAYER%가 네발로 엎드림이 되면,%CALLNAME%가 위에 앉아 왔다
-	PRINTFORML 그대로,당분간 의자로서 보내도록(듯이) 명해졌다…
+	PRINTFORML 그대로,당분간 의자로서 보내듯이 명해졌다…
 ENDIF
 
 
@@ -8574,7 +8574,7 @@ IF TEQUIP:비디오카메라
 ;역조교모드
 ELSEIF TEQUIP:역조교
 	PRINTFORMW %CALLNAME%는비디오카메라로 %CALLNAME:PLAYER%의 촬영을 시작했다
-	PRINTFORML 카메라에 향해,자기 소개를 하도록(듯이) 촉구받았지만…
+	PRINTFORML 카메라에 향해,자기 소개를 하듯이 촉구받았지만…
 ;통상 모드
 ELSE
 	IF FLAG:22 == 1
@@ -8793,7 +8793,7 @@ IF TEQUIP:역조교
 		ELSE
 			PRINT 에이프런
 		ENDIF
-		PRINTL 를 붙이도록(듯이) 말해졌다…
+		PRINTL 를 붙이듯이 말해졌다…
 	ENDIF
 ;통상 모드
 ELSE
@@ -9006,14 +9006,14 @@ ELSEIF TFLAG:151 == 4
 ELSEIF TFLAG:151 >= 5
 	;역조교모드
 	IF TEQUIP:역조교
-		PRINTFORML %CALLNAME%는 더욱 더 %CALLNAME:PLAYER%를 과시하도록(듯이)해 갤러리를 부추겼다…
+		PRINTFORML %CALLNAME%는 더욱 더 %CALLNAME:PLAYER%를 과시하듯이해 갤러리를 부추겼다…
 		PRINTFORMW %STR:81%의 흥분은 더 이상 없을만큼 높아지고 있다
 		PRINTFORML 
 		PRINTFORML 후는%CALLNAME%조차 허락하면,%CALLNAME:PLAYER%는
 		PRINTFORML %STR:81%가 부풀어 오른 성욕으로 가지고,유린해 다하여질 것이다…
 	;통상 모드
 	ELSE
-		PRINTFORML %CALLNAME:PLAYER%는 더욱 더%CALLNAME%를 과시하도록(듯이)해 갤러리를 부추겼다…
+		PRINTFORML %CALLNAME:PLAYER%는 더욱 더%CALLNAME%를 과시하듯이해 갤러리를 부추겼다…
 		PRINTFORMW %STR:81%의 흥분은 더 이상 없을만큼 높아지고 있다
 		PRINTFORML 
 		PRINTFORML 후는 %CALLNAME:PLAYER%조차 허락하면,%STR:81%는
@@ -9068,7 +9068,7 @@ IF TEQUIP:역조교
 				PRINT 로터
 			ENDIF
 		ENDIF
-		PRINTL 를 과시하도록(듯이) 뽑아 내면,
+		PRINTL 를 과시하듯이 뽑아 내면,
 	ENDIF
 	
 	;가렵다
@@ -9131,7 +9131,7 @@ ELSE
 				PRINT 애널의로터
 			ENDIF
 		ENDIF
-		PRINTL 를 과시하도록(듯이) 뽑아 내면,
+		PRINTL 를 과시하듯이 뽑아 내면,
 	ENDIF
 	
 	;가렵다
@@ -9219,10 +9219,10 @@ IF TEQUIP:클리캡
 	PRINTFORML 촉수는%CALLNAME%의클리고문를 중단했다
 ELSE
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -9247,10 +9247,10 @@ IF TEQUIP:전동오나홀
 	PRINTFORML 촉수는%CALLNAME%의페니스를해방 했다
 ELSE
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -9287,10 +9287,10 @@ IF TEQUIP:애널바이브
 	PRINTFORML 촉수는%CALLNAME%의 아누스로부터 뽑아 내졌다
 ELSE
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-		SIF TEQUIP:특수 2 == 5
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		IF TFLAG:55
 			PRINT 의 깨어진 부분을 펴넓혀,
@@ -9335,10 +9335,10 @@ ENDIF
 ;-------------------------------------------------
 @MESSAGE_COM352
 ;스타킹계
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	SIF TEQUIP:특수 2 == 5
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	SIF TEQUIP:특수2 == 5
 		PRINT 스타킹
-	SIF TEQUIP:특수 2 == 6
+	SIF TEQUIP:특수2 == 6
 		PRINT 타이츠
 	IF TFLAG:55
 		PRINT 의 깨어진 부분을 펴넓혀,
@@ -9362,7 +9362,7 @@ ELSEIF ABL:마조끼 >= 5
 	PRINTFORM %CALLNAME%는,배설감을 마음껏 맛보고 있다
 	PRINTFORM %CALLNAME%의 표정은 쾌감에 야무지지 못하게 느슨해져,그입
 	SIF VAGINA(TARGET)
-		PRINT 와 질입
+		PRINT 와 질구
 	PRINTFORML 로부터는 뚝뚝 군침을 방울져 떨어지게 하고 있다
 ENDIF
 
@@ -9425,8 +9425,8 @@ ENDIF
 IF TEQUIP:바이브 == 2
 	PRINTFORMW 촉수는 계속해%CALLNAME%의질내의 가장 민감한 부분에 대해서 완급이 붙은 고문을 전개했다
 ELSEIF TEQUIP:바이브 == 3
-	PRINTFORML 일단%CALLNAME%의 자궁에 기어들고 있던촉수는 갑자기,자궁입를 후벼파도록(듯이) 역류 해
-	PRINTFORMW 다음의 순간%CALLNAME%의 질의 천개를 돌기로 세게 긁도록(듯이) 더듬기 시작했다
+	PRINTFORML 일단%CALLNAME%의 자궁에 기어들고 있던촉수는 갑자기,자궁입를 후벼파듯이 역류 해
+	PRINTFORMW 다음의 순간%CALLNAME%의 질의 천개를 돌기로 세게 긁듯이 더듬기 시작했다
 ELSE
 	PRINTFORMW %CALLNAME%의 성기에 기어들고 있던촉수는 갑자기,%CALLNAME%의질내의 천정을 몰아세우기 시작했다
 ENDIF
@@ -9484,9 +9484,9 @@ ELSEIF ABL:V감각 == 4
 	PRINTFORMW 촉수가 뽑아진후도%CALLNAME%의 질은 펼쳐진 채로 좀처럼 돌아오지 않는다
 ELSEIF ABL:V감각 == 6
 	PRINTFORML 촉수가 뽑아진후의%CALLNAME%의 성기로부터는 고기 빌라가 넘쳐 나와,
-	PRINTFORMW 뻐끔 연 질입의 고향은 자궁입가 보이고 있다
+	PRINTFORMW 뻐끔 연 질구의 고향은 자궁입가 보이고 있다
 ELSE
-	PRINTFORMW %CALLNAME%는 크게 펼쳐진 자신의 질입에 눈을 향한 채로,황홀로 한 표정을 띄우고 있다
+	PRINTFORMW %CALLNAME%는 크게 펼쳐진 자신의 질구에 눈을 향한 채로,황홀로 한 표정을 띄우고 있다
 ENDIF
 
 
@@ -9518,11 +9518,11 @@ PRINTFORML %CALLNAME%의 질과 항문은 고야와 같은극태의촉수로 휘
 PRINTL 
 IF ABL:V감각 >= 7 && ABL:A감각 >= 7
 	PRINTFORML %CALLNAME%는 양구멍이 확장된 여운을 맛보고 있다.
-	PRINTFORML %CALLNAME%의 질입와 항문은 완전히 펼쳐져 내용을 노출하고 있어
+	PRINTFORML %CALLNAME%의 질구와 항문은 완전히 펼쳐져 내용을 노출하고 있어
 	PRINTW 촉수가 빼내진후도 더 원래대로 돌아가는 기색을 보이지 않는다…
 ELSEIF ABL:V감각 > 4 || ABL:A감각 > 4
 	PRINTFORML %CALLNAME%는 양발를 넓히고 녹초가 되어 있다
-	PRINTW 촉수에 의해 펼칠 수 있었던 질입와 항문으로부터는 점액이 질질 흘림이 되어 있다
+	PRINTW 촉수에 의해 펼칠 수 있었던 질구와 항문으로부터는 점액이 질질 흘림이 되어 있다
 ENDIF
 
 
@@ -9669,11 +9669,11 @@ ELSE
 	PRINTFORM 짐승은우리로부터 나오면,%CALLNAME%에 덥쳐,
 	
 	;스타킹계
-	IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 		PRINT 힘껏
-		SIF TEQUIP:특수 2 == 5
+		SIF TEQUIP:특수2 == 5
 			PRINT 스타킹
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			PRINT 타이츠
 		PRINTL 를 찢어,
 	ENDIF
@@ -9725,14 +9725,14 @@ IF TEQUIP:역조교
 	ENDIF
 	;양쪽 모두에 침입할 수 있다
 	IF (!TALENT:남자 || !TEQUIP:바이브 || !TEQUIP:정조대) && (!TEQUIP:애널바이브 || !TEQUIP:애널비즈 || !TEQUIP:확장벌룬)
-		PRINT 애널와 질입가 비어 있는 것을 헤아리면,
+		PRINT 애널와 질구가 비어 있는 것을 헤아리면,
 		PRINTL 그 몸을 구불거리게 해,안에 기어들어 왔다…
 	;A에 도구를 삽입하고 있지 않다
 	ELSEIF (!TEQUIP:애널바이브 || !TEQUIP:애널비즈 || !TEQUIP:확장벌룬)
 		PRINT 애널가 비어 있다고 헤아리면,
 		PRINTL 그 몸을 구불거리게 해,안에 기어들어 왔다…
 	ELSEIF (!TALENT:남자 || !TEQUIP:바이브 || !TEQUIP:정조대)
-		PRINT 질입가 무방비이라고 눈치채면,
+		PRINT 질구가 무방비이라고 눈치채면,
 		PRINTL 그 몸을 구불거리게 해,안에 기어들어 왔다…
 	ENDIF
 	
@@ -9746,7 +9746,7 @@ ELSE
 	;양쪽 모두에 침입할 수 있다
 	IF (!TALENT:남자 || !TEQUIP:바이브 || !TEQUIP:정조대) && (!TEQUIP:애널바이브 || !TEQUIP:애널비즈 || !TEQUIP:확장벌룬)
 		PRINTFORML 
-		PRINTFORML 수필의 뱀장어는%CALLNAME%의애널와 질입가 비어 있는 것을 헤아리면,안에 기어들어 갔다
+		PRINTFORML 수필의 뱀장어는%CALLNAME%의애널와 질구가 비어 있는 것을 헤아리면,안에 기어들어 갔다
 		IF TALENT:처녀
 			PRINTFORML %CALLNAME%는 눈에 눈물을 머금어,반광란이 되면서 열심히 뱀장어를 잡아질내로부터 끌어내려고 하지만,
 			PRINTFORMW 뱀장어들이 분비하는 점액에 의해 굉장한저항도 하지 못한 채처녀의 증거를 물어 찢어져 버렸다…
@@ -9760,7 +9760,7 @@ ELSE
 		PRINTFORMW %CALLNAME%는 반사적으로 엉덩이에 힘을 써,이물의 침입에 저항하려고 하는 것도,결국은 쓸데없게 끝나 버린다…
 	ELSEIF (!TALENT:남자 || !TEQUIP:바이브 || !TEQUIP:정조대)
 		PRINT 
-		PRINTFORML 수필의 뱀장어는%CALLNAME%의 질입가 무방비이라고 눈치채면,안에 기어들어 갔다
+		PRINTFORML 수필의 뱀장어는%CALLNAME%의 질구가 무방비이라고 눈치채면,안에 기어들어 갔다
 		;처녀
 		IF TALENT:처녀
 			PRINTFORML %CALLNAME%는 눈에 눈물을 머금어,반광란이 되면서 열심히 뱀장어를 잡아질내로부터 끌어내려고 하지만,
@@ -9972,7 +9972,7 @@ PRINTFORML %CALLNAME:MASTER%는,%CALLNAME:ASSI%에 사용이 끝난콘돔를손 
 IF TALENT:ASSI:새드
 	PRINTFORM %CALLNAME:ASSI%는%CALLNAME%가 혀를 펴면 닿을 것 같은 정도의 거리로,
 ELSE
-	PRINTFORM %CALLNAME:ASSI%는%CALLNAME%에 과시하도록(듯이)
+	PRINTFORM %CALLNAME:ASSI%는%CALLNAME%에 과시하듯이
 ENDIF
 ;조수의정액중독가 LV5 이상
 IF ABL:ASSI:정액중독 >= 5
@@ -10340,7 +10340,7 @@ IF PALAM:욕정 >= PALAMLV:3 && (TALENT:연모 || TALENT:친애)
 	;모유체질
 	SIF TALENT:모유체질
 		PRINT 모유가 방울져 떨어진다
-	PRINTL 가슴를 강조하도록(듯이) 내밀어,
+	PRINTL 가슴를 강조하듯이 내밀어,
 	PRINTL 보다 강한 자극을 요구했다…
 ;욕정의 PALAMLV3 이상
 ELSEIF PALAM:욕정 > PALAMLV:3
@@ -10610,7 +10610,7 @@ IF (TFLAG:40 == 1 || TFLAG:40 == 2 || TFLAG:40 == 11 || TFLAG:40 == 12) && TFLAG
 	IF TFLAG:41 == 1 || TFLAG:41 == 2
 		;전회 커맨드가 조수삽입
 		IF PREVCOM == 405 || PREVCOM == 406
-			PRINTFORM %CALLNAME%를 범하는 %CALLNAME:ASSI%의 키후로 돌아,그
+			PRINTFORM %CALLNAME%를 범하는 %CALLNAME:ASSI%의 등 뒤로 돌아,그
 			IF TFLAG:40 == 11
 				PRINT 바기나
 			ELSE
@@ -10631,7 +10631,7 @@ IF (TFLAG:40 == 1 || TFLAG:40 == 2 || TFLAG:40 == 11 || TFLAG:40 == 12) && TFLAG
 	ELSE
 		;전회 커맨드가조수를범하게시킨다
 		IF PREVCOM == 430 || PREVCOM == 431
-			PRINTFORM %CALLNAME:ASSI%를 범하는%CALLNAME%의 키후로 돌아,그
+			PRINTFORM %CALLNAME:ASSI%를 범하는%CALLNAME%의 등 뒤로 돌아,그
 			IF TFLAG:40 == 1
 				PRINT 바기나
 			ELSE

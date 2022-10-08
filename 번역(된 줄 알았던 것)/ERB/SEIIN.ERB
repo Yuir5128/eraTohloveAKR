@@ -3,7 +3,7 @@
 ;----------------------------------------------------------------
 @SEIIN_START
 ;입로사정 시키지 않으면 처리하지 않는다
-IF TFLAG:0 == 0 && TFLAG:43!= 13
+IF TFLAG:0 == 0 && TFLAG:43 != 13
 	RETURN
 ENDIF
 
@@ -24,7 +24,7 @@ SIF TFLAG:0 == 0 && TFLAG:43 == 13
 ;----------------------------------------------------------------
 ;강제정음절정의 회수(Pavlov 카운터) 체크
 ;Pavlov 카운터+1회에 정음절정에
-;Pavlov 카운터가발리나 있고 경우
+;Pavlov 카운터가부족해 있고 경우
 ;기구나파이즈리등으로 절정 하고 있으면
 ;강제정음절정에
 ;----------------------------------------------------------------
@@ -153,19 +153,19 @@ SOURCE:굴복 += 3000
 SOURCE:반발 += 800
 
 IF EXP:정음절정경험 == 1
-	TIMES SOURCE:노출, 1.50
-	TIMES SOURCE:굴복, 2.00
-	TIMES SOURCE:반발, 1.50
+	TIMES SOURCE:노출 , 1.50
+	TIMES SOURCE:굴복 , 2.00
+	TIMES SOURCE:반발 , 1.50
 ELSEIF ABL:정액중독 == 5
-	TIMES SOURCE:굴복, 1.20
+	TIMES SOURCE:굴복 , 1.20
 ELSEIF ABL:정액중독 == 8
-	TIMES SOURCE:욕정, 1.50
-	TIMES SOURCE:반발, 0.80
-	TIMES SOURCE:굴복, 1.50
+	TIMES SOURCE:욕정 , 1.50
+	TIMES SOURCE:반발 , 0.80
+	TIMES SOURCE:굴복 , 1.50
 ELSEIF ABL:정액중독 == 10
-	TIMES SOURCE:욕정, 2.00
-	TIMES SOURCE:굴복, 2.00
-	TIMES SOURCE:반발, 0.50
+	TIMES SOURCE:욕정 , 2.00
+	TIMES SOURCE:굴복 , 2.00
+	TIMES SOURCE:반발 , 0.50
 ENDIF
 
 
@@ -201,10 +201,10 @@ SOURCE:울굴 += 200
 SOURCE:반발 += 300
 
 IF EXP:강제정음절정 == 1
-	TIMES SOURCE:두려움, 1.50
-	TIMES SOURCE:굴복, 1.50
-	TIMES SOURCE:울굴, 1.50
-	TIMES SOURCE:반발, 1.50
+	TIMES SOURCE:두려움 , 1.50
+	TIMES SOURCE:굴복 , 1.50
+	TIMES SOURCE:울굴 , 1.50
+	TIMES SOURCE:반발 , 1.50
 ELSEIF EXP:강제정음절정 == P
 	SOURCE:욕정 = 1000
 ENDIF

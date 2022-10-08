@@ -60,49 +60,49 @@ WHILE 1
 	IF !ARG
 		PRINT 　　　　　모드:
 		SETCOLOR !LOCAL ? 0x8888FF # 0xA0A0A0
-		PRINTBUTTON @"[ 0] START　 (100일 기한에 코우슈우금백만고슈금를 버는 모드 주회 플레이유)", 0
+		PRINTBUTTON @"[ 0] START　 (100일 기한에 백만 고슈금을 버는 모드 주회 플레이유)", 0
 		PRINTL 
-		SETCOLOR LOCAL == 8? 0x8888FF # 0xA0A0A0
+		SETCOLOR LOCAL == 8 ? 0x8888FF # 0xA0A0A0
 		PRINTL 　　　　　　　　　[ 1] FREE MISSION　　　　　　　　　　　　　　　　
-		SETCOLOR LOCAL == 9? 0x8888FF # 0xA0A0A0
+		SETCOLOR LOCAL == 9 ? 0x8888FF # 0xA0A0A0
 		PRINTL 　　　　　　　　　[ 2] EXTRA　 (기한도 목표도 없음의 엔드리스 모드)
 		RESETCOLOR
 		PRINTL 
 	ENDIF
 	
 	;PRINT 　　캐릭터명 표시:
-	;SETCOLOR !LOCAL:1? 0x8888FF # 0xA0A0A0
+	;SETCOLOR !LOCAL:1 ? 0x8888FF # 0xA0A0A0
 	;PRINTBUTTON @"[ 3] 통상　　(기본의 이름으로 표시합니다 예:라이나⇒라이나)", 3
 	;PRINTL 
-	;SETCOLOR LOCAL:1? 0x8888FF # 0xA0A0A0
+	;SETCOLOR LOCAL:1 ? 0x8888FF # 0xA0A0A0
 	;PRINTL 　　　　　　　　　[ 4] 본명　　(일부 캐릭터를 본명으로 표시합니다 예:라이나⇒페르나)
 	;RESETCOLOR
 	;PRINTL 
 	
 	PRINT 　　　　　난이도:
-	SETCOLOR LOCAL:2 == 1? 0x8888FF # 0xA0A0A0
+	SETCOLOR LOCAL:2 == 1 ? 0x8888FF # 0xA0A0A0
 	PRINTBUTTON @"[ 5] EASY　　(미지근하게 놀아 보고 싶은 사람용)", 5
 	PRINTL 
-	SETCOLOR LOCAL:2 == 2? 0x8888FF # 0xA0A0A0
+	SETCOLOR LOCAL:2 == 2 ? 0x8888FF # 0xA0A0A0
 	PRINTL 　　　　　　　　　[ 6] NORMAL (보통으로 플레이 하는 사람용)
-	SETCOLOR LOCAL:2 == 3? 0x8888FF # 0xA0A0A0
+	SETCOLOR LOCAL:2 == 3 ? 0x8888FF # 0xA0A0A0
 	PRINTL 　　　　　　　　　[ 7] HARD　　(어려운 플레이에 불타는 사람용)
 	RESETCOLOR
 	PRINTL 
 	
 	PRINT 커맨드 필터:
-	SETCOLOR !LOCAL:3? 0x8888FF # 0xA0A0A0
+	SETCOLOR !LOCAL:3 ? 0x8888FF # 0xA0A0A0
 	PRINTBUTTON @"[ 8] 심플(처음으로 era를 플레이 하는 사람용 기본의 커맨드만)", 8
 	PRINTL 
-	SETCOLOR LOCAL:3 == 1? 0x8888FF # 0xA0A0A0
+	SETCOLOR LOCAL:3 == 1 ? 0x8888FF # 0xA0A0A0
 	PRINTL 　　　　　　　　　[ 9] 매니아(era에 익숙해 온 사람용 취미의 커맨드가 충분히)
-	SETCOLOR LOCAL:3 == 2? 0x8888FF # 0xA0A0A0
+	SETCOLOR LOCAL:3 == 2 ? 0x8888FF # 0xA0A0A0
 	PRINTL 　　　　　　　　　[10] 개별적으로 설정(커맨드마다 사용할까 설정할 수 있습니다)
 	RESETCOLOR
 	PRINTL 
 	
 	PRINT 　튜토리얼:
-	SETCOLOR !LOCAL:4? 0x8888FF # 0xA0A0A0
+	SETCOLOR !LOCAL:4 ? 0x8888FF # 0xA0A0A0
 	PRINTBUTTON @"[11] 있어　　　　　　　　　　　　　　　　　", 11
 	PRINTL 
 	SETCOLOR LOCAL:4? 0x8888FF # 0xA0A0A0
@@ -111,10 +111,10 @@ WHILE 1
 	PRINTL 
 	
 	PRINT 　처녀동정모드:
-	SETCOLOR LOCAL:5? 0x8888FF # 0xA0A0A0
+	SETCOLOR LOCAL:5 ? 0x8888FF # 0xA0A0A0
 	PRINTBUTTON @"[13] ON (저런 사람도 이런 사람도처녀·동정에)　　　", 13
 	PRINTL 
-	SETCOLOR !LOCAL:5? 0x8888FF # 0xA0A0A0
+	SETCOLOR !LOCAL:5 ? 0x8888FF # 0xA0A0A0
 	PRINTL 　　　　　　　　　[14] OFF 　　　　　　　　　　　　　　　　　　　　　
 	RESETCOLOR
 	PRINTL 
@@ -139,17 +139,17 @@ WHILE 1
 	SELECTCASE RESULT
 		CASE 0
 			LOCAL = 0
-		CASE 1, 2
+		CASE 1,2
 			LOCAL = RESULT + 7
-		CASE 3, 4
+		CASE 3,4
 			LOCAL:1 = !LOCAL:1
-		CASE 5, 6, 7
+		CASE 5,6,7
 			LOCAL:2 = RESULT - 4
-		CASE 8, 9, 10
+		CASE 8,9,10
 			LOCAL:3 = RESULT - 8
-		CASE 11, 12
+		CASE 11,12
 			LOCAL:4 = !LOCAL:4
-		CASE 13, 14
+		CASE 13,14
 			LOCAL:5 = !LOCAL:5
 		CASE 15
 			CALL OPTION
@@ -250,7 +250,7 @@ IF BASE:체력 <= 0
 	ENDIF
 	BEGIN AFTERTRAIN
 ELSEIF BASE:체력 < 500
-	PRINTW (체력가 한계에 와 있습니다 조교를 종료합니다)
+	PRINTW (체력이 한계에 와 있습니다 조교를 종료합니다)
 	BEGIN AFTERTRAIN
 ELSEIF TFLAG:74 < 0
 	PRINTW (남은 시간이 없어졌습니다 조교를 종료합니다)
@@ -449,7 +449,7 @@ IF FLAG:150 < 2
 ENDIF
 IF FLAG:150 < 3
 	FLAG:33 = 0
-	FOR LOCAL, 0, CHARANUM
+	FOR LOCAL,0,CHARANUM
 		SIF NO:LOCAL > 150 && NO:LOCAL <= 160
 			FLAG:33++
 	NEXT
@@ -540,31 +540,31 @@ IF FLAG:150 < 13
 			CONTINUE
 		
 		;9자리수 이후를 보유
-		LOCAL:0 = CFLAG:COUNT:4 / POWER(10, 8)
-		;7자리수까지를 보유
-		LOCAL:1 = CFLAG:COUNT:4 % POWER(10, 6)
+		LOCAL:0 = CFLAG:COUNT:4 / POWER(10,8)
+		;7자리수 까지를 보유
+		LOCAL:1 = CFLAG:COUNT:4 % POWER(10,6)
 		
 		;8형목을 보유 둔감 민감
-		LOCAL:2 = (CFLAG:COUNT:4 % POWER(10, 8)) / POWER(10, 7)
+		LOCAL:2 = (CFLAG:COUNT:4 % POWER(10,8)) / POWER(10,7)
 		;7형목을 보유 부위
-		LOCAL:3 = (CFLAG:COUNT:4 % POWER(10, 7)) / POWER(10, 6)
+		LOCAL:3 = (CFLAG:COUNT:4 % POWER(10,7)) / POWER(10,6)
 		
 		;9형목 이후를 11 자리수 이후에 비켜 놓는 7-10 자리수째는 0이 들어가 있다
-		LOCAL:4 = (LOCAL:0 * POWER(10, 10)) + LOCAL:1
+		LOCAL:4 = (LOCAL:0 * POWER(10,10)) + LOCAL:1
 		
 		SELECTCASE LOCAL:3
 			CASE 1
 				;C 7자리수째에 격납한다
-				LOCAL:4 += LOCAL:2 * POWER(10, 6)
+				LOCAL:4 += LOCAL:2 * POWER(10,6)
 			CASE 2
 				;V 8자리수째에 격납한다
-				LOCAL:4 += LOCAL:2 * POWER(10, 7)
+				LOCAL:4 += LOCAL:2 * POWER(10,7)
 			CASE 3
 				;A 9자리수째에 격납한다
-				LOCAL:4 += LOCAL:2 * POWER(10, 8)
+				LOCAL:4 += LOCAL:2 * POWER(10,8)
 			CASE 4
 				;B 10 자리수째에 격납한다
-				LOCAL:4 += LOCAL:2 * POWER(10, 9)
+				LOCAL:4 += LOCAL:2 * POWER(10,9)
 		ENDSELECT
 		
 		CFLAG:COUNT:4 = LOCAL:4

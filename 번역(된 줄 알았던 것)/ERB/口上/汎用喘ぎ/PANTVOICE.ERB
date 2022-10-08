@@ -339,7 +339,7 @@ ENDIF
 SELECTCASE SELECTCOM
 	CASE 6,7,8,50  TO 56,110 TO 116,161,162,163,180,181,183,286,322,345,352,364,367,368,370,371,373,374,381,382,404,406,501,509,510,512,514,515,518,519,526
 		;애널자극 때,애널자극로부터의 파생이 아니면 A는 기분 좋지 않다
-		IF SELECTCOM == 286 && TFLAG:56!= 1
+		IF SELECTCOM == 286 && TFLAG:56 != 1
 		;윤간 때,A에 삽입되어 있지 않으면 A는 기분 좋지 않다
 		ELSEIF SELECTCOM == 322 && (TFLAG:705 & 1) == 0
 		;수간 때,A에 삽입되어 있지 않으면 A는 기분 좋지 않다
@@ -348,7 +348,7 @@ SELECTCASE SELECTCOM
 		;기승위유방자위,역에서 파는 도시락 때,A에 삽입되어 있지 않으면 A는 기분 좋지 않다
 		ELSEIF (SELECTCOM == 509 || SELECTCOM == 510) && TFLAG:705!= 1
 		;샌드위치,연결 때,A에 삽입되어 있지 않으면 A는 기분 좋지 않다
-		ELSEIF (SELECTCOM == 515 || SELECTCOM == 519) && TFLAG:40!= 2 && TFLAG:41!= 2
+		ELSEIF (SELECTCOM == 515 || SELECTCOM == 519) && TFLAG:40 != 2 && TFLAG:41 != 2
 		ELSE
 			SETBIT PANT_D,16
 			;감각 낮은~높고 C0~3
@@ -366,8 +366,8 @@ SELECTCASE SELECTCOM
 				;애널애무,자위,애널바이브,애널비즈
 				IF SELECTCOM == 6 || SELECTCOM == 7 || SELECTCOM == 51 || SELECTCOM == 53 || SELECTCOM == 54
 					IF PALAM:윤활 < PALAMLV:2
-						SETBIT PANT_D,22
-						SETBIT PANT_D,26
+						SETBIT PANT_D, 22
+						SETBIT PANT_D, 26
 					ENDIF
 				ELSE
 					;윤활에 의해고통 1or고통 2
@@ -409,16 +409,16 @@ IF !GETBIT(PANT_D,25)
 	SELECTCASE SELECTCOM
 		CASE 4,7,41  TO 44,100 TO 106,160,162,163,246,322,344,362,363,366,368,369,373,374,381,382,403,405,500,506 TO 511,513,515,517,519
 			;자위 때,V를 사용하지 않으면 V는 기분 좋지 않다
-			IF SELECTCOM == 4 && TFLAG:56!= 1
+			IF SELECTCOM == 4 && TFLAG:56 != 1
 			;윤간 때,V에 삽입되어 있지 않으면 A는 기분 좋지 않다
 			ELSEIF SELECTCOM == 322 && (TFLAG:705 & 2) == 0
 			;수간 때,V에 삽입되어 있지 않으면 V는 기분 좋지 않다
 			;정조대나남자라면 안돼
 			ELSEIF SELECTCOM == 381 && (TEQUIP:정조대 || !VAGINA(TARGET))
 			;기승위유방자위,역에서 파는 도시락 때,V에 삽입되어 있지 않으면 V는 기분 좋지 않다
-			ELSEIF (SELECTCOM == 509 || SELECTCOM == 510) && TFLAG:705!= 0
+			ELSEIF (SELECTCOM == 509 || SELECTCOM == 510) && TFLAG:705 != 0
 			;샌드위치,연결 때,V에 삽입되어 있지 않으면 A는 기분 좋지 않다
-			ELSEIF (SELECTCOM == 515 || SELECTCOM == 519) && TFLAG:40!= 1 && TFLAG:41!= 1
+			ELSEIF (SELECTCOM == 515 || SELECTCOM == 519) && TFLAG:40 != 1 && TFLAG:41 != 1
 			;전기안마 때,속옷이나하의를 착용하고 있으면 V는 기분 좋지 않다
 			ELSEIF SELECTCOM == 246 && (TEQUIP:속옷（아래） || TEQUIP:하의)
 			ELSE
@@ -436,8 +436,8 @@ IF !GETBIT(PANT_D,25)
 					;익숙해지지 않은＆젖지 않았으면고통
 					PANT_B_CALC -= 1
 					IF PALAM:윤활 < PALAMLV:2
-						SETBIT PANT_D,22
-						SETBIT PANT_D,26
+						SETBIT PANT_D, 22
+						SETBIT PANT_D, 26
 					ENDIF
 				ENDIF
 				;조교자의기교에 의해
@@ -460,8 +460,8 @@ IF VCHECK(TARGET)
 	;익숙해지지 않은＆젖지 않았다고 아프다
 	ELSE
 		IF PALAM:윤활 < PALAMLV:2
-			SETBIT PANT_D,22
-			SETBIT PANT_D,26
+			SETBIT PANT_D, 22
+			SETBIT PANT_D, 26
 		ENDIF
 	ENDIF
 ENDIF
@@ -485,7 +485,7 @@ SELECTCASE SELECTCOM
 		;윤간 때,입는 사용하지 않는다
 		IF SELECTCOM == 322 && (TFLAG:705 & 8) == 0
 		;샌드위치,샌드위치 시키는,조수를 샌드위치 때,입는 사용하지 않는다
-		ELSEIF (SELECTCOM == 515 || SELECTCOM == 520 || SELECTCOM == 521) && TFLAG:49!= 8 && TFLAG:49!= 9 && TFLAG:49!= 10
+		ELSEIF (SELECTCOM == 515 || SELECTCOM == 520 || SELECTCOM == 521) && TFLAG:49 != 8 && TFLAG:49 != 9 && TFLAG:49 != 10
 		ELSE
 			SETBIT PANT_D,13
 		ENDIF
@@ -494,10 +494,10 @@ ENDSELECT
 ;계속 아이템에 의한고통
 ;중증
 IF TEQUIP:확장벌룬 || TEQUIP:요도벌룬 || BASE:뇨의 >= 90 || BASE:변의 >= 90 || TEQUIP:삼각목마
-	SETBIT PANT_D,23
+	SETBIT PANT_D, 23
 ;경도
 ELSEIF TEQUIP:밧줄 || TEQUIP:카테터 || TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란 || TEQUIP:촉수유선삽입 || BASE:뇨의 >= 60 || BASE:변의 >= 60 || BASE:구역질 >= 60
-	SETBIT PANT_D,22
+	SETBIT PANT_D, 22
 ENDIF
 ;----------------------------------------------------------------------
 ;함락 자질
@@ -843,7 +843,7 @@ ENDIF
 RESULT = 0
 RESULTS = 
 RESULTS:1 = 
-TRYCALLFORM SELECTER_K{NO:TARGET}(TARGET,1)
+TRYCALLFORM SELECTER_K{NO:TARGET}(TARGET, 1)
 IF RESULT && FLAG:7 > 0
 	RESULT = 0
 	TRYCCALLFORM PANT_VOICE%RESULTS:1%%RESULTS%_%LOCALS%_K{NO:TARGET}
@@ -990,7 +990,7 @@ PANT_P = RAND:3
 	ELSE
 		PRINT … 하아…
 	ENDIF
-PRINTW」
+PRINTW 」
 
 RETURN 0
 
@@ -1006,7 +1006,7 @@ REPEAT PANT_B
 	;볼개그나촉수입학중
 	IF TEQUIP:볼개그 || TEQUIP:촉수구욕
 		IF PANT_P == 0
-			PRINT!
+			PRINT んぐぅぅぅぅぅぅ！
 		ELSEIF PANT_P == 1
 			PRINT 아우우…!
 		ELSEIF PANT_P == 2
@@ -1037,9 +1037,9 @@ REPEAT PANT_B
 		ELSEIF PANT_P == 3
 			PRINT 히…!
 		ELSEIF PANT_P == 4
-			PRINT ,
+			PRINT ぎゃっ、
 		ELSEIF PANT_P == 5
-			PRINT――!
+			PRINT ひぎぃ――っ！
 		ELSEIF PANT_P == 6
 			PRINT 아″――…,
 		ELSEIF PANT_P == 7
@@ -1740,7 +1740,7 @@ PANT_P = RAND:3
 			PRINT 아 아!!!
 		ENDIF
 	ENDIF
-PRINTW」
+PRINTW 」
 
 RETURN 0
 

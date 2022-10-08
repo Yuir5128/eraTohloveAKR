@@ -340,7 +340,7 @@ ELSEIF KANRAKU(TARGET)
 		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
 			IF RAND:3 == 0
 				PRINTFORMW %CALLNAME:PLAYER%가의 방의 문을 열려고 하면,그것보다 빨리 안쪽으로부터 문이 열려 %CALLNAME:PLAYER%는 팔을 잡아지고 안에 이끌어 난처되어져 버렸다.
-				PRINTFORML %CALLNAME:PLAYER%의 키후로 소리를 내 문이 닫히는 것과 동시에,이끌어 난처할 수 있어 약간 앞으로 구부림이 된 %CALLNAME:PLAYER%의 목에 가는 팔이 감겼다.
+				PRINTFORML %CALLNAME:PLAYER%의 등 뒤로 소리를 내 문이 닫히는 것과 동시에,이끌어 난처할 수 있어 약간 앞으로 구부림이 된 %CALLNAME:PLAYER%의 목에 가는 팔이 감겼다.
 				PRINTFORMW 얇은 작은 입술이 %CALLNAME:PLAYER%의 거기에 꽉 누를 수 있자마자 떨어진다.
 				PRINTFORMW 지근거리에%CALLNAME%의 다홍색 갈색의 눈동자가 반짝여 이쪽을 올려보고 있었다.
 				PRINTFORMW 「헤헤헤,잡았다구. 도미 실마리%UNICODE(0x2661)%」
@@ -540,7 +540,7 @@ ELSEIF TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란
 ;배설시키지 않고 종료(배설):촉수관장도 여기 CFLAG:608
 ;--------------------------------------------------
 ;ELSEIF BASE:6 >= 60 && TEQUIP:확장벌룬
-;	;체력가 있어? 라면 좀 더 계속되는거야.
+;	;체력이 있어? 라면 좀 더 계속되는거야.
 ;	IF BASE:0 >= 500
 ;		IF TEQUIP:촉수
 ;			PRINTFORML %CALLNAME:TARGET%의후 구멍에서는,아직도 배설을 막으려고촉수가 꿈틀거리고 있다…
@@ -581,7 +581,7 @@ ELSEIF TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란
 ;밧줄＋기분이 좋은 도구인 채 종료(방치 플레이):촉수플레이중도 여기
 ;--------------------------------------------------
 ;ELSEIF TEQUIP:밧줄 && ALLCHECK(TARGET)
-;	;체력가 있으면 선택지
+;	;체력이 있으면 선택지
 ;	IF BASE:0 >= 500
 ;		IF TEQUIP:촉수
 ;			PRINTFORMW %CALLNAME%의 몸에는 아직도촉수가 감긴 채로,그 성감을 계속 자극하고 있다…
@@ -659,7 +659,7 @@ ELSEIF TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란
 ELSEIF (P < PALAMLV:2) && KANRAKU(TARGET)
 	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
 		IF RAND:2 == 0
-			PRINTFORMW 「아무것도 해 가내는 개미인가. …… 아아,젠장,대장이발리나구라고 이상해지기 전에 또 와 주어라」
+			PRINTFORMW 「아무것도 해 가내는 개미인가. …… 아아,젠장,대장이부족해구라고 이상해지기 전에 또 와 주어라」
 		ELSE
 			PRINTFORMW 「대장의 얼굴 볼 수 있어 기뻐. 다음은 충분히 귀여워해 주어라. 기다리고 있다」
 		ENDIF

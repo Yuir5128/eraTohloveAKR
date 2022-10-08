@@ -135,7 +135,7 @@ IF FIRSTTIME(2)
 			ENDIF
 		;미나이즈미
 		ELSEIF NO:MASTER == 154 || (ASSI > 0 && NO:ASSI == 154)
-			PRINTFORMW 「… 은 저렇게 누군가라고 생각하면 고양이 살인 훈화」
+			PRINTFORMW 「… 은 저렇게 누군가라고 생각하면 묘살시군화」
 			;주인
 			IF NO:MASTER == 154
 				PRINTFORML 『오우 오랜만에』
@@ -148,7 +148,7 @@ IF FIRSTTIME(2)
 				PRINTFORMW 『… 너가 바라는 형태인가는 모르겠지만』
 				PRINTFORMW 「? 식응뭐 좋지만」
 				PRINTFORMW 『……….』
-				PRINTFORML 「… 저기,고양이 살인 훈? 뭔가 거리 근처 없을까」
+				PRINTFORML 「… 저기,묘살시군? 뭔가 거리 근처 없을까」
 				PRINTFORMW 「네 조금,두고 뭐 해…」
 			;조수
 			ELSE
@@ -246,16 +246,16 @@ ELSEIF (TALENT:연모 || TALENT:음란 || TALENT:복종) && FIRSTTIME(7)
 			PRINTFORML 촉구받는 대로,%CALLNAME:PLAYER%가%CALLNAME%의 근처에 앉는다
 			PRINTFORMW 하면 %CALLNAME%는 이쪽에 어깨에 의지해,체중을 맡겨 왔다
 			PRINTFORML 
-			PRINTFORML 「고양이 살인 훈은 정말로 나의 일을 좋아하지 이렇게 열심히 다녀 주어 버려」
+			PRINTFORML 「묘살시군은 정말로 나의 일을 좋아하지 이렇게 열심히 다녀 주어 버려」
 			PRINTFORML 『… 조롱하고 싶어 뿐만이라면이야기 (듣)묻지 않는,냐』
 			PRINTFORMW 「분명하게 이야기하기 때문에 입다물고 받을 수 있을까 성급함 훈」
 			PRINTFORML 
-			PRINTFORML 「고양이 살인 훈과 함께 있어 상당히 길지만」
+			PRINTFORML 「묘살시군과 함께 있어 상당히 길지만」
 			PRINTFORMW 「나를 성욕의 대상으로 해 보고 있었다고는 전혀 생각도 하지 않았어요」
 			PRINTFORMW 「그러니까 거기에 눈치챘을 때는 정직 당황했다」
 			PRINTFORML 
 			PRINTFORMW 「그렇지만 최근에는 조금 차이가 나」
-			PRINTFORML 「고양이 살인 훈에 접할 수 있을 때에 기뻐져 버린다」
+			PRINTFORML 「묘살시군에 접할 수 있을 때에 기뻐져 버린다」
 			PRINTFORMW 「익숙해져,는 아닌 생각하지만… 정말,이상한 이야기지요」
 			PRINTFORML 
 			PRINTFORMW 「… 혹시 이것은 너의 생각 했던 대로의 결과일지도 모른다」
@@ -415,7 +415,7 @@ ELSEIF (TALENT:친애 || TALENT:창부 || TALENT:예속) && FIRSTTIME(8)
 			PRINTFORML 
 			PRINTFORMW 「나는 %CSTR:51%를 좋아한다」
 			PRINTFORMW 「%CSTR:51%의 모두를 갖고 싶다」
-			PRINTFORMW 「아무리 주어져도발리나 있고」
+			PRINTFORMW 「아무리 주어져도부족해 있고」
 			PRINTFORMW 「쭉 %CSTR:51%에 접하고 있고 싶은 접해지고 있고 싶다」
 			PRINTFORML 
 			PRINTFORMW 「… 정말 어떻게 해 줄까나」
@@ -778,7 +778,7 @@ ELSEIF KANRAKU(TARGET)
 			PRINTFORML 「―%UNICODE(0x2661)%」
 			;주인이 미나이즈미
 			IF NO:MASTER == 154 
-				PRINTFORML 「이봐요 이봐요 고양이 살인 훈%UNICODE(0x2661)% 너의 정말 좋아하는 고양이쨩이야」
+				PRINTFORML 「이봐요 이봐요 묘살시군%UNICODE(0x2661)% 너의 정말 좋아하는 고양이쨩이야」
 				PRINTFORML 「나는 두동강이로 되어 버릴까나」
 				PRINTFORML 「그렇지 않으면,좀 더 굉장한 일 되어 버릴까나」
 				PRINTFORML 「전부 너가 마음대로 해도 좋아?」
@@ -789,7 +789,7 @@ ELSEIF KANRAKU(TARGET)
 				PRINTFORML 「의외로 어렵구나,이것」
 				;조수가 미나이즈미
 				IF ASSI > 0 && NO:ASSI == 154
-					PRINTFORML 「고양이 살인 훈 이 어미 뭔가 요령이라든지 있어?」
+					PRINTFORML 「묘살시군 이 어미 뭔가 요령이라든지 있어?」
 					PRINTFORML 『좋아해 붙이고 있는 것이 아니기 때문에 모르는,… 냐』
 				ENDIF
 			ENDIF
@@ -848,7 +848,7 @@ ELSE
 				PRINTFORMW 「질리지 않는다 너는…」
 			;조수를 하고 있는 쿠니히로와 안면이 있다(조교는되어 있지 않다)
 			ELSEIF CFLAG:(2099 + NO:MASTER) == 2
-				PRINTFORMW 「견학 뿐으로는 물건발리나 샀는지? 욕구 깊다,너는」
+				PRINTFORMW 「견학 뿐으로는 물건부족해 샀는지? 욕구 깊다,너는」
 			;쿠니히로를 조교했던 적이 있다
 			ELSEIF CFLAG:(2099 + NO:MASTER) == 8
 				PRINTFORMW 「이전의 복수의 생각인가」
@@ -1078,7 +1078,7 @@ ELSEIF TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란
 ;배설시키지 않고 종료(배설):촉수관장도 여기 CFLAG:608
 ;--------------------------------------------------
 ;ELSEIF BASE:6 >= 60 && TEQUIP:확장벌룬
-;	;체력가 있어? 라면 좀 더 계속되는거야.
+;	;체력이 있어? 라면 좀 더 계속되는거야.
 ;	IF BASE:0 >= 500
 ;		IF TEQUIP:촉수
 ;			PRINTFORML %CALLNAME:TARGET%의후 구멍에서는,아직도 배설을 막으려고촉수가 꿈틀거리고 있다…
@@ -1119,7 +1119,7 @@ ELSEIF TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란
 ;밧줄＋기분이 좋은 도구인 채 종료(방치 플레이):촉수플레이중도 여기
 ;--------------------------------------------------
 ;ELSEIF TEQUIP:밧줄 && ALLCHECK(TARGET)
-;	;체력가 있으면 선택지
+;	;체력이 있으면 선택지
 ;	IF BASE:0 >= 500
 ;		IF TEQUIP:촉수
 ;			PRINTFORMW %CALLNAME%의 몸에는 아직도촉수가 감긴 채로,그 성감을 계속 자극하고 있다…

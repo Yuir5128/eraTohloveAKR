@@ -19,13 +19,13 @@
 ;사정 할까의 체크
 ;커맨드 파일내에서 체크한사정게이지를 반영. 사정 하고 있으면 E를 돌려준다.
 ;---------------------------------------------------------
-@SAMEN_CHECK(ARG, ARG:1)
+@SAMEN_CHECK(ARG,ARG:1)
 ;범용적인 함수인 것으로, 장래적으로는 모든 조교 커맨드의사정체크를 여기서 하는 일도 가능
 S = BASE:ARG:사정
 EJAC = MAXBASE:ARG:사정
 
 SIF TALENT:ARG:조루
-	TIMES S , 1.50
+	TIMES S ,1.50
 SIF TALENT:ARG:지루
 	TIMES S , 0.70
 ;동정상실시의사정게이지 보너스
@@ -94,9 +94,9 @@ ELSE
 ENDIF
 
 ;사정 하는 대상의 설정
-IF (SELECTCOM == 270 || SELECTCOM == 271) && TFLAG:703!= 6
+IF (SELECTCOM == 270 || SELECTCOM == 271) && TFLAG:703 != 6
 	T = MASTER
-ELSEIF ((SELECTCOM == 440 || SELECTCOM == 441) && TFLAG:703!= 6) || (SELECTCOM == 270 || SELECTCOM == 271)
+ELSEIF ((SELECTCOM == 440 || SELECTCOM == 441) && TFLAG:703 != 6) || (SELECTCOM == 270 || SELECTCOM == 271)
 	T = ASSI
 ELSE
 	T = TARGET
@@ -252,7 +252,7 @@ IF CFLAG:T:106 == 1
 	ENDIF
 ;안
 ELSEIF CFLAG:T:106 == 2
-	SIF TEQUIP:T:특수 3
+	SIF TEQUIP:T:특수3
 		STAIN:T:눈장식 |= 4
 ;가슴, 배, 겨드랑이
 ELSEIF CFLAG:T:106 == 3 || CFLAG:T:106 == 4 || CFLAG:T:106 == 5
@@ -298,7 +298,7 @@ ELSEIF CFLAG:T:106 == 6 || CFLAG:T:106 == 7 || CFLAG:T:106 == 8
 ELSEIF CFLAG:T:106 == 10
 	IF TEQUIP:T:신발
 		STAIN:T:신발 |= 4
-	ELSEIF TEQUIP:T:특수 2
+	ELSEIF TEQUIP:T:특수2
 		STAIN:T:발장식 |= 4
 	ELSE
 		STAIN:T:발 |= 4

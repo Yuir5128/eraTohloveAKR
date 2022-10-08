@@ -1,5 +1,5 @@
 ﻿;-------------------------------------------------
-;개체차이 관련의 함수
+;개체차 관련의 함수
 ;-------------------------------------------------
 ;-------------------------------------------------
 ;사양 메모
@@ -9,15 +9,15 @@
 ;
 ;인수:ARG… 캐릭터 등록 번호
 ;
-;FLAG:3 = ▲개체차이 설정 플래그
+;FLAG:3 = ▲개체차 설정 플래그
 ;1:CSV의 소질 우선 |2:성전환 |4:반음반양 후타나리 |8:오메가 |16:쇼타화 |32:대형화 |64:젖기 쉬움 |128:술의 약함
 ;|256:둔감 민감 |512:페니스의 크기 |1024:페니스의 특징 |2048:가슴의 크기 |4096:그 외
 ;
-;CFLAG:4   = ▲개체차이 기록 플래그
-;1형목개체차이 플래그 온 오프(0,개체차이 없음 1,CSV의 소질 우선 2,개체차이 우선)
+;CFLAG:4   = ▲개체차 기록 플래그
+;1형목개체차 플래그 온 오프(0,개체차 없음 1,CSV의 소질 우선 2,개체차 우선)
 ;2		성별(0,남자 1,(여자) 2,반음반양 3,후타나리 4,컨트보이 5,쉬메일)
 ;3		성별 오메가버스(0,없음 1,오메가)
-;4		체격(0,없음 1,소인체형 2,작은체구 3,보통 체형 4,큰체구)
+;4		체격(0,없음 1,소인체형 2,작은체구 3,보통체형 4,큰체구)
 ;5		젖기 쉬움(0,없음 1,젖기쉬움 3,보통 3,젖기어려움)
 ;6		술의 약함(0,없음 1,술꾼 3,보통 3,알콜쓰레기)
 ;7		C둔감민감(0,없음 1,C둔감,2,C민감)
@@ -26,11 +26,11 @@
 ;10		B둔감민감(0,없음 1,B둔감,2,B민감 3,함몰유두)
 ;11		페니스의 크기(0,없음 1,아이사이즈 2,단소 3,보통 4,거근 5,말자지)
 ;12		페니스의 특징(0,없음 1,조루 2,지루 3,절륜 4,포경)
-;13		가슴의 크기(0,없음 1,절벽 2,빈유 3,(보통젖) 4,거유 5,폭유)
+;13		가슴의 크기(0,없음 1,절벽 2,빈유 3,(평유) 4,거유 5,폭유)
 ;14		그 외(0,없음 1,음모없음 2,요리치 3,독약내성 4,모유체질)
 ;
-;※어디까지나 개체차이의 처리를 할 때에 붙은 것만을 기록해,원래 CSV로 설정되어 있는 것은 기록하지 않는다
-; 다만 중복 해 기록되는 경우도 있다(예:CSV로포경의 캐릭터가 개체차이에 의해포경를 얻었을 경우)
+;※어디까지나 개체차의 처리를 할 때에 붙은 것만을 기록해,원래 CSV로 설정되어 있는 것은 기록하지 않는다
+; 다만 중복 해 기록되는 경우도 있다(예:CSV로포경의 캐릭터가 개체차에 의해포경를 얻었을 경우)
 ;-------------------------------------------------
 @DIFF_MAIN(ARG)
 ;만약을 위해 초기화
@@ -118,14 +118,14 @@ IF (FLAG:3 & 4096)
 	CFLAG:ARG:4 += (POWER(10,13) * RESULT)
 ENDIF
 
-;어떠한 개체차이를 얻었을 경우
+;어떠한 개체차를 얻었을 경우
 IF CFLAG:ARG:4 > 0
 	
-	;개체차이 플래그 온 오프
+	;개체차 플래그 온 오프
 	;CSV의 소질 우선
 	IF (FLAG:3 & 1)
 		CFLAG:ARG:4 += (POWER(10,0) * 1)
-	;개체차이 우선
+	;개체차 우선
 	ELSE
 		CFLAG:ARG:4 += (POWER(10,0) * 2)
 	ENDIF
@@ -134,7 +134,7 @@ IF CFLAG:ARG:4 > 0
 	PRINTL 
 	PRINTL ……!
 	PRINTFORML 맞아들인 %CALLNAME:ARG%는,아무래도 통상과는 조금 다른 개체인 것 같다
-	PRINTFORM 얻은 소질:
+	PRINTFORM 얻은 소질：
 				CALL DIFF_TALENT_NAME(ARG)
 	PRINTL
 	PRINTL 
@@ -143,7 +143,7 @@ ENDIF
 
 
 ;-------------------------------------------------
-;이하,개체차이를 얻는 처리
+;이하,개체차를 얻는 처리
 ;-------------------------------------------------
 ;성별(남자 (여자) 반음반양 후타나리 컨트보이 쉬메일)
 @DIFF_SEX(ARG)
@@ -212,8 +212,8 @@ ENDIF
 @DIFF_BODY(ARG)
 IF RAND:10 == 0
 	;큰체구/작은체구/소인체형를 가지고 있다
-	IF CSVTALENT(NO:ARG,113,0) || CSVTALENT(NO:ARG,100,0) || CSVTALENT(NO:ARG,142,0)
-		;CSV의 소질 우선 비트 온
+	IF CSVTALENT(NO:ARG, 113 ,0) || CSVTALENT(NO:ARG, 100 ,0) || CSVTALENT(NO:ARG, 142 ,0)
+		;CSV의 소질을 우선적으로 비트온
 		SIF (FLAG:3 & 1)
 			RETURN 0
 		
@@ -221,7 +221,7 @@ IF RAND:10 == 0
 		TALENT:ARG:작은체구 = 0
 		TALENT:ARG:큰체구 = 0
 		
-		;보통 체형이 된다
+		;보통체형이 된다
 		SIF RAND:4 == 0
 			RETURN 3
 	ENDIF
@@ -246,8 +246,8 @@ ENDIF
 IF RAND:10 == 0
 	;젖기쉬움/젖기어려움를 가지고 있다
 	;※현상 초기치로 가지고 있는 캐릭터는 없다
-	IF CSVTALENT(NO:ARG,42,0) || CSVTALENT(NO:ARG,43,0)
-		;CSV의 소질 우선 비트 온
+	IF CSVTALENT(NO:ARG, 42 ,0) || CSVTALENT(NO:ARG, 43 ,0)
+		;CSVの素質優先ビットオン
 		SIF (FLAG:3 & 1)
 			RETURN 0
 		
@@ -275,7 +275,7 @@ ENDIF
 @DIFF_DRINK(ARG)
 IF RAND:10 == 0
 	;술꾼/알콜쓰레기를 가지고 있다
-	IF CSVTALENT(NO:ARG,48,0) || CSVTALENT(NO:ARG,49,0)
+	IF CSVTALENT(NO:ARG, 48 ,0) || CSVTALENT(NO:ARG, 49 ,0)
 		;CSV의 소질 우선 비트 온
 		SIF (FLAG:3 & 1)
 			RETURN 0
@@ -371,9 +371,9 @@ ENDIF
 ;페니스의 크기(아이사이즈 단소 거근 말자지)
 @DIFF_PENIS_SIZE(ARG)
 IF RAND:3 == 0
-	;아이사이즈/단소/거근/말자지를 가지고 있다
-	IF CSVTALENT(NO:ARG,114,0) || CSVTALENT(NO:ARG,115,0) || CSVTALENT(NO:ARG,116,0) || CSVTALENT(NO:ARG,117,0)
-		;CSV의 소질 우선 비트 온
+	;;아이사이즈/단소/거근/말자지를 가지고 있다
+	IF CSVTALENT(NO:ARG, 114 ,0) || CSVTALENT(NO:ARG, 115 ,0) || CSVTALENT(NO:ARG, 116 ,0) || CSVTALENT(NO:ARG, 117 ,0)
+		;CSVの素質優先ビットオン
 		SIF (FLAG:3 & 1)
 			RETURN 0
 		
@@ -422,8 +422,8 @@ IF RAND:5 == 0
 		TALENT:ARG:절륜 = 1
 		RETURN 3
 	ELSE
-		;CSV의 소질 우선 비트 온 포경를 가지고 있다
-		SIF (FLAG:3 & 1) && CSVTALENT(NO:ARG,119,0)
+		;CSVの素質優先ビットオン　포경を持っている
+		SIF (FLAG:3 & 1) && CSVTALENT(NO:ARG, 119 ,0)
 			RETURN 0
 		
 		TALENT:ARG:포경 = 1
@@ -453,7 +453,7 @@ IF RAND:3 == 0
 		RETURN 5
 	ENDIF
 ELSE
-	;보통젖
+	;평유
 	RETURN 3
 ENDIF
 
@@ -464,8 +464,8 @@ IF RAND:10 == 0
 		TALENT:ARG:음모없음 = 1
 		RETURN 1
 	ELSEIF RAND:3 == 0
-		;CSV의 소질 우선 비트 온 요리고수를 가지고 있다
-		SIF (FLAG:3 & 1) && CSVTALENT(NO:ARG,59,0)
+		;CSVの素質優先ビットオン　요리고수を持っている
+		SIF (FLAG:3 & 1) && CSVTALENT(NO:ARG, 59 ,0)
 			RETURN 0
 		
 		SIF TALENT:ARG:요리고수
@@ -493,16 +493,16 @@ ENDIF
 ;함수명:@DIFF_GET_TALENT(ARG:0,ARG:1)
 ;개요:;구입시에 취득한 소질을 요구하는 함수
 ;인수:ARG:0… 캐릭터 등록 번호
-;　　　:ARG:1…CFLAG:4의 몇 자리수째인가(1-14)
+;　　　：ARG:1…CFLAG:4의 몇 자리수째인가(1-14)
 ;반환값:CFLAG:4에 대해,아래와 같이 소질에 할당되어지고 있는 숫자
 ;비고:문중 함수
 ;
 
-;CFLAG:4   = ▲개체차이 기록 플래그
-;1형목개체차이 플래그 온 오프(0,개체차이 없음 1,CSV의 소질 우선 2,개체차이 우선)
+;CFLAG:4   = ▲개체차 기록 플래그
+;1형목개체차 플래그 온 오프(0,개체차 없음 1,CSV의 소질 우선 2,개체차 우선)
 ;2		성별(0,남자 1,(여자) 2,반음반양 3,후타나리 4,컨트보이 5,쉬메일)
 ;3		성별 오메가버스(0,없음 1,오메가)
-;4		체격(0,없음 1,소인체형 2,작은체구 3,보통 체형 4,큰체구)
+;4		체격(0,없음 1,소인체형 2,작은체구 3,보통체형 4,큰체구)
 ;5		젖기 쉬움(0,없음 1,젖기쉬움 3,보통 3,젖기어려움)
 ;6		술의 약함(0,없음 1,술꾼 3,보통 3,알콜쓰레기)
 ;7		C둔감민감(0,없음 1,C둔감,2,C민감)
@@ -511,11 +511,11 @@ ENDIF
 ;10		B둔감민감(0,없음 1,B둔감,2,B민감 3,함몰유두)
 ;11		페니스의 크기(0,없음 1,아이사이즈 2,단소 3,보통 4,거근 5,말자지)
 ;12		페니스의 특징(0,없음 1,조루 2,지루 3,절륜 4,포경)
-;13		가슴의 크기(0,없음 1,절벽 2,빈유 3,(보통젖) 4,거유 5,폭유)
+;13		가슴의 크기(0,없음 1,절벽 2,빈유 3,(평유) 4,거유 5,폭유)
 ;14		그 외(0,없음 1,음모없음 2,요리치 3,독약내성 4,모유체질)
 ;
 ;-------------------------------------------------
-@DIFF_GET_TALENT(ARG:0,ARG:1)
+@DIFF_GET_TALENT(ARG:0, ARG:1)
 #FUNCTION
 
 ;분명하게 이상한 것은 연주한다
@@ -524,42 +524,42 @@ SIF ARG:1 <= 0 || ARG:1 > 14
 
 LOCAL:1 = ARG:1
 
-LOCAL = INTTU(CFLAG:(ARG:0):4,ARG:1)
+LOCAL = INTTU(CFLAG:(ARG:0):4, ARG:1)
 
 ;분명하게 이상한 것은 연주한다
 SIF LOCAL > 5
 	RETURNF 50
 
-;원래 CSV로 가지고 있는 것은 +10한 것을 돌려준다(개체차이로 얻은 소질과 원래 CSV로 가지고 있는 소질이 감쌌다고 하는 상황)
+;원래 CSV로 가지고 있는 것은 +10한 것을 돌려준다(개체차로 얻은 소질과 원래 CSV로 가지고 있는 소질이 감쌌다고 하는 상황)
 IF LOCAL > 0
 	;체형
 	IF ARG:1 == 4
-		;소인체형 작은체구 큰체구
-		SIF (CSVTALENT(NO:(ARG:0),142,0) && LOCAL == 1) || (CSVTALENT(NO:(ARG:0),100,0) && LOCAL == 2) || (CSVTALENT(NO:(ARG:0),113,0) && LOCAL == 4)
+		;소인체형　작은체구　큰체구
+		SIF (CSVTALENT(NO:(ARG:0), 142 ,0) && LOCAL == 1) || (CSVTALENT(NO:(ARG:0), 100 ,0) && LOCAL == 2) || (CSVTALENT(NO:(ARG:0), 113 ,0) && LOCAL == 4)
 			LOCAL += 10
 	;술의 약함
 	ELSEIF ARG:1 == 6
-		;술꾼 알콜쓰레기
-		SIF (CSVTALENT(NO:(ARG:0),48,0) && LOCAL == 1) || (CSVTALENT(NO:(ARG:0),49,0) && LOCAL == 3)
+		;술꾼　알콜쓰레기
+		SIF (CSVTALENT(NO:(ARG:0), 48 ,0) && LOCAL == 1) || (CSVTALENT(NO:(ARG:0), 49 ,0) && LOCAL == 3)
 			LOCAL += 10
 	;페니스의 크기
 	ELSEIF ARG:1 == 11
-		;아이사이즈 단소
-		SIF (CSVTALENT(NO:(ARG:0),114,0) && LOCAL == 1)|| (CSVTALENT(NO:(ARG:0),115,0) && LOCAL == 2)
+		;아이사이즈　단소
+		SIF (CSVTALENT(NO:(ARG:0), 114 ,0) && LOCAL == 1 )|| (CSVTALENT(NO:(ARG:0), 115 ,0) && LOCAL == 2)
 			LOCAL += 10
 	;페니스의 특징
 	ELSEIF ARG:1 == 12
 		;포경
-		SIF CSVTALENT(NO:(ARG:0),119,0) && LOCAL == 4
+		SIF CSVTALENT(NO:(ARG:0), 119 ,0) && LOCAL == 4
 			LOCAL += 10
 	;음모없음 독약내성
 	ELSEIF ARG:1 == 14
-		SIF (CSVTALENT(NO:(ARG:0),118,0) && LOCAL ==1) || (CSVTALENT(NO:(ARG:0),56,0) && LOCAL ==3)
+		SIF (CSVTALENT(NO:(ARG:0), 118 ,0) && LOCAL ==1) || (CSVTALENT(NO:(ARG:0), 56 ,0) && LOCAL ==3)
 			LOCAL += 10
 	;일단 보류
 	;성별(원래로부터남자의 경우도+10되어 돌아간다)
 	;ELSEIF ARG:1 == 2
-	;	SIF (CSVTALENT(NO:(ARG:0),140,0) && LOCAL == 0) || (CSVTALENT(NO:(ARG:0),137,0) && LOCAL == 2) || (CSVTALENT(NO:(ARG:0),139,0) && LOCAL == 3)
+	;	SIF (CSVTALENT(NO:(ARG:0), 140 ,0) && LOCAL == 0) || (CSVTALENT(NO:(ARG:0), 137 ,0) && LOCAL == 2) || (CSVTALENT(NO:(ARG:0), 139 ,0) && LOCAL == 3)
 	;		LOCAL += 10
 
 	ENDIF
@@ -575,12 +575,12 @@ RETURNF LOCAL
 ;-------------------------------------------------
 @DIFF_GET_BUY(ARG)
 
-;개체차이 나시라면 조속히 연주한다
+;개체차 나시라면 조속히 연주한다
 SIF DIFF_GET_TALENT(ARG,1) == 0
 	RETURN 0
 
-LOCAL = DIFF_GET_TALENT(ARG,2)
-;성별
+LOCAL = DIFF_GET_TALENT(ARG, 2)
+;性別
 IF LOCAL > 0 && LOCAL < 10 
 	TALENT:ARG:남자 = 0
 	TALENT:ARG:반음반양 = 0
@@ -644,7 +644,7 @@ IF LOCAL > 0 && LOCAL < 10
 		CASE 2
 			TALENT:ARG:작은체구 = 1
 		CASE 3
-			;보통 체형
+			;보통체형
 		CASE 4
 			TALENT:ARG:큰체구 = 1
 	ENDSELECT
@@ -819,7 +819,7 @@ IF (LOCAL > 0 && LOCAL < 10) && MALE(ARG) == 0
 		CASE 2
 			TALENT:ARG:빈유 = 1
 		CASE 3
-			;보통젖
+			;평유
 		CASE 4
 			TALENT:ARG:거유 = 1
 		CASE 5
@@ -855,7 +855,7 @@ ENDIF
 
 ;-------------------------------------------------
 ;함수명:@DIFF_TALENT_NAME(ARG)
-;개요:개체차이로 취득한 소질을 표시하는 녀석[]으로 단락지어 표시
+;개요:개체차로 취득한 소질을 표시하는 녀석[]으로 단락지어 표시
 ;인수:ARG… 캐릭터 등록 번호
 ;반환값:없음
 ;비고:
@@ -875,7 +875,7 @@ FOR COUNT,2,15
 	IF COUNT == 2 && GET_TALENT
 		SELECTCASE GET_TALENT
 			CASE 1
-				LOCALS =여자
+				LOCALS = 여자
 			CASE 2 
 				LOCALS = 반음반양
 			CASE 3
@@ -896,7 +896,7 @@ FOR COUNT,2,15
 			CASE 2,12
 				LOCALS = 작은체구
 			CASE 3
-				LOCALS =보통 체형
+				LOCALS = 보통체형
 			CASE 4,14
 				LOCALS = 큰체구
 		ENDSELECT
@@ -906,7 +906,7 @@ FOR COUNT,2,15
 			CASE 1
 				LOCALS = 젖기쉬움
 			CASE 2
-				LOCALS =보통 정도의 젖기 쉬움
+				LOCALS = 윤활보통
 			CASE 3 
 				LOCALS = 젖기어려움
 		ENDSELECT
@@ -916,7 +916,7 @@ FOR COUNT,2,15
 			CASE 1,11
 				LOCALS = 술꾼
 			CASE 2
-				LOCALS =보통 정도의 술의 강함
+				LOCALS = 주량보통
 			CASE 3,13 
 				LOCALS = 알콜쓰레기
 		ENDSELECT
@@ -988,7 +988,7 @@ FOR COUNT,2,15
 			CASE 2 
 				LOCALS = 빈유
 			CASE 3 
-				LOCALS =보통젖
+				LOCALS = 평유
 			CASE 4 
 				LOCALS = 거유
 			CASE 5
@@ -1036,7 +1036,7 @@ TALENT:ARG:V둔감 = 0
 ;반환값:없음
 ;비고:
 ;-------------------------------------------------
-@CLEAR_TALENT_PENIS(ARG:0,ARG:1)
+@CLEAR_TALENT_PENIS(ARG:0, ARG:1)
 SIF ARG:1 < 1 && ARG:1 > 3
 	RETURN
 

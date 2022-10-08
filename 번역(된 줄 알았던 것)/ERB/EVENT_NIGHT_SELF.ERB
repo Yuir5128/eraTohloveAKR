@@ -177,7 +177,7 @@ ELSEIF TALENT:연모 || TALENT:음란 || TALENT:복종 || TALENT:친애 || TALEN
 		CALL NIGHT_SELF_NTR
 	;적극치 일정 이상
 	ELSEIF E >= 40
-		;체력가 낮을 때는 곁잠에
+		;체력이 낮을 때는 곁잠에
 		IF BASE:체력 < 500
 			CALL NIGHT_SELF_SOINE
 		;연모 때 주연과 곁잠, 아이라면 곁잠이 되기 쉽다
@@ -633,7 +633,7 @@ L:2 = RAND:100
 IF L:2 < 10 || ((TALENT:소인체형 || TALENT:유아／유아퇴행 || TALENT:유치) && L:2 < 40)
 	TFLAG:405 = 2
 ELSEIF L:2 > 89 || ((TALENT:음란 || TALENT:창부) && L:2 > 59)
-	IF ((M == 0 && S) && ((TALENT:MASTER:수 || TALENT:MASTER:오메가 || TALENT:MASTER:공 == 0) || (TALENT:공 || TALENT:수 == 0 || TALENT:오메가 == 0))) || ((V == 0 && P) && ((TALENT:MASTER:공 || TALENT:MASTER:수 == 0 || TALENT:MASTER:오메가 == 0) || (TALENT:수 || TALENT:오메가 || TALENT:공 == 0)))
+	IF ((M == 0 && S) && ((TALENT:MASTER:수 || TALENT:MASTER:오메가 || TALENT:MASTER:공 == 0) || (TALENT:공 || TALENT:수 == 0 || TALENT:오메가 == 0))) || ((V == 0 && P) && ((TALENT:MASTER:공 || TALENT:MASTER:수 == 0 || TALENT:MASTER:오메가 == 0 ) || (TALENT:수 || TALENT:오메가 || TALENT:공 == 0)))
 		;노예가공 또는 주인이수나오메가
 		IF TALENT:공 || TALENT:MASTER:수 || TALENT:MASTER:오메가
 			;한편 주인이공 또는 노예가수나오메가
@@ -867,7 +867,7 @@ PRINTW
 TFLAG:405 = 6
 
 ;착유중독에 의한 착유 체크
-;모유체질, 착유중독, 일정 능력, 체력가 필요
+;모유체질, 착유중독, 일정 능력, 체력이 필요
 M = 1
 
 IF ABL:착유중독 == 1

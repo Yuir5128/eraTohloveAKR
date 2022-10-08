@@ -5,7 +5,7 @@
 
 ;해당하는 노역
 ;요리를 만드는 요리를 만들어 받는다
-;손맞댐하타 당번 말당번
+;손맞댐밭내번 말당번
 ;====================================================================
 
 ;-------------------------------------------------
@@ -40,7 +40,7 @@ REPEAT CHARANUM
 	SIF TALENT:COUNT:발정기
 		CONTINUE
 	
-	;손 맞추어라
+	;대련
 	;임신중은 불가
 	IF TALENT:COUNT:임신
 	;체력 1000 미만으로 불가
@@ -50,7 +50,7 @@ REPEAT CHARANUM
 		TEAWASE += 1
 	ENDIF
 	
-	;하타 당번 말당번
+	;밭내번 말당번
 	;달마는 불가
 	IF TALENT:COUNT:달마
 	;체력 1000 미만으로 불가
@@ -84,7 +84,7 @@ REPEAT CHARANUM
 			CONTINUE
 	ENDIF
 	;조수가능, 공범자가 아니었으면 불가
-	SIF CFLAG:COUNT:1!= 2 && CFLAG:COUNT:1!= 3
+	SIF CFLAG:COUNT:1 != 2 && CFLAG:COUNT:1 != 3
 		CONTINUE
 	;벌써극라면 불가
 	SIF TALENT:COUNT:극
@@ -95,7 +95,7 @@ REPEAT CHARANUM
 	;붕괴, 실의, 광기는 불가
 	SIF TALENT:COUNT:붕괴 || TALENT:COUNT:실의 || TALENT:COUNT:광기
 		CONTINUE
-	;후 하늘적인유아／유아퇴행는 불가
+	;후천적인유아／유아퇴행는 불가
 	IF TALENT:COUNT:유아／유아퇴행
 		SIF !CSVTALENT(NO:COUNT, 150, 0)
 			CONTINUE
@@ -111,7 +111,7 @@ REND
 
 
 ;이하 화면 표시부분
-SIF TARGET != -1 && ((KANRAKU(TARGET) || (ABL:순종 >= 3 && ABL:봉사정신 >= 3) || TALENT:요리고수) && MARK:반발각인!= 3 && TALENT:달마 == 0 && TALENT:발정기 == 0)
+SIF TARGET != -1 && ((KANRAKU(TARGET) || (ABL:순종 >= 3 && ABL:봉사정신 >= 3) || TALENT:요리고수) && MARK:반발각인 != 3 && TALENT:달마 == 0 && TALENT:발정기 == 0)
 	PRINTFORML [10] - %CALLNAME%에 요리를 만들어 받는다
 
 SIF ABL:MASTER:기교 >= 3 || ABL:MASTER:요리기능 || TALENT:MASTER:요리고수 || TALENT:MASTER:요리치
@@ -119,11 +119,11 @@ SIF ABL:MASTER:기교 >= 3 || ABL:MASTER:요리기능 || TALENT:MASTER:요리고
 
 ;내번은 낮이라면 가능
 SIF TIME == 0 && (FLAG:161 & 1) == 0 && TEAWASE >= 2
-	PRINTL [20] 내 차례 -손 맞추어라
+	PRINTL [20] 내번 -대련
 SIF TIME == 0 && (FLAG:161 & 2) == 0 && HATAKE >= 2
-	PRINTL [30] 내 번 -하타 당번
+	PRINTL [30] 내번 -밭내번
 SIF TIME == 0 && (FLAG:161 & 4) == 0 && UMA >= 2
-	PRINTL [40] 내 번 -마 당번
+	PRINTL [40] 내번 -말내번
 
 ;수행도 낮이라면 가능
 SIF TIME == 0 && (FLAG:161 & 8) == 0 && KIWAME > 0

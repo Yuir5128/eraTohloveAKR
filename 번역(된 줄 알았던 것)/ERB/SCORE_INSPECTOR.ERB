@@ -97,7 +97,7 @@ SELECTCASE LOCAL
 			ADD_SCORE += 1
 		ENDIF
 	;가학 고통쾌락 굴욕
-	CASE 8, 10, 17
+	CASE 8,10,17
 		SIF TALENT:마조
 			ADD_SCORE += 1
 		SIF TALENT:프라이드높음
@@ -111,7 +111,7 @@ SELECTCASE LOCAL
 			ADD_SCORE += 1
 		ENDIF
 	;봉사 쾌락 봉사
-	CASE 9, 20
+	CASE 9,20
 		SIF TALENT:헌신적
 			ADD_SCORE += 1
 		
@@ -173,7 +173,7 @@ ENDIF
 
 ;섹스계역섹스계
 SELECTCASE SELECTCOM
-	CASE 100 TO 119, 260 TO 265, 430, 431, 506 TO 523, 526
+	CASE 100 TO 119,260 TO 265,430,431,506 TO 523,526
 		SIF TALENT:섹스광
 			ADD_SCORE += 1
 		SIF TALENT:정조관념
@@ -191,7 +191,7 @@ ENDSELECT
 
 SELECTCASE SELECTCOM
 	;정액계
-	CASE 71, 72, 75, 86, 87, 410, 412, 420, 503, 504
+	CASE 71,72,75,86,87,410,412,420,503,504
 		SIF TALENT:악취민감
 			CFLAG:506 += 1
 		SIF TALENT:요리고수
@@ -204,8 +204,8 @@ SELECTCASE SELECTCOM
 		ELSEIF ABL:정액중독 >= 3
 			ADD_SCORE += 1
 		ENDIF
-	;자위계
-	CASE 3 TO 8, 509
+	;자위系
+	CASE 3 TO 8,509
 		SIF TALENT:자위하기쉬움
 			ADD_SCORE += 1
 		SIF  TALENT:자위광
@@ -220,8 +220,8 @@ SELECTCASE SELECTCOM
 		ELSEIF ABL:자위중독 >= 3
 			ADD_SCORE += 1
 		ENDIF
-	;모유계
-	CASE 17, 18
+	;모유系
+	CASE 17,18
 		SIF TALENT:모유체질
 			ADD_SCORE += 1
 		SIF TALENT:모성
@@ -240,7 +240,7 @@ ENDSELECT
 SELECTCASE SELECTCOM
 	;연모 친애 조교자가 사모 대상이 아닌 경우를 포함한다
 	;봉사계 커뮤니케이션계 러브러브 하고 있는 커맨드
-	CASE 0, 1, 70, 71, 73 TO 77, 200 TO 207, 317 TO 319
+	CASE 0,1,70,71,73 TO 77,200 TO 207,317 TO 319
 		SIF CFLAG:39 == 6 || CFLAG:39 == 165
 			ADD_SCORE += 2
 		SIF CFLAG:39 == 3
@@ -248,7 +248,7 @@ SELECTCASE SELECTCOM
 	
 	;음란 창부
 	;B C V A 섹스계 기분이 좋은 계의 커맨드
-	CASE 10 TO 59, 100 TO 119, 500 TO 510
+	CASE 10 TO 59,100 TO 119,500 TO 510
 		SIF CFLAG:39 == 7
 			ADD_SCORE += 2
 		SIF CFLAG:39 == 4
@@ -256,7 +256,7 @@ SELECTCASE SELECTCOM
 	
 	;복종 예속 조교자가 사모 대상이 아닌 경우를 포함한다
 	;SM계 하드한 봉사계 하드한 섹스계 우선 하드한 커맨드
-	CASE 80 TO 87, 130 TO 162, 380 TO 383, 511 TO 514
+	CASE 80 TO 87,130 TO 162,380 TO 383,511 TO 514
 		SIF CFLAG:39 == 8
 			ADD_SCORE += 2
 		SIF CFLAG:39 == 5
@@ -293,7 +293,7 @@ SIF TALENT:음란가슴 && NOWEX:3
 	ADD_SCORE += 1
 
 ;섹스광는 섹스에서의 절정에서 점
-SIF TALENT:섹스광 && ((SEXPLAY(TARGET) == 1 && NOWEX:0)|| (SEXPLAY(TARGET) == 2 && NOWEX:2) || (SEXPLAY(TARGET) > 2 && NOWEX:1))
+SIF TALENT:섹스광 && ((SEXPLAY(TARGET) == 1 && NOWEX:0 )|| (SEXPLAY(TARGET) == 2 && NOWEX:2) || (SEXPLAY(TARGET) > 2 && NOWEX:1))
 	ADD_SCORE += 1
 
 ;즉각함락는 CVAB의 어디선가 절정에서 점
@@ -320,7 +320,7 @@ SIF TALENT:B민감 && NOWEX:3
 SIF TALENT:악취민감 && NOWEX:13
 	ADD_SCORE += 1
 
-;마조 또한 하늘사정나 드라이오가니즘으로 점드 M라면 한층 더 점
+;마조 또한 하늘사정나 드라이오가니즘으로 점도M라면 한층 더 점
 SIF TALENT:마조 && (NOWEX:40 || NOWEX:41)
 	ADD_SCORE += TALENT:마조
 
@@ -329,7 +329,7 @@ SIF TALENT:모성 && (NOWEX:3 || NOWEX:4)
 	ADD_SCORE += 1
 
 ;임신 또한 VA섹스에서의 VA절정에서 점
-SIF TALENT:임신 && ((SEXPLAY(TARGET) == 1 && NOWEX:0)|| (SEXPLAY(TARGET) == 2 && NOWEX:2))
+SIF TALENT:임신 && ((SEXPLAY(TARGET) == 1 && NOWEX:0 )|| (SEXPLAY(TARGET) == 2 && NOWEX:2))
 	ADD_SCORE += 1
 
 ;능력 이상건

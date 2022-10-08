@@ -52,7 +52,7 @@ B = -1
 C = -1
 
 ;어느 이벤트를 발생시키는 것이 가능한가 판정해,가능 이벤트수를 LOCAL:1에,이벤트의 종류를 LOCAL:10~에 기록
-FOR LOCAL,0,500
+FOR LOCAL, 0, 500
 	RESULT = 0
 	TRYCALLFORM DAILY_LIFE_ABLE_{LOCAL}
 	IF RESULT
@@ -65,7 +65,7 @@ SIF !LOCAL:1
 	RETURN 1
 
 ;이벤트의 호출
-;체력가 일정치보다 낮으면 휴게중
+;체력이 일정치보다 낮으면 휴게중
 IF MAXBASE:A:체력 >= 3000
 	Z = 1200
 ELSEIF MAXBASE:A:체력 <= 1200
@@ -83,7 +83,7 @@ ENDIF
 
 $DAILY_END
 ;일상 안면세트
-CALL DAILY_MENSIKI(MASTER,A,B,C)
+CALL DAILY_MENSIKI(MASTER, A, B, C)
 
 ;조교자 변경 대응,주인 이외에의연모·복종를 온으로 한다
 D = 0

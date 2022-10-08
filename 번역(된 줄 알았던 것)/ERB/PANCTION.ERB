@@ -141,11 +141,11 @@ RETURN 0
 ;누구에게도 들어맞지 않았던 경우 RESULT에 0, 그 이외의 경우는도종를 돌려준다
 
 ;도검 난무용으로 RESULT가
-;「1=인간, 2=단도, 3=호신용 단도, 4=타도, 5=칼, 6=대칼, 7=창, 8=나기나타, 9=검
-;12=극단도, 13=극호신용 단도, 14=극타도, 15=극칼, 16=극대칼, 17=극창, 18=극나기나타, 19=극검」
+;「1=인간, 2=단도, 3=협차, 4=타도, 5=태도, 6=대태도, 7=창, 8=나기나타, 9=츠루기
+;12=극단도, 13=극협차, 14=극타도, 15=극태도, 16=극대태도, 17=극창, 18=극나기나타, 19=극츠루기」
 ;도파
-;1=산죠우 2=미이케 3=아오에 4=아와타입 5=고비젠 6=와 7=무라마사 8=사다무네 9=오사후네
-;10=산몬지 11=카네사다 12=호리카와 13=코테츠 14=코테츠…? 15=강 16=마사무네 17=후쿠오카 1문자 18=풍후쿠니유키 히로시
+;1=산죠 2=미이케 3=아오에 4=아와타구치 5=고비젠 6=와 7=무라마사 8=사다무네 9=오사후네
+;10=사몬지 11=카네사다 12=호리카와 13=코테츠 14=코테츠…? 15=강 16=마사무네 17=후쿠오카 이치몬지 18=분고노쿠니 유키히라
 ;--------------------------------------------------
 @LOSTNAME(ARG)
 #FUNCTION
@@ -153,99 +153,99 @@ RETURN 0
 #DIM DYNAMIC 도종
 #DIM DYNAMIC 도파
 
-;CSV가 정의되어 있지 않은 캐릭터
-IF EXISTCSV(ARG, 0) == 0
-	STR:300 =누군가
-	STR:301 =누군가
+;CSV가 정의되지 않은 캐릭터
+IF EXISTCSV(ARG,0) == 0
+	STR:300 = 누군가
+	STR:301 = 누군가
 	RETURNF 0
 ENDIF
 
 ;이름
-STR:300 = CSVNAME(ARG, 0)
+STR:300 = CSVNAME(ARG,0)
 
 ;별명
-STR:301 =  CSVCALLNAME(ARG, 0)
+STR:301 = CSVCALLNAME(ARG,0)
 
 ;도종
-도종 = CSVCFLAG(ARG, 30, 0)
+도종 = CSVCFLAG(ARG,30,0)
 SELECTCASE 도종
 	CASE 1
-		STR:302 =인간
+		STR:302 = 인간
 	CASE 2
-		STR:302 =단도
+		STR:302 = 단도
 	CASE 3
-		STR:302 =호신용 단도
+		STR:302 = 협차
 	CASE 4
-		STR:302 =타도
+		STR:302 = 타도
 	CASE 5
-		STR:302 =칼
+		STR:302 = 태도
 	CASE 6
-		STR:302 =대칼
+		STR:302 = 대태도
 	CASE 7
-		STR:302 =창
+		STR:302 = 창
 	CASE 8
-		STR:302 =나기나타
+		STR:302 = 나기나타
 	CASE 9
-		STR:302 =검
+		STR:302 = 츠루기
 	CASE 12
 		STR:302 = 극단도
 	CASE 13
-		STR:302 = 극호신용 단도
+		STR:302 = 극협차
 	CASE 14
 		STR:302 = 극타도
 	CASE 15
-		STR:302 = 극칼
+		STR:302 = 극태도
 	CASE 16
-		STR:302 = 극대칼
+		STR:302 = 극대태도
 	CASE 17
 		STR:302 = 극창
 	CASE 18
 		STR:302 = 극나기나타
 	CASE 19
-		STR:302 = 극검
+		STR:302 = 극츠루기
 ENDSELECT
 
 ;도파
 도파 = CSVCFLAG(ARG, 31, 0)
 SELECTCASE 도파
 	CASE 0
-		STR:303  =없음
+		STR:303 = 없음
 	CASE 1
-		STR:303 =산죠우
+		STR:303 = 산죠
 	CASE 2
-		STR:303 =미이케
+		STR:303 = 미이케
 	CASE 3
-		STR:303 =아오에
+		STR:303 = 아오에
 	CASE 4
-		STR:303 =아와타입
+		STR:303 = 아와타구치
 	CASE 5
-		STR:303 =고비젠
+		STR:303 = 고비젠
 	CASE 6
-		STR:303 =와
+		STR:303 = 라이
 	CASE 7
-		STR:303 =무라마사
+		STR:303 = 무라마사
 	CASE 8
-		STR:303 =사다무네
+		STR:303 = 사다무네
 	CASE 9
-		STR:303 =오사후네
+		STR:303 = 오사후네
 	CASE 10
-		STR:303 =산몬지
+		STR:303 = 사몬지
 	CASE 11
-		STR:303 =카네사다
+		STR:303 = 카네사다
 	CASE 12
-		STR:303 =호리카와
+		STR:303 = 호리카와
 	CASE 13
-		STR:303 =코테츠
+		STR:303 = 코테츠
 	CASE 14
-		STR:303 =코테츠…?
+		STR:303 = 코테츠…?
 	CASE 15
-		STR:303 =강
+		STR:303 = 고우
 	CASE 16
-		STR:303 =마사무네
+		STR:303 = 마사무네
 	CASE 17
-		STR:303 =후쿠오카 1문자
+		STR:303 = 후쿠오카 이치몬지
 	CASE 18
-		STR:303 =풍후쿠니유키 히로시
+		STR:303 = 분고노쿠니 유키히라
 ENDSELECT
 
 RETURNF 도종
@@ -696,7 +696,7 @@ ELSEIF SELECTCOM == 420 || SELECTCOM == 421 || SELECTCOM == 422 || SELECTCOM == 
 	SIF CFLAG:ASSI:215 <= 1
 		CFLAG:ASSI:215 = 2
 ;비디오카메라(촬영 담당 시켜지고 있다고 해석)
-ELSEIF SELECTCOM == 310 && FLAG:22 == 2
+ELSEIF SELECTCOM == 310 && FLAG:22 = = 2
 	;플레이 내용 갱신
 	SIF CFLAG:ASSI:215 == 0
 		CFLAG:ASSI:215 = 1

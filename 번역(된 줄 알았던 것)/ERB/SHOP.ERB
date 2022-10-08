@@ -78,22 +78,22 @@ IF TFLAG:0 == 0
 		PRINT (금)
 	SIF FLAG:82 == 6
 		PRINT (토)
-	PRINTFORML 　(소지 코우슈우금{MONEY}고슈금)
+	PRINTFORML 　(소지 코슈금{MONEY}고슈금)
 	LOCALS = %CALLNAME:MASTER%(주인)
-	PRINTFORML %LOCALS, 20, LEFT%
+	PRINTFORML %LOCALS,20,LEFT%
 	MAXBASE:MASTER:사정 = 10000
 	IF ASSI >= 0
 		LOCALS = %CALLNAME:ASSI%(조수)
-		PRINTFORML %LOCALS, 20, LEFT%
+		PRINTFORML %LOCALS,20,LEFT%
 		MAXBASE:ASSI:사정 = 10000
 	ENDIF
 	IF TARGET > 0
 		LOCALS = %CALLNAME%(조교중)
-		PRINTFORM %LOCALS, 20, LEFT%
+		PRINTFORM %LOCALS,20,LEFT%
 		CALL PRINT_BASE_SHOP(TARGET)
 		MAXBASE:사정 = 15000
 	ENDIF
-	SETCOLOR 140, 140, 140
+	SETCOLOR 140,140,140
 	DRAWLINE
 	RESETCOLOR
 	CALL STATUS
@@ -136,7 +136,7 @@ IF TFLAG:0 == 0
 	IF FLAG:5 == 8
 		CALL FREE_MISSION_CONFIRM
 	ELSEIF !FLAG:5
-		PRINTFORML 목표:100일 이내에 코우슈우금 1000000고슈금 벌어,[납금]해
+		PRINTFORML 목표:100일 이내에 코슈금 1000000고슈금 벌어,[납금]해
 	ENDIF
 	CALL SHOW_TIPS
 	RESETCOLOR
@@ -187,10 +187,10 @@ IF TFLAG:0 == 0
 				LOCALS = [610] 캐라콘피그
 			CASE 16
 				LOCALS = [700] 헬프
-			;CASE 17
-			;	LOCALS = [710] 캐릭터 도감
-			;CASE 18
-			;	LOCALS = [777] 디버그 메뉴
+			CASE 17
+				LOCALS = [710] 캐릭터 도감
+			CASE 18
+				LOCALS = [777] 디버그 메뉴
 			CASE 19
 				LOCALS = [800] 세이브
 			CASE 20
@@ -203,7 +203,7 @@ IF TFLAG:0 == 0
 					LOCALS = [920] 강해서 뉴 게임
 		ENDSELECT
 		IF STRLENS(LOCALS)
-			PRINTFORM %LOCALS, 26, LEFT%
+			PRINTFORM %LOCALS,26,LEFT%
 			LOCAL:1++
 			SIF (LOCAL:1 % 3) == 0
 				PRINTL 
@@ -334,67 +334,67 @@ FOR LOCAL, 0, CHARANUM
 	LOCAL:9++
 NEXT
 
-IF !GETBIT(FLAG:154, 1) && CHARANUM > 0
+IF !GETBIT(FLAG:154,1) && CHARANUM > 0
 	LOCALS = [210] 도장으로부터, 캐릭터의 소질이나 능력을 볼 수가 있습니다.
 	SETBIT FLAG:154, 1
 ENDIF
-IF !GETBIT(FLAG:154, 2) && TARGET >= 0 && LOCALS == ""
+IF !GETBIT(FLAG:154,2) && TARGET >= 0 && LOCALS == ""
 	LOCALS = [200] 조교를 개시해, 목표의 달성을 목표로 합시다.
 	SETBIT FLAG:154, 2
 ENDIF
-IF !GETBIT(FLAG:154, 3) && !LOCAL:9 && LOCALS == ""
+IF !GETBIT(FLAG:154,3) && !LOCAL:9 && LOCALS == ""
 	LOCALS = [300] 우선은 노예를 구입해 봅시다.
 	SETBIT FLAG:154, 3
 ENDIF
-IF !GETBIT(FLAG:154, 4) && MONEY >= 1000000 && !FLAG:5 && FLAG:23 <= 0 && !TFLAG:0 && CFLAG:MASTER:1 == 3 && LOCALS == ""
+IF !GETBIT(FLAG:154,4) && MONEY >= 1000000 && !FLAG:5 && FLAG:23 <= 0 && !TFLAG:0 && CFLAG:MASTER:1 == 3 && LOCALS == ""
 	LOCALS = [910] 자금이 모였습니다![납금]하면 엔딩입니다.
 	SETBIT FLAG:154, 4
 ENDIF
-IF !GETBIT(FLAG:154, 5) && FLAG:40 == 10 && LOCALS == ""
+IF !GETBIT(FLAG:154,5) && FLAG:40 == 10 && LOCALS == ""
 	LOCALS = [920] 자, 유리한 보너스를 얻어 다음의 주회를 개시합시다.
 	SETBIT FLAG:154, 5
 ENDIF
-IF !GETBIT(FLAG:154, 6) && MONEY >= 1000000 && !FLAG:5 && FLAG:23 <= 0 && !TFLAG:0 && CFLAG:MASTER:1 < 3 && LOCALS == ""
-	LOCALS =원래의 주인공이나 공범자가 아니면[납금]할 수 없습니다.
+IF !GETBIT(FLAG:154,6) && MONEY >= 1000000 && !FLAG:5 && FLAG:23 <= 0 && !TFLAG:0 && CFLAG:MASTER:1 < 3 && LOCALS == ""
+	LOCALS = 원래의 주인공이나 공범자가 아니면[납금]할 수 없습니다.
 	SETBIT FLAG:154, 6
 ENDIF
-IF !GETBIT(FLAG:154, 7) && LOCAL:1 && LOCALS == ""
+IF !GETBIT(FLAG:154,7) && LOCAL:1 && LOCALS == ""
 	LOCALS = [220] 휴게를 취하는 것으로, 자동적으로 도검의손 넣고를 합니다.
 	SETBIT FLAG:154, 7
 ENDIF
-IF !GETBIT(FLAG:154, 8) && TARGET > -1 && JUEL:부정 >= 100 && LOCALS == ""
-	LOCALS =무리한 조교는부정를 더해가반발를 낳아 버립니다.
+IF !GETBIT(FLAG:154,8) && TARGET > -1 && JUEL:부정 >= 100 && LOCALS == ""
+	LOCALS = 무리한 조교는부정를 더해가반발를 낳아 버립니다.
 	SETBIT FLAG:154, 8
 ENDIF
-IF !GETBIT(FLAG:154, 9) && LOCAL:2 && LOCALS == ""
+IF !GETBIT(FLAG:154,9) && LOCAL:2 && LOCALS == ""
 	LOCALS = [510] 가끔 씩은 공범자에게 조교를 맡겨 보는 것도 좋을지도 모릅니다.
 	SETBIT FLAG:154, 9
 ENDIF
-IF !GETBIT(FLAG:154, 10) && LOCAL:3 && LOCALS == ""
+IF !GETBIT(FLAG:154,10) && LOCAL:3 && LOCALS == ""
 	LOCALS = [520] 조교에 조수를 데리고 가면, 새로운 커맨드를 사용할 수 있을지도 모릅니다.
 	SETBIT FLAG:154, 10
 ENDIF
-IF !GETBIT(FLAG:154, 11) && LOCAL:8 > 1 && LOCALS == ""
+IF !GETBIT(FLAG:154,11) && LOCAL:8 > 1 && LOCALS == ""
 	LOCALS = [500] 다른 노예를 조교하고 싶으면, 조교 대상 변경을 선택합시다.
 	SETBIT FLAG:154, 11
 ENDIF
-IF !GETBIT(FLAG:154, 12) && ITEM:비디오카메라 && !ITEM:비디오테이프 && LOCALS == ""
+IF !GETBIT(FLAG:154,12) && ITEM:비디오카메라 && !ITEM:비디오테이프 && LOCALS == ""
 	LOCALS = [310] 비디오테이프를 구입해 촬영하면, AV를 팔아 자금을 얻을 수 있습니다.
 	SETBIT FLAG:154, 12
 ENDIF
-IF !GETBIT(FLAG:154, 13) && !LOCAL:4 && LOCAL && MONEY <= 1000 && ((FLAG:4 == 1 && DAY >= 20) || (FLAG:4 == 2 && DAY >= 15) || (FLAG:4 == 3 && DAY >= 10)) && LOCALS == ""
+IF !GETBIT(FLAG:154,13) && !LOCAL:4 && LOCAL && MONEY <= 1000 && ((FLAG:4 == 1 && DAY >= 20) || (FLAG:4 == 2 && DAY >= 15) || (FLAG:4 == 3 && DAY >= 10)) && LOCALS == ""
 	LOCALS = [400] 어떻게 하지나 없어지면, 노예를 헐값으로 팔아 버리는 것도 1손입니다.
 	SETBIT FLAG:154, 13
 ENDIF
-IF !GETBIT(FLAG:154, 14) && LOCAL:4 && LOCALS == ""
+IF !GETBIT(FLAG:154,14) && LOCAL:4 && LOCALS == ""
 	LOCALS = [400] 노예를[매각]하면, 상당한 자금을 얻을 수 있습니다.
 	SETBIT FLAG:154, 14
 ENDIF
-IF !GETBIT(FLAG:154, 15) && (LOCAL:5 + LOCAL:6 + LOCAL:7) > 0 && LOCALS == ""
+IF !GETBIT(FLAG:154,15) && (LOCAL:5 + LOCAL:6 + LOCAL:7) > 0 && LOCALS == ""
 	LOCALS = [400] %CALLNAME%를 일하게 해 자금을 얻을 수 있습니다.
 	SETBIT FLAG:154, 15
 ENDIF
-IF !GETBIT(FLAG:154, 16) && LOCAL:5 && LOCALS == ""
+IF !GETBIT(FLAG:154,16) && LOCAL:5 && LOCALS == ""
 	LOCALS = [400] 포장마차나 뢰무는, 확실히 밑바닥 시키는 것이 돈을 버는 요령입니다.
 	SETBIT FLAG:154, 16
 ENDIF
@@ -402,9 +402,9 @@ IF LOCALS == ""
 	IF !RAND:8
 		LOCALS = %CALLNAME:MASTER%의기교가 오르면, 보다 조교는 용이하게 되겠지요.
 	ELSEIF !RAND:7
-		LOCALS =커맨드 필터로부터, 필요없는 커맨드를 지울 수가 있습니다.
+		LOCALS = 커맨드 필터로부터, 필요없는 커맨드를 지울 수가 있습니다.
 	ELSEIF !RAND:6
-		LOCALS = 기력가 0이 되면, 조교 효율이 현격히 떨어져 버립니다.
+		LOCALS = 기력이 0이 되면, 조교 효율이 현격히 떨어져 버립니다.
 	ELSEIF !RAND:5
 		LOCALS = [220] 휴게로부터, 모두의 평상시의 모습이 보여집니다.
 	ELSEIF !RAND:4

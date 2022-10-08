@@ -222,7 +222,7 @@ IF SELECTCOM == 1
 			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
 				PRINTFORMW 「%UNICODE(0x2661)% 도미 실마리%UNICODE(0x2661)%%UNICODE(0x2661)%」
 			ELSE
-				PRINTFORMW %CALLNAME%는발리나 있고 산소를 보충하도록(듯이) 어깨로 숨을 쉬고 있다……
+				PRINTFORMW %CALLNAME%는부족해 있고 산소를 보충하도록(듯이) 어깨로 숨을 쉬고 있다……
 			ENDIF
 		ELSEIF CFLAG:301 < 2 || FLAG:7 == 2
 			PRINTFORMW 「응우……」
@@ -457,7 +457,7 @@ IF SELECTCOM == 6
 							PRINTFORMW 이지만,%CALLNAME%의 아누스는 아직 %CALLNAME:PLAYER%의페니스를수 넣을 준비가 갖추어지지 않는 것 같다.
 					ELSE
 						PRINTFORMW 「도미 실마리,부탁하는,나의 손가락이라면 좋은 곳까지 닿지 않아」
-						PRINTFORMW %CALLNAME%는 아누스에 손가락을 근원까지 묻어도 아직발리나 오셔 구,한층 더 안쪽을 후벼파는 것처럼 동글동글 움직이고 있다.
+						PRINTFORMW %CALLNAME%는 아누스에 손가락을 근원까지 묻어도 아직부족해 오셔 구,한층 더 안쪽을 후벼파는 것처럼 동글동글 움직이고 있다.
 					ENDIF
 				ENDIF
 			ELSE
@@ -558,7 +558,7 @@ IF SELECTCOM == 7
 						ELSE
 							SIF TEQUIP:바이브 || TEQUIP:애널바이브
 								PRINTFORMW 「아,앗!그런 완구는,아후,여분,안쪽,안타까워…… 거기에,」
-							PRINTFORMW 「나의 손가락 자발리나 있어라,대장……」
+							PRINTFORMW 「나의 손가락 자부족해 있어라,대장……」
 							PRINTFORMW %CALLNAME%는\@ TEQUIP:바이브 || TEQUIP:애널바이브? 양구멍을바이브와 # 전후의 구멍을\@근원까지 찔러 넣은 손가락으로 질척질척 소리를 내면서 만지작거리고 있다
 						ENDIF
 					ENDIF
@@ -1236,7 +1236,7 @@ ELSEIF SELECTCOM == 42 && TEQUIP:로터삽입
 				PRINTFORMW 갈 것 같은 것을 참으면서%CALLNAME%는,꽤 고생해손를 사용하지 않고 로터를질내로부터 냈다
 				PRINTFORMW 「후,아%UNICODE(0x2661)% 잘 나온 것이니까,오늘이야말로 포상 주어라? 대장%UNICODE(0x2661)%」
 			ELSE
-				PRINTFORMW 「이봐,이런 것 자 조금도발리나 있는이지만? 알고 있을 것이다,도미 실마리%UNICODE(0x2661)%」
+				PRINTFORMW 「이봐,이런 것 자 조금도부족해 있는이지만? 알고 있을 것이다,도미 실마리%UNICODE(0x2661)%」
 				PRINTFORMW 고의로 천천히 뽑아 낸,꿀로 흠뻑젖은로터를 가려%CALLNAME%는 염미에 웃고 있다
 			ENDIF
 		ENDIF
@@ -1438,7 +1438,7 @@ IF SELECTCOM == 51
 			ELSE
 				PRINTFORMW 「우…… 쿠우,기분 나빠」
 				PRINTFORMW 불만스러운 듯한 말을 무시해 손가락을 계속 움직이면 %CALLNAME%의발가 때때로 쫑긋쫑긋 뛰기 시작한다.
-				PRINTFORMW 얼굴도고슈금를 쇄 있던 것처럼 되어 호흡도 흐트러지기 시작한%CALLNAME%의 모습을 즐기면서,%CALLNAME:PLAYER%는 장벽을 찾는 손가락을 늘려 갔다……
+				PRINTFORMW 얼굴도고슈금을 쇄 있던 것처럼 되어 호흡도 흐트러지기 시작한%CALLNAME%의 모습을 즐기면서,%CALLNAME:PLAYER%는 장벽을 찾는 손가락을 늘려 갔다……
 			ENDIF
 			CFLAG:336 = 3
 		;그 이외
@@ -1474,7 +1474,7 @@ IF SELECTCOM == 52 && TEQUIP:로터A삽입 == 0
 							PRINTFORMW 「응읏,기분이 좋아,대장%UNICODE(0x2661)%」
 						ENDIF
 					ELSE
-						PRINTFORMW 「후아,기분이 좋지만,역시 물건발리나 좋은……」
+						PRINTFORMW 「후아,기분이 좋지만,역시 물건부족해 좋은……」
 					ENDIF
 				ENDIF
 			;그 외 함락
@@ -2600,13 +2600,13 @@ IF SELECTCOM == 113
 			IF TALENT:3 || TALENT:6
 				IF TALENT:백버진
 					PRINTFORMW 「후하,…… 굉장한 잘 빠져도…… 좋은,. 이것」
-					PRINTFORMW 키후로부터 끌어들여지고 허리를 최후까지 떨어뜨려 자른 곳에서 중얼거린%CALLNAME%에,여기도%CALLNAME%의 상태는 좋다고 말하면,되돌아 본%CALLNAME%무지개 새와 노려봐졌다.
+					PRINTFORMW 등 뒤로부터 끌어들여지고 허리를 최후까지 떨어뜨려 자른 곳에서 중얼거린%CALLNAME%에,여기도%CALLNAME%의 상태는 좋다고 말하면,되돌아 본%CALLNAME%무지개 새와 노려봐졌다.
 					PRINTFORMW 「다르겠어,도미 실마리. …… 아니,그쪽도 있지만,이 몸의 자세라면 (안)중도 밖도 대장으로 가득해 좋겠다는……					
 					PRINTFORMW 　네? ,무엇이다,도미 실마리? 뭐,격렬해져…… 아,아아 %UNICODE(0x2661)%」
 				ELSE
 					PRINTFORMW 「이러한,대장이 안겨지고 하는 것,다른 야리(분)편때보다 훨씬 좋구나」
 					PRINTFORMW 푹 작은 신체를 끌어들여진%CALLNAME%는,깊숙히 %CALLNAME:PLAYER%의 노장[怒張]을 삼킨 채로 머리를 딴 데로 돌려
-					PRINTFORMW 키후의 %CALLNAME:PLAYER%를 바로 밑으로부터 물기를 띤 눈동자로 응시해 웃었다
+					PRINTFORMW 등 뒤의 %CALLNAME:PLAYER%를 바로 밑으로부터 물기를 띤 눈동자로 응시해 웃었다
 				ENDIF
 			ELSE
 				PRINTFORMW 
@@ -2726,7 +2726,7 @@ IF SELECTCOM == 115
 						PRINTFORMW 
 					ELSE
 						PRINTFORMW 「아%UNICODE(0x2661)% 좋은,저의 있고 %UNICODE(0x2661)%%UNICODE(0x2661)%」
-						PRINTFORMW 벽에 향해 엉덩이를 내밀게 한%CALLNAME%를 키후로부터 관철하면,좀 더 깊은 결합을 바라는지,점차 벽에 몸을 기울이고 엉덩이를 흔들면서 %CALLNAME:PLAYER%편에 허리를 내밀어 왔다……
+						PRINTFORMW 벽에 향해 엉덩이를 내밀게 한%CALLNAME%를 등 뒤로부터 관철하면,좀 더 깊은 결합을 바라는지,점차 벽에 몸을 기울이고 엉덩이를 흔들면서 %CALLNAME:PLAYER%편에 허리를 내밀어 왔다……
 					ENDIF
 				ENDIF
 			ENDIF
@@ -3245,7 +3245,7 @@ IF SELECTCOM == 200
 				IF RAND:3 == 0
 					PRINTFORMW 「형제의 일은 어느 정도 이야기했던가?」
 						IF RAND:12 == 0
-							PRINTFORMW 「고토 토시로는 오와리 토쿠가와가에 간 녀석이다. 상태 좋게 보일지도 모르지만 의지가 된다」
+							PRINTFORMW 「고토 토시로는 오와리 도쿠가와가에 간 녀석이다. 상태 좋게 보일지도 모르지만 의지가 된다」
 						ELSEIF RAND:11 == 0
 							PRINTFORMW 「이치고히토후리는,칼로 맏형적 존재라는 녀석이다. …… 나에나─다운 일 하고 있는 대장은 잔소리일지도?」
 						ELSEIF RAND:10 == 0

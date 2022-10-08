@@ -314,7 +314,7 @@ ELSEIF (TALENT:친애 || TALENT:창부 || TALENT:예속) && FIRSTTIME(8)
 		PRINTFORMW 마루에 주저앉아,혼자서 처음으로 끝내고 있는 것 같다…
 		PRINTFORMW 이쪽을 알아차리면,손를 멈추어 권하도록(듯이) 응시해 온다
 		PRINTFORML 
-		PRINTFORMW 「발리나 있는이다」
+		PRINTFORMW 「부족해 있는이다」
 		PRINTFORMW 「무엇을 해도 신체가 뜨거워서,혼자서 해도 들어가지 않는다」
 		PRINTFORM 「이제(벌써),
 					CALL PNAME_55
@@ -567,7 +567,7 @@ ENDIF
 ;배설시키지 않고 종료(배설):촉수관장도 여기 CFLAG:608
 ;--------------------------------------------------
 ;ELSEIF BASE:6 >= 60 && TEQUIP:확장벌룬
-;	;체력가 있어? 라면 좀 더 계속되는거야.
+;	;체력이 있어? 라면 좀 더 계속되는거야.
 ;	IF BASE:0 >= 500
 ;		IF TEQUIP:촉수
 ;			PRINTFORML %CALLNAME:TARGET%의후 구멍에서는,아직도 배설을 막으려고촉수가 꿈틀거리고 있다…
@@ -608,7 +608,7 @@ ENDIF
 ;밧줄＋기분이 좋은 도구인 채 종료(방치 플레이):촉수플레이중도 여기
 ;--------------------------------------------------
 ;ELSEIF TEQUIP:밧줄 && ALLCHECK(TARGET)
-;	;체력가 있으면 선택지
+;	;체력이 있으면 선택지
 ;	IF BASE:0 >= 500
 ;		IF TEQUIP:촉수
 ;			PRINTFORMW %CALLNAME%의 몸에는 아직도촉수가 감긴 채로,그 성감을 계속 자극하고 있다…
@@ -700,7 +700,7 @@ IF (P < PALAMLV:2) && KANRAKU(TARGET)
 		PRINTFORMW %CALLNAME%는 응석부린 것처럼 신체를 갖다대 왔다…
 	ELSEIF TALENT:음란 || TALENT:창부
 		PRINTFORML 「… 시 없는 것인지? 뭐,다음에 기대해 두는거야」
-		PRINTFORMW %CALLNAME%는 물건발리나 금기 싶다 얼굴로 %CALLNAME:MASTER%를 전송했다…
+		PRINTFORMW %CALLNAME%는 물건부족해 금기 싶다 얼굴로 %CALLNAME:MASTER%를 전송했다…
 	ELSEIF TALENT:복종 || TALENT:예속
 		PRINTFORML 「그것이 명령이라면 어쩔 수 없는,인가…」
 		PRINTFORMW %CALLNAME%는 낙담한 모습으로 %CALLNAME:MASTER%를 전송했다…
@@ -722,7 +722,7 @@ ELSEIF KANRAKU(TARGET)
 		PRINTFORMW %CALLNAME%는 서운한 듯이 눈동자를 물기를 띠게 해 %CALLNAME:MASTER%를 전송했다
 	ELSEIF TALENT:음란 || TALENT:창부
 		PRINTFORML 「… 읏,이제(벌써),끝인가?」
-		PRINTFORMW 아직발리나 있고의 것인지,%CALLNAME%는 녹은 눈동자로 %CALLNAME:MASTER%를 전송했다
+		PRINTFORMW 아직부족해 있고의 것인지,%CALLNAME%는 녹은 눈동자로 %CALLNAME:MASTER%를 전송했다
 	ELSEIF TALENT:예속 || TALENT:복종
 		PRINTFORML 「다음은 오늘보다 봉사시켜 받는거야」
 		PRINTFORMW 

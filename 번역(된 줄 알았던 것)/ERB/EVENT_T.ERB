@@ -126,7 +126,7 @@ IF TARGET >= 0
 	CFLAG:TARGET:10 -= LOCAL
 	PRINTL
 	SIF LOCAL > 0
-		PRINTFORML 하쿠산 요시미츠의신기가 발동했습니다
+		PRINTFORML 하쿠산 요시미츠의 신기가 발동했습니다
 	
 	;스트레스치 100이상으로붕괴를 얻는다
 	SIF CFLAG:TARGET:10 >= 100 && TALENT:붕괴 == 0
@@ -252,7 +252,7 @@ SIF NO:MASTER != 164 && (ASSI >= 0 && NO:ASSI != 164)
 ;ARG의 스트레스치가 일정 이하
 SIF CFLAG:ARG:10 < 90
 	RETURNF 0
-;하쿠산의체력가 1000 미만
+;하쿠산의체력이 1000 미만
 SIF (NO:MASTER == 164 && BASE:MASTER:체력 < 1000) || (ASSI >= 0 && NO:ASSI == 164 && BASE:ASSI:체력 < 1000)
 	RETURNF 0
 

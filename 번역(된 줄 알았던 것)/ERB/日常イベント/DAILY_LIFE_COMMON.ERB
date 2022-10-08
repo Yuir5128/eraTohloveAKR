@@ -2,12 +2,12 @@
 ;함수명:DAILYLIFE_GETJUEL
 ;개요:랜덤으로 구슬의 취득을 하는 함수
 ;인수:ARG:0… 주증가 대상
-;　　　:ARG:1… 구슬의 종류
+;　　　：ARG:1… 구슬의 종류
 ;      :ARG:2… 증가 기본치(여기로부터+-50%로 증가)
 ;반환값:
 ;비고:일상 이벤트로 사용
 ;-------------------------------------------------
-@DAILYLIFE_GETJUEL(ARG,ARG:1,ARG:2)
+@DAILYLIFE_GETJUEL(ARG, ARG:1, ARG:2)
 LOCAL = ARG:2 - (ARG:2 / 2) + RAND:(ARG:2)
 JUEL:ARG:(ARG:1) += LOCAL
 PRINTFORML %CALLNAME:ARG%의 %PALAMNAME:(ARG:1)%＋{LOCAL}
@@ -23,12 +23,12 @@ PRINTFORML %CALLNAME:ARG%의 %PALAMNAME:(ARG:1)%＋{LOCAL}
 @DAILYLIFE_GETCHARA(ARG)
 #FUNCTION
 VARSET LOCAL
-FOR LOCAL,0,CHARANUM
-	;주인은 제외하다
+FOR LOCAL, 0, CHARANUM
+	;주인은 제외
 	SIF LOCAL == MASTER
 		CONTINUE
 	;일상 이벤트에 등장 불가
-	SIF !DAILYLIFE_CHARA(LOCAL,ARG)
+	SIF !DAILYLIFE_CHARA(LOCAL, ARG)
 		CONTINUE
 	;이미 등장하고 있는 캐릭터와 감싸고 있으면 불가
 	SIF LOCAL == A || LOCAL == B || LOCAL == C
@@ -49,7 +49,7 @@ FOR LOCAL,0,CHARANUM
 	ELSEIF CFLAG:LOCAL:39 == 5 || CFLAG:LOCAL:39 == 8 || TALENT:LOCAL:음란 || TALENT:LOCAL:창부
 		LOCAL:4 = 2
 	ENDIF
-	FOR LOCAL:5,0,LOCAL:4
+	FOR LOCAL:5, 0, LOCAL:4
 		LOCAL:(10 + LOCAL:1) = LOCAL
 		LOCAL:1++
 	NEXT
@@ -72,7 +72,7 @@ RETURNF LOCAL:3
 @DAILYLIFE_GETTALENT_1(ARG,ARG:1,ARG:2,ARG:3,ARG:4,ARG:5,ARG:6,ARG:7,ARG:8,ARG:9)
 #FUNCTION
 VARSET LOCAL
-FOR LOCAL,0,CHARANUM
+FOR LOCAL, 0, CHARANUM
 	;주인은 제외하다
 	SIF LOCAL == MASTER
 		CONTINUE
@@ -107,7 +107,7 @@ RETURNF LOCAL:3
 @DAILYLIFE_GETTALENT_2(ARG,ARG:1,ARG:2,ARG:3,ARG:4,ARG:5,ARG:6,ARG:7,ARG:8,ARG:9)
 #FUNCTION
 VARSET LOCAL
-FOR LOCAL,0,CHARANUM
+FOR LOCAL, 0, CHARANUM
 	;주인은 제외하다
 	SIF LOCAL == MASTER
 		CONTINUE
@@ -141,7 +141,7 @@ RETURNF LOCAL:3
 @NUMBER_OF_ABSENTEES
 #FUNCTION
 VARSET LOCAL
-FOR LOCAL,0,CHARANUM
+FOR LOCAL, 0, CHARANUM
 	SIF LOCAL == MASTER
 		CONTINUE
 	SIF DAILYLIFE_CHARA(LOCAL)
@@ -158,7 +158,7 @@ RETURNF LOCAL:1
 ;반환값:이벤트 출현할 수 있으면 1,불가라면 0
 ;비고:문중 함수
 ;-------------------------------------------------
-@DAILYLIFE_CHARA(ARG,ARG:1)
+@DAILYLIFE_CHARA(ARG, ARG:1)
 #FUNCTION
 LOCAL = 1
 ;주인은 파견한다
@@ -195,7 +195,7 @@ RETURNF LOCAL
 ;반환값:이벤트 출현할 수 있으면 캐릭터 등록 번호,불가라면-1
 ;비고:문중 함수
 ;-------------------------------------------------
-@DAILYLIFE_NOCHARA(ARG,ARG:1)
+@DAILYLIFE_NOCHARA(ARG, ARG:1)
 #FUNCTION
 ;그 캐릭터가 존재할까
 GETCHARA ARG
@@ -267,7 +267,7 @@ ELSEIF TALENT:PLAYER:소인체형
 	ELSE
 		S = -2
 	ENDIF
-;보통 체형의 남자
+;보통체형의 남자
 ELSEIF MALE(PLAYER)
 	IF TALENT:큰체구 && MALE(TARGET)
 		S = -1
@@ -278,7 +278,7 @@ ELSEIF MALE(PLAYER)
 	ELSE
 		S = 1
 	ENDIF
-;보통 체형
+;보통체형
 ELSE
 	IF TALENT:큰체구 && MALE(TARGET)
 		S = -2
@@ -302,7 +302,7 @@ ENDIF
 ;그 이외:　　큰 몸집＞보통＞작은 몸집＞소인
 ;따라서,캐릭터 2와 비교해 캐릭터 1이 큰＞같은 정도＞캐릭터 1이 작은 3 > 0 > -3
 ;-------------------------------------------------
-@BUILD2(ARG,ARG:1)
+@BUILD2(ARG, ARG:1)
 #FUNCTION
 ;큰 몸집＋남
 IF TALENT:ARG:큰체구 && MALE(ARG)
@@ -348,7 +348,7 @@ ELSEIF TALENT:ARG:소인체형
 	ELSE
 		LOCAL = -2
 	ENDIF
-;보통 체형의 남자
+;보통체형의 남자
 ELSEIF MALE(ARG)
 	IF TALENT:(ARG:1):큰체구 && MALE(ARG:1)
 		LOCAL = -1
@@ -359,7 +359,7 @@ ELSEIF MALE(ARG)
 	ELSE
 		LOCAL = 1
 	ENDIF
-;보통 체형
+;보통체형
 ELSE
 	IF TALENT:(ARG:1):큰체구 && MALE(ARG:1)
 		LOCAL = -2
@@ -383,14 +383,14 @@ RETURNF LOCAL
 ;0=혈연 없음 1=형제 2=형제? 3=누이와 동생 4=남매 5=자매 6=부모와 자식 7=할아범손자 8=같은 파 9=동일 인물
 ;
 ;CFLAG:31 도파플래그
-;1=산죠우 2=미이케 3=아오에 4=아와타입 5=고비젠 6=와 7=무라마사 8=사다무네 9=오사후네
-;10=산몬지 11=카네사다 12=호리카와 13=코테츠 14=코테츠…? 15=강 16=마사무네 17=후쿠오카 1문자 18=풍후쿠니유키 히로시
+;1=산죠 2=미이케 3=아오에 4=아와타구치 5=고비젠 6=와 7=무라마사 8=사다무네 9=오사후네
+;10=사몬지 11=카네사다 12=호리카와 13=코테츠 14=코테츠…? 15=강 16=마사무네 17=후쿠오카 이치몬지 18=분고노쿠니 유키히라
 ;-------------------------------------------------
-@RELATIONS2(ARG,ARG:1)
+@RELATIONS2(ARG, ARG:1)
 #FUNCTION
 
 ;9,동일 인물(특과극)
-SIF SAME_TOKEN(ARG:0,ARG:1,0) == 1
+SIF SAME_TOKEN(ARG:0, ARG:1, 0) == 1
 	RETURNF 9
 
 ;도파없음 형제
@@ -404,7 +404,7 @@ IF (NO:ARG == 107 || NO:ARG == 111 || NO:ARG == 112 || NO:ARG == 115) && (NO:(AR
 	RETURNF 1
 ENDIF
 
-;산죠우(기본은 「8 같은 파」)
+;산죠(기본은 「8 같은 파」)
 IF CFLAG:ARG:31 == 1 && CFLAG:(ARG:1):31 == 1
 	;초승달과이마노츠루기만 「7할아범손자」
 	IF (NO:ARG == 3 || NO:ARG == 11 || NO:ARG == 12) && (NO:(ARG:1) == 3 || NO:(ARG:1) == 11 || NO:(ARG:1) == 12)
@@ -425,7 +425,7 @@ IF CFLAG:ARG:31 == 3 && CFLAG:(ARG:1):31 == 3
 	RETURNF 8
 ENDIF
 
-;아와타입(대부분은 「1 형제」)
+;아와타구치(대부분은 「1 형제」)
 IF CFLAG:ARG:31 == 4 && CFLAG:(ARG:1):31 == 4
 	;오니마루 쿠니츠나와 다른 아이들의 짜맞추고 「8 같은 파」
 	IF NO:ARG == 21 || NO:(ARG:1) == 21
@@ -464,19 +464,19 @@ IF CFLAG:ARG:31 == 9 && CFLAG:(ARG:1):31 == 9
 	;미쓰타다
 	IF (NO:ARG == 73 || NO:ARG == 204) && (NO:(ARG:1) == 73 || NO:(ARG:1) == 204)
 		RETURNF 1
-	;게임에서는 형제 취급해되어 있지 않아? 의로,일단 comment out
+	;게임에서는 형제 취급해되어 있지 않아? 의로,일단 comment out;동인겜인데 뭐 어떰 산죠랑 사다무네도 형제로 넣었구만
 	;나가미츠
-	;ELSEIF (NO:ARG == 75 || NO:ARG == 148) && (NO:(ARG:1) == 75 || NO:(ARG:1) == 148)
-		;RETURNF 1
+	ELSEIF (NO:ARG == 75 || NO:ARG == 148) && (NO:(ARG:1) == 75 || NO:(ARG:1) == 148)
+		RETURNF 1
 	;경광
-	;ELSEIF (NO:ARG == 77 || NO:ARG == 146) && (NO:(ARG:1) == 77 || NO:(ARG:1) == 146)
-		;RETURNF 1
+	ELSEIF (NO:ARG == 77 || NO:ARG == 146) && (NO:(ARG:1) == 77 || NO:(ARG:1) == 146)
+		RETURNF 1
 	ELSE
 		RETURNF 8
 	ENDIF
 ENDIF
 
-;산몬지(기본은 「1 형제」)
+;사몬지(기본은 「1 형제」)
 IF CFLAG:ARG:31 == 10 && CFLAG:(ARG:1):31 == 10
 	RETURNF 1
 ENDIF
@@ -506,18 +506,18 @@ IF CFLAG:ARG:31 == 15 && CFLAG:(ARG:1):31 == 15
 	RETURNF 8
 ENDIF
 
-;마사무네(아직 없다)
+;마사무네(아직 없다);아직 없다 왤케 슬픔
 ;IF CFLAG:ARG:31 == 16 && CFLAG:(ARG:1):31 == 16
 ;	RETURNF 
 ;ENDIF
 
-;후쿠오카 1문자
+;후쿠오카 이치몬지
 IF CFLAG:ARG:31 == 17 && CFLAG:(ARG:1):31 == 17
 	RETURNF 8
-	;미나이즈미에서 일광에의 호칭이 「일광의 형님」이지만,친형제나 형님분과 동생뻘의 사람이나 판단 붙지 않기 때문에 보류
+	;미나이즈미에서 닛코에의 호칭이 「닛코의 형님」이지만,친형제나 형님분과 동생뻘의 사람이나 판단 붙지 않기 때문에 보류
 ENDIF
 
-;풍후쿠니유키 히로시
+;분고노쿠니 유키히라
 IF CFLAG:ARG:31 == 18 && CFLAG:(ARG:1):31 == 18
 	RETURNF 8
 ENDIF
@@ -610,7 +610,7 @@ RETURNF 0
 ;반환값:
 ;비고:
 ;-------------------------------------------------
-@DAILY_MENSIKI(ARG,ARG:1,ARG:2,ARG:3)
+@DAILY_MENSIKI(ARG, ARG:1, ARG:2, ARG:3)
 SIF ARG:1 > -1
 	CFLAG:(ARG:1):(2099 + NO:ARG) |= 1
 SIF ARG:2 > -1

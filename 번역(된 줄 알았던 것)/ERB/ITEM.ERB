@@ -3,7 +3,7 @@
 ;--------------------------------------------------
 @EVENTBUY
 ;이 가게의 상품은 아닌,판매 조건을 채우지 않았다
-IF !SHOW_ITEM(TFLAG:1,BOUGHT) || !ITEMSALES:BOUGHT
+IF !SHOW_ITEM(TFLAG:1, BOUGHT) || !ITEMSALES:BOUGHT
 	CLEARLINE 1
 	RETURN 0
 ENDIF
@@ -65,9 +65,9 @@ SELECTCASE BOUGHT
 		SETCOLOR 140,140,140
 		DRAWLINE
 		RESETCOLOR
-		PRINTBUTTON "[999 캔슬]",999
+		PRINTBUTTON "[999 캔슬]", 999
 		PRINT 　
-		PRINTBUTTON "[0구입한다]",0
+		PRINTBUTTON "[0 구입한다]", 0
 		PRINTL 
 		$INPUT_LOOP_2
 		INPUT
@@ -106,22 +106,22 @@ SELECTCASE BOUGHT
 		PRINTFORML %ITEMNAME:BOUGHT%를 몇개 구입합니까? (1-{LOCAL:3}개까지)
 		PRINTFORML 숫자를 입력할까 이하의 버튼을 클릭 해 주세요
 		PRINTL 
-		PRINTBUTTON "[999 캔슬]",999
+		PRINTBUTTON "[999 캔슬]", 999
 		PRINT 　
-		PRINTBUTTON "[1개]",1
+		PRINTBUTTON "[1개]", 1
 		IF LOCAL:3 >= 5
 			PRINT 　
-			PRINTBUTTON "[5개]",5
+			PRINTBUTTON "[5개]", 5
 		ENDIF
 		IF LOCAL:3 >= 10
 			PRINT 　
-			PRINTBUTTON "[10개]",10
+			PRINTBUTTON "[10개]", 10
 		ENDIF
 		PRINT 　
 		IF LOCAL:4
-			PRINTBUTTON "[살 수 있을 뿐]",LOCAL:3
+			PRINTBUTTON "[살 수 있을 만큼]",LOCAL:3
 		ELSE
-			PRINTBUTTON "[가질 수 있을 뿐]",LOCAL:3
+			PRINTBUTTON "[가질 수 있을 만큼]",LOCAL:3
 		ENDIF
 		PRINTL 
 		$INPUT_LOOP_3
@@ -136,7 +136,7 @@ SELECTCASE BOUGHT
 			IF RESULT > LOCAL:3 && !LOCAL:4
 				PRINTW 그렇게 가질 수 없습니다
 			ELSEIF RESULT > LOCAL:3 && LOCAL:4
-				PRINTW 돈이발선
+				PRINTW 돈이 부족합니다
 			ENDIF
 			GOTO INPUT_LOOP_3
 		ENDIF
@@ -161,7 +161,7 @@ SELECTCASE BOUGHT
 		RESETCOLOR
 		FOR COUNT,0,CHARANUM
 			;아이템 사용 가능
-			SIF !ITEM_USE_CHECK(COUNT,BOUGHT)
+			SIF !ITEM_USE_CHECK(COUNT, BOUGHT)
 				CONTINUE
 			SETCOLOR 0x8888FF
 			SIF (BOUGHT:96 || BOUGHT:97) && COUNT == MASTER
@@ -180,10 +180,10 @@ SELECTCASE BOUGHT
 			RESETCOLOR
 			PRINTFORM [{COUNT,2}] %CALLNAME:COUNT,16,LEFT%
 			PRINTFORM %UNICODE(0x208D)%
-			CALL PRINT_COLORBAR,BASE:COUNT:체력,MAXBASE:COUNT:체력,8,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("빨강"),RESULT:1,327685
+			CALL PRINT_COLORBAR,BASE:COUNT:체력,MAXBASE:COUNT:체력,8,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("赤"),RESULT:1, 327685
 			PRINTFORM %UNICODE(0x208E)%
 			PRINTFORM %UNICODE(0x208D)%
-			CALL PRINT_COLORBAR,BASE:COUNT:기력,MAXBASE:COUNT:기력,8,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("파랑"),RESULT:1,327685
+			CALL PRINT_COLORBAR,BASE:COUNT:기력,MAXBASE:COUNT:기력,8,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("青"),RESULT:1, 327685
 			PRINTFORM %UNICODE(0x208E)%
 			IF TALENT:MASTER:천리안
 				PRINT  스트레스
@@ -290,7 +290,7 @@ SELECTCASE BOUGHT
 			CLEARLINE 1
 			PRINTW 돈이 충분하지 않습니다
 			GOTO INPUT_LOOP_2
-		ELSEIF !ITEM_USE_CHECK(RESULT,BOUGHT)
+		ELSEIF !ITEM_USE_CHECK(RESULT, BOUGHT)
 			CLEARLINE 1
 			GOTO INPUT_LOOP_2
 		ENDIF
@@ -321,7 +321,7 @@ DRAWLINE
 CALL ITEM_LIST
 LOCALS = 
 LOCAL:1 = 0
-FOR LOCAL,0,199
+FOR LOCAL, 0, 199
 		CALL SALEITEM_CHECK(LOCAL)
 NEXT
 
@@ -329,9 +329,9 @@ NEXT
 SIF FLAG:5 == 8
 	CALL FREE_MISSION_SALEITEM_CHECK
 
-FOR LOCAL,0,199
-	;이 가게에서 살 수 있는 상품인가,판매 플래그가 있을까
-	SIF !SHOW_ITEM(ARG,LOCAL) || !ITEMSALES:LOCAL
+FOR LOCAL, 0, 199
+	;;이 가게에서 살 수 있는 상품인가,판매 플래그가 있을까
+	SIF !SHOW_ITEM(ARG, LOCAL) || !ITEMSALES:LOCAL
 		CONTINUE
 	LOCALS = [{LOCAL,2}] %ITEMNAME:LOCAL%(%MONEY_FORM(ITEMPRICE:LOCAL)%고슈금)
 	IF STRLENS(LOCALS)
@@ -837,11 +837,11 @@ SELECTCASE BOUGHT
 				TALENT:거근 = 0
 				TALENT:말자지 = 0
 			ENDIF
-		;보통 체형→작은체구
+		;보통체형→작은체구
 		ELSEIF !TALENT:큰체구
 			;[작은체구]추가
 			TALENT:작은체구 = 1
-		;큰체구→보통 체형
+		;큰체구→보통체형
 		ELSE
 			;[큰체구]삭제
 			TALENT:큰체구 = 0
@@ -862,11 +862,11 @@ SELECTCASE BOUGHT
 				TALENT:아이사이즈 = 0
 				TALENT:단소 = 1
 			ENDIF
-		;작은체구→보통 체형
+		;작은체구→보통체형
 		ELSEIF TALENT:작은체구
 			;[작은체구]삭제
 			TALENT:작은체구 = 0
-		;보통 체형→큰체구
+		;보통체형→큰체구
 		ELSEIF !TALENT:큰체구
 			;[큰체구]추가
 			TALENT:큰체구 = 1
@@ -894,8 +894,8 @@ SELECTCASE BOUGHT
 						CONTINUE
 					CSVTALENT NO:TARGET,LOCAL,TFLAG:407
 					TALENT:LOCAL = RESULT
-					;개체차이 처리 요리치만
-					SIF DIFF_GET_TALENT(TARGET,12) == 2
+					;개체차 처리 요리치만
+					SIF DIFF_GET_TALENT(TARGET, 12) == 2
 						TALENT:LOCAL:요리치 = 1
 			ENDSELECT
 		NEXT
@@ -917,7 +917,7 @@ SELECTCASE BOUGHT
 		ENDIF
 		;캐릭터 플래그의 일부 초기화
 		;대사용 CFLAG중 5000~(분)편은 초기화하지 않기 때문에,부적당이 있는 경우입우에우치에서 초기화해 주세요
-		FOR LOCAL,0,1300
+		FOR LOCAL, 0, 1300
 			SELECTCASE LOCAL
 				CASE 1,2,10,38 TO 41,140 TO 147,201 TO 600,1099 TO 2098,2099 TO 3098
 					CFLAG:LOCAL = 0
@@ -992,22 +992,22 @@ SELECTCASE BOUGHT
 		;체격은 되돌리지 않고,CSV가소인체형가 아니고 현소인체형 때,경험·능력·처녀계 소질도 백지로 한다
 		
 		;원래는소인체형가 아니다
-		SIF !CSVTALENT(NO:TARGET,142,CFLAG:0)
+		SIF !CSVTALENT(NO:TARGET, 142, CFLAG:0)
 			LOCAL:1 = 1
-		;개체차이로소인체형를 얻지 않았다
-		SIF DIFF_GET_TALENT(TARGET ,4) != 1
+		;개체차로소인체형를 얻지 않았다
+		SIF DIFF_GET_TALENT(TARGET , 4) != 1
 			LOCAL:1 = 1
 		;되감아 경험
 		CFLAG:52++
 		;스트레스 30 추가
 		CFLAG:10 += 30
 		;체력의 초기화
-		MAXBASE:체력 = CSVBASE(NO:TARGET,0,CFLAG:0)
+		MAXBASE:체력 = CSVBASE(NO:TARGET, 0, CFLAG:0)
 		SIF BASE:체력 > MAXBASE:체력
 			BASE:체력 = MAXBASE:체력
 		;경험의 초기화
 		FOR LOCAL,0,70
-			EXP:LOCAL = CSVEXP(NO:TARGET,LOCAL,CFLAG:0)
+			EXP:LOCAL = CSVEXP(NO:TARGET, LOCAL, CFLAG:0)
 			SIF LOCAL:1
 				EXP:LOCAL = 0
 		NEXT
@@ -1015,32 +1015,32 @@ SELECTCASE BOUGHT
 		FOR LOCAL,0,23
 			SIF LOCAL < 2 || (LOCAL > 6 && LOCAL < 12) || LOCAL > 14
 				CONTINUE
-			ABL:LOCAL = CSVABL(NO:TARGET,LOCAL,CFLAG:0)
+			ABL:LOCAL = CSVABL(NO:TARGET, LOCAL, CFLAG:0)
 			SIF LOCAL:1
 				ABL:LOCAL = 0
 		NEXT
 		;소질의 일부 초기화
-		FOR LOCAL,0,205
+		FOR LOCAL, 0, 205
 			SELECTCASE LOCAL
 				;낙인결손은 지운다
-				CASE 159,200 TO 205
+				CASE 159, 200 TO 205
 					TALENT:LOCAL = 0
 				;변화하고 있을지도 모르는 소질을 원래대로 되돌린다
 				;요리치,독약내성,실금버릇,악취민감
 				;신체 특징 소질,성별,동물귀,모유체질,절륜,낙인결손
-				CASE 1,44 TO 47,56,57,62,100 TO 140,142,143,149,163,172,173
-					;아이에는 효과 없음
+				CASE 1, 44 TO 47, 56, 57, 62, 100 TO 140, 142, 143, 149, 163, 172, 173
+					;아이には効果なし
 					SIF NO:TARGET >= 890 && NO:TARGET <= 899
 						CONTINUE
-					TALENT:LOCAL = CSVTALENT(NO:TARGET,LOCAL,CFLAG:0)
-				;처녀계 소질
-				CASE 0,160,161
-					TALENT:LOCAL = CSVTALENT(NO:TARGET,LOCAL,CFLAG:0)
+					TALENT:LOCAL = CSVTALENT(NO:TARGET, LOCAL, CFLAG:0)
+				;처녀系素質
+				CASE 0, 160, 161
+					TALENT:LOCAL = CSVTALENT(NO:TARGET, LOCAL, CFLAG:0)
 					SIF LOCAL:1
 						TALENT:LOCAL = 1
 			ENDSELECT
 		NEXT
-		;개체차이 처리
+		;개체차 처리
 		CALL DIFF_GET_BUY(TARGET)
 		;고통/쾌락각인의 초기화
 		MARK:고통각인 = 0
@@ -1072,7 +1072,7 @@ SIF CFLAG:10 >= 100 && !TALENT:붕괴
 ;--------------------------------------------------
 ;각각의 가게에서 살 수 있는 상품
 ;--------------------------------------------------
-@SHOW_ITEM(ARG,ARG:1)
+@SHOW_ITEM(ARG, ARG:1)
 #FUNCTION
 LOCAL = 0
 ;어덜트 숍
@@ -1163,7 +1163,7 @@ FOR LOCAL,0,CHARANUM
 	
 	;아이템 사용 개인 조건
 	SIF ARG >= 60 && ARG <= 85
-		LOCAL:(ARG - 50) += ITEM_USE_CHECK(LOCAL,ARG)
+		LOCAL:(ARG - 50) += ITEM_USE_CHECK(LOCAL, ARG)
 NEXT
 
 ;주인이나 공범자,조수경험자의 아무도금지된지식를 가지고 있지 않다
@@ -1248,10 +1248,10 @@ TFLAG:0 = -1
 SETCOLOR 140,140,140
 DRAWLINE
 RESETCOLOR
-PRINTFORML 소지 코우슈우금:{MONEY}고슈금
+PRINTFORML 소지 코슈금:{MONEY}고슈금
 PRINT 소지 아이템:
 LOCAL:1 = 0
-FOR LOCAL,0,199
+FOR LOCAL, 0, 199
 	IF ITEM:LOCAL
 		SIF (LOCAL >= 50 && LOCAL <= 56) || (LOCAL >= 59 && LOCAL <= 85)
 			CONTINUE
@@ -1281,7 +1281,7 @@ RESETCOLOR
 ;--------------------------------------------------
 ;아이템 사용 개인 조건
 ;--------------------------------------------------
-@ITEM_USE_CHECK(ARG,ARG:1)
+@ITEM_USE_CHECK(ARG, ARG:1)
 #FUNCTION
 ;노역중의 캐릭터는 제외
 SIF CFLAG:ARG:12 > 0
@@ -1329,8 +1329,8 @@ SELECTCASE ARG:1
 			RETURNF 1
 	;푸른환약
 	CASE 63
-		;모유체질가 아니다
-		SIF !TALENT:ARG:모유체질 && ((FLAG:2 & 256) || ((BREAST(ARG) || TALENT:ARG:절벽) && (FLAG:2 & 256) == 0))
+		;모유체질でない
+		SIF !TALENT:ARG:모유체질 && ((FLAG:2 & 256) || ((BREAST(ARG) || TALENT:ARG:절벽) && (FLAG:2 & 256) == 0 ))
 			RETURNF 1
 	;붉은환약
 	CASE 64
@@ -1675,7 +1675,7 @@ FOR COUNT,40,46
 			;소비 금액을 산출
 			USED_MONEY = SUPPLY * ITEMPRICE:COUNT
 		ELSE
-			PRINTFORML 소지금이발리나 손상해 %ITEMNAME:COUNT%를 보충할 수 없었습니다. (현재 소지수:{ITEM:COUNT}개)
+			PRINTFORML 소지금이 부족해 손상해 %ITEMNAME:COUNT%를 보충할 수 없었습니다. (현재 소지수:{ITEM:COUNT}개)
 			CONTINUE
 		ENDIF
 	ENDIF

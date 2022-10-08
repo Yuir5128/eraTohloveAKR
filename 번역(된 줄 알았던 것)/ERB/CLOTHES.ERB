@@ -59,7 +59,7 @@ SIF FLAG:1 == 9 && CFLAG:614 == 1
 ;-------------------------------------------------
 ;독자 설정이 유효하고 의상의 독자 설정이 설정이 끝난 상태(※전라는 불가)
 ;-------------------------------------------------
-;CFLAG:133에 TEQUIP:0~TEQUIP:4(특수,신발하,속옷（아래）,속옷（위）,하의)
+;CFLAG:133에 TEQUIP:0~TEQUIP:4(특수,신발아래,속옷（아래）,속옷（위）,하의)
 ;CFLAG:134에 TEQUIP:5~TEQUIP:9(상의,전신상의,머리장식,안경,신발)
 ;CFLAG:135에 TEQUIP:10(악세사리─)을 기록
 IF FLAG:1 == 99 && (CFLAG:133 > 0 || CFLAG:134 > 0 || CFLAG:135 > 0)
@@ -69,13 +69,13 @@ IF FLAG:1 == 99 && (CFLAG:133 > 0 || CFLAG:134 > 0 || CFLAG:135 > 0)
 				LOCAL = COUNT
 				;N형목을 요구하고 싶을 때는 10의 N승의 나머지를 10의 N-1승으로 나누면 좋다
 				;예) 8,7자리수째를 요구하고 싶을 때는 COUNT=LOCAL= 3이 되어,10의 8승(=(3+1)*2)의 나머지를 10의 6승(=3*2)으로 나눈다
-				LOCAL:1 = CFLAG:133 % POWER(10,(LOCAL+1)*2) / POWER(10,LOCAL*2)
+				LOCAL:1 = CFLAG:133 % POWER(10, (LOCAL+1)*2) / POWER(10, LOCAL*2)
 				
 				T:COUNT = LOCAL:1
 			CASE 5 TO 9
 				LOCAL = COUNT - 5
 				;처리는 위와 같이
-				LOCAL:1 = CFLAG:134 % POWER(10,(LOCAL+1)*2) / POWER(10,LOCAL*2)
+				LOCAL:1 = CFLAG:134 % POWER(10, (LOCAL+1)*2) / POWER(10, LOCAL*2)
 				
 				T:COUNT = LOCAL:1
 			;악세사리─
@@ -135,9 +135,9 @@ ELSEIF FLAG:1 == 3
 	TEQUIP:전신상의 = 0
 	TEQUIP:신발 = 0
 	;모자/넥타이/리본타이는 뗀다
-	CLEARBIT TEQUIP:악세사리,1
-	CLEARBIT TEQUIP:악세사리,3
-	CLEARBIT TEQUIP:악세사리,4
+	CLEARBIT TEQUIP:악세사리, 1
+	CLEARBIT TEQUIP:악세사리, 3
+	CLEARBIT TEQUIP:악세사리, 4
 ;-------------------------------------------------
 ;속옷 모습
 ;-------------------------------------------------
@@ -146,9 +146,9 @@ ELSEIF FLAG:1 == 2
 	TEQUIP:상의 = 0
 	TEQUIP:전신상의 = 0
 	;모자/넥타이/리본타이는 뗀다
-	CLEARBIT TEQUIP:악세사리,1
-	CLEARBIT TEQUIP:악세사리,3
-	CLEARBIT TEQUIP:악세사리,4
+	CLEARBIT TEQUIP:악세사리, 1
+	CLEARBIT TEQUIP:악세사리, 3
+	CLEARBIT TEQUIP:악세사리, 4
 ;-------------------------------------------------
 ;반나체（위）
 ;-------------------------------------------------
@@ -157,9 +157,9 @@ ELSEIF FLAG:1 == 5
 	TEQUIP:상의 = 0
 	TEQUIP:전신상의 = 0
 	;모자/넥타이/리본타이는 뗀다
-	CLEARBIT TEQUIP:악세사리,1
-	CLEARBIT TEQUIP:악세사리,3
-	CLEARBIT TEQUIP:악세사리,4
+	CLEARBIT TEQUIP:악세사리, 1
+	CLEARBIT TEQUIP:악세사리, 3
+	CLEARBIT TEQUIP:악세사리, 4
 	
 	;상하 세트하도 벗겨진다
 	SIF TEQUIP:하의 >= 1 && TEQUIP:하의 <= 10 || TEQUIP:하의 == 25
@@ -213,7 +213,7 @@ ENDIF
 ;초기 의상이 전회 설정의 경우,전원의 착의 상태를 취득
 ;BEGIN TRAIN로 모든 캐릭터의 TEQUIP에 0이 대입되기 (위해)때문에
 IF FLAG:1 == 4
-	FOR LOCAL,0,CHARANUM
+	FOR LOCAL, 0, CHARANUM
 		REPEAT 10
 			A = COUNT + 123
 			TEQUIP:(LOCAL):COUNT = CFLAG:(LOCAL):A
@@ -251,7 +251,7 @@ IF (CFLAG:121 & 1024) == 0
 ENDIF
 
 PRINTL 
-SIF TEQUIP:특수1!= 2 && TEQUIP:특수3!= 2
+SIF TEQUIP:특수1 != 2 && TEQUIP:특수3 != 2
 	PRINT [200]외출복의 착용　
 ;표시 제한
 PRINT [400]표시 제한　
@@ -300,7 +300,7 @@ ELSEIF Z == 200
 		TALENT:동물귀 = 0
 	REPEAT 11
 		A = COUNT
-		;갈아입고 불필요한 속옷(신발하와 상하) 이외의 착의 더러움을 리셋트. 안경도 그대로.
+		;갈아입고 불필요한 속옷(신발아래와 상하) 이외의 착의 더러움을 리셋트. 안경도 그대로.
 		IF (TEQUIP:A != T:A && A != 1 && A != 2 && A != 3) || A != 8
 			TEQUIP:A = 0
 			X = 8 + A
@@ -362,7 +362,7 @@ ELSEIF Z != 200 && Z != 400 && Z != 800 && Z != 900
 	B = Z / 10
 	B = B % 10
 	IF B == 0
-		;전신상의의 맨 위의 자리수가발리나구 되었다…… 것으로(Z = X0X)에 두어 지정. TEQUIP:6 == XX
+		;전신상의의 맨 위의 자리수가부족해구 되었다…… 것으로(Z = X0X)에 두어 지정. TEQUIP:6 == XX
 		A = 6
 		;Z의 100의 위를 Y의 10의 위로 해,Z의 1의 위를 Y의 1의 위에발. 옷의 종류의 지정에 사용한다
 		Y = (Z / 10) + (Z % 100)
@@ -438,7 +438,7 @@ ELSEIF Z != 200 && Z != 400 && Z != 800 && Z != 900
 		TEQUIP:A = 0
 		CALL CLOTHES_MESSAGE
 		
-		;신발하를 벗길 때신발도 벗겨진다
+		;신발아래를 벗길 때신발도 벗겨진다
 		IF A == 1
 			TEQUIP:신발 = 0
 			
@@ -462,7 +462,7 @@ ELSEIF Z != 200 && Z != 400 && Z != 800 && Z != 900
 		IF A == 2 && (BOTTOMS(TARGET) >= 3 || TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6 || TEQUIP:특수2 == 7)
 			TEQUIP:하의 = 0
 			
-			;스타킹,타이츠 때,신발하와신발가 벗겨진다
+			;스타킹,타이츠 때,신발아래와신발가 벗겨진다
 			IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6 || TEQUIP:특수2 == 7
 				TEQUIP:특수2 = 0
 				TEQUIP:신발 = 0
@@ -557,7 +557,7 @@ ELSEIF Z != 200 && Z != 400 && Z != 800 && Z != 900
 		IF A == 5
 			TEQUIP:전신상의 = 0
 		ENDIF
-		;신발하를 입을 때신발가 벗겨진다
+		;신발아래를 입을 때신발가 벗겨진다
 		IF A == 1
 			TEQUIP:신발 = 0
 			;스타킹,타이츠,레깅스 때는 바지계도 벗겨진다
@@ -598,9 +598,9 @@ ELSEIF Z != 200 && Z != 400 && Z != 800 && Z != 900
 			TEQUIP:악세사리 -= TEQUIP:악세사리 & 8
 		ENDIF
 		;세트 의상을 입을 때,다른 세트 의상은 벗겨진다
-		IF A == 4 && ( TEQUIP:상의 >= 1 && TEQUIP:상의 <= 10 || TEQUIP:상의 == 25)
+		IF A == 4 && ( TEQUIP:상의 >= 1 && TEQUIP:상의 <= 10 || TEQUIP:상의 == 25 )
 				TEQUIP:상의 = 0
-		ELSEIF A == 5 && ( TEQUIP:하의 >= 1 && TEQUIP:하의 <= 10 || TEQUIP:하의 == 25)
+		ELSEIF A == 5 && ( TEQUIP:하의 >= 1 && TEQUIP:하의 <= 10 || TEQUIP:하의 == 25 )
 				TEQUIP:하의 = 0
 		ENDIF
 		
@@ -674,7 +674,7 @@ ELSE
 ENDIF
 PRINTL 
 
-PRINT [ 5] 신발하　　　 
+PRINT [ 5] 신발아래　　　 
 IF CFLAG:121 & 32
 	PRINT ×
 ELSE
@@ -723,7 +723,7 @@ ENDIF
 PRINTL 
 
 PRINTL 
-SIF CFLAG:121!= 2047
+SIF CFLAG:121 != 2047
 	PRINTL [20] 모두 오프로 한다
 SIF CFLAG:121 & 2047
 	PRINTL [25] 모두 온으로 한다
@@ -784,7 +784,7 @@ IF RESULT >= 0 && RESULT <= 10
 			Z = 1
 		ENDIF
 	ELSEIF RESULT == 5
-		PRINT 신발하
+		PRINT 신발아래
 		IF CFLAG:121 & 32
 			CFLAG:121 -= 32
 		ELSE
@@ -964,7 +964,7 @@ REPEAT 7
 	;손의 착의는 계산하지 않는다
 	SIF COUNT == 0
 		CONTINUE
-	;신발하의 착의는 계산하지 않는다
+	;신발아래의 착의는 계산하지 않는다
 	SIF COUNT == 1
 		CONTINUE
 	;상의는 코데체크 유효 때 계산하지 않는다
@@ -1060,7 +1060,7 @@ ENDIF
 
 ;=======================================================
 ;특수한 착의 상태의 표시 처리
-;전라(알몸 코트,알몸 백의,알몸 걸쳐입어,반나체,알몸 망토,알몸에이프런,알몸신발하)
+;전라(알몸 코트,알몸 백의,알몸 걸쳐입어,반나체,알몸 망토,알몸에이프런,알몸신발아래)
 ;속옷 모습,반나체（위）,반나체（아래）,노 팬츠,노브라
 ;=======================================================
 @PRINT_CLOTHES
@@ -1096,7 +1096,7 @@ IF !CODE_CHECK(TARGET)
 				IF TEQUIP:특수1 == 2
 					PRINT 【알몸에이프런】
 				ELSEIF TEQUIP:특수2
-					PRINT 【알몸신발하】
+					PRINT 【알몸신발아래】
 				ELSEIF TEQUIP:악세사리 & 256
 					PRINT 【알몸 망토】
 				ELSE
@@ -1196,7 +1196,7 @@ REPEAT 20
 	;특수1 조건
 	IF A == 0
 		;장갑,에이프런 이외는 더러운 판정 없음
-		SIF T:0!= 1 && T:0!= 2
+		SIF T:0 != 1 && T:0 != 2
 			CONTINUE
 		;장갑는손의 더러움 이외 붙지 않는다
 		SIF T:0 == 1 && S != 2
@@ -1250,7 +1250,7 @@ REPEAT 20
 		CONTINUE
 	;신발
 	ELSEIF A == 9
-		;발가 더러워져,신발하의 더러움
+		;발가 더러워져,신발아래의 더러움
 		SIF S != 9 && S != 18
 			CONTINUE
 	ENDIF
@@ -1286,18 +1286,18 @@ ELSEIF S == 3
 		RETURN
 ;발의 더러움
 ELSEIF S == 9 && (TEQUIP:특수2 || TEQUIP:신발)
-	;신발하가 있을 때는 부착하지 않는다
+	;신발아래가 있을 때는 부착하지 않는다
 	SIF TEQUIP:특수2
 		RETURN
-	;부착시키는 것이신발하 이외 때에,신발를 신고 있다
+	;부착시키는 것이신발아래 이외 때에,신발를 신고 있다
 	SIF A != 1 && TEQUIP:신발
 		RETURN
-;신발하의 더러움
+;신발아래의 더러움
 ELSEIF S == 18
 	;신발가 있을 때 더러워지지 않는다
 	SIF TEQUIP:신발
 		RETURN
-	;신발하와 같은 더러움이발에 있을 때 안쪽의 더러움으로 간주한다
+	;신발아래와 같은 더러움이발에 있을 때 안쪽의 더러움으로 간주한다
 	S:1 |= STAIN:발
 	S:2 = S:1 - STAIN:발장식
 	SIF S:2 > 0
@@ -1306,7 +1306,7 @@ ELSEIF S == 18
 		RETURN
 ;신발
 ELSEIF S == 19
-	;같은 더러움이신발하or발에 있을 때 안쪽의 더러움으로 간주한다
+	;같은 더러움이신발아래or발에 있을 때 안쪽의 더러움으로 간주한다
 	IF TEQUIP:특수2
 		S:1 |= STAIN:발장식
 	ELSE

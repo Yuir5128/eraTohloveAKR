@@ -434,7 +434,7 @@ IF TFLAG:13 == 20
 			PRINTFORMW 「…… 가득 볼 수 있었다」
 			PRINTFORMW 「좀,부끄럽다……」
 		ELSEIF K:1 == 4 && TIME != 0 && (TALENT:음란 || TALENT:창부)
-			PRINTFORMW 「즐겁지만,조금 물건발리나 가는거야」
+			PRINTFORMW 「즐겁지만,조금 물건부족해 가는거야」
 			PRINTFORMW 「좀 더 손대어 받을 수 있는 (분)편이,기쁘지만……」
 		ELSE
 			PRINTFORMW 「일,성공이구나」
@@ -479,7 +479,7 @@ IF TFLAG:13 == 21
 	;스트립 쇼
 	ELSEIF B == 1
 		IF TALENT:창부
-			PRINTFORMW 「즐겁지만,조금 물건발리나 가는거야」
+			PRINTFORMW 「즐겁지만,조금 물건부족해 가는거야」
 			PRINTFORMW 「좀 더 손대어 받을 수 있는 (분)편이,기쁘지만……」
 		ELSE
 			PRINTFORMW 「…… 가득 볼 수 있었다」
@@ -833,7 +833,7 @@ IF TFLAG:13 == 18
 		ELSEIF RESULT == 1
 			PRINTFORMW 「………… 그런,것이다」
 			PRINTFORMW 「나 나름대로,노력해 온 생각이지만……」
-			PRINTFORMW 「발리나 샀다라는 것,인가」
+			PRINTFORMW 「부족해 샀다라는 것,인가」
 			PRINTFORMW 「입삭감은,어쩔 수 없는 것이라고 알고 있지만……」
 		;불필요하게 되었기 때문에
 		ELSEIF RESULT == 2
@@ -1184,7 +1184,7 @@ IF TFLAG:13 == 63
 ENDIF
 
 ;-------------------------------------------------
-;드 M취득
+;도M취득
 ;-------------------------------------------------
 IF TFLAG:13 == 64
 	CALL EVENT_MESSAGE

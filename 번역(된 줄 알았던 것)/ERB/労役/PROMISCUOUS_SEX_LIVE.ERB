@@ -47,10 +47,10 @@ ELSEIF RESULT == 0
 	PRINTL 무희에는 절대로손를 접하지 말아 주세요.
 	PRINTL 
 	PRINTL ■ 기본 서비스
-	PRINTL 　:[올 누드] [자위 감상]
+	PRINTL 　：[올 누드] [자위 감상]
 	PRINTL 
 	PRINTL ■ 선택되고 있는 추가 옵션
-	PRINTL 　:＜이용 가능한 옵션은 없습니다＞
+	PRINTL 　：＜이용 가능한 옵션은 없습니다＞
 	PRINTL 
 	DRAWLINE
 	PRINTFORML 스트립 쇼로 좋습니까?
@@ -72,10 +72,10 @@ ELSEIF RESULT == 1 && BASE:A:체력 > 800
 	PRINTL 공수 묻지 않고, 여러가지 (분)편에게 즐길 수 있습니다.
 	PRINTL 
 	PRINTL ■ 기본 서비스
-	PRINTL 　:[복수인 플레이] [삽입] [애널fuck] [역섹스]
+	PRINTL 　：[복수인 플레이] [삽입] [애널fuck] [역섹스]
 	PRINTL 
 	PRINTL ■ 선택되고 있는 추가 옵션
-	PRINT 　:
+	PRINT 　：
 	
 	SIF (FLAG:160 & 1) == 0
 		FONTSTYLE 4
@@ -119,11 +119,11 @@ ELSEIF RESULT == 2 && BASE:A:체력 > 1000
 	PRINTL 옵션에 따라서는, 통상보다 하드한 플레이를 감상할 수 있을지도.
 	PRINTL 
 	PRINTL ■ 기본 서비스
-	PRINTL 　:[삽입] [애널fuck] [역섹스] [역조교]
-	PRINTL 　:[소프트 SM(수치 고문이나 구속, 고통를 주는 플레이를 포함한다)
+	PRINTL 　：[삽입] [애널fuck] [역섹스] [역조교]
+	PRINTL 　：[소프트 SM(수치 고문이나 구속, 고통를 주는 플레이를 포함한다)
 	PRINTL 
 	PRINTL ■ 선택되고 있는 추가 옵션
-	PRINT 　:
+	PRINT 　：
 	
 	SIF (FLAG:160 & 1) == 0
 		FONTSTYLE 4
@@ -142,7 +142,7 @@ ELSEIF RESULT == 2 && BASE:A:체력 > 1000
 	PRINTL [동정 먹어]
 	FONTSTYLE LOCAL:4
 	
-	PRINT 　:
+	PRINT 　：
 	
 	SIF (FLAG:160 & 8) == 0
 		FONTSTYLE 4
@@ -187,10 +187,10 @@ ELSEIF RESULT == 3 && BASE:A:체력 > 1200
 	PRINTL 기본적으로는 성행위나, 쾌락을 수반하는 플레이는 행해지지 않습니다.
 	PRINTL 
 	PRINTL ■ 기본 서비스
-	PRINTL 　:[하도SM(채찍/촛불/바늘/삼각목마etc)] [역조교]
+	PRINTL 　：[하도SM(채찍/촛불/바늘/삼각목마etc)] [역조교]
 	PRINTL 
 	PRINTL ■ 선택되고 있는 추가 옵션
-	PRINT 　:
+	PRINT 　：
 	
 	SIF (FLAG:160 & 192) == 0
 		FONTSTYLE 4
@@ -228,10 +228,10 @@ ELSEIF RESULT == 4 && BASE:A:체력 > 1500
 	PRINTL 손나입를 사용한 봉사의 외, 삽입되는 모습도 감상할 수 있습니다.
 	PRINTL 
 	PRINTL ■ 기본 서비스
-	PRINTL 　:[수간] [성적 봉사 전반] [삽입] [애널fuck]
+	PRINTL 　：[수간] [성적 봉사 전반] [삽입] [애널fuck]
 	PRINTL 
 	PRINTL ■ 선택되고 있는 추가 옵션
-	PRINT 　:
+	PRINT 　：
 	
 	SIF (FLAG:160 & 1) == 0
 		FONTSTYLE 4
@@ -2116,7 +2116,7 @@ SIF TALENT:PLAYER:천리안
 ;보수액의 가산
 ;-----------------------------
 ;최후에 금액의 가산
-PRINTFORMW 쇼의 수익으로 해서{S}고슈금를 얻었습니다
+PRINTFORMW 쇼의 수익으로 해서{S}고슈금을 얻었습니다
 MONEY += S
 
 DRAWLINE

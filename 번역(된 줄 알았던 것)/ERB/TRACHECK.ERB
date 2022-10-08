@@ -142,38 +142,38 @@ RETURN 1
 ;레즈비언
 IF !MALE(PLAYER) && !MALE(TARGET)
 	;ABL:레즈끼를 본다
-	;레즈끼 2 이하로 약패널티, 레즈끼 4 이상으로 약보너스
+	;레즈끼 2 이하로 약패널티 , 레즈끼 4 이상으로 약보너스
 	IF ABL:레즈끼 == 0
-		TIMES SOURCE:굴복, 1.20
-		TIMES SOURCE:일탈, 1.30
+		TIMES SOURCE:굴복 , 1.20
+		TIMES SOURCE:일탈 , 1.30
 	ELSEIF ABL:레즈끼 == 1
-		TIMES SOURCE:굴복, 1.10
-		TIMES SOURCE:일탈, 1.20
+		TIMES SOURCE:굴복 , 1.10
+		TIMES SOURCE:일탈 , 1.20
 	ELSEIF ABL:레즈끼 == 2
-		TIMES SOURCE:굴복, 1.05
-		TIMES SOURCE:일탈, 1.10
+		TIMES SOURCE:굴복 , 1.05
+		TIMES SOURCE:일탈 , 1.10
 	ELSEIF ABL:레즈끼 == 3
 	ELSEIF ABL:레즈끼 == 4
-		TIMES SOURCE:굴복, 0.95
-		TIMES SOURCE:일탈, 0.90
+		TIMES SOURCE:굴복 , 0.95
+		TIMES SOURCE:일탈 , 0.90
 	ELSEIF ABL:레즈끼 == 5
-		TIMES SOURCE:굴복, 0.90
-		TIMES SOURCE:일탈, 0.80
+		TIMES SOURCE:굴복 , 0.90
+		TIMES SOURCE:일탈 , 0.80
 	ELSEIF ABL:레즈끼 == 6
-		TIMES SOURCE:굴복, 0.85
-		TIMES SOURCE:일탈, 0.70
+		TIMES SOURCE:굴복 , 0.85
+		TIMES SOURCE:일탈 , 0.70
 	ELSEIF ABL:레즈끼 == 7
-		TIMES SOURCE:굴복, 0.80
-		TIMES SOURCE:일탈, 0.60
+		TIMES SOURCE:굴복 , 0.80
+		TIMES SOURCE:일탈 , 0.60
 	ELSEIF ABL:레즈끼 == 8
-		TIMES SOURCE:굴복, 0.75
-		TIMES SOURCE:일탈, 0.50
+		TIMES SOURCE:굴복 , 0.75
+		TIMES SOURCE:일탈 , 0.50
 	ELSEIF ABL:레즈끼 == 9
-		TIMES SOURCE:굴복, 0.70
-		TIMES SOURCE:일탈, 0.40
+		TIMES SOURCE:굴복 , 0.70
+		TIMES SOURCE:일탈 , 0.40
 	ELSE
-		TIMES SOURCE:굴복, 0.65
-		TIMES SOURCE:일탈, 0.30
+		TIMES SOURCE:굴복 , 0.65
+		TIMES SOURCE:일탈 , 0.30
 	ENDIF
 	
 	;ABL:레즈중독를 본다
@@ -184,219 +184,219 @@ IF !MALE(PLAYER) && !MALE(TARGET)
 		TIMES SOURCE:쾌V , 1.10
 		TIMES SOURCE:쾌A , 1.10
 		TIMES SOURCE:쾌B , 1.10
-		TIMES SOURCE:성취감, 1.10
-		TIMES SOURCE:굴복, 0.90
-		TIMES SOURCE:불결, 0.90
-		TIMES SOURCE:일탈, 0.90
+		TIMES SOURCE:성취감 , 1.10
+		TIMES SOURCE:굴복 , 0.90
+		TIMES SOURCE:불결 , 0.90
+		TIMES SOURCE:일탈 , 0.90
 	ELSEIF ABL:레즈중독 == 2
 		SOURCE:중독충족 += 200
 		TIMES SOURCE:쾌C , 1.20
 		TIMES SOURCE:쾌V , 1.20
 		TIMES SOURCE:쾌A , 1.20
 		TIMES SOURCE:쾌B , 1.20
-		TIMES SOURCE:성취감, 1.20
-		TIMES SOURCE:굴복, 0.80
-		TIMES SOURCE:불결, 0.80
-		TIMES SOURCE:일탈, 0.80
+		TIMES SOURCE:성취감 , 1.20
+		TIMES SOURCE:굴복 , 0.80
+		TIMES SOURCE:불결 , 0.80
+		TIMES SOURCE:일탈 , 0.80
 	ELSEIF ABL:레즈중독 == 3
 		SOURCE:중독충족 += 350
 		TIMES SOURCE:쾌C , 1.30
 		TIMES SOURCE:쾌V , 1.30
 		TIMES SOURCE:쾌A , 1.30
 		TIMES SOURCE:쾌B , 1.30
-		TIMES SOURCE:성취감, 1.30
-		TIMES SOURCE:굴복, 0.70
-		TIMES SOURCE:불결, 0.70
-		TIMES SOURCE:일탈, 0.70
+		TIMES SOURCE:성취감 , 1.30
+		TIMES SOURCE:굴복 , 0.70
+		TIMES SOURCE:불결 , 0.70
+		TIMES SOURCE:일탈 , 0.70
 	ELSEIF ABL:레즈중독 == 4
 		SOURCE:통증 += 500
 		TIMES SOURCE:쾌C , 1.40
 		TIMES SOURCE:쾌V , 1.40
 		TIMES SOURCE:쾌A , 1.40
 		TIMES SOURCE:쾌B , 1.40
-		TIMES SOURCE:성취감, 1.40
-		TIMES SOURCE:굴복, 0.60
-		TIMES SOURCE:불결, 0.60
-		TIMES SOURCE:일탈, 0.60
+		TIMES SOURCE:성취감 , 1.40
+		TIMES SOURCE:굴복 , 0.60
+		TIMES SOURCE:불결 , 0.60
+		TIMES SOURCE:일탈 , 0.60
 	ELSEIF ABL:레즈중독 == 5
 		SOURCE:중독충족 += 750
 		TIMES SOURCE:쾌C , 1.40
 		TIMES SOURCE:쾌V , 1.40
 		TIMES SOURCE:쾌A , 1.40
 		TIMES SOURCE:쾌B , 1.40
-		TIMES SOURCE:성취감, 1.40
-		TIMES SOURCE:굴복, 0.60
-		TIMES SOURCE:불결, 0.60
-		TIMES SOURCE:일탈, 0.60
+		TIMES SOURCE:성취감 , 1.40
+		TIMES SOURCE:굴복 , 0.60
+		TIMES SOURCE:불결 , 0.60
+		TIMES SOURCE:일탈 , 0.60
 	ELSEIF ABL:레즈중독 == 6
 		SOURCE:중독충족 += 1000
 		TIMES SOURCE:쾌C , 1.50
 		TIMES SOURCE:쾌V , 1.50
 		TIMES SOURCE:쾌A , 1.50
 		TIMES SOURCE:쾌B , 1.50
-		TIMES SOURCE:성취감, 1.50
-		TIMES SOURCE:굴복, 0.50
-		TIMES SOURCE:불결, 0.50
-		TIMES SOURCE:일탈, 0.50
+		TIMES SOURCE:성취감 , 1.50
+		TIMES SOURCE:굴복 , 0.50
+		TIMES SOURCE:불결 , 0.50
+		TIMES SOURCE:일탈 , 0.50
 	ELSEIF ABL:레즈중독 == 7
 		SOURCE:중독충족 += 1200
 		TIMES SOURCE:쾌C , 1.60
 		TIMES SOURCE:쾌V , 1.60
 		TIMES SOURCE:쾌A , 1.60
 		TIMES SOURCE:쾌B , 1.60
-		TIMES SOURCE:성취감, 1.60
-		TIMES SOURCE:굴복, 0.40
-		TIMES SOURCE:불결, 0.40
-		TIMES SOURCE:일탈, 0.40
+		TIMES SOURCE:성취감 , 1.60
+		TIMES SOURCE:굴복 , 0.40
+		TIMES SOURCE:불결 , 0.40
+		TIMES SOURCE:일탈 , 0.40
 	ELSEIF ABL:레즈중독 == 8
 		SOURCE:중독충족 += 1500
 		TIMES SOURCE:쾌C , 1.70
 		TIMES SOURCE:쾌V , 1.70
 		TIMES SOURCE:쾌A , 1.70
 		TIMES SOURCE:쾌B , 1.70
-		TIMES SOURCE:성취감, 1.70
-		TIMES SOURCE:굴복, 0.30
-		TIMES SOURCE:불결, 0.30
-		TIMES SOURCE:일탈, 0.30
+		TIMES SOURCE:성취감 , 1.70
+		TIMES SOURCE:굴복 , 0.30
+		TIMES SOURCE:불결 , 0.30
+		TIMES SOURCE:일탈 , 0.30
 	ELSEIF ABL:레즈중독 == 9
 		SOURCE:중독충족 += 1800
 		TIMES SOURCE:쾌C , 1.80
 		TIMES SOURCE:쾌V , 1.80
 		TIMES SOURCE:쾌A , 1.80
 		TIMES SOURCE:쾌B , 1.80
-		TIMES SOURCE:성취감, 1.80
-		TIMES SOURCE:굴복, 0.20
-		TIMES SOURCE:불결, 0.20
-		TIMES SOURCE:일탈, 0.20
+		TIMES SOURCE:성취감 , 1.80
+		TIMES SOURCE:굴복 , 0.20
+		TIMES SOURCE:불결 , 0.20
+		TIMES SOURCE:일탈 , 0.20
 	ELSEIF ABL:레즈중독 >= 10
 		SOURCE:중독충족 += 2500
 		TIMES SOURCE:쾌C , 1.90
 		TIMES SOURCE:쾌V , 1.90
 		TIMES SOURCE:쾌A , 1.90
 		TIMES SOURCE:쾌B , 1.90
-		TIMES SOURCE:성취감, 1.90
-		TIMES SOURCE:굴복, 0.10
-		TIMES SOURCE:불결, 0.10
-		TIMES SOURCE:일탈, 0.10
+		TIMES SOURCE:성취감 , 1.90
+		TIMES SOURCE:굴복 , 0.10
+		TIMES SOURCE:불결 , 0.10
+		TIMES SOURCE:일탈 , 0.10
 	ENDIF
 
 	;조교자의 ABL:레즈끼
 	IF ABL:PLAYER:레즈끼 == 0
-		TIMES SOURCE:애정, 0.50
-		TIMES SOURCE:성취감, 0.50
+		TIMES SOURCE:애정 , 0.50
+		TIMES SOURCE:성취감 , 0.50
 	ELSEIF ABL:PLAYER:레즈끼 == 1
-		TIMES SOURCE:애정, 0.70
-		TIMES SOURCE:성취감, 0.70
+		TIMES SOURCE:애정 , 0.70
+		TIMES SOURCE:성취감 , 0.70
 	ELSEIF ABL:PLAYER:레즈끼 == 2
-		TIMES SOURCE:애정, 0.90
-		TIMES SOURCE:성취감, 0.90
+		TIMES SOURCE:애정 , 0.90
+		TIMES SOURCE:성취감 , 0.90
 	ELSEIF ABL:PLAYER:레즈끼 == 3
 	ELSEIF ABL:PLAYER:레즈끼 == 4
-		TIMES SOURCE:애정, 1.10
-		TIMES SOURCE:성취감, 1.10
+		TIMES SOURCE:애정 , 1.10
+		TIMES SOURCE:성취감 , 1.10
 	ELSEIF ABL:PLAYER:레즈끼 == 5
-		TIMES SOURCE:애정, 1.15
-		TIMES SOURCE:성취감, 1.20
+		TIMES SOURCE:애정 , 1.15
+		TIMES SOURCE:성취감 , 1.20
 	ELSEIF ABL:PLAYER:레즈끼 == 6
-		TIMES SOURCE:애정, 1.20
-		TIMES SOURCE:성취감, 1.30
+		TIMES SOURCE:애정 , 1.20
+		TIMES SOURCE:성취감 , 1.30
 	ELSEIF ABL:PLAYER:레즈끼 == 7
-		TIMES SOURCE:애정, 1.25
-		TIMES SOURCE:성취감, 1.40
+		TIMES SOURCE:애정 , 1.25
+		TIMES SOURCE:성취감 , 1.40
 	ELSEIF ABL:PLAYER:레즈끼 == 8
-		TIMES SOURCE:애정, 1.30
-		TIMES SOURCE:성취감, 1.50
+		TIMES SOURCE:애정 , 1.30
+		TIMES SOURCE:성취감 , 1.50
 	ELSEIF ABL:PLAYER:레즈끼 == 9
-		TIMES SOURCE:애정, 1.35
-		TIMES SOURCE:성취감, 1.60
+		TIMES SOURCE:애정 , 1.35
+		TIMES SOURCE:성취감 , 1.60
 	ELSE
-		TIMES SOURCE:애정, 1.40
-		TIMES SOURCE:성취감, 1.70
+		TIMES SOURCE:애정 , 1.40
+		TIMES SOURCE:성취감 , 1.70
 	ENDIF
 
 	;조교자의 ABL:레즈중독
 	IF ABL:PLAYER:레즈중독 == 1
-		TIMES SOURCE:애정, 1.10
-		TIMES SOURCE:성행동, 1.10
-		TIMES SOURCE:성취감, 1.10
+		TIMES SOURCE:애정 , 1.10
+		TIMES SOURCE:성행동 , 1.10
+		TIMES SOURCE:성취감 , 1.10
 	ELSEIF ABL:PLAYER:레즈중독 == 2
-		TIMES SOURCE:애정, 1.20
-		TIMES SOURCE:성행동, 1.20
-		TIMES SOURCE:성취감, 1.20
+		TIMES SOURCE:애정 , 1.20
+		TIMES SOURCE:성행동 , 1.20
+		TIMES SOURCE:성취감 , 1.20
 	ELSEIF ABL:PLAYER:레즈중독 == 3
-		TIMES SOURCE:애정, 1.30
-		TIMES SOURCE:성행동, 1.30
-		TIMES SOURCE:성취감, 1.30
+		TIMES SOURCE:애정 , 1.30
+		TIMES SOURCE:성행동 , 1.30
+		TIMES SOURCE:성취감 , 1.30
 	ELSEIF ABL:PLAYER:레즈중독 == 4
-		TIMES SOURCE:애정, 1.40
-		TIMES SOURCE:성행동, 1.40
-		TIMES SOURCE:성취감, 1.40
+		TIMES SOURCE:애정 , 1.40
+		TIMES SOURCE:성행동 , 1.40
+		TIMES SOURCE:성취감 , 1.40
 	ELSEIF ABL:PLAYER:레즈중독 == 5
-		TIMES SOURCE:애정, 1.50
-		TIMES SOURCE:성행동, 1.50
-		TIMES SOURCE:성취감, 1.50
+		TIMES SOURCE:애정 , 1.50
+		TIMES SOURCE:성행동 , 1.50
+		TIMES SOURCE:성취감 , 1.50
 	ELSEIF ABL:PLAYER:레즈중독 == 6
-		TIMES SOURCE:애정, 1.60
-		TIMES SOURCE:성행동, 1.60
-		TIMES SOURCE:성취감, 1.60
+		TIMES SOURCE:애정 , 1.60
+		TIMES SOURCE:성행동 , 1.60
+		TIMES SOURCE:성취감 , 1.60
 	ELSEIF ABL:PLAYER:레즈중독 == 7
-		TIMES SOURCE:애정, 1.70
-		TIMES SOURCE:성행동, 1.70
-		TIMES SOURCE:성취감, 1.70
+		TIMES SOURCE:애정 , 1.70
+		TIMES SOURCE:성행동 , 1.70
+		TIMES SOURCE:성취감 , 1.70
 	ELSEIF ABL:PLAYER:레즈중독 == 8
-		TIMES SOURCE:애정, 1.80
-		TIMES SOURCE:성행동, 1.80
-		TIMES SOURCE:성취감, 1.80
+		TIMES SOURCE:애정 , 1.80
+		TIMES SOURCE:성행동 , 1.80
+		TIMES SOURCE:성취감 , 1.80
 	ELSEIF ABL:PLAYER:레즈중독 == 9
-		TIMES SOURCE:애정, 1.90
-		TIMES SOURCE:성행동, 1.90
-		TIMES SOURCE:성취감, 1.90
+		TIMES SOURCE:애정 , 1.90
+		TIMES SOURCE:성행동 , 1.90
+		TIMES SOURCE:성취감 , 1.90
 	ELSEIF ABL:PLAYER:레즈중독 >= 10
-		TIMES SOURCE:애정, 2.00
-		TIMES SOURCE:성행동, 2.00
-		TIMES SOURCE:성취감, 2.00
+		TIMES SOURCE:애정 , 2.00
+		TIMES SOURCE:성행동 , 2.00
+		TIMES SOURCE:성취감 , 2.00
 	ENDIF
 
 	;조교자의자제심
 	IF TALENT:PLAYER:자제심
-		TIMES SOURCE:성행동, 0.50
-		TIMES SOURCE:성취감, 0.50
+		TIMES SOURCE:성행동 , 0.50
+		TIMES SOURCE:성취감 , 0.50
 	ENDIF
 ;동성애자
 ELSEIF MALE(PLAYER) && MALE(TARGET)
 	;ABL:게이끼를 본다
-	;게이끼 2 이하로 약패널티, 게이끼 4 이상으로 약보너스
+	;게이끼 2 이하로 약패널티 , 게이끼 4 이상으로 약보너스
 	IF ABL:게이끼 == 0
-		TIMES SOURCE:굴복, 1.20
-		TIMES SOURCE:일탈, 1.30
+		TIMES SOURCE:굴복 , 1.20
+		TIMES SOURCE:일탈 , 1.30
 	ELSEIF ABL:게이끼 == 1
-		TIMES SOURCE:굴복, 1.10
-		TIMES SOURCE:일탈, 1.20
+		TIMES SOURCE:굴복 , 1.10
+		TIMES SOURCE:일탈 , 1.20
 	ELSEIF ABL:게이끼 == 2
-		TIMES SOURCE:굴복, 1.05
-		TIMES SOURCE:일탈, 1.10
+		TIMES SOURCE:굴복 , 1.05
+		TIMES SOURCE:일탈 , 1.10
 	ELSEIF ABL:게이끼 == 3
 	ELSEIF ABL:게이끼 == 4
-		TIMES SOURCE:굴복, 0.95
-		TIMES SOURCE:일탈, 0.90
+		TIMES SOURCE:굴복 , 0.95
+		TIMES SOURCE:일탈 , 0.90
 	ELSEIF ABL:게이끼 == 5
-		TIMES SOURCE:굴복, 0.90
-		TIMES SOURCE:일탈, 0.80
+		TIMES SOURCE:굴복 , 0.90
+		TIMES SOURCE:일탈 , 0.80
 	ELSEIF ABL:게이끼 == 6
-		TIMES SOURCE:굴복, 0.85
-		TIMES SOURCE:일탈, 0.70
+		TIMES SOURCE:굴복 , 0.85
+		TIMES SOURCE:일탈 , 0.70
 	ELSEIF ABL:게이끼 == 7
-		TIMES SOURCE:굴복, 0.80
-		TIMES SOURCE:일탈, 0.60
+		TIMES SOURCE:굴복 , 0.80
+		TIMES SOURCE:일탈 , 0.60
 	ELSEIF ABL:게이끼 == 8
-		TIMES SOURCE:굴복, 0.75
-		TIMES SOURCE:일탈, 0.50
+		TIMES SOURCE:굴복 , 0.75
+		TIMES SOURCE:일탈 , 0.50
 	ELSEIF ABL:게이끼 == 9
-		TIMES SOURCE:굴복, 0.70
-		TIMES SOURCE:일탈, 0.40
+		TIMES SOURCE:굴복 , 0.70
+		TIMES SOURCE:일탈 , 0.40
 	ELSE
-		TIMES SOURCE:굴복, 0.65
-		TIMES SOURCE:일탈, 0.30
+		TIMES SOURCE:굴복 , 0.65
+		TIMES SOURCE:일탈 , 0.30
 	ENDIF
 	
 	;ABL:게이중독를 본다
@@ -406,183 +406,183 @@ ELSEIF MALE(PLAYER) && MALE(TARGET)
 		TIMES SOURCE:쾌V , 1.10
 		TIMES SOURCE:쾌A , 1.10
 		TIMES SOURCE:쾌B , 1.10
-		TIMES SOURCE:성취감, 1.10
-		TIMES SOURCE:굴복, 0.90
-		TIMES SOURCE:불결, 0.90
-		TIMES SOURCE:일탈, 0.90
+		TIMES SOURCE:성취감 , 1.10
+		TIMES SOURCE:굴복 , 0.90
+		TIMES SOURCE:불결 , 0.90
+		TIMES SOURCE:일탈 , 0.90
 	ELSEIF ABL:게이중독 == 2
 		SOURCE:중독충족 += 200
 		TIMES SOURCE:쾌C , 1.20
 		TIMES SOURCE:쾌V , 1.20
 		TIMES SOURCE:쾌A , 1.20
 		TIMES SOURCE:쾌B , 1.20
-		TIMES SOURCE:성취감, 1.20
-		TIMES SOURCE:굴복, 0.80
-		TIMES SOURCE:불결, 0.80
-		TIMES SOURCE:일탈, 0.80
+		TIMES SOURCE:성취감 , 1.20
+		TIMES SOURCE:굴복 , 0.80
+		TIMES SOURCE:불결 , 0.80
+		TIMES SOURCE:일탈 , 0.80
 	ELSEIF ABL:게이중독 == 3
 		SOURCE:중독충족 += 350
 		TIMES SOURCE:쾌C , 1.30
 		TIMES SOURCE:쾌V , 1.30
 		TIMES SOURCE:쾌A , 1.30
 		TIMES SOURCE:쾌B , 1.30
-		TIMES SOURCE:성취감, 1.30
-		TIMES SOURCE:굴복, 0.70
-		TIMES SOURCE:불결, 0.70
-		TIMES SOURCE:일탈, 0.70
+		TIMES SOURCE:성취감 , 1.30
+		TIMES SOURCE:굴복 , 0.70
+		TIMES SOURCE:불결 , 0.70
+		TIMES SOURCE:일탈 , 0.70
 	ELSEIF ABL:게이중독 == 4
 		SOURCE:통증 += 500
 		TIMES SOURCE:쾌C , 1.40
 		TIMES SOURCE:쾌V , 1.40
 		TIMES SOURCE:쾌A , 1.40
 		TIMES SOURCE:쾌B , 1.40
-		TIMES SOURCE:성취감, 1.40
-		TIMES SOURCE:굴복, 0.60
-		TIMES SOURCE:불결, 0.60
-		TIMES SOURCE:일탈, 0.60
+		TIMES SOURCE:성취감 , 1.40
+		TIMES SOURCE:굴복 , 0.60
+		TIMES SOURCE:불결 , 0.60
+		TIMES SOURCE:일탈 , 0.60
 	ELSEIF ABL:게이중독 == 5
 		SOURCE:중독충족 += 750
 		TIMES SOURCE:쾌C , 1.40
 		TIMES SOURCE:쾌V , 1.40
 		TIMES SOURCE:쾌A , 1.40
 		TIMES SOURCE:쾌B , 1.40
-		TIMES SOURCE:성취감, 1.40
-		TIMES SOURCE:굴복, 0.60
-		TIMES SOURCE:불결, 0.60
-		TIMES SOURCE:일탈, 0.60
+		TIMES SOURCE:성취감 , 1.40
+		TIMES SOURCE:굴복 , 0.60
+		TIMES SOURCE:불결 , 0.60
+		TIMES SOURCE:일탈 , 0.60
 	ELSEIF ABL:게이중독 == 6
 		SOURCE:중독충족 += 1000
 		TIMES SOURCE:쾌C , 1.50
 		TIMES SOURCE:쾌V , 1.50
 		TIMES SOURCE:쾌A , 1.50
 		TIMES SOURCE:쾌B , 1.50
-		TIMES SOURCE:성취감, 1.50
-		TIMES SOURCE:굴복, 0.50
-		TIMES SOURCE:불결, 0.50
-		TIMES SOURCE:일탈, 0.50
+		TIMES SOURCE:성취감 , 1.50
+		TIMES SOURCE:굴복 , 0.50
+		TIMES SOURCE:불결 , 0.50
+		TIMES SOURCE:일탈 , 0.50
 	ELSEIF ABL:게이중독 == 7
 		SOURCE:중독충족 += 1200
 		TIMES SOURCE:쾌C , 1.60
 		TIMES SOURCE:쾌V , 1.60
 		TIMES SOURCE:쾌A , 1.60
 		TIMES SOURCE:쾌B , 1.60
-		TIMES SOURCE:성취감, 1.60
-		TIMES SOURCE:굴복, 0.40
-		TIMES SOURCE:불결, 0.40
-		TIMES SOURCE:일탈, 0.40
+		TIMES SOURCE:성취감 , 1.60
+		TIMES SOURCE:굴복 , 0.40
+		TIMES SOURCE:불결 , 0.40
+		TIMES SOURCE:일탈 , 0.40
 	ELSEIF ABL:게이중독 == 8
 		SOURCE:중독충족 += 1500
 		TIMES SOURCE:쾌C , 1.70
 		TIMES SOURCE:쾌V , 1.70
 		TIMES SOURCE:쾌A , 1.70
 		TIMES SOURCE:쾌B , 1.70
-		TIMES SOURCE:성취감, 1.70
-		TIMES SOURCE:굴복, 0.30
-		TIMES SOURCE:불결, 0.30
-		TIMES SOURCE:일탈, 0.30
+		TIMES SOURCE:성취감 , 1.70
+		TIMES SOURCE:굴복 , 0.30
+		TIMES SOURCE:불결 , 0.30
+		TIMES SOURCE:일탈 , 0.30
 	ELSEIF ABL:게이중독 == 9
 		SOURCE:중독충족 += 1800
 		TIMES SOURCE:쾌C , 1.80
 		TIMES SOURCE:쾌V , 1.80
 		TIMES SOURCE:쾌A , 1.80
 		TIMES SOURCE:쾌B , 1.80
-		TIMES SOURCE:성취감, 1.80
-		TIMES SOURCE:굴복, 0.20
-		TIMES SOURCE:불결, 0.20
-		TIMES SOURCE:일탈, 0.20
+		TIMES SOURCE:성취감 , 1.80
+		TIMES SOURCE:굴복 , 0.20
+		TIMES SOURCE:불결 , 0.20
+		TIMES SOURCE:일탈 , 0.20
 	ELSEIF ABL:게이중독 >= 10
 		SOURCE:중독충족 += 2500
 		TIMES SOURCE:쾌C , 1.90
 		TIMES SOURCE:쾌V , 1.90
 		TIMES SOURCE:쾌A , 1.90
 		TIMES SOURCE:쾌B , 1.90
-		TIMES SOURCE:성취감, 1.90
-		TIMES SOURCE:굴복, 0.10
-		TIMES SOURCE:불결, 0.10
-		TIMES SOURCE:일탈, 0.10
+		TIMES SOURCE:성취감 , 1.90
+		TIMES SOURCE:굴복 , 0.10
+		TIMES SOURCE:불결 , 0.10
+		TIMES SOURCE:일탈 , 0.10
 	ENDIF
 
 	;조교자의 ABL:게이끼
 	IF ABL:PLAYER:게이끼 == 0
-		TIMES SOURCE:애정, 0.50
-		TIMES SOURCE:성취감, 0.50
+		TIMES SOURCE:애정 , 0.50
+		TIMES SOURCE:성취감 , 0.50
 	ELSEIF ABL:PLAYER:게이끼 == 1
-		TIMES SOURCE:애정, 0.70
-		TIMES SOURCE:성취감, 0.70
+		TIMES SOURCE:애정 , 0.70
+		TIMES SOURCE:성취감 , 0.70
 	ELSEIF ABL:PLAYER:게이끼 == 2
-		TIMES SOURCE:애정, 0.90
-		TIMES SOURCE:성취감, 0.90
+		TIMES SOURCE:애정 , 0.90
+		TIMES SOURCE:성취감 , 0.90
 	ELSEIF ABL:PLAYER:게이끼 == 3
 	ELSEIF ABL:PLAYER:게이끼 == 4
-		TIMES SOURCE:애정, 1.10
-		TIMES SOURCE:성취감, 1.10
+		TIMES SOURCE:애정 , 1.10
+		TIMES SOURCE:성취감 , 1.10
 	ELSEIF ABL:PLAYER:게이끼 == 5
-		TIMES SOURCE:애정, 1.15
-		TIMES SOURCE:성취감, 1.20
+		TIMES SOURCE:애정 , 1.15
+		TIMES SOURCE:성취감 , 1.20
 	ELSEIF ABL:PLAYER:게이끼 == 6
-		TIMES SOURCE:애정, 1.20
-		TIMES SOURCE:성취감, 1.30
+		TIMES SOURCE:애정 , 1.20
+		TIMES SOURCE:성취감 , 1.30
 	ELSEIF ABL:PLAYER:게이끼 == 7
-		TIMES SOURCE:애정, 1.25
-		TIMES SOURCE:성취감, 1.40
+		TIMES SOURCE:애정 , 1.25
+		TIMES SOURCE:성취감 , 1.40
 	ELSEIF ABL:PLAYER:게이끼 == 8
-		TIMES SOURCE:애정, 1.30
-		TIMES SOURCE:성취감, 1.50
+		TIMES SOURCE:애정 , 1.30
+		TIMES SOURCE:성취감 , 1.50
 	ELSEIF ABL:PLAYER:게이끼 == 9
-		TIMES SOURCE:애정, 1.35
-		TIMES SOURCE:성취감, 1.60
+		TIMES SOURCE:애정 , 1.35
+		TIMES SOURCE:성취감 , 1.60
 	ELSE
-		TIMES SOURCE:애정, 1.40
-		TIMES SOURCE:성취감, 1.70
+		TIMES SOURCE:애정 , 1.40
+		TIMES SOURCE:성취감 , 1.70
 	ENDIF
 
 	;조교자의 ABL:게이중독
 	IF ABL:PLAYER:게이중독 == 1
-		TIMES SOURCE:애정, 1.10
-		TIMES SOURCE:성행동, 1.10
-		TIMES SOURCE:성취감, 1.10
+		TIMES SOURCE:애정 , 1.10
+		TIMES SOURCE:성행동 , 1.10
+		TIMES SOURCE:성취감 , 1.10
 	ELSEIF ABL:PLAYER:게이중독 == 2
-		TIMES SOURCE:애정, 1.20
-		TIMES SOURCE:성행동, 1.20
-		TIMES SOURCE:성취감, 1.20
+		TIMES SOURCE:애정 , 1.20
+		TIMES SOURCE:성행동 , 1.20
+		TIMES SOURCE:성취감 , 1.20
 	ELSEIF ABL:PLAYER:게이중독 == 3
-		TIMES SOURCE:애정, 1.30
-		TIMES SOURCE:성행동, 1.30
-		TIMES SOURCE:성취감, 1.30
+		TIMES SOURCE:애정 , 1.30
+		TIMES SOURCE:성행동 , 1.30
+		TIMES SOURCE:성취감 , 1.30
 	ELSEIF ABL:PLAYER:게이중독 == 4
-		TIMES SOURCE:애정, 1.40
-		TIMES SOURCE:성행동, 1.40
-		TIMES SOURCE:성취감, 1.40
+		TIMES SOURCE:애정 , 1.40
+		TIMES SOURCE:성행동 , 1.40
+		TIMES SOURCE:성취감 , 1.40
 	ELSEIF ABL:PLAYER:게이중독 == 5
-		TIMES SOURCE:애정, 1.50
-		TIMES SOURCE:성행동, 1.50
-		TIMES SOURCE:성취감, 1.50
+		TIMES SOURCE:애정 , 1.50
+		TIMES SOURCE:성행동 , 1.50
+		TIMES SOURCE:성취감 , 1.50
 	ELSEIF ABL:PLAYER:게이중독 == 6
-		TIMES SOURCE:애정, 1.60
-		TIMES SOURCE:성행동, 1.60
-		TIMES SOURCE:성취감, 1.60
+		TIMES SOURCE:애정 , 1.60
+		TIMES SOURCE:성행동 , 1.60
+		TIMES SOURCE:성취감 , 1.60
 	ELSEIF ABL:PLAYER:게이중독 == 7
-		TIMES SOURCE:애정, 1.70
-		TIMES SOURCE:성행동, 1.70
-		TIMES SOURCE:성취감, 1.70
+		TIMES SOURCE:애정 , 1.70
+		TIMES SOURCE:성행동 , 1.70
+		TIMES SOURCE:성취감 , 1.70
 	ELSEIF ABL:PLAYER:게이중독 == 8
-		TIMES SOURCE:애정, 1.80
-		TIMES SOURCE:성행동, 1.80
-		TIMES SOURCE:성취감, 1.80
+		TIMES SOURCE:애정 , 1.80
+		TIMES SOURCE:성행동 , 1.80
+		TIMES SOURCE:성취감 , 1.80
 	ELSEIF ABL:PLAYER:게이중독 == 9
-		TIMES SOURCE:애정, 1.90
-		TIMES SOURCE:성행동, 1.90
-		TIMES SOURCE:성취감, 1.90
+		TIMES SOURCE:애정 , 1.90
+		TIMES SOURCE:성행동 , 1.90
+		TIMES SOURCE:성취감 , 1.90
 	ELSEIF ABL:PLAYER:게이중독 >= 10
-		TIMES SOURCE:애정, 2.00
-		TIMES SOURCE:성행동, 2.00
-		TIMES SOURCE:성취감, 2.00
+		TIMES SOURCE:애정 , 2.00
+		TIMES SOURCE:성행동 , 2.00
+		TIMES SOURCE:성취감 , 2.00
 	ENDIF
 
 	;조교자의자제심
 	IF TALENT:PLAYER:자제심
-		TIMES SOURCE:성행동, 0.50
-		TIMES SOURCE:성취감, 0.50
+		TIMES SOURCE:성행동 , 0.50
+		TIMES SOURCE:성취감 , 0.50
 	ENDIF
 ;이성끼리의 경우
 ELSE
@@ -591,122 +591,122 @@ ELSE
 		TIMES SOURCE:쾌V , 0.45
 		TIMES SOURCE:쾌A , 0.45
 		TIMES SOURCE:쾌B , 0.45
-		TIMES SOURCE:성취감, 0.20
-		TIMES SOURCE:굴복, 1.60
-		TIMES SOURCE:울굴, 1.20
-		TIMES SOURCE:반발, 1.60
+		TIMES SOURCE:성취감 , 0.20
+		TIMES SOURCE:굴복 , 1.60
+		TIMES SOURCE:울굴 , 1.20
+		TIMES SOURCE:반발 , 1.60
 	ELSEIF ABL:게이중독 == 9 || ABL:레즈중독 == 9
 		TIMES SOURCE:쾌C , 0.50
 		TIMES SOURCE:쾌V , 0.50
 		TIMES SOURCE:쾌A , 0.50
 		TIMES SOURCE:쾌B , 0.50
-		TIMES SOURCE:성취감, 0.25
-		TIMES SOURCE:굴복, 1.50
-		TIMES SOURCE:울굴, 2.00
-		TIMES SOURCE:반발, 1.55
+		TIMES SOURCE:성취감 , 0.25
+		TIMES SOURCE:굴복 , 1.50
+		TIMES SOURCE:울굴 , 2.00
+		TIMES SOURCE:반발 , 1.55
 	ELSEIF ABL:게이중독 == 8 || ABL:레즈중독 == 8
 		TIMES SOURCE:쾌C , 0.55
 		TIMES SOURCE:쾌V , 0.55
 		TIMES SOURCE:쾌A , 0.55
 		TIMES SOURCE:쾌B , 0.55
-		TIMES SOURCE:성취감, 0.30
-		TIMES SOURCE:굴복, 1.45
-		TIMES SOURCE:울굴, 1.90
-		TIMES SOURCE:반발, 1.50
+		TIMES SOURCE:성취감 , 0.30
+		TIMES SOURCE:굴복 , 1.45
+		TIMES SOURCE:울굴 , 1.90
+		TIMES SOURCE:반발 , 1.50
 	ELSEIF ABL:게이중독 == 7 || ABL:레즈중독 == 7
 		TIMES SOURCE:쾌C , 0.60
 		TIMES SOURCE:쾌V , 0.60
 		TIMES SOURCE:쾌A , 0.60
 		TIMES SOURCE:쾌B , 0.60
-		TIMES SOURCE:성취감, 0.35
-		TIMES SOURCE:굴복, 1.40
-		TIMES SOURCE:울굴, 1.80
-		TIMES SOURCE:반발, 1.45
+		TIMES SOURCE:성취감 , 0.35
+		TIMES SOURCE:굴복 , 1.40
+		TIMES SOURCE:울굴 , 1.80
+		TIMES SOURCE:반발 , 1.45
 	ELSEIF ABL:게이중독 == 6 || ABL:레즈중독 == 6
 		TIMES SOURCE:쾌C , 0.65
 		TIMES SOURCE:쾌V , 0.65
 		TIMES SOURCE:쾌A , 0.65
 		TIMES SOURCE:쾌B , 0.65
-		TIMES SOURCE:성취감, 0.40
-		TIMES SOURCE:굴복, 1.35
-		TIMES SOURCE:울굴, 1.70
-		TIMES SOURCE:반발, 1.40
+		TIMES SOURCE:성취감 , 0.40
+		TIMES SOURCE:굴복 , 1.35
+		TIMES SOURCE:울굴 , 1.70
+		TIMES SOURCE:반발 , 1.40
 	ELSEIF ABL:게이중독 == 5 || ABL:레즈중독 == 5
 		TIMES SOURCE:쾌C , 0.70
 		TIMES SOURCE:쾌V , 0.70
 		TIMES SOURCE:쾌A , 0.70
 		TIMES SOURCE:쾌B , 0.70
-		TIMES SOURCE:성취감, 0.50
-		TIMES SOURCE:굴복, 1.30
-		TIMES SOURCE:울굴, 1.60
-		TIMES SOURCE:반발, 1.35
+		TIMES SOURCE:성취감 , 0.50
+		TIMES SOURCE:굴복 , 1.30
+		TIMES SOURCE:울굴 , 1.60
+		TIMES SOURCE:반발 , 1.35
 	ELSEIF ABL:게이중독 == 4 || ABL:레즈중독 == 4
 		TIMES SOURCE:쾌C , 0.75
 		TIMES SOURCE:쾌V , 0.75
 		TIMES SOURCE:쾌A , 0.75
 		TIMES SOURCE:쾌B , 0.75
-		TIMES SOURCE:성취감, 0.60
-		TIMES SOURCE:굴복, 1.25
-		TIMES SOURCE:울굴, 1.50
-		TIMES SOURCE:반발, 1.30
+		TIMES SOURCE:성취감 , 0.60
+		TIMES SOURCE:굴복 , 1.25
+		TIMES SOURCE:울굴 , 1.50
+		TIMES SOURCE:반발 , 1.30
 	ELSEIF ABL:게이중독 == 3 || ABL:레즈중독 == 3
 		TIMES SOURCE:쾌C , 0.80
 		TIMES SOURCE:쾌V , 0.80
 		TIMES SOURCE:쾌A , 0.80
 		TIMES SOURCE:쾌B , 0.80
-		TIMES SOURCE:성취감, 0.70
-		TIMES SOURCE:굴복, 1.20
-		TIMES SOURCE:울굴, 1.40
-		TIMES SOURCE:반발, 1.20
+		TIMES SOURCE:성취감 , 0.70
+		TIMES SOURCE:굴복 , 1.20
+		TIMES SOURCE:울굴 , 1.40
+		TIMES SOURCE:반발 , 1.20
 	ELSEIF ABL:게이중독 == 2 || ABL:레즈중독 == 2
 		TIMES SOURCE:쾌C , 0.85
 		TIMES SOURCE:쾌V , 0.85
 		TIMES SOURCE:쾌A , 0.85
 		TIMES SOURCE:쾌B , 0.85
-		TIMES SOURCE:성취감, 0.80
-		TIMES SOURCE:굴복, 1.15
-		TIMES SOURCE:울굴, 1.30
-		TIMES SOURCE:반발, 1.15
+		TIMES SOURCE:성취감 , 0.80
+		TIMES SOURCE:굴복 , 1.15
+		TIMES SOURCE:울굴 , 1.30
+		TIMES SOURCE:반발 , 1.15
 	ELSEIF ABL:게이중독 == 1 || ABL:레즈중독 == 1
 		TIMES SOURCE:쾌C , 0.90
 		TIMES SOURCE:쾌V , 0.90
 		TIMES SOURCE:쾌A , 0.90
 		TIMES SOURCE:쾌B , 0.90
-		TIMES SOURCE:성취감, 0.90
-		TIMES SOURCE:굴복, 1.10
-		TIMES SOURCE:울굴, 1.20
-		TIMES SOURCE:반발, 1.10
+		TIMES SOURCE:성취감 , 0.90
+		TIMES SOURCE:굴복 , 1.10
+		TIMES SOURCE:울굴 , 1.20
+		TIMES SOURCE:반발 , 1.10
 	ENDIF
 	IF ABL:PLAYER:게이중독 >= 10 || ABL:PLAYER:레즈중독 >= 10
-		TIMES SOURCE:애정, 0.15
-		TIMES SOURCE:성행동, 0.25
+		TIMES SOURCE:애정 , 0.15
+		TIMES SOURCE:성행동 , 0.25
 	ELSEIF ABL:PLAYER:게이중독 == 9 || ABL:PLAYER:레즈중독 == 9
-		TIMES SOURCE:애정, 0.20
-		TIMES SOURCE:성행동, 0.30
+		TIMES SOURCE:애정 , 0.20
+		TIMES SOURCE:성행동 , 0.30
 	ELSEIF ABL:PLAYER:게이중독 == 8 || ABL:PLAYER:레즈중독 == 8
-		TIMES SOURCE:애정, 0.25
-		TIMES SOURCE:성행동, 0.35
+		TIMES SOURCE:애정 , 0.25
+		TIMES SOURCE:성행동 , 0.35
 	ELSEIF ABL:PLAYER:게이중독 == 7 || ABL:PLAYER:레즈중독 == 7
-		TIMES SOURCE:애정, 0.30
-		TIMES SOURCE:성행동, 0.40
+		TIMES SOURCE:애정 , 0.30
+		TIMES SOURCE:성행동 , 0.40
 	ELSEIF ABL:PLAYER:게이중독 == 6 || ABL:PLAYER:레즈중독 == 6
-		TIMES SOURCE:애정, 0.40
-		TIMES SOURCE:성행동, 0.45
+		TIMES SOURCE:애정 , 0.40
+		TIMES SOURCE:성행동 , 0.45
 	ELSEIF ABL:PLAYER:게이중독 == 5 || ABL:PLAYER:레즈중독 == 5
-		TIMES SOURCE:애정, 0.50
-		TIMES SOURCE:성행동, 0.50
+		TIMES SOURCE:애정 , 0.50
+		TIMES SOURCE:성행동 , 0.50
 	ELSEIF ABL:PLAYER:게이중독 == 4 || ABL:PLAYER:레즈중독 == 4
-		TIMES SOURCE:애정, 0.60
-		TIMES SOURCE:성행동, 0.60
+		TIMES SOURCE:애정 , 0.60
+		TIMES SOURCE:성행동 , 0.60
 	ELSEIF ABL:PLAYER:게이중독 == 3 || ABL:PLAYER:레즈중독 == 3
-		TIMES SOURCE:애정, 0.70
-		TIMES SOURCE:성행동, 0.75
+		TIMES SOURCE:애정 , 0.70
+		TIMES SOURCE:성행동 , 0.75
 	ELSEIF ABL:PLAYER:게이중독 == 2 || ABL:PLAYER:레즈중독 == 2
-		TIMES SOURCE:애정, 0.80
-		TIMES SOURCE:성행동, 0.80
+		TIMES SOURCE:애정 , 0.80
+		TIMES SOURCE:성행동 , 0.80
 	ELSEIF ABL:PLAYER:게이중독 == 1 || ABL:PLAYER:레즈중독 == 1
-		TIMES SOURCE:애정, 0.90
-		TIMES SOURCE:성행동, 0.90
+		TIMES SOURCE:애정 , 0.90
+		TIMES SOURCE:성행동 , 0.90
 	ENDIF
 ENDIF
 
@@ -719,48 +719,48 @@ IF TALENT:PLAYER:해방
 	TIMES SOURCE:쾌V , 1.20
 	TIMES SOURCE:쾌A , 1.20
 	TIMES SOURCE:쾌B , 1.20
-	TIMES SOURCE:애정, 1.20
+	TIMES SOURCE:애정 , 1.20
 ENDIF
 ;조교자의 TALENT:바이를 본다
 IF TALENT:PLAYER:바이
-	TIMES SOURCE:애정, 1.20
-	TIMES SOURCE:성행동, 1.20
-	TIMES SOURCE:성취감, 1.20
+	TIMES SOURCE:애정 , 1.20
+	TIMES SOURCE:성행동 , 1.20
+	TIMES SOURCE:성취감 , 1.20
 ENDIF
 ;조교자의 TALENT:새드를 본다
 SIF TALENT:PLAYER:새드
-	TIMES SOURCE:두려움, 1.50
+	TIMES SOURCE:두려움 , 1.50
 ;조교자의 TALENT:소악마를 본다
 SIF TALENT:PLAYER:소악마
-	TIMES SOURCE:노출, 1.50
+	TIMES SOURCE:노출 , 1.50
 ;조교자의 TALENT:매혹를 본다
 IF TALENT:PLAYER:매혹
-	TIMES SOURCE:불결, 0.50
-	TIMES SOURCE:일탈, 0.50
+	TIMES SOURCE:불결 , 0.50
+	TIMES SOURCE:일탈 , 0.50
 
 	TIMES SOURCE:쾌C , 1.20
 	TIMES SOURCE:쾌V , 1.20
 	TIMES SOURCE:쾌A , 1.20
 	TIMES SOURCE:쾌B , 1.20
-	TIMES SOURCE:성행동, 1.20
+	TIMES SOURCE:성행동 , 1.20
 ENDIF
 ;조교자의 TALENT:수수께끼의매력를 본다
 IF TALENT:PLAYER:수수께끼의매력
-	TIMES SOURCE:불결, 0.50
-	TIMES SOURCE:일탈, 0.50
+	TIMES SOURCE:불결 , 0.50
+	TIMES SOURCE:일탈 , 0.50
 
 	TIMES SOURCE:쾌C , 1.20
 	TIMES SOURCE:쾌V , 1.20
 	TIMES SOURCE:쾌A , 1.20
 	TIMES SOURCE:쾌B , 1.20
-	TIMES SOURCE:성행동, 1.20
-	TIMES SOURCE:성취감, 1.50
+	TIMES SOURCE:성행동 , 1.20
+	TIMES SOURCE:성취감 , 1.50
 ENDIF
 
 
 ;-------------------------------------------------
 ;처녀/bA생처녀상실시의 처리
-;43바이브, 100~106 섹스,
+;43바이브 , 100~106 섹스,
 ;-------------------------------------------------
 @LOST_VIRGIN
 ;--------------------
@@ -782,25 +782,25 @@ IF TALENT:처녀 && TFLAG:19 == 1
 	IF TALENT:정조관념
 		;정조관념+연모or친애(주인에 의한처녀상실만)
 		IF (TALENT:연모 || TALENT:친애) && TFLAG:20 == 1
-			TIMES SOURCE:애정, 1.20
-			TIMES SOURCE:반발, 0.50
+			TIMES SOURCE:애정 , 1.20
+			TIMES SOURCE:반발 , 0.50
 			;발정기
 			SIF TALENT:발정기
-				TIMES SOURCE:울굴, 1.50
+				TIMES SOURCE:울굴 , 1.50
 		ELSE
-			TIMES SOURCE:애정, 0.60
-			TIMES SOURCE:반발, 10.00
+			TIMES SOURCE:애정 , 0.60
+			TIMES SOURCE:반발 , 10.00
 			;발정기
 			SIF TALENT:발정기
-				TIMES SOURCE:울굴, 2.00
+				TIMES SOURCE:울굴 , 2.00
 		ENDIF
 	;정조무관심
 	ELSEIF TALENT:정조무관심
-		TIMES SOURCE:애정, 0.60
-		TIMES SOURCE:반발, 0.50
+		TIMES SOURCE:애정 , 0.60
+		TIMES SOURCE:반발 , 0.50
 	;발정기
 	ELSEIF TALENT:발정기
-		TIMES SOURCE:울굴, 1.50
+		TIMES SOURCE:울굴 , 1.50
 	ENDIF
 	
 	;함락 소질에 의한 처리
@@ -810,24 +810,24 @@ IF TALENT:처녀 && TFLAG:19 == 1
 			PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%에처녀를 바칠 수 있었던 일에 행복을 느끼고 있는 것 같다…
 			;반발각인의 회피
 			TFLAG:150 = 2
-			TIMES SOURCE:애정, 2.00
-			TIMES SOURCE:반발, 0.30
+			TIMES SOURCE:애정 , 2.00
+			TIMES SOURCE:반발 , 0.30
 		;친애 또한 상대가 주인
 		ELSEIF TALENT:친애
 			PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%가 처음의 상대인 일에 이 이상 없는 행복을 느끼고 있는 것 같다…
 			;반발각인의 회피
 			TFLAG:150 = 2
-			TIMES SOURCE:애정, 2.00
-			TIMES SOURCE:반발, 0.10
+			TIMES SOURCE:애정 , 2.00
+			TIMES SOURCE:반발 , 0.10
 		ENDIF
 		
-		;행위에 의해, 애정경험를 가산한다
+		;행위에 의해 , 애정경험를 가산한다
 		SELECTCASE SELECTCOM
 			;정상위
 			CASE 100
 				E = 10
 			;대면정도
-			CASE 102, 104
+			CASE 102 , 104
 				E = 8
 			;그 이외
 			CASEELSE
@@ -849,9 +849,9 @@ IF TALENT:처녀 && TFLAG:19 == 1
 		CASE 43
 			PRINTFORML 완구를 사용한처녀상실로 %EXPNAME:50%＋1
 			EXP:이상경험 += 1
-		;기승위, 윤간, 촉수삽입, 촉수V 확장, 촉수양구멍확장, 촉수산란, 수간, 뱀장어탕, 목조르기섹스, 3 P계
-		CASE 106, 322, 344, 366, 368, 369, 381, 382, 513, 515 TO 524
-			PRINTFORML 이상한 행위에서의처녀상실로 %EXPNAME:50%＋1
+		;기승위、윤간、촉수삽입、촉수Ｖ拡張、촉수양구멍확장、촉수산란、수간、뱀장어탕、목조르기セックス、３Ｐ系
+		CASE 106,322,344,366,368,369,381,382,513,515 TO 524
+			PRINTFORML 이상한 행위로 처녀상실해서 %EXPNAME:50%＋１
 			EXP:이상경험 += 1
 	ENDSELECT
 	
@@ -882,7 +882,7 @@ IF TALENT:처녀 && TFLAG:19 == 1
 	ENDIF
 	
 	;거치고 싶고 실마리응용 안면 판정의 갱신
-	;바이브, 뱀장어탕, 수간, 촉수삽입, 촉수확장, 촉수양구멍확장, 촉수산란, 윤간를 빠뜨린다
+	;바이브 , 뱀장어탕 , 수간 , 촉수삽입 , 촉수확장 , 촉수양구멍확장 , 촉수산란 , 윤간를 빠뜨린다
 	IF SELECTCOM != 43 && SELECTCOM != 381 && SELECTCOM != 382 && SELECTCOM != 344 && SELECTCOM != 366 && SELECTCOM != 368 && SELECTCOM != 369 && SELECTCOM != 322
 		;꼬맹이 서치
 		R = NO:TARGET
@@ -905,7 +905,7 @@ IF TALENT:처녀 && TFLAG:19 == 1
 		CSTR:10 = %CALLNAME:ASSI%
 	ELSE
 		SELECTCASE SELECTCOM
-			CASE 100 TO 106, 515 TO 524
+			CASE 100 TO 106 , 515 TO 524
 				CSTR:10 = %CALLNAME:PLAYER%
 			CASE 405,
 				CSTR:10 = %CALLNAME:ASSI%
@@ -930,8 +930,8 @@ IF TALENT:PLAYER:처녀 && TFLAG:19 == 2
 	STAIN:PLAYER:질내 |= 64
 	STAIN:PLAYER:바기나 |= 64
 	
-	TIMES SOURCE:노출, 20.00
-	TIMES SOURCE:굴복, 3.00
+	TIMES SOURCE:노출 , 20.00
+	TIMES SOURCE:굴복 , 3.00
 	
 	;행위에 의해이상경험를 가산한다
 	;기승위한다
@@ -983,8 +983,8 @@ IF ASSI >= 0 && TALENT:ASSI:처녀 && TFLAG:19 == 3
 	STAIN:ASSI:질내 |= 64
 	STAIN:ASSI:바기나 |= 64
 	
-	TIMES SOURCE:굴복, 5.00
-	TIMES SOURCE:일탈, 3.00
+	TIMES SOURCE:굴복 , 5.00
+	TIMES SOURCE:일탈 , 3.00
 	
 	;처녀상실상대에 의해이상경험를 넣는 처리
 	IF SELECTCOM == 405
@@ -1048,25 +1048,25 @@ IF TALENT:백버진 && TFLAG:161 == 1
 	;정조관념
 	IF TALENT:정조관념
 		IF TALENT:연모 || TALENT:친애
-			TIMES SOURCE:애정, 1.20
-			TIMES SOURCE:반발, 0.50
+			TIMES SOURCE:애정 , 1.20
+			TIMES SOURCE:반발 , 0.50
 			;발정기
 			SIF TALENT:발정기
-				TIMES SOURCE:울굴, 1.50
+				TIMES SOURCE:울굴 , 1.50
 		ELSE
-			TIMES SOURCE:애정, 0.60
-			TIMES SOURCE:반발, 10.00
+			TIMES SOURCE:애정 , 0.60
+			TIMES SOURCE:반발 , 10.00
 			;발정기
 			SIF TALENT:발정기
-				TIMES SOURCE:울굴, 2.00
+				TIMES SOURCE:울굴 , 2.00
 		ENDIF
 	;정조무관심
 	ELSEIF TALENT:정조무관심
-		TIMES SOURCE:애정, 0.60
-		TIMES SOURCE:반발, 0.50
+		TIMES SOURCE:애정 , 0.60
+		TIMES SOURCE:반발 , 0.50
 	;발정기
 	ELSEIF TALENT:발정기
-		TIMES SOURCE:울굴, 1.50
+		TIMES SOURCE:울굴 , 1.50
 	ENDIF
 	
 	;함락 소질에 의한 처리
@@ -1076,22 +1076,22 @@ IF TALENT:백버진 && TFLAG:161 == 1
 			PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%에백버진를 바칠 수 있었던 일에 행복을 느끼고 있는 것 같다…
 			;반발각인의 회피
 			TFLAG:150 = 2
-			TIMES SOURCE:애정, 2.00
-			TIMES SOURCE:반발, 0.30
+			TIMES SOURCE:애정 , 2.00
+			TIMES SOURCE:반발 , 0.30
 		;친애 또한 상대가 주인
 		ELSEIF TALENT:친애
 			PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%가 처음의 상대인 일에 이 이상 없는 행복을 느끼고 있는 것 같다…
 			;반발각인의 회피
 			TFLAG:150 = 2
-			TIMES SOURCE:애정, 2.00
-			TIMES SOURCE:반발, 0.10
+			TIMES SOURCE:애정 , 2.00
+			TIMES SOURCE:반발 , 0.10
 		ENDIF
-		;행위에 의해, 애정경험를 가산한다
+		;행위에 의해 , 애정경험를 가산한다
 		SELECTCASE SELECTCOM
 			;정상위A
 			CASE 110
 				E = 10
-			;대면좌위A, 대면입위A
+			;대면좌위Ａ,대면입위Ａ
 			CASE 112, 114
 				E = 8
 			CASEELSE
@@ -1109,9 +1109,9 @@ IF TALENT:백버진 && TFLAG:161 == 1
 	
 	;행위에 의해이상경험를 가산한다
 	SELECTCASE SELECTCOM
-		;육변기, 윤간, 수간, 뱀장어탕, 목조르기애널, 3P
+		;육변기,윤간,수간,뱀장어탕,목조르기애널,３Ｐ
 		CASE 181, 322, 381, 382, 514, 515 TO 525
-			PRINTFORML 이상한 행위에서의백버진상실로 %EXPNAME:50%＋1
+			PRINTFORML 이상한 행위에서의백버진상실로%EXPNAME:50%＋１
 			EXP:이상경험 += 1
 		CASEELSE
 			E = 0
@@ -1183,8 +1183,8 @@ IF TALENT:PLAYER:백버진 && TFLAG:161 == 2
 	PRINTFORMW %CALLNAME:PLAYER%가백버진상실
 	TALENT:PLAYER:백버진 = 0
 	
-	TIMES SOURCE:노출, 20.00
-	TIMES SOURCE:굴복, 3.00
+	TIMES SOURCE:노출 , 20.00
+	TIMES SOURCE:굴복 , 3.00
 	
 	;행위에 의해이상경험를 가산한다
 	;기승위애널한다
@@ -1228,8 +1228,8 @@ IF ASSI >= 0 && TALENT:ASSI:백버진 && TFLAG:161 == 3
 	PRINTFORMW %CALLNAME:ASSI%가백버진상실
 	TALENT:ASSI:백버진 = 0
 	
-	TIMES SOURCE:굴복, 5.00
-	TIMES SOURCE:일탈, 3.00
+	TIMES SOURCE:굴복 , 5.00
+	TIMES SOURCE:일탈 , 3.00
 	
 	;이상한 상태에서의처녀상실로이상경험를 가산한다
 	;처녀상실상대에 의해이상경험를 넣는 처리
@@ -1278,16 +1278,16 @@ IF TALENT:동정 && TFLAG:160 == 1
 	;정조관념
 	IF TALENT:정조관념
 		IF TALENT:연모 || TALENT:친애
-			TIMES SOURCE:애정, 1.20
-			TIMES SOURCE:반발, 0.50
+			TIMES SOURCE:애정 , 1.20
+			TIMES SOURCE:반발 , 0.50
 		ELSE
-			TIMES SOURCE:애정, 0.60
-			TIMES SOURCE:반발, 10.00
+			TIMES SOURCE:애정 , 0.60
+			TIMES SOURCE:반발 , 10.00
 		ENDIF
 	;정조무관심
 	ELSEIF TALENT:정조무관심
-		TIMES SOURCE:애정, 0.60
-		TIMES SOURCE:반발, 0.50
+		TIMES SOURCE:애정 , 0.60
+		TIMES SOURCE:반발 , 0.50
 	ENDIF
 	
 	;함락 소질에 의한 처리
@@ -1296,18 +1296,18 @@ IF TALENT:동정 && TFLAG:160 == 1
 		IF TALENT:연모
 			PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%에동정를 바칠 수 있었던 일에 행복을 느끼고 있는 것 같다…
 			TFLAG:150 = 2
-			TIMES SOURCE:애정, 2.00
-			TIMES SOURCE:반발, 0.30
+			TIMES SOURCE:애정 , 2.00
+			TIMES SOURCE:반발 , 0.30
 		;친애 또한 상대가 주인
 		ELSEIF TALENT:친애
 			PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%가 처음의 상대인 일에 이 이상 없는 행복을 느끼고 있는 것 같다…
 			TFLAG:150 = 2
-			TIMES SOURCE:애정, 2.00
-			TIMES SOURCE:반발, 0.10
+			TIMES SOURCE:애정 , 2.00
+			TIMES SOURCE:반발 , 0.10
 		ENDIF
-		;행위에 의해, 애정경험를 가산한다
+		;행위에 의해 , 애정경험를 가산한다
 		SELECTCASE SELECTCOM
-			;역정상위, 역정상위애널
+			;逆정상위,逆정상위애널
 			CASE 260, 263
 				E = 10
 			CASEELSE
@@ -1367,7 +1367,7 @@ IF TALENT:동정 && TFLAG:160 == 1
 		CSTR:11 = %CALLNAME:ASSI%
 	ELSE
 		SELECTCASE SELECTCOM
-			CASE 430, 431
+			CASE 430 , 431
 				CSTR:11 = %CALLNAME:ASSI%
 			CASE 260 TO 271
 				CSTR:11 = %CALLNAME:PLAYER%
@@ -1474,67 +1474,67 @@ IF TFLAG:28
 		TIMES SOURCE:쾌V , 0.50
 		TIMES SOURCE:쾌A , 0.50
 		TIMES SOURCE:쾌B , 0.50
-		TIMES SOURCE:성행동, 0.50
+		TIMES SOURCE:성행동 , 0.50
 	ELSEIF ABL:기교 == 1
 		TIMES SOURCE:쾌C , 0.60
 		TIMES SOURCE:쾌V , 0.60
 		TIMES SOURCE:쾌A , 0.60
 		TIMES SOURCE:쾌B , 0.60
-		TIMES SOURCE:성행동, 0.55
+		TIMES SOURCE:성행동 , 0.55
 	ELSEIF ABL:기교 == 2
 		TIMES SOURCE:쾌C , 0.80
 		TIMES SOURCE:쾌V , 0.80
 		TIMES SOURCE:쾌A , 0.80
 		TIMES SOURCE:쾌B , 0.80
-		TIMES SOURCE:성행동, 0.70
+		TIMES SOURCE:성행동 , 0.70
 	ELSEIF ABL:기교 == 3
 		TIMES SOURCE:쾌C , 1.00
 		TIMES SOURCE:쾌V , 1.00
 		TIMES SOURCE:쾌A , 1.00
 		TIMES SOURCE:쾌B , 1.00
-		TIMES SOURCE:성행동, 0.90
+		TIMES SOURCE:성행동 , 0.90
 	ELSEIF ABL:기교 == 4
 		TIMES SOURCE:쾌C , 1.20
 		TIMES SOURCE:쾌V , 1.20
 		TIMES SOURCE:쾌A , 1.20
 		TIMES SOURCE:쾌B , 1.20
-		TIMES SOURCE:성행동, 1.20
+		TIMES SOURCE:성행동 , 1.20
 	ELSEIF ABL:기교 == 5
 		TIMES SOURCE:쾌C , 1.50
 		TIMES SOURCE:쾌V , 1.50
 		TIMES SOURCE:쾌A , 1.50
 		TIMES SOURCE:쾌B , 1.50
-		TIMES SOURCE:성행동, 1.50
+		TIMES SOURCE:성행동 , 1.50
 	ELSEIF ABL:기교 == 6
 		TIMES SOURCE:쾌C , 1.80
 		TIMES SOURCE:쾌V , 1.80
 		TIMES SOURCE:쾌A , 1.80
 		TIMES SOURCE:쾌B , 1.80
-		TIMES SOURCE:성행동, 1.80
+		TIMES SOURCE:성행동 , 1.80
 	ELSEIF ABL:기교 == 7
 		TIMES SOURCE:쾌C , 2.50
 		TIMES SOURCE:쾌V , 2.50
 		TIMES SOURCE:쾌A , 2.50
 		TIMES SOURCE:쾌B , 2.50
-		TIMES SOURCE:성행동, 2.50
+		TIMES SOURCE:성행동 , 2.50
 	ELSEIF ABL:기교 == 8
 		TIMES SOURCE:쾌C , 3.00
 		TIMES SOURCE:쾌V , 3.00
 		TIMES SOURCE:쾌A , 3.00
 		TIMES SOURCE:쾌B , 3.00
-		TIMES SOURCE:성행동, 3.00
+		TIMES SOURCE:성행동 , 3.00
 	ELSEIF ABL:기교 == 9
 		TIMES SOURCE:쾌C , 3.50
 		TIMES SOURCE:쾌V , 3.50
 		TIMES SOURCE:쾌A , 3.50
 		TIMES SOURCE:쾌B , 3.50
-		TIMES SOURCE:성행동, 3.50
+		TIMES SOURCE:성행동 , 3.50
 	ELSEIF ABL:기교 == 10
 		TIMES SOURCE:쾌C , 5.00
 		TIMES SOURCE:쾌V , 5.00
 		TIMES SOURCE:쾌A , 5.00
 		TIMES SOURCE:쾌B , 5.00
-		TIMES SOURCE:성행동, 5.00
+		TIMES SOURCE:성행동 , 5.00
 	ENDIF
 ;조교자의 경우
 ELSE
@@ -1887,7 +1887,7 @@ ELSE
 	;실금버릇소유는 통상의 3분의 2참을 수 있는 나머지는 랜덤
 	SIF TALENT:실금버릇 && BASE:뇨의 > (P*2/3) && RAND:10
 		CALL DEFECATION_CHECK3
-	;배변 플래그가 서 있어, 뇨의가 있다
+	;배변 플래그가 서 있어 , 뇨의가 있다
 	SIF TFLAG:58 == 1 && BASE:뇨의 > 10
 		CALL DEFECATION_CHECK3
 ENDIF
@@ -2115,28 +2115,28 @@ PRINTL 스캇경험＋1
 
 ;스캇중독
 IF ABL:스캇중독 == 0
-	TIMES SOURCE:일탈, 1.00
-	TIMES SOURCE:반발, 1.00
+	TIMES SOURCE:일탈 , 1.00
+	TIMES SOURCE:반발 , 1.00
 ELSEIF ABL:스캇중독 == 1
 	SOURCE:성취감 += 100
-	TIMES SOURCE:일탈, 0.70
-	TIMES SOURCE:반발, 0.70
+	TIMES SOURCE:일탈 , 0.70
+	TIMES SOURCE:반발 , 0.70
 ELSEIF ABL:스캇중독 == 2
 	SOURCE:성취감 += 300
-	TIMES SOURCE:일탈, 0.50
-	TIMES SOURCE:반발, 0.50
+	TIMES SOURCE:일탈 , 0.50
+	TIMES SOURCE:반발 , 0.50
 ELSEIF ABL:스캇중독 == 3
 	SOURCE:성취감 += 500
-	TIMES SOURCE:일탈, 0.30
-	TIMES SOURCE:반발, 0.30
+	TIMES SOURCE:일탈 , 0.30
+	TIMES SOURCE:반발 , 0.30
 ELSEIF ABL:스캇중독 == 4
 	SOURCE:성취감 += 1000
-	TIMES SOURCE:일탈, 0.20
-	TIMES SOURCE:반발, 0.20
+	TIMES SOURCE:일탈 , 0.20
+	TIMES SOURCE:반발 , 0.20
 ELSEIF ABL:스캇중독 == 5
 	SOURCE:성취감 += 2000
-	TIMES SOURCE:일탈, 0.10
-	TIMES SOURCE:반발, 0.10
+	TIMES SOURCE:일탈 , 0.10
+	TIMES SOURCE:반발 , 0.10
 ENDIF
 
 ;더러움의 처리
@@ -2147,7 +2147,7 @@ SIF TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5
 	STAIN:속옷（아래） |= 512
 SIF BOTTOMS(TARGET) >= 3
 	STAIN:하의 |= 512
-SIF TEQUIP:특수 2
+SIF TEQUIP:특수2
 	STAIN:발장식 |= 512
 
 
@@ -2203,28 +2203,28 @@ PRINTL 스캇경험＋1
 
 ;스캇중독
 IF ABL:스캇중독 == 0
-	TIMES SOURCE:일탈, 1.00
-	TIMES SOURCE:반발, 1.00
+	TIMES SOURCE:일탈 , 1.00
+	TIMES SOURCE:반발 , 1.00
 ELSEIF ABL:스캇중독 == 1
 	SOURCE:성취감 += 100
-	TIMES SOURCE:일탈, 0.70
-	TIMES SOURCE:반발, 0.70
+	TIMES SOURCE:일탈 , 0.70
+	TIMES SOURCE:반발 , 0.70
 ELSEIF ABL:스캇중독 == 2
 	SOURCE:성취감 += 300
-	TIMES SOURCE:일탈, 0.50
-	TIMES SOURCE:반발, 0.50
+	TIMES SOURCE:일탈 , 0.50
+	TIMES SOURCE:반발 , 0.50
 ELSEIF ABL:스캇중독 == 3
 	SOURCE:성취감 += 500
-	TIMES SOURCE:일탈, 0.30
-	TIMES SOURCE:반발, 0.30
+	TIMES SOURCE:일탈 , 0.30
+	TIMES SOURCE:반발 , 0.30
 ELSEIF ABL:스캇중독 == 4
 	SOURCE:성취감 += 1000
-	TIMES SOURCE:일탈, 0.20
-	TIMES SOURCE:반발, 0.20
+	TIMES SOURCE:일탈 , 0.20
+	TIMES SOURCE:반발 , 0.20
 ELSEIF ABL:스캇중독 == 5
 	SOURCE:성취감 += 2000
-	TIMES SOURCE:일탈, 0.10
-	TIMES SOURCE:반발, 0.10
+	TIMES SOURCE:일탈 , 0.10
+	TIMES SOURCE:반발 , 0.10
 ENDIF
 
 ;더러움의 처리
@@ -2238,7 +2238,7 @@ SIF TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5
 	STAIN:속옷（아래） |= 128
 SIF BOTTOMS(TARGET) >= 3
 	STAIN:하의 |= 128
-SIF TEQUIP:특수 2
+SIF TEQUIP:특수2
 	STAIN:발장식 |= 128
 
 ;-------------------------------------------------
@@ -2295,7 +2295,7 @@ ELSE
 			STAIN:속옷（아래） |= 2048
 		SIF TEQUIP:신발 > 0
 			STAIN:신발 |= 2048
-		SIF TEQUIP:특수 2 > 0
+		SIF TEQUIP:특수2 > 0
 			STAIN:발장식 |= 2048
 		STAIN:발 |= 2048
 	ENDIF
@@ -2398,7 +2398,7 @@ IF TEQUIP:강정신약 == 1
 ENDIF
 
 ;절정 C
-;사정의 처리를 위해서(때문에), 처리는후돌리기
+;사정의 처리를 위해서(때문에) , 처리는후돌리기
 IF UP:쾌C + PALAM:쾌C >= PALAMLV:4 * 2
 	C = 2
 ELSEIF UP:쾌C + PALAM:쾌C >= PALAMLV:4
@@ -2538,7 +2538,7 @@ SIF BASE:사정 > MAXBASE:사정
 IF TALENT:TARGET:조루
 	;게이지 15000이라면사정
 	IF BASE:사정 == 15000
-		;사정의 한계, 또는사정관리를 하고 있다, 또는 소질[아이사이즈]
+		;사정의 한계 , 또는사정관리를 하고 있다 , 또는 소질[아이사이즈]
 		IF !CFLAG:11 || TEQUIP:사정관리 || TEQUIP:요도벌룬 || TALENT:아이사이즈
 			;초조하게 해 포인트 높다
 			IF TFLAG:166 >= 3
@@ -2554,7 +2554,7 @@ IF TALENT:TARGET:조루
 		ENDIF
 	;게이지 10000이상이라도사정
 	ELSEIF BASE:사정 > 10000
-		;사정의 한계, 또는사정관리를 하고 있다, 또는 소질[아이사이즈]
+		;사정의 한계 , 또는사정관리를 하고 있다 , 또는 소질[아이사이즈]
 		IF !CFLAG:11 || TEQUIP:사정관리 || TEQUIP:요도벌룬 || TALENT:아이사이즈
 			;초조하게 해 포인트 높다
 			IF TFLAG:166 >= 3
@@ -2570,9 +2570,9 @@ IF TALENT:TARGET:조루
 		ENDIF
 	;게이지 8000이상이라면 절정 하고 있을까 본다
 	ELSEIF BASE:사정 > 8000
-		;C절정, 또는 VAB절정 또한 VAB사정의 조건을 채우고 있다
+		;C절정 , 또는 VAB절정 또한 VAB사정의 조건을 채우고 있다
 		IF C || (A && EXP:A사정경험 >= 20) || (B && EXP:B사정경험 >= 30) || (V && EXP:V사정경험 >= 30)
-			;사정의 한계, 또는사정관리를 하고 있다, 또는 소질[아이사이즈]
+			;사정의 한계 , 또는사정관리를 하고 있다 , 또는 소질[아이사이즈]
 			IF !CFLAG:11 || TEQUIP:사정관리 || TEQUIP:요도벌룬 || TALENT:아이사이즈
 				;초조하게 해 포인트 높다
 				IF TFLAG:166 >= 3
@@ -2586,7 +2586,7 @@ IF TALENT:TARGET:조루
 				;조루사정
 				TFLAG:165 = 3
 			ENDIF
-		;절정 하고 있지 않는, 혹은 조건을 채우지 않았다
+		;절정 하고 있지 않는 , 혹은 조건을 채우지 않았다
 		ELSE
 			;초조하게 해 포인트
 			TFLAG:166++
@@ -2600,9 +2600,9 @@ IF TALENT:TARGET:조루
 ELSEIF TALENT:TARGET:지루
 	;게이지 10000이상이라면 절정 하고 있을까 본다
 	IF BASE:사정 > 10000
-		;C절정, 또는 VAB절정 또한 VAB사정의 조건을 채우고 있다
+		;C절정 , 또는 VAB절정 또한 VAB사정의 조건을 채우고 있다
 		IF C || (A && EXP:A사정경험 >= 20) || (B && EXP:B사정경험 >= 30) || (V && EXP:V사정경험 >= 30)
-			;사정의 한계, 또는사정관리를 하고 있다, 또는 소질[아이사이즈]
+			;사정의 한계 , 또는사정관리를 하고 있다 , 또는 소질[아이사이즈]
 			IF !CFLAG:11 || TEQUIP:사정관리 || TEQUIP:요도벌룬 || TALENT:아이사이즈
 				;초조하게 해 포인트 높다
 				IF TFLAG:166 >= 3
@@ -2638,7 +2638,7 @@ ELSEIF TALENT:TARGET:지루
 					TFLAG:166++
 				ENDIF
 			ENDIF
-		;절정 하고 있지 않는, 혹은 조건을 채우지 않았다
+		;절정 하고 있지 않는 , 혹은 조건을 채우지 않았다
 		ELSE
 			;초조하게 해 포인트
 			TFLAG:166++
@@ -2652,7 +2652,7 @@ ELSEIF TALENT:TARGET:지루
 ELSE
 	;게이지 15000이라면사정
 	IF BASE:사정 == 15000
-		;사정의 한계, 또는사정관리를 하고 있다, 또는 소질[아이사이즈]
+		;사정의 한계 , 또는사정관리를 하고 있다 , 또는 소질[아이사이즈]
 		IF !CFLAG:11 || TEQUIP:사정관리 || TEQUIP:요도벌룬 || TALENT:아이사이즈
 			;초조하게 해 포인트 높다
 			IF TFLAG:166 >= 3
@@ -2668,9 +2668,9 @@ ELSE
 		ENDIF
 	;게이지 10000이상이라면 절정 하고 있을까 본다
 	ELSEIF BASE:사정 > 10000
-		;C절정, 또는 VAB절정 또한 VAB사정의 조건을 채우고 있다
+		;C절정 , 또는 VAB절정 또한 VAB사정의 조건을 채우고 있다
 		IF C || (A && EXP:A사정경험 >= 20) || (B && EXP:B사정경험 >= 30) || (V && EXP:V사정경험 >= 30)
-			;사정의 한계, 또는사정관리를 하고 있다, 또는 소질[아이사이즈]
+			;사정의 한계 , 또는사정관리를 하고 있다 , 또는 소질[아이사이즈]
 			IF !CFLAG:11 || TEQUIP:사정관리 || TEQUIP:요도벌룬 || TALENT:아이사이즈
 				;초조하게 해 포인트 높다
 				IF TFLAG:166 >= 3
@@ -2684,7 +2684,7 @@ ELSE
 				;사정
 				TFLAG:165 = 5
 			ENDIF
-		;절정 하고 있지 않는, 혹은 조건을 채우지 않았다
+		;절정 하고 있지 않는 , 혹은 조건을 채우지 않았다
 		ELSE
 			;초조하게 해 포인트
 			TFLAG:166++
@@ -2696,20 +2696,20 @@ ELSE
 	ENDIF
 ENDIF
 
-;보통으로사정 하고 있으면, 초조하게 해 포인트를 0으로 해, 연속사정플래그를 온에
+;보통으로사정 하고 있으면 , 초조하게 해 포인트를 0으로 해 , 연속사정플래그를 온에
 IF TFLAG:165 == 3 || TFLAG:165 == 5 || TFLAG:165 == 6
 	TFLAG:166 = 0
 	TFLAG:167++
-;사정 하고 있지 않으면, 연속사정플래그를 오프로 해, 드라이 오르가즘 가부의 판정
+;사정 하고 있지 않으면 , 연속사정플래그를 오프로 해 , 드라이 오르가즘 가부의 판정
 ELSE
 	TFLAG:167 = 0
 	CALL SHOOT_DRY_CHECK
 ENDIF
 
-;하늘사정, 조루사정, 사정라면 1
+;하늘사정 , 조루사정 , 사정라면 1
 IF TFLAG:165 == 1 || TFLAG:165 == 3 || TFLAG:165 == 5
 	E = 1
-;강공사정, 대량사정라면 2
+;강공사정 , 대량사정라면 2
 ELSEIF TFLAG:154 == 2 || TFLAG:154 == 6
 	E = 2
 ;캔슬 혹은 드라이 오르가즘 하고 싶은들 0
@@ -2964,7 +2964,7 @@ EX:3 += B
 EXP:절정경험 += C+V+A+B
 
 ;금욕 포인트의 리셋트
-;페니스가 없는지, 아이사이즈의 경우, C나 V로 절정 하고 있으면 사라진다
+;페니스가 없는지 , 아이사이즈의 경우 , C나 V로 절정 하고 있으면 사라진다
 SIF (!PENIS(TARGET) || TALENT:아이사이즈) && (C || V)
 	CFLAG:602 = 0
 
@@ -2983,7 +2983,7 @@ SIF !PENIS(TARGET)
 	RETURN 0
 
 ;성전환 하고 있는 경우에 대비해 원의 성별을 본다
-;MALE2(ARG) 남성이라면 1, 여성이라면 0을 돌려준다
+;MALE2(ARG) 남성이라면 1 , 여성이라면 0을 돌려준다
 LOCAL = MALE2(TARGET)
 
 ;드라이 오르가즘
@@ -2991,7 +2991,7 @@ IF TFLAG:165 == 7
 	SIF TEQUIP:사정관리 || TEQUIP:요도벌룬
 		SOURCE:통증 += ((BASE:사정 * 30) / MAXBASE:사정)
 	SOURCE:욕정 += ((BASE:사정 * 60) / MAXBASE:사정)
-	TIMES SOURCE:욕정, 1.20
+	TIMES SOURCE:욕정 , 1.20
 	NOWEX:41 += 1
 	EX:41 += 1
 	LOCAL:1 = 20
@@ -3001,7 +3001,7 @@ ELSEIF TFLAG:165 == 2
 	SIF TEQUIP:사정관리 || TEQUIP:요도벌룬
 		SOURCE:통증 += ((BASE:사정 * 30) / MAXBASE:사정)
 	SOURCE:욕정 += ((BASE:사정 * 60) / MAXBASE:사정)
-	TIMES SOURCE:욕정, 1.20
+	TIMES SOURCE:욕정 , 1.20
 	BASE:사정 = 9999
 	IF (TFLAG:167 > 3 && !TALENT:절륜) || TFLAG:165 > 5
 		BASE:사정 = 0
@@ -3015,7 +3015,7 @@ ELSEIF TFLAG:165 == 1
 	SIF TEQUIP:사정관리 || TEQUIP:요도벌룬
 		SOURCE:통증 += ((BASE:사정 * 15) / MAXBASE:사정)
 	SOURCE:욕정 += ((BASE:사정 * 30) / MAXBASE:사정)
-	TIMES SOURCE:욕정, 1.10
+	TIMES SOURCE:욕정 , 1.10
 	BASE:사정 = 9999
 	SIF (TFLAG:167 > 3 && !TALENT:절륜) || TFLAG:165 > 5
 		BASE:사정 = 5000
@@ -3073,7 +3073,7 @@ ELSEIF TFLAG:165 == 6
 	;P에 정액 더러움
 	STAIN:페니스 |= 4
 	
-	;착의시, 옷에 정액 더러움이 붙는다(착의 섹스 때는 속옷에는 붙지 않는다)
+	;착의시 , 옷에 정액 더러움이 붙는다(착의 섹스 때는 속옷에는 붙지 않는다)
 	STAIN:하의 |= 4
 	IF SELECTCOM == 100 || SELECTCOM == 101 || SELECTCOM == 102 || SELECTCOM == 103 || SELECTCOM == 106 || SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116 || SELECTCOM == 260 || SELECTCOM == 261 || SELECTCOM == 262 || SELECTCOM == 263 || SELECTCOM == 264 || SELECTCOM == 265 || SELECTCOM == 503 || SELECTCOM == 505 || SELECTCOM == 506 || SELECTCOM == 507 || SELECTCOM == 508 || SELECTCOM == 509 || SELECTCOM == 510 || SELECTCOM == 511 || SELECTCOM == 512 || SELECTCOM == 513 || SELECTCOM == 514
 	ELSE
@@ -3141,7 +3141,7 @@ ELSEIF TFLAG:165 == 5 || TFLAG:165 == 3
 	;P에 정액 더러움
 	STAIN:페니스 |= 4
 	
-	;착의시, 옷에 정액 더러움이 붙는다(착의 섹스시는 속옷에는 붙지 않는다)
+	;착의시 , 옷에 정액 더러움이 붙는다(착의 섹스시는 속옷에는 붙지 않는다)
 	IF (SELECTCOM >= 100 && SELECTCOM <= 106) || (SELECTCOM >= 110 && SELECTCOM <= 116) || (SELECTCOM >= 260 && SELECTCOM <= 265) || SELECTCOM == 503 || (SELECTCOM >= 505 && SELECTCOM <= 514)
 		STAIN:하의 |= 4
 	ELSE
@@ -3172,7 +3172,7 @@ IF TFLAG:165 == 3 || TFLAG:165 == 5 || TFLAG:165 == 6
 	IF TFLAG:165 == 6
 		;금욕 포인트 줄인다
 		CFLAG:602 -= (CFLAG:602/5)
-	;사정, 조루사정,
+	;사정 , 조루사정,
 	ELSEIF TFLAG:165 == 5 || TFLAG:165 == 3
 		CFLAG:602 -= (CFLAG:602/10)
 	ENDIF
@@ -3222,7 +3222,7 @@ SIF TALENT:자제심
 SIF TALENT:쾌감에솔직
 	TIMES A , 1.20
 
-;쾌감을부정(음란, 창부로 무효)
+;쾌감을부정(음란 , 창부로 무효)
 SIF TALENT:쾌감을부정 && (TALENT:음란 == 0 && TALENT:창부 == 0)
 	TIMES A , 0.80
 
@@ -3328,7 +3328,7 @@ IF E == 2
 	;B에모유더러움
 	STAIN:가슴 |= 16
 	
-	;착의시, 옷에모유더러움
+	;착의시 , 옷에모유더러움
 	SIF TEQUIP:속옷（위）
 		STAIN:속옷（위） |= 16
 	IF TEQUIP:상의
@@ -3394,7 +3394,7 @@ ELSEIF E == 1
 	;B에모유더러움
 	STAIN:가슴 |= 16
 
-	;착의시, 옷에모유더러움
+	;착의시 , 옷에모유더러움
 	IF TEQUIP:속옷（위）
 		STAIN:속옷（위） |= 16
 	ELSEIF TEQUIP:상의
@@ -3419,10 +3419,10 @@ ENDIF
 
 
 ;-------------------------------------------------
-;고통쾌락경험, 봉사쾌락경험의 체크
+;고통쾌락경험 , 봉사쾌락경험의 체크
 ;-------------------------------------------------
 @EXP_GOT_CHECK
-;봉사계인, 봉사 쾌락의 체크
+;봉사계인 , 봉사 쾌락의 체크
 A = UP:쾌C+UP:쾌V+UP:쾌A+UP:쾌B
 E = 0
 
@@ -3441,28 +3441,28 @@ ENDIF
 IF TFLAG:100
 	IF A >= 12000
 		E = 16
-		TIMES UP:공포, 0.65
-		TIMES UP:반감, 0.30
+		TIMES UP:공포 , 0.65
+		TIMES UP:반감 , 0.30
 	ELSEIF A >= 8000
 		E = 12
-		TIMES UP:공포, 0.70
-		TIMES UP:반감, 0.40
+		TIMES UP:공포 , 0.70
+		TIMES UP:반감 , 0.40
 	ELSEIF A >= 5000
 		E = 8
-		TIMES UP:공포, 0.75
-		TIMES UP:반감, 0.50
+		TIMES UP:공포 , 0.75
+		TIMES UP:반감 , 0.50
 	ELSEIF A >= 3000
 		E = 4
-		TIMES UP:공포, 0.80
-		TIMES UP:반감, 0.60
+		TIMES UP:공포 , 0.80
+		TIMES UP:반감 , 0.60
 	ELSEIF A >= 2000
 		E = 2
-		TIMES UP:공포, 0.85
-		TIMES UP:반감, 0.70
+		TIMES UP:공포 , 0.85
+		TIMES UP:반감 , 0.70
 	ELSEIF A >= 1000
 		E = 1
-		TIMES UP:공포, 0.90
-		TIMES UP:반감, 0.80
+		TIMES UP:공포 , 0.90
+		TIMES UP:반감 , 0.80
 	ENDIF
 	IF E
 		PRINT 봉사쾌락경험+
@@ -3476,22 +3476,22 @@ ENDIF
 E = 0
 IF UP:욕정 >= 3000 && UP:고통 >= 2000
 	E = 16
-	TIMES UP:공포, 0.65
+	TIMES UP:공포 , 0.65
 ELSEIF UP:욕정 >= 2500 && UP:고통 >= 1500
 	E = 12
-	TIMES UP:공포, 0.70
+	TIMES UP:공포 , 0.70
 ELSEIF UP:욕정 >= 1500 && UP:고통 >= 1000
 	E = 8
-	TIMES UP:공포, 0.75
+	TIMES UP:공포 , 0.75
 ELSEIF UP:욕정 >= 1000 && UP:고통 >= 500
 	E = 4
-	TIMES UP:공포, 0.80
+	TIMES UP:공포 , 0.80
 ELSEIF UP:욕정 >= 600 && UP:고통 >= 300
 	E = 2
-	TIMES UP:공포, 0.85
+	TIMES UP:공포 , 0.85
 ELSEIF UP:욕정 >= 300 && UP:고통 >= 100
 	E = 1
-	TIMES UP:공포, 0.90
+	TIMES UP:공포 , 0.90
 ENDIF
 IF E > 0
 	PRINT 고통쾌락경험+
@@ -3649,20 +3649,20 @@ ENDIF
 SIF U >= 1
 	STAIN:페니스 |= 128
 
-;착의시, 옷에 뇨더러움
+;착의시 , 옷에 뇨더러움
 IF U >= 4
 	SIF TEQUIP:속옷（아래）
 		STAIN:속옷（아래） |= 128
 	SIF TEQUIP:하의
 		STAIN:하의 |= 128
-	SIF TEQUIP:특수 2
+	SIF TEQUIP:특수2
 		STAIN:발장식 |= 128
 ELSEIF U >= 2
 	SIF TEQUIP:속옷（아래）
 		STAIN:속옷（아래） |= 128
 	IF TEQUIP:하의
 		STAIN:하의 |= 128
-	ELSEIF TEQUIP:특수 2
+	ELSEIF TEQUIP:특수2
 		STAIN:발장식 |= 128
 	ENDIF
 ELSEIF U >= 1
@@ -3670,7 +3670,7 @@ ELSEIF U >= 1
 		STAIN:속옷（아래） |= 128
 	ELSEIF TEQUIP:하의
 		STAIN:하의 |= 128
-	ELSEIF TEQUIP:특수 2
+	ELSEIF TEQUIP:특수2
 		STAIN:발장식 |= 128
 	ENDIF
 ENDIF
@@ -3706,7 +3706,7 @@ ELSEIF UP:고통 >= 8000 && MARK:고통각인 <= 2
 		TFLAG:25 = 1
 	ENDIF
 	;고통각인 3로이상경험
-	;주인이새드, 또는바느질잘함소유로바늘커맨드를 사용했을 때 게다가＋1
+	;주인이새드 , 또는바느질잘함소유로바늘커맨드를 사용했을 때 게다가＋1
 	IF TALENT:PLAYER:새드
 		EXP:이상경험 += 2
 	ELSEIF TALENT:PLAYER:바느질잘함 && SELECTCOM == 143
@@ -3920,7 +3920,7 @@ PRINTL 　
 VARSET LOCAL
 ;쾌C의 구슬
 SELECTCASE SELECTCOM
-	CASE 70 TO 76, 80 TO 84, 86, 87, 100 TO 116, 220, 226, 244, 245, 318, 420 TO 422, 440, 441, 503, 504, 506 TO 518
+	CASE 70 TO 76,80 TO 84,86,87,100 TO 116,220,226,244,245,318,420 TO 422,440,441,503,504,506 TO 518
 		LOCAL:1 = 5 + ABL:PLAYER:C감각 * 3
 		JUEL:PLAYER:쾌C += LOCAL:1
 ENDSELECT
@@ -3942,7 +3942,7 @@ SELECTCASE SELECTCOM
 ENDSELECT
 ;수치의 구슬
 SELECTCASE SELECTCOM
-	CASE 226, 227, 270, 271, 280 TO 286
+	CASE 226,227,270,271,280 TO 286
 		LOCAL:5 = 10 + ABL:새드끼 * 5
 		JUEL:PLAYER:수치 += LOCAL:5
 ENDSELECT
@@ -3975,60 +3975,60 @@ IF ASSIPLAY == 0
 		TIMES SOURCE:쾌V , 1.40
 		TIMES SOURCE:쾌A , 1.40
 		TIMES SOURCE:쾌B , 1.40
-		TIMES SOURCE:애정, 1.50
+		TIMES SOURCE:애정 , 1.50
 		
-		TIMES SOURCE:불결, 0.50
-		TIMES SOURCE:일탈, 0.50
+		TIMES SOURCE:불결 , 0.50
+		TIMES SOURCE:일탈 , 0.50
 	ELSEIF CFLAG:2 >= 2000
 		TIMES SOURCE:쾌C , 1.20
 		TIMES SOURCE:쾌V , 1.20
 		TIMES SOURCE:쾌A , 1.20
 		TIMES SOURCE:쾌B , 1.20
-		TIMES SOURCE:애정, 1.30
+		TIMES SOURCE:애정 , 1.30
 		
-		TIMES SOURCE:불결, 0.70
-		TIMES SOURCE:일탈, 0.70
+		TIMES SOURCE:불결 , 0.70
+		TIMES SOURCE:일탈 , 0.70
 	ELSEIF CFLAG:2 >= 1000
 		TIMES SOURCE:쾌C , 1.10
 		TIMES SOURCE:쾌V , 1.10
 		TIMES SOURCE:쾌A , 1.10
 		TIMES SOURCE:쾌B , 1.10
-		TIMES SOURCE:애정, 1.20
+		TIMES SOURCE:애정 , 1.20
 		
-		TIMES SOURCE:불결, 0.80
-		TIMES SOURCE:일탈, 0.80
+		TIMES SOURCE:불결 , 0.80
+		TIMES SOURCE:일탈 , 0.80
 	ELSEIF CFLAG:2 >= 500
-		TIMES SOURCE:애정, 1.10
+		TIMES SOURCE:애정 , 1.10
 		
-		TIMES SOURCE:불결, 0.90
-		TIMES SOURCE:일탈, 0.90
+		TIMES SOURCE:불결 , 0.90
+		TIMES SOURCE:일탈 , 0.90
 	;부벡터
 	ELSEIF CFLAG:2 <= -5000
-		TIMES SOURCE:두려움, 1.40
-		TIMES SOURCE:중독충족, 1.40
-		TIMES SOURCE:굴복, 1.50
+		TIMES SOURCE:두려움 , 1.40
+		TIMES SOURCE:중독충족 , 1.40
+		TIMES SOURCE:굴복 , 1.50
 		
-		TIMES SOURCE:울굴, 0.50
-		TIMES SOURCE:반발, 0.50
+		TIMES SOURCE:울굴 , 0.50
+		TIMES SOURCE:반발 , 0.50
 	ELSEIF CFLAG:2 <= -2000
-		TIMES SOURCE:두려움, 1.20
-		TIMES SOURCE:중독충족, 1.20
-		TIMES SOURCE:굴복, 1.30
+		TIMES SOURCE:두려움 , 1.20
+		TIMES SOURCE:중독충족 , 1.20
+		TIMES SOURCE:굴복 , 1.30
 		
-		TIMES SOURCE:울굴, 0.70
-		TIMES SOURCE:반발, 0.70
+		TIMES SOURCE:울굴 , 0.70
+		TIMES SOURCE:반발 , 0.70
 	ELSEIF CFLAG:2 <= -1000
-		TIMES SOURCE:두려움, 1.10
-		TIMES SOURCE:중독충족, 1.10
-		TIMES SOURCE:굴복, 1.20
+		TIMES SOURCE:두려움 , 1.10
+		TIMES SOURCE:중독충족 , 1.10
+		TIMES SOURCE:굴복 , 1.20
 		
-		TIMES SOURCE:울굴, 0.80
-		TIMES SOURCE:반발, 0.80
+		TIMES SOURCE:울굴 , 0.80
+		TIMES SOURCE:반발 , 0.80
 	ELSEIF CFLAG:2 <= -500
-		TIMES SOURCE:굴복, 1.10
+		TIMES SOURCE:굴복 , 1.10
 		
-		TIMES SOURCE:울굴, 0.90
-		TIMES SOURCE:반발, 0.90
+		TIMES SOURCE:울굴 , 0.90
+		TIMES SOURCE:반발 , 0.90
 	ENDIF
 ENDIF
 
@@ -4039,11 +4039,11 @@ ENDIF
 ;사양 설명:
 ;@ECST_CANCEL로 EX:11~EX:14에 기록해 온 절정 회수를해방 합니다.
 ;패치 모듬에서는 TFLAG:44~TFLAG:47을 대신에 사용. 내역은
-;TFLAG:44 = EX:11(C절정처리)의 대신해, TFLAG:45 = EX:12(V절정처리)의 대신해,
-;TFLAG:46 = EX:13(A절정처리)의 대신해, TFLAG:47 = EX:14(B절정처리)의 대신
-;기록해 온 절정 회수 1회에 대해, 해당하는 부위의 쾌소스(UP:쾌C, 쾌V, 쾌A, 쾌B)를 2배로 합니다.
+;TFLAG:44 = EX:11(C절정처리)의 대신해 , TFLAG:45 = EX:12(V절정처리)의 대신해,
+;TFLAG:46 = EX:13(A절정처리)의 대신해 , TFLAG:47 = EX:14(B절정처리)의 대신
+;기록해 온 절정 회수 1회에 대해 , 해당하는 부위의 쾌소스(UP:쾌C , 쾌V , 쾌A , 쾌B)를 2배로 합니다.
 ;1회의 커맨드로 하나의 부위에 대해 1회씩 이 배화 처리를 실시해,
-;EX:11~EX:14의 합계가 0이 되었을 때, 반동이 해제됩니다.
+;EX:11~EX:14의 합계가 0이 되었을 때 , 반동이 해제됩니다.
 ;-------------------------------------------------
 ;쾌C의 처리
 IF TFLAG:44 > 0 && UP:쾌C > 0

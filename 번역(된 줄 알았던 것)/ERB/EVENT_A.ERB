@@ -243,11 +243,11 @@ IF ABL:마조끼 >= 5 && EXP:고통쾌락경험 >= 300 && TALENT:마조 == 0
 	PRINTFORMW %NAME:TARGET%는【마조】를 얻었다
 	PRINTL 　
 	TALENT:마조 = 1
-;드 M:마조끼Lv8 이상, 고통쾌락경험 1000 이상
+;도M:마조끼Lv8 이상, 고통쾌락경험 1000 이상
 ELSEIF ABL:마조끼 >= 8 && EXP:고통쾌락경험 >= 1000 && TALENT:마조 == 1
 	TFLAG:13 = 64
 	CALL KOJO_MESSAGE_EVENT
-	PRINTFORMW %NAME:TARGET%는【드 M】를 얻었다
+	PRINTFORMW %NAME:TARGET%는【도M】를 얻었다
 	PRINTL 　
 	TALENT:마조 = 2
 ENDIF
@@ -481,7 +481,7 @@ ENDIF
 IF ABL:MASTER:마조끼 >= 5 && EXP:MASTER:고통쾌락경험 >= 300 && !TALENT:MASTER:마조
 	PRINTFORMW %NAME:MASTER%는【마조】를 몸에 익혔다
 	TALENT:MASTER:마조 = 1
-;주인의 드 M:마조끼Lv8 이상, 고통쾌락경험 1000 이상, 도S가 아니다
+;주인의 도M:마조끼Lv8 이상, 고통쾌락경험 1000 이상, 도S가 아니다
 ELSEIF ABL:MASTER:마조끼 >= 8 && EXP:MASTER:고통쾌락경험 >= 1000 && TALENT:MASTER:마조 == 1
 	PRINTFORMW %NAME:MASTER%는【도M】를 몸에 익혔다
 	TALENT:MASTER:마조 = 2
@@ -613,11 +613,11 @@ IF ABL:ASSI:마조끼 >= 4 && EXP:ASSI:고통쾌락경험 >= 300 && TALENT:ASSI:
 	PRINTFORMW %NAME:ASSI%는【마조】를 몸에 익혔다
 	PRINTL 　
 	TALENT:ASSI:마조 = 1
-;조수의 드 M:마조끼Lv8 이상, 고통쾌락경험 1000 이상, 도S가 아니다
+;조수의 도M:마조끼Lv8 이상, 고통쾌락경험 1000 이상, 도S가 아니다
 ELSEIF ABL:ASSI:마조끼 >= 8 && EXP:ASSI:고통쾌락경험 >= 1000 && TALENT:ASSI:마조 == 1 && TALENT:ASSI:새드 < 2
 	PRINTFORMW %CALLNAME:ASSI%의 이쪽을 보는 눈이 이상하다
 	PRINTFORML %CALLNAME:ASSI%는 시달려고통를 맛보는 것에 완전히 열중한 것 같다
-	PRINTFORMW %NAME:ASSI%는【드 M】를 얻었다
+	PRINTFORMW %NAME:ASSI%는【도M】를 얻었다
 	PRINTL 　
 	TALENT:ASSI:마조 = 2
 ENDIF
@@ -663,7 +663,7 @@ IF NO:MASTER != X && C > CFLAG:ARG && RELATION:X < 100 && TALENT:음란
 	ELSE
 		PRINTFORMW %CALLNAME%는 %CALLNAME:W%의 이름을 안타까운 듯이 중얼거리고 있었다
 	ENDIF
-	PRINTFORMW %CALLNAME%과 %CALLNAME:W%의 궁합이{RELATION:X}%가 되었습니다
+	PRINTFORMW %CALLNAME%과 %CALLNAME:W%의 궁합이{RELATION:X}％가 되었습니다
 ELSE
 	X = NO:MASTER
 	SIF RELATION:X == 0 || RELATION:X > 100
@@ -671,7 +671,7 @@ ELSE
 	Y = RELATION:X
 	Z = 200 - Y
 	RELATION:X = Z
-	PRINTFORMW %CALLNAME%의 %CALLNAME:MASTER%에 대한 궁합이{RELATION:X}%가 되었습니다
+	PRINTFORMW %CALLNAME%의 %CALLNAME:MASTER%에 대한 궁합이{RELATION:X}％가 되었습니다
 ENDIF
 
 

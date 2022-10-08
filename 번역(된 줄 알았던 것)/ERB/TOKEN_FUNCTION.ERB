@@ -24,7 +24,7 @@ SELECTCASE NO:ARG
 	CASE 107 TO 110, 112 TO 113
 		RETURNF 1
 	;히게키리·히자마루의극
-	CASE 111, 115
+	CASE 111,115
 		RETURNF 2
 	;장 소네까지
 	CASE 1 TO 106
@@ -140,16 +140,16 @@ ENDIF
 SIF LOCAL == 0 || LOCAL:1 == 0
 	RETURNF 0
 
-;어느 쪽인지가 「아이」
-SIF (LOCAL >= 890 && LOCAL <= 899) || ( LOCAL:1 >= 890 && LOCAL:1 <= 899)
+;;어느 쪽인지가 「아이」
+SIF (LOCAL >= 890 && LOCAL <= 899 ) || ( LOCAL:1 >= 890 && LOCAL:1 <= 899)
 	RETURNF 0
 
 ;히게키리는 먼저 처리
-SIF ( LOCAL >= 107 && LOCAL <= 111) && ( LOCAL:1 >= 107 && LOCAL:1 <= 111)
+SIF ( LOCAL >= 107 && LOCAL <= 111 ) && ( LOCAL:1 >= 107 && LOCAL:1 <= 111 )
 	RETURNF 1
 
 ;히자마루는 먼저 처리
-SIF ( LOCAL >= 112 && LOCAL <= 115) && ( LOCAL:1 >= 112 && LOCAL:1 <= 115)
+SIF ( LOCAL >= 112 && LOCAL <= 115 ) && ( LOCAL:1 >= 112 && LOCAL:1 <= 115 )
 	RETURNF 1
 
 ;캐릭터 번호가 서로 이웃이 되지 않았다

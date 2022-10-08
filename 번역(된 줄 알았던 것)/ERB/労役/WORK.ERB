@@ -868,32 +868,32 @@ FOR LOCAL, 0, 210
 		C = 0
 		LOCAL:1 = 0
 		SELECTCASE LOCAL
-			;처녀, 예속
-			CASE 0, 8
+			;처녀、예속
+			CASE 0,8
 				C = 100
 				V += 100
 			;창부
 			CASE 7
 				C = 60
 				V += 60
-			;복종, 매력, 수수께끼의매력
-			CASE 5, 92, 94
+			;복종、매력、수수께끼의매력
+			CASE 5,92,94
 				C = 50
 				V += 50
-			;꿋꿋함, 마조
-			CASE 12, 84
+			;꿋꿋함、마조
+			CASE 12,84
 				C = 40
 				V += 40
-			;음란, 일선을넘지않음, 헌신적, 쾌감을부정, 음란구멍, 음란가슴, 섹스광, 새드
-			;맹신, C민감, V민감, A민감, B민감, 폭유, 불사신, 절륜
-			CASE 4, 27, 47, 63, 71, 75, 77, 78, 83, 86, 102, 104, 106, 108, 112, 147
+			;음란、일선을넘지않음、헌신적、쾌감을부정、음란구멍、음란가슴、섹스광、새드
+			;맹신、C민감、V민감、A민감、B민감、폭유、불사신、절륜
+			CASE 4,27,47,63,71,75,77,78,83,86,102,104,106,108,112,147
 				SIF LOCAL == 102 && ABL:C감각 < 3 || LOCAL == 104 && ABL:V감각 < 3 || LOCAL == 106 && ABL:A감각 < 3 || LOCAL == 108 && ABL:B감각 < 3
 					CONTINUE
 				C = 30
 				V += 30
-			;재생처녀, 반항적, 프라이드높음, 건방짐, 츤데레, 자제심, 정조관념, 고통에약함
-			;악취민감, 자위광, 항문광, 소악마, 요호, 인기, 거유, 함몰유두, 회복빠름, 모유체질
-			CASE 1, 11, 15, 16, 18, 20, 30, 41, 62, 74, 76, 87, 91, 111, 120, 130, 145, 149
+			;재생처녀、반항적、프라이드높음、건방짐、츤데레、자제심、정조관념、고통에약함
+			;악취민감、자위광、항문광、소악마、요호、인기、거유、함몰유두、회복빠름、모유체질
+			CASE 1,11,15,16,18,20,30,41,62,74,76,87,91,111,120,130,145,149
 				C = 20
 				V += 20
 				
@@ -906,13 +906,13 @@ FOR LOCAL, 0, 210
 					IF TALENT:처녀
 						C = 40
 						V += 10
-						PRINTFORML %TALENTNAME:LOCAL%과 %TALENTNAME:(LOCAL:1)%과 %TALENTNAME:0% ＋ {C}%
+						PRINTFORML %TALENTNAME:LOCAL%과 %TALENTNAME:(LOCAL:1)%과 %TALENTNAME:0% ＋ {C}％
 						CONTINUE
 					ENDIF
 				ENDIF
-			;호기심, 보수적, 눈에띄고싶음, 혀놀림, 해방, 부끄럼쟁이, 젖기쉬움, 습득빠름, 실금버릇
-			;자위하기쉬움, 즉각함락, 도착적, 골드핑거, 소인체형, 말자지, 극, 달마
-			CASE 23, 24, 28, 33, 35, 42, 50, 52, 57, 58, 60, 73, 80, 117, 142, 180, 204
+			;호기심、보수적、눈에띄고싶음、혀놀림、해방、부끄럼쟁이、젖기쉬움、습득빠름、실금버릇
+			;자위하기쉬움、즉각함락、도착적、골드핑거、소인체형、말자지、극、달마
+			CASE 23,24,28,33,35,42,50,52,57,58,60,73,80,117,142,180,204
 				C = 10
 				V += 10
 				
@@ -950,19 +950,19 @@ FOR LOCAL, 0, 210
 				V += 5
 		ENDSELECT
 		IF LOCAL:1 && C
-			PRINTFORML %TALENTNAME:LOCAL%과 %TALENTNAME:(LOCAL:1)% ＋ {C}%
+			PRINTFORML %TALENTNAME:LOCAL%과 %TALENTNAME:(LOCAL:1)% ＋ {C}％
 		ELSEIF C
-			PRINTFORML %TALENTNAME:LOCAL% ＋ {C}%
+			PRINTFORML %TALENTNAME:LOCAL% ＋ {C}％
 		ENDIF
 		C = 0
 		SELECTCASE LOCAL
-			;수치심없음, 젖기어려움, 습득느림, 남자혐오, 여자혐오, 절벽, 한다리결손
-			CASE 35, 43, 51, 82, 88, 110, 202
+			;수치심없음、젖기어려움、습득느림、남자혐오、여자혐오、절벽、한다리결손
+			CASE 35,43,51,82,88,110,202
 				C = 10
 				V -= 10
-			;겁쟁이, 솔직함, 얌전함, 프라이드낮음, 멘헤라, 무관심, 감정부족, 정조무관심, 고통에강함
-			;독약내성, 악취둔감, 더러움무시, 빈유, 회복느림,
-			CASE 10, 13, 14, 17, 21, 22, 31, 38, 40, 56, 61, 64, 109, 131,
+			;겁쟁이、솔직함、얌전함、프라이드낮음、멘헤라、무관심、감정부족、정조무관심、고통에강함
+			;독약내성、악취둔감、더러움무시、빈유、회복느림、
+			CASE 10,13,14,17,21,22,31,38,40,56,61,64,109,131,
 				C = 20
 				V -= 20
 				
@@ -976,8 +976,8 @@ FOR LOCAL, 0, 210
 					C = 10
 					V += 10
 				ENDIF
-			;쾌감에솔직, C둔감, V둔감, A둔감, B둔감, 유아／유아퇴행, 한팔결손, 양다리결손
-			CASE 70, 101, 103, 105, 107, 150, 200, 203
+			;쾌감에솔직、C둔감、V둔감、A둔감、B둔감、유아／유아퇴행、한팔결손、양다리결손
+			CASE 70,101,103,105,107,150,200,203
 				SIF LOCAL == 101 && ABL:C감각 >= 4 || LOCAL == 103 && ABL:V감각 >= 4 || LOCAL == 105 && ABL:A감각 >= 4 || LOCAL == 107 && ABL:B감각 >= 4
 					CONTINUE
 				C = 30
@@ -989,8 +989,8 @@ FOR LOCAL, 0, 210
 					C = 20
 					V += 10
 				ENDIF
-			;연모, 양팔결손
-			CASE 3, 201
+			;연모、양팔결손
+			CASE 3,201
 				C = 50
 				V -= 50
 			;친애
@@ -999,9 +999,9 @@ FOR LOCAL, 0, 210
 				V -= 80
 		ENDSELECT
 		IF LOCAL:1 && C
-			PRINTFORML %TALENTNAME:LOCAL%과 %TALENTNAME:(LOCAL:1)% － {C}%
+			PRINTFORML %TALENTNAME:LOCAL%과 %TALENTNAME:(LOCAL:1)% － {C}％
 		ELSEIF C
-			PRINTFORML %TALENTNAME:LOCAL% － {C}%
+			PRINTFORML %TALENTNAME:LOCAL% － {C}％
 		ENDIF
 	ENDIF
 NEXT
@@ -1010,14 +1010,14 @@ NEXT
 IF ISASSI:TARGET == 1
 	C = 100
 	V -= 100
-	PRINTFORML 원조수 －{C}%
+	PRINTFORML 원조수 －{C}％
 ENDIF
 
 ;보정치가 0 이하의 경우는 1으로 한다
 SIF V <= 0
 	V = 1
 
-PRINTFORML 최종 배율 {V}%
+PRINTFORML 최종 배율 {V}％
 
 ;보정치의 적용
 S *= V
@@ -1031,19 +1031,19 @@ PRINTL
 		TIMES S , 0.08
 		Z = ABL:순종
 		Z *= 8
-		PRINTFORML %TALENTNAME:9% ×{Z}%
+		PRINTFORML %TALENTNAME:9% ×{Z}％
 	ELSEIF TALENT:광기
 		S *= ABL:순종
 		TIMES S , 0.08
 		Z = ABL:순종
 		Z *= 8
-		PRINTFORML %TALENTNAME:141% ×{Z}%
+		PRINTFORML %TALENTNAME:141% ×{Z}％
 	ELSEIF TALENT:임신
 		S *= ABL:순종
 		TIMES S , 0.08
 		Z = ABL:순종
 		Z *= 8
-		PRINTFORML %TALENTNAME:153% ×{Z}%
+		PRINTFORML %TALENTNAME:153% ×{Z}％
 	ENDIF
 PRINTL 
 ENDIF
@@ -1052,19 +1052,19 @@ ENDIF
 ;난이도 처리
 ;EASY
 IF FLAG:4 == 1
-	PRINTFORML 난이도:EASY ×120%
+	PRINTFORML 난이도:EASY ×120％
 	TIMES S , 1.20
 ;NORMAL
 ELSEIF FLAG:4 == 2
 	TIMES S , 1.00
 ;HARD
 ELSEIF FLAG:4 == 3
-	PRINTFORML 난이도:HARD ×80%
+	PRINTFORML 난이도:HARD ×80％
 	TIMES S , 0.80
 ENDIF
 
 ;매각 확인
-PRINTFORML %NAME:TARGET%는{S}고슈금로 팔릴 것 같습니다
+PRINTFORML %NAME:TARGET%는{S}고슈금으로 팔릴 것 같습니다
 PRINTL 매각합니까?
 PRINTL [0] 네
 PRINTL [1] 아니오
@@ -1076,7 +1076,7 @@ IF RESULT == 0
 	CALL KOJO_MESSAGE_EVENT
 	;매각액
 	IF S > 0
-		PRINTFORMW 결과, %NAME:TARGET%는{S}고슈금로 팔렸습니다
+		PRINTFORMW 결과, %NAME:TARGET%는{S}고슈금으로 팔렸습니다
 		MONEY += S
 	ELSEIF S == 0
 		PRINTFORMW 결과, %NAME:TARGET%는 업자에게 거두어 졌습니다
@@ -1151,23 +1151,23 @@ P = 0
 REPEAT TFLAG:70
 	A = COUNT + 11
 	SELECTCASE FLAG:A
-		CASE 0, 1, 10, 11, 20, 30, 31, 40, 50, 51, 52, 70, 131, 220, 221, 223, 225, 226, 227, 228, 300 TO 306, 314, 315, 316, 318, 319, 400 TO 402, 526,
+		CASE 0,1,10,11,20,30,31,40,50,51,52,70,131,220,221,223,225,226,227,228,300 TO 306,314,315,316,318,319,400 TO 402,526,
 			P += 100
-		CASE 12, 14, 18, 32, 42, 76, 81 TO 83, 152 TO 154, 222, 224, 240, 241, 243, 245, 403, 404, 407, 410 TO 412, 500 TO 502
+		CASE 12,14,18,32,42,76,81 TO 83,152 TO 154,222,224,240,241,243,245,403,404,407,410 TO 412,500 TO 502
 			P += 150
-		CASE 13, 15, 21 TO 24, 33 TO 36, 44, 53, 54
+		CASE 13,15,21 TO 24,33 TO 36,44,53,54
 			P += 200
-		CASE 17, 71 TO 75, 77, 80, 84 TO 87, 130, 134 TO 142, 144, 150, 242, 246, 244, 280, 282 TO 284, 314, 317, 320, 321, 503, 504, 528
+		CASE 17,71 TO 75,77,80,84 TO 87,130,134 TO 142,144,150,242,246,244,280,282 TO 284,314,317,320,321,503,504,528
 			P += 300
-		CASE 3, 8, 100 TO 105, 110 TO 115, 263, 264, 281, 285, 311, 313, 405, 406, 420 TO 422, 505, 506, 516
+		CASE 3,8,100 TO 105,110 TO 115,263,264,281,285,311,313,405,406,420 TO 422,505,506,516
 			P += 400
-		CASE 4 TO 7, 16, 25, 44, 55, 56, 60 TO 62, 106, 116, 143, 145, 151, 155, 160, 161, 180 TO 185, 262, 265 TO 271, 286, 511, 512
+		CASE 4 TO 7,16,25,44,55,56,60 TO 62,106,116,143,145,151,155,160,161,180 TO 185,262,265 TO 271,286,511,512
 			P += 500
-		CASE 430, 431, 440, 441, 507 TO 510, 513 TO 525
+		CASE 430,431,440,441,507 TO 510,513 TO 525
 			P += 600
-		CASE 340 TO 360, 362 TO 364, 366, 367, 380, 382, 517, 518
+		CASE 340 TO 360,362 TO 364,366,367,380,382,517,518
 			P += 700
-		CASE 156, 162, 322, 361, 365, 368 TO 370, 381, 383, 390 TO 392, 527
+		CASE 156,162,322,361,365,368 TO 370,381,383,390 TO 392,527
 			P += 1000
 		CASEELSE
 			P += 10
@@ -1305,7 +1305,7 @@ DRAWLINE
 $INPUT_LOOP
 INPUT
 IF RESULT == 0
-	PRINTFORML 조교시에 녹화한 비디오를 팔아,{TFLAG:36}고슈금손에 넣었습니다
+	PRINTFORML 조교시에 녹화한 비디오를 팔아,{TFLAG:36}고슈금을 손에 넣었습니다
 	MONEY += TFLAG:36
 	TFLAG:36 = 0
 	;이벤트대사 호출(비디오 매각시)
@@ -1549,6 +1549,6 @@ IF O > 0
 	PRINTFORML 착유기를 사용해%CALLNAME%로부터모유를 짜냈다
 	PRINTFORMW %CALLNAME%의모유에는{O}의 매입가가 붙었다
 	MONEY += O
-	PRINTFORMW 소지 코우슈우금 {O}증가
+	PRINTFORMW 소지 코슈금 {O}증가
 ENDIF
 

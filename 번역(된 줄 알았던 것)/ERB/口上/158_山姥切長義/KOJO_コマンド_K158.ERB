@@ -1364,7 +1364,7 @@ IF SELECTCOM == 80
 					PRINTFORML 「이봐요 이봐요 이것이 좋을 것이다?」
 					PRINTFORML 「소망대로로 해 줄게 드 변태의 %CSTR:51%%UNICODE(0x2661)%」
 				ELSEIF ABL:새드끼 >= 5 && PREVCOM == 80 
-					PRINTFORML 「%CSTR:51%의마조자지는 이 정도는발리나 있고일 것이다?」
+					PRINTFORML 「%CSTR:51%의마조자지는 이 정도는부족해 있고일 것이다?」
 					PRINTFORML 「분명하게발축으로 해 주기 때문에 안심하면 좋다」
 				
 				;새드끼 5 이상이라면 이하의 8종류로부터 랜덤
@@ -2214,7 +2214,7 @@ IF SELECTCOM == 200
 			ELSEIF CFLAG:402 == 1
 				PRINTFORMW 「가짜군에 대해?」
 			ELSEIF CFLAG:402 == 2
-				PRINTFORMW 「고양이 살인 훈에 대해?」
+				PRINTFORMW 「묘살시군에 대해?」
 			ENDIF
 			
 			;소유하고 있지 않는 매각되었을 경우도 여기
@@ -2246,7 +2246,7 @@ IF SELECTCOM == 200
 					;아직 없다
 					ELSE
 						PRINTFORMW 「유쾌하고 사랑스러운 칼이라고 생각한다」
-						PRINTFORMW 「고양이 살인 훈이 왔을 때에는 부디, 내에게도 대면시키기를 원하는데」
+						PRINTFORMW 「묘살시군이 왔을 때에는 부디, 내에게도 대면시키기를 원하는데」
 					ENDIF
 				ENDIF
 			;음란·창부 신체의 궁합의 이야기인가 하지 않는다
@@ -2400,7 +2400,7 @@ IF SELECTCOM == 202
 		PRINTFORMW %CALLNAME%과 서로 장난해 보았다
 		;주인이나 조수가 미나이즈미에서 분기 추가
 		IF RAND:2 == 0 && ( NO:MASTER == 154 || ( ASSI > 0 && NO:ASSI == 154))
-			PRINTFORML 「응─고양이 살인 훈 사랑스럽다!스구루!!!!!!!」
+			PRINTFORML 「응─묘살시군 사랑스럽다!스구루!!!!!!!」
 			PRINTFORMW 『두고 소가 출이라고 감사관』
 		ELSE
 			PRINTFORMW 「두, 두어 너무 손대지마 불가로 하겠어」

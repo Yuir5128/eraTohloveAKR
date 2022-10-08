@@ -30,7 +30,7 @@ ELSE
 	ENDIF
 ENDIF
 
-;체력가 큰 경우는기력가, 기력가 큰 경우는체력가 성장하는 확률이 상승
+;체력이 큰 경우는기력이, 기력이 큰 경우는체력이 성장하는 확률이 상승
 IF C == 1 && MAXBASE:체력 > MAXBASE:기력 && RAND:3 == 0
 	C = 2
 ELSEIF C == 2 && MAXBASE:기력 > MAXBASE:체력 && RAND:3 == 0

@@ -1,25 +1,25 @@
 ﻿;====================================================================
-;DUTY_HATAKE.ERB 내번-하타 당번
+;DUTY_HATAKE.ERB 내번-밭내번
 ;1날 1조 밖에 낼 수 없다
 ;내번에 낸 캐릭터는 그 날 1일 구속된다
 ;====================================================================
 @DUTY_HATAKE
-;각각 하타 당번 담당의 남사의 등록 번호를 보유 초기치-1
+;각각 밭내번 담당의 남사의 등록 번호를 보유 초기치-1
 #DIM DYNAMIC HATAKE_A = -1
 #DIM DYNAMIC HATAKE_B = -1
 
 
 DRAWLINE
-PRINTL 【 내 번-하타 당번 】
+PRINTL 【 내번-밭내번 】
 PRINTL 
-PRINTL 노예에게 2명 1조로 페어를 짜게 해 동안차례 「하타 당번」을 실시하게 한다.
+PRINTL 노예에게 2명 1조로 페어를 짜게 해 동안차례 「밭내번」을 실시하게 한다.
 PRINTL 체력의 최대치가 상승한다
 PRINTL 
 PRINTL ■ 당번 내용
-PRINTL 　:[하타 당번]
+PRINTL 　：[밭내번]
 PRINTL 
 PRINTL ■ 선택되고 있는 추가 옵션
-PRINTL 　:＜이용 가능한 옵션은 없습니다＞
+PRINTL 　：＜이용 가능한 옵션은 없습니다＞
 DRAWLINE
 PRINTL 
 
@@ -27,7 +27,7 @@ PRINTL
 ;내번 시키는 노예를 선택
 ;--------------------------------------------------------
 PRINTL
-PRINTL 하타 당번을 시키는 남사를 2명, 선택해 주세요
+PRINTL 밭내번을 시키는 남사를 2명, 선택해 주세요
 PRINTL
 $INPUT_LOOP_START
 ;양쪽 모두 선택이 끝난 상태
@@ -37,7 +37,7 @@ IF HATAKE_A > 0 && HATAKE_B > 0
 	PRINTL
 ELSE
 	REPEAT CHARANUM
-		;하타 당번 할 수 있는 플래그가 서 있지 않은 남사는 표시하지 않는다
+		;밭내번 할 수 있는 플래그가 서 있지 않은 남사는 표시하지 않는다
 		SIF (CFLAG:COUNT:151 & 128) == 0
 			CONTINUE
 		
@@ -90,11 +90,11 @@ ELSE
 ENDIF
 
 ;--------------------------------------------------------
-;하타 당번을 실행한다
+;밭내번을 실행한다
 ;--------------------------------------------------------
-;PRINTFORML %CALLNAME:HATAKE_A%과 %CALLNAME:HATAKE_B%가, 하타 당번을 개시했습니다
+;PRINTFORML %CALLNAME:HATAKE_A%과 %CALLNAME:HATAKE_B%가, 밭내번을 개시했습니다
 
-;노역 플래그를 하타 당번으로 설정
+;노역 플래그를 밭내번으로 설정
 CFLAG:HATAKE_A:12 = 4
 CFLAG:HATAKE_B:12 = 4
 
@@ -121,13 +121,13 @@ TARGET = LOCAL
 
 PRINTL 
 
-;하타 당번 담당남사가 조교 대상이나 조수의 경우는, 조교 대상이나 조수로부터 제외한다
+;밭내번 담당남사가 조교 대상이나 조수의 경우는, 조교 대상이나 조수로부터 제외한다
 SIF UCHIBAN_A == TARGET || UCHIBAN_B == TARGET
 	TARGET = -1
 SIF UCHIBAN_A == ASSI || UCHIBAN_B == ASSI
 	ASSI = -1
 
-;내번개시가 끝난 플래그(하타 당번=2)를 세운다
+;내번개시가 끝난 플래그(밭내번=2)를 세운다
 FLAG:161 |= 2
 
 
@@ -213,7 +213,7 @@ BASE:HATAKE_B:체력 -= 500
 CFLAG:HATAKE_A:12 = 0
 CFLAG:HATAKE_B:12 = 0
 
-;내번개시가 끝난 플래그(하타 당번=2)를 떨어뜨린다
+;내번개시가 끝난 플래그(밭내번=2)를 떨어뜨린다
 SIF FLAG:161 & 2
 	FLAG:161 -= 2
 

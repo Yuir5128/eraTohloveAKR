@@ -60,10 +60,10 @@ IF TARGET >= 0
 			PRINTFORML 　　　·
 			PRINTFORML 　　　·
 			BASE:체력 += P
-			;체력가 상한을 넘으면 최대치에
+			;체력이 상한을 넘으면 최대치에
 			SIF BASE:체력 > MAXBASE:체력
 				BASE:체력 = MAXBASE:체력
-			PRINTFORML %CALLNAME%의체력가 회복했다.
+			PRINTFORML %CALLNAME%의체력이 회복했다.
 			JUEL:순종 += P * 4
 			PRINTFORMW %PALAMNAME:5%의 구슬＋{P*4}
 		ENDIF
@@ -73,7 +73,7 @@ IF TARGET >= 0
 	ELSEIF RESULT == 1
 		PRINTFORML %CALLNAME:MASTER%가 만든 요리에는{M}의 매입가가 붙었다
 		MONEY += M
-		PRINTFORMW 소지 코우슈우금 {M}증가
+		PRINTFORMW 소지 코슈금 {M}증가
 	ELSE
 		GOTO INPUT_LOOP
 	ENDIF
@@ -81,7 +81,7 @@ IF TARGET >= 0
 ELSE
 	PRINTFORML %CALLNAME:MASTER%가 만든 요리에는{M}의 매입가가 붙었다.
 	MONEY += M
-	PRINTFORMW 소지 코우슈우금 {M}증가
+	PRINTFORMW 소지 코슈금 {M}증가
 ENDIF
 
 M = 0
@@ -191,10 +191,10 @@ IF (TALENT:연모 == 0 || TALENT:친애 == 0) && (MARK:반발각인 >= 2 || ABL:
 		PRINTFORML 　　　·
 		PRINTFORML 　　　·
 		BASE:체력 += P
-		;체력가 상한을 넘으면 최대치에
+		;체력이 상한을 넘으면 최대치에
 		SIF BASE:체력 > MAXBASE:체력
 			BASE:체력 = MAXBASE:체력
-		PRINTFORML %CALLNAME%의체력가 회복했다.
+		PRINTFORML %CALLNAME%의체력이 회복했다.
 		JUEL:순종 += P * 4
 		PRINTFORMW %PALAMNAME:5%의 구슬＋{P*4}
 	ENDIF
@@ -227,10 +227,10 @@ ELSE
 			PRINTFORML 　　　·
 			PRINTFORML 　　　·
 			BASE:체력 += P
-			;체력가 상한을 넘으면 최대치에
+			;체력이 상한을 넘으면 최대치에
 			SIF BASE:체력 > MAXBASE:체력
 				BASE:체력 = MAXBASE:체력
-			PRINTFORML %CALLNAME%의체력가 회복했다.
+			PRINTFORML %CALLNAME%의체력이 회복했다.
 			JUEL:순종 += P * 4
 			PRINTFORMW %PALAMNAME:5%의 구슬＋{P*4}
 		ENDIF
@@ -245,7 +245,7 @@ ELSE
 		ENDIF
 		PRINTFORML 만든 요리에는{M}의 매입가가 붙었다.
 		MONEY += M
-		PRINTFORMW 소지 코우슈우금 {M}증가
+		PRINTFORMW 소지 코슈금 {M}증가
 		TFLAG:14 = 0
 	ELSE
 		GOTO INPUT_LOOP
@@ -618,14 +618,14 @@ IF TALENT:MASTER:조제지식 == 0 && TALENT:MASTER:독약내성 == 0 && RAND:M 
 	;매력감소
 	ELSEIF L == 5 && FLAG:30 > 0
 		IF FLAG:30 >= 5
-			PRINTFORMW %NAME:MASTER%의매력가 내렸다
+			PRINTFORMW %NAME:MASTER%의매력이 내렸다
 			FLAG:30 = 4
 			IF TALENT:MASTER:수수께끼의매력
 				PRINTFORMW %NAME:MASTER%는【수수께끼의매력】를 잃었다
 				TALENT:MASTER:수수께끼의매력 = 0
 			ENDIF
 		ELSE
-			PRINTFORMW %NAME:MASTER%의매력가 내렸다
+			PRINTFORMW %NAME:MASTER%의매력이 내렸다
 			FLAG:30 -= 1
 		ENDIF
 	;기교감소
@@ -757,7 +757,7 @@ RETURN 1
 ;-------------------------------------------------
 @ENDING_POISONED
 DRAWLINE
-PRINTFORMW ―――%NAME:MASTER%의체력가 다했습니다 ―――
+PRINTFORMW ―――%NAME:MASTER%의체력이 다했습니다 ―――
 PRINTL …………
 PRINTL ………
 PRINTL ……

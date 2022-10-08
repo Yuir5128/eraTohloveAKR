@@ -397,7 +397,7 @@ RETURN 1
 ;방으로부터 데리고 나간다
 @DAILY_LIFE_ABLE_31
 ;복종함락(상대 묻지 않고)(이)가 아니면 불가
-SIF CFLAG:A:39!= 5 && CFLAG:A:39!= 8
+SIF CFLAG:A:39 != 5 && CFLAG:A:39 != 8
 	RETURN 0
 ;반발각인 3 있으면 불가
 SIF MARK:A:반발각인 >= 3
@@ -410,7 +410,7 @@ RETURN 1
 ;유치인 노예를 격려한다
 @DAILY_LIFE_ABLE_32
 ;[유치][유아／유아퇴행]소유가 없다
-SIF DAILYLIFE_GETTALENT_1(150,151) == -1
+SIF DAILYLIFE_GETTALENT_1(150, 151) == -1
 	RETURN 0
 ;[헌신적]가 없고봉사정신 4 이하라면 안돼
 SIF !TALENT:A:헌신적 && ABL:A:봉사정신 <= 4
@@ -652,7 +652,7 @@ SIF TALENT:A:실의
 SIF MARK:A:반발각인 >= 3
 	RETURN 0
 ;[음란][창부][소악마]가 아니고,A가 주인의 사모 대상도 아니다
-SIF !TALENT:A:음란 && !TALENT:A:창부 && !TALENT:A:소악마 && CFLAG:MASTER:41!= NO:A
+SIF !TALENT:A:음란 && !TALENT:A:창부 && !TALENT:A:소악마 && CFLAG:MASTER:41 != NO:A
 	RETURN 0
 RETURN 1
 
@@ -668,7 +668,7 @@ SIF TALENT:A:실의
 SIF MARK:A:반발각인 >= 3
 	RETURN 0
 ;[음란][창부][소악마]가 아니고,A가 주인의 사모 대상도 아니다
-SIF !TALENT:A:음란 && !TALENT:A:창부 && !TALENT:A:소악마 && CFLAG:MASTER:41!= NO:A
+SIF !TALENT:A:음란 && !TALENT:A:창부 && !TALENT:A:소악마 && CFLAG:MASTER:41 != NO:A
 	RETURN 0
 RETURN 1
 
@@ -798,7 +798,7 @@ SIF TALENT:A:실의
 SIF !ITEM:카메라 || !ITEM:필름
 	RETURN 0
 ;주인의 사모 대상이 A가 아니다
-SIF CFLAG:MASTER:41!= NO:A
+SIF CFLAG:MASTER:41 != NO:A
 	RETURN 0
 RETURN 1
 

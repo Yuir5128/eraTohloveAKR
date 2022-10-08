@@ -146,12 +146,12 @@ IF FLAG:161 & 1
 	CALL END_DUTY_PRACTICE
 ENDIF
 
-;내번-하타 당번이 끝났을 경우의 종료 처리
+;내번-밭내번이 끝났을 경우의 종료 처리
 IF FLAG:161 & 2
 	CALL END_DUTY_HATAKE
 ENDIF
 
-;내번-마 당번이 끝났을 경우의 종료 처리
+;내번-말내번이 끝났을 경우의 종료 처리
 IF FLAG:161 & 4
 	CALL END_DUTY_UMA
 ENDIF
@@ -196,7 +196,7 @@ REPEAT LOCAL
 			DRAWLINE
 			CALL REACH_FULL_TERM
 		;출산 전날에는 육아실에의 방문을 묻는 이벤트 발생
-		ELSEIF (CFLAG:COUNT:110 - 1) == DAY && TFLAG:701!= DAY
+		ELSEIF (CFLAG:COUNT:110 - 1) == DAY && TFLAG:701 != DAY
 			;부친을 FATHER로 한다(없으면-1)
 			FATHER = GETCHARA(CFLAG:COUNT:111)
 			
@@ -238,9 +238,9 @@ REPEAT LOCAL
 			SIF CFLAG:(LOCAL:1):114 == NO:COUNT
 				LOCAL:2 = 1
 			;출산후 3일에는 육아실에의 방문을 묻는 이벤트 발생
-			IF (CFLAG:COUNT:116 + 3) == DAY && TFLAG:701!= DAY
+			IF (CFLAG:COUNT:116 + 3) == DAY && TFLAG:701 != DAY
 				DRAWLINE
-				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2? 를 출산해 # 를 기르기 시작해\@로부터 3일 지났습니다
+				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2 ? 를 출산해 # 를 기르기 시작해\@로부터 3일 지났습니다
 				PRINTFORML %CALLNAME:(LOCAL:1)%의 상태를 보러 갑니까?
 				PRINTL [0] - 육아실에 간다
 				SIF FATHER >= 0 && FATHER != MASTER
@@ -258,9 +258,9 @@ REPEAT LOCAL
 					GOTO INPUT_LOOP
 				ENDIF
 			;출산후 5일에는 육아실에의 방문을 묻는 이벤트 발생
-			ELSEIF (CFLAG:COUNT:116 + 5) == DAY && TFLAG:701!= DAY
+			ELSEIF (CFLAG:COUNT:116 + 5) == DAY && TFLAG:701 != DAY
 				DRAWLINE
-				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2? 를 출산해 # 를 기르기 시작해\@로부터 5일 지났습니다
+				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2 ? 를 출산해 # 를 기르기 시작해\@로부터 5일 지났습니다
 				PRINTFORML %CALLNAME:(LOCAL:1)%의 상태를 보러 갑니까?
 				PRINTL [0] - 육아실에 간다
 				SIF FATHER >= 0 && FATHER != MASTER
@@ -278,9 +278,9 @@ REPEAT LOCAL
 					GOTO INPUT_LOOP
 				ENDIF
 			;출산후 10일에는 육아실에의 방문을 묻는 이벤트 발생
-			ELSEIF (CFLAG:COUNT:116 + 10) == DAY && TFLAG:701!= DAY
+			ELSEIF (CFLAG:COUNT:116 + 10) == DAY && TFLAG:701 != DAY
 				DRAWLINE
-				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2? 를 출산해 # 를 기르기 시작해\@로부터 10 일경했다
+				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2 ? 를 출산해 # 를 기르기 시작해\@로부터 10 일경했다
 				PRINTFORML %CALLNAME:(LOCAL:1)%의 상태를 보러 갑니까?
 				PRINTL [0] - 육아실에 간다
 				SIF FATHER >= 0 && FATHER != MASTER
@@ -298,9 +298,9 @@ REPEAT LOCAL
 					GOTO INPUT_LOOP
 				ENDIF
 			;출산후 15일에는 육아실에의 방문을 묻는 이벤트 발생
-			ELSEIF (CFLAG:COUNT:116 + 15) == DAY && TFLAG:701!= DAY
+			ELSEIF (CFLAG:COUNT:116 + 15) == DAY && TFLAG:701 != DAY
 				DRAWLINE
-				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2? 를 출산해 # 를 기르기 시작해\@로부터 15일 지났습니다
+				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2 ? 를 출산해 # 를 기르기 시작해\@로부터 15일 지났습니다
 				PRINTFORML %CALLNAME:(LOCAL:1)%의 상태를 보러 갑니까?
 				PRINTL [0] - 육아실에 간다
 				SIF FATHER >= 0 && FATHER != MASTER
