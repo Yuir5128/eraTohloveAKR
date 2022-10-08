@@ -1,0 +1,496 @@
+﻿;-------------------------------------------------
+;輪姦
+;シチュエーション別コマンド
+;-------------------------------------------------
+@COM322
+#LOCALSIZE 17
+
+PRINTL 輪姦
+STR:0 = 輪姦
+
+CALL KOJO_MESSAGE_COM
+
+;プレイ内容を判定
+CALL OUTDOOR_PLAY_CHECK
+
+;V経験を伴うコマンドのフラグ(処女膜再生対応)
+SIF E && (TALENT:処女 || TALENT:再生処女)
+	TFLAG:19 |= 1
+
+;調教対象がバックバージンだった場合の喪失フラグ
+SIF F && TALENT:バックバージン
+	TFLAG:161 |= 1
+
+;調教対象が童貞だった場合の喪失フラグ
+SIF G && TALENT:童貞
+	TFLAG:160 |= 1
+
+;ついてた玩具は（物によってはランダムで）外す
+SIF TEQUIP:ニプルキャップ && !RAND:5
+	TEQUIP:ニプルキャップ = 0
+SIF TEQUIP:乳首クリップ && !RAND:5
+	TEQUIP:乳首クリップ = 0
+SIF TEQUIP:搾乳機 && !RAND:5
+	TEQUIP:搾乳機 = 0
+SIF TEQUIP:クリキャップ && !RAND:5
+	TEQUIP:クリキャップ = 0
+SIF TEQUIP:陰核クリップ && !RAND:5
+	TEQUIP:陰核クリップ = 0
+SIF TEQUIP:電動オナホール && (G || !RAND:5)
+	TEQUIP:電動オナホール = 0
+SIF TEQUIP:カテーテル && (G || !RAND:5)
+	TEQUIP:カテーテル = 0
+SIF TEQUIP:尿道バルーン && (G || !RAND:5)
+	TEQUIP:尿道バルーン = 0
+SIF TEQUIP:ローター挿入
+	TEQUIP:ローター挿入 = 0
+SIF TEQUIP:バイブ
+	TEQUIP:バイブ = 0
+SIF TEQUIP:ローターＡ挿入
+	TEQUIP:ローターＡ挿入 = 0
+SIF TEQUIP:アナルビーズ
+	TEQUIP:アナルビーズ = 0
+SIF TEQUIP:アナルバイブ
+	TEQUIP:アナルバイブ = 0
+SIF TEQUIP:拡張バルーン
+	TEQUIP:拡張バルーン = 0
+
+;ストッキングびりびりフラグ
+SIF TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6
+	TFLAG:55 = 1
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 500
+LOSEBASE:気力 += 500
+
+;Ｖ
+IF E
+	SOURCE:快Ｖ += 300 * E
+	SOURCE:痛み += 500
+ENDIF
+;Ａ
+IF F
+	SOURCE:快Ａ += 300 * F
+	SOURCE:痛み += 700
+ENDIF
+;逆セックス
+IF G
+	SOURCE:快Ｃ += 300 * G
+ELSEIF C
+	SOURCE:快Ｃ += 300 * C
+ELSEIF V
+	SOURCE:快Ｃ += 300 * V
+ENDIF
+
+;快Ｂ、屈従、液体、欲情、性行動、露出、痛み、恐れ、逸脱、反感のソース
+SOURCE:快Ｂ += 300
+
+SOURCE:性行動 += 30 * (E+F+G)
+SOURCE:恐れ += 2000 / (EXP:輪姦経験+1)
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、鬱屈ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 1000
+
+;Ｖ
+IF E
+	;処女、再生処女だった場合
+	IF TALENT:処女 || TALENT:再生処女
+		TIMES SOURCE:快Ｖ , 2.00
+		SOURCE:痛み += 2000
+	ENDIF
+
+	;Vへの苦痛は先に処理しておく
+	;EXP:Ｖ経験をみる（処女の反感は別途処理済みなので省略）
+	IF EXP:Ｖ経験 < EXPLV:1
+		TIMES SOURCE:痛み , 2.50
+	ELSEIF EXP:Ｖ経験 < EXPLV:2
+		TIMES SOURCE:痛み , 0.80
+		TIMES SOURCE:快Ｖ , 1.20
+	ELSEIF EXP:Ｖ経験 < EXPLV:3
+		TIMES SOURCE:痛み , 0.40
+	ELSEIF EXP:Ｖ経験 < EXPLV:4
+		TIMES SOURCE:痛み , 0.10
+	ELSEIF EXP:Ｖ経験 < EXPLV:5
+		TIMES SOURCE:痛み , 0.00
+	ELSEIF EXP:Ｖ経験 >= EXPLV:5
+		TIMES SOURCE:痛み , 0.00
+	ENDIF
+
+	;PALAM:潤滑をみる
+	IF PALAM:潤滑 < PALAMLV:1
+		TIMES SOURCE:痛み , 1.20
+		TIMES SOURCE:快Ｖ , 1.50
+	ELSEIF PALAM:潤滑 < PALAMLV:2
+		TIMES SOURCE:痛み , 0.70
+		TIMES SOURCE:快Ｖ , 1.20
+	ELSEIF PALAM:潤滑 < PALAMLV:3
+		TIMES SOURCE:痛み , 0.40
+	ELSEIF PALAM:潤滑 < PALAMLV:4
+		TIMES SOURCE:痛み , 0.10
+	ELSEIF PALAM:潤滑 >= PALAMLV:4
+		TIMES SOURCE:痛み , 0.10
+	ENDIF
+ENDIF
+
+;Ａ
+IF F
+	;バックバージンだった場合
+	IF TALENT:バックバージン
+		TIMES SOURCE:快Ａ , 2.00
+		SOURCE:痛み += 2000
+	ENDIF
+
+	;Aへの苦痛は先に処理しておく
+	;EXP:Ａ経験をみる
+	IF EXP:Ａ経験 < EXPLV:1
+		TIMES SOURCE:痛み , 3.00
+		TIMES SOURCE:快Ａ , 3.00
+	ELSEIF EXP:Ａ経験 < EXPLV:2
+		TIMES SOURCE:痛み , 1.20
+		TIMES SOURCE:快Ａ , 2.00
+	ELSEIF EXP:Ａ経験 < EXPLV:3
+		TIMES SOURCE:痛み , 0.80
+		TIMES SOURCE:快Ａ , 1.50
+	ELSEIF EXP:Ａ経験 < EXPLV:4
+		TIMES SOURCE:痛み , 0.60
+		TIMES SOURCE:快Ａ , 1.20
+	ELSEIF EXP:Ａ経験 < EXPLV:5
+		TIMES SOURCE:痛み , 0.40
+	ELSEIF EXP:Ａ経験 >= EXPLV:5
+		TIMES SOURCE:痛み , 0.20
+	ENDIF
+
+	;PALAM:潤滑をみる
+	IF PALAM:潤滑 < PALAMLV:1
+		TIMES SOURCE:痛み , 1.20
+		TIMES SOURCE:快Ｖ , 2.00
+	ELSEIF PALAM:潤滑 < PALAMLV:2
+		TIMES SOURCE:痛み , 1.00
+		TIMES SOURCE:快Ｖ , 1.50
+	ELSEIF PALAM:潤滑 < PALAMLV:3
+		TIMES SOURCE:痛み , 0.60
+	ELSEIF PALAM:潤滑 < PALAMLV:4
+		TIMES SOURCE:痛み , 0.30
+	ELSEIF PALAM:潤滑 >= PALAMLV:4
+		TIMES SOURCE:痛み , 0.20
+	ENDIF
+ENDIF
+
+;逆レイプ
+IF G
+	;童貞だった場合
+	IF TALENT:童貞
+		;射精ゲージにボーナス
+		BASE:射精 += 8000
+		TIMES SOURCE:快Ｃ , 1.20
+	ENDIF
+ENDIF
+
+;特にハードなコマンドでは、異常経験に応じて効果を減らす
+IF EXP:異常経験 < EXPLV:1
+	TIMES SOURCE:恐れ , 1.20
+ELSEIF EXP:異常経験 < EXPLV:2
+	TIMES SOURCE:恐れ , 0.90
+ELSEIF EXP:異常経験 < EXPLV:3
+	TIMES SOURCE:恐れ , 0.80
+ELSEIF EXP:異常経験 < EXPLV:4
+	TIMES SOURCE:恐れ , 0.70
+ELSEIF EXP:異常経験 < EXPLV:5
+	TIMES SOURCE:恐れ , 0.60
+ELSE
+	TIMES SOURCE:恐れ , 0.50
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF !EXP:輪姦経験
+	EXP:異常経験 += 1
+	PRINTL 輪姦初経験で異常経験＋１
+ENDIF
+EXP:輪姦経験 += 1
+
+;獣姦の場合
+IF TFLAG:500 == 1
+	IF EXP:獣姦経験 == 0
+		EXP:異常経験 += 1
+		PRINTL 獣姦初経験で異常経験＋１
+	ENDIF
+	EXP:獣姦経験 += 1
+ENDIF
+
+;フェラ
+IF C
+	;フェラ経験
+	EXP:フェラ経験 += C
+	PRINTFORML フェラ経験+{C}
+	;精液経験
+	EXP:精液経験 += C
+	PRINTFORML 精液経験+{C}
+ENDIF
+
+;Ｖ
+IF E
+	;Ｖ経験加算
+	EXP:Ｖ経験 += E
+	PRINTFORML Ｖ経験+{E}
+	D = E/2
+	SIF D < 1
+		D = 1
+	;膣射経験加算
+	EXP:膣射経験 += D
+	PRINTFORML 膣射経験+{D}
+	;娼館などの客と奴隷間の中田氏カウント用
+	CFLAG:105 += D
+ENDIF
+
+;Ａ
+IF F
+	;Ａ経験
+	EXP:Ａ経験 += F
+	PRINTFORML Ａ経験+{F}
+	H = F/2
+	SIF H < 1
+		H = 1
+	;腸射経験加算
+	EXP:腸射経験 += H
+	PRINTFORML 腸射経験+{F}
+	;娼館などの客と奴隷間の中田氏カウント用
+	CFLAG:705 += F
+ENDIF
+
+;性交経験
+EXP:性交経験 += E+F+G
+PRINTFORML 性交経験+{E+F+G}
+
+;便意や尿意があれば排出
+SIF BASE:便意 >= 60
+	CALL DEFECATION_CHECK2
+SIF BASE:尿意 >= 60
+	CALL DEFECATION_CHECK3
+
+;収益を資金に加算
+MONEY += TFLAG:71
+
+;状況とギャラリーをリセット
+TFLAG:151 = 0
+TFLAG:500 = 0
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;-------------------------------------------------
+;汚れの処理
+;経験を見て汚れを追加するのでこっちに持ってくる
+;-------------------------------------------------
+
+CALL COM_STAIN
+
+;奴隷の全身（衣類）に汚れを追加
+;Ｖ
+IF E
+	STAIN:ヴァギナ |= 2
+	STAIN:膣内 |= 2
+	STAIN:ヴァギナ |= 4
+	STAIN:膣内 |= 4
+	
+	;獣姦の場合、粘液も追加
+	IF TFLAG:500 == 1
+		STAIN:ヴァギナ |= 32
+		STAIN:膣内 |= 32
+	ENDIF
+	
+	;掻痒剤使ってる場合は効果が切れる
+	SIF STAIN:ヴァギナ & 1024
+		STAIN:ヴァギナ -= 1024
+	SIF STAIN:膣内 & 1024
+		STAIN:膣内 -= 1024
+ENDIF
+
+;Ａ
+IF F
+	STAIN:アナル |= 2
+	STAIN:腸内 |= 2
+	STAIN:アナル |= 4
+	STAIN:腸内 |= 4
+	;獣姦の場合、粘液も追加
+	IF TFLAG:500 == 1
+		STAIN:アナル |= 32
+		STAIN:腸内 |= 32
+	ENDIF
+	
+	;掻痒剤使ってる場合は効果が切れる
+	SIF STAIN:アナル & 1024
+		STAIN:アナル -= 1024
+	SIF STAIN:腸内 & 1024
+		STAIN:腸内 -= 1024
+ENDIF
+
+;フェラ
+IF C
+	STAIN:髪 |= 4
+	SIF TEQUIP:頭部装飾
+		STAIN:頭部装飾 |= 4
+	SIF TEQUIP:特殊３
+		STAIN:目装飾 |= 4
+	
+	IF TEQUIP:特殊１ == 1
+		STAIN:手袋 |= 2
+		STAIN:手袋 |= 4
+	ELSE
+		STAIN:手 |= 2
+		STAIN:手 |= 4
+	ENDIF
+	
+	STAIN:口 |= 2
+	STAIN:口 |= 4
+	
+	STAIN:胸 |= 4
+	
+	SIF TEQUIP:特殊２
+		STAIN:足装飾 |= 4
+	STAIN:足 |= 4
+	
+	;獣姦の場合、粘液も追加
+	IF TFLAG:500 == 1
+		STAIN:口 |= 32
+		STAIN:胸 |= 32
+	ENDIF
+ENDIF
+
+;クンニ
+IF V
+	STAIN:手 |= 1
+	STAIN:口 |= 1
+ENDIF
+
+;逆レイプ
+IF G
+	IF TFLAG:500 & 8
+		STAIN:手 |= 1
+		STAIN:ペニス |= 1
+	ELSEIF TFLAG:500 & 16
+		STAIN:手 |= 8
+		STAIN:ペニス |= 8
+	ENDIF
+	
+	;掻痒剤使ってる場合は効果が切れる
+	SIF STAIN:ペニス & 1024
+		STAIN:ペニス -= 1024
+ENDIF
+
+;掻痒剤使ってる場合は効果が切れる
+SIF STAIN:胸 & 1024
+	STAIN:胸 -= 1024
+
+RETURN 1
+
+
+
+;-------------------------------------------------
+;プレイ内容チェック
+;-------------------------------------------------
+@OUTDOOR_PLAY_CHECK
+
+;性交系　E:Ｖ　F:Ａ　G:逆レイプ　D:膣射数　H:腸射数
+E = 0
+F = 0
+G = 0
+D = 0
+H = 0
+
+;性的奉仕　C:フェラ系　V:クンニ系
+C = 0
+V = 0
+
+;奴隷が攻めではなく、ギャラリーに[獣][子供][男][オカマ]どれかがいる
+;IF !TALENT:攻め && (TFLAG:500 & 1 || TFLAG:500 & 2 || TFLAG:500 & 4 || TFLAG:500 & 16)
+IF !TALENT:攻め && (TFLAG:500 == 1 || TFLAG:500 == 2 || TFLAG:500 & 4 || TFLAG:500 & 16)
+	;VとAのプレイ差
+	;オトコ、貞操帯はAのみ
+	IF TALENT:オトコ || TEQUIP:貞操帯
+		E = 0
+		F = (ABL:Ａ感覚+ABL:欲望+1)/3
+		SIF F < 1
+			F = 1
+	ELSE
+		E = (ABL:Ｖ感覚+ABL:欲望+1)/3
+		F = (ABL:Ａ感覚+ABL:欲望+1)/3
+		SIF E < 1
+			E = 1
+		SIF F < 1
+			F = 1
+	ENDIF
+	
+ENDIF
+
+;奴隷が受けでもオメガではなく、貞操帯がなく、ペニスがあって、[女]か[オカマ]がいる
+IF !TALENT:受け && !TALENT:オメガ && TEQUIP:下着（下） != 5 && PENIS(TARGET) && (TFLAG:500 & 8 || TFLAG:500 & 16)
+	G = (ABL:Ｃ感覚+ABL:欲望+1)/3
+	
+	SIF G < 1
+		G = 1
+ENDIF
+
+;ギャラリーに[獣][子供][男][オカマ]どれかがいる
+SIF (TFLAG:500 & 1 || TFLAG:500 & 2 || TFLAG:500 & 4 || TFLAG:500 & 16)
+	C = (ABL:奉仕精神+ABL:技巧+ABL:精液中毒)/3
+
+;ギャラリーに[女]がいる
+SIF TFLAG:500 & 8
+	V = (ABL:奉仕精神+ABL:技巧+ABL:従順)/3
+
+;犯す場所を記録
+TFLAG:705 = 0
+SIF E
+	TFLAG:705 |= 2
+SIF F
+	TFLAG:705 |= 1
+SIF G
+	TFLAG:705 |= 4
+SIF C
+	TFLAG:705 |= 8
+
+
+;先に収益を算出してTFLAG:71に入れておく（地の文で表示するため）
+TFLAG:71 = 0
+
+;行為回数によって金額加算
+SIF E
+	TFLAG:71 += E*1000
+SIF F
+	TFLAG:71 += F*1000
+SIF G
+	TFLAG:71 += G*1000
+SIF C
+	TFLAG:71 += C*500
+SIF V
+	TFLAG:71 += V*500
+
+;処女／再生処女を破ってたら補正 
+SIF E && (TALENT:処女 || TALENT:再生処女)
+	TFLAG:71 += 10000
+;バックバージンを奪ってたら補正
+SIF F && TALENT:バックバージン
+	TFLAG:71 += 10000
+;童貞を奪ってたら補正
+SIF G && TALENT:童貞
+	TFLAG:71 += 5000
+
+;犬はお金をくれない
+IF TFLAG:500 == 1
+	TFLAG:71 = 0
+;子供は金額がかなり減る
+ELSEIF TFLAG:500 == 2
+	TFLAG:71 /= 3
+ENDIF
+
+

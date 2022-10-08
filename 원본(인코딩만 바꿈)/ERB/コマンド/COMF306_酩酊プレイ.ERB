@@ -1,0 +1,275 @@
+﻿;-------------------------------------------------
+;酩酊プレイ
+;シチュエーション別コマンド
+;-------------------------------------------------
+@COM306
+
+PRINTL 酩酊プレイ
+STR:0 = 酩酊プレイ
+
+;飲ませたお酒
+CALL DRINK_TYPE
+
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+;甘酒
+IF TFLAG:76 == 1
+	LOSEBASE:体力 += 10
+	LOSEBASE:気力 += 20
+;ビール
+ELSEIF TFLAG:76 == 2
+	IF TALENT:下戸
+		LOSEBASE:体力 = 20
+		LOSEBASE:気力 = 70
+	ELSE
+		LOSEBASE:体力 = 10
+		LOSEBASE:気力 = 50
+	ENDIF
+;日本酒
+ELSEIF TFLAG:76 == 3
+	IF TALENT:上戸
+		LOSEBASE:体力 = 10
+		LOSEBASE:気力 = 50
+	ELSE
+		LOSEBASE:体力 = 20
+		LOSEBASE:気力 = 70
+	ENDIF
+ENDIF
+
+SOURCE:逸脱 += 100
+SOURCE:反発 += 100
+
+;下戸が日本酒
+IF TALENT:下戸 && TFLAG:76 == 3
+	BASE:吐き気 += 80
+;下戸が甘酒・ビール　もしくは　上戸以外が日本酒
+ELSEIF TALENT:下戸 || (TFLAG:76 == 3 && !TALENT:上戸)
+	BASE:吐き気 += 60
+ELSE
+	;下戸以外が甘酒
+	IF TFLAG:76 == 1
+		BASE:吐き気 += 30
+	;下戸以外がビール　もしくは　上戸が日本酒
+	ELSE
+		BASE:吐き気 += 50
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 300
+
+A = 20
+B = 50
+;欲望を見る
+IF ABL:欲望 == 0
+	TIMES A , 0.80
+	TIMES B , 0.80
+	;SOURCE:液体 += 0
+	;SOURCE:欲情 += 0
+ELSEIF ABL:欲望 == 1
+	TIMES A , 1.00
+	TIMES B , 1.00
+	;SOURCE:液体 += 20
+	;SOURCE:欲情 += 30
+ELSEIF ABL:欲望 == 2
+	TIMES A , 1.20
+	TIMES B , 1.20
+	;SOURCE:液体 += 40
+	;SOURCE:欲情 += 70
+ELSEIF ABL:欲望 == 3
+	TIMES A , 1.40
+	TIMES B , 1.40
+	;SOURCE:液体 += 70
+	;SOURCE:欲情 += 120
+ELSEIF ABL:欲望 == 4
+	TIMES A , 1.50
+	TIMES B , 1.50
+	;SOURCE:液体 += 110
+	;SOURCE:欲情 += 180
+ELSEIF ABL:欲望 == 5
+	TIMES A , 1.70
+	TIMES B , 1.70
+	;SOURCE:液体 += 150
+	;SOURCE:欲情 += 250
+ELSEIF ABL:欲望 == 6
+	TIMES A , 1.90
+	TIMES B , 1.90
+	;SOURCE:液体 += 200
+	;SOURCE:欲情 += 300
+ELSEIF ABL:欲望 == 7
+	TIMES A , 2.10
+	TIMES B , 2.10
+	;SOURCE:液体 += 250
+	;SOURCE:欲情 += 350
+ELSEIF ABL:欲望 == 8
+	TIMES A , 2.30
+	TIMES B , 2.30
+	;SOURCE:液体 += 300
+	;SOURCE:欲情 += 400
+ELSEIF ABL:欲望 == 9
+	TIMES A , 2.50
+	TIMES B , 2.50
+	;SOURCE:液体 += 350
+	;SOURCE:欲情 += 450
+ELSEIF ABL:欲望 >= 10
+	TIMES A , 3.00
+	TIMES B , 3.00
+	;SOURCE:液体 += 500
+	;SOURCE:欲情 += 500
+ENDIF
+
+;ビール
+IF TFLAG:76 == 2
+	TIMES A , 2.00
+	TIMES B , 2.00
+;日本酒
+ELSEIF TFLAG:76 == 3
+	TIMES A , 1.50
+	TIMES B , 1.50
+ENDIF
+
+SOURCE:液体 += A
+SOURCE:欲情 += B
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;依存度ベクトル
+TFLAG:33 = 3
+
+RETURN 1
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM306
+;酩酊プレイ
+
+PRINTL ＜酩酊プレイ中＞
+
+LOSEBASE:体力 += 10
+LOSEBASE:気力 += 20
+
+SOURCE:逸脱 += 200
+SOURCE:反発 += 200
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 300
+
+A = 20
+B = 50
+;欲望を見る
+IF ABL:欲望 == 0
+	TIMES A , 0.80
+	TIMES B , 0.80
+	;SOURCE:液体 += 0
+	;SOURCE:欲情 += 0
+ELSEIF ABL:欲望 == 1
+	TIMES A , 1.00
+	TIMES B , 1.00
+	;SOURCE:液体 += 20
+	;SOURCE:欲情 += 30
+ELSEIF ABL:欲望 == 2
+	TIMES A , 1.20
+	TIMES B , 1.20
+	;SOURCE:液体 += 40
+	;SOURCE:欲情 += 70
+ELSEIF ABL:欲望 == 3
+	TIMES A , 1.40
+	TIMES B , 1.40
+	;SOURCE:液体 += 70
+	;SOURCE:欲情 += 120
+ELSEIF ABL:欲望 == 4
+	TIMES A , 1.50
+	TIMES B , 1.50
+	;SOURCE:液体 += 110
+	;SOURCE:欲情 += 180
+ELSEIF ABL:欲望 == 5
+	TIMES A , 1.70
+	TIMES B , 1.70
+	;SOURCE:液体 += 150
+	;SOURCE:欲情 += 250
+ELSEIF ABL:欲望 == 6
+	TIMES A , 1.90
+	TIMES B , 1.90
+	;SOURCE:液体 += 200
+	;SOURCE:欲情 += 300
+ELSEIF ABL:欲望 == 7
+	TIMES A , 2.10
+	TIMES B , 2.10
+	;SOURCE:液体 += 250
+	;SOURCE:欲情 += 350
+ELSEIF ABL:欲望 == 8
+	TIMES A , 2.30
+	TIMES B , 2.30
+	;SOURCE:液体 += 300
+	;SOURCE:欲情 += 400
+ELSEIF ABL:欲望 == 9
+	TIMES A , 2.50
+	TIMES B , 2.50
+	;SOURCE:液体 += 350
+	;SOURCE:欲情 += 450
+ELSEIF ABL:欲望 >= 10
+	TIMES A , 3.00
+	TIMES B , 3.00
+	;SOURCE:液体 += 500
+	;SOURCE:欲情 += 500
+ENDIF
+
+IF TFLAG:76 == 2
+	TIMES A , 1.50
+	TIMES B , 1.50
+ELSEIF TFLAG:76 == 3
+	TIMES A , 1.20
+	TIMES B , 1.20
+ENDIF
+
+SOURCE:液体 += A
+SOURCE:欲情 += B
+
+RETURN 1
+
+;-------------------------------------------------
+;飲ませたお酒の種類
+;-------------------------------------------------
+@DRINK_TYPE
+
+PRINTL 何を飲ませますか？
+SIF ITEM:86 > 0
+	PRINTL [0] - 甘酒
+SIF ITEM:87 > 0
+	PRINTL [1] - ビール
+SIF ITEM:88 > 0
+	PRINTL [2] - 日本酒
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	TFLAG:76 = 1
+	ITEM:86 -= 1
+ELSEIF RESULT == 1
+	TFLAG:76 = 2
+	ITEM:87 -= 1
+ELSEIF RESULT == 2
+	TFLAG:76 = 3
+	ITEM:88 -= 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+TEQUIP:酩酊プレイ = 1
+

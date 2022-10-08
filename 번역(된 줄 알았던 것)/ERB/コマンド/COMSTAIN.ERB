@@ -1,0 +1,697 @@
+﻿;====================================================================
+;더러운 처리 금액 물들이지 않아 물러나고 말이야 샀으므로 정리해 본다
+;====================================================================
+@COM_STAIN
+A = 0
+B = 0
+S = 0
+T = 0
+X = 0
+Y = 0
+
+SELECTCASE SELECTCOM
+	;-------------------------------------------------
+	;조교자의손, 가슴, 발⇔노예의 BC
+	;-------------------------------------------------
+	CASE 0, 10, 11, 14, 23, 30, 33 TO 36, 41, 51, 140, 141, 160, 161, 162, 240, 242, 246, 500, 501, 502
+		SELECTCASE SELECTCOM
+			CASE 240
+				X = 3
+			CASE 242, 246
+				X = 9
+			CASEELSE
+				X = 2
+		ENDSELECT
+		
+		SELECTCASE SELECTCOM
+			CASE 0
+				;상반신
+				IF TOPS(TARGET) == 3
+					A = 13
+				ELSEIF TEQUIP:상의
+					A = 14
+				ELSEIF TEQUIP:속옷（위）
+					A = 16
+				ELSE
+					A = 3
+				ENDIF
+				;하반신
+				IF BOTTOMS(TARGET) >= 4
+					A = 15
+				ELSEIF TEQUIP:속옷（아래） && !TEQUIP:정조대
+					A = 17
+				ELSEIF (TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6) && TFLAG:55 == 0
+					A = 18
+				ELSE
+					IF SELECTCOM == 140
+						A = 0
+					ELSEIF PENIS(TARGET)
+						A = 4
+					ELSE
+						A = 5
+					ENDIF
+				ENDIF
+			CASE 162
+				A = 6
+				B = 8
+			CASE 10, 11, 14, 141, 502
+				SIF SELECTCOM == 502
+					STAIN:가슴 |= 16
+				
+				;상반신
+				IF TOPS(TARGET) == 3
+					A = 13
+				ELSEIF TEQUIP:상의
+					A = 14
+				ELSEIF TEQUIP:속옷（위）
+					A = 16
+				ELSE
+					A = 3
+				ENDIF
+			CASE 23, 30, 33, 34, 35, 36, 140, 240, 242, 246
+				;하반신
+				IF BOTTOMS(TARGET) >= 4
+					A = 15
+				ELSEIF TEQUIP:속옷（아래） && !TEQUIP:정조대
+					A = 17
+				ELSEIF (TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6) && TFLAG:55 == 0
+					A = 18
+				ELSE
+					IF SELECTCOM == 140
+						A = 0
+					ELSEIF SELECTCOM == 246
+						A = 5
+						B = 6
+					ELSEIF PENIS(TARGET)
+						A = 4
+					ELSE
+						A = 5
+					ENDIF
+				ENDIF
+			CASE 41, 160, 500
+				A = 6
+			CASE 51, 161, 501
+				A = 8
+		ENDSELECT
+		
+		STAIN:PLAYER:X |= STAIN:A
+		STAIN:A |= STAIN:PLAYER:X
+		IF B > 0
+			STAIN:PLAYER:X |= STAIN:B
+			STAIN:B |= STAIN:PLAYER:X
+		ENDIF
+	;-------------------------------------------------
+	;조교자의입←노예의 몸
+	;-------------------------------------------------
+	CASE 18, 31, 40, 50, 241, 280, 282
+		IF SELECTCOM == 18
+			A = 3
+		ELSEIF SELECTCOM == 282
+			;신발를 붙이고 있을 때
+			IF TEQUIP:신발
+				A = 19
+			;신발하를 붙이고 있을 때
+			ELSEIF TEQUIP:특수 2
+				A = 18
+			ELSE
+				A = 9
+			ENDIF
+		ELSEIF SELECTCOM == 50
+			IF BOTTOMS(TARGET) >= 4
+				A = 15
+			ELSEIF (TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6) && TFLAG:55 == 0
+				A = 18
+			ELSEIF TEQUIP:속옷（아래）
+				A = 17
+			ELSE
+				A = 7
+			ENDIF
+		ELSE
+			IF BOTTOMS(TARGET) >= 4
+				A = 15
+			ELSEIF (TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6) && TFLAG:55 == 0
+				A = 18
+			ELSEIF TEQUIP:속옷（아래）
+				A = 17
+			ELSE
+				IF PENIS(TARGET)
+					A = 4
+				ELSE
+					A = 5
+				ENDIF
+			ENDIF
+		ENDIF
+		
+		;가슴도 사용한다
+		IF SELECTCOM == 241
+			X = 3
+		ENDIF
+		
+		STAIN:PLAYER:입 |= STAIN:A
+		SIF X > 0
+			STAIN:PLAYER:입 |= STAIN:A
+		STAIN:A = 0
+	;-------------------------------------------------
+	;레즈비언 플레이
+	;-------------------------------------------------
+	CASE 1, 243, 244, 245, 503, 504
+		;키스
+		IF SELECTCOM == 1 ||  SELECTCOM == 412
+			STAIN:입 |= STAIN:PLAYER:입
+			STAIN:PLAYER:입 |= STAIN:입
+		;가슴을비빈다
+		ELSEIF SELECTCOM == 243
+			IF TEQUIP:특수 1 == 1
+				X = 12
+			ELSE
+				X = 2
+			ENDIF
+			
+			;상반신
+			IF TOPS(TARGET) == 3
+				A = 13
+			ELSEIF TEQUIP:상의
+				A = 14
+			ELSEIF TEQUIP:속옷（위）
+				A = 16
+			ELSE
+				A = 3
+			ENDIF
+			
+			STAIN:A |= STAIN:PLAYER:손
+			STAIN:PLAYER:손 |= STAIN:A
+			STAIN:X |= STAIN:PLAYER:가슴
+			STAIN:PLAYER:가슴 |= STAIN:X
+		;조개비비기
+		ELSEIF SELECTCOM == 244
+			STAIN:바기나 |= STAIN:PLAYER:바기나
+			STAIN:PLAYER:바기나 |= STAIN:바기나
+		;장대비비기
+		ELSEIF SELECTCOM == 245
+			STAIN:페니스 |= STAIN:PLAYER:페니스
+			STAIN:PLAYER:페니스 |= STAIN:페니스
+			
+			;조교자에게손가 있으면 조교자의손를 사용한다
+			IF !TALENT:PLAYER:양팔결손 && !TALENT:PLAYER:달마
+				STAIN:페니스 |= STAIN:PLAYER:손
+				STAIN:PLAYER:손 |= STAIN:페니스
+			;조교자에게손가 없고, 노예에게손가 있으면 노예의손를 사용한다
+			ELSEIF !TALENT:양팔결손 && !TALENT:달마
+				IF TEQUIP:특수 1 == 1
+					X = 12
+				ELSE
+					X = 2
+				ENDIF
+				STAIN:X |= STAIN:PLAYER:페니스
+				STAIN:PLAYER:페니스 |= STAIN:X
+			ENDIF
+		;식스나인
+		ELSEIF SELECTCOM == 503
+			IF PENIS(TARGET)
+				A = 4
+			ELSE
+				A = 5
+			ENDIF
+			IF PENIS(PLAYER)
+				X = 4
+			ELSE
+				X = 5
+			ENDIF
+			
+			STAIN:PLAYER:입 |= STAIN:A
+			STAIN:A = 0
+			STAIN:입 |= STAIN:PLAYER:X
+			STAIN:PLAYER:X = 0
+		;69파이즈리
+		ELSEIF SELECTCOM == 504
+			STAIN:가슴 |= STAIN:PLAYER:페니스
+			STAIN:PLAYER:페니스 |= STAIN:가슴
+			
+			STAIN:PLAYER:가슴 |= STAIN:페니스
+			STAIN:페니스 |= STAIN:PLAYER:가슴
+		ENDIF
+	;-------------------------------------------------
+	;조교자의자위
+	;-------------------------------------------------
+	CASE 226, 227
+		IF SELECTCOM == 227
+			STAIN:PLAYER:손 |= STAIN:PLAYER:장내
+			STAIN:PLAYER:장내 |= STAIN:PLAYER:손
+			STAIN:PLAYER:손 |= STAIN:PLAYER:애널
+			STAIN:PLAYER:애널 |= STAIN:PLAYER:손
+		ELSE
+			STAIN:PLAYER:손 |= STAIN:PLAYER:가슴
+			STAIN:PLAYER:가슴 |= STAIN:PLAYER:손
+			
+			;조교자의손⇔조교자의 C의 더러움이 이동
+			;페니스가 있다
+			IF PENIS(PLAYER)
+				STAIN:PLAYER:손 |= STAIN:PLAYER:페니스
+				STAIN:PLAYER:페니스 |= STAIN:PLAYER:손
+			ENDIF
+			;바기나가 있다
+			IF VAGINA(PLAYER)
+				;공가 아니다
+				IF !TALENT:PLAYER:공
+					STAIN:PLAYER:손 |= STAIN:PLAYER:질내
+					STAIN:PLAYER:질내 |= STAIN:PLAYER:손
+				ENDIF
+				STAIN:PLAYER:손 |= STAIN:PLAYER:바기나
+				STAIN:PLAYER:바기나 |= STAIN:PLAYER:손
+			ENDIF
+		ENDIF
+	;-------------------------------------------------
+	;섹스계
+	;-------------------------------------------------
+	CASE 100 TO 106, 110 TO 116, 181, 260 TO 265, 270, 271, 430, 431, 440, 441, 507, 508, 526
+		SELECTCASE SELECTCOM
+			;주인×노예
+			CASE 100 TO 106, 507, 508
+				A = 6
+			;주인×노예
+			CASE 110 TO 116, 181, 526
+				A = 8
+				SIF SELECTCOM == 181
+					STAIN:장내 |= 128
+			;노예×주인
+			CASE 260, 261, 262
+				X = 6
+			;노예×주인
+			CASE 263, 264, 265
+				X = 8
+			;조수×주인
+			CASE 270
+				X = 6
+			;조수×주인
+			CASE 271
+				X = 8
+			;노예×조수
+			CASE 430
+				Y = 6
+			;노예×조수
+			CASE 431
+				Y = 8
+			;주인×조수
+			CASE 440
+				Y = 6
+			;노예×조수
+			CASE 441
+				Y = 8
+		ENDSELECT
+		
+		SELECTCASE SELECTCOM
+			CASE 100 TO 106, 110 TO 116, 181, 507, 508, 526
+				STAIN:PLAYER:4 |= STAIN:A
+				STAIN:A |= STAIN:PLAYER:4
+			CASE 260 TO 265
+				STAIN:PLAYER:X |= STAIN:페니스
+				STAIN:페니스 |= STAIN:PLAYER:X
+			CASE 270, 271
+				STAIN:PLAYER:X |= STAIN:ASSI:페니스
+				STAIN:ASSI:페니스 |= STAIN:PLAYER:X
+			CASE 430, 431
+				STAIN:ASSI:Y |= STAIN:페니스
+				STAIN:페니스 |= STAIN:ASSI:Y
+			CASE 440, 441
+				STAIN:ASSI:Y |= STAIN:PLAYER:페니스
+				STAIN:PLAYER:페니스 |= STAIN:ASSI:Y
+		ENDSELECT
+		
+	;-------------------------------------------------
+	;노예의손(장갑)⇔노예의 BVA
+	;-------------------------------------------------
+	CASE 3, 4, 5, 6, 7, 8
+		;장갑를 하고 있다
+		IF TEQUIP:특수 1 == 1
+			X = 12
+		ELSE
+			X = 2
+		ENDIF
+		IF SELECTCOM == 3
+			A = 5
+		ELSEIF SELECTCOM == 4
+			;페니스가 있어, 원이남자라면페니스를 우선해 사용한다
+			IF PENIS(TARGET) && MALE2(TARGET)
+				A = 4
+			ELSE
+				;바기나를 사용할 수 있는 경우는 손가락을 넣는다
+				IF TFLAG:56 == 1
+					A = 6
+				ELSE
+					A = 5
+				ENDIF
+			ENDIF
+		ELSEIF SELECTCOM == 5
+			A = 3
+		ELSEIF SELECTCOM == 6
+			A = 8
+		ELSEIF SELECTCOM == 7
+			IF !TEQUIP:바이브 && !TEQUIP:로터삽입
+				A = 6
+			ENDIF
+			IF !TEQUIP:애널바이브 && !TEQUIP:로터A삽입 && !TEQUIP:애널비즈 && !TEQUIP:확장벌룬
+				B = 8
+			ENDIF
+		ELSEIF SELECTCOM == 8
+			A = 5
+		ENDIF
+		
+		IF A > 0
+			STAIN:X |= STAIN:A
+			STAIN:A |= STAIN:X
+		ENDIF
+		IF B > 0
+			STAIN:X |= STAIN:B
+			STAIN:B |= STAIN:X
+		ENDIF
+	;-------------------------------------------------
+	;노예의손, 가슴, 가랑이, 발, 머리카락⇔조교자의 CVA
+	;-------------------------------------------------
+	CASE 70, 73, 74, 76, 80 TO 84, 86, 220, 221, 223, 225, 528
+		;애널
+		IF SELECTCOM == 0
+			X = 5
+		;가슴
+		ELSEIF SELECTCOM == 221
+			X = 3
+		;질내
+		ELSEIF SELECTCOM == 223
+			X = 6
+		;장내
+		ELSEIF SELECTCOM == 225
+			X = 8
+		;페니스
+		ELSE
+			IF PENIS(PLAYER)
+				X = 4
+			ELSE
+				X = 5
+			ENDIF
+		ENDIF
+		
+		;가슴
+		IF SELECTCOM == 73 || SELECTCOM == 74 || SELECTCOM == 84
+			A = 3
+		;고
+		ELSEIF SELECTCOM == 76
+			A = 5
+		;발
+		ELSEIF SELECTCOM == 80
+			;신발를 붙이고 있을 때
+			IF TEQUIP:신발
+				A = 19
+			;신발하를 붙이고 있을 때
+			ELSEIF TEQUIP:특수 2
+				A = 18
+			ELSE
+				A = 9
+			ENDIF
+		;머리카락
+		ELSEIF SELECTCOM == 81
+			A = 0
+		;고
+		ELSEIF SELECTCOM == 83
+			IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+				A = 18
+			ELSE
+				A = 17
+			ENDIF
+		ELSE
+			;장갑를 하고 있다
+			IF TEQUIP:특수 1 == 1
+				A = 12
+			ELSE
+				A = 2
+			ENDIF
+		ENDIF
+		
+		STAIN:A |= STAIN:PLAYER:X
+		STAIN:PLAYER:X |= STAIN:A
+	;-------------------------------------------------
+	;노예의입←조교자의 몸
+	;-------------------------------------------------
+	CASE 71, 72, 75, 77, 85, 87, 222, 224
+		IF SELECTCOM == 77
+			X = 2
+		ELSEIF SELECTCOM == 85
+			X = 9
+		ELSEIF SELECTCOM == 224
+			X = 7
+		ELSEIF SELECTCOM == 222
+			X = 5
+		ELSE
+			X = 4
+		ENDIF
+		
+		;가슴도 사용한다
+		IF SELECTCOM == 75
+			A = 3
+		ENDIF
+		
+		STAIN:입 |= STAIN:PLAYER:X
+		SIF A > 0
+			STAIN:A |= STAIN:PLAYER:X
+		STAIN:PLAYER:X = 0
+	;-------------------------------------------------
+	;음뇨
+	;-------------------------------------------------
+	CASE 184
+		STAIN:입 |= 128
+		;그 자리에 오줌이 없으면 주인이 낸다
+		IF TFLAG:66 == 0
+			IF PENIS(TARGET)
+				X = 4
+			ELSE
+				X = 5
+			ENDIF
+			
+			STAIN:PLAYER:X |= 128
+			STAIN:입 |= STAIN:PLAYER:X
+			
+			;노예가스캇중독 3/aA조끼 4+스캇중독 2라면 CorV의 더러움까지 빨아낸다
+			IF ABL:스캇중독 >= 3 || (ABL:마조끼 >= 4 && ABL:스캇중독 >= 2)
+				STAIN:PLAYER:X = 0
+			;반대로스캇중독 2 이하/aA조끼 2 이하라고 흘려, 옷에 뇨더러움이 붙는다
+			ELSE
+				;장식품
+				SIF TEQUIP:특수 1 == 1
+					STAIN:장갑 |= 128
+				
+				;상하의류
+				SIF TEQUIP:전신상의
+					STAIN:전신상의 |= 128
+				;상반신
+				IF TEQUIP:상의
+					STAIN:상의 |= 128
+				ELSEIF TEQUIP:속옷（위）
+					STAIN:속옷（위） |= 128
+				ENDIF
+				;하반신
+				IF TEQUIP:하의
+					STAIN:하의 |= 128
+				ELSEIF TEQUIP:속옷（아래）
+					STAIN:속옷（아래） |= 128
+				ENDIF
+			ENDIF
+		ENDIF
+	;-------------------------------------------------
+	;식분
+	;-------------------------------------------------
+	CASE 185
+		STAIN:입 |= 512
+	;-------------------------------------------------
+	;음뇨한다
+	;-------------------------------------------------
+	CASE 285
+		STAIN:PLAYER:입 |= 128
+		IF PENIS(PLAYER)
+			A = 4
+		ELSE
+			A = 5
+		ENDIF
+		STAIN:PLAYER:입 |= STAIN:A
+	;-------------------------------------------------
+	;식분한다
+	;-------------------------------------------------
+	CASE 286
+		STAIN:PLAYER:입 |= 512
+		IF TFLAG:56 == 1
+			STAIN:PLAYER:입 |= STAIN:애널
+			STAIN:애널 = 8
+		ENDIF
+	;-------------------------------------------------
+	;완구 장착시:촉수의 체액⇔노예의 몸
+	;-------------------------------------------------
+	CASE 13, 17, 22, 32, 43, 54, 60, 132, 180
+		SIF TEQUIP:촉수 == 0
+			RETURN 0
+		
+		;가슴
+		IF SELECTCOM == 13 || SELECTCOM == 17
+			A = 3
+		;바기나(클리토리스)
+		ELSEIF SELECTCOM == 22
+			A = 5
+		;페니스
+		ELSEIF SELECTCOM == 32 || SELECTCOM == 60
+			A = 4
+		;질내
+		ELSEIF SELECTCOM == 43
+			A = 6
+		;장내
+		ELSEIF SELECTCOM == 54 || SELECTCOM == 180
+			A = 8
+		;입
+		ELSEIF SELECTCOM == 132
+			A = 1
+		ENDIF
+		
+		STAIN:A |= 32
+	;-------------------------------------------------
+	;촉수의 체액→노예의 몸전체
+	;-------------------------------------------------
+	CASE 130
+		SIF TEQUIP:촉수 == 0
+			RETURN 0
+		
+		REPEAT 10
+			A = COUNT
+			STAIN:A |= 32
+		REND
+		
+		IF TEQUIP:특수 1 || TEQUIP:특수 2 || TEQUIP:속옷（아래） || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의 || TEQUIP:머리장식 || TEQUIP:특수 3 || TEQUIP:신발
+			REPEAT 10
+				A = COUNT + 10
+				IF A == 12
+					;장갑, 에이프런 이외는 더러운 판정 없음
+					SIF TEQUIP:특수 1!= 1 && TEQUIP:특수 1!= 2
+						CONTINUE
+				ENDIF
+				STAIN:A |= 32
+			REND
+		ENDIF
+	;-------------------------------------------------
+	;몸전체의 더러움을 지운다
+	;-------------------------------------------------
+	CASE 207, 316, 317, 318
+		REPEAT 20
+			A = COUNT
+			STAIN:A = 0
+			STAIN:PLAYER:A = 0
+			SIF ASSI >= 0
+				STAIN:ASSI:A = 0
+		REND
+		
+		IF SELECTCOM != 207 && SELECTCOM != 315
+			IF TEQUIP:특수 1 || TEQUIP:특수 2 || TEQUIP:속옷（아래） || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의 || TEQUIP:머리장식 || TEQUIP:특수 3 || TEQUIP:신발
+				REPEAT 10
+					A = COUNT + 10
+					IF A == 12
+						;장갑, 에이프런 이외는 더러운 판정 없음
+						SIF TEQUIP:특수 1!= 1 && TEQUIP:특수 1!= 2
+							CONTINUE
+					ENDIF
+					STAIN:A |= 256
+				REND
+			ENDIF
+		ENDIF
+	;-------------------------------------------------
+	;머리카락에 물더러움
+	;-------------------------------------------------
+	CASE 157
+		STAIN:머리카락 |= 256
+		;상반신 입고 있으면 위도 물더러움
+		IF TEQUIP:전신상의 || TEQUIP:상의
+			SIF TEQUIP:전신상의
+				TEQUIP:전신상의 |= 256
+			SIF TEQUIP:상의
+				TEQUIP:상의 |= 256
+		ELSEIF TEQUIP:속옷（위）
+			TEQUIP:속옷（위） |= 256
+		ENDIF
+	;-------------------------------------------------
+	;가려움증약
+	;-------------------------------------------------
+	CASE 305
+		IF TEQUIP:촉수
+			STAIN:가슴 |= 1024
+			IF PENIS(TARGET)
+				STAIN:페니스 |= 1024
+			ELSE
+				STAIN:바기나 |= 1024
+			ENDIF
+			STAIN:애널 |= 1024
+			STAIN:장내 |= 1024
+			SIF VAGINA(TARGET)
+				STAIN:질내 |= 1024
+		ELSE
+			;가슴
+			IF TFLAG:56 == 0
+				STAIN:가슴 |= 1024
+			;PorV
+			ELSEIF TFLAG:56 == 1
+				IF PENIS(TARGET)
+					STAIN:페니스 |= 1024
+				ELSE
+					STAIN:바기나 |= 1024
+				ENDIF
+			;애널
+			ELSEIF TFLAG:56 == 2
+				STAIN:애널 |= 1024
+				STAIN:장내 |= 1024
+			;바기나
+			ELSEIF TFLAG:56 == 3
+				STAIN:질내 |= 1024
+			;바를 수 있는 곳 전부
+			ELSEIF TFLAG:56 == 10
+				STAIN:가슴 |= 1024
+				IF PENIS(TARGET)
+					STAIN:페니스 |= 1024
+				ELSE
+					STAIN:바기나 |= 1024
+				ENDIF
+				STAIN:애널 |= 1024
+				STAIN:장내 |= 1024
+				SIF VAGINA(TARGET)
+					STAIN:질내 |= 1024
+			;자신의 손가락
+			ELSEIF TFLAG:56 == 99
+				STAIN:PLAYER:손 |= 1024
+			ENDIF
+		ENDIF
+ENDSELECT
+
+SIF STAIN:질내 > 0 && STAIN:바기나 == 0
+	STAIN:바기나 |= STAIN:질내
+SIF STAIN:MASTER:질내 > 0 && STAIN:MASTER:바기나 == 0
+	STAIN:MASTER:바기나 |= STAIN:MASTER:질내
+SIF ASSI >= 0 && STAIN:ASSI:질내 > 0 && STAIN:ASSI:바기나 == 0
+	STAIN:ASSI:바기나 |= STAIN:ASSI:질내
+
+SIF STAIN:장내 > 0 && STAIN:애널 == 0
+	STAIN:애널 |= STAIN:장내
+SIF STAIN:MASTER:장내 > 0 && STAIN:MASTER:애널 == 0
+	STAIN:MASTER:애널 |= STAIN:MASTER:장내
+SIF ASSI >= 0 && STAIN:ASSI:장내 > 0 && STAIN:ASSI:애널 == 0
+	STAIN:ASSI:애널 |= STAIN:ASSI:장내
+
+STAIN:MASTER:페니스 |= 2
+STAIN:MASTER:바기나 |= 1
+STAIN:MASTER:질내 |= 1
+STAIN:MASTER:애널 |= 8
+STAIN:MASTER:장내 |= 8
+
+IF ASSI >= 0
+	STAIN:ASSI:페니스 |= 2
+	STAIN:ASSI:바기나 |= 1
+	STAIN:ASSI:질내 |= 1
+	STAIN:ASSI:애널 |= 8
+	STAIN:ASSI:장내 |= 8
+ENDIF
+
+STAIN:페니스 |= 2
+STAIN:바기나 |= 1
+STAIN:질내 |= 1
+STAIN:애널 |= 8
+STAIN:장내 |= 8
+

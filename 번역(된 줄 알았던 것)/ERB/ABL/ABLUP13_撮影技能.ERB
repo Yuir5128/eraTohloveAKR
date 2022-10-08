@@ -1,0 +1,132 @@
+﻿;촬영기능의 가부
+@ISABLUP13
+;연모, 친애, 복종, 예속는 MAXLV10
+IF ABL:촬영기능 >= 10
+	RETURN 0
+ELSEIF ABL:촬영기능 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP13
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+;촬영기능
+@ABLUP13
+DRAWLINE
+;연모, 친애, 복종, 예속는 MAXLV10
+IF ABL:촬영기능 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:촬영기능 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP13
+
+PRINTFORM [0] - %PALAMNAME:8%의 구슬×{A}, %EXPNAME:62%{B}이상……
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:촬영기능 += 1
+
+IF RESULT == 0
+	JUEL:습득 -= A
+ENDIF
+
+PRINTFORMW %ABLNAME:13%의 레벨이{ABL:촬영기능}가 되었습니다
+
+;촬영기능LVUP 판정
+@DECIDE_ABLUP13
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:촬영기능 == 0
+	A = 75
+	B = 5
+ELSEIF ABL:촬영기능 == 1
+	A = 500
+	B = 10
+ELSEIF ABL:촬영기능 == 2
+	A = 3000
+	B = 30
+ELSEIF ABL:촬영기능 == 3
+	A = 9000
+	B = 50
+ELSEIF ABL:촬영기능 == 4
+	A = 24000
+	B = 100
+ELSEIF ABL:촬영기능 == 5
+	A = 30000
+	B = 200
+ELSEIF ABL:촬영기능 == 6
+	A = 35000
+	B = 300
+ELSEIF ABL:촬영기능 == 7
+	A = 40000
+	B = 400
+ELSEIF ABL:촬영기능 == 8
+	A = 45000
+	B = 500
+ELSEIF ABL:촬영기능 == 9
+	A = 50000
+	B = 600
+ENDIF
+
+;연모
+IF TALENT:연모
+	TIMES A , 0.60
+	TIMES B , 0.60
+ENDIF
+;친애
+IF TALENT:친애
+	TIMES A , 0.40
+	TIMES B , 0.40
+ENDIF
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+	TIMES B , 2.00
+ENDIF
+
+;습득의 구슬로 올린다
+SIF JUEL:습득 < A
+	I |= 1
+
+SIF EXP:촬영경험 < B
+	I |= 2
+
+IF I == 0
+	Z = 1
+ENDIF
+
+RETURN 1
+
+

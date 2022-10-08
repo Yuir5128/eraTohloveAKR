@@ -1,0 +1,209 @@
+﻿;-------------------------------------------------
+;가슴자위
+;자위계 커맨드
+;-------------------------------------------------
+@COM5
+
+;-------------------------------------------------
+;특수 파생 처리
+;-------------------------------------------------
+;전회와 이번 조교자가 같음
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;전회의 조교가기승위or기승위애널, 기승위유방자위 때, 승마 유방자위에
+	IF PREVCOM == 106 || PREVCOM == 116 || PREVCOM == 509
+		IF PREVCOM == 106
+			TFLAG:705 = 0
+		ELSEIF PREVCOM == 116
+			TFLAG:705 = 1
+		ENDIF
+		CALL COM_ABLE509
+		SIF RESULT == 1
+			JUMP COM509
+	ENDIF
+ENDIF
+
+LOCALS = 
+SIF TEQUIP:비디오카메라
+	LOCALS =공개
+SIF TEQUIP:야외플레이
+	LOCALS =  %LOCALS%야외
+
+LOCALS = %LOCALS%가슴자위
+STR:0 = %LOCALS%
+PRINTFORML %STR:0%
+
+;-------------------------------------------------
+;실행 판정 처리
+;-------------------------------------------------
+;모든 명령에 공통의 요소를 고려
+;(순종가 높다고 명령에 따르기 쉬운 등)
+CALL COM_ORDER
+
+;실행 판정 조작
+CALL KOJO_DENIAL_PLUS
+
+;합계를 표시(33이상으로 실행)
+PRINT  = 
+PRINTV A
+
+;난이도 상승
+;공개로+10
+V = 33
+SIF TEQUIP:비디오카메라
+	V += 10
+SIF TEQUIP:야외플레이
+	V += 10
+SIF TEQUIP:니틀캡
+	V += 3
+SIF TEQUIP:유두클립
+	V += 10
+SIF TEQUIP:착유기
+	V += 5
+
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행치
+PRINTV V
+
+;실행 불가입상/실행 판정 조작
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;실행 할 수 없다
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;실행자가 노예인 플래그
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 50
+
+SOURCE:쾌B += 80
+SIF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기
+	TIMES SOURCE:쾌B , 1.50
+
+SIF TEQUIP:유두클립
+	SOURCE:통증 += 200
+
+SOURCE:성행동 += 40
+SOURCE:두려움 += 100
+SOURCE:중독충족 += 100
+SOURCE:노출 += 200
+SOURCE:굴복 += 400
+SOURCE:일탈 += 150
+SOURCE:반발 += 150
+
+IF TEQUIP:비디오카메라 || TEQUIP:야외플레이
+	SOURCE:액체 += 50
+	SOURCE:일탈 += 100
+ENDIF
+
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;중독에 의한중독충족의 소스는 먼저 처리해 둔다
+;자위중독를 본다
+IF ABL:자위중독 == 1
+	TIMES SOURCE:쾌B , 1.00
+	TIMES SOURCE:중독충족, 0.00
+ELSEIF ABL:자위중독 == 2
+	TIMES SOURCE:쾌B , 1.10
+	TIMES SOURCE:중독충족, 0.30
+ELSEIF ABL:자위중독 == 3
+	TIMES SOURCE:쾌B , 1.20
+	TIMES SOURCE:중독충족, 0.60
+ELSEIF ABL:자위중독 == 4
+	TIMES SOURCE:쾌B , 1.30
+	TIMES SOURCE:중독충족, 0.90
+ELSEIF ABL:자위중독 == 5
+	TIMES SOURCE:쾌B , 1.50
+	TIMES SOURCE:중독충족, 1.20
+ELSEIF ABL:자위중독 == 6
+	TIMES SOURCE:쾌B , 1.70
+	TIMES SOURCE:중독충족, 1.50
+ELSEIF ABL:자위중독 == 7
+	TIMES SOURCE:쾌B , 2.00
+	TIMES SOURCE:중독충족, 1.80
+ELSEIF ABL:자위중독 == 8
+	TIMES SOURCE:쾌B , 2.30
+	TIMES SOURCE:중독충족, 2.30
+ELSEIF ABL:자위중독 == 9
+	TIMES SOURCE:쾌B , 2.50
+	TIMES SOURCE:중독충족, 3.00
+ELSEIF ABL:자위중독 >= 10
+	TIMES SOURCE:쾌B , 3.50
+	TIMES SOURCE:중독충족, 5.00
+ENDIF
+
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 150
+
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;노예의손(장갑)⇔노예의 B의 더러움이 이동
+;도구가 붙어 있으면 더러움은 이동하지 않는다
+IF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;비디오촬영시는 경험에 플러스
+IF TEQUIP:비디오카메라
+	EXP:자위경험 += 2
+	PRINTL 자위경험＋2
+	EXP:조교자위경험 += 2
+	PRINTL 조교자위경험＋2
+	
+	IF !EXP:공개자위 && !TALENT:음란 && !TALENT:창부
+		EXP:이상경험 += 1
+		PRINTL 공개자위첫경험으로이상경험＋1
+	ENDIF
+	EXP:공개자위 += 1
+	PRINTL 공개자위경험＋1
+ELSE
+	EXP:자위경험 += 1
+	PRINTL 자위경험＋1
+	EXP:조교자위경험 += 1
+	PRINTL 조교자위경험＋1
+ENDIF
+
+;게이경험라든지 가산
+CALL COM_EXP(3)
+
+;의존도 벡터
+TFLAG:33 = 3
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+

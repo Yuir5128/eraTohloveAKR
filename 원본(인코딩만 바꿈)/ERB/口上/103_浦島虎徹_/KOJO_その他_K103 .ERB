@@ -1,0 +1,750 @@
+﻿
+;==================================================
+;@KOJO_MESSAGE_PALAMCNG関係（1をキャラ番号に置換）
+;パラメータ変化などをトリガーにした口上　CFLAG 221～260を使用
+;==================================================
+;-------------------------------------------------
+;@KOJO_MESSAGE_PALAMCNG_A（103をキャラ番号に置換）
+;調教者の射精をトリガーにした口上
+;-------------------------------------------------
+@KOJO_MESSAGE_PALAMCNG_A_K103
+;助手が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には地の文を表示して口上をスキップする
+;IF TEQUIP:ボールギャグ && SELECTCOM != 107
+;	CALL PALAM_MESSAGE_A
+;	RETURN 0
+;ENDIF
+;--------------------------------------------------
+;特定助手、主人時に特殊助手口上を呼び出す(Y1を特定助手、Z3を主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_PALAMCNG_A_PY1_KZ3
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_PALAMCNG_A_PY1_KZ3
+;		RETURN 0
+;	ENDIF
+;ENDIF
+;=================================================
+;調教者の射精時のテキスト
+;=================================================
+;-------------------------------------------------
+;射精箇所変更時のテキスト　有効時はここで関数終了　CFLAG:221～230
+;-------------------------------------------------
+IF CFLAG:106
+	CALL PALAM_MESSAGE_A
+	;髪
+	IF CFLAG:106 == 1
+		CFLAG:221 = 1
+	;顔
+	ELSEIF CFLAG:106 == 2
+		IF RAND:2 == 0
+		PRINTFORM 「…趣味としてはわからないでもないけど、
+			IF TALENT:オトコ == 1
+				PRINTFORMW 俺とか、男にしてもあんまり楽しくないんじゃないのかな」
+			ELSE
+				PRINTFORMW フツーの女の子にした方がいいんじゃない？」
+			ENDIF
+		ELSE
+			PRINTFORMW 「なにするんだよぉ！」
+		ENDIF
+		CFLAG:222 = 1
+	;胸
+	ELSEIF CFLAG:106 == 3
+		CFLAG:223 = 1
+	;腹
+	ELSEIF CFLAG:106 == 4
+		CFLAG:224 = 1
+	;腋
+	ELSEIF CFLAG:106 == 5
+		CFLAG:225 = 1
+	;太腿
+	ELSEIF CFLAG:106 == 6
+		CFLAG:226 = 1
+	;割れ目
+	ELSEIF CFLAG:106 == 7
+		CFLAG:227 = 1
+	;尻
+	ELSEIF CFLAG:106 == 8
+		CFLAG:228 = 1
+	;ゴム
+	ELSEIF CFLAG:106 == 9
+		;セックスで射精かつ、アナルセックス以外を実行時
+		IF TFLAG:2 > 0 && SELECTCOM != 110 && SELECTCOM != 111 && SELECTCOM != 112 && SELECTCOM != 113 && SELECTCOM != 114 && SELECTCOM != 115 && SELECTCOM != 116
+			CFLAG:229 = 1
+		ELSE
+			CFLAG:230 = 1
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;手、口以外で射精　CFLAG:231
+;TFLAG:9 == １は射精、２は大量射精
+;対応コマンドはキス、素股、足コキ、アナル強制奉仕、ダブル素股
+;-------------------------------------------------
+IF TFLAG:9 == 1 || TFLAG:9 == 2
+	CALL PALAM_MESSAGE_A
+	CFLAG:231 = 1
+ENDIF
+
+;-------------------------------------------------
+;助手を犯すで射精　CFLAG:232
+;-------------------------------------------------
+IF TFLAG:7 > 0
+	CALL PALAM_MESSAGE_A
+ENDIF
+
+;-------------------------------------------------
+;口で射精　CFLAG:233
+;-------------------------------------------------
+IF TFLAG:0 > 0
+	CALL PALAM_MESSAGE_A
+	;陥落済み+精液中毒もしくは奉仕精神
+	IF (ABL:奉仕精神 >= 4 || ABL:精液中毒 >= 2) && KANRAKU(TARGET) && (CFLAG:233 < 3 || FLAG:7 == 2)
+		IF RAND:2 == 0
+			PRINTFORMW 「はぁ……っ%UNICODE(0x2661)%　へへっ、おいしい……%UNICODE(0x2661)%」
+		ELSE
+			PRINTFORMW 「んっ…んむ…んぐ…」
+			PRINTFORMW 「はぁ……っ%UNICODE(0x2661)%　すっごい濃い……%UNICODE(0x2661)%%UNICODE(0x2661)%」
+		ENDIF
+		PRINTFORMW %CALLNAME%は濃厚な精液の臭いに蕩けた様な顔をしている
+		CFLAG:233 = 3
+	;陥落済み
+	ELSEIF KANRAKU(TARGET) && (CFLAG:233 < 2 || FLAG:7 == 2)
+		IF RAND:2 == 0
+			PRINTFORMW 「んっ%UNICODE(0x2661)%…んむ…んぐ…%UNICODE(0x2661)%%UNICODE(0x2661)%」
+		ELSE
+			PRINTFORMW 「んく、はぁ……んんっ、ふぐっ！」
+			PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%に命じられるまま、大量の白濁を飲み込んだが、むせて咳きこんでいる……
+			PRINTFORMW しばらくして落ち着くと、こぼしてしまった分を舐めとりはじめた
+		ENDIF
+		CFLAG:233 = 2
+	;それ以外
+	ELSEIF CFLAG:233 < 1 || FLAG:7 == 2
+		PRINTFORMW 「ん、………う」
+		PRINTFORMW %CALLNAME%はむせそうになりながらも、%CALLNAME:PLAYER%の精液を飲み込んでいる……
+		CFLAG:233 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;手で射精　CFLAG:234
+;-------------------------------------------------
+IF TFLAG:1 > 0
+	CALL PALAM_MESSAGE_A
+	CFLAG:234 = 1
+ENDIF
+
+;-------------------------------------------------
+;胸で射精　CFLAG:235
+;-------------------------------------------------
+IF TFLAG:34 > 0
+	CALL PALAM_MESSAGE_A
+	CFLAG:235 = 1
+ENDIF
+
+;-------------------------------------------------
+;足で射精　CFLAG:236
+;-------------------------------------------------
+IF TFLAG:16 > 0
+	CALL PALAM_MESSAGE_A
+	CFLAG:236 = 1
+ENDIF
+
+;-------------------------------------------------
+;セックスで射精　CFLAG:237　CFLAG:238
+;-------------------------------------------------
+IF TFLAG:2 > 0
+	CALL PALAM_MESSAGE_A
+	;アナルセックス系
+	IF SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:237 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF RAND:2 == 0
+						PRINTFORMW 「ああんっ、あるじさんっ！　俺のなかでいっぱい出してね！」
+					ELSE
+						PRINTFORMW 「ふぁ、熱いのお腹に出てるぅ%UNICODE(0x2661)%　あるじさんのすごい、こんなたくさん……」
+					ENDIF
+				ELSEIF NO:MASTER == 101 || (ASSI > 0 && NO:ASSI == 101)
+					PRINTFORMW 「は、はちすかにいちゃぁん……ぁんっ、奥まで熱いのきて……%UNICODE(0x2661)%」
+					PRINTFORMW 「にいちゃんの、もうあふれちゃうよぅ……」
+				ELSEIF NO:MASTER == 105 || (ASSI > 0 && NO:ASSI == 105)
+					PRINTFORMW 「長曾祢兄ちゃん……まだ出て……はぅうぅ%UNICODE(0x2661)%　お、奥までいっぱいだぁ%UNICODE(0x2661)%」
+				ELSE
+					PRINTFORMW 「ぅ、あ……はぁ……あついよぉ……っ」
+				ENDIF
+			;淫乱、娼婦
+				ELSEIF TALENT:4 || TALENT:7
+					PRINTFORMW 「あぁああああっ！　いいっ、いっぱいでてるよぅ%UNICODE(0x2661)%」
+					PRINTFORMW 「俺のなか、もっといっぱいちょうだいっ！」
+			;服従、隷属
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 「ぅ、あ……はぁ……あつい……っ」
+			ENDIF
+		CFLAG:237 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:237 < 3 || FLAG:7 == 2)
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「ふぁ……あ、熱…いぃ……%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 「んんっ！　はぅ%UNICODE(0x2661)%　ナカ出しちゃやだって言ったじゃんかぁ……っ%UNICODE(0x2661)%」
+			ENDIF
+		CFLAG:237 = 3
+		;それ以外
+		ELSEIF CFLAG:237 < 2 || FLAG:7 == 2
+			PRINTFORMW 「やだやだっ！　中に出すのやめてくれよぉ！」
+		ENDIF
+		CFLAG:237 = 2
+	;セックス系
+	ELSE
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			IF PALAM:欲情 > 20000
+				PRINTFORML 「ふああっ、あるじさんっ%UNICODE(0x2661)%　はぅ……ナカに、いっぱい出されてるぅ……%UNICODE(0x2661)%」
+				PRINTFORMW %CALLNAME%はとろんとした顔で、子種を植えつけられる快感に酔いしれていた
+			ELSE
+				PRINTFORMW 「あぁああっ%UNICODE(0x2661)%　あるじさんのがいっぱい%UNICODE(0x2661)%　ナカごぽごぽ言ってるっ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+			ENDIF
+		ELSEIF NO:MASTER == 101 || (ASSI > 0 && NO:ASSI == 101)
+			PRINTFORMW 「は、はちすかにいちゃぁん……！　ぁんっ、奥まで熱いのきて……%UNICODE(0x2661)%」
+			PRINTFORMW 「おれのココ、にいちゃんに中出しされて喜んじゃってるよぉ%UNICODE(0x2661)%」
+		ELSEIF NO:MASTER == 105 || (ASSI > 0 && NO:ASSI == 105)
+			PRINTFORMW 「長曾祢兄ちゃん……全部、ちょーだい%UNICODE(0x2661)%　俺の中に出してぇ%UNICODE(0x2661)%」
+			PRINTFORMW %CALLNAME%はより奥に精液を強請る様に腰を振っている……
+		ELSE
+			IF RAND:2 == 0
+				PRINTFORMW 「ぅ、あ……はぁ……あついよぉ……っ」
+			ELSE
+				PRINTFORMW 「あっ、あっ%UNICODE(0x2661)% 　なか、でてる……お、おくまで……ふぁっ%UNICODE(0x2661)%」
+			ENDIF
+			PRINTFORMW 胎内の最奥に種付けられる感触に%CALLNAME%は全身を震わせている……
+		ENDIF
+		CFLAG:238 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;逆セックスで射精させた　CFLAG:239
+;-------------------------------------------------
+IF (SELECTCOM == 260 || SELECTCOM == 261 || SELECTCOM == 262 || SELECTCOM == 263 || SELECTCOM == 264 || SELECTCOM == 265) && TFLAG:10 > 0
+	CALL PALAM_MESSAGE_A
+	CFLAG:239 = 1
+ENDIF
+
+;-------------------------------------------------
+;調教者空射精　CFLAG:239
+;-------------------------------------------------
+IF TFLAG:164 > 0
+	CALL PALAM_MESSAGE_A
+	CFLAG:239 = 1
+ENDIF
+
+
+
+;==================================================
+;@KOJO_MESSAGE_PALAMCNG_E（103をキャラ番号に置換）
+;触手の射精をトリガーにした口上
+;==================================================
+@KOJO_MESSAGE_PALAMCNG_E_K103
+;助手が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には地の文を表示して口上をスキップする
+;IF TEQUIP:ボールギャグ &&  SELECTCOM != 107
+;	CALL PALAM_MESSAGE_E
+;	RETURN 0
+;ENDIF
+;--------------------------------------------------
+;特定助手、主人時に特殊助手口上を呼び出す(Y1を特定助手、Z3を主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_PALAMCNG_E_PY1_KZ3
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_PALAMCNG_E_PY1_KZ3
+;		RETURN 0
+;	ENDIF
+;ENDIF
+;=================================================
+;触手の射精時のテキスト
+;=================================================
+;-------------------------------------------------
+;触手が射精　CFLAG:240
+;-------------------------------------------------
+IF TFLAG:15 >0
+	CALL PALAM_MESSAGE_E
+	CFLAG:240 = 1
+ENDIF
+
+
+
+;==================================================
+;@KOJO_MESSAGE_PALAMCNG_B関係（103をキャラ番号に置換）
+;奴隷の絶頂をトリガーにした口上
+;==================================================
+@KOJO_MESSAGE_PALAMCNG_B_K103
+;助手が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には地の文を表示して口上をスキップする
+;IF TEQUIP:ボールギャグ &&  SELECTCOM != 107
+;	CALL PALAM_MESSAGE_B
+;	RETURN 0
+;ENDIF
+;--------------------------------------------------
+;特定助手、主人時に特殊助手口上を呼び出す(Y1を特定助手、Z3を主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_PALAMCNG_B_PY1_KZ3
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_PALAMCNG_B_PY1_KZ3
+;		RETURN 0
+;	ENDIF
+;ENDIF
+;=================================================
+;奴隷の絶頂時のテキスト
+;=================================================
+;-------------------------------------------------
+;媚薬の効果発動時
+;-------------------------------------------------
+IF TEQUIP:媚薬 == 1 && FLAG:29 == 0
+ENDIF
+
+;-------------------------------------------------
+;初めてC絶頂　CFLAG:241
+;-------------------------------------------------
+IF NOWEX:0 > 0 && CFLAG:241 == 0
+	CFLAG:241 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてV絶頂　CFLAG:242
+;-------------------------------------------------
+IF NOWEX:1 > 0 && CFLAG:242 == 0
+	CFLAG:242 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてA絶頂　CFLAG:243
+;-------------------------------------------------
+IF NOWEX:2 > 0 && CFLAG:243 == 0
+	CFLAG:243 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてB絶頂　CFLAG:244
+;-------------------------------------------------
+IF NOWEX:3 > 0 && CFLAG:244 == 0
+	CFLAG:244 = 1
+ENDIF
+
+;-------------------------------------------------
+;絶頂　CFLAG:245　CFLAG:246
+;-------------------------------------------------
+;強絶頂
+IF TFLAG:29 > 1
+	CALL PALAM_MESSAGE_B
+	;陥落済み
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:245 < 4 || FLAG:7 == 2)
+	;恋慕、親愛
+	IF TALENT:3 || TALENT:6
+		;アナルセックスで絶頂
+		IF SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116 || SELECTCOM == 526
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「あるっ、あるじさんっ！　すご、ごりゅごりゅきてぇ、あぅ、あぁあああああっ！」
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「ふぁあああああっ%UNICODE(0x2661)%　はちすかにいちゃ、いいっ！　いいよぉっ！！」
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「ながそねにぃ、にーちゃ、もっと%UNICODE(0x2661)%　お尻ずぼずぼ、もっとぉ%UNICODE(0x2661)%　あ、ああぁあああ！！」
+			ELSE
+				PRINTFORMW 「あぁああああっ！　俺イっちゃ、ひぁ、や、お、しりぃ、もっとしてぇっ！」
+			ENDIF
+		ELSE
+			IF RAND:2 == 0
+				PRINTFORMW 「もっと%UNICODE(0x2661)%　もっとぉ、めちゃくちゃにしてえぇっ！！ん、ああっ%UNICODE(0x2661)%%UNICODE(0x2661)%　ひぃいいっ！！%UNICODE(0x2661)%%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 「イくイくっ、おかしくなるっ%UNICODE(0x2661)%　ひぁぁあああぁっイくっ！イくの止まらなぁあっ、ああああっ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+			ENDIF
+		ENDIF
+	;淫乱、娼婦
+	ELSEIF TALENT:4 || TALENT:7
+		PRINTFORMW 「んあぁぁっイクぅっ%UNICODE(0x2661)%　あひっ%UNICODE(0x2661)%　ひぁぁあぁっ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%」
+	;服従、隷属
+	ELSEIF TALENT:5 || TALENT:8
+		PRINTFORMW 「あっあっ、あっ%UNICODE(0x2661)%　あふ、ぁああーーっ！」
+	ENDIF
+	CFLAG:245 = 4
+	;屈服刻印Lv3
+	ELSEIF MARK:2 == 3 && (CFLAG:245 < 3 || FLAG:7 == 2)
+		;アナルセックスで強絶頂
+		IF SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116 || SELECTCOM == 526
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「んあぁぁっイクぅっ%UNICODE(0x2661)%　あひっ%UNICODE(0x2661)%　ひぁぁあぁっ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%」
+			ELSEIF NO:MASTER == 101 || (ASSI > 0 && NO:ASSI == 101)
+				PRINTFORMW 「やっ、やだっ！　ひぐっ、はちす、にーちゃ、やめ、ひぃっ%UNICODE(0x2661)%%UNICODE(0x2661)%　あ、くっ、はひゃあぁぁぁっ%UNICODE(0x2661)%」
+			ELSEIF NO:MASTER == 105 || (ASSI > 0 && NO:ASSI == 105)
+				PRINTFORMW 「やっ、やだっ！　ひぐっ、ながっ、にーちゃ、やめ、ひぃっ%UNICODE(0x2661)%%UNICODE(0x2661)%　あ、くっ、はひゃあぁぁぁっ%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 「やっ、やだっ！　ひぐっ、イキたく、なっ、ひぃっ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+			ENDIF
+		ELSE
+			PRINTFORMW 「ひぃ、ん%UNICODE(0x2661)%%UNICODE(0x2661)%　あたま、まっしろにな――あぁああああっ！！」
+				IF RAND:2 == 0
+					PRINTFORMW 限界を超えた激しい快楽に、%CALLNAME:TARGET%は全身をガクガクと痙攣させて絶頂を迎えた。
+				ELSE
+					PRINTFORMW 与えられる極限快楽に耐えられず、悲鳴じみた声をあげながら、%CALLNAME:TARGET%は絶頂を迎えた。
+				ENDIF
+		ENDIF
+	CFLAG:245 = 3
+	;それ以外
+	ELSEIF CFLAG:245 < 2 || FLAG:7 == 2
+		PRINTFORMW 「んぁっ、いひぃっ！！　やだ、こんな、や、あぁあああーーっ！」
+		CFLAG:245 = 2
+	ENDIF
+;絶頂
+ELSEIF TFLAG:29 > 0
+	CALL PALAM_MESSAGE_B
+	;陥落済み
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:246 < 4 || FLAG:7 == 2)
+	;恋慕、親愛
+	IF TALENT:3 || TALENT:6
+		;アナルセックスで絶頂
+		IF SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116 || SELECTCOM == 526
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「お尻が…ぁ…蕩けちゃう…%UNICODE(0x2661)%…気持ちいいよぅ%UNICODE(0x2661)%　奥っ、じゅぽじゅぽいい、イっちゃうよぉっ%UNICODE(0x2661)%」
+			ELSEIF NO:MASTER == 101 || (ASSI > 0 && NO:ASSI == 101)
+				PRINTFORMW 「気持ちいいよぅ%UNICODE(0x2661)%　俺ぇ、蜂須賀兄ちゃんに奥までずんずん犯されてるぅ%UNICODE(0x2661)%」
+				PRINTFORMW 「あっ、ああぁっ！　お尻イっちゃうぅ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+			ELSEIF NO:MASTER == 105 || (ASSI > 0 && NO:ASSI == 105)
+				PRINTFORMW 「きもち、きもちいい！%UNICODE(0x2661)%　長曾祢兄ちゃんっ、おしりっ、いいよぉっ！　ああぁんっ%UNICODE(0x2661)%
+			ELSE
+				PRINTFORMW 「ひゃぁん…ダメぇっ%UNICODE(0x2661)%　お尻っ激しくしちゃ、あっ、あぁんっ%UNICODE(0x2661)%」
+			ENDIF
+		ELSE
+			IF RAND:2 == 0
+				PRINTFORMW 「ふあっ、ううっ、イクイクっ%UNICODE(0x2661)%　あっ、あっ、あああぁぁっ%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 「あ、気持ちいいよぅ%UNICODE(0x2661)%　あぁあ、あひっ%UNICODE(0x2661)%　あぁあああーーっ%UNICODE(0x2661)%」
+			ENDIF
+		ENDIF
+	;淫乱、娼婦
+	ELSEIF TALENT:4 || TALENT:7
+		PRINTFORMW 「だめぇ、あっ、あっ%UNICODE(0x2661)%　ああ、アツくなって、俺っ、どんどんアツくなってるっ%UNICODE(0x2661)%」
+		PRINTFORMW 「ああ、イっちゃう、イっちゃうよぉ%UNICODE(0x2661)%　あぁああっ、あっ！　イクぅ、ああああああ%UNICODE(0x2661)%%UNICODE(0x2661)%
+	;服従、隷属
+	ELSEIF TALENT:5 || TALENT:8
+		PRINTFORMW 「んっ%UNICODE(0x2661)%　あっ、はぁぅっ！　もうっ…イっちゃうぅう%UNICODE(0x2661)%%UNICODE(0x2661)%」
+	ENDIF
+	CFLAG:246 = 4
+	;屈服刻印Lv3
+	ELSEIF MARK:2 == 3 && (CFLAG:246 < 3 || FLAG:7 == 2)
+		IF RAND:2 == 0
+			PRINTFORMW 「や、め、あぁあ、あひっ%UNICODE(0x2661)%　あぁあああーーっ%UNICODE(0x2661)%」
+		ELSE
+			PRINTFORMW 「くっ、うぅっ……っ！は、イっ、イっちゃ、イくぅっ%UNICODE(0x2661)%」
+		ENDIF
+	CFLAG:246 = 3
+	;それ以外
+	ELSEIF CFLAG:246 < 2 || FLAG:7 == 2
+		PRINTFORMW 「ふぁ……ああんっ！　あっ、あああぁっ！」
+		CFLAG:246 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;射精　CFLAG:247
+;-------------------------------------------------
+;射精している
+IF TFLAG:10 > 0
+	IF RAND:2 == 0
+		PRINTFORMW 「あ、ふぁ……んっ！」
+	ELSE
+		PRINTFORMW 「や、出ちゃ……あああっ！」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;ドライオーガズム
+;-------------------------------------------------
+;空射精している
+IF NOWEX:41
+	CALL PALAM_MESSAGE_A3
+ENDIF
+
+;-------------------------------------------------
+;空射精　※リボンパッチによる追加
+;-------------------------------------------------
+;空射精している
+IF NOWEX:40
+	CALL PALAM_MESSAGE_A2
+	;空射精回7以上
+	IF TFLAG:802 & 32768
+		PRINTFORMW 「や、やああぁっ！　もう許してぇ！」
+	;空射精3回以上
+	ELSEIF TFLAG:802 & 4096
+	;空射精1回以上
+	ELSEIF TFLAG:802 & 1024
+	ENDIF
+	;空射精の回数をカウント
+	IF TFLAG:802 & 32768
+		TFLAG:802 |= 65536
+	ELSEIF TFLAG:802 & 16384
+		TFLAG:802 |= 32768
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 65536
+	ELSEIF TFLAG:802 & 8192
+		TFLAG:802 |= 16384
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 32768
+	ELSEIF TFLAG:802 & 4096
+		TFLAG:802 |= 8192
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 16384
+	ELSEIF TFLAG:802 & 2048
+		TFLAG:802 |= 4096
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 8192
+	ELSEIF TFLAG:802 & 1024
+		TFLAG:802 |= 2048
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 4096
+	ELSE
+		TFLAG:802 |= 1024
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 2048
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;噴乳　CFLAG:248
+;-------------------------------------------------
+;噴乳している
+IF TFLAG:11 > 0
+	CFLAG:247 = 1
+ENDIF
+
+
+
+;==================================================
+;@KOJO_MESSAGE_PALAMCNG_C関係（103をキャラ番号に置換）
+;調教後の変化をトリガーにした口上
+;==================================================
+@KOJO_MESSAGE_PALAMCNG_C_K103
+;助手が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には地の文を表示して口上をスキップする
+IF TEQUIP:ボールギャグ &&  SELECTCOM != 107
+	CALL PALAM_MESSAGE_C
+	RETURN 0
+ENDIF
+;--------------------------------------------------
+;特定助手、主人時に特殊助手口上を呼び出す(Y1を特定助手、Z3を主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_PALAMCNG_C_PY1_KZ3
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_PALAMCNG_C_PY1_KZ3
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;=================================================
+;調教後のテキスト
+;=================================================
+;-------------------------------------------------
+;処女喪失(処女のみ)
+;-------------------------------------------------
+IF TFLAG:3 > 0
+	CALL PALAM_MESSAGE_C
+ENDIF
+
+;-------------------------------------------------
+;童貞喪失
+;-------------------------------------------------
+IF TFLAG:160 == 1
+	CALL PALAM_MESSAGE_C
+ENDIF
+
+;-------------------------------------------------
+;バックバージン喪失
+;-------------------------------------------------
+IF TFLAG:161 == 1
+	CALL PALAM_MESSAGE_C
+ENDIF
+
+
+
+;==================================================
+;@KOJO_MESSAGE_PALAMCNG_D関係（103をキャラ番号に置換）
+;パラメータ変化をトリガーにした口上
+;==================================================
+@KOJO_MESSAGE_PALAMCNG_D_K103
+;助手が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には地の文を表示して口上をスキップする
+IF TEQUIP:ボールギャグ &&  SELECTCOM != 107
+	CALL PALAM_MESSAGE_D
+	RETURN 0
+ENDIF
+;--------------------------------------------------
+;特定助手、主人時に特殊助手口上を呼び出す(Y1を特定助手、Z3を主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_PALAMCNG_D_PY1_KZ3
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_PALAMCNG_D_PY1_KZ3
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;=================================================
+;パラメータ変化時のテキスト
+;=================================================
+;-------------------------------------------------
+;初めて潤滑がLV3超えた　CFLAG:249
+;-------------------------------------------------
+P = PALAM:4 + UP:4
+IF P > PALAMLV:4 && CFLAG:249 == 0
+	CALL PALAM_MESSAGE_D
+	;ローションを使った場合
+	IF SELECTCOM == 180
+	;それ以外
+	ELSE
+	ENDIF
+	CFLAG:249 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて欲情がLV2超えた　CFLAG:250
+;-------------------------------------------------
+P = PALAM:6 + UP:6
+IF P > PALAMLV:2 && CFLAG:250 == 0
+	CALL PALAM_MESSAGE_D
+	;媚薬を使った場合
+	IF SELECTCOM == 181
+	;それ以外
+	ELSE
+	ENDIF
+	CFLAG:250 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて屈服がLV3超えた　CFLAG:251
+;-------------------------------------------------
+P = PALAM:7 + UP:7
+IF P > PALAMLV:3 && CFLAG:251 == 0
+	CALL PALAM_MESSAGE_D
+	CFLAG:251 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて恭順がLV3超えた　CFLAG:252
+;-------------------------------------------------
+P = PALAM:5 + UP:5
+IF P > PALAMLV:3 && CFLAG:252 == 0
+	CFLAG:252 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて恐怖がLV3超えた　CFLAG:253
+;-------------------------------------------------
+P = PALAM:11 + UP:11
+IF P > PALAMLV:3 && CFLAG:253 == 0
+	CALL PALAM_MESSAGE_D
+	CFLAG:253 = 1
+ENDIF
+
+
+
+;=================================================
+;@KOJO_MESSAGE_MARKCNG関係（103をキャラ番号に置換）
+;刻印変動をトリガーにした口上
+;刻印変動後に口上を発動します
+;=================================================
+@KOJO_MESSAGE_MARKCNG_K103
+;助手が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には地の文を表示して口上をスキップする
+IF TEQUIP:ボールギャグ &&  SELECTCOM != 107
+	CALL MARK_MESSAGE
+	RETURN 0
+ENDIF
+SIF TFLAG:22 != 3 && TFLAG:23 != 3 && TFLAG:24 != 13 && TFLAG:24 != 23 && TFLAG:24 != 33 && TFLAG:21 != 3
+	CALL MARK_MESSAGE
+;--------------------------------------------------
+;特定助手、主人時に特殊助手口上を呼び出す(Y1を特定助手、Z3を主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_MARKCNG_PY1_KZ3
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_MARKCNG_PY1_KZ3
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;-------------------------------------------------
+;調教中に体力0になった場合
+;-------------------------------------------------
+IF BASE:0 <= 0
+ENDIF
+
+;-------------------------------------------------
+;苦痛刻印Lv3
+;-------------------------------------------------
+IF TFLAG:22 == 3
+	CALL MARK_MESSAGE_A
+ENDIF
+
+;-------------------------------------------------
+;快楽刻印Lv3
+;-------------------------------------------------
+IF TFLAG:23 == 3
+ENDIF
+
+;-------------------------------------------------
+;屈服刻印Lv3
+;-------------------------------------------------
+IF TFLAG:24 == 13 || TFLAG:24 == 23 || TFLAG:24 == 33
+	CALL MARK_MESSAGE_S
+	;快楽による屈服
+	IF TFLAG:24 == 13
+	;恐怖と苦痛による屈服
+	ELSEIF TFLAG:24 == 23
+	;屈服と恭順による屈服
+	ELSEIF TFLAG:24 == 33
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;反発刻印Lv3
+;-------------------------------------------------
+IF TFLAG:21 == 3
+	CALL MARK_MESSAGE_R
+ENDIF
+
+

@@ -1,0 +1,139 @@
+﻿;-------------------------------------------------
+;커닐링구스
+;V계 조교 커맨드
+;-------------------------------------------------
+@COM40
+
+;-------------------------------------------------
+;특수 파생 처리
+;-------------------------------------------------
+;전회와 이번 조교자가 같음
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;벌써삽입명령중은 「샌드위치」
+	IF PREVCOM == 405 || PREVCOM == 406
+		CALL COM_ABLE515
+		IF RESULT == 1
+			TFLAG:40 = 4
+			IF PREVCOM == 405
+				TFLAG:41 = 1
+			ELSE
+				TFLAG:41 = 2
+			ENDIF
+			TFLAG:49 = 0
+			JUMP COM515
+		ENDIF
+	;전회 커맨드가촉수에범하게시킨다라고 해 「샌드위치 시킨다」
+	ELSEIF PREVCOM == 270 || PREVCOM == 271
+		CALL COM_ABLE520
+		IF RESULT == 1
+			TFLAG:40 = 4
+			IF PREVCOM == 270
+				TFLAG:41 = 6
+			ELSE
+				TFLAG:41 = 7
+			ENDIF
+			TFLAG:49 = 0
+			JUMP COM520
+		ENDIF
+	;전회의 조교가펠라치오, 커닐링구스강제, 식스나인이라고, 식스나인에 파생
+	ELSEIF PREVCOM == 71 || PREVCOM == 222 || PREVCOM == 503
+		CALL COM_ABLE503
+		SIF RESULT == 1
+			JUMP COM503
+	;전회가 샌드위치인가, 샌드위치 시킨다
+	ELSEIF PREVCOM == 515 || PREVCOM == 520
+		;조수가 노예에게 삽입하고 있으면 다시 「샌드위치」에
+		IF TFLAG:41 == 1 || TFLAG:41 == 2
+			CALL COM_ABLE515
+			IF RESULT == 1
+				TFLAG:40 = 4
+				TFLAG:49 = 0
+				JUMP COM515
+			ENDIF
+		;조수가 주인에게 삽입하고 있으면 「샌드위치 시킨다」에
+		ELSEIF TFLAG:41 == 6 || TFLAG:41 == 7
+			CALL COM_ABLE520
+			IF RESULT == 1
+				TFLAG:40 = 4
+				TFLAG:49 = 0
+				JUMP COM520
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;페니스가 없는가 개뇨의가 높은, 혹은뇨의가 있어카테터장착중은음뇨한다에 파생
+IF !PENIS(TARGET) && (BASE:뇨의 >= 90 || (BASE:뇨의 >= 60 && TEQUIP:카테터))
+	CALL COM_ABLE285
+	SIF RESULT == 1
+		JUMP COM285
+ENDIF
+
+;아무것도 읽지 않고 여기에 왔을 때는 플래그 해제
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 커닐링구스
+STR:0 = 커닐링구스
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 30
+
+SOURCE:쾌V += 150
+;혀를 사용하는 조교에서는, 조교자의혀놀림에 의해, 쾌감의 소스 증가
+IF TALENT:PLAYER:혀놀림
+	TIMES SOURCE:쾌V , 1.50
+ELSEIF TALENT:PLAYER:고양이혀
+	TIMES SOURCE:쾌V , 0.75
+ENDIF
+;착의 때
+SIF TEQUIP:속옷（아래） || TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TIMES SOURCE:쾌V , 0.80
+
+SOURCE:액체 += 60
+SOURCE:노출 += 10
+SOURCE:일탈 += 15
+SOURCE:반발 += 15
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 20
+
+;스킨십선호라면애정의 소스 추가
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+CALL COM_STAIN
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;게이경험라든지 가산
+CALL COM_EXP(3)
+
+;조교자가고양이혀소유의 경우는, 조교자에게가학쾌락경험를 추가
+IF TALENT:PLAYER:고양이혀
+	EXP:PLAYER:가학쾌락경험 += 1
+	PRINTFORML %CALLNAME:PLAYER%의가학쾌락경험＋1
+ENDIF
+
+;의존도 벡터
+TFLAG:33 = 1
+
+RETURN 1
+
+

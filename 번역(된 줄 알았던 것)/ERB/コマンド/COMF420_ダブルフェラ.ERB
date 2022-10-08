@@ -1,0 +1,189 @@
+﻿;-------------------------------------------------
+;더블펠라
+;주인×(조수＋노예) 계 커맨드
+;-------------------------------------------------
+@COM420
+
+PRINTL 더블펠라
+STR:0 = 더블펠라
+
+;-------------------------------------------------
+;실행 판정 처리
+;-------------------------------------------------
+;모든 명령에 공통의 요소를 고려
+;(순종가 높다고 명령에 따르기 쉬운 등)
+CALL COM_ORDER
+
+;실행 판정 조작
+CALL KOJO_DENIAL_PLUS
+
+;합계를 표시(34이상으로 실행)
+PRINT  = 
+PRINTV A
+
+V = 34
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행치
+PRINTV V
+
+;실행 불가입상/실행 판정 조작
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;실행 할 수 없다
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;실행자가 노예인 플래그
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;사정게이지 체크
+;-------------------------------------------------
+B = 1300
+
+CALL SHOOT_GAUGE_CHECK_3PM
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:MASTER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:MASTER:사정 += B
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 20
+LOSEBASE:기력 += 80
+
+SOURCE:애정 += 100
+
+;스킨십선호라면애정의 소스 추가
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+SOURCE:성행동 += 400
+SOURCE:성취감 += 200
+SOURCE:굴복 += 600
+SOURCE:일탈 += 200
+SOURCE:반발 += 200
+
+;위 쪽으로 계산한 더러운 데이터
+SOURCE:불결 += Y*40 + 100
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 400
+
+
+;-------------------------------------------------
+;사정체크
+;-------------------------------------------------
+;사정 하는 것은 주인인 것으로 전용의 함수를 부른다
+CALL SAMEN_CHECK(MASTER, 1)
+
+;사정시의 처리
+IF E >= 1
+	;사정처 타입의 설정
+	TFLAG:703 = 4
+	;사정처 선택의 가능·불가
+	TFLAG:704 = 1
+	;범용적인 처리는 이 함수로 실시한다
+	;(사정게이지의 재계산이나사정경험의 상승과 공통 부분의 표시)
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;조교자의 P의 더러움이 노예, 조수의입에 이동
+STAIN:입 |= STAIN:MASTER:페니스
+STAIN:ASSI:입 |= STAIN:MASTER:페니스
+
+STAIN:MASTER:페니스 = 2
+
+SIF E >= 1
+	TFLAG:8 = 2
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;사정에 관계없이 행해지는 처리는 여기로부터
+PRINTFORML %EXPNAME:22%＋1
+EXP:펠라경험 += 1
+
+;레즈경험
+A = 7
+B = NO:MASTER + 1099
+C = NO:ASSI + 1099
+D = 10
+
+IF MALE(TARGET) == 0 && MALE(MASTER) == 0 && MALE(ASSI) == 0
+	PRINTFORML %EXPNAME:40%+{D}
+	EXP:레즈경험 += D
+ELSEIF MALE(TARGET) == 0 && MALE(MASTER) == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:레즈경험 += A
+ELSEIF MALE(TARGET) == 0 && MALE(ASSI) == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:레즈경험 += A
+ELSEIF MALE(TARGET) && MALE(MASTER) && MALE(ASSI)
+	PRINTFORML %EXPNAME:41%+{D}
+	EXP:게이경험 += D
+ELSEIF MALE(TARGET) && MALE(MASTER)
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:게이경험 += A
+ELSEIF MALE(TARGET) && MALE(ASSI)
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:게이경험 += A
+ENDIF
+;조교자를 기록
+CFLAG:B += A
+CFLAG:C += A
+
+;노예가고양이혀소유의 경우는, 조교자에게가학쾌락경험를 추가
+IF TALENT:고양이혀
+	EXP:가학쾌락경험 += 1
+	PRINTFORML %EXPNAME:32%＋1
+ENDIF
+
+;의존도 벡터
+P = PLAYER
+IF RELATION:P > 100
+	TFLAG:33 = 2
+ELSEIF RELATION:P < 100
+	TFLAG:33 = 3
+ELSE
+	TFLAG:33 = 1
+ENDIF
+
+;의존도 보정치(궁합 100↑또한음란로 1, 창부로 2)
+P = PLAYER
+IF TALENT:음란 && RELATION:P > 100
+	TFLAG:30 += 1
+ELSEIF TALENT:창부 && RELATION:P > 100
+	TFLAG:30 += 2
+ENDIF
+
+TFLAG:100 = 1
+
+
+RETURN 1
+
+

@@ -1,0 +1,152 @@
+﻿;-------------------------------------------------
+;本体姦
+;ＳＭ-拷問系コマンド
+;-------------------------------------------------
+@COM163
+
+PRINTL 本体姦
+STR:0 = 本体姦
+
+;エロいイメージ
+IF RAND:3 == 0
+	TFLAG:56 = 1
+;怖いイメージ
+ELSEIF RAND:2 == 0
+	TFLAG:56 = 2
+;幸福なイメージ
+ELSE
+	TFLAG:56 = 3
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 1000
+LOSEBASE:気力 += 1000
+
+IF EXP:脳姦経験 < EXPLV:1
+	TIMES LOSEBASE:体力 , 1.10
+	TIMES LOSEBASE:気力 , 2.00
+ELSEIF EXP:脳姦経験 < EXPLV:2
+	TIMES LOSEBASE:体力 , 0.90
+	TIMES LOSEBASE:気力 , 1.80
+ELSEIF EXP:脳姦経験 < EXPLV:3
+	TIMES LOSEBASE:体力 , 0.80
+	TIMES LOSEBASE:気力 , 1.50
+ELSEIF EXP:脳姦経験 < EXPLV:4
+	TIMES LOSEBASE:体力 , 0.70
+	TIMES LOSEBASE:気力 , 1.20
+ELSEIF EXP:脳姦経験 < EXPLV:5
+	TIMES LOSEBASE:体力 , 0.60
+	TIMES LOSEBASE:気力 , 1.00
+ELSE
+	TIMES LOSEBASE:体力 , 0.50
+	TIMES LOSEBASE:気力 , 0.50
+ENDIF
+
+;エロいイメージ
+IF TFLAG:56 == 1
+	IF ABL:Ｂ感覚 == 0
+		SOURCE:快Ｂ += 500
+	ELSEIF ABL:Ｂ感覚 == 1
+		SOURCE:快Ｂ += 800
+	ELSEIF ABL:Ｂ感覚 >= 2
+		LOCAL = ABL:Ｂ感覚 * 500
+		SOURCE:快Ｂ += LOCAL
+	ENDIF
+	
+	IF ABL:Ｃ感覚 == 0
+		SOURCE:快Ｃ += 500
+	ELSEIF ABL:Ｃ感覚 == 1
+		SOURCE:快Ｃ += 800
+	ELSEIF ABL:Ｃ感覚 >= 2
+		LOCAL = ABL:Ｃ感覚 * 500
+		SOURCE:快Ｃ += LOCAL
+	ENDIF
+	
+	IF VAGINA(TARGET) && ABL:Ｖ感覚 == 0
+		SOURCE:快Ｖ += 500
+	ELSEIF VAGINA(TARGET) && ABL:Ｖ感覚 == 1
+		SOURCE:快Ｖ += 800
+	ELSEIF VAGINA(TARGET) && ABL:Ｖ感覚 >= 2
+		LOCAL = ABL:Ｖ感覚 * 500
+		SOURCE:快Ｖ += LOCAL
+	ENDIF
+	
+	IF ABL:Ａ感覚 == 0
+		SOURCE:快Ａ += 500
+	ELSEIF ABL:Ａ感覚 == 1
+		SOURCE:快Ａ += 800
+	ELSEIF ABL:Ａ感覚 >= 2
+		LOCAL = ABL:Ａ感覚 * 500
+		SOURCE:快Ａ += LOCAL
+	ENDIF
+	
+	SOURCE:性行動 += 750
+	SOURCE:達成感 += 1000
+	SOURCE:中毒充足 += 1000
+	SOURCE:液体 += 2500
+	SOURCE:欲情 += 3000
+;怖いイメージ
+ELSEIF TFLAG:56 == 2
+	SOURCE:痛み += 3000
+	SOURCE:恐れ += 2000
+	SOURCE:欲情 += 2000
+	SOURCE:露出 += 1500
+	SOURCE:屈従 += 3000
+;幸福なイメージ
+ELSEIF TFLAG:56 == 3
+	SOURCE:情愛 += 2000
+	SOURCE:性行動 += 500
+	SOURCE:達成感 += 800
+	SOURCE:中毒充足 += 500
+	SOURCE:液体 += 1200
+	SOURCE:欲情 += 2000
+	SOURCE:恭順 += 3000
+ENDIF
+
+SOURCE:屈従 += 2000
+SOURCE:逸脱 += 1200
+SOURCE:反発 += 1500
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 1200
+
+;マゾを見る
+IF TALENT:マゾ
+	TIMES SOURCE:欲情 , 1.50
+	TIMES SOURCE:反発 , 0.80
+ENDIF
+
+;ストレスいっぱい増加　10-45（幸福なイメージの場合は15-50）加算
+CFLAG:10 += 10
+
+SIF TFLAG:56 == 3
+	CFLAG:10 += 5
+
+CFLAG:10 += RAND:36
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF EXP:脳姦経験 == 0
+	EXP:異常経験 += 1
+	PRINTL 脳姦初経験で異常経験＋1
+ENDIF
+
+EXP:脳姦経験 += 1
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+RETURN 1
+

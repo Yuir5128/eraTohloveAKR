@@ -1,0 +1,176 @@
+﻿;=============================================================================
+;특이라든지극라든지에 관련한 함수 파일
+;개변이나 재배포는 자유입니다(eraToLove 이외에서의 이용가치는 전무라고 생각됩니다만…)
+;=============================================================================
+;-------------------------------------------------
+;함수명:TOKU_KIWAME
+;개요:특인가극인지를 판정한다
+;인수:ARG… 캐릭터의 등록 번호
+;반환값:0. 남사 이외 1. 특 2. 극
+;비고:식 나카노세키수
+;히게키리까지는 짝수가극, 히자마루로부터는 홀수가극
+;-------------------------------------------------
+@TOKU_KIWAME(ARG)
+#FUNCTION
+
+SELECTCASE NO:ARG
+	;「당신」는 남사 이외
+	CASE 0
+		RETURNF 0
+	;「아이」는 남사 이외
+	CASE 890 TO 899
+		RETURNF 0
+	;히게키리·히자마루의 특
+	CASE 107 TO 110, 112 TO 113
+		RETURNF 1
+	;히게키리·히자마루의극
+	CASE 111, 115
+		RETURNF 2
+	;장 소네까지
+	CASE 1 TO 106
+		;캐릭터 고유 번호가 짝수라면극
+		IF LOCAL % 2 == 0
+			RETURNF 2
+		ELSE
+			RETURNF 1
+		ENDIF
+	;오오쿠리카라로부터
+	CASE IS >= 116
+		;캐릭터 고유 번호가 홀수라면극
+		IF LOCAL % 2 == 1
+			RETURNF 2
+		ELSE
+			RETURNF 1
+		ENDIF
+ENDSELECT
+
+;-------------------------------------------------
+;함수명:TOKU_KIWAME2
+;개요:특인가극인지를 판정한다
+;인수:ARG:0, ARG:1… 캐릭터의 등록 번호
+;반환값:0. 양쪽 모두남사 이외 1. 양쪽 모두특 2. 양쪽 모두극
+;3. 남사 의외로특 4. 남사 의외로극 5. 특과극 6. 그 외(버그 확인용으로 일단)
+;비고:식 나카노세키수
+;어느 쪽이 특인가극인가의 구별은 붙이지 않기 때문에 별개로 판정해 주세요
+;-------------------------------------------------
+@TOKU_KIWAME2(ARG:0, ARG:1)
+#FUNCTION
+
+LOCAL = TOKU_KIWAME(ARG:0)
+LOCAL:1 = TOKU_KIWAME(ARG:1)
+
+;특끼리, 극끼리, 그 이외끼리는 먼저 처리
+IF LOCAL == LOCAL:1
+	IF LOCAL == 0
+		RETURNF 0
+	ELSEIF LOCAL == 1
+		RETURNF 1
+	ELSE
+		RETURNF 2
+	ENDIF
+ENDIF
+
+LOCAL:2 = 0
+
+;ARG:0이 특인가극나 남사 이외인가로 비트를 세우는 장소를 바꾼다
+IF LOCAL == 2
+	LOCAL:2 |= 2
+ELSEIF LOCAL == 1
+	LOCAL:2 |= 1
+ELSE
+	LOCAL:2 |= 0
+ENDIF
+
+;ARG:1이 특인가극나 남사 이외인가로 비트를 세우는 장소를 바꾼다
+IF LOCAL:1 == 2
+	LOCAL:2 |= 2
+ELSEIF LOCAL:1 == 1
+	LOCAL:2 |= 1
+ELSE
+	LOCAL:2 |= 0
+ENDIF
+
+IF LOCAL:2 == 1
+	RETURNF 3
+ELSEIF LOCAL:2 == 2
+	RETURNF 4
+ELSEIF LOCAL:2 == 3
+	RETURNF 5
+;버그 확인용으로 일단
+ELSE
+	RETURNF 6
+ENDIF
+
+;-------------------------------------------------
+;함수명:SAME_TOKEN
+;개요:동일 도검이나 판정한다
+;인수:
+;ARG:2 == 0 → ARG:0, ARG:1… 캐릭터 등록 번호
+;ARG:2 == 1 → ARG:0, ARG:1… 캐릭터 고유 번호
+;반환값:0. 동일 도검이 아닌 1. 동일 도검
+;비고:식 나카노세키수
+;특과극의 구별은 붙이지 않기 때문에 별개로 판정해 주세요
+;-------------------------------------------------
+@SAME_TOKEN(ARG:0, ARG:1, ARG:2)
+#FUNCTION
+
+IF ARG:2 == 0
+	LOCAL = NO:(ARG:0)
+	LOCAL:1 = NO:(ARG:1)
+ELSE
+	LOCAL = ARG:0
+	LOCAL:1 = ARG:1
+ENDIF
+
+;있을 수 없을 것이지만 일단
+SIF LOCAL == LOCAL:1
+	RETURNF 1
+
+;LOCAL:1이 크면 바꿔 넣는다
+IF LOCAL:1 > LOCAL
+	;LOCAL:1의 숫자를 LOCAL:2에 일시 퇴피해 둔다
+	LOCAL:2 = LOCAL:1
+	LOCAL:1 = LOCAL
+	LOCAL = LOCAL:2
+ENDIF
+
+;여기 이후는 반드시 LOCAL > LOCAL:1이 된다
+
+;어느 쪽인지가 「당신」
+SIF LOCAL == 0 || LOCAL:1 == 0
+	RETURNF 0
+
+;어느 쪽인지가 「아이」
+SIF (LOCAL >= 890 && LOCAL <= 899) || ( LOCAL:1 >= 890 && LOCAL:1 <= 899)
+	RETURNF 0
+
+;히게키리는 먼저 처리
+SIF ( LOCAL >= 107 && LOCAL <= 111) && ( LOCAL:1 >= 107 && LOCAL:1 <= 111)
+	RETURNF 1
+
+;히자마루는 먼저 처리
+SIF ( LOCAL >= 112 && LOCAL <= 115) && ( LOCAL:1 >= 112 && LOCAL:1 <= 115)
+	RETURNF 1
+
+;캐릭터 번호가 서로 이웃이 되지 않았다
+SIF LOCAL - LOCAL:1 > 1
+	RETURNF 0
+
+;장 소네까지 큰 것이 짝수라면 동일 도검
+IF LOCAL >= 1 && LOCAL <= 106
+	IF LOCAL % 2 == 0
+		RETURNF 1
+	ELSE
+		RETURNF 0
+	ENDIF
+;오오쿠리카라로부터는 큰 것이 홀수라면 동일 도검
+ELSEIF LOCAL >= 116
+	IF LOCAL % 2 == 1
+		RETURNF 1
+	ELSE
+		RETURNF 0
+	ENDIF
+ENDIF
+
+
+

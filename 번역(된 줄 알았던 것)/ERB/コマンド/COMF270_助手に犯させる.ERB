@@ -1,0 +1,307 @@
+﻿;-------------------------------------------------
+;촉수에범하게시킨다
+;주인수계 커맨드
+;-------------------------------------------------
+@COM270
+
+;-------------------------------------------------
+;특수 파생 처리
+;-------------------------------------------------
+;전회와 이번 조교자가 같음
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;노예가 조수를 범하고 있으면 「연결(주인←조수←노예)」
+	IF PREVCOM == 430 || PREVCOM == 431
+		CALL COM_ABLE519
+		IF RESULT == 1
+			TFLAG:40 = 0
+			IF PREVCOM == 430
+				TFLAG:49 = 11
+			ELSE
+				TFLAG:49 = 12
+			ENDIF
+			TFLAG:41 = 6
+			JUMP COM519
+		ENDIF
+	;주인이 노예를 범하고 있으면 「연결(노예←주인←조수)」
+	ELSEIF PREVCOM == 100 || PREVCOM == 101 || PREVCOM == 104 || PREVCOM == 105 || PREVCOM == 110 || PREVCOM == 111 || PREVCOM == 114 || PREVCOM == 115
+		CALL COM_ABLE519
+		IF RESULT == 1
+			IF PREVCOM == 100 || PREVCOM == 101 || PREVCOM == 104 || PREVCOM == 105
+				TFLAG:40 = 1
+			ELSE
+				TFLAG:40 = 2
+			ENDIF
+			TFLAG:41 = 6
+			TFLAG:49 = 0
+			JUMP COM519
+		ENDIF
+	;양쪽 모두 V삽입하고 있으면 「이륜 꽂아 시킨다」
+	ELSEIF PREVCOM == 262
+		CALL COM_ABLE522
+		IF RESULT == 1
+			TFLAG:40 = 0
+			TFLAG:41 = 6
+			TFLAG:49 = 6
+			JUMP COM522
+		ENDIF
+	;노예를입봉사하고 있으면 「샌드위치 시킨다」
+	ELSEIF PREVCOM == 31 || PREVCOM == 40 || PREVCOM == 280
+		CALL COM_ABLE520
+		IF RESULT == 1
+			IF PREVCOM == 31
+				TFLAG:40 = 3
+			ELSEIF PREVCOM == 40
+				TFLAG:40 = 4
+			ELSEIF PREVCOM == 280
+				TFLAG:40 = 5
+			ENDIF
+			TFLAG:41 = 6
+			TFLAG:49 = 0
+			JUMP COM520
+		ENDIF
+	;전회 커맨드도 3 P계
+	ELSEIF PREVCOM == 519 || PREVCOM == 520 || PREVCOM == 522
+		;노예에게입봉사하고 있으면 「샌드위치 시킨다」
+		IF TFLAG:40 == 3 || TFLAG:40 == 4 || TFLAG:40 == 5
+			CALL COM_ABLE520
+			IF RESULT == 1
+				TFLAG:41 = 6
+				TFLAG:49 = 0
+				JUMP COM520
+			ENDIF
+		;주인이 노예를 범하고 있으면 「연결(노예←주인←조수)」
+		ELSEIF TFLAG:40 == 1 || TFLAG:40 == 2
+			CALL COM_ABLE519
+			IF RESULT == 1
+				TFLAG:41 = 6
+				TFLAG:49 = 0
+				JUMP COM519
+			ENDIF
+		;양쪽 모두 V삽입하고 있으면 「이륜 꽂아 시킨다」
+		ELSEIF TFLAG:49 == 6
+			CALL COM_ABLE522
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:41 = 6
+				JUMP COM522
+			ENDIF
+		;노예가 조수를 범하고 있으면 「연결(주인←조수←노예)」
+		ELSEIF TFLAG:49 == 11 || TFLAG:49 == 12
+			CALL COM_ABLE519
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:41 = 6
+				JUMP COM519
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;아무것도 읽지 않고 여기에 왔을 때는 플래그 해제
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 촉수에범하게시킨다
+STR:0 = 촉수에범하게시킨다
+
+CALL KOJO_MESSAGE_COM
+
+;조교자가처녀였던 경우의 상실 플래그(처녀막재생 대응)
+TFLAG:19 |= 2
+
+;조수가동정였던 경우의 상실 플래그
+SIF TALENT:ASSI:동정
+	TFLAG:160 |= 3
+
+;삽입 개소 판정 플래그
+TFLAG:705 = 0
+
+
+;-------------------------------------------------
+;사정게이지 체크(주인)
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_MA1
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+;-------------------------------------------------
+;사정게이지 체크(조수)
+;-------------------------------------------------
+B = 1350
+
+CALL SHOOT_GAUGE_CHECK_MA2
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:ASSI:9 > 0
+	B /= 20
+
+SIF PENIS(ASSI)
+	BASE:ASSI:사정 += B
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 0
+LOSEBASE:기력 += 80
+
+SOURCE:액체 += 100
+SOURCE:굴복 += 1500
+SOURCE:일탈 += 700
+SOURCE:반발 += 700
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 700
+
+;조수와 노예의 궁합에 의해, 전체의 소스가 변화
+T = NO:TARGET
+A = NO:ASSI
+SOURCE:액체 *= RELATION:A
+SOURCE:굴복 *= RELATION:A
+SOURCE:울굴 *= RELATION:A
+SOURCE:일탈 *= RELATION:A
+SOURCE:반발 *= RELATION:A
+SOURCE:액체 /= 100
+SOURCE:굴복 /= 100
+SOURCE:울굴 /= 100
+SOURCE:일탈 /= 100
+SOURCE:반발 /= 100
+
+
+;-------------------------------------------------
+;사정체크(주인)
+;-------------------------------------------------
+CALL SAMEN_CHECK(MASTER, 1)
+
+;사정시의 처리
+IF E >= 1
+	;사정처 타입의 설정
+	TFLAG:703 = 9
+	;사정처 선택의 가능·불가
+	TFLAG:704 = 0
+	;범용적인 처리는 이 함수로 실시한다
+	;(사정게이지의 재계산이나사정경험의 상승과 공통 부분의 표시)
+	CALL SAMEN_SHOOT
+ENDIF
+
+;촉수에범하게시킨다로 주인이사정 한 플래그
+IF E == 2
+	TFLAG:7 = 4
+ELSEIF E == 1
+	TFLAG:7 = 3
+ENDIF
+
+;-------------------------------------------------
+;사정체크(조수)
+;-------------------------------------------------
+CALL SAMEN_CHECK(ASSI)
+IF E >= 1
+	;사정처 타입의 설정
+	TFLAG:703 = 6
+	;사정처 선택의 가능·불가
+	TFLAG:704 = 0
+	;범용적인 처리는 이 함수로 실시한다
+	;(사정게이지의 재계산이나사정경험의 상승과 공통 부분의 표시)
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;조수의 C⇔주인의 V와질내의 더러움이 이동
+;페니스밴드를 사용하는 경우, 더러움은 이동하지 않는다
+SIF PENIS(ASSI)
+	CALL COM_STAIN
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;주인이처녀의 경우, 주인과 노예에게이상경험부가. 다만 한 번 만
+IF TALENT:PLAYER:처녀 == 1
+	PRINTFORML ＜%CALLNAME:PLAYER%가처녀상실＞
+	TALENT:PLAYER:처녀 = 0
+	EXP:PLAYER:이상경험 += 1
+	;이상한 상태에서의처녀상실로이상경험를 가산한다
+	;처녀상실의 상대나 꼬맹이의 자신
+		;꼬맹이 서치
+		R = NO:PLAYER
+		L = NO:ASSI
+		CALL GET_JIBUN
+		IF A
+			PRINTFORML %CALLNAME:ASSI%상대에처녀상실로이상경험＋1
+			EXP:ASSI:이상경험 += 1
+		ENDIF
+	;처녀상실이 촬영되었다
+	IF TEQUIP:비디오카메라
+		PRINTL 비디오촬영중에처녀상실로이상경험＋1
+		EXP:PLAYER:이상경험 += 1
+	ENDIF
+	IF (CFLAG:99 & 2) == 0
+		IF RELATION:(NO:PLAYER) > 100
+			EXP:이상경험 += 1
+			PRINTFORML %CALLNAME%에이상경험＋1
+		ENDIF
+		CFLAG:99 |= 2
+	ENDIF
+	;거치고 싶고 실마리응용 안면 판정의 갱신
+	G = (2099 + NO:ASSI)
+	H = (2099 + NO:PLAYER)
+	CFLAG:ASSI:H |= 64
+	CFLAG:PLAYER:G |= 128
+	;처녀상실상대의 기록
+	CSTR:MASTER:10 = %CALLNAME:ASSI%
+ENDIF
+
+EXP:PLAYER:V경험 += 1
+
+;주인이소인체형로 조수가말자지였던 경우
+IF TALENT:PLAYER:소인체형 && TALENT:ASSI:말자지
+	IF EXP:PLAYER:V확장경험 == 0
+		EXP:PLAYER:이상경험 += 1
+		PRINTFORML %CALLNAME:PLAYER%의이상경험＋1
+	ENDIF
+	EXP:PLAYER:V확장경험 += 1
+	PRINTFORML %CALLNAME:PLAYER%의 V확장경험＋1
+ENDIF
+
+;성교경험
+EXP:ASSI:성교경험 += 1
+EXP:MASTER:성교경험 += 1
+PRINTS EXPNAME:4
+PRINTL +1
+
+;삽입경험
+EXP:ASSI:삽입경험 += 1
+
+;게이경험라든지 가산
+CALL COM_EXP(10)
+
+;의존도 벡터
+TFLAG:33 = 5
+
+T = NO:TARGET
+A = NO:ASSI
+;의존도 보정치(조수와의 궁합 100↑또한음란로 1, 창부로 2)
+IF TALENT:음란 && RELATION:A > 100
+	TFLAG:30 += 1
+ELSEIF TALENT:창부 && RELATION:A > 100
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+

@@ -1,0 +1,95 @@
+﻿;-------------------------------------------------
+;아무것도안한다
+;기본계 커맨드
+;-------------------------------------------------
+@COM2
+
+PRINTL 아무것도안한다
+STR:0 = 아무것도안한다
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 -= 10
+LOSEBASE:기력 -= 10
+
+SOURCE:노출 += 10
+SOURCE:일탈 += 10
+
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;고통를 수반하지 않는마조끼 및마조가 수반하는 처리는 먼저 해 둔다
+;마조끼를 본다
+IF ABL:마조끼 == 0
+	TIMES SOURCE:노출, 0.80
+	SOURCE:액체 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:노출, 1.00
+	SOURCE:액체 += 20
+	SOURCE:욕정 += 30
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:노출, 1.20
+	SOURCE:액체 += 40
+	SOURCE:욕정 += 70
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:노출, 1.40
+	SOURCE:액체 += 70
+	SOURCE:욕정 += 120
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:노출, 1.50
+	SOURCE:액체 += 110
+	SOURCE:욕정 += 180
+ELSEIF ABL:마조끼 == 5
+	TIMES SOURCE:노출, 1.70
+	SOURCE:액체 += 150
+	SOURCE:욕정 += 250
+ELSEIF ABL:마조끼 == 6
+	TIMES SOURCE:노출, 1.90
+	SOURCE:액체 += 200
+	SOURCE:욕정 += 300
+ELSEIF ABL:마조끼 == 7
+	TIMES SOURCE:노출, 2.10
+	SOURCE:액체 += 250
+	SOURCE:욕정 += 350
+ELSEIF ABL:마조끼 == 8
+	TIMES SOURCE:노출, 2.30
+	SOURCE:액체 += 300
+	SOURCE:욕정 += 400
+ELSEIF ABL:마조끼 == 9
+	TIMES SOURCE:노출, 2.50
+	SOURCE:액체 += 350
+	SOURCE:욕정 += 450
+ELSEIF ABL:마조끼 >= 10
+	TIMES SOURCE:노출, 3.00
+	SOURCE:액체 += 500
+	SOURCE:욕정 += 500
+ENDIF
+
+;마조를 본다
+IF TALENT:마조
+	TIMES SOURCE:노출, 2.50
+	TIMES SOURCE:액체, 1.20
+	TIMES SOURCE:욕정, 1.20
+ENDIF
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+
+;의존도 벡터
+TFLAG:33 = 0
+
+RETURN 1
+
+
+
+
+
+

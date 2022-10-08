@@ -1,0 +1,364 @@
+﻿;-------------------------------------------------
+;대면입위애널
+;애널섹스계 커맨드
+;-------------------------------------------------
+@COM114
+
+;-------------------------------------------------
+;특수 파생 처리
+;-------------------------------------------------
+;전회와 이번 조교자가 같음
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;전회 커맨드가촉수에범하게시킨다= 「연결(노예←주인←조수)」
+	IF PREVCOM == 270 || PREVCOM == 271
+		CALL COM_ABLE519
+		IF RESULT == 1
+			TFLAG:40 = 2
+			IF PREVCOM == 270
+				TFLAG:41 = 6
+			ELSE
+				TFLAG:41 = 7
+			ENDIF
+			TFLAG:49 = 0
+			JUMP COM519
+		ENDIF
+	;A삽입중인가, 전회 커맨드가삽입명령 때 「이륜 꽂아애널」
+	ELSEIF PREVCOM == 406
+		CALL COM_ABLE518
+		IF RESULT == 1
+			TFLAG:40 = 2
+			TFLAG:41 = 2
+			TFLAG:49 = 0
+			JUMP COM518
+		ENDIF
+	;전회의 조교가대면좌위애널 때, 역에서 파는 도시락
+	ELSEIF PREVCOM == 112 || PREVCOM == 510
+		CALL COM_ABLE510
+		IF RESULT == 1
+			TFLAG:705 = 1
+			JUMP COM510
+		ENDIF
+	;전회의 조교가목조르기 때, 목조르기애널
+	ELSEIF PREVCOM == 155
+		CALL COM_ABLE514
+		SIF RESULT == 1
+			JUMP COM514
+	;전회 커맨드가 연결이나 이륜 꽂아 A
+	ELSEIF PREVCOM == 519 || PREVCOM == 518
+		IF TFLAG:41 == 6 || TFLAG:41 == 7
+			CALL COM_ABLE519
+			IF RESULT == 1
+				TFLAG:40 = 2
+				TFLAG:49 = 0
+				JUMP COM519
+			ENDIF
+		;전회 커맨드가 이륜 꽂아 A로, 조수가 A삽입하고 있다
+		ELSEIF TFLAG:41 == 2
+			CALL COM_ABLE518
+			IF RESULT == 1
+				TFLAG:40 = 2
+				TFLAG:41 = 2
+				TFLAG:49 = 0
+				JUMP COM518
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;아무것도 읽지 않고 여기에 왔을 때는 플래그 해제
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 대면입위애널
+STR:0 = 대면입위애널
+
+
+;-------------------------------------------------
+;실행 판정 처리
+;-------------------------------------------------
+;구속되어 있지 않아서, 체격차이가 1 미만 때(주인과 노예의 체형이 같은건 안돼) 마셔 실행 판정을 실시한다
+CALL BUILD
+IF !TEQUIP:밧줄 && S < 1
+	;모든 명령에 공통의 요소를 고려
+	;(순종가 높다고 명령에 따르기 쉬운 등)
+	CALL COM_ORDER
+
+	;실행 판정 조작
+	CALL KOJO_DENIAL_PLUS
+
+	;합계를 표시(40이상으로 실행)
+	PRINT  = 
+	PRINTV A
+
+	V = 40
+	SIF A < V
+		PRINT  < 
+	SIF A == V
+		PRINT  = 
+	SIF A > V
+		PRINT  > 
+	PRINT 실행치
+	PRINTV V
+
+	;실행 불가입상/실행 판정 조작
+	SIF A < V
+		CALL KOJO_DENIAL
+
+	WAIT
+
+	;실행 할 수 없다
+	SIF A < V
+		RETURN 0
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+
+;스타킹 찌릿찌릿 플래그
+IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;조교 대상이백버진였던 경우의 상실 플래그
+SIF TALENT:백버진
+	TFLAG:161 |= 1
+;주인의 섹스에 의한백버진상실
+SIF TALENT:백버진 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0
+	TFLAG:163 = 1
+
+;조교자가동정였던 경우의 상실 플래그
+SIF TALENT:PLAYER:동정
+	TFLAG:160 |= 2
+
+
+;-------------------------------------------------
+;사정게이지 체크
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 50
+LOSEBASE:기력 += 100
+
+SOURCE:쾌A += 300
+
+SOURCE:애정 += 100
+;스킨십선호라면애정의 소스 추가
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+SOURCE:성취감 += 300
+SOURCE:통증 += 700
+SOURCE:중독충족 += 400
+SOURCE:노출 += 350
+SOURCE:일탈 += 200
+SOURCE:반발 += 500
+
+;위 쪽으로 계산한 더러운 데이터
+SOURCE:불결 += Y*10 + 60
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;소인체형로 조교자가거근나말자지의 경우, 고통와공포의 소스를 추가
+IF TALENT:소인체형
+	IF TALENT:PLAYER:거근
+		SOURCE:통증 += 200
+		SOURCE:두려움 += 500
+	ELSEIF TALENT:PLAYER:말자지
+		SOURCE:통증 += 500
+		SOURCE:두려움 += 1000
+	ENDIF
+ENDIF
+
+;조교자가말자지의 경우
+IF TALENT:PLAYER:말자지
+	;A확장경험일정 이상으로중독충족의 소스를 추가
+	IF EXP:A확장경험 >= 20
+		SOURCE:중독충족 += 500
+	;A확장경험일정 이하로고통와공포의 소스를 추가
+	ELSE
+		SOURCE:통증 += 500
+		SOURCE:두려움 += 1000
+	ENDIF
+ENDIF
+
+;백버진였던 경우는, 반발의 소스를 추가한다
+IF TALENT:백버진 == 1
+	SOURCE:반발 += 2000
+ENDIF
+
+;A에의고통는 먼저 처리해 둔다
+;EXP:A경험를 본다
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:통증, 3.00
+	TIMES SOURCE:반발, 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:통증, 1.20
+	TIMES SOURCE:반발, 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:통증, 0.80
+	TIMES SOURCE:반발, 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:통증, 0.60
+	TIMES SOURCE:반발, 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:통증, 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:통증, 0.20
+ENDIF
+
+;PALAM:윤활를 본다
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증, 1.20
+	TIMES SOURCE:반발, 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증, 1.00
+	TIMES SOURCE:반발, 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증, 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증, 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증, 0.20
+ENDIF
+
+;중독에 의한중독충족의 소스는 먼저 처리해 둔다
+;섹스중독를 본다
+IF ABL:섹스중독 == 1
+	TIMES SOURCE:중독충족, 0.00
+ELSEIF ABL:섹스중독 == 2
+	TIMES SOURCE:중독충족, 0.30
+ELSEIF ABL:섹스중독 == 3
+	TIMES SOURCE:중독충족, 0.60
+ELSEIF ABL:섹스중독 == 4
+	TIMES SOURCE:중독충족, 0.90
+ELSEIF ABL:섹스중독 == 5
+	TIMES SOURCE:중독충족, 1.20
+ELSEIF ABL:섹스중독 == 6
+	TIMES SOURCE:중독충족, 1.50
+ELSEIF ABL:섹스중독 == 7
+	TIMES SOURCE:중독충족, 1.80
+ELSEIF ABL:섹스중독 == 8
+	TIMES SOURCE:중독충족, 2.30
+ELSEIF ABL:섹스중독 == 9
+	TIMES SOURCE:중독충족, 3.00
+ELSEIF ABL:섹스중독 >= 10
+	TIMES SOURCE:중독충족, 5.00
+ENDIF
+
+;봉사정신로순종증가
+IF ABL:봉사정신 == 1
+	SOURCE:순종 += 100
+ELSEIF ABL:봉사정신 == 2
+	SOURCE:순종 += 200
+ELSEIF ABL:봉사정신 == 3
+	SOURCE:순종 += 300
+ELSEIF ABL:봉사정신 == 4
+	SOURCE:순종 += 400
+ELSEIF ABL:봉사정신 == 5
+	SOURCE:순종 += 500
+ELSEIF ABL:봉사정신 >= 6
+	SOURCE:순종 +=600
+ENDIF
+
+
+;-------------------------------------------------
+;사정체크
+;-------------------------------------------------
+CALL SAMEN_CHECK(PLAYER, 1)
+
+;사정시의 처리
+IF E >= 1
+	;사정처 타입의 설정
+	TFLAG:703 = 2
+	;사정처 선택의 가능·불가
+	TFLAG:704 = 1
+	;범용적인 처리는 이 함수로 실시한다
+	;(사정게이지의 재계산이나사정경험의 상승과 공통 부분의 표시)
+	CALL SAMEN_SHOOT
+	;커맨드 마다 고유의 처리는 이 아래에 쓴다
+ENDIF
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;페니스밴드를 사용하는 경우, 더러움은 이동하지 않는다
+IF !PENIS(PLAYER)
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;A경험
+EXP:A경험 += 2
+PRINTL A경험＋2
+
+;조교자가말자지로 노예가소인체형였던 경우, A확장경험
+IF TALENT:소인체형 && TALENT:PLAYER:말자지
+	IF EXP:A확장경험 == 0
+		EXP:이상경험 += 1
+		PRINTL A확장 첫경험으로이상경험＋1
+	ENDIF
+	EXP:A확장경험 += 1
+	PRINTL A확장경험＋1
+ENDIF
+
+;성교경험
+EXP:PLAYER:성교경험 += 1
+EXP:성교경험 += 1
+PRINTS EXPNAME:4
+PRINTL +1
+
+;삽입경험
+EXP:PLAYER:삽입경험 += 1
+
+;게이경험라든지 가산
+CALL COM_EXP(4)
+
+;애정경험
+IF TALENT:연모 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +1
+	EXP:애정경험 += 1
+ELSEIF TALENT:친애 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +2
+	EXP:애정경험 += 2
+ENDIF
+
+;의존도 벡터
+TFLAG:33 = 1
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+

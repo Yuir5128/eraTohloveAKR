@@ -1,0 +1,771 @@
+﻿
+;====================================================================
+;주인이 요리를 만들었다
+;====================================================================
+@LUNCH_SELF
+;-------------------------------------------------
+;K =요리의 종류
+;L =요리의 가격의 보정을 결정
+;M =요리의 가격
+;N =요리의 가격의 기초
+;O = 습득의 주증가량
+;P =난수 처리용
+;-------------------------------------------------
+
+L = 0
+M = 0
+N = 0
+O = 0
+
+;요리의 솜씨 판정
+CALL LUNCH_RESULT(MASTER)
+
+PRINTFORML 
+PRINTFORMW %CALLNAME:MASTER%는 스스로 요리를 만들었다
+PRINTFORML 
+PRINTFORML 　　　·
+PRINTFORML 　　　·
+PRINTFORML 　　　·
+PRINTFORML 　　　!
+PRINTFORMW 
+PRINTFORMW %CALLNAME:MASTER%는%LUNCH_NAME_DETAIL(MASTER)%를 만들었다.
+PRINTFORML 　　　·
+PRINTFORML 　　　·
+PRINTFORML 　　　·
+PRINTFORML 
+;타겟이 있다
+IF TARGET >= 0
+	PRINTL 그런데…… 모처럼의 요리다
+	PRINTW 팔아 잔돈을 버는지, 그렇지 않으면 여기서 함께 식사를 취할까…
+	PRINTL (어떻게 해?)
+	DRAWLINE
+	
+	PRINTFORML [0] - %CALLNAME%에 먹인다
+	PRINTFORML [1] - 요리를 판다
+	
+	DRAWLINE
+	PRINTL 
+	$INPUT_LOOP
+	INPUT
+	;-------------------------------------------------
+	;%CALLNAME%에 먹인다
+	;-------------------------------------------------
+	IF RESULT == 0
+		K = 3
+		;이벤트입상 호출
+		TFLAG:13 = 26
+		CALL KOJO_MESSAGE_EVENT
+		IF P > 0
+			PRINTFORML 　　　·
+			PRINTFORML 　　　·
+			PRINTFORML 　　　·
+			BASE:체력 += P
+			;체력가 상한을 넘으면 최대치에
+			SIF BASE:체력 > MAXBASE:체력
+				BASE:체력 = MAXBASE:체력
+			PRINTFORML %CALLNAME%의체력가 회복했다.
+			JUEL:순종 += P * 4
+			PRINTFORMW %PALAMNAME:5%의 구슬＋{P*4}
+		ENDIF
+	;-------------------------------------------------
+	;요리를 판다
+	;-------------------------------------------------
+	ELSEIF RESULT == 1
+		PRINTFORML %CALLNAME:MASTER%가 만든 요리에는{M}의 매입가가 붙었다
+		MONEY += M
+		PRINTFORMW 소지 코우슈우금 {M}증가
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+;타겟이 없는 경우는 팔 뿐
+ELSE
+	PRINTFORML %CALLNAME:MASTER%가 만든 요리에는{M}의 매입가가 붙었다.
+	MONEY += M
+	PRINTFORMW 소지 코우슈우금 {M}증가
+ENDIF
+
+M = 0
+O = ABL:MASTER:요리기능 + (1 + RAND:5)
+PRINTFORML %CALLNAME:MASTER%의 %EXPNAME:61%＋{O}
+EXP:MASTER:가사경험 += O
+
+IF ABL:MASTER:요리기능 == 4 && EXP:MASTER:가사경험 >= 1000
+	M = 1
+ELSEIF ABL:MASTER:요리기능 == 3 && EXP:MASTER:가사경험 >= 400
+	M = 1
+ELSEIF ABL:MASTER:요리기능 == 2 && EXP:MASTER:가사경험 >= 100
+	M = 1
+ELSEIF ABL:MASTER:요리기능 == 1 && EXP:MASTER:가사경험 >= 20
+	M = 1
+ELSEIF ABL:MASTER:요리기능 == 0 && EXP:MASTER:가사경험 >= 5
+	M = 1
+ENDIF
+IF M == 1
+	ABL:MASTER:요리기능 += 1
+	PRINTFORMW %CALLNAME:MASTER%의 %ABLNAME:12%의 레벨이{ABL:MASTER:요리기능}가 되었습니다.
+ENDIF
+
+;밥후의 운동 이벤트
+IF TFLAG:14 == 1 && ABL:욕망 > 0
+	B = TARGET
+	CALL LUNCH_EXERCISE
+ELSE
+	TFLAG:14 = 0
+ENDIF
+
+;휴게 플래그를 세운다
+FLAG:0 = 1
+BEGIN TURNEND
+RETURN 1
+
+
+
+
+;====================================================================
+;노예에게 요리를 만들게 했다
+;====================================================================
+@LUNCH_SALE
+;-------------------------------------------------
+;도시락을 만들게 해 판다, 혹은 스스로 먹는 옵션.
+;정식포장마차보다 벌이는 적은. 러브러브 둘이서 밥 먹이고 싶은 사람용
+;혹은 독을 담아져 보고 싶은 사람용
+;K =요리의 종류
+;L =요리의 가격의 보정을 결정
+;M =요리의 가격
+;N =요리의 가격의 기초
+;O = 습득의 주증가량
+;P =고유 요리의 종류, 난수 처리용
+;-------------------------------------------------
+A = 0
+B = TARGET
+K = 0
+L = 0
+M = 0
+N = 0
+
+;요리의 솜씨 판정
+CALL LUNCH_RESULT(TARGET)
+
+PRINTL 
+PRINTFORMW %CALLNAME%에 요리를 만들게 했다
+PRINTL 
+
+
+IF (TALENT:연모 || TALENT:친애 || TALENT:음란 || TALENT:창부) && !TALENT:무관심
+	PRINTFORML   「♪~」
+	PRINTFORML  「♪♪~」
+	PRINTFORML 「♪~♪~」
+	PRINTFORML      !
+ELSE
+	PRINTFORML 　　　·
+	PRINTFORML 　　　·
+	PRINTFORML 　　　·
+	PRINTFORML 　　　!
+ENDIF
+PRINTW 
+PRINTFORM %CALLNAME%는
+SIF TALENT:친애
+	PRINTFORM 애정 충분한
+IF ITEM:41 > 0 && (((TALENT:음란 || TALENT:창부) && !RAND:2) || ((KANRAKU(TARGET) >= 1 && KANRAKU(TARGET) <= 3) && !RAND:4))
+	ITEM:41 -= 1
+	TFLAG:14 = 1
+	PRINTFORM 달콤한 향기가 나는 핑크색의 스프
+ELSE
+	PRINTFORM %LUNCH_NAME_DETAIL(TARGET)%
+ENDIF
+PRINTW 를 만들었다
+PRINTFORML 　　　·
+PRINTFORML 　　　·
+PRINTFORML 　　　·
+PRINTW 
+
+IF (TALENT:연모 == 0 || TALENT:친애 == 0) && (MARK:반발각인 >= 2 || ABL:순종 < 5)
+	K = 1
+	
+	;입상은 EVENT_M로 관리하는 것이 좋은 것 같은 생각이 들었으므로
+	TFLAG:13 = 26
+	CALL KOJO_MESSAGE_EVENT
+	
+	IF P > 0
+		PRINTFORML 　　　·
+		PRINTFORML 　　　·
+		PRINTFORML 　　　·
+		BASE:체력 += P
+		;체력가 상한을 넘으면 최대치에
+		SIF BASE:체력 > MAXBASE:체력
+			BASE:체력 = MAXBASE:체력
+		PRINTFORML %CALLNAME%의체력가 회복했다.
+		JUEL:순종 += P * 4
+		PRINTFORMW %PALAMNAME:5%의 구슬＋{P*4}
+	ENDIF
+ELSE
+	PRINTL 그런데…… 모처럼의 요리다.
+	PRINTW 팔아 약간의 돈을 버는지, 그렇지 않으면 여기서 두 명 함께 식사를 취할까……
+	PRINTL (어떻게 해?)
+	DRAWLINE
+	IF TALENT:친애
+		PRINTL [0] - 둘이서 함께 먹는다
+		PRINTL [1] - 요리를 판다
+	ELSE
+		PRINTL [0] - 모처럼이니까 둘이서 먹는다
+		PRINTL [1] - 요리를 판다
+	ENDIF
+	DRAWLINE
+	PRINTL 
+	$INPUT_LOOP
+	INPUT
+	;-------------------------------------------------
+	;함께 먹는다
+	;-------------------------------------------------
+	IF RESULT == 0
+		K = 2
+		TFLAG:13 = 26
+		CALL KOJO_MESSAGE_EVENT
+		
+		IF P > 0
+			PRINTFORML 　　　·
+			PRINTFORML 　　　·
+			PRINTFORML 　　　·
+			BASE:체력 += P
+			;체력가 상한을 넘으면 최대치에
+			SIF BASE:체력 > MAXBASE:체력
+				BASE:체력 = MAXBASE:체력
+			PRINTFORML %CALLNAME%의체력가 회복했다.
+			JUEL:순종 += P * 4
+			PRINTFORMW %PALAMNAME:5%의 구슬＋{P*4}
+		ENDIF
+	;-------------------------------------------------
+	;판다
+	;-------------------------------------------------
+	ELSEIF RESULT == 1
+		PRINTFORM %CALLNAME%가
+		IF (TALENT:연모 || TALENT:친애)
+			PRINTFORM 사랑을 담아
+			TIMES M , 1.50
+		ENDIF
+		PRINTFORML 만든 요리에는{M}의 매입가가 붙었다.
+		MONEY += M
+		PRINTFORMW 소지 코우슈우금 {M}증가
+		TFLAG:14 = 0
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ENDIF
+
+;가사경험
+O = ABL:요리기능 + (1 + RAND:5)
+PRINTFORML %EXPNAME:61%＋{O}
+EXP:가사경험 += O
+
+;친애, 상사상애소유 또한 밥후의 이벤트 발생 확정시는애정경험가 들어간다
+;또, 밥후의 이벤트로 밀어 넘어뜨리는 것을 선택하면봉사쾌락경험가 들어가게 된다
+IF TFLAG:14 == 1 && (TALENT:연모 || TALENT:친애)
+	PRINTFORML %EXPNAME:23% ＋2
+	EXP:애정경험 += 2
+	TFLAG:14 = 2
+;복종소유 때는 밥후의 이벤트로 밀어 넘어뜨리는 것을 선택하면봉사쾌락경험가 들어가게 된다
+ELSEIF TFLAG:14 == 1 && (TALENT:복종 || TALENT:예속)
+	TFLAG:14 = 2
+ENDIF
+WAIT
+
+;밥후의 운동 이벤트
+IF (TFLAG:14 >= 1 && TFLAG:14 <= 2) && ABL:욕망 > 0
+	CALL LUNCH_EXERCISE
+ELSE
+	TFLAG:14 = 0
+ENDIF
+
+;휴게 플래그를 세운다
+FLAG:0 = 1
+BEGIN TURNEND
+RETURN 1
+
+
+
+
+;====================================================================
+;밥후의 운동 이벤트
+;====================================================================
+
+@LUNCH_EXERCISE
+;SELF.ERB를 기본으로 작성.
+
+S = 0
+;V감각
+IF ABL:V감각 == 1
+	S = 1
+ELSEIF ABL:V감각 == 2 || ABL:V감각 == 3
+	S = 2
+ELSEIF ABL:V감각 >= 4
+	S = 3
+ENDIF
+
+;A감각
+IF ABL:A감각 == 1
+	S = 1
+ELSEIF ABL:A감각 == 2 || ABL:A감각 == 3
+	S = 2
+ELSEIF ABL:A감각 >= 5
+	S = 3
+ENDIF
+
+;욕망와봉사정신에 의한 보너스
+IF ABL:욕망 == 4 && ABL:봉사정신 >= 4
+	S += 2
+ELSEIF ABL:욕망 >= 5 && ABL:봉사정신 >= 4
+	S += 3
+ENDIF
+
+;욕망LV3에서도 S로+1한다
+IF ABL:욕망 == 3 && ABL:V감각 >= 3 && ABL:봉사정신 >= 5
+	S += 1
+ENDIF
+
+;쾌감에솔직, 쾌감을부정, 음란, 발정기
+IF TALENT:쾌감에솔직 && S
+	S += 1
+ELSEIF TALENT:쾌감을부정 && S
+	S -= 2
+ENDIF
+IF (TALENT:음란 || TALENT:창부) && S
+	S += 1
+ENDIF
+IF TALENT:발정기 && S
+	S += 1
+ENDIF
+
+;낮의 경우는 밤까지 캐캐우후후
+IF TIME == 0 && S > 3
+	TIME += 1
+	S += 2
+ENDIF
+
+;반발각인가 있으면 실행 하기 어려워진다. 또, 연모없음반발 3에서는 발생하지 않고
+IF MARK:반발각인 && S
+	IF MARK:반발각인 && (!TALENT:연모 || !TALENT:친애)
+		S = 0
+	ELSE
+		S /= 1+MARK:반발각인
+		S -= MARK:반발각인
+	ENDIF
+ENDIF
+
+IF S > 0
+	DRAWLINE
+	PRINTFORML 　　　·
+	PRINTFORML 　　　·
+	PRINTFORML 　　　·
+	PRINTFORMW 　　　!
+	PRINTFORML 요리를 먹은 %CALLNAME:MASTER%과%CALLNAME%는, 뭐라고도 말할 수 없는 감각에 습격당했다
+	PRINTFORMW 어쩐지, 몸이 달아오르고 있는 것 같다…
+	PRINTFORML [0] - 오늘은 그만둔다
+	PRINTFORML [1] - %CALLNAME%를 밀어 넘어뜨린다
+	DRAWLINE
+	$SELECT_POINT_EXERCISE
+	INPUT
+	;-------------------------------------------------
+	;밀어 넘어뜨리지 않는다
+	;-------------------------------------------------
+	IF RESULT == 0
+		PRINTFORMW %CALLNAME:MASTER%는 소용돌이치는욕망를 억눌러,%CALLNAME%를 남겨 자신의 방으로 향했다…
+		PRINTFORML 
+		WAIT
+		;욕망
+		SIF ABL:욕망
+			S += ABL:욕망
+		;자위중독
+		SIF ABL:자위중독
+			S += ABL:자위중독
+		;음란
+		SIF TALENT:음란 || TALENT:창부
+			S += 1
+		;자제심
+		SIF TALENT:자제심
+			S -= 2
+		;쾌락의부정
+		SIF TALENT:쾌감을부정
+			S -= 3
+		;반발각인
+		SIF MARK:반발각인
+			S -= MARK:반발각인
+		S /= 2
+		S -= 3
+		SIF TFLAG:14 == 2
+			S += 5
+		IF S > 0
+			PRINTFORM 방에 한사람 남겨진%CALLNAME%는 견디지 않고
+			IF TEQUIP:속옷（아래） == 5
+				PRINTL 자위를 하려고 했지만,
+				PRINTFORML 하반신을 가리는정조대에 방해되어 괴로운 생각을 한 것 같다…
+			ELSE
+				PRINT ,
+				PRINTV S
+				PRINTL 회자위를 한 것 같다…
+				PRINTFORML %EXPNAME:10%＋{S}
+				PRINTFORML %PALAMNAME:0%의 구슬＋{S*100}
+				PRINTFORML %PALAMNAME:5%의 구슬＋{S*50}
+				PRINTFORMW %PALAMNAME:6%의 구슬＋{S*100}
+				EXP:자위경험 += S
+				JUEL:쾌C += S*100
+				JUEL:순종 += S*50
+				JUEL:욕정 += S*100
+			ENDIF
+			SIF TEQUIP:속옷（아래） == 5
+				CFLAG:602 += 5
+		ENDIF
+	;-------------------------------------------------
+	;밀어 넘어뜨린다
+	;-------------------------------------------------
+	ELSEIF RESULT == 1
+		SIF TFLAG:14 == 2
+			S += 2
+		K = 4
+		;이벤트입상 호출
+		TFLAG:13 = 26
+		CALL KOJO_MESSAGE_EVENT
+		PRINTL 
+		WAIT
+		TFLAG:130 = 4
+		;정조대
+		IF TEQUIP:속옷（아래） != 5
+			PRINTFORML %EXPNAME:4%＋{S}
+			EXP:성교경험 += S
+			EXP:MASTER:삽입경험 += S
+		ENDIF
+		;상사상애·복종를 가지고 있었을 경우봉사쾌락경험가 들어간다
+		IF TFLAG:14 == 2
+			PRINTFORML %EXPNAME:21% ＋2
+			EXP:봉사쾌락경험 += 2
+		ENDIF
+		PRINTFORML %PALAMNAME:5%의 구슬＋{S*100}
+		PRINTFORML %PALAMNAME:6%의 구슬＋{S*300}
+		JUEL:순종 += S*100
+		JUEL:욕정 += S*300
+		;처녀 때
+		IF TALENT:처녀 && TEQUIP:속옷（아래） != 5
+			JUEL:순종 += S*250
+			PRINTFORML %PALAMNAME:5%의 구슬＋{S*250}
+			PRINTL 
+			PRINTL 
+			IF TALENT:연모 || TALENT:친애
+				PRINTFORML %CALLNAME%는, %CALLNAME:MASTER%에 순결을 바친 일에 행복을 느끼고 있는 것 같다…
+			ELSEIF TALENT:복종 || TALENT:예속
+				PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%에 순결을 바친 일에 열락을 느끼고 있는 것 같다…
+			ELSE
+				PRINTFORML %CALLNAME%의 비순[秘唇]으로부터 배어 나온 파과[破瓜]의 피가 시트를 더럽히는 것도,
+				PRINTFORML 성교에 열중했던 두 명은, 눈치채는 일 없이 연회를 계속했다……
+			ENDIF
+			TALENT:처녀 = 0
+		ENDIF
+		SIF TEQUIP:속옷（아래） == 5
+			CFLAG:602 += 5
+	ELSE
+		GOTO SELECT_POINT_EXERCISE
+	ENDIF
+ENDIF
+TFLAG:14 = 0
+S = 0
+
+
+
+
+;====================================================================
+;독을 담아지는 이벤트
+;====================================================================
+@POISONED_LUNCH
+;-------------------------------------------------
+;K =요리의 종류
+;L =독의 종류
+;M =독의 간파하기 어려움 보정
+;N =간파해 보정
+;O = 습득의 주증가량
+;P =고유 요리의 종류, 난수 처리용
+;-------------------------------------------------
+K = RAND:16
+L = RAND:7
+M = 0
+N = 0
+
+;ABL:기교를 본다
+IF ABL:기교 == 0
+	M = 1
+ELSE
+	M = ABL:기교 + 1
+ENDIF
+
+;ABL:요리기능를 본다
+IF ABL:요리기능 == 0
+	TIMES M , 1.00
+ELSEIF ABL:요리기능 == 1
+	TIMES M , 1.10
+ELSEIF ABL:요리기능 == 2
+	TIMES M , 1.20
+ELSEIF ABL:요리기능 == 3
+	TIMES M , 1.30
+ELSEIF ABL:요리기능 == 4
+	TIMES M , 1.40
+ELSE
+	TIMES M , 1.50
+ENDIF
+
+;EXP:조리 경험을 본다
+IF EXP:가사경험 < EXPLV:1
+	TIMES M , 1.00
+ELSEIF EXP:가사경험 < EXPLV:2
+	TIMES M , 1.20
+ELSEIF EXP:가사경험 < EXPLV:3
+	TIMES M , 1.40
+ELSEIF EXP:가사경험 < EXPLV:4
+	TIMES M , 1.60
+ELSEIF EXP:가사경험 < EXPLV:5
+	TIMES M , 1.80
+ELSE
+	TIMES M , 2.00
+ENDIF
+
+PRINTFORML 　　　·
+PRINTFORML 　　　·
+PRINTFORML 　　　·
+PRINTFORML 　　　!
+PRINTW 
+PRINTFORM %CALLNAME%는
+IF K == 0
+	PRINTL 주먹밥
+	M += 12
+ELSEIF K == 1 || K == 15
+	PRINT 카레
+	M += 10
+ELSEIF K == 2 || K == 14
+	PRINT 스튜
+	M += 8
+ELSEIF K == 3 || K == 13
+	PRINT 과자
+	M += 6
+ELSEIF K == 4 || K == 12
+	PRINT 빵
+	M += 6
+ELSEIF K == 5 || K == 11
+	IF NO:TARGET == 5
+		PRINT 신선 야채의
+		M += 1
+	ENDIF
+	PRINT 샐러드
+	M += 4
+ELSEIF K == 6 || K == 10
+	PRINT 도시락
+	M += 4
+ELSE
+	PRINT 스프
+	M += 2
+ENDIF
+M += RAND:4
+
+SIF TALENT:MASTER:조제지식
+	TIMES M , 2.00
+SIF TALENT:MASTER:독약내성
+	TIMES M , 2.00
+
+SIF MARK:반발각인
+	M *= MARK:반발각인
+SIF MARK:굴복각인
+	M /= MARK:굴복각인
+SIF ABL:B감각
+	M -= ABL:B감각
+SIF ABL:순종
+	M -= ABL:순종
+
+SIF M <= 4
+	M = 4
+
+PRINTFORMW 를 만들었다
+PRINTFORML 　　　·
+PRINTFORML 　　　·
+PRINTFORML 　　　·
+PRINTFORML 그런데… 모처럼의 요리다
+PRINTFORMW 고맙게 받는다고 하자…
+
+;-------------------------------------------------
+;조제지식, 독약내성 가져 또는 일정 확률로 걸리지 않는다
+;-------------------------------------------------
+IF TALENT:MASTER:조제지식 == 0 && TALENT:MASTER:독약내성 == 0 && RAND:M > 2
+	K = 5
+	TFLAG:13 = 26
+	CALL KOJO_MESSAGE_EVENT
+	PRINTL …
+	PRINTL ……
+	PRINTL ………….
+	;금지된지식로스트
+	IF L == 0 && TALENT:MASTER:금지된지식
+		PRINTFORMW %NAME:MASTER%는【금단의지식】를 잃었다
+		TALENT:MASTER:금지된지식 = 0
+	;새드소멸
+	ELSEIF L == 1 && TALENT:MASTER:새드
+		PRINTFORMW %NAME:MASTER%는【새드】를 잃었다
+		TALENT:MASTER:새드 = 0
+	;조루소멸
+	ELSEIF L == 2 && TALENT:MASTER:절륜
+		PRINTFORMW %NAME:MASTER%는【절륜】를 잃었다
+		TALENT:MASTER:절륜 = 0
+	;더러움무시소멸
+	ELSEIF L == 3 && TALENT:MASTER:더러움무시
+		PRINTFORMW %NAME:MASTER%는【더러움무시】를 잃었다
+		TALENT:MASTER:더러움무시 = 0
+	;광기부가
+	ELSEIF L == 4 && TALENT:MASTER:광기 == 0
+		PRINTFORMW %NAME:MASTER%는【광기】를 얻었다
+		TALENT:MASTER:광기 = 1
+	;매력감소
+	ELSEIF L == 5 && FLAG:30 > 0
+		IF FLAG:30 >= 5
+			PRINTFORMW %NAME:MASTER%의매력가 내렸다
+			FLAG:30 = 4
+			IF TALENT:MASTER:수수께끼의매력
+				PRINTFORMW %NAME:MASTER%는【수수께끼의매력】를 잃었다
+				TALENT:MASTER:수수께끼의매력 = 0
+			ENDIF
+		ELSE
+			PRINTFORMW %NAME:MASTER%의매력가 내렸다
+			FLAG:30 -= 1
+		ENDIF
+	;기교감소
+	ELSEIF L == 6 && ABL:MASTER:기교 > 0
+		PRINTFORMW %NAME:MASTER%의기교가 내렸다
+		ABL:MASTER:기교 -= 1 + RAND:2
+		SIF ABL:MASTER:기교 < 0
+			ABL:MASTER:기교 = 0
+	;체력감소
+	ELSE
+		PRINTFORM %NAME:MASTER%는체력를
+		SIF K >= 4
+			PRINT 크고
+		PRINTW 소모했다
+		BASE:MASTER:체력 -= 200 * (M/3)
+	ENDIF
+	IF NO:TARGET == 33
+		BASE:MASTER:체력 /= 2
+		BASE:MASTER:체력 -= 75 * (RAND:5 + 1)
+	ELSE
+		BASE:MASTER:체력 -= 75 * (RAND:5 + 1)
+	ENDIF
+;-------------------------------------------------
+;독을 간파한다
+;-------------------------------------------------
+ELSE
+	PRINTFORML 　　　·
+	PRINTFORML 　　　·
+	PRINTFORML 　　　·
+	PRINTFORML 　　　!
+	PRINTFORMW %NAME:MASTER%는 나온 음식에 독이 번창해지고 있는 것을 간파했다
+	;약점잡힘를 잡는 이벤트 발생 판정용
+	B = 0
+	C = 0
+	REPEAT CHARANUM
+		;MASTER는 제외
+		SIF COUNT == MASTER
+			CONTINUE
+		;노역중 따위 이 장소에 없으면 제외
+		SIF CFLAG:COUNT:12 >= 1
+			CONTINUE
+		;조수가능, 순종Lv4 이상, 굴복각인Lv3, 약점잡힘, 연모계 소질의 어떤 것인지를 가지고 있을 필요가 있다
+		SIF ABL:COUNT:순종 < 4 && MARK:COUNT:굴복각인 < 3 && TALENT:COUNT:약점잡힘 == 0 && TALENT:COUNT:질투 == 0 && TALENT:COUNT:맹신 == 0
+			CONTINUE
+		;위의 조건을 채우는 캐릭터를 노예의 안에서 픽업 해, 조교 대상과의 궁합을 비교해 본다
+		;여기서 조교 대상과 궁합이 좋은 캐릭터가 픽업 되어 2/3의 확률로
+		;(귀축인 주인에 의해) 조교 대상의 독들이 요리를 먹이도록(듯이) 사 향할 수 있다
+		A = NO:COUNT
+		SIF RELATION:A < 100
+			CONTINUE
+		IF RELATION:A > RELATION:TARGET && (C == 0 || RAND:3 > 0)
+			B = NO:COUNT
+			C = COUNT
+		ENDIF
+	REND
+	IF C > 0 && RAND:3 > 0
+		K = 6
+		TFLAG:13 = 26
+		CALL KOJO_MESSAGE_EVENT
+
+		M += 12
+		IF TALENT:약점잡힘 == 0
+			IF RAND:3 == 0
+				PRINTFORMW %NAME:TARGET%의【약점잡힘】를 잡는 일에 성공했다
+				TALENT:약점잡힘 = 1
+				TIMES M , 2.00
+			ENDIF
+		ENDIF
+		JUEL:욕정 += M*8
+		PRINTFORML %PALAMNAME:7%의 구슬＋{M*8}
+		SIF TALENT:겁쟁이
+			M *= 2
+		SIF TALENT:낙관적
+			M -= 5
+		SIF TALENT:비관적
+			M += 10
+		SIF TALENT:감정부족
+			M /= 2
+		SIF M <= 0
+			M = 0
+		IF M > 0
+			PRINTFORML %PALAMNAME:100%의 구슬＋{M*30}
+			JUEL:부정 += M*30
+		ENDIF
+	ELSE
+		K = 7
+		TFLAG:13 = 26
+		CALL KOJO_MESSAGE_EVENT
+
+		JUEL:욕정 += M*5
+		PRINTFORML %PALAMNAME:7%의 구슬＋{M*5}
+		SIF TALENT:겁쟁이
+			M *= 2
+		SIF TALENT:낙관적
+			M -= 5
+		SIF TALENT:비관적
+			M += 10
+		SIF TALENT:감정부족
+			M /= 2
+		SIF M <= 0
+			M = 0
+		IF M > 0
+			PRINTFORML %PALAMNAME:100%의 구슬＋{M*20}
+			JUEL:부정 += M*20
+		ENDIF
+	ENDIF
+ENDIF
+
+
+;요리 경험
+O = ABL:요리기능 + (1 + RAND:5)
+PRINTFORML %EXPNAME:61%＋{O}
+EXP:가사경험 += O
+WAIT
+
+IF BASE:MASTER:체력 <= 0
+	CALL ENDING_POISONED
+ENDIF
+
+;휴게 플래그를 세운다
+FLAG:0 = 1
+BEGIN TURNEND
+RETURN 1
+
+
+
+;-------------------------------------------------
+;독살 엔드
+;-------------------------------------------------
+@ENDING_POISONED
+DRAWLINE
+PRINTFORMW ―――%NAME:MASTER%의체력가 다했습니다 ―――
+PRINTL …………
+PRINTL ………
+PRINTL ……
+
+K = 8
+TFLAG:13 = 26
+CALL KOJO_MESSAGE_EVENT
+
+QUIT
+
+

@@ -1,0 +1,385 @@
+﻿;-------------------------------------------------
+;対面立位
+;セックス系コマンド
+;-------------------------------------------------
+@COM104
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回コマンドが助手に犯させる＝「連結（奴隷←主人←助手）」
+	IF PREVCOM == 270 || PREVCOM == 271
+		CALL COM_ABLE519
+		IF RESULT == 1
+			TFLAG:40 = 1
+			IF PREVCOM == 270
+				TFLAG:41 = 6
+			ELSE
+				TFLAG:41 = 7
+			ENDIF
+			TFLAG:49 = 0
+			JUMP COM519
+		ENDIF
+	;Ｖ挿入中か、前回コマンドが挿入命令のとき「二輪挿し」
+	ELSEIF PREVCOM == 405
+		CALL COM_ABLE517
+		IF RESULT == 1
+			TFLAG:40 = 1
+			TFLAG:41 = 1
+			TFLAG:49 = 0
+			JUMP COM517
+		ENDIF
+	;Ａ挿入中か、前回コマンドがＡ挿入命令のとき「サンドイッチ（二穴挿入）」
+	ELSEIF PREVCOM == 406
+		CALL COM_ABLE515
+		IF RESULT == 1
+			TFLAG:40 = 1
+			TFLAG:41 = 2
+			TFLAG:49 = 0
+			JUMP COM515
+		ENDIF
+	;前回の調教が対面座位だと駅弁に
+	ELSEIF PREVCOM == 102 || PREVCOM == 510
+		CALL COM_ABLE510
+		IF RESULT == 1
+			TFLAG:705 = 0
+			JUMP COM510
+		ENDIF
+	;前回の調教が首絞めだと首絞めセックス
+	ELSEIF PREVCOM == 155
+		CALL COM_ABLE513
+		SIF RESULT == 1
+			JUMP COM513
+	;前回コマンドがサンドイッチか二輪挿しか連結
+	ELSEIF PREVCOM == 515 || PREVCOM == 517 || PREVCOM == 519
+		IF TFLAG:41 == 2
+			CALL COM_ABLE515
+			IF RESULT == 1
+				TFLAG:40 = 1
+				TFLAG:49 = 0
+				JUMP COM515
+			ENDIF
+		;前回コマンドが二輪挿しで、助手が挿入してる
+		ELSEIF TFLAG:41 == 1
+			CALL COM_ABLE517
+			IF RESULT == 1
+				TFLAG:40 = 1
+				TFLAG:41 = 1
+				TFLAG:49 = 0
+				JUMP COM517
+			ENDIF
+		;前回コマンドが連結
+		ELSEIF TFLAG:41 == 6 || TFLAG:41 == 7
+			CALL COM_ABLE519
+			IF RESULT == 1
+				TFLAG:40 = 1
+				TFLAG:49 = 0
+				JUMP COM519
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;何も読まずにこっちに来たときはフラグ解除
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 対面立位セックス
+STR:0 = 対面立位セックス
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;拘束されてなくて、体格差が１未満のとき（主人と奴隷の体型が同じは駄目）のみ実行判定を行う
+CALL BUILD
+IF !TEQUIP:縄 && S < 1
+	;すべての命令に共通の要素を考慮
+	;(従順が高いと命令に従いやすいなど)
+	CALL COM_ORDER
+
+	;実行判定操作
+	CALL KOJO_DENIAL_PLUS
+
+	;合計を表示(38以上で実行)
+	PRINT  = 
+	PRINTV A
+
+	V = 38
+	SIF A < V
+		PRINT  < 
+	SIF A == V
+		PRINT  = 
+	SIF A > V
+		PRINT  > 
+	PRINT 実行値
+	PRINTV V
+
+	;実行不可口上/実行判定操作
+	SIF A < V
+		CALL KOJO_DENIAL
+
+	WAIT
+
+	;実行できない
+	SIF A < V
+		RETURN 0
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+
+;ストッキングびりびりフラグ
+IF TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6
+	TFLAG:55 = 1
+ENDIF
+
+;処女喪失フラグ
+SIF TALENT:処女 || TALENT:再生処女
+	TFLAG:19 |= 1
+;主人による処女喪失
+SIF TALENT:処女 && (TALENT:恋慕 || TALENT:親愛) && ASSIPLAY == 0
+	TFLAG:20 = 1
+
+;調教者が童貞だった場合の喪失フラグ
+SIF TALENT:PLAYER:童貞
+	TFLAG:160 |= 2
+
+
+;-------------------------------------------------
+;射精ゲージチェック
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;再装填処理中は射精ゲージは20分の1に
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:射精 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 50
+LOSEBASE:気力 += 100
+
+SOURCE:快Ｖ += 300
+
+SOURCE:情愛 += 100
+;スキンシップ好きだと情愛のソース追加
+SIF TALENT:スキンシップ好き
+	SOURCE:情愛 += 50
+
+SOURCE:痛み += 300
+
+SOURCE:達成感 += 300
+SOURCE:中毒充足 += 500
+SOURCE:露出 += 300
+SOURCE:反発 += 400
+
+;上のほうで計算した汚れデータ
+SOURCE:不潔 += Y*10 + 60
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 300
+
+;貞操観念持ちで恋慕、親愛持ち以外には常に反発のソースを追加する（セックス系のみ）
+SIF TALENT:貞操観念 && (TALENT:恋慕 == 0 && TALENT:親愛 == 0)
+	SOURCE:反発 += 1000
+
+;処女だった場合は、苦痛のソースと反発のソースを追加する
+IF TALENT:処女 == 1
+	SOURCE:痛み += 2000
+	SOURCE:反発 += 3000
+ENDIF
+
+;再生処女だった場合は、苦痛のソースと反発のソースを追加する
+IF TALENT:再生処女 == 1
+	SOURCE:痛み += 500
+	SOURCE:反発 += 1000
+ENDIF
+
+;小人体型で調教者が巨根か馬並みの場合、苦痛と恐怖のソースを追加
+IF TALENT:小人体型
+	IF TALENT:PLAYER:巨根
+		SOURCE:痛み += 200
+		SOURCE:恐れ += 500
+	ELSEIF TALENT:PLAYER:馬並み
+		SOURCE:痛み += 500
+		SOURCE:恐れ += 1000
+	ENDIF
+ENDIF
+
+;調教者が馬並みの場合
+IF TALENT:PLAYER:馬並み
+	;Ｖ拡張経験一定以上で中毒充足のソースを追加
+	IF EXP:Ｖ拡張経験 >= 20
+		SOURCE:中毒充足 += 500
+	;Ｖ拡張経験一定以下で苦痛と恐怖のソースを追加
+	ELSE
+		SOURCE:痛み += 500
+		SOURCE:恐れ += 1000
+	ENDIF
+ENDIF
+
+;Vへの苦痛は先に処理しておく
+;EXP:Ｖ経験をみる（処女の反感は別途処理済みなので省略）
+IF EXP:Ｖ経験 < EXPLV:1
+	TIMES SOURCE:痛み , 2.50
+ELSEIF EXP:Ｖ経験 < EXPLV:2
+	TIMES SOURCE:痛み , 0.80
+	TIMES SOURCE:反発 , 1.20
+ELSEIF EXP:Ｖ経験 < EXPLV:3
+	TIMES SOURCE:痛み , 0.40
+ELSEIF EXP:Ｖ経験 < EXPLV:4
+	TIMES SOURCE:痛み , 0.10
+ELSEIF EXP:Ｖ経験 < EXPLV:5
+	TIMES SOURCE:痛み , 0.00
+ELSEIF EXP:Ｖ経験 >= EXPLV:5
+	TIMES SOURCE:痛み , 0.00
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	TIMES SOURCE:痛み , 1.20
+	TIMES SOURCE:反発 , 1.50
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	TIMES SOURCE:痛み , 0.70
+	TIMES SOURCE:反発 , 1.20
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	TIMES SOURCE:痛み , 0.40
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	TIMES SOURCE:痛み , 0.10
+ELSEIF PALAM:潤滑 >= PALAMLV:4
+	TIMES SOURCE:痛み , 0.10
+ENDIF
+
+;中毒による中毒充足のソースは先に処理しておく
+;セックス中毒を見る
+IF ABL:セックス中毒 == 1
+	TIMES SOURCE:中毒充足 , 0.00
+ELSEIF ABL:セックス中毒 == 2
+	TIMES SOURCE:中毒充足 , 0.30
+ELSEIF ABL:セックス中毒 == 3
+	TIMES SOURCE:中毒充足 , 0.60
+ELSEIF ABL:セックス中毒 == 4
+	TIMES SOURCE:中毒充足 , 0.90
+ELSEIF ABL:セックス中毒 == 5
+	TIMES SOURCE:中毒充足 , 1.20
+ELSEIF ABL:セックス中毒 == 6
+	TIMES SOURCE:中毒充足 , 1.50
+ELSEIF ABL:セックス中毒 == 7
+	TIMES SOURCE:中毒充足 , 1.80
+ELSEIF ABL:セックス中毒 == 8
+	TIMES SOURCE:中毒充足 , 2.30
+ELSEIF ABL:セックス中毒 == 9
+	TIMES SOURCE:中毒充足 , 3.00
+ELSEIF ABL:セックス中毒 >= 10
+	TIMES SOURCE:中毒充足 , 5.00
+ENDIF
+
+;奉仕精神で恭順増加
+IF ABL:奉仕精神 == 1
+	SOURCE:恭順 += 100
+ELSEIF ABL:奉仕精神 == 2
+	SOURCE:恭順 += 200
+ELSEIF ABL:奉仕精神 == 3
+	SOURCE:恭順 += 300
+ELSEIF ABL:奉仕精神 == 4
+	SOURCE:恭順 += 400
+ELSEIF ABL:奉仕精神 == 5
+	SOURCE:恭順 += 500
+ELSEIF ABL:奉仕精神 >= 6
+	SOURCE:恭順 +=600
+ENDIF
+
+
+;-------------------------------------------------
+;射精チェック
+;-------------------------------------------------
+CALL SAMEN_CHECK(PLAYER,1)
+
+;射精時の処理
+IF E >= 1
+	;射精先タイプの設定
+	TFLAG:703 = 1
+	;射精先選択の可・不可
+	TFLAG:704 = 1
+	;汎用的な処理はこの関数で行う
+	;（射精ゲージの再計算や射精経験の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;ペニスバンドを使う場合、汚れは移動しない
+IF !PENIS(PLAYER)
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;V経験
+EXP:Ｖ経験 += 1
+PRINTL Ｖ経験＋１
+
+;調教者が馬並みで奴隷が小人体型だった場合、Ｖ拡張経験
+IF TALENT:小人体型 && TALENT:PLAYER:馬並み
+	IF EXP:Ｖ拡張経験 == 0
+		EXP:異常経験 += 1
+		PRINTL Ｖ拡張初経験で異常経験＋１
+	ENDIF
+	EXP:Ｖ拡張経験 += 1
+	PRINTL Ｖ拡張経験＋１
+ENDIF
+
+;性交経験
+EXP:PLAYER:性交経験 += 1
+EXP:性交経験 += 1
+PRINTS EXPNAME:4
+PRINTL +1
+
+;挿入経験
+EXP:PLAYER:挿入経験 += 1
+
+;ゲイ経験とか加算
+CALL COM_EXP(4)
+
+;愛情経験
+IF TALENT:恋慕 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +2
+	EXP:愛情経験 += 2
+ELSEIF TALENT:親愛 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +4
+	EXP:愛情経験 += 4
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+;依存度補正値(恋慕で1、親愛で2）
+IF TALENT:恋慕 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:親愛 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+

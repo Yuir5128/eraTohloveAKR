@@ -1,0 +1,2143 @@
+﻿;----------------------------------------------------------------------
+;汎用喘ぎ別人版ERB
+;ver0.02(10/11/28)
+
+;>>118さん版または別人版0.01verでは「PANT_E |= 2とするとみさくら語が表示されなくなる」と説明していましたが、実際にはPANT_E |= 2とするとみさくら語が表示されるようになってました
+;以前のバージョンを使っている方でみさくら語を禁止したい方はPANT_E |= 2を消してください。
+;絶叫系喘ぎとみさくら語を禁止してた方はPANT_E |= 3をPANT_E |= 1にしてください。
+;----------------------------------------------------------------------
+;【使い方】
+;まずキャラ口上ERBのどこかに以下の文を入れる。
+;変数に入れる数字については下記参照。
+;------------ここから-------------
+;@PANT_VOICE_KX1
+;	PANT_A = (1～5の数字)
+;	PANT_E = (0～7の数字／特に付けたいオプションがなければ0でよい)
+;CALL PANT_VOICE
+;RETURN 0
+;------------ここまで-------------
+;X1にはキャラ番号を入れる。
+;あとは喘がせたい場所で
+;------------ここから-------------
+;CALL PANT_VOICE_KX1
+;------------ここまで-------------
+;と書くと喘ぎます。
+;回数または喘ぎパターンを指定したい場合は
+;------------ここから-------------
+;PANT_F = (1～10の数字)
+;PANT_G = (1～7の数字)
+;CALL PANT_VOICE_KX1
+;------------ここまで-------------
+;と書くと、指定した喘ぎパターンでPANT_F回喘ぎを反復します。
+;いちいちPANT_F=なんちゃらとか書くのめんどくさいという方は
+;------------ここから-------------
+;@PANTVOICE_1_KX1
+;	PANT_A = (1～5の数字)
+;	PANT_E = (0～7の数字／特に付けたいオプションがなければ0でよい)
+;	PANT_F = (1～10の数字)
+;	PANT_G = (1～7の数字)
+;CALL PANT_VOICE
+;RETURN 0
+;------------ここまで-------------
+;と書いてCALL PANTVOICE_1_KX1とかすると良いと思います。
+;記述例はreadme別人版に書いてあるのでそちらも参照ください。
+
+;----------------------------------------------------------------------
+;変数使用状況
+;PANT_A = キャラ口調（現在5種）
+;PANT_B = 喘ぎ回数の多さ
+;PANT_C = 感度
+;PANT_D = 分岐用ビット
+;PANT_E = オプション追加
+;PANT_F = 喘ぎ回数指定用
+;PANT_G = 喘ぎの種類指定用
+;PANT_P = ランダム用
+
+;----------------------------------------------------------------------
+;変数初期化
+;----------------------------------------------------------------------
+@PANT_VOICE
+PANT_B = 0
+PANT_C = 0
+PANT_D = 0
+PANT_P:1 = (-1)
+PANT_B_CALC = 0
+PANT_C_CALC = 0
+
+;----------------------------------------------------------------------
+;変数と対応数字一覧
+;----------------------------------------------------------------------
+;PANT_Aに入れるもの
+;乱暴=1
+;標準=2
+;柔らかめ=3
+;敬語=4
+;関西弁=5
+
+;PANT_Bに入ってるもの
+;PANT_F=0のときの喘ぎ反復回数
+
+;PANT_Cに入ってるもの
+;PANT_G=0のときの喘ぎパターンを決定する数値
+
+;PANT_Dに入ってるもの
+;崩壊=1=0
+;反発1=2=1
+;反発2=4=2
+;反発3=8=3
+;屈服1=16=4
+;屈服2=32=5
+;屈服3=64=6
+;恋慕=128=7
+;淫乱=256=8
+;服従=512=9
+;親愛=1024=10
+;娼婦=2048=11
+;隷属=4096=12
+;口=8192=13
+;B=16384=14
+;C=32768=15
+;A=65536=16
+;V=131072=17
+;その他=262144=18
+;本番=524288=19
+;触手=1048576=20
+;道具=2097152=21
+;苦痛1=4194304=22
+;苦痛2=8388608=23
+;奉仕系=16777216=24
+;奴隷性別男=33554432=25
+;慣らさず濡らさず突っこんだ==26
+
+;PANT_Eに入れるもの
+;絶叫系喘ぎ禁止=1
+;(↑を入れると苦痛LV2になる状況でも苦痛LV1の喘ぎが、快楽LV4になる状況でも快楽LV3の喘ぎが出るようになる)
+;みさくら語で喘ぐ(現状らめぇくらいしかセリフが増えない)=2
+;淫語で喘ぐ(ちんぽ汁出るうううとか)=4
+;淫語で喘ぐモードは一つひとつのセリフが長めなので、PANT_F = 4以下くらいで喘ぎ回数を指定しておいたほうがいいかもしれません。
+;PANT_E = 0 :オプションなし
+;PANT_E = 1 :絶叫系喘ぎ禁止
+;PANT_E = 2 :みさくら語モード
+;PANT_E = 3 :絶叫系喘ぎ禁止＋みさくら語モード
+;PANT_E = 4 :淫語モード
+;PANT_E = 5 :絶叫系喘ぎ禁止＋淫語モード
+;PANT_E = 6 :みさくら語モード＋淫語モード
+;PANT_E = 7 :絶叫系喘ぎ禁止＋みさくら語モード＋淫語モード
+
+;PANT_Fに入れるもの
+;1～10までの数字
+;入れた数字の分だけ喘ぎを反復するようになる
+;0または負の数を入れるとPANT_Fに何も入れなかったときと同じ動きをし、
+;10より大きい数字を入れると喘ぎ反復回数は10回になる
+
+;PANT_Gに入れるもの
+;1～7までの数字
+;入れた数字に対応する喘ぎパターンで喘ぐようになる
+;1～7以外の数字を入れると何も入れなかったのと同じ動きをする
+;弱快感=1
+;快感LV2=2
+;快感LV3=3
+;快感LV4=4
+;苦痛LV1=5
+;苦痛LV2=6
+;口が塞がってる(ボールギャグ・触手口虐中以外)=7
+
+;----------------------------------------------------------------------
+;素質によってB喘ぐ回数とC感度にプラスマイナス。
+;上がり下がりは自分の想像です。
+;感度や苦痛に関わる素質は最後に。
+;----------------------------------------------------------------------
+;男である
+SIF TALENT:オトコ == 1
+	PANT_D |= 33554432
+;反抗的
+IF TALENT:反抗的 == 1
+	PANT_B -= 1
+	PANT_C -= 1
+ENDIF
+;気丈
+SIF TALENT:気丈 == 1
+	PANT_B -= 1
+;素直
+SIF TALENT:素直 == 1
+	PANT_B += 1
+;プライド高い
+IF TALENT:プライド高い == 1
+	PANT_B -= 2
+	PANT_C -= 1
+ENDIF
+;プライド低い
+SIF TALENT:プライド低い == 1
+	PANT_B += 1
+;ツンデレは従順4以上ならPANT_B＋以下ならPANT_B－
+SIF TALENT:ツンデレ == 1 && ABL:従順 >= 4
+	PANT_B += 1
+SIF TALENT:ツンデレ == 1 && ABL:従順 < 4
+	PANT_B -= 1
+;自制心
+IF TALENT:自制心 == 1
+	PANT_B -= 1
+	PANT_C -= 2
+ENDIF
+;無関心
+IF TALENT:無関心 == 1
+	PANT_B -= 2
+	PANT_C -= 2
+ENDIF
+;感情乏しい
+IF TALENT:感情乏しい == 1
+	PANT_B -= 3
+	PANT_C -= 1
+ENDIF
+;保守的
+SIF TALENT:保守的 == 1
+	PANT_B -= 1
+;一線越えないは陥落前ならPANT_B PANT_C-
+IF TALENT:一線越えない == 1 && (TALENT:恋慕 == 1 || TALENT:淫乱 == 1 || TALENT:服従 == 1 || TALENT:親愛 == 1 || TALENT:娼婦 == 1 || TALENT:隷属 == 1)
+	PANT_B -= 1
+	PANT_C -= 2
+ENDIF
+;貞操観念
+IF TALENT:貞操観念 == 1
+	PANT_B -= 1
+	PANT_C -= 2
+ENDIF
+;抑圧
+SIF TALENT:抑圧 == 1
+	PANT_C -= 1
+;解放
+IF TALENT:解放 == 1
+	PANT_B += 2
+	PANT_C += 1
+ENDIF
+;抵抗
+SIF TALENT:抵抗 == 1
+	PANT_C -= 1
+;恥じらい
+SIF TALENT:恥じらい == 1
+	PANT_B -= 1
+;恥薄い
+SIF TALENT:恥薄い == 1
+	PANT_B += 1
+;自慰しやすいまたは自慰狂いは自慰系COMで
+SIF (TALENT:自慰しやすい == 1 || TALENT:自慰狂い == 1) && (SELECTCOM == 4 || SELECTCOM == 5 || SELECTCOM == 6 || SELECTCOM == 7 || SELECTCOM == 509)
+	PANT_C += 1
+;快感に素直
+IF TALENT:快感に素直 == 1
+	PANT_B += 2
+	PANT_C += 2
+ENDIF
+;快感の否定
+IF TALENT:快感の否定 == 1
+	PANT_B -= 2
+	PANT_C -= 2
+ENDIF
+;発情期
+SIF TALENT:発情期 == 1
+	PANT_B += 1
+
+;一度BCの回数異常阻止
+;真面目で大人しい性格だと感度上がってもどうしようもないので。
+SIF PANT_B < 1
+	PANT_B = 1
+SIF PANT_C < -2
+	PANT_C = -2
+;快感が入ってなくても喘ぎだすので素質補正は２まで
+SIF PANT_C > 2
+	PANT_C = 2
+
+;----------------------------------------------------------------------
+;行為箇所＋感度計算
+;----------------------------------------------------------------------
+;感覚が高いとPANT_B PANT_Cにプラス。
+;またこの時点でどこを使った行為かPANT_Dに付ける
+;泡踊りってなんだろう…。
+;----------------------------------------------------------------------
+;B
+SELECTCASE SELECTCOM
+	CASE 0,5,10 TO 18,73 TO 75,84,141,163,243,317,318,322,341,360,361,373,374,382,402,421,502,504,509,528
+		SETBIT PANT_D,14
+		;感覚低い～高いでC0～3
+		IF ABL:Ｂ感覚 >= 7
+			PANT_B_CALC += 2
+			PANT_C_CALC += 3
+		ELSEIF ABL:Ｂ感覚 >= 5
+			PANT_B_CALC += 1
+			PANT_C_CALC += 2
+		ELSEIF ABL:Ｂ感覚 >= 3
+			PANT_C_CALC += 1
+		ELSE
+			PANT_B_CALC -= 1
+		ENDIF
+		;調教者の技巧により
+		IF ABL:PLAYER:技巧 == 0
+			PANT_C_CALC += 2
+		ELSEIF ABL:PLAYER:技巧 >= 5
+			PANT_C_CALC += 1
+		ELSEIF ABL:PLAYER:技巧 < 3
+			PANT_C_CALC -= 1
+		ENDIF
+ENDSELECT
+;アイテムがついているときは最大+1
+IF BCHECK(TARGET)
+	SETBIT PANT_D,14
+	SIF ABL:Ｂ感覚 >= 5
+		PANT_B_CALC += 1
+	SIF ABL:Ｂ感覚 >= 3
+		PANT_C_CALC += 1
+ENDIF
+;C
+SELECTCASE SELECTCOM
+	CASE 0,3,4,20 TO 40,60 TO 62,76,145,163,182,240 TO 242,244 TO 246,260 TO 265,280,285,317,318,322,342,343,365,373,374,380 TO 382,400,401,422,430,431,503,504,505,515,519 TO 525
+		;愛撫のとき、貞操帯があるとＣは気持ちよくない
+		IF SELECTCOM == 0 && TEQUIP:貞操帯
+		;輪姦のとき、逆セックスがないとＣは気持ちよくない
+		ELSEIF SELECTCOM == 322 && (TFLAG:705 & 4) == 0
+		;獣姦のとき、ＶかＡどっちかに突っ込まれてると、Ｃは気持ちよくない
+		ELSEIF (SELECTCOM == 322 || SELECTCOM == 381) && TFLAG:705 != 4
+		;飲尿するのとき、その場の尿を飲むんだとＣは気持ちよくない
+		ELSEIF SELECTCOM == 285 && BASE:尿意 < 60
+		;サンドイッチのとき、Ｃ愛撫されてないとＣは気持ちよくない
+		ELSEIF SELECTCOM == 515 && TFLAG:40 != 3 && TFLAG:40 != 4 && TFLAG:40 != 5
+		;サンドイッチさせるのとき、愛撫する側だとＣは気持ちよくない
+		ELSEIF SELECTCOM == 520 && (TFLAG:49 == 8 || TFLAG:49 == 9 || TFLAG:49 == 10)
+		;連結のとき、受けだとＣは気持ちよくない
+		ELSEIF SELECTCOM == 519 && TFLAG:49 != 6 && TFLAG:49 != 7 && TFLAG:49 != 11 && TFLAG:49 != 12
+		ELSE
+			SETBIT PANT_D,15
+			;感覚低い～高いでC0～3
+			IF ABL:Ｃ感覚 >= 7
+				PANT_B_CALC += 2
+				PANT_C_CALC += 3
+			ELSEIF ABL:Ｃ感覚 >= 5
+				PANT_B_CALC += 1
+				PANT_C_CALC += 2
+			ELSEIF ABL:Ｃ感覚 >= 3
+				PANT_C_CALC += 1
+			ELSE
+				PANT_B_CALC += 1
+			ENDIF
+			;調教者の技巧により
+			IF ABL:PLAYER:技巧 == 0
+				PANT_C_CALC += 2
+			ELSEIF ABL:PLAYER:技巧 >= 5
+				PANT_C_CALC += 1
+			ELSEIF ABL:PLAYER:技巧 < 3
+				PANT_C_CALC -= 1
+			ENDIF
+		ENDIF
+ENDSELECT
+;アイテムがついているときは最大+1
+IF CCHECK(TARGET)
+	SETBIT PANT_D,15
+	SIF ABL:Ｃ感覚 >= 5
+		PANT_B_CALC += 1
+	SIF ABL:Ｃ感覚 >= 3
+		PANT_C_CALC += 1
+ENDIF
+;A
+SELECTCASE SELECTCOM
+	CASE 6,7,8,50  TO 56,110 TO 116,161,162,163,180,181,183,286,322,345,352,364,367,368,370,371,373,374,381,382,404,406,501,509,510,512,514,515,518,519,526
+		;アナル舐めのとき、アナル舐めからの派生じゃないとＡは気持ちよくない
+		IF SELECTCOM == 286 && TFLAG:56 != 1
+		;輪姦のとき、Ａに挿入されてないとＡは気持ちよくない
+		ELSEIF SELECTCOM == 322 && (TFLAG:705 & 1) == 0
+		;獣姦のとき、Ａに挿入されてないとＡは気持ちよくない
+		;バイブも貞操帯もないとＶに挿入してＡは使用しない
+		ELSEIF SELECTCOM == 381 && !TEQUIP:バイブ && !TEQUIP:貞操帯
+		;騎乗位乳房自慰、駅弁のとき、Ａに挿入されてないとＡは気持ちよくない
+		ELSEIF (SELECTCOM == 509 || SELECTCOM == 510) && TFLAG:705 != 1
+		;サンドイッチ、連結のとき、Ａに挿入されてないとＡは気持ちよくない
+		ELSEIF (SELECTCOM == 515 || SELECTCOM == 519) && TFLAG:40 != 2 && TFLAG:41 != 2
+		ELSE
+			SETBIT PANT_D,16
+			;感覚低い～高いでC0～3
+			IF ABL:Ａ感覚 >= 7
+				PANT_B_CALC += 2
+				PANT_C_CALC += 3
+			ELSEIF ABL:Ａ感覚 >= 5
+				PANT_B_CALC += 1
+				PANT_C_CALC += 2
+			ELSEIF ABL:Ａ感覚 >= 3
+				PANT_C_CALC += 1
+			;慣れてなかったら痛いと思うので苦痛＋
+			ELSEIF SELECTCOM != 50
+				PANT_B_CALC -= 1
+				;アナル愛撫、アナニー、アナルバイブ、アナルビーズ
+				IF SELECTCOM == 6 || SELECTCOM == 7 || SELECTCOM == 51 || SELECTCOM == 53 || SELECTCOM == 54
+					IF PALAM:潤滑 < PALAMLV:2
+						SETBIT PANT_D, 22
+						SETBIT PANT_D, 26
+					ENDIF
+				ELSE
+					;潤滑により苦痛１or苦痛２
+					IF PALAM:潤滑 < PALAMLV:2
+						SETBIT PANT_D, 23
+					ELSE
+						SETBIT PANT_D, 22
+					ENDIF
+					SETBIT PANT_D, 26
+				ENDIF
+			ENDIF
+			;調教者の技巧により
+			IF ABL:PLAYER:技巧 == 0
+				PANT_C_CALC += 2
+			ELSEIF ABL:PLAYER:技巧 >= 5
+				PANT_C_CALC += 1
+			ELSEIF ABL:PLAYER:技巧 < 3
+				PANT_C_CALC -= 1
+			ENDIF
+		ENDIF
+ENDSELECT
+;アイテムがついているときは最大+1
+IF ACHECK(TARGET)
+	SETBIT PANT_D,16
+	SIF ABL:Ａ感覚 >= 5
+		PANT_B_CALC += 1
+	IF ABL:Ａ感覚 >= 3
+		PANT_C_CALC += 1
+	;慣れてない＆濡れてないと痛い
+	ELSE
+		IF PALAM:潤滑 < PALAMLV:2
+			SETBIT PANT_D, 22
+			SETBIT PANT_D, 26
+		ENDIF
+	ENDIF
+ENDIF
+;V
+IF !GETBIT(PANT_D,25)
+	SELECTCASE SELECTCOM
+		CASE 4,7,41  TO 44,100 TO 106,160,162,163,246,322,344,362,363,366,368,369,373,374,381,382,403,405,500,506 TO 511,513,515,517,519
+			;自慰のとき、Ｖを使わないとＶは気持ちよくない
+			IF SELECTCOM == 4 && TFLAG:56 != 1
+			;輪姦のとき、Ｖに挿入されてないとＡは気持ちよくない
+			ELSEIF SELECTCOM == 322 && (TFLAG:705 & 2) == 0
+			;獣姦のとき、Ｖに挿入されてないとＶは気持ちよくない
+			;貞操帯かオトコだと駄目
+			ELSEIF SELECTCOM == 381 && (TEQUIP:貞操帯 || !VAGINA(TARGET))
+			;騎乗位乳房自慰、駅弁のとき、Ｖに挿入されてないとＶは気持ちよくない
+			ELSEIF (SELECTCOM == 509 || SELECTCOM == 510) && TFLAG:705 != 0
+			;サンドイッチ、連結のとき、Ｖに挿入されてないとＡは気持ちよくない
+			ELSEIF (SELECTCOM == 515 || SELECTCOM == 519) && TFLAG:40 != 1 && TFLAG:41 != 1
+			;電気あんまのとき、下着か下衣を着用しているとＶは気持ちよくない
+			ELSEIF SELECTCOM == 246 && (TEQUIP:下着（下） || TEQUIP:下衣)
+			ELSE
+				SETBIT PANT_D,17
+				;感覚低い～高いでC0～3
+				IF ABL:Ｖ感覚 >= 7
+					PANT_B_CALC += 2
+					PANT_C_CALC += 3
+				ELSEIF ABL:Ｖ感覚 >= 5
+					PANT_B_CALC += 1
+					PANT_C_CALC += 2
+				ELSEIF ABL:Ｖ感覚 >= 3
+					PANT_C_CALC += 1
+				ELSE
+					;慣れてない＆濡れてなかったら苦痛
+					PANT_B_CALC -= 1
+					IF PALAM:潤滑 < PALAMLV:2
+						SETBIT PANT_D, 22
+						SETBIT PANT_D, 26
+					ENDIF
+				ENDIF
+				;調教者の技巧により
+				IF ABL:PLAYER:技巧 == 0
+					PANT_C_CALC += 2
+				ELSEIF ABL:PLAYER:技巧 >= 5
+					PANT_C_CALC += 1
+				ELSEIF ABL:PLAYER:技巧 < 3
+					PANT_C_CALC -= 1
+				ENDIF
+			ENDIF
+	ENDSELECT
+ENDIF
+IF VCHECK(TARGET)
+	SETBIT PANT_D,17
+	SIF ABL:Ｖ感覚 >= 5
+		PANT_B_CALC += 1
+	IF ABL:Ｖ感覚 >= 3
+		PANT_C_CALC += 1
+	;慣れてない＆濡れてないと痛い
+	ELSE
+		IF PALAM:潤滑 < PALAMLV:2
+			SETBIT PANT_D, 22
+			SETBIT PANT_D, 26
+		ENDIF
+	ENDIF
+ENDIF
+
+;２か所以上責めるコマンドは、行為箇所による感度を半分にする
+SELECTCASE SELECTCOM
+	CASE 0,7,162,163,317,318,322,368,373,374,381,382,504,509,515,519
+		;愛撫のとき、貞操帯がついてるとＢしか触らない
+		IF SELECTCOM == 0 && TEQUIP:貞操帯
+		ELSE
+			PANT_B_CALC = PANT_B_CALC / 2
+			PANT_C_CALC = PANT_C_CALC / 2
+		ENDIF
+ENDSELECT
+PANT_B += PANT_B_CALC
+PANT_C += PANT_C_CALC
+
+;口
+SELECTCASE SELECTCOM
+	CASE 1,71,72,75,77,85,87,184,185,222,224,322,407,410,412,420,515,516,520,521,527
+		;輪姦のとき、口は使わない
+		IF SELECTCOM == 322 && (TFLAG:705 & 8) == 0
+		;サンドイッチ、サンドイッチさせる、助手をサンドイッチのとき、口は使わない
+		ELSEIF (SELECTCOM == 515 || SELECTCOM == 520 || SELECTCOM == 521) && TFLAG:49 != 8 && TFLAG:49 != 9 && TFLAG:49 != 10
+		ELSE
+			SETBIT PANT_D,13
+		ENDIF
+ENDSELECT
+
+;継続アイテムによる苦痛
+;重度
+IF TEQUIP:拡張バルーン || TEQUIP:尿道バルーン || BASE:尿意 >= 90 || BASE:便意 >= 90 || TEQUIP:三角木馬
+	SETBIT PANT_D, 23
+;軽度
+ELSEIF TEQUIP:縄 || TEQUIP:カテーテル || TEQUIP:触手膣内産卵 || TEQUIP:触手腸内産卵 || TEQUIP:触手乳腺挿入 || BASE:尿意 >= 60 || BASE:便意 >= 60 || BASE:吐き気 >= 60
+	SETBIT PANT_D, 22
+ENDIF
+;----------------------------------------------------------------------
+;陥落資質
+;----------------------------------------------------------------------
+;恋慕
+IF TALENT:恋慕 == 1
+	PANT_B += 1
+	PANT_D |= 128
+ENDIF
+;親愛
+IF TALENT:親愛 == 1
+	PANT_B += 1
+	PANT_D |= 1024
+ENDIF
+;淫乱
+IF TALENT:淫乱 == 1
+	PANT_B += 2
+	PANT_C += 1
+	PANT_D |= 256
+ENDIF
+;娼婦
+IF TALENT:娼婦 == 1
+	PANT_B += 2
+	PANT_C += 2
+	PANT_D |= 2048
+ENDIF
+;服従
+IF TALENT:服従 == 1
+	PANT_B -= 1
+	PANT_D |= 512
+ENDIF
+;隷属
+IF TALENT:隷属== 1
+	PANT_B -= 1
+	PANT_D |= 4096
+ENDIF
+;反発
+IF MARK:反発刻印 > 0
+	;認めたくないってことでPANT_C - 
+	PANT_B -= 2
+	PANT_C -= 2
+	;反発Lv1
+	IF MARK:反発刻印 == 1
+		PANT_D |= 2
+	;反発Lv2
+	ELSEIF MARK:反発刻印 == 2
+		PANT_D |= 4
+	;反発Lv3
+	ELSEIF MARK:反発刻印 == 3
+		PANT_D |= 8
+	ENDIF
+ENDIF
+;屈服
+IF MARK:屈服刻印 > 0
+	;屈服Lv1
+	IF MARK:屈服刻印 == 1
+		PANT_D |= 16
+	;屈服Lv2
+	ELSEIF MARK:屈服刻印 == 2
+		PANT_D |= 32
+	;屈服Lv3
+	ELSEIF MARK:屈服刻印 == 3
+		PANT_D |= 64
+	ENDIF
+ENDIF
+;崩壊
+IF TALENT:崩壊 == 1
+	PANT_D |= 1
+ENDIF
+;----------------------------------------------------------------------
+;素質その２
+;----------------------------------------------------------------------
+;淫壺
+IF TALENT:淫壺 == 1 && (PANT_D & 131072) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+;尻穴狂い
+IF TALENT:尻穴狂い == 1 && (PANT_D & 655369) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+;淫乳
+IF TALENT:淫乳 == 1 && (PANT_D & 16384) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+;セックス狂
+IF TALENT:セックス狂 ==1 && (PANT_D & 524288) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+;CVAB鈍感でBC-
+IF TALENT:Ｃ鈍感 && (PANT_D & 32768) != 0
+	PANT_B -= 1
+	PANT_C -= 1
+ENDIF
+IF TALENT:Ｖ鈍感 && (PANT_D & 131072) != 0
+	PANT_B -= 1
+	PANT_C -= 1
+ENDIF
+IF TALENT:Ａ鈍感 && (PANT_D & 655369) != 0
+	PANT_B -= 1
+	PANT_C -= 1
+ENDIF
+IF TALENT:Ｂ鈍感 &&(PANT_D & 16384) != 0
+	PANT_B -= 1
+	PANT_C -= 1
+ENDIF
+;CVAB敏感でBC+
+IF TALENT:Ｃ敏感 && (PANT_D & 32768) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+IF TALENT:Ｖ敏感 && (PANT_D & 131072) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+IF TALENT:Ａ敏感 && (PANT_D & 655369) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+IF TALENT:Ｂ敏感 && (PANT_D & 16384) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+;貧乳か絶壁だとPANT_D = 1のときにPANT_F + 
+SIF TALENT:貧乳 == 1 && (PANT_D & 16384) != 0
+	PANT_C += 1
+SIF TALENT:絶壁 == 1 && (PANT_D & 16384) != 0
+	PANT_C += 2
+;巨乳か爆乳だとPANT_D = 1のときにPANT_F - 
+SIF TALENT:巨乳 == 1 && (PANT_D & 16384) != 0
+	PANT_C -= 1
+SIF TALENT:爆乳 == 1 && (PANT_D & 16384) != 0
+	PANT_C -= 2
+;母乳体質ならPANT_D = 1のときにPANT_F + 
+SIF TALENT:母乳体質 == 1 && (PANT_D & 16384) != 0
+	PANT_C += 1
+
+;----------------------------------------------------------------------
+;行為軽度＋苦痛計算
+;行為が激しいとPANT_B PANT_Fにプラス
+;----------------------------------------------------------------------
+;乳ファック、泡踊りってどこだろう……。
+;奉仕系は奴隷側がするだけのものは入ってません。
+
+;軽い
+SELECTCASE SELECTCOM
+	CASE 0,1,3 TO 6,8,10,11,18,30,31,34,36,40,50,73 TO 75,87,222,224,240,241,243 TO 245,317,318,400 TO 402,502 TO 505,528
+ENDSELECT
+
+;普通
+SELECTCASE SELECTCOM
+	CASE 12 TO 15,20 TO 23,32,41,42,50,51,76,80,84,85,130,140,141,242,246,380,403,404,422,500,501
+		PANT_B += 1
+		PANT_C += 1
+		;苦痛なら
+		SIF ((SELECTCOM == 14 || SELECTCOM == 23) && (TEQUIP:地下室 || TALENT:PLAYER:サド || ABL:PLAYER:サドっ気 >= 3)) || SELECTCOM == 15 || SELECTCOM == 24 || SELECTCOM == 130 || SELECTCOM == 140 || SELECTCOM == 141
+			PANT_D |= 4194304
+ENDSELECT
+
+;重い＋本番
+SELECTCASE SELECTCOM
+	CASE 7,17,33,43,53,54,60,72,100 TO 116,142 TO 145,155,157,158,322,341 TO 345,360 TO 365,405,406,506 TO 512,515,519 TO 521,526
+		PANT_B += 2
+		PANT_C += 2
+		;苦痛なら
+		SIF SELECTCOM == 33 || SELECTCOM == 60 || SELECTCOM == 72 || SELECTCOM == 158 || SELECTCOM == 361 || SELECTCOM == 365 || SELECTCOM == 511 || SELECTCOM == 512
+			PANT_D |= 4194304
+		;苦痛LV2
+		SIF SELECTCOM == 142 || SELECTCOM == 143 || SELECTCOM == 144 || SELECTCOM == 145 || SELECTCOM == 157
+			PANT_D |= 8388608
+		;本番ならPANT_B + 1
+		SELECTCASE SELECTCOM
+			CASE 100 TO 116,405,406,506 TO 512,515,519 TO 521,526
+				PANT_B += 1
+				PANT_D |= 524288
+		ENDSELECT
+ENDSELECT
+
+;通常じゃやらないの
+SELECTCASE SELECTCOM
+	CASE 16,25,35,44,55,56,61,62,153,154,156,160 TO 163,180,181,352,366 TO 374,381 TO 383,390 TO 392,513,514,517,518,522 TO 525,527
+		PANT_B += 3
+		PANT_D |= 8388608
+		;本番ならPANT_B + 1
+		IF SELECTCOM == 181 || SELECTCOM == 513 || SELECTCOM == 514 || SELECTCOM == 517 || SELECTCOM == 518 || SELECTCOM == 522 || SELECTCOM == 523 || SELECTCOM == 524 || SELECTCOM == 525
+			PANT_B = PANT_B + 1
+			PANT_D |= 524288
+		ENDIF
+ENDSELECT
+
+;奉仕系（イラマチオのような強制系は含まない）
+SELECTCASE SELECTCOM
+	CASE 70 TO 87,220 TO 225,243,317,420 TO 422,503,504,528
+		PANT_D |= 16777216
+	;本番あり
+	CASE 260 TO 265
+		SETBIT PANT_D,19
+		SETBIT PANT_D,24
+ENDSELECT
+
+;触手系
+SELECTCASE SELECTCOM
+	CASE 340 TO 374
+		PANT_D |= 1048576
+ENDSELECT
+
+;道具系
+SELECTCASE SELECTCOM
+	CASE 12,13,15 TO 17,20 TO 22,24,25,32,42 TO 44,52 TO 56,60 TO 62,130 TO 134,142 TO 145,180,300 TO 305
+		PANT_D |= 2097152
+ENDSELECT
+;----------------------------------------------------------------------
+;素質その３
+;----------------------------------------------------------------------
+;臆病は苦痛があるときPANT_B + 1（ぎゃあぎゃあ喚くイメージ）
+SIF TALENT:臆病 == 1 && (PANT_D & 12582912) != 0
+	PANT_B += 1
+;痛みに弱い
+IF TALENT:痛みに弱い == 1 && (PANT_D & 12582912) != 0
+	PANT_B += 1
+	PANT_C -= 1
+ENDIF
+;痛みに強い
+IF TALENT:痛みに強い == 1 && (PANT_D & 12582912) != 0
+	PANT_B -= 1
+	IF (PANT_D & 8388608) == 8388608
+		PANT_D -= 8388608
+		PANT_D |= 4194304
+	ENDIF
+ENDIF
+;サド
+SIF TALENT:サド && (PANT_D & 12582912) != 0
+	PANT_C -= 1
+;マゾ
+IF TALENT:マゾ && (PANT_D & 12582912) != 0
+	PANT_C += 1
+	SIF TALENT:マゾ == 2
+		PANT_C++
+	SIF GETBIT(PANT_D,23)
+		PANT_C++
+	PANT_B += 1
+ENDIF
+
+;----------------------------------------------------------------------
+;喘ぐよ！
+;----------------------------------------------------------------------
+;喘ぐ前に回数に異常ないかチェック
+;現状10回以上は繰り返さない。
+IF PANT_B > 10
+	PANT_B = 10
+ELSEIF PANT_B < 1
+	PANT_B = 1
+ENDIF
+;Cも異常防止
+SIF PANT_C < 0
+	PANT_C = 0
+;Fの数字異常防止
+;ないとは思うけど変数が初期化されてないで負の値を持ってたりしたら困るので一応処理
+IF PANT_F < 1
+	PANT_F = 0
+ELSEIF PANT_F > 8
+	PANT_F = 8
+ENDIF
+;PANT_Gの数字異常防止
+IF PANT_G < 1
+	PANT_G = 0
+ELSEIF PANT_G > 7
+	PANT_G = 0
+ENDIF
+
+
+;苦痛LV2と快感LV3,4が喚きすぎるので-処理
+SIF PANT_C >= 4 || (PANT_D & 8388608) != 0
+	PANT_B -= 4
+
+;Fが1以上なら喘ぎ回数はBの値に限らずF回に
+SIF PANT_F >= 1
+	PANT_B = PANT_F
+;PANT_Gが1～7ならCの値によらず指定した喘ぎに
+IF PANT_G == 1
+	LOCALS = G
+ELSEIF PANT_G == 2
+	LOCALS = F
+ELSEIF PANT_G == 3
+	LOCALS = E
+ELSEIF PANT_G == 4
+	LOCALS = D
+ELSEIF PANT_G == 5
+	LOCALS = C
+ELSEIF PANT_G == 6
+	LOCALS = B
+ELSEIF PANT_G == 7
+	LOCALS = A
+;崩壊なら問答無用で快感LV1へ
+ELSEIF (PANT_D & 1) != 0
+	PANT_C = 0
+	LOCALS = G
+;口が塞がってる(ボールギャグ・触手口虐中以外)なら飛ぶ
+ELSEIF (PANT_D & 8192) != 0
+	LOCALS = A
+;苦痛LV2
+ELSEIF (PANT_D & 8388608) != 0
+	;苦痛LV2禁止でLV1へ
+	IF (PANT_E & 1) != 0
+		LOCALS = C
+	ELSE
+		;絶叫系は６回まで
+		SIF PANT_B > 6
+			PANT_B = 6
+		LOCALS = B
+	ENDIF
+;苦痛LV1
+ELSEIF (PANT_D & 4194304) != 0
+	LOCALS = C
+;快感はLV1～LV4で分ける
+;快感LV4
+ELSEIF PANT_C >= 8
+	;快感LV4禁止でLV3へ
+	IF (PANT_E & 1) != 0
+		LOCALS = E
+	ELSE
+		;絶叫系は６回まで
+		SIF PANT_B > 6
+			PANT_B = 6
+		LOCALS = D
+	ENDIF
+;快感LV3
+ELSEIF PANT_C >= 5
+	LOCALS = E
+;快感LV2
+ELSEIF PANT_C >= 3
+	LOCALS = F
+;快感LV1
+;念のためその他もこっちに
+ELSE
+	LOCALS = G
+ENDIF
+
+;個別汎用喘ぎがあればそちらを表示
+RESULT = 0
+RESULTS = 
+RESULTS:1 = 
+TRYCALLFORM SELECTER_K{NO:TARGET}(TARGET, 1)
+IF RESULT && FLAG:7 > 0
+	RESULT = 0
+	TRYCCALLFORM PANT_VOICE%RESULTS:1%%RESULTS%_%LOCALS%_K{NO:TARGET}
+	CATCH
+		TRYCCALLFORM KOJO%RESULTS:1%%RESULTS%_EXCLUSION_K{NO:TARGET}
+		CATCH
+			RESULT = 0
+		ENDCATCH
+	ENDCATCH
+	IF !RESULT
+		TRYCCALLFORM PANT_VOICE%RESULTS:1%_%LOCALS%_K{NO:TARGET}
+		CATCH
+			TRYCCALLFORM KOJO%RESULTS:1%_EXCLUSION_K{NO:TARGET}
+			CATCH
+				RESULT = 0
+			ENDCATCH
+		ENDCATCH
+	ENDIF
+	IF !RESULT
+		TRYCCALLFORM PANT_VOICE%RESULTS%_%LOCALS%_K{NO:TARGET}
+		CATCH
+			TRYCCALLFORM KOJO%RESULTS%_EXCLUSION_K{NO:TARGET}
+			CATCH
+				RESULT = 0
+			ENDCATCH
+		ENDCATCH
+	ENDIF
+	IF !RESULT
+		TRYCCALLFORM PANT_VOICE_%LOCALS%_K{NO:TARGET}
+		CATCH
+			RESULT = 0
+		ENDCATCH
+	ENDIF
+ENDIF
+SIF !RESULT || FLAG:7 <= 0
+	CALLFORM PANT_VOICE_%LOCALS%
+PANT_A = 0
+PANT_B = 0
+PANT_C = 0
+PANT_D = 0
+PANT_E = 0
+PANT_F = 0
+PANT_G = 0
+;連続禁止用処理
+@VOICE_RENZOKU
+$RETRY
+PANT_P = RAND:(PANT_P:2)
+SIF PANT_P:1 >= 0 && PANT_P == PANT_P:1
+	GOTO RETRY
+
+;----------------------------------------------------------------------
+;口が塞がってる(ボールギャグ・触手口虐中以外)
+;----------------------------------------------------------------------
+@PANT_VOICE_A
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;苦痛がある
+	IF (PANT_D & 12582912) != 0
+		IF PANT_P == 0
+			PRINT ……
+		ELSEIF PANT_P == 1
+			PRINT んん、
+		ELSEIF PANT_P == 2
+			PRINT んっ、
+		ELSEIF PANT_P == 3
+			PRINT …んぅ、
+		ELSEIF PANT_P == 4
+			PRINT ん、むっ…
+		ELSEIF PANT_P == 5
+			PRINT ふぅ…
+		ELSEIF PANT_P == 6
+			PRINT んぐっ！
+		ELSEIF PANT_P == 7
+			PRINT ん゛ー…っ、
+		ELSEIF PANT_P == 8
+			PRINT んーっんー！
+		ELSEIF PANT_P == 9
+			PRINT うぐ…
+		ENDIF
+	;任意奉仕系
+	ELSEIF (PANT_D & 16777216) != 0
+		IF PANT_P == 0
+			PRINT ……
+		ELSEIF PANT_P == 1
+			PRINT んん、
+		ELSEIF PANT_P == 2
+			PRINT んっ、
+		ELSEIF PANT_P == 3
+			PRINT …んぅ、
+		ELSEIF PANT_P == 4
+			PRINT ん、むっ…
+		ELSEIF PANT_P == 5
+			PRINT ふぅ…
+		ELSEIF PANT_P == 6
+			PRINT んく…っ、
+		ELSEIF PANT_P == 7
+			PRINT あむっ…
+		ELSEIF PANT_P == 8
+			PRINT …ちゅ、
+		ELSEIF PANT_P == 9
+			;淫乱か娼婦
+			IF (PANT_D & 2304) != 0
+				PRINT おいひ…っ、
+			ELSE
+				PRINT は…、
+			ENDIF
+		ENDIF
+	;その他
+	ELSE
+		IF PANT_P == 0
+			PRINT ……
+		ELSEIF PANT_P == 1
+			PRINT んん、
+		ELSEIF PANT_P == 2
+			PRINT んっ、
+		ELSEIF PANT_P == 3
+			PRINT …んぅ、
+		ELSEIF PANT_P == 4
+			PRINT ん、むっ…
+		ELSEIF PANT_P == 5
+			PRINT ふぅ…
+		ELSEIF PANT_P == 6
+			PRINT んく…っ、
+		ELSEIF PANT_P == 7
+			PRINT あむっ…
+		ELSEIF PANT_P == 8
+			PRINT …ちゅ、
+		ELSEIF PANT_P == 9
+			PRINT は…、
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+PANT_P = RAND:3
+	IF PANT_P == 0
+		PRINT んんっ
+	ELSEIF PANT_P == 1
+		PRINT …ぷはっ
+	;反発3または苦痛有でえづく
+	ELSEIF PANT_P == 2 && (PANT_D & 12582920) != 0
+		PRINT ……ぅ、ぐぇ…
+	ELSE
+		PRINT …はぁ…っ
+	ENDIF
+PRINTW 」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;苦痛LV2
+;----------------------------------------------------------------------
+@PANT_VOICE_B
+;PANT_A = 口調（1=雑、2=標準、3=柔、4=敬語、5=関西）
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;ボールギャグか触手口虐中
+	IF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+		IF PANT_P == 0
+			PRINT んぐぅぅぅぅぅぅ！
+		ELSEIF PANT_P == 1
+			PRINT あううぅ…！
+		ELSEIF PANT_P == 2
+			PRINT ん――――！
+		ELSEIF PANT_P == 3
+			PRINT う゛ぅっ…
+		ELSEIF PANT_P == 4
+			PRINT ぐぅっ、
+		ELSEIF PANT_P == 5
+			PRINT む―――っ！
+		ELSEIF PANT_P == 6
+			PRINT あぉぉ…っ、
+		ELSEIF PANT_P == 7
+			PRINT んんんっ、
+		ELSEIF PANT_P == 8
+			PRINT んぐっ
+		ELSEIF PANT_P  ==  9
+			PRINT むぅぅ…！
+		ENDIF
+	;マゾ持ち、LV3以上の快感あり
+	ELSEIF TALENT:マゾ || PANT_C >= 5
+		IF PANT_P == 0
+			PRINT いあああああっ！
+		ELSEIF PANT_P == 1
+			PRINT ひいいいっ…！
+		ELSEIF PANT_P == 2
+			PRINT ひ、―――ッッッッ、
+		ELSEIF PANT_P == 3
+			PRINT ひぁっ…！
+		ELSEIF PANT_P == 4
+			PRINT ぎゃっ、
+		ELSEIF PANT_P == 5
+			PRINT ひぎぃ――っ！
+		ELSEIF PANT_P == 6
+			PRINT あ゛――…っ、
+		ELSEIF PANT_P == 7
+			PRINT ひぃぃっ、
+		ELSEIF PANT_P == 8
+			SIF PANT_A == 1 || PANT_A == 6 || PANT_A == 8
+				PRINT きもち、い゛っ…
+			SIF PANT_A == 3 && ACTIVECOM(SELECTCOM) < 4
+				PRINT もっとしてぇっ！
+			SIF PANT_A == 2 || PANT_A == 4 || (PANT_A == 3 && ACTIVECOM(SELECTCOM) >= 4)
+				PRINT やだっ…やだ、気持ちぃよぉおっ、
+			SIF PANT_A == 5
+				PRINT おかしゅうなるき、いかんちや…っ
+			SIF PANT_A == 7
+				PRINT 狂ってまう…！
+			SIF PANT_A == 8
+				PRINT えらいぼっこしてぇ…っ
+		ELSEIF PANT_P  ==  9
+			SIF PANT_A == 1 || PANT_A == 2
+				PRINT あっ、あっ、
+			SIF PANT_A == 3 || PANT_A == 6
+				PRINT 気持ち、ぃ…
+			SIF PANT_A == 4
+				PRINT …ヘン、になっちゃいま…っ、
+			SIF PANT_A == 5
+				PRINT えい、えいがよ…っ
+			SIF PANT_A == 7
+				PRINT あかん、て…っ
+			SIF PANT_A == 8
+				PRINT 気持ちよか…っ
+		ENDIF
+	;普通の人用
+	ELSE
+		IF PANT_P == 0
+			PRINT ひぎぃ――っ、
+		ELSEIF PANT_P == 1
+			PRINT いあああああっ！
+		ELSEIF PANT_P == 2
+			PRINT ひいいいっ…！
+		ELSEIF PANT_P == 3
+			PRINT ひ、―――ッッッッ、
+		ELSEIF PANT_P == 4
+			PRINT ぎゃっ、
+		ELSEIF PANT_P == 5
+			PRINT 死ぬ、ぅっ
+		ELSEIF PANT_P == 6
+			PRINT はぁっ……はぁっ、はっ、
+		ELSEIF PANT_P == 7
+			PRINT ぐあ…っ！
+		ELSEIF PANT_P == 8 && ACTIVECOM(SELECTCOM) < 4
+			;プライド高いor生意気or気丈or抵抗or反抗的or痛みに強いor服従or反発
+			IF TALENT:反抗的 == 1 || TALENT:気丈 == 1 || TALENT:プライド高い == 1 || TALENT:生意気 == 1 || TALENT:抵抗 == 1 || TALENT:痛みに弱い == 1 || TALENT:服従 == 1 || TALENT:隷属 == 1 || MARK:反発刻印>0
+				PRINT ひ…っ、
+			ELSE
+				SIF PANT_A == 1 || PANT_A == 2 || PANT_A == 8
+					PRINT やめ…っ、
+				SIF PANT_A == 3
+					PRINT やめて…っ、
+				SIF PANT_A == 4
+					PRINT お願っ…ですから…！
+				SIF PANT_A == 5
+					PRINT もっ、やめとぉせ…
+				SIF PANT_A == 6
+					PRINT む、り……だぁっ
+				SIF PANT_A == 7
+					PRINT もっ、堪忍して…やぁっ
+			ENDIF
+		ELSEIF PANT_P == 9 && ACTIVECOM(SELECTCOM) < 4
+			;プライド高いor生意気or気丈or抵抗or反抗的or痛みに強いor服従or反発
+			IF TALENT:反抗的 == 1 || TALENT:気丈 == 1 || TALENT:プライド高い == 1 || TALENT:生意気 == 1 || TALENT:抵抗 == 1 || TALENT:痛みに弱い == 1 || TALENT:服従 == 1 || TALENT:隷属 == 1 || MARK:反発刻印>0
+				PRINT ぐ…っ、
+			ELSE
+				SIF PANT_A == 1 || PANT_A == 2 || PANT_A == 6
+					PRINT やめろ、
+				SIF PANT_A == 3
+					PRINT やめてよぉ…！
+				SIF PANT_A == 4
+					PRINT 許してくださっ…
+				SIF PANT_A == 5
+					PRINT 許しとおせ、
+				SIF PANT_A == 7
+					PRINT イヤやあーーっっ！
+				SIF PANT_A == 8
+					PRINT も、せんで、
+			ENDIF
+		ELSE
+			PRINT ひぎぃ――っ、
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;締め
+PANT_P = RAND:3
+	;ボールギャグか触手口虐中
+	IF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+		IF PANT_P == 0
+			PRINT んぐううぅぅうう！
+		ELSEIF PANT_P == 1
+			PRINT あおおおっ…！
+		ELSEIF PANT_P == 2
+			PRINT ぐぅぅ…ふっ…
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			PRINT ああぁっぁぁっぁあぁ！！！
+		ELSEIF PANT_P == 1
+			PRINT ひぃ―――っっ！！！
+		ELSEIF PANT_P == 2
+			PRINT はぁん…っ、はぁ…
+		ENDIF
+	ENDIF
+PRINTW 」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;苦痛LV1
+;----------------------------------------------------------------------
+@PANT_VOICE_C
+;PANT_A = 口調（1=雑、2=標準、3=柔、4=敬語、5=関西）
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;ボールギャグか触手口虐中
+	IF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+		IF PANT_P == 0
+			PRINT んぅぅ！
+		ELSEIF PANT_P == 1
+			PRINT …くぅ…
+		ELSEIF PANT_P == 2
+			PRINT ん…
+		ELSEIF PANT_P == 3
+			PRINT あぅっ…
+		ELSEIF PANT_P == 4
+			PRINT んむぅ…
+		ELSEIF PANT_P == 5
+			PRINT …っ…！
+		ELSEIF PANT_P == 6
+			PRINT あぉ…っ、
+		ELSEIF PANT_P == 7
+			PRINT んく…っ、
+		ELSEIF PANT_P == 8
+			PRINT ぐぅ…
+		ELSEIF PANT_P  ==  9
+			PRINT むぅぅ…！
+		ENDIF
+	;マゾ持ちかマゾッ気3以上ありか、LV3以上の快感あり
+	ELSEIF TALENT:マゾ || ABL:マゾっ気 > 2 || PANT_C >= 5
+		IF PANT_P == 0
+			PRINT ああ！
+		ELSEIF PANT_P == 1
+			PRINT ひいッ、
+		ELSEIF PANT_P == 2
+			PRINT い…っ、
+		ELSEIF PANT_P == 3
+			PRINT ぁっん…！
+		ELSEIF PANT_P == 4 && ACTIVECOM(SELECTCOM) < 4
+			PRINT やめっ、
+		ELSEIF PANT_P == 5
+			PRINT ぁああっ…
+		ELSEIF PANT_P == 6
+			PRINT ひっ、
+		ELSEIF PANT_P == 7
+			PRINT んあっ…、
+		ELSEIF PANT_P == 8
+			PRINT あっ…ぁあ…っ、
+		ELSEIF PANT_P == 9
+			;陥落前
+			IF (PANT_A == 1 || PANT_A == 2 || PANT_A == 3 || PANT_A == 4 || PANT_A == 6) && (!TALENT:恋慕 && !TALENT:淫乱 && !TALENT:服従 && !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属)
+				PRINT なんでっ、感じ…っ、
+			ELSEIF PANT_A == 5 && (!TALENT:恋慕 && !TALENT:淫乱 && !TALENT:服従 && !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属)
+				PRINT なんで、えいなが…
+			ELSEIF PANT_A == 7 && (!TALENT:恋慕 && !TALENT:淫乱 && !TALENT:服従 && !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属)
+				PRINT なんでええのぉ…？
+			ELSEIF PANT_A == 8 && (!TALENT:恋慕 && !TALENT:淫乱 && !TALENT:服従 && !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属)
+				PRINT なしてよかん…っ
+			ELSE
+				PRINT く…ぁっ…、
+			ENDIF
+		ELSE
+			PRINT ああ！
+		ENDIF
+	;普通の人
+	ELSE
+		IF PANT_P == 0
+			PRINT ああ！
+		ELSEIF PANT_P == 1
+			PRINT ひいッ、
+		ELSEIF PANT_P == 2
+			PRINT い…っ、
+		ELSEIF PANT_P == 3
+			PRINT やぁっ…！
+		ELSEIF PANT_P == 4 && ACTIVECOM(SELECTCOM) < 4
+			PRINT やめっ、
+		ELSEIF PANT_P == 5
+			PRINT ぐ…
+		ELSEIF PANT_P == 6
+			PRINT うぐ…っ、
+		ELSEIF PANT_P == 7
+			PRINT くぅ…っ…
+		ELSEIF PANT_P == 8 && ACTIVECOM(SELECTCOM) < 4
+			SIF PANT_A == 1 || PANT_A == 2
+				PRINT やめっ…！
+			SIF PANT_A == 3 || PANT_A == 4
+				PRINT いや…
+			SIF PANT_A == 5
+				PRINT も…っ、やめ…っ、
+			SIF PANT_A == 6
+				PRINT くそッ…、
+			SIF PANT_A == 7
+				PRINT も…っ、せんで…っ、
+			SIF PANT_A == 8
+				PRINT ちゃしてとってくれ…
+		ELSEIF PANT_P == 9 && ACTIVECOM(SELECTCOM) < 4
+			SIF PANT_A == 1 || PANT_A == 6
+				PRINT …っ…ふ…ざけ……、
+			SIF PANT_A == 2 || PANT_A == 3 || PANT_A == 4
+				PRINT ダメ…っ、
+			SIF PANT_A == 5
+				PRINT いかん…っ
+			SIF PANT_A == 7
+				PRINT 嫌やぁ―っ、
+			SIF PANT_A == 8
+				PRINT 嫌ばいっ
+		ELSE
+			PRINT ああ！
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;締め
+PANT_P = RAND:3
+	;ボールギャグか触手口虐中
+	IF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+		IF PANT_P == 0
+			PRINT …んんっ！
+		ELSEIF PANT_P == 1
+			PRINT …ぅ…
+		ELSEIF PANT_P == 2
+			PRINT …ん…ぁぅ…
+		ENDIF
+	;マゾ持ちかマゾッ気あり、LV3以上の快感あり
+	ELSEIF TALENT:マゾ || ABL:マゾっ気 > 2 || PANT_C >= 5
+		IF PANT_P == 0
+			PRINT やああっんっ
+		ELSEIF PANT_P == 1
+			PRINT …ぅう、あ…
+		ELSEIF PANT_P == 2
+			PRINT んっ、あぅ…
+		ENDIF
+	;普通の人
+	ELSE
+		IF PANT_P == 0
+			PRINT …ぅう、あ…
+		ELSEIF PANT_P == 1
+			PRINT あ……あ………
+		ELSEIF PANT_P == 2
+			PRINT ひいぃっ！
+		ENDIF
+	ENDIF
+PRINTW 」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;快感LV4
+;----------------------------------------------------------------------
+@PANT_VOICE_D
+;PANT_A = 口調（1=雑、2=標準、3=柔、4=敬語、5=関西）
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;ボールギャグか触手口虐中
+	IF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+		IF PANT_P == 0
+			PRINT んん――――！
+		ELSEIF PANT_P == 1
+			PRINT む―――！
+		ELSEIF PANT_P == 2
+			PRINT あうっ…、
+		ELSEIF PANT_P == 3
+			PRINT んうう！
+		ELSEIF PANT_P == 4
+			PRINT ふうぅっ、
+		ELSEIF PANT_P == 5
+			PRINT んおっ、
+		ELSEIF PANT_P == 6
+			PRINT あぉ…っ！
+		ELSEIF PANT_P == 7
+			PRINT んく…っ、
+		ELSEIF PANT_P == 8
+			PRINT んんんっ、
+		ELSEIF PANT_P  ==  9
+			PRINT あううぅ！
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			PRINT ひぃあああっ、
+		ELSEIF PANT_P == 1
+			PRINT あああっ！
+		ELSEIF PANT_P == 2
+			PRINT んっ…ああっ、
+		ELSEIF PANT_P == 3
+			PRINT イ…くぅっ、
+		ELSEIF PANT_P == 4
+			PRINT イくっ、イくぅ――…！！
+		ELSEIF PANT_P == 5
+			IF PANT_A == 1 || PANT_A == 6
+				PRINT 死…ぬぅ…っ
+			ELSEIF PANT_A == 5
+				PRINT 死ぬる…っ
+			ELSEIF PANT_A == 7
+				PRINT 死んでまぅ…
+			ELSEIF PANT_A == 8
+				PRINT 死んやう…
+			ELSE
+				PRINT 死んじゃ…っ、
+			ENDIF
+		ELSEIF PANT_P == 6 && ACTIVECOM(SELECTCOM) < 4
+			;淫語モード
+			IF PANT_E & 4
+				SELECTCASE RAND:8
+				CASE 0
+					PRINTFORM 気持ちいぃっ、気持ちいぃのぉっ%UNICODE(0x2661)%
+				CASE 1
+					PRINTFORM ぐちゃぐちゃにされて
+				CASE 2
+					PRINTFORM 気持ちいいこといっぱいで
+				CASE 3
+					PRINTFORM あちこちいじめられて
+				CASE 4
+					PRINTFORM 全部きもちいぃっ%UNICODE(0x2661)%
+				CASE 5
+					PRINTFORM 全部、ぜんぶいいっ%UNICODE(0x2661)%　ぜんぶいいのぉっ%UNICODE(0x2661)%
+				CASE 6
+					PRINTFORM 気持ちよすぎてバカになっちゃうぅぅ%UNICODE(0x2661)%
+				CASEELSE
+					PRINTFORM ぜんぶいいっ%UNICODE(0x2661)%　全身きもちいいっ%UNICODE(0x2661)%
+					ENDSELECT
+				;胸弄られてる
+				IF PANT_D & 16384
+					SELECTCASE RAND:18
+					CASE 0
+						PRINTFORM ちくびいじられて
+					CASE 1
+						PRINTFORM おっぱいいじられて
+					CASE 2
+						PRINTFORM ちくびいじめられて
+					CASE 3
+						PRINTFORM おっぱいいじめられて
+					CASE 4
+						PRINTFORM ちくび気持ちぃぃ%UNICODE(0x2661)%
+					CASE 5
+						PRINTFORM おっぱい気持ちいぃぃ%UNICODE(0x2661)%
+					CASE 6
+						PRINTFORM ちくび気持ちいぃのらめぇぇ%UNICODE(0x2661)%
+					CASE 7
+						PRINTFORM おっぱいもうらめぇぇ%UNICODE(0x2661)%
+					CASE 8
+						PRINTFORM おっぱい気持ちいぃのらめぇぇぇぇ%UNICODE(0x2661)%
+					CASE 9
+						PRINTFORM ちくびもうらめぇぇ%UNICODE(0x2661)%
+					CASE 10
+						PRINTFORM おっぱいいじめるのらめぇぇ%UNICODE(0x2661)%
+					CASE 11
+						PRINTFORM ちくびいじめるのらめぇぇ%UNICODE(0x2661)%
+					CASE 12
+						PRINTFORM ちくびでいくっ%UNICODE(0x2661)%いっちゃうぅぅ%UNICODE(0x2661)%
+					CASE 13
+						PRINTFORM ちくびがおかしくなるぅぅぅっ%UNICODE(0x2661)%
+					CASE 14
+						PRINTFORM おっぱいおかしくなるぅぅぅっ%UNICODE(0x2661)%
+					CASE 15
+						PRINTFORM おっぱいでいくっ%UNICODE(0x2661)%いっちゃうぅぅ%UNICODE(0x2661)%
+					CASE 16
+						PRINTFORM ちくび感じすぎるのぉぉ%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM おっぱい感じすぎるのぉぉぉ%UNICODE(0x2661)%
+					ENDSELECT
+				;Ａを弄られてる
+				ELSEIF PANT_D & 65536
+					SELECTCASE RAND:25
+					CASE 0
+						PRINTFORM けつまんこいじられて
+					CASE 1
+						PRINTFORM おしりいじられて
+					CASE 2
+						PRINTFORM おしりほじほじされて
+					CASE 3
+						PRINTFORM けつまんこぐちゅぐちゅされて
+					CASE 4
+						PRINTFORM けつまんこいじめられて
+					CASE 5
+						PRINTFORM オスまんこいじめられて
+					CASE 6
+						PRINTFORM おしりなのに感じるぅ%UNICODE(0x2661)%
+					CASE 7
+						PRINTFORM けつまんこ気持ちいぃぃ%UNICODE(0x2661)%
+					CASE 8
+						PRINTFORM おしりぐちゃぐちゃだよぉ%UNICODE(0x2661)%
+					CASE 9
+						PRINTFORM けつまんこいっぱいして%UNICODE(0x2661)%
+					CASE 10
+						PRINTFORM おしりがおまんこになっちゃうぅぅ%UNICODE(0x2661)%
+					CASE 11
+						PRINTFORM おしりっ、おしりもうっ、おまんこにゃるのぉぉ%UNICODE(0x2661)%
+					CASE 12
+						PRINTFORM おしりぐちゅぐちゅしゅごいのぉぉ%UNICODE(0x2661)%
+					CASE 13
+						PRINTFORM けつまんこ感じすぎるのぉぉ%UNICODE(0x2661)%
+					CASE 14
+						PRINTFORM おしりっ%UNICODE(0x2661)%おしりじゅぽじゅぽってぇ%UNICODE(0x2661)%
+					CASE 15
+						PRINTFORM けつまんこじゅぽじゅぽいいっ%UNICODE(0x2661)%
+					CASE 16
+						PRINTFORM けつまんこ%UNICODE(0x2661)%まんこ%UNICODE(0x2661)%もうおまんこなのぉぉ%UNICODE(0x2661)%
+					CASE 17
+						PRINTFORM おしりじゅぽじゅぽしゅごいいっ%UNICODE(0x2661)%
+					CASE 18
+						PRINTFORM おしりの奥まで入ってるぅっ%UNICODE(0x2661)%
+					CASE 19
+						PRINTFORM けつまんこ壊れちゃうぅぅぅ%UNICODE(0x2661)%
+					CASE 20
+						PRINTFORM けつまんこの奥まできてるぅぅ%UNICODE(0x2661)%
+					CASE 21
+						PRINTFORM おしりがっ%UNICODE(0x2661)%おしりが壊れちゃうぅぅっ%UNICODE(0x2661)%
+					CASE 22
+						PRINTFORM おしりがっ%UNICODE(0x2661)%おしりがぁぁっ%UNICODE(0x2661)%
+					CASE 23
+						PRINTFORM おしりっ%UNICODE(0x2661)%女の子にされてるぅぅっ%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM けちゅまんこ%UNICODE(0x2661)%女の子にされてるぅ%UNICODE(0x2661)%
+					ENDSELECT
+				ENDIF
+				;ペニスあり
+				IF PENIS(TARGET) && (PANT_D & 32768)
+					SELECTCASE RAND:6
+					CASE 0
+						PRINT おちんぽ
+					CASE 1
+						PRINT クリちんぽ
+					CASE 2
+						PRINT はしたないおちんぽ
+					CASE 3
+						PRINT いやらしいおちんぽ
+					CASE 4
+						PRINT メスちんぽ
+					CASEELSE
+						PRINT 役立たずのおちんぽ
+					ENDSELECT
+					;膣もある
+					IF TALENT:半陰半陽 || TALENT:ふたなり
+					SELECTCASE RAND:6
+					CASE 0
+						PRINTFORM とおまんこからえっちなお汁でるうう%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 1
+						PRINTFORM とおまんこからお汁でちゃうぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 2
+						PRINTFORM とおまんこがお潮ふいちゃうぅぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM とおまんこからお汁もれちゃうぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM とおまんこからぴゅっぴゅするぅぅぅう%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM からみるくでちゃうぅぅぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%おまんこもイっちゃうぅぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					ENDSELECT
+					ELSE
+					SELECTCASE RAND:6
+					CASE 0
+						PRINTFORM からえっちなお汁でるうう%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 1
+						PRINTFORM からお汁でちゃうぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 2
+						PRINTFORM がお潮ふいちゃうぅぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM 汁もれちゃうぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM ぴゅっぴゅするぅぅぅう%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM からみるくでちゃうぅぅぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					ENDSELECT
+					ENDIF
+				;ペニスなし
+				ELSE
+					SELECTCASE RAND:2
+					CASE 0
+						PRINTFORM おまんこからお汁でちゃうぅぅうう！
+					CASEELSE
+						PRINTFORM お潮でちゃうぅぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					ENDSELECT
+				ENDIF
+			;みさくら語モード
+			ELSEIF (PANT_E & 2) != 0
+				SELECTCASE RAND:20
+					CASE 0
+						PRINTFORM らめぇっ、
+					CASE 1
+						PRINTFORM …んああああ！
+					CASE 2
+						PRINTFORM んおぉぉぉぉっ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM ひぃぃぃぃん！！
+					CASE 4
+						PRINTFORM やらぁぁぁぁぁぁ%UNICODE(0x2661)%
+					CASE 5
+						PRINTFORM んほぉぉっ%UNICODE(0x2661)%
+					CASE 6
+						PRINTFORM きもぢいぃﾞーっ%UNICODE(0x2661)%
+					CASE 7
+						PRINTFORM ぴぎゃあぁ！！
+					CASE 8
+						PRINTFORM あへぇぇぇっ%UNICODE(0x2661)%
+					CASE 9
+						PRINTFORM いいいいいっ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 10
+						PRINTFORM だめぇっ%UNICODE(0x2661)%ダメえへええぇぇえぇっ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 11
+						PRINTFORM らめっ%UNICODE(0x2661)%らめっ%UNICODE(0x2661)%らめぇえぇぇぇっ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 12
+						PRINTFORM もおいぐぅ%UNICODE(0x2661)%
+					CASE 13
+						PRINTFORM いぐっ、いぐぅぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 14
+						PRINTFORM いってりゅ%UNICODE(0x2661)%もぉいってゅぅぅうぅ%UNICODE(0x2661)%
+					CASE 15
+						PRINTFORM アクメぇ%UNICODE(0x2661)%%UNICODE(0x2661)%アクメしゅりゅぅぅぅう%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 16
+						PRINTFORM イクぅぅっ%UNICODE(0x2661)%イクイクイクイクイクっ%UNICODE(0x2661)%UNICODE(0x2661)%UNICODE(0x2661)%
+					CASE 17
+						PRINTFORM もおイクぅぅぅっ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 18
+						PRINTFORM くほぉぉぉぉっ%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM んほぉぉぉぉっ！！
+					ENDSELECT
+			ELSE
+				PRINT …んああああ！
+			ENDIF
+		ELSEIF PANT_P == 7
+			PRINT ひぃっ、
+		ELSEIF PANT_P == 8 && ACTIVECOM(SELECTCOM) < 4
+			;陥落前
+			IF (PANT_A == 1 || PANT_A == 2 || PANT_A == 3 || PANT_A == 4 || PANT_A == 6) && (!TALENT:恋慕 && !TALENT:淫乱 && !TALENT:服従 && !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属)
+				PRINT いやだあああっ！
+			ELSEIF (PANT_A == 5) && (!TALENT:恋慕 && !TALENT:淫乱 && !TALENT:服従 && !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属)
+				PRINT 嫌じゃあああっ！
+			ELSEIF (PANT_A == 7) && (!TALENT:恋慕 && !TALENT:淫乱 && !TALENT:服従 && !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属)
+				PRINT 嫌やあああっ！
+			ELSEIF (PANT_A == 8) && (!TALENT:恋慕 && !TALENT:淫乱 && !TALENT:服従 && !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属)
+				PRINT 嫌ったいっ！
+			;淫語モード
+			ELSEIF PANT_E & 4
+				;胸弄られてる
+				IF PANT_D & 16384
+					SELECTCASE RAND:8
+					CASE 0
+						PRINTFORM ちくびへんになるぅぅ！！
+					CASE 1
+						PRINTFORM おっぱいへんになるぅぅ！！
+					CASE 2
+						PRINTFORM ちくびいいのぉぉ%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM おっぱいいいのぉぉ%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM おっぱいでいっちゃうぅぅ%UNICODE(0x2661)%
+					CASE 5
+						PRINTFORM ちくびでいっちゃうぅぅ%UNICODE(0x2661)%
+					CASE 6
+						PRINTFORM ちくびしゅごいよぉぉっ%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM おっぱいしゅごいよぉぉっ%UNICODE(0x2661)%
+					ENDSELECT
+				;ペニス持ちでＣを弄られてる
+				ELSEIF PENIS(TARGET) && (PANT_D & 32768)
+					SELECTCASE RAND:8
+					CASE 0
+						PRINTFORM おちんぽからせーえき出るぅっ！
+					CASE 1
+						PRINTFORM おちんぽぴゅっぴゅってしちゃぅぅっ！！
+					CASE 2
+						PRINTFORM おちんぽみるくでちゃうぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM おちんぽからお汁もれちゃうぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM くりちんぽ壊れるぅぅぅっ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 5
+						PRINTFORM おちんぽ壊れるぅぅぅっ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 6
+						PRINTFORM おちんぽしゅごいよぉぉぉっ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM お潮でちゃうぅぅぅぅ%UNICODE(0x2661)%
+					ENDSELECT
+				;ペニスなしでＣを弄られてる
+				ELSEIF PANT_D & 32768
+					SELECTCASE RAND:7
+					CASE 0
+						PRINTFORM クリ感じすぎちゃっ…んああ！
+					CASE 1
+						PRINTFORM えっちなお豆いじられていくぅぅ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 2
+						PRINTFORM クリいじっちゃやぁぁ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM えっちなお豆くにゅくにゅしないでぇぇ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM クリトリス壊れるぅぅぅっ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 5
+						PRINTFORM えっちなお豆さんいいのぉぉ%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM クリいじられたらお潮でちゃうぅぅぅぅ%UNICODE(0x2661)%
+					ENDSELECT
+				;Ａを弄られてる
+				ELSEIF PANT_D & 65536
+					IF ABL:Ａ感覚 > 4
+						SELECTCASE RAND:8
+						CASE 0
+							PRINTFORM けつまんこぐちゃぐちゃにされてイくぅ！
+						CASE 1
+							PRINTFORM けつまんこ感じすぎりゅからぁぁぁ%UNICODE(0x2661)%%UNICODE(0x2661)%
+						CASE 2
+							PRINTFORM けつまんこすごいのぉぉぉ！！！
+						CASE 3
+							PRINTFORM けつまんこ、いいっ！いいよぉぉっ%UNICODE(0x2661)%%UNICODE(0x2661)%
+						CASE 4
+							PRINTFORM おしり壊れるぅ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+						CASE 5
+							PRINTFORM おしりまんこ壊れるぅ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+						CASE 6
+							PRINTFORM おしりぐちゃぐちゃなのぉ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+						CASEELSE
+							PRINTFORM けつまんこぐちゃぐちゃになるぅ%UNICODE(0x2661)%
+						ENDSELECT
+					ENDIF
+				;Ｖを弄られてる
+				ELSEIF PANT_D & 131072
+					SELECTCASE RAND:6
+					CASE 0
+						PRINTFORM おまんこいいぃいぃぃ！
+					CASE 1
+						PRINTFORM おまんこっ%UNICODE(0x2661)%おまんこぉぉ%UNICODE(0x2661)%%UNICODE(0x2661)%気持ちよすぎりゅぅぅぅ！！！
+					CASE 2
+						PRINTFORM おまんこ、壊れるっ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM おまんこがぁぁッ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM 気持ちよすぎぃ%UNICODE(0x2661)%おまんこ壊れるぅ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM おまんこぐちゃぐちゃなのぉぉ%UNICODE(0x2661)%
+					ENDSELECT
+				;一応保険
+				ELSE
+					PRINT あああ…っ、
+				ENDIF
+			ELSE
+				PRINT あああ…っ、
+			ENDIF
+		ELSEIF PANT_P == 9
+			SIF PANT_A == 1 || PANT_A == 2
+				PRINT あたまがっ…変になるっ…
+			SIF PANT_A == 3 || PANT_A == 4
+				PRINT 壊れちゃ…っ、
+			SIF PANT_A == 5
+				PRINT わらくる…っ
+			SIF PANT_A == 6
+				PRINT こんな…嘘だろ…ッ
+			SIF PANT_A == 7
+				PRINT あかん…っ、あかんてぇ…
+			SIF PANT_A == 8
+				PRINT 嫌ばい、えずかちゃー…
+		ELSE
+			PRINT ひぃあああっ、
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;締め
+PANT_P = RAND:3
+	;ボールギャグか触手口虐中
+	IF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+		IF PANT_P == 0
+			PRINT んう――――！
+		ELSEIF PANT_P == 1
+			PRINT んあっぁあああ！
+		ELSEIF PANT_P == 2
+			PRINT ああ――――！
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			IF (E & 2) != 0
+				PRINT らめぇぇええ！！
+			ELSE
+				PRINT …ッッッ！！！
+			ENDIF
+		ELSEIF PANT_P == 1
+			PRINT ひぃ―――っ！！！
+		ELSEIF PANT_P == 2
+			PRINT あああぁっぁぁぁ！！！
+		ENDIF
+	ENDIF
+PRINTW 」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;快感LV3
+;----------------------------------------------------------------------
+@PANT_VOICE_E
+;PANT_A = 口調（1=雑、2=標準、3=柔、4=敬語、5=関西）
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;ボールギャグか触手口虐中
+	IF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+		IF PANT_P == 0
+			PRINT ん―！
+		ELSEIF PANT_P == 1
+			PRINT ふぅっ…！
+		ELSEIF PANT_P == 2
+			PRINT んおっ…
+		ELSEIF PANT_P == 3
+			PRINT ぅっ…
+		ELSEIF PANT_P == 4
+			PRINT くぅっ、
+		ELSEIF PANT_P == 5
+			PRINT んんっ！
+		ELSEIF PANT_P == 6
+			PRINT あぅ…っ、
+		ELSEIF PANT_P == 7
+			PRINT んく…っ、
+		ELSEIF PANT_P == 8
+			PRINT ふっ…あっ、
+		ELSEIF PANT_P  ==  9
+			PRINT あうぅ！
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			PRINT や…っ、
+		ELSEIF PANT_P == 1
+			PRINT あっ、あっ、
+		ELSEIF PANT_P == 2
+			PRINT ふあ、ひ…っ、
+		ELSEIF PANT_P == 3
+			PRINT あひ、ぃっ、
+		ELSEIF PANT_P == 4
+			PRINT ひぁっ…
+		ELSEIF PANT_P == 5
+			PRINT もっ…
+		ELSEIF PANT_P == 6
+			PRINT やああっ…！
+		ELSEIF PANT_P == 7
+			PRINT あーっ！
+		ELSEIF PANT_P == 8
+				PRINT んっ、んーっ…
+		ELSEIF PANT_P == 9 && ACTIVECOM(SELECTCOM) < 4
+			;反発刻印１以上
+			IF (PANT_D & 14) != 0
+				IF PANT_A == 1
+					PRINT 嫌だぁっ、
+				ELSEIF PANT_A == 2 || PANT_A == 3
+					PRINT だめっ、だめぇ…っ、
+				ELSEIF PANT_A == 4
+					PRINT もう無理ですっ、
+				ELSEIF PANT_A == 5
+					PRINT も、無理やき…っ
+				ELSEIF PANT_A == 6
+					PRINT やめろっ、
+				ELSEIF PANT_A == 7
+					PRINT あかんよぉっ、
+				ELSEIF PANT_A == 8
+					PRINT もう、いかんたいっ
+				ENDIF
+			;淫語モード
+			ELSEIF PANT_E & 4
+				;胸弄られてる
+				IF PANT_D & 16384
+					SELECTCASE RAND:6
+					CASE 0
+						PRINT おっぱいだめぇ……っ
+					CASE 1
+						PRINT おっぱいいじめられるぅ
+					CASE 2
+						PRINT おっぱいいいのぉっ
+					CASE 3
+						PRINT ちくびいいのぉっ
+					CASE 4
+						PRINT ちくび感じちゃうっ
+					CASEELSE
+						PRINT ちくびコリコリいいっ、
+					ENDSELECT
+				;ペニス持ちでＣを弄られてる
+				ELSEIF PENIS(TARGET) && (PANT_D & 32768)
+					SIF PANT_A == 2 || PANT_A == 3 || PANT_A == 4 || PANT_A ==5
+						PRINT お
+					PRINT ちんぽ汁出るぅっ、
+				;ペニスなしでＣを弄られてる
+				ELSEIF PANT_D & 32768
+					PRINT クリきもちいいっ、
+				;Ａを弄られてる
+				ELSEIF PANT_D & 65536
+					SELECTCASE RAND:6
+					CASE 0
+						PRINT けつまんこがぁ…っ
+					CASE 1
+						PRINT おしりがぁ……っ
+					CASE 2
+						PRINT おしりやぁっ……
+					CASE 3
+						PRINT けつまんこやぁ……っ
+					CASE 4
+						PRINT けつまんこいぃのぉっ、
+					CASEELSE
+						PRINT おしりいじられてるぅ……っ
+					ENDSELECT
+				;Ｖを弄られてる
+				ELSEIF PANT_D & 131072
+					SELECTCASE RAND:6
+					CASE 0
+						PRINT おまんこいいっ
+					CASE 1
+						PRINT おまんこがぁ……っ
+					CASE 2
+						PRINT おまんこいいのぉっ
+					CASE 3
+						PRINT おまんこいじられて……っ
+					CASE 4
+						PRINT やぁ、おまんこ感じちゃうっ
+					CASEELSE
+						PRINT 男なのに、おまんこ、いいっ
+					ENDSELECT
+				;一応保険
+				ELSE
+					PRINT ひぃっ、
+				ENDIF
+			ELSE
+				PRINT ひいっ、
+			ENDIF
+		ELSE
+			PRINT や…っ、
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;締め
+PANT_P = RAND:3
+	;ボールギャグか触手口虐中
+	IF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+		IF PANT_P == 0
+			PRINT んあぁ――！
+		ELSEIF PANT_P == 1
+			PRINT む――！
+		ELSEIF PANT_P == 2
+			PRINT ふあぁ――！
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			PRINT ぁあああ―っ！
+		ELSEIF PANT_P == 1
+			PRINT …っく――！！
+		ELSEIF PANT_P == 2
+			PRINT ああっ
+		ENDIF
+	ENDIF
+PRINTW 」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;快感LV2
+;----------------------------------------------------------------------
+@PANT_VOICE_F
+;PANT_A = 口調（1=雑、2=標準、3=柔、4=敬語、5=関西）
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;ボールギャグか触手口虐中
+	IF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+		IF PANT_P == 0
+			PRINT んんっ…
+		ELSEIF PANT_P == 1
+			PRINT ふぅっ…
+		ELSEIF PANT_P == 2
+			PRINT っ…、
+		ELSEIF PANT_P == 3
+			PRINT ぅあ…
+		ELSEIF PANT_P == 4
+			PRINT ふっ…ぅ、
+		ELSEIF PANT_P == 5
+			PRINT んっ、
+		ELSEIF PANT_P == 6
+			PRINT あ…っ、
+		ELSEIF PANT_P == 7
+			PRINT くぅ…
+		ELSEIF PANT_P == 8
+			PRINT ふっ…あっ、
+		ELSEIF PANT_P  ==  9
+			PRINT ぁあ…
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			PRINT ふっ…
+		ELSEIF PANT_P == 1
+			PRINT んあっ、
+		ELSEIF PANT_P == 2
+			PRINT んんっ…
+		ELSEIF PANT_P == 3
+			;淫語モード
+			IF (PANT_E & 4) && ACTIVECOM(SELECTCOM) < 4
+				;胸弄られてる
+				IF PANT_D & 16384
+					PRINT 胸いい…っ
+				;ペニス持ちでＣを弄られてる
+				ELSEIF PENIS(TARGET) && (PANT_D & 32768)
+					PRINT おちんぽどくどくする…
+				;ペニスなしでＣを弄られてる
+				ELSEIF PANT_D & 32768
+					PRINT もっとそこくりくりして
+					SIF PANT_A == 1 || PANT_A == 6
+						PRINT くれぇ…、
+					SIF PANT_A == 2 || PANT_A == 3 || PANT_A ==5
+						PRINT ぇ…
+					SIF PANT_A == 4
+						PRINT くださ…っ、
+				;Ａを弄られてる
+				ELSEIF PANT_D & 65536
+					PRINT けつまんこいい…っ
+				;Ｖを弄られてる
+				ELSEIF PANT_D & 131072
+					PRINT おまんこ汁出
+					SIF PANT_A == 1
+						PRINT るぅ…、
+					SIF PANT_A == 2 || PANT_A == 3 || PANT_A ==5
+						PRINT るよぉ…
+					SIF PANT_A == 4
+						PRINT ちゃいます…っ、
+					SIF PANT_A == 6
+						PRINT てしまう…っ、
+				;一応保険
+				ELSE
+					PRINT あっ、あ…っ、
+				ENDIF
+			ELSE
+				PRINT あっ、あ…っ、
+			ENDIF
+		ELSEIF PANT_P == 4
+			PRINT はぁ…んっ…
+		ELSEIF PANT_P == 5
+			PRINT …ぁあっ、
+		ELSEIF PANT_P == 6
+			PRINT ん…
+		ELSEIF PANT_P == 7
+			PRINT …ん、ぅ、
+		ELSEIF PANT_P == 8
+			;陥落前でAで感じるまたは男でBで感じる
+			IF ((PANT_D & 65536) != 0 || (PANT_D & 33570816) != 0) && (!TALENT:恋慕 && !TALENT:淫乱 && !TALENT:服従 && !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属)
+				SIF PANT_A == 1
+					PRINT うそだ…っ、
+				SIF PANT_A == 2 || PANT_A == 3 || PANT_A == 8
+					PRINT なん、で…っ？
+				SIF PANT_A == 4 || PANT_A == 6
+					PRINT …嘘……、
+				SIF PANT_A == 5
+					PRINT なん、が…っ
+				SIF PANT_A == 7
+					PRINT 嘘や、ん…っ
+				SIF PANT_A == 8
+					PRINT なして、こぎゃんこつっ
+			ELSE
+				PRINT いっ…
+			ENDIF
+		;淫乱系陥落
+		ELSEIF PANT_P == 9 && (PANT_D & 2304) != 0
+			SIF PANT_A == 1 || PANT_A == 2 || PANT_A == 3 || PANT_A == 4 || PANT_A == 6
+				PRINT いい、っ…
+			SIF PANT_A == 5
+				PRINT えい、よぉ…っ、
+			SIF PANT_A == 7
+				PRINT ええ…っ、
+			SIF PANT_A == 8
+				PRINT 気持ちよか…っ、
+		;反発刻印が１以上ある
+		ELSEIF PANT_P == 9 && (PANT_D & 14) != 0 && ACTIVECOM(SELECTCOM) < 4
+			SIF PANT_A == 1
+				PRINT くそ…っ、
+			SIF PANT_A == 2
+				PRINT ヤダっ…
+			SIF PANT_A == 3
+				PRINT だめ、ぇっ…っ、
+			SIF PANT_A == 4
+				PRINT やめ…てくださ…っ、
+			SIF PANT_A == 5
+				PRINT やが…っ、
+			SIF PANT_A == 6
+				PRINT 離せ…っ、
+			SIF PANT_A == 7
+				PRINT 嫌や…っ、
+			SIF PANT_A == 8
+				PRINT やめ…っ、
+		ELSEIF PANT_P == 9
+			PRINT っあ…！
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;締め
+PANT_P = RAND:3
+	IF PANT_P == 0
+		PRINT んっ
+	ELSEIF PANT_P == 1
+		PRINT あ…っ！
+	ELSEIF PANT_P == 2
+		PRINT あっ、ん
+	ENDIF
+PRINTW 」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;弱快感
+;----------------------------------------------------------------------
+@PANT_VOICE_G
+;PANT_A = 口調（1=雑、2=標準、3=柔、4=敬語、5=関西）
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	IF PANT_P == 0
+		PRINT ……
+	ELSEIF PANT_P == 1
+		PRINT …ん、
+	ELSEIF PANT_P == 2
+		PRINT あ…
+	ELSEIF PANT_P == 3
+		PRINT んっ、
+	ELSEIF PANT_P == 4
+		PRINT ……ふぁ、
+	ELSEIF PANT_P == 5
+		PRINT んん…、
+	ELSEIF PANT_P == 6
+		PRINT んぁ…、
+	ELSEIF PANT_P == 7
+		PRINT …っ……
+	ELSEIF PANT_P == 8
+		PRINT ……ぁ…、
+	ELSEIF PANT_P == 9
+		;ボールギャグか触手口虐中
+		IF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+			PRINT ん…
+		;反発刻印１以上
+		ELSEIF (PANT_D & 14) != 0 && ACTIVECOM(SELECTCOM) < 4
+			SIF PANT_A == 1
+				PRINT やめろっ！
+			SIF PANT_A == 2
+				PRINT やめ…っ、
+			SIF PANT_A == 3
+				PRINT ヤダ…っ、
+			SIF PANT_A == 4
+				PRINT 触らないでください…
+			SIF PANT_A == 5
+				PRINT 離しとぉせ…
+			SIF PANT_A == 6
+				PRINT 離せ！
+			SIF PANT_A == 7
+				PRINT 触んなや…
+			SIF PANT_A == 8
+				PRINT やめてくれんね！
+		;淫乱か娼婦
+		ELSEIF (PANT_D & 2304) != 0 && ACTIVECOM(SELECTCOM) < 4
+			SIF PANT_A == 1 || PANT_A == 2
+				PRINT そこ…、じゃなくて…っ、
+			SIF PANT_A == 3 || PANT_A == 4
+				PRINT もっと…ぁ、
+			SIF PANT_A == 5
+				PRINT …そこや、ないきに……、
+			SIF PANT_A == 6
+				PRINT ……違う…、
+			SIF PANT_A == 7
+				PRINT しょこや、なくて…っ
+			SIF PANT_A == 8
+				PRINT しょこつちごうとる…
+		ELSE
+			PRINT …は……、
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;締め
+PANT_P = RAND:3
+	IF PANT_P == 0
+		PRINT …っ
+	ELSEIF PANT_P == 1
+		PRINT んっ
+	ELSEIF PANT_P == 2
+		PRINT …ぁ
+	ENDIF
+PRINTW 」
+
+RETURN 0
+

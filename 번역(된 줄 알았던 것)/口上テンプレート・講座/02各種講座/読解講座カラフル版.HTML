@@ -1,0 +1,1346 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title></title>
+<meta content="text/html; charset=shift_jis" http-equiv="Content-Type">
+<style type="text/css">TD {
+	LINE-HEIGHT: 200%; FONT-FAMILY: Verdana; COLOR: #555555
+}
+BODY {
+	Z-INDEX: 0; LINE-HEIGHT: 140%; FONT-FAMILY: Verdana; COLOR: #555555; MARGIN-LEFT: 50px; MARGIN-RIGHT: 50px; ffffff: 
+}
+RT {
+	FONT-SIZE: 6pt
+}
+A:link {
+	COLOR: #555555
+}
+A:visited {
+	COLOR: #5bb421
+}
+A:active {
+	COLOR: #ff0000
+}
+A:hover {
+	POSITION: relative; COLOR: #fa0e6c
+}
+</style>
+
+<meta name="GENERATOR" content="MSHTML 8.00.6001.18812"></head>
+<body>
+<p><br>
+<font size="2"><strong>【IF구문 독해 강좌】</strong></font></p>
+<p><font size="2">※구문을 붙어라발 해 나가는 타입의 강좌는 있었지만 깎아 가는 타입은 없는 생각이 들었으므로 만들어 보았습니다. <br>
+　어디까지나 사견에 의한 적당 강좌이므로,실수 따위에 눈치는 적절히 고쳐 받을 수 있으면 다행입니다. <br>
+<strong>※이 텍스트는 그대로 ERB에 카피해 사용할 수 있지 않습니다</strong>(인덴트는 아니고 스페이스를 사용하고 있기 (위해)때문에)<br>
+　검증에 이용할 수 있을 것 같은 개소는,미리 텍스트 에리어를 붙여 두었으므로 그 쪽으로부터 카피해 주세요. <br>
+</font></p>
+<p><font size="2">===================================================</font></p>
+<p><font size="2"><font color="#555555">국화… 왜일까 era에 자세한 이차원 마스터인 할아버지입니다</font><br>
+<font color="#5254ad">알프레드… era의 일은 전혀의 AKY인 애송이입니다</font></font></p>
+<p><font size="2">===================================================<br>
+【목차】<br>
+1. <a href="#1">처음에</a> <br>
+2. <a href="#2">기본의 텐프레 구조</a> <br>
+3. <a href="#3">변수에 의한 표시 제한</a> <br>
+4. <a href="#4">IF-ENDIF의 대응 독해</a> <br>
+5. <a href="#5">IF구문의 조립법</a> <br>
+6. <a href="#6">에러가 나올 때에는</a> <br>
+7. <a href="#7">끝에</a> </font><font size="2"><br>
+<a href="#omake"><font size="2">덤</font></a> <br>
+</font><br>
+<br>
+</p>
+<hr align="left" size="1" width="640">
+<font size="2"><font color="#555555"><a name="1"><font size="2"><font color="#555555"><strong>【1. 처음에】</strong><br>
+</font></font></a> <br>
+「재차 오늘 밤은,혼다국화라고 합니다」</font><br>
+<font color="#5254ad">『어시스턴트는 이 나,세계의 히어로 알프레드로 보내 드린다!』</font></font> 
+<p><font size="2">　　　　</font></p>
+<p><font size="2"><font color="#5254ad">『조속히이지만 국화,구문이라는 의미 모른다!알파벳 가득하지만 영어가 아니고!』</font><br>
+<font color="#555555">「확실히 사용되고 있는 것은 알파벳입니다만,이것은 문장이라고 생각해서는 안됩니다. 도로표식이라고 생각하는 것이 적절한 것으로」</font><br>
+<font color="#5254ad">『도로표식?』</font><br>
+<font color="#555555">「에에,예를 들면……<br>
+</font><textarea rows="3" cols="80">	IF A == 0
+		A가 0입니다
+	ENDIF</textarea><br>
+<font size="2"> <font color="#555555">라고 한다<font color="#fa0e6c"><strong>『IF』~ 『ENDIF』구문</strong></font>과 『여기에서 한쪽 편 1 차선』~ 『여기까지』라고 하는 표지는 닮지 않지 않습니까?」</font></font><br>
+<font color="#5254ad">『응~…… 잘 모르는구나!』</font><br>
+<font color="#555555">「……<strong>『IF』</strong>가<strong><font color="#fa0e6c">『만약~라면』</font></strong>라고 하는 의미가 있는 것은 아는군요?」</font><br>
+<font color="#5254ad">『당연해!네가 사용하고 있는 것도 나의 집의 영어일 것이다!』</font><br>
+<font color="#555555">「그러니까,<strong>『IF』</strong>로부터 시작되는 것은<strong>『만약~라면』통과해야 할 루트</strong>로,그 루트는 반드시<font color="#fa0e6c"><strong>『ENDIF』</strong></font>로 끝납니다」<br>
+</font><font color="#5254ad">『구체적으로 뭔가 보여 주어라』</font><br>
+<font color="#555555">「……………… 그럼,커맨드 0<font color="#555555">「애무」</font>를 예로 할까요」<br>
+<br>
+</p>
+<hr align="left" size="1" width="640">
+</font></font><font size="2"><a name="2"><font size="2"><strong>【2. 기본의 텐프레 구조】</strong></font></a> <br>
+;-------------------------------------------------<br>
+;0,애무<br>
+;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;처음<br>
+　　　　<font color="#ff8811">IF CFLAG:300 == 
+0<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　CFLAG:300 = 
+1<br>
+　　　　;2회째 이후<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;함락이 끝난 상태<br>
+　　　　　　　　<font color="#5bb421">IF 
+(TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) 
+&amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　;연모,친애<br>
+　　　　　　　　　　　　<font color="#24a6b5">IF TALENT:3 
+|| TALENT:6<br>
+</font>　　　　　　　　　　　　　　　　PRINTFORMW 
+<br>
+　　　　　　　　　　　　;음란,창부<br>
+　　　　　　　　　　　　<font color="#24a6b5">ELSEIF TALENT:4 || 
+TALENT:7<br>
+</font>　　　　　　　　　　　　　　　　PRINTFORMW 
+<br>
+　　　　　　　　　　　　;복종,예속<br>
+　　　　　　　　　　　　<font color="#24a6b5">ELSEIF TALENT:5 || 
+TALENT:8<br>
+</font>　　　　　　　　　　　　　　　　PRINTFORMW <br>
+　　　　　　　　　　　　<font color="#24a6b5">ENDIF<br>
+</font>　　　　　　　　　　　　CFLAG:300 = 
+4<br>
+　　　　　　　　;굴복각인Lv3<br>
+　　　　　　　<font color="#5bb421"> ELSEIF MARK:2 == 3 
+&amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)</font><br>
+　　　　　　　　　　　　PRINTFORMW 
+<br>
+　　　　　　　　　　　　CFLAG:300 = 3<br>
+　　　　　　　　;그 이외<br>
+　　　　　　　　<font color="#5bb421">ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 
+2<br>
+</font>　　　　　　　　　　　　PRINTFORMW <br>
+　　　　　　　　　　　　CFLAG:300 = 
+2<br>
+　　　　　　　　<font color="#5bb421">ENDIF</font><br>
+　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c">ENDIF<br>
+</font>;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+;0,애무
+;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;처음
+	IF CFLAG:300 == 0
+		PRINTFORMW 
+		CFLAG:300 = 1
+	;2회째 이후
+	ELSE
+		;함락이 끝난 상태
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 2)
+			;연모,친애
+			IF TALENT:3 || TALENT:6
+				PRINTFORMW 
+			;음란,창부
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+			;복종,예속
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+			ENDIF
+			CFLAG:300 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:300 = 3
+		;그 이외
+		ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea><br>
+<font size="2"><font color="#555555">「이 때,맨 위의<font color="#fa0e6c"><strong>"IF SELECTCOM 
+== 0"</strong></font>이 최초의 조건문입니다」</font><br>
+<font color="#5254ad">『이것은 영단어가 조금 들어가 있기 때문에 안다!<br>
+　SELECT가 선택하는,COM가 커맨드의 약어이니까,<font color="#2972c2"><strong>「만약 선택한 커맨드가 0이라면」</strong></font>라고 말하는 일이구나』</font><br>
+<font color="#555555">「이런,과연 알프레드씨군요. 그럼,<font color="#fa0e6c"><strong>이 IF와 대응하는 ENDIF</strong></font>를 어떤 것인가 압니까?」</font><br>
+<font color="#5254ad">『엣또………… 뭐,뭔가 아래쪽에 3개 정도 있지만』</font><br>
+<font color="#555555">「여기가 수상한 놈이군요. <strong>입상의 IF구문의 상당수는,이렇게 해 상자 방식이 되어 있습니다」</strong></font><br>
+<font color="#5254ad">『이레코………?』</font><br>
+<font color="#555555">「알프레드씨,받은 적 없습니까? 선물의 상자를 열면 또 상자가 있어…… 라고 하는,장난」</font><br>
+<font color="#5254ad">『아아,있는 것이야. 그건 안절부절 하네요!이것이 그런 것인가?』</font><br>
+<font color="#555555">「정확하게는 다릅니다만,<strong>IF로 만든 하나의 상자안에,더욱 IF의 상자가 있다고 하는 개념</strong>은 파악하기 쉬워질까하고. <br>
+　이반씨의 곳의 마트료시카를 상상하는 것도 가까울지도 모릅니다」</font><br>
+<font color="#5254ad">『시,싫은 이름을 내지 말아줘…… 그가 와 버리지 않은가』</font><br>
+<font color="#555555">「뭐,그것은 놓아두어……<br>
+　어쨌든,선물의 상자나 마트료시카와 같이,제일 큰 상자가 외측을 가리고 있습니다. <br>
+　그러니까,<strong><font color="#fa0e6c">맨 위의 IF에 대응할 것은 맨 밑의 ENDIF</font></strong>군요」</font><br>
+<font color="#5254ad">『아,자주(잘) 보면,시작되는 단락도 함께가 아닌가!』</font><br>
+<font color="#555555">「그렇네요. 다른 ENDIF는 문장의 머리에 큰 공백이 있습니다. <br>
+　이것은<strong>"인덴트"</strong>라고 해,구문을 보기 쉽게 하기 위해서 직공씨가 넣어 주고 있는 것입니다. <br>
+　사용의 키보드로 넣을 때는,아마 왼쪽손(분)편에 있는 Tab 키를 이용하면 좋을까. <br>
+　따라서,기본적으로는<font color="#555555"><strong>『세로 일직선에 줄지어 있는 IF-ENDIF가 대가 되어 있다』</strong></font>라고 하는 것입니다」</font></font> 
+
+<p><font size="2"><font color="#5254ad">『응응? 그러면 다른 ENDIF도 어떤 것인가에 대응하는지?』</font><br>
+<font color="#555555">「그럼,위로부터 보고 갑시다. <br>
+　각 관련 wiki등으로 추천 되고 있는 사쿠라 에디터 따위를 가지고 있으면,플래그 부분을 알 수 있기 쉬울 것입니다만……」</font></font></p>
+<p><font size="2"><br>
+</p>
+<hr align="left" size="1" width="640">
+<a name="3"><strong><font size="2">【3. 변수에 의한 표시 제한】</font></strong><br>
+</a> ;-------------------------------------------------<br>
+;0,애무<br>
+;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 
+0　　　　　　　　←만약 커맨드 0 「애무」가 선택되었을 때,라고 하는 조건의 IF</font><br>
+　　　　CALL 
+TRAIN_MESSAGE　　　　←전캐릭터에게 공통되는 기존의 지문을 불러내는 CALL<br>
+　　　　;처음　　　　　　　　　　　　←;에 의해 comment out 되고 있는 설명문<br>
+　　　　<font color="#ff8811">IF CFLAG:300 == 0　　　　←만약 CFLAG:300이 0 
+그러면,이라고 하는 조건의 IF<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 1　　　　←CFLAG:300을 1으로 한다</font><br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+;0,애무
+;-------------------------------------------------
+IF SELECTCOM == 0		←만약 커맨드 0&lt;font color="#8000 ff"&gt; 「애무」&lt;/font&gt;가 선택되었을 때,라고 하는 조건의 IF
+	CALL TRAIN_MESSAGE	←전캐릭터에게 공통되는 기존의 지문을 불러내는 CALL
+	;처음			←;에 의해 comment out 되고 있는 설명문
+	IF CFLAG:300 == 0	←만약 CFLAG:300이 0이라면,이라고 하는 조건의 IF
+		PRINTFORMW 
+		CFLAG:300 = 1	←CFLAG:300을 1으로 한다</textarea> 
+<p><font size="2"><font color="#5254ad">『조,조금 기다려 주어라!원래<font color="#8000ff"><strong>"CFLAG:300"</strong></font>이라는건 뭐야?』</font><br>
+<font color="#555555">「하아,그렇네요…… 변수,정도는 압니까? <br>
+　만약 모르는 것이라면,eratohowiki를 휙 읽어 주시면 기쁜 곳입니다」</font></font></p>
+<p><font size="2">　　　　~알프레드공부중~</font></p>
+<p><font size="2"><font color="#5254ad">『――즉,변수라고 하는 것은<strong>「조작할 수 있다(=바꿀 수 있다) 숫자」</strong>라는 것이구나. <br>
+　그래서,자주(잘) 말하는<strong>「플래그가 섰다」</strong>라고 하는 것의<strong>「플래그」</strong>도 이<strong>「변수」</strong>에 포함되는 것이다』</font><br>
+<font color="#555555">「그런 일입니다. <strong>플래그는,이쪽의 조작으로 온으로 하거나 오프로 하거나가 가능</strong>이니까요. <br>
+　그리고<strong><font color="#ff0000">CFLAG</font></strong>란,<font color="#ff0000">그 캐릭터=조교 대상인 만큼 유효한 플래그</font>라고 하는 일입니다」</font><br>
+<font color="#5254ad">『뭐,뭔가 국화가 조교라든지 말하면 조금 두근두근 하는 것이야……』</font><br>
+<font color="#555555">「이차원이라면 맡겨 주세요. …… 는 아니고,<strong>이 때<font color="#555555">「FLAG」</font>로 잘못알지 않게 주의를. </strong><br>
+　C가 없는 (분)편은,캐릭터 관계 없음의 시스템을 지지하고 있는 플래그입니다」</font><br>
+<br>
+<font color="#5254ad">『그러면,결국<strong>CFLAG:300</strong>이라고 하는 것은……』</font><br>
+<font color="#555555">「<font color="#8000ff">조교중의 캐릭터 특유의 플래그의 300번</font>,라는 것입니다. <br>
+　그것이<strong>0 때만,PRINTFORMW 
+의 계속에 쓰여지는 문장이 표시되는</strong>구조입니다. <br>
+　PRINTFORMW의 바로 아래에서,CFLAG:300에 1이 대입되고 있군요? <br>
+　이것에 의해,<strong><font color="#ff8811">「IF CFLAG:300 == 
+0」</font>으로 시작되는 문장은 이제 두 번 다시 표시되지 않는다……</strong><br>
+　즉,<strong><font color="#555555">「;처음」</font>의 조교로<font color="#555555">「한 번 만」</font>표시되는입상이 되는 것입니다</strong>」</font><br>
+<font color="#5254ad">『어째서 300번인 것이야?』</font><br>
+<font color="#555555">「자,우연히 꼭 좋았기 때문에는? 이 300번은,현재애무전용의 플래그입니다. <br>
+　301번,302번…… 으로<strong>각각의 조교에 특유의 플래그가 있습니다</strong>것으로,<br>
+　함부로 텐프레를 카피하면 귀찮은 것이 되어요」</font><br>
+<font color="#5254ad">『호,정말 귀찮다 이것……』</font><br>
+<font color="#555555">「이것을 쓰고 있는 중의 사람은 너무나 귀찮음쟁이였으므로,이 근처를 어느 정도 카피 가능하게 개조하고 있습니다」</font><br>
+<font color="#5254ad">『에에!? 그런 일 할 수 있는 것인가!?』</font><br>
+<font color="#555555">「터무니없게 힘으로 정직 처리가 늦어질 것 같습니다만,편리함에 이길 수 없어서……<br>
+　흥미가 있는 (분)편은,이 파일의 맨 밑인가,알프레드입상을 참조해 주세요」</font><br>
+<font color="#5254ad">『!? …… 아 아!봐서는 안 되는 것이다!저것은 내가 아니니까!!』</font></font></p>
+<p><font size="2">　　　　~알프레드 어질러 안~</font></p>
+<p><font size="2"><font color="#5254ad">『하아,……… 젠장……』</font><br>
+<font color="#555555">「침착해졌습니까? 그럼,다음으로 옮길까요. <font color="#555555">「;2회째 이후」</font>의 아래를 봐 주세요」</font></font></p>
+<p><br>
+<font size="2">;-------------------------------------------------<br>
+;0,애무<br>
+;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;처음<br>
+　　　　<font color="#ff8811">IF CFLAG:300 == 
+0<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1　　　　←CFLAG:300을 1으로 한다<br>
+</font>　　　　;2회째 이후<br>
+　　　　<font color="#ff8811">ELSE　　　　　　　　　　　　←그 이외 때,라고 하는 ELSE<br>
+</font>　　　　　　　　;함락이 끝난 상태<br>
+　　　　　　　　<font color="#5bb421">IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || 
+TALENT:8) &amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　;연모,친애<br>
+　　　　　　　　　　　　<font color="#24a6b5">IF TALENT:3 
+|| TALENT:6<br>
+</font>　　　　　　　　　　　　　　　　PRINTFORMW <br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+;0,애무
+;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;처음
+	IF CFLAG:300 == 0
+		PRINTFORMW 
+		CFLAG:300 = 1	←CFLAG:300을 1으로 한다
+	;2회째 이후
+	ELSE			←그 이외 때,라고 하는 ELSE
+		;함락이 끝난 상태
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 2)
+			;연모,친애
+			IF TALENT:3 || TALENT:6
+				PRINTFORMW </textarea></p>
+<p><font size="2"><font color="#5254ad">『<strong><font color="#ff8811">ELSE</font></strong>라고 하는 것은……<strong><font color="#ff8811">「그 밖에」</font></strong>라는 의미지요. <strong>ELSEIF</strong>와는 다른지?』</font><br>
+<font color="#555555">「<strong>ELSEIF</strong>는 문자 그대로,<font color="#555555"><strong>「그 밖에,만약~라면」</strong></font>라고 하는 의미군요. <br>
+　그렇지만<strong>ELSE</strong>는,<strong>ELSE보다 앞에 나온 조건 이외라면 모두</strong>,라고 하는 지시입니다. <br>
+　이 경우,<strong>CFLAG:300이 0이 아닐 때</strong>…… 즉,한 번<font color="#555555">「처음」</font>의입상을 표시하고 있을 때 이외 모두,<br>
+　그렇다고 하는 의미가 되는 것입니다」</font><br>
+<font color="#5254ad">『그 ELSE아래에 또 IF가…… 어? 2개나 있어』</font><br>
+<font color="#555555">「이것도<strong>상자</strong>군요. 함락 끝나,즉<strong><font color="#5bb421">연모,음란,복종,친애,창부,예속</font></strong>의 어느쪽이든을 가지고 있으면<br>
+　「;함락이 끝난 상태」의 바로 아래의 루트에 들어와,그 중에서도 특히<font color="#2cb5cd"><strong>연모,친애</strong></font>였던 때에 더욱 루트에 들어온다,라고」</font><br>
+<font color="#5254ad">『아,머리 헷갈려 오는 것이야……』</font><br>
+<font color="#555555">「제대로 단락을 나누고 있으면 괜찮아요. 그 때문의 인덴트입니다. <br>
+　<strong>구조를 알 수 있기 어려울 때는,안쪽의 상자에서 없애 가면 돼요</strong>」<br>
+</font></font><font size="2"><br>
+</p>
+<hr align="left" size="1" width="640">
+<a name="4"><font size="2"><strong>【4. IF-ENDIF의 대응 독해】</strong></font></a> <br>
+;-------------------------------------------------<br>
+;0,애무<br>
+;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;처음<br>
+　　　　<font color="#ff8811">IF CFLAG:300 == 
+0<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　;2회째 이후<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;함락이 끝난 상태<br>
+　　　　　　　　<font color="#24a6b5">IF 
+(TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) 
+&amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 2)<br>
+</font></font><br>
+<font size="2">　　　　　　　　　　　　PRINTFORMW 【등 째네】<br>
+</font><br>
+<font size="2">　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 4<br>
+</font>　　　　　　　　;굴복각인Lv3<br>
+　　　　　　　　<font color="#24a6b5">ELSEIF MARK:2 == 3 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　PRINTFORMW <br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 3<br>
+</font>　　　　　　　　;그 이외<br>
+　　　　　　　　<font color="#24a6b5">ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 
+2<br>
+</font>　　　　　　　　　　　　PRINTFORMW <br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 
+= 2<br>
+</font>　　　　　　　　<font color="#24a6b5">ENDIF</font><br>
+　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF<br>
+</font>;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+;0,애무
+;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;처음
+	IF CFLAG:300 == 0
+		PRINTFORMW 
+		CFLAG:300 = 1
+	;2회째 이후
+	ELSE
+		;함락이 끝난 상태
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 2)
+
+
+			PRINTFORMW 【등 째네】
+
+
+			CFLAG:300 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:300 = 3
+		;그 이외
+		ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea> 
+<p><font size="2"><font color="#555555">「제일 최초의 형태와 비교해,어디가 바뀌었는지 압니까?」</font><br>
+<font color="#5254ad">『응─… 아,함락 끝난 아래의<font color="#5bb421"><strong>「연모,친애」</strong></font>라든지의 분기구나!』</font><br>
+<font color="#555555">「그렇습니다. <font color="#5bb421"><strong>"IF TALENT:3 || TALENT:6"<font color="#555555">로부터 아래에 더듬어 가,제일 가까운 행의</font>"ENDIF"</strong></font>까지를 없앴습니다. <br>
+　이 구문이라고,함락제의 경우는 일괄로 같은입상이 표시되게 됩니다. 【놈들네】라고」</font><br>
+<font color="#5254ad">『국화…… 정직 그것은…… 없다고 생각한다』</font><br>
+<font color="#555555">「아,알기 쉬웠으면 좋아요!다음 갑니다,다음!」</font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;처음<br>
+　　　　<font color="#ff8811">IF CFLAG:300 == 
+0<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　;2회째 이후<br>
+　　　　<font color="#ff8811">ELSEIF CFLAG:300 &lt; 2 || 
+FLAG:7 == 2<br>
+</font></font><br>
+<font size="2">　　　　　　　　PRINTFORMW 
+【놈들네】<br>
+</font><br>
+<font size="2">　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+2</font><br>
+　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;처음
+	IF CFLAG:300 == 0
+		PRINTFORMW 
+		CFLAG:300 = 1
+	;2회째 이후
+	ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+
+
+		PRINTFORMW 【등 째네】
+
+
+		CFLAG:300 = 2
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea></p>
+<p><font size="2"><font color="#5254ad">『와오,많이 시원해졌군요!』</font><br>
+<font color="#555555">「이번은 함락,굴복,그 이외로 분기 하고 있던<font color="#24a6b5"><strong>"IF (TALENT:3 || 
+TALENT:4 ~이하 생략"<font color="#555555">로부터,제일 가까운</font>"ENDIF"</strong></font>까지를 없앴습니다. <br>
+　이렇게 하면 이제(벌써),2회째의애무 이후는 어떻게 하든지【놈들네】밖에 표시되지 않습니다」</font><br>
+<font color="#5254ad">『그런 것 재미없는 응이군요』</font><br>
+<font color="#555555">「에에. 그러니까,재미있게 하기 위해서,직공씨들은 많이 분기를 만들어 주시고 있다고 하는 일입니다」</font><br>
+<font color="#5254ad">『분기 많이 만들고 있는 사람은 존경하는 것이야!이것 만들고 있는 녀석 같은 것,시스템 장난질이 너무 즐거워입상 진행되지 않는 것 같고……』</font><br>
+<font color="#555555">「어쩔 수 없습니다. era 너무 즐겁습니다. …… 그런데,하나 더 차이를 알아차립니까?」</font><br>
+<font color="#5254ad">『응…… 아!<font color="#2972c2"><strong>「;2회째 이후」의 아래의<font color="#ff8811">「ELSE」<font color="#2972c2">가</font>「ELSEIF CFLAG:300 &lt; 2 || 
+FLAG:7 == 2」</font>가 되어 있다!</strong></font><br>
+<font color="#555555">「네. 즉,<font color="#ff8811"><strong>"CFLAG:300이 1 이하,또는 FLAG:7이 2 때"</strong></font>라고 하는 조건문이군요. <br>
+　이것은 옵션의<font color="#555555">「입상은 최초의 한 번만 표시」</font>기능을 위한 플래그입니다. <br>
+　귀찮을지도 모릅니다만,고려할 필요가 있는 곳이기 때문에 함부로 깎지 않게 주의합시다」</font><br>
+<font color="#5254ad">『ELSEIF로 나온 CFLAG:300 &lt; 
+2의<strong>2의 부분</strong>은,거기서 표시되는입우에우치에서<font color="#8000ff">「CFLAG:300 = 
+2」</font>로서 가산되고 있지요』</font><br>
+<font color="#555555">「좋은 결과예요,알프레드씨. 그러면,더욱 심플한 형태로 해 봅시다」</font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+</font><br>
+<font size="2">　　　　PRINTFORMW 
+【놈들네】<br>
+</font><br>
+<font size="2"><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+
+
+	PRINTFORMW 【등 째네】
+
+
+ENDIF
+;-------------------------------------------------
+</textarea></p>
+<p><font size="2"><font color="#555555">「이렇게 되면 이제(벌써),최초의 조교에서도 100회애무 해도 모두【등 째네】입니다」</font><br>
+<font color="#5254ad">『심플 이즈 베스트라고 하지만,여기까지는……』</font><br>
+<font color="#555555">「그러나,한종류의입상에서도 의외로 안된다 라고라고 하고도 있으니까요. 무슨 일도 임기응변입니다」<br>
+<br>
+<br>
+</p>
+<hr align="left" size="1" width="640">
+<a name="5"><strong>【5. IF구문의 조립법】</strong><br>
+</a> <br>
+</font></font>
+<p><font size="2"><font color="#555555">「…… 그런데,이번에는 덧붙여 가 볼까요. <br>
+　모처럼 깨끗이 시켰으므로,자신이 알 수 있기 쉬운 형태에 추가해 봅시다. <br>
+　어떤 조건이라면,덧붙여 쓰는입상에 차이가 나온다고 생각합니까?」</font><br>
+<font color="#5254ad">『역시,함락 하고 있을 때로 하고 있지 않을 때는 굉장히 다르다고 생각한다』</font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;함락이 끝난 상태<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 2 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 【등 째네】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　;그 이외<br>
+　　　　<font color="#ff8811">ELSEIF CFLAG:300 &lt; 1 || FLAG:7 == 
+2<br>
+</font>　　　　　　　　PRINTFORMW 【살려 예네】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 1<br>
+</font>　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 2 || FLAG:7 == 2)
+		PRINTFORMW 【등 째네】
+		CFLAG:300 = 2
+	;그 이외
+	ELSEIF CFLAG:300 &lt; 1 || FLAG:7 == 2
+		PRINTFORMW 【살려 예네】
+		CFLAG:300 = 1
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea></p>
+<p><font size="2"><font color="#555555">「그럼,우선 위에 함락 하고 있는 경우의 분기를 만듭시다」</font><br>
+<font color="#5254ad">『함락 하고 있지 않는 분기를 위에 만들 수 없는 것인지?』</font><br>
+<font color="#555555">「할 수 있습니다만……<br>
+　"TALENT:3 == 0 &amp;&amp; TALENT:4 == 0 &amp;&amp; 
+TALENT:5 == 0 &amp;&amp; TALENT:6 == 0 &amp;&amp; TALENT:7 == 0 &amp;&amp; 
+TALENT:8 == 0"<br>
+　라고 모두에 == 0이 붙으므로<strong>귀찮네요」<br>
+</strong></font><font color="#5254ad">『그 조건을 쓰지 않으면 어떻게 되는 거야?』<br>
+</font><font color="#555555">「<font color="#ff8811">IF CFLAG:300 &lt; 2 || FLAG:7 == 
+2 </font>그렇다고 하는 조건을 최초로 가져와,<br>
+　</font><font color="#ff8811">ELSEIF (TALENT:3 || 
+TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 
+&lt;&nbsp;1 || FLAG:7 == 2)</font><font color="#555555"><br>
+</font> 그렇다고 하는 조건을 아래에 쓴다고 하는 일입니까? 그것은 안됩니다. <br>
+　구문은 위로부터 읽히므로,최초의<font color="#ff8811">IF CFLAG:300 &lt; 2 || FLAG:7 == 
+2</font>를 읽어들인 시점에서 그입상이 표시되어 버려,<br>
+　<font color="#ff8811">ELSEIF (TALENT:3 || 
+TALENT:4 || 
+…</font>그렇다고 하는 조건이 표시되지 않게 되어 버립니다. <br>
+　그러므로,<strong>IF구문에서는 조건의 어려운 분기정도상에 쓰는 것이 추천 되고 있습니다</strong>」<br>
+<font color="#5254ad">『그러면,어째서 위의<font color="#8000ff">「CFLAG:300 = 
+」는 「2」로,아래가 「1」</font>이야?』</font><br>
+<font color="#555555">「함락 이외의입상이 표시되는 (분)편이 함락입상보다 빠를 것으로,<br>
+　그쪽을 작은 숫자로 하지 않는 곳의 플래그는 상대구작동하지 않고……<br>
+　읏,이 문장의 작자는 이런 일 생각하는 것이 귀찮아 개조한 것이에요. <br>
+　자세하게는 쌀입상을<font color="#5254ad"><strong>『우와아아아아아아!!』</strong></font></font></p>
+<p><font size="2"><font color="#5254ad">『짜짜짜자,너무 말하면 과연 나라도 화내니까요!』</font><br>
+<font color="#555555">「이런,그렇습니까? 그럼,<font color="#5bb421">함락 하고 있지 않는 루트에반발각인Lv3의 조건을발 해 볼까요</font>. <br>
+　…… 후후,저항 되는 것도 특이한 것이군요……」</font><br>
+<font color="#5254ad">『구,국화……?』</font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;함락이 끝난 상태<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 【등 째네】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 3<br>
+</font>　　　　;그 이외<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;미함락으로반발각인Lv3<br>
+　　　　　　　　<font color="#5bb421">IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　PRINTFORMW 【손대지마 천한 자식!】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　　　　　;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기<br>
+　　　　　　　　<font color="#5bb421">ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 
+2<br>
+</font>　　　　　　　　　　　　PRINTFORMW 【살려 예네】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　　　　　<font color="#5bb421">ENDIF</font><br>
+　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF<br>
+</font>;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【등 째네】
+		CFLAG:300 = 3
+	;그 이외
+	ELSE
+		;미함락으로반발각인Lv3
+		IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+			PRINTFORMW 【손대지마 천한 자식!】
+			CFLAG:300 = 1
+		;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기
+		ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+			PRINTFORMW 【살려 예네】
+			CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea></p>
+<p><font size="2"><font color="#5254ad">『캐릭터붕괴라는 레벨이 아니야!』</font><br>
+<font color="#555555">「알기 쉬움이 생명이기 때문에. 이것으로,반발 하고 있는 캐릭터에게 매도해지는 것이 가능합니다」</font><br>
+<font color="#5254ad">『어? <font color="#ff8811">「;그 이외」아래의 「ELSEIF」가 「ELSE」</font>가 되어 있지만……』</font><br>
+<font color="#555555">「네. <font color="#5bb421">그 이외,의 부분의 조건이 2종류가 되었다</font>것으로,조건을 지웠습니다. <br>
+　이 근처는 익숙해져 오면 승손를 알 수 있다고 생각합니다만……<br>
+　덧붙여서,위의 구문은</font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;함락이 끝난 상태<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 【등 째네】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 3</font><br>
+　　　　;미함락으로반발각인Lv3<br>
+　　　　<font color="#ff8811">ELSEIF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 
+2)</font><br>
+　　　　　　　　PRINTFORMW 【손대지마 천한 자식!】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1</font><br>
+　　　　;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기<br>
+　　　　<font color="#ff8811">ELSEIF 
+CFLAG:300 &lt; 2 || FLAG:7 == 2</font><br>
+　　　　　　　　PRINTFORMW 
+【살려 예네】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 2</font><br>
+　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【등 째네】
+		CFLAG:300 = 3
+	;미함락으로반발각인Lv3
+	ELSEIF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+		PRINTFORMW 【손대지마 천한 자식!】
+		CFLAG:300 = 1
+	;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기
+	ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+		PRINTFORMW 【살려 예네】
+		CFLAG:300 = 2
+	ENDIF
+ENDIF
+;-------------------------------------------------
+
+</textarea></p>
+<p><font size="2"> <font color="#555555">…… 라고 하는 것과<strong>거의 같은 의미가 됩니다. </strong>이 근처도 뭐,익숙해지고군요」</font></font><br>
+<font color="#5254ad">『흥흥…… 다음은,함락 루트 마다 나누어 보는 것이야!』</font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;함락이 끝난 상태<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 【등 째네】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 3<br>
+</font>　　　　;연모,친애<br>
+　　　　<font color="#ff8811">ELSEIF TALENT:3 || TALENT:6</font><br>
+　　　　　　　　PRINTFORMW 
+【너무 좋아!】<br>
+　　　　;음란,창부<br>
+　　　　<font color="#ff8811">ELSEIF TALENT:4 || 
+TALENT:7</font><br>
+　　　　　　　　PRINTFORMW 【좀 더!】<br>
+　　　　;복종,예속<br>
+　　　　<font color="#ff8811">ELSEIF TALENT:5 || TALENT:8</font><br>
+　　　　　　　　PRINTFORMW 
+【말하는 일 (듣)묻기 때문에 아 아】<br>
+　　　　;미함락으로반발각인Lv3<br>
+　　　　<font color="#ff8811">ELSEIF MARK:3 == 3 
+&amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)</font><br>
+　　　　　　　　PRINTFORMW 
+【손대지마 천한 자식!】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1</font><br>
+　　　　;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기<br>
+　　　　<font color="#ff8811">ELSEIF 
+CFLAG:300 &lt; 2 || FLAG:7 == 2</font><br>
+　　　　　　　　PRINTFORMW 
+【살려 예네】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 2</font><br>
+　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【등 째네】
+		CFLAG:300 = 3
+	;연모,친애
+	ELSEIF TALENT:3 || TALENT:6
+		PRINTFORMW 【너무 좋아!】
+	;음란,창부
+	ELSEIF TALENT:4 || TALENT:7
+		PRINTFORMW 【좀 더!】
+	;복종,예속
+	ELSEIF TALENT:5 || TALENT:8
+		PRINTFORMW 【말하는 일 (듣)묻기 때문에 아 아】
+	;미함락으로반발각인Lv3
+	ELSEIF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+		PRINTFORMW 【손대지마 천한 자식!】
+		CFLAG:300 = 1
+	;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기
+	ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+		PRINTFORMW 【살려 예네】
+		CFLAG:300 = 2
+	ENDIF
+ENDIF
+;-------------------------------------------------
+</textarea></p>
+<p><font size="2"><font color="#5254ad">『이런 느끼고 보람?』</font><br>
+<strong><font color="#555555">「대 빗나가고입니다」</font><br>
+</strong><font color="#5254ad">『에에에에,무엇으로 매우?』</font><br>
+<font color="#555555">「<strong>함락이 끝난 1행째로,모든 루트가 망라되고 있기 때문</strong>이에요. <br>
+　이것으로는,<strong>연모도음란도복종도【놈들네】가 표시되어 종료입니다. </strong>루트로 나누고 싶으면……</font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;함락이 끝난 상태<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　;연모,친애<br>
+　　　　　　　　<font color="#5bb421">IF TALENT:3 
+|| TALENT:6</font><br>
+　　　　　　　　　　　　PRINTFORMW 
+【너무 좋아!】<br>
+　　　　　　　　;음란,창부<br>
+　　　　　　　　<font color="#5bb421">ELSEIF TALENT:4 || 
+TALENT:7<br>
+</font>　　　　　　　　　　　　PRINTFORMW 
+【좀 더!】<br>
+　　　　　　　　;복종,예속<br>
+　　　　　　　　<font color="#5bb421">ELSEIF TALENT:5 || 
+TALENT:8</font><br>
+　　　　　　　　　　　　PRINTFORMW 【말하는 일 (듣)묻기 때문에 아 아】<br>
+　　　　　　　　<font color="#5bb421">ENDIF<br>
+</font>　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+3<br>
+</font>　　　　;미함락으로반발각인Lv3<br>
+　　　　<font color="#ff8811">ELSEIF MARK:3 == 3 
+&amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 
+【손대지마 천한 자식!】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1</font><br>
+　　　　;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기<br>
+　　　　<font color="#ff8811">ELSEIF 
+CFLAG:300 &lt; 2 || FLAG:7 == 2<br>
+</font>　　　　　　　　PRINTFORMW 
+【살려 예네】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		;연모,친애
+		IF TALENT:3 || TALENT:6
+			PRINTFORMW 【너무 좋아!】
+		;음란,창부
+		ELSEIF TALENT:4 || TALENT:7
+			PRINTFORMW 【좀 더!】
+		;복종,예속
+		ELSEIF TALENT:5 || TALENT:8
+			PRINTFORMW 【말하는 일 (듣)묻기 때문에 아 아】
+		ENDIF
+		CFLAG:300 = 3
+	;미함락으로반발각인Lv3
+	ELSEIF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+		PRINTFORMW 【손대지마 천한 자식!】
+		CFLAG:300 = 1
+	;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기
+	ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+		PRINTFORMW 【살려 예네】
+		CFLAG:300 = 2
+	ENDIF
+ENDIF
+;-------------------------------------------------
+</textarea></p>
+<p><font color="#555555" size="2"> 그렇다고 하는 형태로,상자로 하지 않으면 안됩니다」</font><br>
+<font color="#5254ad">『응─,이것,최초(분)편에 본 형태와 닮아있네요!』</font><br>
+<font color="#555555">「기억하고 계시지 않습니까…… 아,덧붙여서 이것도 상자로 하지 않는 것은 가능합니다. </font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;함락이 끝난 상태<br>
+　　　　;연모,친애<br>
+　　　　<font color="#ff8811">IF TALENT:3 
+|| TALENT:6 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　PRINTFORMW 【너무 좋아!】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 
+= 3</font><br>
+　　　　;음란,창부<br>
+　　　　<font color="#ff8811">ELSEIF TALENT:4 || TALENT:7 
+&amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 
+【좀 더!】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+3</font><br>
+　　　　;복종,예속<br>
+　　　　<font color="#ff8811">ELSEIF TALENT:5 || TALENT:8 
+&amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 
+【말하는 일 (듣)묻기 때문에 아 아】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 3</font></font></p>
+<p><font size="2">　　　　;미함락으로반발각인Lv3<br>
+　　　　<font color="#ff8811">ELSEIF MARK:3 == 3 
+&amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 
+【손대지마 천한 자식!】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기<br>
+　　　　<font color="#ff8811">ELSEIF 
+CFLAG:300 &lt; 2 || FLAG:7 == 2<br>
+</font>　　　　　　　　PRINTFORMW 
+【살려 예네】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;함락이 끝난 상태
+	;연모,친애
+	IF TALENT:3 || TALENT:6 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【너무 좋아!】
+		CFLAG:300 = 3
+	;음란,창부
+	ELSEIF TALENT:4 || TALENT:7 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【좀 더!】
+		CFLAG:300 = 3
+	;복종,예속
+	ELSEIF TALENT:5 || TALENT:8 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【말하는 일 (듣)묻기 때문에 아 아】
+		CFLAG:300 = 3
+
+	;미함락으로반발각인Lv3
+	ELSEIF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+		PRINTFORMW 【손대지마 천한 자식!】
+		CFLAG:300 = 1
+	;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기
+	ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+		PRINTFORMW 【살려 예네】
+		CFLAG:300 = 2
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea></p>
+<p><font size="2"> <font color="#555555">이 기술이라면 함락 루트를 한덩어리로 하지 말고,개별적으로 판정하고 있는 일이 됩니다」</font></font><br>
+<font color="#5254ad">『<font color="#ff8811">(CFLAG:300 &lt; 3 || FLAG:7 == 
+2)</font>와<font color="#8000ff">CFLAG:300 = 
+3</font>이 3개나 있지만 좋은 것인지?』</font><br>
+<font color="#555555">「네. 통상의 경우,연모와음란와복종 각각의입상이 개별적으로 표시될 것은 없기 때문에,<br>
+　같은 플래그의 값을 사용하고 무슨 문제도 없습니다. …… 그렇지만,뭐…… 보고 괴롭지요」</font><br>
+<font color="#5254ad"><strong>『알기 쉽게 정리하는 것이야!』</strong></font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;함락이 끝난 상태<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　;연모,친애<br>
+　　　　　　　　<font color="#5bb421">IF TALENT:3 
+|| TALENT:6<br>
+</font>　　　　　　　　　　　　PRINTFORMW 
+【너무 좋아!】<br>
+　　　　　　　　;음란,창부<br>
+　　　　　　　　<font color="#5bb421">ELSEIF TALENT:4 || 
+TALENT:7</font><br>
+　　　　　　　　　　　　PRINTFORMW 
+【좀 더!】<br>
+　　　　　　　　;복종,예속<br>
+　　　　　　　　<font color="#5bb421">ELSEIF TALENT:5 || 
+TALENT:8<br>
+</font>　　　　　　　　　　　　PRINTFORMW 【말하는 일 (듣)묻기 때문에 아 아】<br>
+　　　　　　　　<font color="#5bb421">ENDIF<br>
+</font>　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+3<br>
+</font>　　　　;그 이외<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;미함락으로반발각인Lv3<br>
+　　　　　　　　<font color="#24a6b5">IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 
+2)</font><br>
+　　　　　　　　　　　　PRINTFORMW 【손대지마 천한 자식!】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　　　　　;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기<br>
+　　　　　　　　<font color="#24a6b5">ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 
+2</font><br>
+　　　　　　　　　　　　PRINTFORMW 【살려 예네】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　　　　　<font color="#24a6b5">ENDIF<br>
+</font>　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		;연모,친애
+		IF TALENT:3 || TALENT:6
+			PRINTFORMW 【너무 좋아!】
+		;음란,창부
+		ELSEIF TALENT:4 || TALENT:7
+			PRINTFORMW 【좀 더!】
+		;복종,예속
+		ELSEIF TALENT:5 || TALENT:8
+			PRINTFORMW 【말하는 일 (듣)묻기 때문에 아 아】
+		ENDIF
+		CFLAG:300 = 3
+	;그 이외
+	ELSE
+		;미함락으로반발각인Lv3
+		IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+			PRINTFORMW 【손대지마 천한 자식!】
+			CFLAG:300 = 1
+		;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기
+		ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+			PRINTFORMW 【살려 예네】
+			CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea></p>
+<p><font size="2"><font color="#5254ad">『이런 느낌으로 어때?』</font><br>
+<font color="#555555">「이것이라면 인덴트도 확실히 되고 있어,정리를 알 수 있기 쉽네요. <br>
+　기호의 문제가 되어 버립니다만,나는 이 형태를 상당히 좋아해요. <br>
+　<strong>한가운데의 ELSE 등은 정직 단순한 장식입니다</strong>가,어느후들입상 전체를 파악하기 쉬워지는 이점도 있습니다. <br>
+　다만,인덴트가 많으면 구문이 옆에 길어져 파악하기 어렵다고 말하는 일도 있기 때문에,이 근처는 기호군요」</font></font></p>
+<hr align="left" size="1" width="640">
+<a name="6"><strong>【6. 에러가 나올 때에는】</strong></a> <br>
+<br>
+<font size="2"><font color="#555555">「그런데,오리지날의입상의 형태를 만들어 보았습니다만,텐프레와 비교해 어떨까요?」</font><br>
+<font color="#5254ad">『여기는,최초와 2회째를 나누지 않다. 그리고반발각인Lv3도 여기 밖에 없어』</font><br>
+<font color="#555555">「그런 일입니다. 이와 같이해,필요하다고 생각하는 변수를 붙어라발 하거나 찔러 당기거나 해 분기 시켜 갑니다. </font> 
+<p><font color="#555555" size="2"> <strong>대응하고 있지 않는 IF,ENDIF가 있다</strong>라고 하는 에러나,<br>
+　<strong>~IF~ENDIF의 밖에서 ELSEIF문이 사용되었습니다</strong>,라고 하는 에러가 나왔을 경우는,<br>
+　상기와 같이<strong>상자가 되어 있어야 할 IF~ENDIF문을 안쪽으로부터 깎아 가는</strong>것도 상황을 파악하는 하나의손입니다. <br>
+　거기에 따라,한 개만 남은<strong>IF나 ENDIF</strong>,IF~ENDIF에 제대로 끼일 수 있지 않은<strong>ELSEIF나 ELSE</strong>를 찾아낼 수 있습니다. </font></p>
+<p><font color="#555555" size="2"> 예를 들면,텐프레나 손본입상 따위의 가필 미스로 이하와 같이 되어 있었을 경우……</font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;함락이 끝난 상태<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 【등 째네】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 3</font></font></p>
+<p><font size="2">　　　　　　　　<strong><font color="#5bb421">ENDIF　　　　　　　　　　　　　　　　←!? </font></strong><br>
+　　　　;그 이외<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;미함락으로반발각인Lv3<br>
+　　　　　　　　<font color="#24a6b5">IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　PRINTFORMW 【손대지마 천한 자식!】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　　　　　;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기<br>
+　　　　　　　　<font color="#24a6b5">ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 
+2<br>
+</font>　　　　　　　　　　　　PRINTFORMW 【살려 예네】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　　　　　<font color="#24a6b5">ENDIF<br>
+</font>　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c"><strong>ENDIF　　　　　　　　　　　　　　　　　　　　　　　　←? </strong></font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【등 째네】
+		CFLAG:300 = 3
+
+		ENDIF				←!?
+	;그 이외
+	ELSE
+		;미함락으로반발각인Lv3
+		IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+			PRINTFORMW 【손대지마 천한 자식!】
+			CFLAG:300 = 1
+		;결과적으로,반발각인Lv2 이하로 미함락의 경우는 모두 여기
+		ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+			PRINTFORMW 【살려 예네】
+			CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF						←?
+;-------------------------------------------------</textarea></p>
+<p><font size="2"> <font color="#5bb421"><strong>←!? </strong></font><font color="#555555">의 개소의 ENDIF를 깎아 해친 탓으로,맨 밑의<font color="#fa0e6c"><strong>←? 의 ENDIF</strong></font>가 에러 취급이 되어 버리거나 합니다. <br>
+　어떻게 하고 있는 것 같은의 것인지는,<strong>IF~ENDIF를 안쪽으로부터 깎아 가면 알아 받을 수 있을 것입니다」</strong></font></font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;함락이 끝난 상태</font></p>
+<p><font size="2">　　　　　　　　<strong>※함락 끝난 부분의<font color="#ff8811">IF</font>-<font color="#5bb421">ENDIF</font>를 지워 본다(시스템적으로는 여기가 한덩어리라고 인식됩니다)</strong></font></p>
+<p><font size="2">　　　　;그 이외<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;미함락으로반발각인Lv3</font></p>
+<p><font size="2">　　　　　　　　<strong>※미함락의 부분의<font color="#24a6b5">IF-ENDIF</font>를 지워 본다</strong></font></p>
+<p><font size="2">　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c">ENDIF　　　　　　　　　　　　　　　　　　　　　　　　←? <br>
+</font>;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;함락이 끝난 상태
+
+		※함락 끝난 부분의 IF-ENDIF를 지워 본다
+
+	;그 이외
+	ELSE
+		;미함락으로반발각인Lv3
+
+		※미함락의 부분의 IF-ENDIF를 지워 본다
+
+	ENDIF
+ENDIF						←?
+;-------------------------------------------------</textarea></p>
+<p><br>
+<font size="2"> <font color="#555555">↓ 한층 더<strong><font color="#fa0e6c">맨 위의 IF</font>와 거기에 가장 가까운 하부의 행의<font color="#ff8811">ENDIF</font></strong>를 지우면……</font></font></p>
+<p><br>
+<font size="2">;-------------------------------------------------</font></p>
+<p><br>
+<font size="2"><font color="#fa0e6c"><strong>ENDIF　　　　　　　　　　　　　　　　　　　　　　　　←? <br>
+</strong></font>;-------------------------------------------------</font></p>
+<p><font size="2"><font color="#555555">「그래서,<font color="#fa0e6c"><strong>최후에 남는 ENDIF</strong></font>가 있는 것이군요. <br>
+　본래의입상에서는 더욱 큰 IF에 둘러싸여 있으므로보다 복잡합니다만,<br>
+　자신의손로 한개씩 확인하면 원인이 확실하는 일이 있습니다. <br>
+　원인을 파악하면,같은 에러가 몇번이나 나오는 사태를 막을 수도 있어요. <br>
+　<strong>최후까지 다 깎기 전에,인덴트에 의한 세로의 라인이 갖추어지지 않은 IF-ENDIF문에 직면하면 대개 그것이 에러의 원인입니다」</strong></font></font></p>
+<p><strong>
+<hr align="left" size="1" width="640">
+</strong><a name="7"><strong>【7. 끝에】</strong></a> <br>
+<br>
+<font size="2"><font color="#555555">「알아 받을 수 있었습니까,알프레드씨…… 알프레드씨?」</font><br>
+<font color="#5254ad">『아,머리가 펑크날 것 같구나…… 응,이것 전부 기억하지 않으면 안 되는 것인지? 변수,라든지……』</font><br>
+<font color="#555555">「무슨 말을 하고 계십니까. 무리로 정해져 있습니다」</font><br>
+<font color="#5254ad">『에에에에에에』</font><br>
+<font color="#555555">「정직,이것을 쓰고 있는 중의 사람도 기본적으로는 필링으로 어떻게든 하고 있을 뿐입니다. 문과이고. <br>
+　era라든지 처음으로 손대었는데 김으로 신기능을 만들어서는 버그투성이로 낙담하는 나날인것 같아요. 이제(벌써) 눈물고인 눈. <br>
+　…… 다만,필요한 것은<font color="#555555">『모를 때에,어떻게 조사하면 아는 것인가』</font>를 아는 것일까,라고. <br>
+　이 텍스트는 IF구문의 구조 분해를 이해하는손도움이 되면,이라고 생각 작성한 것입니다만,<br>
+　중요한 IF구문의 기술 방법 따위에는 거의 접하고 있지 않기 때문에,그것은 별도 조사해 받을 필요가 있습니다」</font><br>
+<font color="#5254ad">『국화는 가르쳐 주지 않는 것인지?』</font><br>
+<font color="#555555">「그 밖에 많이 훌륭한 강좌가 있습니다. eraheta의 원이 된<a href="http://www7.atwiki.jp/eratoho/" target="_blank"><strong>eratoho씨의 wiki</strong></a> 의 충실상은 재어 알려지지않고,<br>
+　이 텍스트의 손책이 되어 있는<strong>erajogio씨에게 동고 된 강좌</strong>도 추천입니다」</font><br>
+<font color="#5254ad">『그것은 든든하다!그래서,어디에 가면 그것이 발견되지?』</font><br>
+<font color="#555555">「…… 알프레드씨에게는,조금 eraheta는 너무 빠른 것 같네요……」</font><br>
+<font color="#5254ad">『기,기다려요 국화,버리지 마!』<br>
+<br>
+</font><br>
+<font color="#555555">「완전히,젊은 (분)편의 기세를 동경하는 부분은 있습니다만……<br>
+　한 번 멈춰 서고 생각하는 것은,한계가 아닙니다. <br>
+　여기까지 읽어 받아,그래서 조금 생각해 받아…… 그런데도 모를 때는,언제라도 기다리고 있으니까」<br>
+<font color="#5254ad">『…… 아,그런데 이제 와서인 것이지만,이렇게 해 플래그로 분류 되어 있는 것은 편리하겠지? <br>
+　추천 되고 있는 사쿠라 에디터는 이런 식으로 텍스트에 색을 칠해 표시할 수 있다!<br>
+　만약입상을 써 구두도 리나등,도입할 수 있으면 편리하다고 생각하는 것이야』</font><br>
+</font></font>
+<p></p>
+<p><font size="2">　　　　</font></p>
+<p><font size="2"><font color="#555555">「그러면,장황히 교제해 주셔,변명아 없었습니다」</font><br>
+<font color="#5254ad">『그러면,또 어디선가!』</font></font></p>
+<p>
+<p><font size="2"></font></p><font size="2"><br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+==============================================<br>
+후서</font> 
+
+<p></p>
+<p><font size="2"> 소연극에 교제해 주셔,감사합니다. <br>
+　초심자전용 IF구문 독해 강좌,의 생각으로 작성한 텍스트입니다만,과불발나 실수도 있는 것으로 생각합니다. <br>
+　생각나신 점이 있으면,가필 수정,꼭 꼭 부탁합니다. <br>
+　그다지 도움이 될지 어떨지 모르는 강좌였지만,어떠한 도움이 될 수 있으면 다행입니다. </font></p>
+<p><br>
+<font size="2">2009/10/16</font></p>
+<p><font size="2">　　　　</font></p>
+<p><font size="2">　　　　</font></p>
+<p><font size="2">　　　　</font></p><font size="2">
+<hr align="left" size="1" width="640">
+<a name="omake"><font size="2"><strong>【덤】</strong></font></a> <br>
+<br>
+아마,대개의 커맨드는 최저한 함락이 끝난 상태와 그 이외의 대사 묻으면 그것 같아질 생각이 든다……<br>
+무엇으로부터 묻으면 좋은 것인지,라는 사람은손처음에 어떻겠는가<br>
+;-------------------------------------------------<br>
+;■,××<br>
+;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == ■</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;함락이 끝난 상태<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:● &lt; 2 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:● = 2<br>
+</font>　　　　;그 이외<br>
+　　　　<font color="#ff8811">ELSEIF 
+CFLAG:● &lt; 1 || FLAG:7 == 2<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:● = 1<br>
+</font>　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+;■,××
+;-------------------------------------------------
+IF SELECTCOM == ■
+	CALL TRAIN_MESSAGE
+	;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:● &lt; 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:● = 2
+	;그 이외
+	ELSEIF CFLAG:● &lt; 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:● = 1
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea><br>
+<br>
+하는 김에,쌀입상에서 이용한 「한 번 본입상비표시 기능용 함수」라고 그것을 적용한 텐프레의 간이 ver<br>
+<font color="#ff0000">●</font>는 CFRAG의 숫자입니다. 애무라면<font color="#ff0000">●=300</font>인 것로<strong>O = <font color="#ff0000">300</font></strong>. (여기만 각 조교로 만지면으로 IF 
+SELECTCOM~ENDIF내에 코피페 가능)<br>
+X1는 캐릭터 넘버로 치환(쌀이라면 10). <strong>대응하는 L:▲와 N = 
+▲는 같은 숫자가 들어갑니다. (0~9)</strong><br>
+10 자리수의 숫자의 각 자리수를 사용해,10항목까지의 플래그의 온 오프를 제어하고 있습니다. <br>
+그러므로 11항목 이상의 플래그를 제어할 수 없습니다만……<br>
+또,응용하면 「어느 플레이로 어느입상을 표시했던 적이 있을까」라고 하는 플래그로도 될까하고. <br>
+이것이라면 입지 않을 것이라고 얕봐 1문자 변수 L~O를 사용하고 있습니다만,다른 기능의 방해가 될 때는 적당하게 이동 추천. <br>
+;------------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == </font><font color="#ff0000">■<br>
+</font>　　　　<strong>O = <font color="#ff0000">●</font><br>
+</strong>　　　　<font color="#8000ff">CALL ONCE_S_K<font color="#ff0000">X1</font><br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;처음<br>
+　　　　<font color="#ff8811">IF L:0 == 
+0<br>
+</font>　　　　　　　　PRINTFORMW<br>
+　　　　　　　　<font color="#8000ff">N = 
+0<br>
+</font>　　　　;2회째 이후<br>
+　　　　<font color="#ff8811">ELSE<br>
+<font color="#555555">　　　　　　　　;함락이 끝난 상태</font><br>
+<font color="#555555">　　　　　　　　</font><font color="#5bb421">IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || 
+TALENT:8) &amp;&amp; (L:1 == 0 || FLAG:7 == 2)<br>
+</font><font color="#555555">　　　　　　　　　　　　;연모,친애<br>
+　　　　　　　　　　　　</font><font color="#2cb5cd">IF 
+TALENT:3 || TALENT:6</font><br>
+<font color="#555555">　　　　　　　　　　　　　　　　PRINTFORMW<br>
+　　　　　　　　　　　　;음란,창부<br>
+　　　　　　　　　　　　</font><font color="#2cb5cd">ELSEIF TALENT:4 || TALENT:7<br>
+</font><font color="#555555">　　　　　　　　　　　　　　　　PRINTFORMW<br>
+　　　　　　　　　　　　;복종,예속<br>
+　　　　　　　　　　　　</font><font color="#2cb5cd">ELSEIF TALENT:5 || TALENT:8<br>
+</font><font color="#555555">　　　　　　　　　　　　　　　　PRINTFORMW<br>
+　　　　　　　　　　　　</font><font color="#2cb5cd">ENDIF</font><br>
+<font color="#555555">　　　　　　　　　　　　</font><font color="#8000ff">N = 1</font><br>
+</font>　　　　　　　　;굴복각인Lv3<br>
+　　　　　　　　<font color="#5bb421">ELSEIF MARK:2 == 3 &amp;&amp; (L:2 == 0 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　PRINTFORMW<br>
+　　　　　　　　　　　　<font color="#8000ff">N = 
+2<br>
+</font>　　　　　　　　;그 이외<br>
+　　　　　　　　<font color="#5bb421">ELSEIF L:3 == 0 || 
+FLAG:7 == 2<br>
+</font>　　　　　　　　　　　　PRINTFORMW<br>
+　　　　　　　　　　　　<font color="#8000ff">N = 3<br>
+</font>　　　　　　　　<font color="#5bb421">ENDIF<br>
+</font>　　　　<font color="#ff8811">ENDIF</font><br>
+　　　　<font color="#8000ff">CALL ONCE_E_K</font><font color="#ff0000">X1</font><br>
+<font color="#fa0e6c">ENDIF</font><br>
+;------------------------------------------------------<br>
+<textarea rows="3" cols="80">IF SELECTCOM == ■
+	O = ●
+	CALL ONCE_S_KX1
+	CALL TRAIN_MESSAGE
+	;처음
+	IF L:0 == 0
+		PRINTFORMW
+		N = 0
+	;2회째 이후
+	ELSE
+		;함락이 끝난 상태
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (L:1 == 0 || FLAG:7 == 2)
+			;연모,친애
+			IF TALENT:3 || TALENT:6
+				PRINTFORMW
+			;음란,창부
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW
+			;복종,예속
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW
+			ENDIF
+			N = 1
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 &amp;&amp; (L:2 == 0 || FLAG:7 == 2)
+			PRINTFORMW
+			N = 2
+		;그 이외
+		ELSEIF L:3 == 0 || FLAG:7 == 2
+			PRINTFORMW
+			N = 3
+		ENDIF
+	ENDIF
+	CALL ONCE_E_KX1
+ENDIF</textarea><br>
+<br>
+;------------------------------------------------------<br>
+；이하의 것@으로 시작되는 함수 2개를입상 파일의 맨 밑에라도 도착해라발움직일 것. <br>
+;------------------------------------------------------<br>
+<font color="#8000ff">@ONCE_S_K</font><font color="#ff0000">X1</font><br>
+REPEAT 
+10<br>
+　　　　L:COUNT = 0<br>
+REND<br>
+M = CFLAG:O<br>
+IF M &gt;= 1000000000<br>
+　　　　L:9 
+= 1<br>
+　　　　M -= 1000000000<br>
+ENDIF<br>
+IF M &gt;= 100000000<br>
+　　　　L:8 = 
+1<br>
+　　　　M -= 100000000<br>
+ENDIF<br>
+IF M &gt;= 10000000<br>
+　　　　L:7 = 1<br>
+　　　　M 
+-= 10000000<br>
+ENDIF<br>
+IF M &gt;= 1000000<br>
+　　　　L:6 = 1<br>
+　　　　M -= 
+1000000<br>
+ENDIF<br>
+IF M &gt;= 100000<br>
+　　　　L:5 = 1<br>
+　　　　M -= 
+100000<br>
+ENDIF<br>
+IF M &gt;= 10000<br>
+　　　　L:4 = 1<br>
+　　　　M -= 
+10000<br>
+ENDIF<br>
+IF M &gt;= 1000<br>
+　　　　L:3 = 1<br>
+　　　　M -= 1000<br>
+ENDIF<br>
+IF 
+M &gt;= 100<br>
+　　　　L:2 = 1<br>
+　　　　M -= 100<br>
+ENDIF<br>
+IF M &gt;= 10<br>
+　　　　L:1 
+= 1<br>
+　　　　M -= 10<br>
+ENDIF<br>
+IF M &gt;= 1<br>
+　　　　L:0 = 1<br>
+ENDIF<br>
+M = 0 
+<p><font color="#8000ff">@ONCE_E_K</font><font color="#ff0000">X1</font><br>
+;마지막의 처리<br>
+IF N == 0 &amp;&amp; L:0 == 
+0<br>
+　　　　CFLAG:O += 1<br>
+ELSEIF N != 0 &amp;&amp; L:N == 0<br>
+　　　　M = 
+1<br>
+　　　　REPEAT N<br>
+　　　　　　　　M = M * 10<br>
+　　　　REND<br>
+　　　　CFLAG:O += 
+M<br>
+ENDIF<br>
+<textarea rows="3" cols="80">@ONCE_S_KX1
+REPEAT 10
+	L:COUNT = 0
+REND
+M = CFLAG:O
+IF M &gt;= 1000000000
+	L:9 = 1
+	M -= 1000000000
+ENDIF
+IF M &gt;= 100000000
+	L:8 = 1
+	M -= 100000000
+ENDIF
+IF M &gt;= 10000000
+	L:7 = 1
+	M -= 10000000
+ENDIF
+IF M &gt;= 1000000
+	L:6 = 1
+	M -= 1000000
+ENDIF
+IF M &gt;= 100000
+	L:5 = 1
+	M -= 100000
+ENDIF
+IF M &gt;= 10000
+	L:4 = 1
+	M -= 10000
+ENDIF
+IF M &gt;= 1000
+	L:3 = 1
+	M -= 1000
+ENDIF
+IF M &gt;= 100
+	L:2 = 1
+	M -= 100
+ENDIF
+IF M &gt;= 10
+	L:1 = 1
+	M -= 10
+ENDIF
+IF M &gt;= 1
+	L:0 = 1
+ENDIF
+M = 0
+
+
+
+@ONCE_E_KX1
+;마지막의 처리
+IF N == 0 &amp;&amp; L:0 == 0
+	CFLAG:O += 1
+ELSEIF N != 0 &amp;&amp; L:N == 0
+	M = 1
+	REPEAT N
+		M = M * 10
+	REND
+	CFLAG:O += M
+ENDIF</textarea><br>
+</p></font></font></body></html>

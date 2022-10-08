@@ -1,0 +1,147 @@
+﻿;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+;eraeraA新口上テンプレートv1.00
+;X1をキャラ番号に置換して使用してください(フェリシアーノなら1、アルフレッドなら10)
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+;==================================================
+;○○口上
+;==================================================
+;・コマンド口上の直前に呼ばれる
+;・RETURN 1すると口上が表示されなくなり、地の文だけ表示される
+;・個別に設定したい場合はこの関数内でスキップする/しないの判定を行う
+;-------------------------------------------------
+@KOJO_TRAIN_MESSAGE_SKIP_KX1
+
+;装備品補完口上を使用しない
+;TFLAG:59 = 1
+
+;ボールギャグ付き、触手口辱中の場合は地の文のみ
+;SIF TEQUIP:ボールギャグ || TEQUIP:触手口辱
+;	RETURN 1
+;崩壊している場合は地の文のみ
+;SIF TALENT:崩壊
+;	RETURN 1
+
+
+;==================================================
+;特定の条件を満たしている場合、コマンドを実行する度にソースが追加
+;露出癖とかマゾっ気とか趣味に合ったコマンドや状態で体力・気力回復する仕様に。
+;マゾっ気くそ高いのにすぐ気絶するのなんとかしたかったんでテスト。
+;==================================================
+;奉仕系のコマンド実行時に体力／気力回復。
+IF ABL:奉仕精神 >= 3
+	SELECTCASE SELECTCOM
+		;受け身奉仕は体力回復
+		CASE 70,71,73 TO 80,85 TO 87,317,420,421,422
+			BASE:体力 += ABL:奉仕精神*2
+		;攻め奉仕は気力回復
+		CASE 220 TO 225,260,261,263,264,318
+			BASE:気力 += ABL:奉仕精神*2
+		;体力気力両方回復する
+		CASE 243 TO 245,319,503,504
+			BASE:体力 += ABL:奉仕精神*2
+			BASE:気力 += ABL:奉仕精神*2
+	ENDSELECT
+ENDIF
+
+;服を着てないと気力回復、露出プレイ中は体力回復。
+IF ABL:露出癖 >= 3
+	;全裸ルート
+	IF !TEQUIP:全身上着 && !TEQUIP:上衣 && !TEQUIP:下衣 && !TEQUIP:下着（上） && !TEQUIP:下着（下） && !TEQUIP:特殊２ && !TEQUIP:特殊１
+		BASE:気力 += ABL:露出癖*2
+	;半裸ルート
+	ELSEIF (TEQUIP:全身上着 || (TEQUIP:上衣 && TEQUIP:下衣)) && !TEQUIP:下着（上） && !TEQUIP:下着（下）
+		BASE:気力 += ABL:露出癖*2
+	ENDIF
+	SIF TEQUIP:ビデオカメラ || TEQUIP:野外プレイ || TEQUIP:羞恥プレイ || SELECTCOM == 3
+		BASE:体力 += ABL:露出癖*2
+ENDIF
+
+;拘束されてると気力回復。
+;苦痛コマンド実行時に体力回復。
+IF ABL:マゾっ気 >= 3
+	SIF TEQUIP:縄 || TEQUIP:アイマスク || TEQUIP:ボールギャグ || TEQUIP:貞操帯 || TEQUIP:射精止め || TEQUIP:全身上着 == 9
+		BASE:気力 += ABL:マゾっ気*2
+	SELECTCASE SELECTCOM
+		CASE 16,25,44,56,62,140 TO 155
+			BASE:体力 += ABL:マゾっ気*2
+	ENDSELECT
+ENDIF
+
+;奴隷攻めコマンド実行時に体力／気力回復。
+IF ABL:サドっ気 >= 3
+	SIF TEQUIP:靴 > 0 && SELECTCOM == 80
+		BASE:体力 += ABL:サドっ気*2
+	SIF ABL:PLAYER:マゾっ気 >= 3 && (SELECTCOM == 226 || SELECTCOM == 227)
+		BASE:体力 += ABL:サドっ気*2
+		BASE:気力 += ABL:サドっ気*2
+	SIF SELECTCOM >= 226 && SELECTCOM <= 227
+		BASE:気力 += ABL:サドっ気*2
+ENDIF
+
+;自慰をすると体力・気力回復。
+IF ABL:自慰中毒 >= 3
+	SELECTCASE SELECTCOM
+		CASE 4,5,6,7
+			BASE:気力 += ABL:自慰中毒*2
+	ENDSELECT
+ENDIF
+
+;精液飲んで体力回復。
+;精液がもらえそうなコマンド実行時は気力回復。
+IF ABL:精液中毒 >= 3
+	SIF TFLAG:0 == 0 && TFLAG:43 == 13
+		BASE:体力 += ABL:精液中毒*2
+	SELECTCASE SELECTCOM
+		CASE 70 TO 75,226,227,407,420,421,516
+			BASE:気力 += ABL:精液中毒*2
+		CASE 410,412
+			BASE:体力 += ABL:精液中毒*2
+	ENDSELECT
+ENDIF
+
+;セックスすると体力・気力回復。淫乱√なら特殊セックスでも回復。
+IF ABL:セックス中毒 >= 3
+	IF TALENT:淫乱 || TALENT:娼婦
+		SELECTCASE SELECTCOM
+			CASE 322,381,405,406,430,431,511 TO 515,517 TO 525
+				BASE:体力 += ABL:セックス中毒*2
+				BASE:気力 += ABL:セックス中毒*2
+		ENDSELECT
+	ENDIF
+	SELECTCASE SELECTCOM
+		CASE 100 TO 116,260 TO 265,507 TO 510,526
+			BASE:体力 += ABL:セックス中毒*2
+			BASE:気力 += ABL:セックス中毒*2
+	ENDSELECT
+ENDIF
+
+;スカ系コマンド実行で体力回復。
+;便意／尿意のあるときに気力回復。
+IF ABL:スカ中毒 >= 3
+	SIF BASE:尿意 >= 60 || BASE:便意 >= 60
+		BASE:気力 += ABL:スカ中毒*2
+	SELECTCASE SELECTCOM
+		CASE 182 TO 185,285,286,302,304
+			BASE:体力 += ABL:スカ中毒*2
+	ENDSELECT
+	;動くかわからんけど一応入れてみる
+	SIF TFLAG:58 == 1 || TFLAG:68 == 1
+		BASE:体力 += ABL:スカ中毒*2
+ENDIF
+
+
+;==================================================
+;ランダム小口上
+;==================================================
+;絶頂回数
+IF (EX:0 + EX:1 + EX:2 + EX:3 >= 20)
+	PRINTFORMW 二十回以上の絶頂を経て、%CALLNAME%は頭のネジが飛んでしまったようだ
+	PRINTFORMW だらしなく顔を緩ませ、呂律の回らない口調で品の無い喘ぎを洩らしている
+ELSEIF (EX:0 + EX:1 + EX:2 + EX:3 >= 10) && (EX:0 + EX:1 + EX:2 + EX:3 < 20)  && MARK:反発刻印 != 3
+	PRINTFORMW 絶頂を何度も味あわされ、%CALLNAME%は息も絶え絶えに喘いでいる
+ENDIF
+
+RETURN 0
+
+
+

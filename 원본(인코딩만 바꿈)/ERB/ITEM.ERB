@@ -1,0 +1,1690 @@
+﻿;--------------------------------------------------
+;アイテム購入
+;--------------------------------------------------
+@EVENTBUY
+;この店の商品ではない、販売条件を満たしていない
+IF !SHOW_ITEM(TFLAG:1, BOUGHT) || !ITEMSALES:BOUGHT
+	CLEARLINE 1
+	RETURN 0
+ENDIF
+
+;--------------------------------------------------
+;購入処理
+;--------------------------------------------------
+;アイテム説明表示
+MONEY += ITEMPRICE:BOUGHT
+ITEM:BOUGHT--
+CALL ITEM_LIST
+SELECTCASE BOUGHT
+	;【汚れ無視】
+	CASE 50
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_64
+	;【調合知識】
+	CASE 51
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_55
+	;【禁断の知識】
+	CASE 52
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_144
+	;【千里眼】
+	CASE 53
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_156
+	;【絶倫】
+	CASE 54
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_47
+	;【受け】
+	CASE 55
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_157
+	;【攻め】
+	CASE 56
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_158
+	;【オメガ】
+	CASE 59
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_170
+	CASEELSE
+		PRINTFORML 【%ITEMNAME:BOUGHT%】
+		TRYCALLFORM DICTIONARY_ITEM_{BOUGHT}
+		PRINTL 
+ENDSELECT
+SETCOLOR 140,140,140
+DRAWLINE
+RESETCOLOR
+SELECTCASE BOUGHT
+	;基本アイテム
+	;0～26アダルトグッズ、30貞操帯、31～33動物耳、34ヘッドセット、38エプロン、39ウェディングセット
+	;57触手使役術、58進化の秘法、90手術道具、91檻、92～93屋台（増築）、94プラカード
+	CASE 0 TO 26,30 TO 34,38,39,57,58,90 TO 94,96 TO 94
+		PRINTFORML 購入しますか？
+		SETCOLOR 140,140,140
+		DRAWLINE
+		RESETCOLOR
+		PRINTBUTTON "[999 キャンセル]", 999
+		PRINT 　
+		PRINTBUTTON "[0 購入する]", 0
+		PRINTL 
+		$INPUT_LOOP_2
+		INPUT
+		SIF RESULT == 999
+			RETURN 0
+		IF RESULT != 0
+			CLEARLINE 1
+			GOTO INPUT_LOOP_2
+		ELSEIF MONEY < ITEMPRICE:BOUGHT
+			CLEARLINE 1
+			PRINTW お金がたりません
+			GOTO INPUT_LOOP_2
+		ENDIF
+		IF BOUGHT == 57 || BOUGHT == 58
+			PRINTFORMW ＜%ITEMNAME:BOUGHT%を身につけました＞
+		ELSE
+			PRINTFORMW ＜%ITEMNAME:BOUGHT%を購入しました＞
+		ENDIF
+		ITEMSALES:BOUGHT = 0
+		ITEM:BOUGHT++
+		MONEY -= ITEMPRICE:BOUGHT
+		TFLAG:13 = 28
+		CALL KOJO_MESSAGE_EVENT
+	;消費アイテム
+	;36,37ストッキング,タイツ、40～49薬品系、86～88酒類
+	CASE 36,37,40 TO 49,86 TO 88
+		IF (100 - ITEM:BOUGHT) <= (MONEY / ITEMPRICE:BOUGHT)
+			LOCAL:3 = 100 - ITEM:BOUGHT
+		ELSE
+			LOCAL:3 = MONEY / ITEMPRICE:BOUGHT
+			LOCAL:4 = 1
+		ENDIF
+		SETCOLOR 140,140,140
+		DRAWLINE
+		RESETCOLOR
+		PRINTFORML %ITEMNAME:BOUGHT%をいくつ購入しますか？（1-{LOCAL:3}個まで）
+		PRINTFORML 数字を入力するか以下のボタンをクリックしてください
+		PRINTL 
+		PRINTBUTTON "[999 キャンセル]", 999
+		PRINT 　
+		PRINTBUTTON "[1個]", 1
+		IF LOCAL:3 >= 5
+			PRINT 　
+			PRINTBUTTON "[5個]", 5
+		ENDIF
+		IF LOCAL:3 >= 10
+			PRINT 　
+			PRINTBUTTON "[10個]", 10
+		ENDIF
+		PRINT 　
+		IF LOCAL:4
+			PRINTBUTTON "[買えるだけ]", LOCAL:3
+		ELSE
+			PRINTBUTTON "[持てるだけ]", LOCAL:3
+		ENDIF
+		PRINTL 
+		$INPUT_LOOP_3
+		INPUT
+		SIF RESULT == 999
+			RETURN 0
+		IF RESULT < 0
+			CLEARLINE 1
+			GOTO INPUT_LOOP_3
+		ELSEIF RESULT > LOCAL:3
+			CLEARLINE 1
+			IF RESULT > LOCAL:3 && !LOCAL:4
+				PRINTW そんなに持てません
+			ELSEIF RESULT > LOCAL:3 && LOCAL:4
+				PRINTW お金が足りません
+			ENDIF
+			GOTO INPUT_LOOP_3
+		ENDIF
+		PRINTFORMW ＜%ITEMNAME:BOUGHT%を{RESULT}個購入しました＞
+		ITEM:BOUGHT += RESULT
+		MONEY -= ITEMPRICE:BOUGHT * RESULT
+		TFLAG:13 = 28
+		CALL KOJO_MESSAGE_EVENT
+	;使用アイテム
+	;50汚れ無視、51調合知識、52禁断の知識、53千里眼、54絶倫、55受け、56攻め、59オメガ
+	;60～85体質変化系の薬、96お守り、97お守り・極
+	CASE 50 TO 56,59 TO 85,96,97
+		IF BOUGHT < 60
+			PRINTFORML 誰が身につけますか？
+		ELSEIF BOUGHT > 95
+			PRINTFORML 誰に持たせますか？
+		ELSE
+			PRINTFORML 誰に使用しますか？
+		ENDIF
+		SETCOLOR 140,140,140
+		DRAWLINE
+		RESETCOLOR
+		FOR COUNT, 0, CHARANUM
+			;アイテム使用可能
+			SIF !ITEM_USE_CHECK(COUNT, BOUGHT)
+				CONTINUE
+			SETCOLOR 0x8888FF
+			SIF (BOUGHT:96 || BOUGHT:97) && COUNT == MASTER
+				CONTINUE
+			IF COUNT == MASTER
+				PRINTFORM %UNICODE(0x27A0)%
+			ELSEIF COUNT == ASSI
+				PRINT 助
+			ELSEIF CFLAG:COUNT:1 == 3
+				PRINT 共
+			ELSEIF COUNT == TARGET
+				PRINT ☆
+			ELSE
+				PRINT 　
+			ENDIF
+			RESETCOLOR
+			PRINTFORM [{COUNT,2}] %CALLNAME:COUNT,16,LEFT%
+			PRINTFORM %UNICODE(0x208D)%
+			CALL PRINT_COLORBAR,BASE:COUNT:体力,MAXBASE:COUNT:体力,8,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("赤"),RESULT:1, 327685
+			PRINTFORM %UNICODE(0x208E)%
+			PRINTFORM %UNICODE(0x208D)%
+			CALL PRINT_COLORBAR,BASE:COUNT:気力,MAXBASE:COUNT:気力,8,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("青"),RESULT:1, 327685
+			PRINTFORM %UNICODE(0x208E)%
+			IF TALENT:MASTER:千里眼
+				PRINT  ストレス
+				IF CFLAG:COUNT:10 >= 95
+					SETCOLOR 0xC0C0C0
+				ELSEIF CFLAG:COUNT:10 >= 80
+					SETCOLOR 0x7070C0
+				ELSEIF CFLAG:COUNT:10 >= 50
+					SETCOLOR 0x70C070
+				ELSEIF CFLAG:COUNT:10 >= 30
+					SETCOLOR 0xC07070
+				ELSE
+					SETCOLOR 0xC070C0
+				ENDIF
+				PRINTFORM {CFLAG:COUNT:10,3} 
+				RESETCOLOR
+			ENDIF
+			;変更系は現在の素質表示
+			SELECTCASE BOUGHT
+				CASE 55,56,59
+					IF TALENT:COUNT:受け
+						PRINT  受け
+					ELSEIF TALENT:COUNT:攻め
+						PRINT  攻め
+					ELSEIF TALENT:COUNT:オメガ
+						PRINT  オメガ
+					ENDIF
+				CASE 73,74,75
+					IF TALENT:COUNT:子供サイズ
+						PRINT  子供サイズ
+					ELSEIF TALENT:COUNT:短小
+						PRINT  短小
+					ELSEIF TALENT:COUNT:巨根
+						PRINT  巨根
+					ELSEIF TALENT:COUNT:馬並み
+						PRINT  馬並み
+					ELSE
+						PRINT  人並み
+					ENDIF
+				CASE 65,66
+					IF TALENT:COUNT:貧乳
+						PRINT  貧乳
+					ELSEIF TALENT:COUNT:絶壁
+						PRINT  絶壁
+					ELSEIF TALENT:COUNT:巨乳
+						PRINT  巨乳
+					ELSEIF TALENT:COUNT:爆乳
+						PRINT  爆乳
+					ELSE
+						PRINT  人並み
+					ENDIF
+				CASE 71,72
+					IF TALENT:COUNT:小人体型
+						PRINT  小人体型
+					ELSEIF TALENT:COUNT:小柄体型
+						PRINT  小柄体型
+					ELSEIF TALENT:COUNT:大柄体型
+						PRINT  大柄体型
+					ELSE
+						PRINT  人並み
+					ENDIF
+				CASE 61,62,69,70
+					IF TALENT:COUNT:半陰半陽 || TALENT:COUNT:ふたなり
+						SETCOLOR 0x999999
+						PRINT  双
+					ENDIF
+					IF TALENT:COUNT:カントボーイ
+						SETCOLOR 0x8491c3
+						PRINTFORM 上♂下♀
+					ELSEIF TALENT:COUNT:シーメール
+						SETCOLOR 0xcc7eb1
+						PRINTFORM 上♀下♂
+					ELSEIF MALE(COUNT)
+						SETCOLOR 0x8491c3
+						PRINTFORM  ♂
+					ELSE
+						SETCOLOR 0xcc7eb1
+						PRINTFORM  ♀
+					ENDIF
+					RESETCOLOR
+				CASE 96,97
+					SIF CFLAG:COUNT:693 == 0
+						SETCOLOR 0x808080
+						PRINTFORM  お守り({CFLAG:COUNT:693})
+						RESETCOLOR
+					PRINTFORM  /
+					SIF CFLAG:COUNT:694 == 0
+						SETCOLOR 0x808080
+						PRINTFORM  お守り・極({CFLAG:COUNT:694})
+						RESETCOLOR
+					ENDSELECT
+			PRINTL 
+		NEXT
+		SETCOLOR 140,140,140
+		DRAWLINE
+		RESETCOLOR
+		PRINT [999] 戻る　　　　　　　　
+		$INPUT_LOOP_4
+		INPUT
+		IF RESULT == 999
+			TFLAG:0 = -2
+			RETURN 0
+		ELSEIF MONEY < ITEMPRICE:BOUGHT
+			CLEARLINE 1
+			PRINTW お金がたりません
+			GOTO INPUT_LOOP_2
+		ELSEIF !ITEM_USE_CHECK(RESULT, BOUGHT)
+			CLEARLINE 1
+			GOTO INPUT_LOOP_2
+		ENDIF
+		MONEY -= ITEMPRICE:BOUGHT
+		LOCAL:5 = RESULT
+		LOCAL:6 = TARGET
+		TARGET = LOCAL:5
+		;アイテム使用
+		CALL USE_ITEM
+		;口上呼び出し処理
+		;産卵イベントはイベント口上を別枠で呼び出す(アイテム：黄色い丸薬分のテンプレは無い)
+		IF BOUGHT == 84
+			TFLAG:13 = 10
+		ELSE
+			TFLAG:13 = 28
+		ENDIF
+		CALL KOJO_MESSAGE_EVENT
+		TARGET = LOCAL:6
+ENDSELECT
+TFLAG:0 = -2
+
+
+;--------------------------------------------------
+;アイテム購入の処理
+;--------------------------------------------------
+@SHOP_ITEM_LIST(ARG)
+DRAWLINE
+CALL ITEM_LIST
+LOCALS = 
+LOCAL:1 = 0
+FOR LOCAL, 0, 199
+		CALL SALEITEM_CHECK(LOCAL)
+NEXT
+
+;ミッションモード
+SIF FLAG:5 == 8
+	CALL FREE_MISSION_SALEITEM_CHECK
+
+FOR LOCAL, 0, 199
+	;この店で買える商品か、販売フラグがあるか
+	SIF !SHOW_ITEM(ARG, LOCAL) || !ITEMSALES:LOCAL
+		CONTINUE
+	LOCALS = [{LOCAL,2}] %ITEMNAME:LOCAL%(%MONEY_FORM(ITEMPRICE:LOCAL)%朱)
+	IF STRLENS(LOCALS)
+		IF STRLENS(LOCALS) > 26
+			LOCAL:1++
+			SIF (LOCAL:1 % 3) == 0
+				PRINTL 
+			PRINTFORM %LOCALS,52,LEFT%
+			PRINT  
+			SIF (LOCAL:1 % 3) == 0
+				LOCAL:1++
+		ELSE
+			PRINTFORM %LOCALS,26,LEFT%
+		ENDIF
+		LOCAL:1++
+	ENDIF
+	IF (LOCAL:1 % 3) == 0
+		PRINTL 
+	ELSE
+		PRINT  
+	ENDIF
+NEXT
+SIF (LOCAL:1 % 3) != 0
+	PRINTL 
+SETCOLOR 140,140,140
+DRAWLINE
+RESETCOLOR
+TFLAG:0 = -1
+
+
+;--------------------------------------------------
+@USE_ITEM
+;--------------------------------------------------
+VARSET LOCAL
+TFLAG:407 = 0
+SELECTCASE BOUGHT
+	;【汚れ無視】
+	CASE 50
+		TALENT:汚れ無視 = 1
+	;【調合知識】
+	CASE 51
+		TALENT:調合知識 = 1
+	;【禁断の知識】
+	CASE 52
+		TALENT:禁断の知識 = 1
+	;【千里眼】
+	CASE 53
+		TALENT:千里眼 = 1
+	;【絶倫】
+	CASE 54
+		TALENT:絶倫 = 1
+	;受け
+	CASE 55
+		;攻めなら素質削除
+		IF TALENT:攻め
+			TALENT:攻め = 0
+		;無ければ[受け]追加
+		ELSE
+			TALENT:受け = 1
+		ENDIF
+	;攻め
+	CASE 56
+		;受けなら素質削除
+		IF TALENT:受け
+			TALENT:受け = 0
+		;無ければ[攻め]追加
+		ELSE
+			TALENT:攻め = 1
+		ENDIF
+	;オメガ
+	CASE 59
+		TALENT:オメガ = 1
+		;発情期のカウント　0-6でランダムで初期値を付与
+		CFLAG:700 = RAND:7
+	;河童の妙薬
+	CASE 60
+		;体力気力500回復、気絶回復、ストレス5追加
+		;主人か助手が[治療]か[調合知識]持ちなら追加で体力気力300回復
+		CFLAG:10 += 5
+		BASE:体力 += 500
+		BASE:気力 += 500
+		IF TALENT:MASTER:治療 || TALENT:MASTER:調合知識 || (ASSI >= 0 && (TALENT:ASSI:治療 || TALENT:ASSI:調合知識))
+			BASE:体力 += 300
+			BASE:気力 += 300
+		ENDIF
+		SIF BASE:体力 > MAXBASE:体力
+			BASE:体力 = MAXBASE:体力
+		SIF BASE:気力 > MAXBASE:気力
+			BASE:気力 = MAXBASE:気力
+		TALENT:気絶 = 0
+	;薬の材料(双)
+	CASE 61
+		;ストレス30追加
+		CFLAG:10 += 30
+		;男のときは半陰半陽(男性体型にヴァギナあり)になる
+		IF TALENT:オトコ
+			;ヴァギナ生えた経験フラグが無ければランダムでＶ関係素質＆[処女]追加
+			SIF !CFLAG:24
+				CALL VAGINA_SET(TARGET)
+			;ヴァギナ生えた経験フラグ、ペニスあったことある経験フラグ
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[オトコ]消去[半陰半陽]追加
+			TALENT:オトコ = 0
+			TALENT:半陰半陽 = 1
+		;女のときはふたなり(女性体型にペニスあり)になる
+		ELSE
+			;ペニス生えた経験なければ、ランダムでペニスサイズ設定＆ランダムで包む＆[童貞]
+			IF !CFLAG:25
+				CALL PENIS_SET(TARGET)
+				;口上追加表示フラグ
+				TFLAG:407 = 1
+			ENDIF
+			;ペニス生えた経験フラグ、ヴァギナ・胸有ったことある経験フラグ
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[ふたなり]追加
+			TALENT:ふたなり = 1
+		ENDIF
+	;薬の材料(消)
+	CASE 62
+		;ストレス10追加
+		CFLAG:10 += 10
+		;半陰半陽のときは男に
+		IF TALENT:半陰半陽
+			;ヴァギナ生えた経験フラグ、ペニスあったことある経験フラグ
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[半陰半陽]消去[オトコ]追加
+			TALENT:オトコ = 1
+			TALENT:半陰半陽 = 0
+		;ふたなりのときは女に
+		ELSE
+			;ペニス生えた経験フラグ、ヴァギナ・胸有ったことある経験フラグ
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[ふたなり]消去
+			TALENT:ふたなり = 0
+		ENDIF
+	;青い丸薬
+	CASE 63
+		;ストレス5追加
+		CFLAG:10 += 5
+		;[母乳体質]追加
+		TALENT:母乳体質 = 1
+	;赤い丸薬
+	CASE 64
+		;ストレス10追加
+		CFLAG:10 += 10
+		;[再生処女]追加
+		TALENT:再生処女 = 1
+	;豊胸剤
+	CASE 65
+		;ストレス10追加
+		CFLAG:10 += 10
+		;絶壁→貧乳
+		IF TALENT:絶壁
+			TALENT:絶壁 = 0
+			TALENT:貧乳 = 1
+		;貧乳→普乳
+		ELSEIF TALENT:貧乳
+			TALENT:貧乳 = 0
+		;普乳→巨乳
+		ELSEIF !TALENT:巨乳
+			TALENT:巨乳 = 1
+		;巨乳→爆乳
+		ELSE
+			TALENT:巨乳 = 0
+			TALENT:爆乳 = 1
+		ENDIF
+	;縮胸剤
+	CASE 66
+		;ストレス10追加
+		CFLAG:10 += 10
+		;爆乳→巨乳
+		IF TALENT:爆乳
+			TALENT:巨乳 = 1
+			TALENT:爆乳 = 0
+		;巨乳→普乳
+		ELSEIF TALENT:巨乳
+			TALENT:巨乳 = 0
+		;普乳→貧乳
+		ELSEIF !TALENT:貧乳
+			TALENT:貧乳 = 1
+		;貧乳→絶壁、母乳も出なくなる
+		ELSE
+			TALENT:絶壁 = 1
+			TALENT:貧乳 = 0
+			;口上追加表示フラグ
+			SIF TALENT:母乳体質
+				TFLAG:407 = 1
+			TALENT:母乳体質 = 0
+		ENDIF
+	;抑プロラクチン薬
+	CASE 67
+		;ストレス5追加
+		CFLAG:10 += 5
+		;[母乳体質]削除
+		TALENT:母乳体質 = 0
+	;３環系抗鬱薬
+	CASE 68
+		;ストレス5追加
+		CFLAG:10 += 5
+		;[おもらし癖]削除
+		TALENT:おもらし癖 = 0
+	;黄色い丸薬
+	CASE 84
+		;LOCAL = 最終的に加算されるストレス値
+		;LOCAL:1 = 減算されるストレス値（産卵経験）　LCOAL:2 = 加算されるストレス値（父親）
+		;LOCAL:3 = 加算される異常経験の数
+		;PREGNANT = 妊娠してるキャラの登録番号　FATHER = 父親の登録番号
+		PREGNANT = TARGET
+		;[妊娠]削除
+		TALENT:PREGNANT:妊娠 = 0
+		;妊娠イベントで減った体力の最大値が回復（少なめ）
+		MAXBASE:PREGNANT:体力 += 300
+		;膣で孕んでいるなら女
+		IF CFLAG:PREGNANT:101 / 100 == 1
+			;胸の縮小処理を実行
+			CALL REVERSE_B_SIZE
+		ENDIF
+		;妊娠関係のフラグ処理
+		CALL CLEAR_FLAG
+		
+		;ストレス値の計算
+		;産卵経験をみる
+		IF EXP:PREGNANT:産卵経験 < EXPLV:1
+			LOCAL:1 = 0
+		ELSEIF EXP:PREGNANT:産卵経験 < EXPLV:2
+			LOCAL:1 = 2
+		ELSEIF EXP:PREGNANT:産卵経験 < EXPLV:3
+			LOCAL:1 = 4
+		ELSEIF EXP:PREGNANT:産卵経験 < EXPLV:4
+			LOCAL:1 = 6
+		ELSEIF EXP:PREGNANT:産卵経験 < EXPLV:5
+			LOCAL:1 = 8
+		ELSE
+			LOCAL:1 = 10
+		ENDIF
+		;妊娠相手と陥落素質をみる
+		;母親が未陥落
+		IF !KANRAKU2(PREGNANT)
+			LOCAL:2 = 100
+		;父親が顧客
+		ELSEIF CFLAG:PREGNANT:101 % 100 == 5
+			;母親が服従陥落
+			IF KANRAKU2(PREGNANT) == 3
+				LOCAL:2 = 30
+			;母親が恋慕陥落
+			ELSEIF KANRAKU2(PREGNANT) == 1
+				LOCAL:2 = 80
+			;母親が淫乱陥落
+			ELSE
+				LOCAL:2 = 50
+			ENDIF
+		;母親が淫乱陥落
+		ELSEIF KANRAKU2(PREGNANT) == 2
+			LOCAL:2 = 50
+		;父親が売却された元思慕・畏怖対象
+		ELSEIF CFLAG:PREGNANT:38 > 0 && CFLAG:PREGNANT:111 == CFLAG:PREGNANT:38
+			LOCAL:2 = 200
+		;母親が服従陥落
+		ELSEIF KANRAKU2(PREGNANT) == 3
+			LOCAL:2 = 30
+		;母親が恋慕陥落
+		ELSE
+			;思慕対象が父親
+			FATHER = GETCHARA(CFLAG:PREGNANT:111)
+			IF FATHER >= 0 && CFLAG:PREGNANT:41 == NO:(FATHER)
+				LOCAL:2 = 120
+			;それ以外
+			ELSE
+				LOCAL:2 = 80
+			ENDIF
+		ENDIF
+		LOCAL = LOCAL:2 - (LOCAL:1 + ABL:PREGNANT:従順 * 4 + ABL:PREGNANT:Ｖ感覚 * 2) + TALENT:PREGNANT:母性 * 5 - TALENT:PREGNANT:気丈 * 2 - TALENT:PREGNANT:感情乏しい * 5
+		SIF LOCAL < 0
+			LOCAL = 0
+		
+		;最終的なストレス値の加算
+		CFLAG:PREGNANT:10 += LOCAL
+		
+		;経験の追加
+		;膣で孕んでる
+		IF CFLAG:PREGNANT:101 / 100 == 1
+			EXP:PREGNANT:Ｖ拡張経験 += 5
+			PRINTL Ｖ拡張経験＋5
+		;アナルで孕んでる
+		ELSEIF CFLAG:PREGNANT:101 / 100 == 7
+			EXP:PREGNANT:Ａ拡張経験 += 5
+			PRINTL Ａ拡張経験＋5
+		ENDIF
+		
+		EXP:PREGNANT:産卵経験 += 1
+		PRINTL 産卵経験＋1
+		
+		;出産、Ｖ拡張経験・Ａ拡張経験がなければ異常経験
+		SIF !EXP:PREGNANT:出産経験
+			LOCAL:3 += 2
+		SIF EXP:PREGNANT:Ｖ拡張経験 == 5 && (CFLAG:PREGNANT:101 / 100 == 1)
+			LOCAL:3 += 1
+		SIF EXP:PREGNANT:Ａ拡張経験 == 5 && (CFLAG:PREGNANT:101 / 100 == 7)
+			LOCAL:3 += 1
+		IF LOCAL:3
+			EXP:PREGNANT:異常経験 += LOCAL:3
+			PRINTFORML 異常経験＋{LOCAL:3}
+		ENDIF
+		;体力は10になる
+		BASE:PREGNANT:体力 = 10
+		;崩壊処理
+		SIF CFLAG:PREGNANT:10 >= 100 && !TALENT:PREGNANT:崩壊
+			CALL COLLAPSE_MIND
+		;休憩フラグをたて、ターンエンド
+		PRINTW 
+		FLAG:0 = 1
+		BEGIN TURNEND
+	;半性転換の薬
+	CASE 69
+		;ストレス30追加
+		CFLAG:10 += 30
+		;カントボーイから男へ
+		IF TALENT:カントボーイ
+			;ペニス生えた経験なければ、ランダムでペニスサイズ設定＆ランダムで包む＆[童貞]
+			IF !CFLAG:25
+				CALL PENIS_SET(TARGET)
+				;口上追加表示フラグ
+				TFLAG:407 = 1
+			ENDIF
+			;ペニス生えた経験フラグ、ヴァギナ有ったことある経験フラグ
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[カントボーイ]消去
+			TALENT:カントボーイ = 0
+			;[オトコ]追加
+			TALENT:オトコ = 1
+		;シーメールから女へ
+		ELSEIF TALENT:シーメール
+			;ヴァギナ生えた経験フラグが無ければランダムでＶ関係素質＆[処女]追加
+			SIF !CFLAG:24
+				CALL VAGINA_SET(TARGET)
+			;ヴァギナ生えた経験フラグ、ペニスあったことある経験フラグ
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[シーメール]消去
+			TALENT:シーメール = 0
+		;ふたなりからシーメール
+		ELSEIF TALENT:ふたなり
+			;ヴァギナ有ったことある経験フラグ
+			CFLAG:24 = 1
+			;[ふたなり]消去
+			TALENT:ふたなり = 0
+			;[シーメール]追加
+			TALENT:シーメール = 1
+		;半陰半陽からカントボーイ
+		ELSEIF TALENT:半陰半陽
+			;ペニスあったことある経験フラグ
+			CFLAG:25 = 1
+			;[半陰半陽]消去
+			TALENT:半陰半陽 = 0
+			;[カントボーイ]追加
+			TALENT:カントボーイ = 1
+		;男からカントボーイに
+		ELSEIF TALENT:オトコ
+			;ヴァギナ生えた経験フラグが無ければランダムでＶ関係素質＆[処女]追加
+			SIF !CFLAG:24
+				CALL VAGINA_SET(TARGET)
+			;ヴァギナ生えた経験フラグ、ペニスあったことある経験フラグ
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[オトコ]消去
+			TALENT:オトコ = 0
+			;[カントボーイ]追加
+			TALENT:カントボーイ = 1
+		;女からシーメールに
+		ELSE
+			;ペニス生えた経験なければ、ランダムでペニスサイズ設定＆ランダムで包む＆[童貞]
+			IF !CFLAG:25
+				CALL PENIS_SET(TARGET)
+				;口上追加表示フラグ
+				TFLAG:407 = 1
+			ENDIF
+			;ペニス生えた経験フラグ、ヴァギナ有ったことある経験フラグ
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[シーメール]追加
+			TALENT:シーメール = 1
+		ENDIF
+	;性転換の薬
+	CASE 70
+		;ストレス30追加
+		CFLAG:10 += 30
+		;ふたなりから半陰半陽
+		IF TALENT:ふたなり
+			;ペニス・ヴァギナ・胸生えた経験フラグ
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[ふたなり]消去
+			TALENT:ふたなり = 0
+			;[半陰半陽]追加
+			TALENT:半陰半陽 = 1
+		;半陰半陽からふたなり
+		ELSEIF TALENT:半陰半陽
+			;胸生えた経験なければ、ランダムで胸サイズ設定
+			IF !CFLAG:23
+				CALL BREAST_SET(TARGET)
+				;口上追加表示フラグ
+				TFLAG:407 = 1
+			ENDIF
+			;ペニス・ヴァギナ・胸生えた経験フラグ
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[半陰半陽]消去
+			TALENT:半陰半陽 = 0
+			;[ふたなり]追加
+			TALENT:ふたなり = 1
+		;カントボーイからシーメールに
+		ELSEIF TALENT:カントボーイ
+			;胸生えた経験なければ、ランダムで胸サイズ設定
+			IF !CFLAG:23
+				CALL BREAST_SET(TARGET)
+				;口上追加表示フラグ
+				TFLAG:407 = 1
+			ENDIF
+			;ペニス生えた経験なければ、ランダムでペニスサイズ設定＆ランダムで包む＆[童貞]
+			IF !CFLAG:25
+				CALL PENIS_SET(TARGET)
+				;口上追加表示フラグ
+				TFLAG:407 = 1
+			ENDIF
+			;ペニス・胸生えた経験フラグ、ヴァギナ有ったことある経験フラグ
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[カントボーイ]消去
+			TALENT:カントボーイ  = 0
+			;[シーメール]追加
+			TALENT:シーメール  = 1
+		;シーメールからカントボーイに
+		ELSEIF TALENT:シーメール
+			;ヴァギナ生えた経験フラグが無ければランダムでＶ関係素質＆[処女]追加
+			SIF !CFLAG:24
+				CALL VAGINA_SET(TARGET)
+			;ヴァギナ生えた経験フラグ、ペニス・胸有ったことある経験フラグ
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[シーメール]消去
+			TALENT:シーメール  = 0
+			;[カントボーイ]追加
+			TALENT:カントボーイ  = 1
+		;男から女に
+		ELSEIF TALENT:オトコ
+			;胸生えた経験なければ、ランダムで胸サイズ設定
+			IF !CFLAG:23
+				CALL BREAST_SET(TARGET)
+				;口上追加表示フラグ
+				TFLAG:407 = 1
+			ENDIF
+			;ヴァギナ生えた経験フラグが無ければランダムでＶ関係素質＆[処女]追加
+			SIF !CFLAG:24
+				CALL VAGINA_SET(TARGET)
+			;ヴァギナ、胸生えた経験フラグ、ペニスあったことある経験フラグ
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[オトコ]消去
+			TALENT:オトコ = 0
+		;女から男に
+		ELSE
+			;ペニス生えた経験なければ、ランダムでペニスサイズ設定＆ランダムで包む＆[童貞]
+			IF !CFLAG:25
+				CALL PENIS_SET(TARGET)
+				;口上追加表示フラグ
+				TFLAG:407 = 1
+			ENDIF
+			;ペニス生えた経験フラグ、ヴァギナ・胸有ったことある経験フラグ
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[オトコ]追加
+			TALENT:オトコ = 1
+		ENDIF
+	;天使の奇跡
+	CASE 71
+		;ストレス20追加
+		CFLAG:10 += 20
+		;小柄体型→小人体型
+		IF TALENT:小柄体型
+			;[パイパン][小人体型]追加[小柄体型]削除
+			TALENT:パイパン = 1
+			TALENT:小人体型 = 1
+			TALENT:小柄体型 = 0
+			;ペニスあり
+			IF PENIS(TARGET)
+				;[子供サイズ][包茎]追加、他のペニスサイズ素質を削除
+				TALENT:子供サイズ = 1
+				TALENT:包茎 = 1
+				TALENT:短小 = 0
+				TALENT:巨根 = 0
+				TALENT:馬並み = 0
+			ENDIF
+		;普通体型→小柄体型
+		ELSEIF !TALENT:大柄体型
+			;[小柄体型]追加
+			TALENT:小柄体型 = 1
+		;大柄体型→普通体型
+		ELSE
+			;[大柄体型]削除
+			TALENT:大柄体型 = 0
+		ENDIF
+	;悪魔の呪い
+	CASE 72
+		;ストレス20追加
+		CFLAG:10 += 20
+		;小人体型→小柄体型
+		IF TALENT:小人体型
+			;[パイパン][小人体型]削除[小柄体型]追加
+			TALENT:パイパン = 0
+			TALENT:小人体型 = 0
+			TALENT:小柄体型 = 1
+			;ペニスあり
+			IF PENIS(TARGET)
+				;[子供サイズ]削除[短小]追加
+				TALENT:子供サイズ = 0
+				TALENT:短小 = 1
+			ENDIF
+		;小柄体型→普通体型
+		ELSEIF TALENT:小柄体型
+			;[小柄体型]削除
+			TALENT:小柄体型 = 0
+		;普通体型→大柄体型
+		ELSEIF !TALENT:大柄体型
+			;[大柄体型]追加
+			TALENT:大柄体型 = 1
+		ENDIF
+	;包根剤
+	CASE 75
+		;ストレス5追加
+		CFLAG:10 += 5
+		;[包茎]追加
+		TALENT:包茎 = 1
+	;記憶消去薬
+	CASE 80
+		;記憶消去経験
+		CFLAG:51++
+		;素質の一部初期化
+		FOR LOCAL, 0, 170
+			SELECTCASE LOCAL
+				;[恋慕][淫乱][服従][親愛][娼婦][隷属][崩壊][失意][相愛]
+				CASE 3 TO 9,162,165
+					TALENT:LOCAL = 0
+				;身体特徴素質はそのまま
+				CASE 10 TO 37,44,63,82 TO 94,141,150,151,155
+					;子供には効果なし
+					SIF NO:TARGET >= 890 && NO:TARGET <= 899
+						CONTINUE
+					CSVTALENT NO:TARGET, LOCAL, TFLAG:407
+					TALENT:LOCAL = RESULT
+					;個体差処理　メシマズのみ
+					SIF DIFF_GET_TALENT(TARGET, 12) == 2
+						TALENT:LOCAL:メシマズ = 1
+			ENDSELECT
+		NEXT
+		;刻印の初期化
+		FOR LOCAL, 0, 5
+			MARK:LOCAL = 0
+		NEXT
+		;能力の一部初期化
+		FOR LOCAL, 0, 23
+			SIF LOCAL >= 3 && LOCAL <= 6
+				CONTINUE
+			ABL:LOCAL = 0
+		NEXT
+		;相愛がある場合、相愛相手の[相愛]を消し、陥落素質記録フラグを[親愛]に戻す
+		IF CFLAG:39 == 165
+			LOCAL = RESULT
+			TALENT:(NO2(CFLAG:LOCAL:41)):相愛 = 0
+			CFLAG:(NO2(CFLAG:LOCAL:41)):39 = 6
+		ENDIF
+		;キャラフラグの一部初期化
+		;口上用CFLAGのうち5000～の方は初期化しないので、不都合がある場合口上内で初期化して下さい
+		FOR LOCAL, 0, 1300
+			SELECTCASE LOCAL
+				CASE 1,2,10,38 TO 41,140 TO 147,201 TO 600,1099 TO 2098,2099 TO 3098
+					CFLAG:LOCAL = 0
+			ENDSELECT
+		NEXT
+		;FIRSTTIME関数の初期化
+		CSTR:20 = 
+		;ストレス50追加
+		CFLAG:10 += 50
+	;排卵誘発剤
+	CASE 82
+		CFLAG:109 = 1
+	;高性能避妊具
+	CASE 83
+		CFLAG:108 = 1
+	;緊急避妊薬
+	CASE 85
+		PREGNANT = TARGET
+		;妊娠関係のフラグ処理
+		CALL CLEAR_FLAG
+	;豊根剤
+	CASE 73
+		;ストレス10追加
+		CFLAG:10 += 10
+		;子供サイズ→短小
+		IF TALENT:子供サイズ
+			;[子供サイズ]削除[短小]追加
+			TALENT:子供サイズ = 0
+			TALENT:短小 = 1
+		;短小→人並み
+		ELSEIF TALENT:短小
+			;[短小]削除
+			TALENT:短小 = 0
+		;人並み→巨根
+		ELSEIF !TALENT:巨根 && !TALENT:馬並み
+			;[巨根]追加
+			TALENT:巨根 = 1
+		;巨根→馬並み
+		ELSE
+			;[巨根]削除[馬並み]追加
+			TALENT:巨根 = 0
+			TALENT:馬並み = 1
+		ENDIF
+	;縮根剤
+	CASE 74
+		;ストレス15追加
+		CFLAG:10 += 15
+		;馬並み→巨根
+		IF TALENT:馬並み
+			;[馬並み]削除[巨根]追加
+			TALENT:巨根 = 1
+			TALENT:馬並み = 0
+		;巨根→人並み
+		ELSEIF TALENT:巨根
+			;[巨根]削除
+			TALENT:巨根 = 0
+		;人並み→短小
+		ELSEIF !TALENT:短小 && !TALENT:子供サイズ
+			;[短小]追加
+			TALENT:短小 = 1
+		;短小→子供サイズ
+		ELSE
+			;[短小]削除[子供サイズ]追加
+			TALENT:子供サイズ = 1
+			TALENT:短小 = 0
+		ENDIF
+	;巻き戻しの薬
+	CASE 81
+		;CSVの設定から呼び出すので、口上で生まれつき女体化、未経験などの設定を付けるときは
+		;イベント口上：巻き戻し薬に素質変更を仕込むこと
+		
+		;体格は戻さず、CSVが小人体型でなく現小人体型のとき、経験・能力・処女系素質も白紙にする
+		
+		;元は小人体型でない
+		SIF !CSVTALENT(NO:TARGET, 142, CFLAG:0)
+			LOCAL:1 = 1
+		;個体差で小人体型を得ていない
+		SIF DIFF_GET_TALENT(TARGET , 4) != 1
+			LOCAL:1 = 1
+		;巻き戻し経験
+		CFLAG:52++
+		;ストレス30追加
+		CFLAG:10 += 30
+		;体力の初期化
+		MAXBASE:体力 = CSVBASE(NO:TARGET, 0, CFLAG:0)
+		SIF BASE:体力 > MAXBASE:体力
+			BASE:体力 = MAXBASE:体力
+		;経験の初期化
+		FOR LOCAL, 0, 70
+			EXP:LOCAL = CSVEXP(NO:TARGET, LOCAL, CFLAG:0)
+			SIF LOCAL:1
+				EXP:LOCAL = 0
+		NEXT
+		;能力の一部初期化
+		FOR LOCAL, 0, 23
+			SIF LOCAL < 2 || (LOCAL > 6 && LOCAL < 12) || LOCAL > 14
+				CONTINUE
+			ABL:LOCAL = CSVABL(NO:TARGET, LOCAL, CFLAG:0)
+			SIF LOCAL:1
+				ABL:LOCAL = 0
+		NEXT
+		;素質の一部初期化
+		FOR LOCAL, 0, 205
+			SELECTCASE LOCAL
+				;烙印欠損は消す
+				CASE 159, 200 TO 205
+					TALENT:LOCAL = 0
+				;変化してるかもしれない素質を元に戻す
+				;メシマズ,薬毒耐性,おもらし癖,汚臭敏感
+				;身体特徴素質,性別,動物耳,母乳体質,絶倫,烙印欠損
+				CASE 1, 44 TO 47, 56, 57, 62, 100 TO 140, 142, 143, 149, 163, 172, 173
+					;子供には効果なし
+					SIF NO:TARGET >= 890 && NO:TARGET <= 899
+						CONTINUE
+					TALENT:LOCAL = CSVTALENT(NO:TARGET, LOCAL, CFLAG:0)
+				;処女系素質
+				CASE 0, 160, 161
+					TALENT:LOCAL = CSVTALENT(NO:TARGET, LOCAL, CFLAG:0)
+					SIF LOCAL:1
+						TALENT:LOCAL = 1
+			ENDSELECT
+		NEXT
+		;個体差処理
+		CALL DIFF_GET_BUY(TARGET)
+		;苦痛/快楽刻印の初期化
+		MARK:苦痛刻印 = 0
+		MARK:快楽刻印 = 0
+		;経験系フラグを初期化
+		CFLAG:23 = 0
+		CFLAG:24 = 0
+		CFLAG:25 = 0
+		CFLAG:43 = 0
+		CFLAG:44 = 0
+		CFLAG:45 = 0
+		CFLAG:46 = 0
+		CFLAG:47 = 0
+		CFLAG:49 = 0
+		CFLAG:50 = 0
+		;妊娠パッチまわりのフラグをリセット
+		SIF !CFLAG:110
+			CALL CLEAR_FLAG
+	CASE 96
+		CFLAG:693 += 1
+	CASE 97
+		CFLAG:694 += 1
+ENDSELECT
+;アイテムによる崩壊の処理
+SIF CFLAG:10 >= 100 && !TALENT:崩壊
+	CALL COLLAPSE_MIND
+
+
+;--------------------------------------------------
+;それぞれの店で買える商品
+;--------------------------------------------------
+@SHOW_ITEM(ARG, ARG:1)
+#FUNCTION
+LOCAL = 0
+;アダルトショップ
+;ローター　Ｅマッサージャ　クリキャップ　電動オナホール　バイブ　アナルバイブ　アナルビーズ
+;ボディクリップ　拡張バルーン　浣腸器具一式　ニプルキャップ　搾乳機　ペニスバンド
+;鞭　針　アイマスク　縄　ボールギャグ　ビデオカメラ　カメラ　プレイマット　大鏡
+;首輪＋リード　電極プレイキット　リボン　カテーテル　三角木馬
+;ビデオテープ　フィルム　低温蝋燭　酒
+;（薬局兼用）ローション　媚薬　利尿剤　コンドーム　強精神薬　瀉下薬
+;（ブティック兼用）貞操帯
+IF ARG == 1
+	SELECTCASE ARG:1
+		CASE 0 TO 26,30 TO 34,36 TO 39,40 TO 75,80 TO 88,90 TO 94,96,97,
+			LOCAL = 1
+	ENDSELECT
+ENDIF
+RETURNF LOCAL
+
+
+;--------------------------------------------------
+;販売条件
+;--------------------------------------------------
+@SALEITEM_CHECK(ARG)
+VARSET LOCAL
+ITEMSALES:ARG = 1
+;存在しないアイテムは売れない
+SIF !STRLENS(ITEMNAME:ARG)
+	ITEMSALES:ARG = 0
+;アイテム番号以上
+SIF ARG >= 200
+	ITEMSALES:ARG = 0
+;基本アイテム
+IF (ARG >= 0 && ARG != 36 && ARG != 37 && ARG <= 39) || ARG == 57 || ARG == 58 || (ARG >= 90 && ARG <= 94)
+	;すでに所持しているなら販売しない
+	SIF ITEM:ARG
+		ITEMSALES:ARG = 0
+ENDIF
+;消費アイテム
+IF ARG == 36 || ARG == 37 || (ARG >= 40 && ARG <= 49) || (ARG >= 86 && ARG <= 88)
+	;すでに99個持っているなら販売しない
+	SIF ITEM:ARG >= 99
+		ITEMSALES:ARG = 0
+ENDIF
+;主人か助手が禁断の知識を持っている
+SIF TALENT:MASTER:禁断の知識 || (ASSI >= 0 && TALENT:ASSI:禁断の知識)
+	LOCAL:1 = 1
+;主人か助手が調合知識を持っている
+SIF TALENT:MASTER:調合知識 || (ASSI >= 0 && TALENT:ASSI:調合知識)
+	LOCAL:2 = 1
+FOR LOCAL, 0, CHARANUM
+	;主人か共犯者、助手経験者のいずれかが禁断の知識を持っている
+	IF TALENT:LOCAL:禁断の知識
+		SIF CFLAG:LOCAL:1 == 3 || ISASSI:LOCAL == 1
+			LOCAL:3++
+	ENDIF
+	;主人か共犯者、助手経験者のいずれかが調合知識を持っている
+	IF TALENT:LOCAL:調合知識
+		SIF CFLAG:LOCAL:1 == 3 || ISASSI:LOCAL == 1
+			LOCAL:4++
+	ENDIF
+	;相愛カップルがいる
+	SIF TALENT:LOCAL:相愛
+		LOCAL:5++
+	;汚れ無視を持っている
+	SIF TALENT:LOCAL:汚れ無視
+		LOCAL:6++
+	;調合知識を持っている
+	SIF TALENT:LOCAL:調合知識
+		LOCAL:7++
+	;禁断の知識を持っている
+	SIF TALENT:LOCAL:禁断の知識
+		LOCAL:8++
+	;千里眼を持っている
+	SIF TALENT:LOCAL:千里眼
+		LOCAL:9++
+	;絶倫を持っている
+	SIF TALENT:LOCAL:絶倫
+		LOCAL:10++
+	;受けを持っている
+	SIF TALENT:LOCAL:受け
+		LOCAL:11++
+	;攻めを持っている
+	SIF TALENT:LOCAL:攻め
+		LOCAL:12++
+	;陥落済み奴隷がいる
+	SIF TALENT:LOCAL:服従 || TALENT:LOCAL:隷属 || TALENT:LOCAL:恋慕 || TALENT:LOCAL:親愛 || TALENT:LOCAL:淫乱 || TALENT:LOCAL:娼婦
+		LOCAL:13++
+	
+	;アイテム使用個人条件
+	SIF ARG >= 60 && ARG <= 85
+		LOCAL:(ARG - 50) += ITEM_USE_CHECK(LOCAL, ARG)
+NEXT
+
+;主人か共犯者、助手経験者のだれも禁断の知識を持っていない
+;触手使役術　進化の秘法　薬の材料(双)　半性転換の薬　手術道具一式
+SELECTCASE ARG
+	CASE 57,58,61,69,90
+		SIF !LOCAL:3
+			ITEMSALES:ARG = 0
+ENDSELECT
+
+;【調合知識】主人か共犯者、助手経験者のだれも調合知識を持っていない
+SIF ARG == 52 && !LOCAL:4
+	ITEMSALES:ARG = 0
+
+;主人か助手の調合知識が必須
+;薬の材料(双) 薬の材料(消) 青い丸薬 赤い丸薬 豊胸剤 縮胸剤
+;抑プロラクチン薬 ３環系抗鬱薬 半性転換の薬 性転換の薬 豊根剤 縮根剤 包根剤
+;黄色い丸薬 記憶消去薬 巻き戻しの薬　緊急避妊薬
+SELECTCASE ARG
+	CASE 61 TO 70,73 TO 75,80,81,84,85
+		SIF !LOCAL:2
+			ITEMSALES:ARG = 0
+ENDSELECT
+
+;主人か助手の禁断の知識が必須
+;千里眼　【オメガ】　天使の奇跡　悪魔の呪い　記憶消去薬　巻き戻しの薬　黄色い丸薬
+SELECTCASE ARG
+	CASE 53,59,71,72,80,81,84
+		SIF !LOCAL:1
+			ITEMSALES:ARG = 0
+ENDSELECT
+;その他条件
+SELECTCASE ARG
+	;檻、屋台、プラカード
+	CASE 91,92,94
+		;陥落済み奴隷がいない
+		SIF !LOCAL:13
+			ITEMSALES:ARG = 0
+	;屋台の増築
+	CASE 93
+		;屋台を持ってない
+		SIF !ITEM:92
+			ITEMSALES:ARG = 0
+	;進化の秘法
+	CASE 58
+		;触手使役術を持っていない
+		SIF !ITEM:57
+			ITEMSALES:ARG = 0
+	;ウエディングセット
+	CASE 39
+		;相愛のカップルがいない
+		SIF !LOCAL:5
+			ITEMSALES:ARG = 0
+	;手術道具一式
+	CASE 90
+		;猟奇コマンド拡張オフ
+		SIF (FLAG:2 & 32) == 0
+			ITEMSALES:ARG = 0
+	;ビデオテープ
+	CASE 43
+		;ビデオカメラが無い
+		SIF !ITEM:18
+			ITEMSALES:ARG = 0
+	;フィルム
+	CASE 44
+		;カメラが無い
+		SIF !ITEM:19
+			ITEMSALES:ARG = 0
+	;【汚れ無視】【調合知識】【禁断の知識】【千里眼】【絶倫】【受け】【攻め】
+	;全員所持している
+	CASE 50 TO 56
+		SIF LOCAL:(ARG - 35) == CHARANUM
+			ITEMSALES:ARG = 0
+ENDSELECT
+
+
+;--------------------------------------------------
+;所持アイテムの表示
+;--------------------------------------------------
+@ITEM_LIST
+TFLAG:0 = -1
+SETCOLOR 140,140,140
+DRAWLINE
+RESETCOLOR
+PRINTFORML 所持甲州金：{MONEY}朱
+PRINT 所持アイテム：
+LOCAL:1 = 0
+FOR LOCAL, 0, 199
+	IF ITEM:LOCAL
+		SIF (LOCAL >= 50 && LOCAL <= 56) || (LOCAL >= 59 && LOCAL <= 85)
+			CONTINUE
+		LOCAL:2 = STRLENS(ITEMNAME:LOCAL)
+		LOCAL:1 += LOCAL:2 + 3
+		IF LOCAL:1 > 60
+			PRINTL 
+			PRINT 　　　　　　　
+			LOCAL:1 = LOCAL:2 + 3
+		ENDIF
+		PRINTFORM [%ITEMNAME:LOCAL%
+		IF ITEM:LOCAL > 1
+			PRINTFORM ×{ITEM:LOCAL}
+			LOCAL:1 += 5
+		ENDIF
+		PRINTFORM ] 
+	ENDIF
+NEXT
+SIF !LOCAL:1
+	PRINT なし
+PRINTL 
+SETCOLOR 140,140,140
+DRAWLINE
+RESETCOLOR
+
+
+;--------------------------------------------------
+;アイテム使用個人条件
+;--------------------------------------------------
+@ITEM_USE_CHECK(ARG, ARG:1)
+#FUNCTION
+;労役中のキャラは除外
+SIF CFLAG:ARG:12 > 0
+	RETURNF 0
+;成長前の子供は除外
+SIF CFLAG:ARG:26
+	RETURNF 0
+;育児部屋に移動しているキャラは除外
+SIF (TALENT:ARG:妊娠 && CFLAG:ARG:110 - 3 <= DAY) || TALENT:ARG:育児中
+	RETURNF 0
+SELECTCASE ARG:1
+	;【汚れ無視】【調合知識】【禁断の知識】【千里眼】【絶倫】は助手可能キャラのみ
+	CASE 50 TO 54
+		SIF CFLAG:ARG:1 >= 2
+			RETURNF 1
+	;受け
+	CASE 55
+		;受けでない
+		SIF !TALENT:ARG:受け
+			RETURNF 1
+	;攻め
+	CASE 56
+		;攻めでない
+		SIF !TALENT:ARG:攻め
+			RETURNF 1
+	;オメガ
+	CASE 59
+		;オメガでない
+		SIF !TALENT:ARG:オメガ
+			RETURNF 1
+	;河童の妙薬
+	CASE 60
+		;体力気力のどちらかが減少している
+		SIF BASE:ARG:体力 < MAXBASE:ARG:体力 || BASE:ARG:気力 < MAXBASE:ARG:気力
+			RETURNF 1
+	;薬の材料(双)
+	CASE 61
+		;ふたなり/半陰半陽/カントボーイ/シーメールでなく、主人か助手が禁断の知識を持っているか対象に不思議な根か具現が必要
+		SIF !TALENT:ARG:ふたなり && !TALENT:ARG:半陰半陽 && !TALENT:ARG:カントボーイ && !TALENT:ARG:シーメール && ((TALENT:MASTER:禁断の知識 || (ASSI >= 0 && TALENT:ASSI:禁断の知識)) || (TALENT:ARG:不思議な根 || TALENT:ARG:具現))
+			RETURNF 1
+	;薬の材料(消)
+	CASE 62
+		;ふたなり/半陰半陽をもっている
+		SIF TALENT:ARG:ふたなり || TALENT:ARG:半陰半陽
+			RETURNF 1
+	;青い丸薬
+	CASE 63
+		;母乳体質でない
+		SIF !TALENT:ARG:母乳体質 && ((FLAG:2 & 256) || ((BREAST(ARG) || TALENT:ARG:絶壁) && (FLAG:2 & 256) == 0 ))
+			RETURNF 1
+	;赤い丸薬
+	CASE 64
+		;処女/再生処女でなく、ヴァギナがある
+		SIF !TALENT:ARG:処女 && !TALENT:ARG:再生処女 && VAGINA(ARG)
+			RETURNF 1
+	;豊胸剤
+	CASE 65
+		;男でなく、爆乳でない
+		SIF !MALE(ARG) && !TALENT:ARG:爆乳
+			RETURNF 1
+	;縮胸剤
+	CASE 66
+		;男でなく、絶壁でない
+		SIF !MALE(ARG) && !TALENT:ARG:絶壁
+			RETURNF 1
+	;抑プロラクチン薬
+	CASE 67
+		;母乳体質である
+		SIF TALENT:ARG:母乳体質
+			RETURNF 1
+	;３環系抗鬱薬
+	CASE 68
+		;おもらし癖である
+		SIF TALENT:ARG:おもらし癖
+			RETURNF 1
+	;半性転換の薬
+	CASE 69
+		;主人か助手が禁断の知識を持っている　かつ　妊娠していない（発覚前含む）
+		SIF (TALENT:MASTER:禁断の知識 || (ASSI >= 0 && TALENT:ASSI:禁断の知識)) && CFLAG:ARG:110 <= 0
+			RETURNF 1
+	;性転換薬
+	CASE 70
+		;妊娠していない（発覚前含む）
+		SIF CFLAG:ARG:110 <= 0
+			RETURNF 1
+	;天使の奇跡
+	CASE 71
+		;小人体型でない
+		SIF !TALENT:ARG:小人体型
+			RETURNF 1
+	;悪魔の呪い
+	CASE 72
+		;大柄体型でない
+		SIF !TALENT:ARG:大柄体型
+			RETURNF 1
+	;豊根剤
+	CASE 73
+		;ペニスがあり馬並みでない
+		SIF PENIS(ARG) && !TALENT:ARG:馬並み
+			RETURNF 1
+	;縮根剤
+	CASE 74
+		;ペニスがあり子供サイズでない
+		SIF PENIS(ARG) && !TALENT:ARG:子供サイズ
+			RETURNF 1
+	;包根剤
+	CASE 75
+		;ペニスがあり包まれていない
+		SIF PENIS(ARG) && !TALENT:ARG:包茎
+			RETURNF 1
+	;記憶消去薬
+	CASE 80
+		;共犯者フラグが立っていなくて妊娠中、育児中でない
+		SIF CFLAG:ARG:1 <= 2 && !TALENT:ARG:妊娠 && !TALENT:ARG:育児中
+			RETURNF 1
+	;巻き戻しの薬
+	CASE 81
+		;共犯者フラグが立っていなくて妊娠中、育児中でなく、共犯者フラグが無い
+		SIF CFLAG:ARG:1 <= 2 && !TALENT:ARG:妊娠 && !TALENT:ARG:育児中 && CFLAG:ARG:1 < 3
+			RETURNF 1
+	;排卵誘発剤
+	CASE 82
+		;男でないかオメガ持ち　かつ排卵誘発剤効果発動中でなく、共犯者フラグが無い
+		SIF (!MALE(ARG) || TALENT:ARG:オメガ) && !CFLAG:ARG:109 && CFLAG:ARG:1 < 3
+			RETURNF 1
+	;高性能避妊具
+	CASE 83
+		;男でないかオメガ持ち　かつ高性能避妊具効果発動中でなく、共犯者フラグが無い
+		SIF (!MALE(ARG) || TALENT:ARG:オメガ) && !CFLAG:ARG:108 && CFLAG:ARG:1 < 3
+			RETURNF 1
+	;黄色い丸薬
+	CASE 84
+		;妊娠中で臨月であり、共犯者フラグがない
+		SIF TALENT:ARG:妊娠 && (CFLAG:ARG:110 - 3) > DAY && CFLAG:ARG:1 < 3
+			RETURNF 1
+	;緊急避妊薬
+	CASE 85
+		;オトコでなく中田氏フラグが立ってる　もしくは　オメガ持ちオトコで腸中田氏フラグが立ってる
+		SIF (!MALE(ARG) && (CFLAG:ARG:102 || CFLAG:ARG:103 || CFLAG:ARG:104 || CFLAG:ARG:105)) || (MALE(ARG) && TALENT:ARG:オメガ && (CFLAG:ARG:702 || CFLAG:ARG:703 || CFLAG:ARG:704 || CFLAG:ARG:705))
+			RETURNF 1
+	CASEELSE
+		RETURNF 1
+ENDSELECT
+RETURNF 0
+
+
+;--------------------------------------------------
+;【崩壊】を得た場合の処理
+;--------------------------------------------------
+@COLLAPSE_MIND
+TFLAG:13 = 52
+;口上分岐フラグ
+TFLAG:53 = 4
+CALL KOJO_MESSAGE_EVENT
+;お守りがあれば復活
+IF CFLAG:693 || CFLAG:694
+	TFLAG:13 = 72
+	CALL KOJO_MESSAGE_EVENT
+	IF CFLAG:694
+		CFLAG:10 = 0
+		CFLAG:694 -= 1
+	ELSE
+		CFLAG:10 = 90
+		CFLAG:693 -= 1
+	ENDIF
+ELSE
+	TALENT:崩壊 = 1
+	TALENT:恋慕 = 0
+	TALENT:淫乱 = 0
+	TALENT:服従 = 0
+	TALENT:親愛 = 0
+	TALENT:娼婦 = 0
+	TALENT:隷属 = 0
+	TALENT:相愛 = 0
+	;相愛がある場合、相愛相手の[相愛]を消し、陥落素質記録フラグを[親愛]に戻す
+	IF CFLAG:39 == 165
+		TALENT:(NO2(CFLAG:LOCAL:41)):相愛 = 0
+		CFLAG:(NO2(CFLAG:LOCAL:41)):39 = 6
+	ENDIF
+	CFLAG:40 = 0
+	CFLAG:41 = -1
+	CFLAG:10 = 0
+ENDIF
+
+
+;--------------------------------------------------
+;性転換・ふたなり用ペニスを生やす処理
+;--------------------------------------------------
+@PENIS_SET(ARG)
+;ペニス用素質が既にある場合
+SIF TALENT:ARG:子供サイズ || TALENT:ARG:短小 || TALENT:ARG:巨根 || TALENT:ARG:馬並み
+	RETURN 0
+;体型に応じてランダムな大きさのペニスが生える
+LOCAL = RAND:100
+IF TALENT:ARG:小人体型
+	IF LOCAL >= 20
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 5
+		LOCAL:1 = 1
+	ELSE
+		LOCAL:1 = 2
+	ENDIF
+ELSEIF TALENT:ARG:小柄体型
+	IF LOCAL >= 95
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 45
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 10
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 3
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ELSEIF !TALENT:ARG:大柄体型
+	IF LOCAL >= 97
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 80
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 20
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 5
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ELSE
+	IF LOCAL >= 99
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 90
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 30
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 10
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ENDIF
+IF LOCAL:1 == 0
+	TALENT:ARG:子供サイズ = 1
+ELSEIF LOCAL:1 == 1
+	TALENT:ARG:短小 = 1
+ELSEIF LOCAL:1 == 3
+	TALENT:ARG:巨根 = 1
+ELSEIF LOCAL:1 == 4
+	TALENT:ARG:馬並み = 1
+ENDIF
+;体型に応じてランダムで包まれる
+SIF (TALENT:子供サイズ && RAND:4 > 0) || (TALENT:短小 && RAND:2) || (!TALENT:子供サイズ && !TALENT:短小 && !RAND:5)
+	TALENT:ARG:包茎 = 1
+;ランダムでペニス関連の素質がつく
+IF !RAND:5
+	TALENT:ARG:早漏 = 1
+	TALENT:ARG:遅漏 = 0
+ELSEIF !RAND:4
+	TALENT:ARG:遅漏 = 1
+	TALENT:ARG:早漏 = 0
+ENDIF
+;[童貞]追加
+TALENT:ARG:童貞 = 1
+
+
+;--------------------------------------------------
+;性転換用胸を生やす処理
+;--------------------------------------------------
+@BREAST_SET(ARG)
+;胸用素質が既にある場合
+SIF TALENT:ARG:絶壁 || TALENT:ARG:貧乳 || TALENT:ARG:巨乳 || TALENT:ARG:爆乳
+	RETURN 0
+;体型に応じてランダムな大きさの胸が生える
+LOCAL = RAND:100
+IF TALENT:ARG:小人体型
+	IF LOCAL >= 20
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 5
+		LOCAL:1 = 1
+	ELSE
+		LOCAL:1 = 2
+	ENDIF
+ELSEIF TALENT:ARG:小柄体型
+	IF LOCAL >= 95
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 45
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 10
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 3
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ELSEIF !TALENT:ARG:大柄体型
+	IF LOCAL >= 97
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 80
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 20
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 5
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ELSE
+	IF LOCAL >= 99
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 90
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 30
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 10
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ENDIF
+IF LOCAL:1 == 0
+	TALENT:ARG:絶壁 = 1
+ELSEIF LOCAL:1 == 1
+	TALENT:ARG:貧乳 = 1
+ELSEIF LOCAL:1 == 3
+	TALENT:ARG:巨乳 = 1
+ELSEIF LOCAL:1 == 4
+	TALENT:ARG:爆乳 = 1
+ENDIF
+
+
+;--------------------------------------------------
+;性転換用Ｖ関連素質処理
+;--------------------------------------------------
+@VAGINA_SET(ARG)
+;ランダムでＶ関連の素質がつく
+IF !RAND:5
+	TALENT:ARG:Ｖ敏感 = 1
+	TALENT:ARG:Ｖ鈍感 = 0
+ELSEIF !RAND:4
+	TALENT:ARG:Ｖ鈍感 = 1
+	TALENT:ARG:Ｖ敏感 = 0
+ENDIF
+;[処女]追加
+TALENT:ARG:処女 = 1
+
+;--------------------------------------------------
+;消耗品の自動補充
+;--------------------------------------------------
+@ITEM_AUTO_SUPPLY
+;補充個数
+#DIM DYNAMIC SUPPLY = 0
+;消費金額
+#DIM DYNAMIC USED_MONEY = 0
+
+;所持基準数を持っているフラグ番号
+;FLAG:50=ローション、FLAG:51=ビデオテープ、FLAG:52=フィルム、FLAG:53=コンドーム
+#DIM DYNAMIC FLG = 49
+
+;COUNTの数はアイテム番号と一致
+;40=ローション、43=ビデオテープ、44=フィルム、45=コンドーム
+FOR COUNT,40,46
+	;自動補充の対象でないアイテムはスキップ
+	SIF COUNT == 41 || COUNT == 42
+		CONTINUE
+	
+	FLG++
+	
+	;現在の所持個数が、所持基準数を上回るならスキップ
+	SIF ITEM:COUNT >= FLAG:FLG
+		CONTINUE
+	
+	;ビデオテープはビデオカメラを所持していないと補充されない
+	SIF COUNT == 43 && ITEM:ビデオカメラ == 0
+		CONTINUE
+	
+	;フィルムはカメラを所持していないと補充されない
+	SIF COUNT == 44 && ITEM:カメラ == 0
+		CONTINUE
+	
+	;以下、アイテム補充処理
+	
+	;補充個数を算出
+	SUPPLY = FLAG:FLG - ITEM:COUNT
+	;消費金額を算出
+	USED_MONEY = SUPPLY * ITEMPRICE:COUNT
+	
+	;消費金額 > 所持金
+	IF USED_MONEY > MONEY
+		;所持金で買える最大数を算出
+		SUPPLY = MONEY / ITEMPRICE:COUNT
+		
+		IF SUPPLY
+			;消費金額を算出
+			USED_MONEY = SUPPLY * ITEMPRICE:COUNT
+		ELSE
+			PRINTFORML 所持金が足りないため、%ITEMNAME:COUNT%が補充できませんでした。(現在所持数：{ITEM:COUNT}個)
+			CONTINUE
+		ENDIF
+	ENDIF
+	
+	MONEY = MONEY - USED_MONEY
+	ITEM:COUNT += SUPPLY
+	PRINTFORML {SUPPLY}個の%ITEMNAME:COUNT%が補充され、{USED_MONEY}円消費しました。(現在所持数：{ITEM:COUNT}個)
+NEXT
+
+
+
+

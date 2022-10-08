@@ -1,0 +1,210 @@
+﻿;----------------------------------------------------------------
+;정음절정 관련의 처리의 시동
+;----------------------------------------------------------------
+@SEIIN_START
+;입로사정 시키지 않으면 처리하지 않는다
+IF TFLAG:0 == 0 && TFLAG:43!= 13
+	RETURN
+ENDIF
+
+;조교자가 아닌 (분)편만이사정 했을 경우, 일시적으로 PLAYER에 넣는다
+IF TFLAG:0 == 0 && TFLAG:43 == 13
+	M = PLAYER
+	PLAYER = ASSIPLAY ? MASTER # ASSI
+ENDIF
+
+;강제정음절정의 회수(통칭:Pavlov 카운터)를 체크한다
+CALL SEIIN_CHECK
+
+;PLAYER를 되돌린다
+SIF TFLAG:0 == 0 && TFLAG:43 == 13
+	PLAYER = M
+
+
+;----------------------------------------------------------------
+;강제정음절정의 회수(Pavlov 카운터) 체크
+;Pavlov 카운터+1회에 정음절정에
+;Pavlov 카운터가발리나 있고 경우
+;기구나파이즈리등으로 절정 하고 있으면
+;강제정음절정에
+;----------------------------------------------------------------
+@SEIIN_CHECK
+
+;규정의 회수
+P = 20
+;창부, 음란는 기본 15
+SIF TALENT:음란 == 1 || TALENT:창부 == 1
+	P = 15
+
+;노예의 소질에 의해 규정 회수를 증감한다
+;꿋꿋함
+SIF TALENT:꿋꿋함 == 1
+	P += 2
+;프라이드높음
+SIF TALENT:프라이드높음 == 1
+	P += 5
+;보수적
+SIF TALENT:보수적 == 1
+	P += 2
+;낙관적
+SIF TALENT:낙관적 == 1
+	P -= 2
+;비관적
+SIF TALENT:비관적 == 1
+	P += 2
+;일선을넘지않음
+SIF TALENT:일선을넘지않음 == 1
+	P += 5
+;억압
+SIF TALENT:억압 == 1
+	P += 2
+;해방
+SIF TALENT:해방 == 1
+	P -= 2
+;독약내성
+SIF TALENT:독약내성 == 1
+	P += 2
+;더러움무시
+SIF TALENT:더러움무시 == 1
+	P -= 3
+;악취둔감
+SIF TALENT:악취둔감 == 1
+	P -= 2
+;악취민감
+SIF TALENT:악취민감 == 1
+	P += 2
+;쾌감에솔직
+SIF TALENT:쾌감에솔직 == 1
+	P -= 2
+;쾌감을부정
+SIF TALENT:쾌감을부정 == 1
+	P += 2
+;중독되기쉬움
+SIF TALENT:중독되기쉬움 == 1
+	P -= 5
+;도착적
+SIF TALENT:도착적 == 1
+	P -= 2
+;남자혐오
+SIF TALENT:남자혐오 == 1
+	P += 2
+
+IF EXP:강제정음절정 >= P
+	CALL SEIIN_ORGASM
+ELSEIF TFLAG:29 > 0
+	CALL SEIIN_COMPULSION_ORGASM
+ENDIF
+
+;----------------------------------------------------------------
+;정음절정의 처리
+;----------------------------------------------------------------
+@SEIIN_ORGASM
+
+;정음절정경험의 회수 추가
+EX:13 += 1
+EXP:정음절정경험 += 1
+
+;정음절정경험의 처리
+;경험의 회수에 의해 처리가 변화
+IF EXP:정음절정경험 == 1
+	PRINTFORML 
+	PRINTFORMW %CALLNAME%의 모습이 이상하다…
+	PRINTFORML %CALLNAME:PLAYER%가%CALLNAME%의입에사정 한 순간,
+	;통상의 절정의 유무에 의해 지문이 변화
+	IF TFLAG:29 > 0
+		PRINTFORMW %CALLNAME%는 평소보다도 크게 신체를 진동시켰다…
+	ELSE
+		PRINTFORML %CALLNAME%는 성적인 자극이 없는 것에도 불구하고
+		PRINTFORMW 정액을 마신 것 뿐으로 가 버린 것 같다……
+	ENDIF
+	PRINTFORML 
+	PRINTFORMW %CALLNAME%는입내사정에 과잉에 반응하게 되었습니다
+	;정액중독가 LV3에 오른다
+	IF ABL:정액중독 < 3
+		PRINTFORMW %CALLNAME%의 %ABLNAME:16%가 3에 올랐습니다
+		ABL:정액중독 = 3
+	ENDIF
+	PRINTFORMW %EXPNAME:50%＋1
+	EXP:이상경험 += 1
+	
+	;소질의 변화
+	;악취민감가 없어져, 약점잡힘를 잡는다
+	SIF TALENT:악취민감 == 1
+		PRINTFORMW %CALLNAME%는 %TALENTNAME:62%가 아니게 되었습니다
+		TALENT:악취민감 = 0
+	SIF TALENT:약점잡힘 == 0
+		PRINTFORMW %CALLNAME:MASTER%는%CALLNAME%의 %TALENTNAME:37%를 잡았습니다
+	PRINTL 
+	TALENT:약점잡힘 = 1
+ELSE
+	PRINTFORML %CALLNAME:PLAYER%의사정와 동시에
+	PRINTFORML 페니스를 물고 있던%CALLNAME%는 흐려진 소리를 질러
+	PRINTFORML 흠칫 어깨를 작게 진동시켜 절정에 이르렀다…
+ENDIF
+
+PRINTFORML 정음절정경험＋1
+
+;파라미터(parameter) 증감
+;기본 소스 노출, 욕정, 윤활, 굴복, 반발
+SOURCE:액체 += 500
+SOURCE:욕정 += 2000
+SOURCE:노출 += 1000
+SOURCE:굴복 += 3000
+SOURCE:반발 += 800
+
+IF EXP:정음절정경험 == 1
+	TIMES SOURCE:노출, 1.50
+	TIMES SOURCE:굴복, 2.00
+	TIMES SOURCE:반발, 1.50
+ELSEIF ABL:정액중독 == 5
+	TIMES SOURCE:굴복, 1.20
+ELSEIF ABL:정액중독 == 8
+	TIMES SOURCE:욕정, 1.50
+	TIMES SOURCE:반발, 0.80
+	TIMES SOURCE:굴복, 1.50
+ELSEIF ABL:정액중독 == 10
+	TIMES SOURCE:욕정, 2.00
+	TIMES SOURCE:굴복, 2.00
+	TIMES SOURCE:반발, 0.50
+ENDIF
+
+
+;----------------------------------------------------------------
+;강제정음절정의 처리
+;강제정음절정의 경험 회수를 CFLAG:4000에 격납
+;----------------------------------------------------------------
+@SEIIN_COMPULSION_ORGASM
+
+EXP:강제정음절정 += 1
+
+;강제정음절정의 경험 회수에 의해 처리를 분기
+IF EXP:강제정음절정 == 1
+	PRINTFORML 
+	PRINTFORML %CALLNAME%는 %CALLNAME:PLAYER%가 발한 정액을 삼키면서
+	PRINTFORML 주어지는 자극에 의해
+	PRINTFORML 강제적으로 가게 되어 버리고 있다…
+ELSEIF EXP:강제정음절정 == P
+	PRINTFORML 
+	PRINTFORML %CALLNAME%는 완전히
+	PRINTFORML 정액의 맛을 확실히 익혀 버린 것 같다…
+ELSE
+	PRINTFORML 강제정음절정
+	PRINTL 
+ENDIF
+
+;파라미터(parameter) 증감
+;기본 소스
+;굴복, 두려움, 울굴, 반발
+SOURCE:두려움 += 500
+SOURCE:굴복 += 1000
+SOURCE:울굴 += 200
+SOURCE:반발 += 300
+
+IF EXP:강제정음절정 == 1
+	TIMES SOURCE:두려움, 1.50
+	TIMES SOURCE:굴복, 1.50
+	TIMES SOURCE:울굴, 1.50
+	TIMES SOURCE:반발, 1.50
+ELSEIF EXP:강제정음절정 == P
+	SOURCE:욕정 = 1000
+ENDIF

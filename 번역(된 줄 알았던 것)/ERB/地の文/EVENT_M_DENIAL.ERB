@@ -1,0 +1,90 @@
+﻿;실행 판정 불가 때의 텍스트
+;-------------------------------------------------
+;지문 호출
+;-------------------------------------------------
+@DENIAL_MESSAGE
+RESULT = 0
+TRYCALLFORM DENIAL_MESSAGE_{SELECTCOM}
+SIF !RESULT
+	CALL DENIAL_MESSAGE_EX
+
+;-------------------------------------------------
+;범용
+;-------------------------------------------------
+@DENIAL_MESSAGE_EX
+LOCALS = 
+SELECTCASE SELECTCOM
+	CASE 1
+		LOCALS = %CALLNAME%에키스한다
+	CASE 3
+		LOCALS = %CALLNAME%에비패개장 시킨다
+	CASE 4
+		LOCALS = %CALLNAME%에자위 시킨다
+	CASE 5
+		LOCALS = %CALLNAME%에가슴자위 시킨다
+	CASE 6
+		LOCALS = %CALLNAME%에자위 시킨다
+	CASE 7
+		LOCALS = %CALLNAME%에항문자위 시킨다
+	;수음,펠라치오,파이즈리,세로파이즈리,파이즈리펠라,손가락츄파,풋잡,겨드랑이잡,수유손코키
+	CASE 70,71,73,74,75,77,80,82,528
+		LOCALS = %CALLNAME%에 %STR:0%시킨다
+	CASE 85
+		LOCALS = %CALLNAME%에발 빨게 한다
+	CASE 86
+		LOCALS = %CALLNAME%에 구슬 비비어 시킨다
+	CASE 87
+		LOCALS = %CALLNAME%에 구슬 빨게 한다
+	;섹스,A섹스
+	CASE 100 TO 116
+		LOCALS = %CALLNAME%에 %STR:0%시킨다
+	CASE 150
+		LOCALS = %CALLNAME%를가구로한다
+	CASE 181
+		LOCALS = %CALLNAME%를육변기로 한다
+	;음뇨시킨다,식분시킨다
+	CASE 184,185
+		LOCALS = %CALLNAME%에 %STR:0%
+	CASE 206
+		LOCALS = %CALLNAME%에선물시킨다
+	;애무시킨다,가슴을주무르게한다,손가락삽입시킨다,애널애무시킨다
+	CASE 220,221,223,225
+		LOCALS = %CALLNAME%에 %STR:0%
+	CASE 222
+		LOCALS = %CALLNAME%에커닐링구스 시킨다
+	CASE 224
+		LOCALS = %CALLNAME%에애널자극 시킨다
+	;가슴을비빈다,조개비비기,장대비비기
+	CASE 243,244,245
+		LOCALS = %CALLNAME%과 %STR:0%한다
+	;주인수섹스
+	CASE 260 TO 265
+		LOCALS = %CALLNAME%에 %STR:0%
+	;이라마치오시킨다,매도당한다,얻어맞는다,채찍으로맞는다
+	CASE 280,281,283,284
+		LOCALS = %CALLNAME%에 %STR:0%
+	CASE 314
+		LOCALS = %CALLNAME%의털를 깎는다
+	CASE 317
+		LOCALS = %CALLNAME%에거품비비기 시킨다
+	;더블펠라,더블파이즈리,더블스마타
+	CASE 420 TO 422
+		LOCALS = %CALLNAME%에 %STR:0%시킨다
+	;조수를범하게시킨다
+	CASE 430,431
+		LOCALS = %CALLNAME%에 %STR:0%
+	CASEELSE 
+		LOCALS = %CALLNAME%에 %STR:0%
+ENDSELECT
+
+IF STRLENS(LOCALS)
+	PRINTFORML %LOCALS%에는,좀 더 조교가 필요한 것 같다
+ELSE
+	PRINTFORML %CALLNAME%에 %STR:0%시키려면,좀 더 조교가 필요한 것 같다
+ENDIF
+
+
+
+;-------------------------------------------------
+;자신용 메모 실행 판정이 있는 커맨드 일람
+;-------------------------------------------------

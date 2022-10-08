@@ -1,0 +1,130 @@
+﻿;프리 미션의 이름과 클리어 조건, 0에는 미션 번호를 넣는다(머리에 0을 붙이지 않아도 괜찮다)
+;사용시는 0을 미션 번호(1자리수라면 머리 0 없음)에 치환해 주세요
+
+;프리 미션의 샘플겸에 만들어 보았습니다
+@FREE_MISSION_NAME_0
+PRINTFORM [0] 시작의 칼　
+PRINTFORML (초기 도내의 어느쪽이든 1만이상을 30일 이내에 함락 시킨다)
+
+;0에는 미션의 번호를 넣는다(머리에 0을 붙이지 않아도 괜찮다)
+@FREE_MISSION_START_0
+
+;조교 대상으로 하는 캐릭터를 추가
+ADDCHARA 85
+ADDCHARA 89
+ADDCHARA 93
+ADDCHARA 95
+ADDCHARA 101
+TARGET = 1
+
+DRAWLINE
+PRINTFORML 
+PRINTFORMW 플레이어는 %CALLNAME:MASTER%입니다
+PRINTFORML 
+PRINTFORML 【 조교 대상자 】
+FOR LOCAL, 1, CHARANUM
+	PRINTFORML - 　%CALLNAME:LOCAL%
+NEXT
+PRINTFORMW
+PRINTFORML 【 소유 아이템 】
+PRINTFORML - 없음
+PRINTFORML 
+PRINTFORML ~ MISSION ~
+PRINTFORML 목표:카슈 키요미츠, 카센 카네사다, 무츠노카미 요시유키, 야만바기리 쿠니히로, 하치스카 코테츠의 어느쪽이든 1만이상을 30일 이내에 함락 시킨다
+PRINTFORMW ※함락 소질은 묻지 않는다
+DRAWLINE
+
+
+;※보발
+;캐릭터의 소질이나 능력을 변화시키고 싶은 경우도, 여기서 기재해 두면 좋다
+;ABL:MASTER:기교 = 3
+;TALENT:MASTER:경험풍부 = 1
+
+;초기 자금을 변경하는 경우
+;MONEY = 50000
+
+;아이템을 갖게하는 경우(조교 아이템은 1, 소비 아이템은 개수)
+;ITEM:로터 = 1
+;ITEM:로션 = 10
+
+
+@FREE_MISSION_SALEITEM_CHECK_0
+;아이템 구입 가부 설정
+REPEAT 200
+	;기본적인 아이템(ITEM:0~ITEM:29)과 복수 구입가능의 아이템(ITEM:40~ITEM:49) 마셔 구입가능으로 한다
+	SIF COUNT < 30 || (COUNT > 39 && COUNT < 50)
+		CONTINUE
+
+	ITEMSALES:COUNT = 0
+	
+REND
+
+;※보발
+;아이템의 구입 가부는 「ITEMSALES:아이템 번호」혹은 「ITEMSALES:아이템명」으로 판단하고 있다
+;아이템 번호와 아이템명은 ITEM.csv를 참조
+
+
+@FREE_MISSION_CONFIRM_0
+PRINTFORML 목표:카슈 키요미츠, 카센 카네사다, 무츠노카미 요시유키, 야만바기리 쿠니히로, 하치스카 코테츠의 어느쪽이든 1만이상을 30일 이내에 함락 시킨다
+
+
+@FREE_MISSION_CHECK_0
+#DIM DYNAMIC CLEAR = 0
+
+;클리어 조건
+REPEAT CHARANUM
+	;사모 공포 대상은 판정하고 있지 않았기 때문에, 남사→남사의연모나복종에서도 클리어 할 수 있습니다
+	SIF KANRAKU2(COUNT)
+		CLEAR += 1
+	SIF CLEAR
+		BREAK
+REND
+	
+IF CLEAR >= 1
+	PRINTFORMW - 목표 달성
+	PRINTFORMW - 수고 하셨습니다
+	PRINTFORMW - 엔딩등은 없습니다
+	PRINTFORMW -　
+	PRINTFORMW -　　　　　　　　　　　　　　　　　　　SEE YOU NEXT DREAM...
+	
+	CALL GAME_END(1)
+	
+	;게임 계속을 압하했을 경우, 캐릭터 구입 플래그를 부활시킨다
+	IF FLAG:5 == 9
+		REPEAT FLAG:44
+	
+			;CSV가 없는 캐릭터는 스킵
+			SIF !EXISTCSV(COUNT, 0)
+				CONTINUE
+			
+			;구입이 끝난 캐릭터는 스킵
+			SIF COUNT == 85 || COUNT == 89 || COUNT == 93 || COUNT == 95 || COUNT == 101
+				CONTINUE
+			
+			;ITEMPRICE:구입 금액=0은 스킵
+			IF ITEMPRICE:(199+COUNT) == 0
+				CONTINUE
+			ELSEIF ITEMPRICE:(199 + COUNT)
+				ITEMSALES:(199 + COUNT) = 1
+			ENDIF
+		REND
+	ENDIF
+ELSEIF DAY >= 31
+	PRINTFORMW 
+	PRINTFORMW 　――목표 실패
+	PRINTFORMW 　　　마감 시간입니다
+	PRINTFORMW 
+	
+	CALL GAME_END
+ENDIF
+
+;※보발
+;일자 경과 따위로 캐릭터를 추가하거나 소질을 변화시킨다고 한 것도 가능
+;IF DAY == 2
+;	ADDCHARA 198
+;	TALENT:MASTER:거근 = 1
+;ENDIF
+
+
+
+

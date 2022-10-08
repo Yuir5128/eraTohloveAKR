@@ -1,0 +1,200 @@
+﻿;-------------------------------------------------
+;음뇨시킨다
+;스카계 커맨드
+;-------------------------------------------------
+@COM184
+
+PRINTL 음뇨시킨다
+STR:0 = 음뇨시킨다
+
+;-------------------------------------------------
+;특수 파생 처리
+;-------------------------------------------------
+;지하실에 있어, 촉수구욕중, 뇨의가 있어촉수요도삽입 하고 있으면 연결 튜브(소)
+IF TEQUIP:지하실 && TEQUIP:촉수구욕 && TEQUIP:카테터 && BASE:뇨의 > 60
+	CALL COM_ABLE527
+	IF RESULT == 1
+		TFLAG:56 = 1
+		JUMP COM527
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;실행 판정 처리
+;-------------------------------------------------
+;모든 명령에 공통의 요소를 고려
+;(순종가 높다고 명령에 따르기 쉬운 등)
+CALL COM_ORDER
+
+;실행 판정 조작
+CALL KOJO_DENIAL_PLUS
+
+;합계를 표시(40이상으로 실행)
+PRINT  = 
+PRINTV A
+
+V = 40
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행치
+PRINTV V
+
+;실행 불가입상/실행 판정 조작
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;실행 할 수 없다
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;실행자가 노예인 플래그
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 100
+
+;성행동, 노출, 굴복, 불결, 일탈, 반감
+SOURCE:성행동 += 300
+SOURCE:노출 += 400
+SOURCE:굴복 += 2200
+SOURCE:불결 += 1000
+SOURCE:일탈 += 1500
+SOURCE:반발 += 1000
+
+;위 쪽으로 계산한 더러운 데이터
+SOURCE:불결 += Y*10 + 60
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 1000
+
+;마조끼를 본다
+IF ABL:마조끼 == 0
+	TIMES SOURCE:굴복, 0.80
+	SOURCE:중독충족 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:굴복, 1.00
+	SOURCE:중독충족 += 20
+	SOURCE:욕정 += 30
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:굴복, 1.20
+	SOURCE:중독충족 += 40
+	SOURCE:욕정 += 70
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:굴복, 1.40
+	SOURCE:중독충족 += 70
+	SOURCE:욕정 += 120
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:굴복, 1.50
+	SOURCE:중독충족 += 110
+	SOURCE:욕정 += 180
+ELSEIF ABL:마조끼 == 5
+	TIMES SOURCE:굴복, 1.70
+	SOURCE:중독충족 += 150
+	SOURCE:욕정 += 250
+ELSEIF ABL:마조끼 == 6
+	TIMES SOURCE:굴복, 1.90
+	SOURCE:중독충족 += 200
+	SOURCE:욕정 += 300
+ELSEIF ABL:마조끼 == 7
+	TIMES SOURCE:굴복, 2.10
+	SOURCE:중독충족 += 250
+	SOURCE:욕정 += 350
+ELSEIF ABL:마조끼 == 8
+	TIMES SOURCE:굴복, 2.30
+	SOURCE:중독충족 += 300
+	SOURCE:욕정 += 400
+ELSEIF ABL:마조끼 == 9
+	TIMES SOURCE:굴복, 2.50
+	SOURCE:중독충족 += 350
+	SOURCE:욕정 += 450
+ELSEIF ABL:마조끼 >= 10
+	TIMES SOURCE:굴복, 3.00
+	SOURCE:중독충족 += 500
+	SOURCE:욕정 += 500
+ENDIF
+
+;마조를 본다
+IF TALENT:마조
+	TIMES SOURCE:욕정, 1.50
+	TIMES SOURCE:반발, 0.80
+ENDIF
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;그 자리에 오줌이 있어, 노예가스캇중독 3/aA조끼 4+스캇중독 2라면 전부 마신다
+IF TFLAG:66 && (ABL:스캇중독 >= 3 || (ABL:마조끼 >= 4 && ABL:스캇중독 >= 2))
+	TFLAG:66 = 0
+ELSE
+	;플레이어의 오줌이 마루에
+	TFLAG:66 |= 2
+ENDIF
+
+;더러움의 이동은, 그 자리에 오줌이 없을 때 마셔
+SIF TFLAG:66 == 0
+	CALL COM_STAIN
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;음뇨경험
+EXP:음뇨경험 += 1
+PRINTFORML 음뇨경험＋1
+
+;스캇경험를 수반하는 조교에 의한이상경험
+IF EXP:스캇경험 == 0
+	EXP:이상경험 += 1
+	PRINTL 스카톨로지 첫경험으로이상경험＋1
+ENDIF
+EXP:스캇경험 += 1
+PRINTL 스캇경험＋1
+
+IF TFLAG:66 == 0
+	;조교자에게배뇨경험
+	PRINTFORML %CALLNAME:PLAYER%에 %EXPNAME:31%＋1
+	EXP:PLAYER:배뇨경험 += 1
+ENDIF
+
+;조교자에게스캇경험
+IF EXP:PLAYER:스캇경험 == 0
+	EXP:PLAYER:이상경험 += 1
+	PRINTFORML 스카톨로지 첫경험으로 %CALLNAME:PLAYER%에이상경험＋1
+ENDIF
+EXP:PLAYER:스캇경험 += 1
+PRINTFORML %CALLNAME:PLAYER%에스캇경험＋1
+
+;게이경험라든지 가산
+CALL COM_EXP(2)
+
+;의존도 벡터
+TFLAG:33 = 3
+
+;의존도 보정치(주인 또한연모, 음란, 복종로 1. 친애, 창부, 예속로 2)
+IF (TALENT:연모 || TALENT:음란 || TALENT:복종) && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF (TALENT:친애 || TALENT:창부 || TALENT:예속) && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+

@@ -1,0 +1,1561 @@
+﻿;=======================================================
+;조교 개시시에,착의의 초기설정을 실시한다
+;입고 있는 옷의 자세한 것은 여기를 참조해 주세요
+;※의상을 늘리는 경우의 가변 필요 개소는 CLOTHES2.ERB에 이동시켰습니다
+;=======================================================
+@EVENTTRAIN
+#PRI
+;데포동물귀 이외의동물귀는 일단 해제.
+SIF TALENT:동물귀 > 10
+	TALENT:동물귀 = 0
+;초기 의상이 기록되고 있을 때,읽어들입니다
+;※CFLAG:120은,전라 캐릭터 이외의 간이 첫조교 기록 플래그로도 됩니다
+B = CFLAG:120
+C = NO:TARGET
+VARSET T
+
+
+;=======================================================
+;의상의 파일 팽창하고 있으므로 나눕니다
+CALL CLOTHES_SET(TARGET)
+;=======================================================
+
+
+;-------------------------------------------------
+;데이트용으로 만지고 있습니다. 각 캐릭터의 정장? 를 기록. 특수와 얼굴 장식은 별개 판정.
+;-------------------------------------------------
+;특수의상은 기본적으로 코스프레 취급
+IF TARGET >= 0
+	;착의 상태의 보존 처리
+	REPEAT 7
+		E = COUNT
+		D:E = T:E
+	REND
+	D:9 = T:9
+	;플래그 가득 사용하는 것 미안하기 때문에 한 개에 밀어넣습니다
+	CFLAG:120 = D:0 + (D:1 * 10) + (D:2 * 100) + (D:3 * 1000) + (D:4 * 10000) + (D:5 * 100000) + (D:6 * 1000000) + (D:9 * 10000000)
+ENDIF
+
+
+;=======================================================
+;특수의상이 유효 때는,그것을 덮어 씌운다
+;=======================================================
+;-------------------------------------------------
+;캐릭터마다 설정된 의상이라든지. ※현재미실장
+;-------------------------------------------------
+;SIF CFLAG:22
+;	CALL CLOTHES_SET2(TARGET)
+;-------------------------------------------------
+;착의 설정(내번)이 유효
+;-------------------------------------------------
+SIF FLAG:1 == 10
+	CALL CLOTHES_SET3(TARGET)
+;-------------------------------------------------
+;착의 설정(경장)이 유효하고 경장입손 끝난 캐릭터
+;-------------------------------------------------
+SIF FLAG:1 == 9 && CFLAG:614 == 1
+	CALL CLOTHES_SET4(TARGET)
+
+;-------------------------------------------------
+;독자 설정이 유효하고 의상의 독자 설정이 설정이 끝난 상태(※전라는 불가)
+;-------------------------------------------------
+;CFLAG:133에 TEQUIP:0~TEQUIP:4(특수,신발하,속옷（아래）,속옷（위）,하의)
+;CFLAG:134에 TEQUIP:5~TEQUIP:9(상의,전신상의,머리장식,안경,신발)
+;CFLAG:135에 TEQUIP:10(악세사리─)을 기록
+IF FLAG:1 == 99 && (CFLAG:133 > 0 || CFLAG:134 > 0 || CFLAG:135 > 0)
+	REPEAT 11
+		SELECTCASE COUNT
+			CASE 0 TO 4
+				LOCAL = COUNT
+				;N형목을 요구하고 싶을 때는 10의 N승의 나머지를 10의 N-1승으로 나누면 좋다
+				;예) 8,7자리수째를 요구하고 싶을 때는 COUNT=LOCAL= 3이 되어,10의 8승(=(3+1)*2)의 나머지를 10의 6승(=3*2)으로 나눈다
+				LOCAL:1 = CFLAG:133 % POWER(10,(LOCAL+1)*2) / POWER(10,LOCAL*2)
+				
+				T:COUNT = LOCAL:1
+			CASE 5 TO 9
+				LOCAL = COUNT - 5
+				;처리는 위와 같이
+				LOCAL:1 = CFLAG:134 % POWER(10,(LOCAL+1)*2) / POWER(10,LOCAL*2)
+				
+				T:COUNT = LOCAL:1
+			;악세사리─
+			CASEELSE
+				T:10 = CFLAG:135
+		ENDSELECT
+	REND
+ENDIF
+;-------------------------------------------------
+;실제로 덮어 씌우는 것은 여기
+;-------------------------------------------------
+;옷의 종별이 전부 11종류 있으므로,A로 센다.
+REPEAT 11
+	A = COUNT
+	TEQUIP:A = T:A
+REND
+
+;첫회에 조교 플래그의 유무를 체크
+IF B == 0
+	REPEAT CHARANUM
+		A = NO:COUNT
+		X = 999 + A
+		SIF A != 0
+			FLAG:X = 0
+	REND
+	;프리 미션 모드 때
+	SIF FLAG:5 == 8
+		CALL FREE_MISSION_SALEITEM_CHECK
+ENDIF
+;초기 착의 설정에 응해,옷의 설정을 한다
+;전회 설정… 전라 데포캐라 이외는 첫회에 스킵
+A = 0
+;-------------------------------------------------
+;전회 종료시
+;-------------------------------------------------
+IF FLAG:1 == 4  && B != 0
+	REPEAT 10
+		A = COUNT + 123
+		TEQUIP:COUNT = CFLAG:A
+	REND
+	TEQUIP:악세사리 = CFLAG:122
+	;에이프런,아이마스크는 강제 떼어내
+	SIF TEQUIP:특수1 == 2
+	TEQUIP:특수1 = 0
+	SIF TEQUIP:특수3 == 2
+	TEQUIP:특수3 = 0
+;-------------------------------------------------
+;전라
+;-------------------------------------------------
+ELSEIF FLAG:1 == 3
+	TEQUIP:특수1 = 0
+	TEQUIP:특수2 = 0
+	TEQUIP:속옷（아래） = 0
+	TEQUIP:속옷（위） = 0
+	TEQUIP:하의 = 0
+	TEQUIP:상의 = 0
+	TEQUIP:전신상의 = 0
+	TEQUIP:신발 = 0
+	;모자/넥타이/리본타이는 뗀다
+	CLEARBIT TEQUIP:악세사리,1
+	CLEARBIT TEQUIP:악세사리,3
+	CLEARBIT TEQUIP:악세사리,4
+;-------------------------------------------------
+;속옷 모습
+;-------------------------------------------------
+ELSEIF FLAG:1 == 2
+	TEQUIP:하의 = 0
+	TEQUIP:상의 = 0
+	TEQUIP:전신상의 = 0
+	;모자/넥타이/리본타이는 뗀다
+	CLEARBIT TEQUIP:악세사리,1
+	CLEARBIT TEQUIP:악세사리,3
+	CLEARBIT TEQUIP:악세사리,4
+;-------------------------------------------------
+;반나체（위）
+;-------------------------------------------------
+ELSEIF FLAG:1 == 5
+	TEQUIP:속옷（위） = 0
+	TEQUIP:상의 = 0
+	TEQUIP:전신상의 = 0
+	;모자/넥타이/리본타이는 뗀다
+	CLEARBIT TEQUIP:악세사리,1
+	CLEARBIT TEQUIP:악세사리,3
+	CLEARBIT TEQUIP:악세사리,4
+	
+	;상하 세트하도 벗겨진다
+	SIF TEQUIP:하의 >= 1 && TEQUIP:하의 <= 10 || TEQUIP:하의 == 25
+		TEQUIP:하의 = 0
+;-------------------------------------------------
+;반나체（아래）
+;-------------------------------------------------
+ELSEIF FLAG:1 == 6
+	TEQUIP:속옷（아래） = 0
+	TEQUIP:하의 = 0
+	;상하 세트 상도 벗겨진다
+	SIF TEQUIP:상의 >= 1 && TEQUIP:상의 <= 10 || TEQUIP:상의 == 25
+		TEQUIP:상의 = 0
+;-------------------------------------------------
+;노 팬츠
+;-------------------------------------------------
+ELSEIF FLAG:1 == 1
+	TEQUIP:속옷（아래） = 0
+ENDIF
+
+;-------------------------------------------------
+;동물귀를 반영시킨다. 옵션으로 설정을 변경했을 경우용.
+;-------------------------------------------------
+SIF TEQUIP:머리장식 == 1
+	TALENT:동물귀 = 11
+SIF TEQUIP:머리장식 == 2
+	TALENT:동물귀 = 12
+SIF TEQUIP:머리장식 == 3
+	TALENT:동물귀 = 13
+VARSET T
+
+
+;=======================================================
+@EVENTEND
+;=======================================================
+;조교 종료후의 처리
+#PRI
+IF TARGET >= 0
+	;깨진스타킹는 벗긴다
+	IF (TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6) && TFLAG:55
+		TEQUIP:특수2 = 0
+	ENDIF
+	;착의 상태의 보존 처리
+	REPEAT 10
+		A = COUNT + 123
+		CFLAG:A = TEQUIP:COUNT
+	REND
+	CFLAG:122 = TEQUIP:악세사리
+ENDIF
+
+;초기 의상이 전회 설정의 경우,전원의 착의 상태를 취득
+;BEGIN TRAIN로 모든 캐릭터의 TEQUIP에 0이 대입되기 (위해)때문에
+IF FLAG:1 == 4
+	FOR LOCAL,0,CHARANUM
+		REPEAT 10
+			A = COUNT + 123
+			TEQUIP:(LOCAL):COUNT = CFLAG:(LOCAL):A
+		REND
+		TEQUIP:(LOCAL):악세사리 = CFLAG:(LOCAL):122
+	NEXT
+ENDIF
+
+;초기 의상이 전회 설정이 아닌 경우,데포동물귀 이외의동물귀는 해제.
+SIF FLAG:1!= 4 && TALENT:동물귀 > 10
+	TALENT:동물귀 = 0
+
+;=======================================================
+;착의의 표시( 「갈아입게 한다」선택시의 페이지)
+;=======================================================
+@CLOTHES_CHANGE
+C = NO:TARGET
+
+A = 0
+Y = 0
+VARSET T
+VARSET X
+VARSET Z
+
+PRINTL 
+PRINTFORML 【%CALLNAME:TARGET%】의 착의를 설정합니다
+PRINTL 
+CALL CLOTHES_LIST
+
+IF (CFLAG:121 & 1024) == 0
+	;악세사리
+	B = 0
+	E = 0
+	CALL ACCESSORY
+ENDIF
+
+PRINTL 
+SIF TEQUIP:특수1!= 2 && TEQUIP:특수3!= 2
+	PRINT [200]외출복의 착용　
+;표시 제한
+PRINT [400]표시 제한　
+
+SIF TEQUIP:특수1 || TEQUIP:특수2 || TEQUIP:속옷（아래） || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의 || TEQUIP:신발
+	PRINT [800]홀랑 벗긴다　
+PRINTL [900]돌아온다
+DRAWLINE
+PRINTFORM 현재:
+CALL PRINT_CLOTHES
+SIF TEQUIP:악세사리
+	CALL PRINT_ACCESSORY
+
+PRINTL 
+PRINTL 
+
+$INPUT_LOOP
+INPUT
+Z = RESULT
+
+SIF Z > 999
+	GOTO INPUT_LOOP
+
+
+;----------------------------------------------------
+;돌아온다
+;----------------------------------------------------
+IF Z == 900
+	RETURN 0
+
+;----------------------------------------------------
+;표시 제한 관계
+;----------------------------------------------------
+ELSEIF Z == 400
+	;상세 설정 화면으로 난다
+	CALL CLOTHES_CONTROL
+	RESTART
+
+;----------------------------------------------------
+;외출복의 착용
+;----------------------------------------------------
+ELSEIF Z == 200
+	;더러운 처리를 위해 먼저 전라로 해 버린다
+	;사전에동물귀해제
+	SIF TEQUIP:머리장식 == 1 || TEQUIP:머리장식 == 2 || TEQUIP:머리장식 == 3
+		TALENT:동물귀 = 0
+	REPEAT 11
+		A = COUNT
+		;갈아입고 불필요한 속옷(신발하와 상하) 이외의 착의 더러움을 리셋트. 안경도 그대로.
+		IF (TEQUIP:A != T:A && A != 1 && A != 2 && A != 3) || A != 8
+			TEQUIP:A = 0
+			X = 8 + A
+			STAIN:X = 0
+		ENDIF
+	REND
+	CALL CLOTHES_SET(TARGET)
+	;더러움
+	REPEAT 11
+		A = COUNT
+		CALL CLOTHES_STAIN
+		TEQUIP:A = T:A
+		COUNT = A
+	REND
+	RESTART
+
+;----------------------------------------------------
+;홀랑 벗긴다
+;----------------------------------------------------
+ELSEIF Z == 800 && (TEQUIP:특수1 || TEQUIP:특수2 || TEQUIP:속옷（아래） || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의 || TEQUIP:신발)
+	REPEAT 10
+		A = 9 - COUNT
+		SIF A == 7 || A == 8
+			CONTINUE
+		SIF A == 2 && TEQUIP:속옷（아래） == 5
+			CONTINUE
+		IF TEQUIP:A
+			T:A = TEQUIP:A
+			TEQUIP:A = 0
+			CALL CLOTHES_MESSAGE
+		ENDIF
+		X = 8 + A
+		STAIN:X = 0
+		;머플러,넥타이,리본타이,망토는 함께 제외한다
+		SIF TEQUIP:악세사리 & 1
+			TEQUIP:악세사리 -= 1
+		SIF TEQUIP:악세사리 & 4
+			TEQUIP:악세사리 -= 4
+		SIF TEQUIP:악세사리 & 8
+			TEQUIP:악세사리 -= 8
+		SIF TEQUIP:악세사리 & 256
+			TEQUIP:악세사리 -= 256
+		
+		TEQUIP:특수1 = 0
+	REND
+	RESTART
+
+
+;악세사리는 150-200에 격납.
+ELSEIF Z >= 150 && Z < 200
+	CALL ACCESSORY_CHANGE
+	RESTART
+
+;코스프레 처리.
+;번호 이동해 처리를 간략화해 보았다.
+;참지 못하고로 늘려 버린 것이다
+ELSEIF Z != 200 && Z != 400 && Z != 800 && Z != 900
+	;Z의 10의 위가 0 때는전신상의(다만,200,300 등은 사용할 수 없다)
+	B = Z / 10
+	B = B % 10
+	IF B == 0
+		;전신상의의 맨 위의 자리수가발리나구 되었다…… 것으로(Z = X0X)에 두어 지정. TEQUIP:6 == XX
+		A = 6
+		;Z의 100의 위를 Y의 10의 위로 해,Z의 1의 위를 Y의 1의 위에발. 옷의 종류의 지정에 사용한다
+		Y = (Z / 10) + (Z % 100)
+	ELSEIF Z > 100
+		;A에 100의 위를 격납·착용 부위의 지정에 사용한다(6까지는 수치가 반전하고 있으므로 바탕으로 되돌린다)
+		A = Z / 100
+		SIF A <= 6
+			A = 6 - A
+		;Y에 10의 위이하를 격납·옷의 종류의 지정에 사용한다
+		Y = Z % 100
+	ELSE
+		;A에 10의 위를 격납·착용 부위의 지정에 사용한다(6까지는 수치가 반전하고 있으므로 바탕으로 되돌린다)
+		A = Z / 10
+		SIF A <= 6
+			A = 6 - A
+		;Y에 1의 위를 격납·옷의 종류의 지정에 사용한다
+		Y = Z % 10
+	ENDIF
+	SIF A > 9
+		GOTO INPUT_LOOP
+	;T:X에 가격납. 벗기는 경우도 벗길 예정의 의상
+	T:A = Y
+
+	;에이프런판정.
+	;착탈과입상 호출은신혼부부플레이측에서 처리. 표시에 제한 걸쳤으므로 기본적으로는 괜찮을 것입니다만 생각에는 생각을……
+	
+	;PREVCOM = -2가 되는 것은,의상의 독자 설정 화면으로부터 불려 갔을 경우
+	;정조대판정
+	IF Z == 45 && X:45 == 1 && PREVCOM != -2
+		CALL COM_ABLE133
+		IF RESULT
+			SELECTCOM = 133
+			CALL COM133
+			CALL SP_CLOTHES
+			RESTART
+		ELSE
+			PRINTFORMW 지금은정조대를 붙이지 않을 수 없다.
+			RESTART
+		ENDIF
+	ENDIF
+	;에이프런(신혼부부플레이) 판정
+	IF Z == 62 && X:62 == 1 && PREVCOM != -2
+		CALL COM_ABLE319
+		IF RESULT && PREVCOM != -2
+			SELECTCOM = 319
+			CALL COM319
+			CALL SP_CLOTHES
+			RESTART
+		;착의 설정이 내번의상 캐릭터가 빨간콩,후쿠시마의 경우는에이프런가 착탈 가능
+		ELSEIF FLAG:1 == 10 && (C == 148 || C == 204)
+		ELSE
+			PRINTFORMW 신혼부부플레이를 제안하려면 아직 너무 빠른 것 같다
+			RESTART
+		ENDIF
+	ENDIF
+	;아이마스크판정
+	IF Z == 82 && X:82 == 1 && PREVCOM != -2
+		CALL COM_ABLE131
+		IF RESULT && PREVCOM != -2
+			SELECTCOM = 131
+			CALL COM131
+			CALL SP_CLOTHES
+			RESTART
+		ELSE
+			PRINTFORMW 지금은아이마스크를 붙이지 않을 수 없다.
+			RESTART
+		ENDIF
+	ENDIF
+	
+	;지금 입고 있는 것과 RESULT가 같은 경우
+	IF TEQUIP:A == Y
+		;벗게 한후 상태를 알 수 있도록(듯이) 벗게 하고 나서 텍스트를 부르도록(듯이) 변경
+		TEQUIP:A = 0
+		CALL CLOTHES_MESSAGE
+		
+		;신발하를 벗길 때신발도 벗겨진다
+		IF A == 1
+			TEQUIP:신발 = 0
+			
+			;스타킹를 벗길 때 스커트 이외의하의도 벗겨진다
+			;또,만약 깨지지 않으면 ITEM에발
+			IF BOTTOMS(TARGET) >= 3
+				TEQUIP:하의 = 0
+				IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6 || TEQUIP:특수2 == 7
+					TFLAG:55 = 0
+					IF TFLAG:55 == 0
+						SIF TEQUIP:특수2 == 5
+							ITEM:36 += 1
+						SIF TEQUIP:특수2 == 6
+							ITEM:37 += 1
+					ENDIF
+				ENDIF
+			ENDIF
+		ENDIF
+		
+		;속옷（아래）를 벗길 때 스커트 이외의하의도 벗겨진다
+		IF A == 2 && (BOTTOMS(TARGET) >= 3 || TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6 || TEQUIP:특수2 == 7)
+			TEQUIP:하의 = 0
+			
+			;스타킹,타이츠 때,신발하와신발가 벗겨진다
+			IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6 || TEQUIP:특수2 == 7
+				TEQUIP:특수2 = 0
+				TEQUIP:신발 = 0
+				IF TFLAG:55 == 0
+					SIF TEQUIP:특수2 == 5
+						ITEM:36 += 1
+					SIF TEQUIP:특수2 == 6
+						ITEM:37 += 1
+				ENDIF
+			ENDIF
+		ENDIF
+		
+		;속옷（위）를 벗길 때상의와전신상의도 벗겨진다
+		IF A == 3
+			TEQUIP:상의 = 0
+			TEQUIP:전신상의 = 0
+			;넥타이와리본타이를 제외한다
+			TEQUIP:악세사리 -= TEQUIP:악세사리 & 4
+			TEQUIP:악세사리 -= TEQUIP:악세사리 & 8
+		ENDIF
+		
+		;상의를 벗길 때,전신상의도 벗겨진다
+		IF A == 5 || A == 6
+			IF TEQUIP:속옷（위） != 3
+				;넥타이와리본타이를 제외한다
+				TEQUIP:악세사리 -= TEQUIP:악세사리 & 4
+				TEQUIP:악세사리 -= TEQUIP:악세사리 & 8
+			ENDIF
+			TEQUIP:전신상의 = 0
+		ENDIF
+		
+		;세트 의상을 벗었을 때,이제(벌써) 다른 한쪽도 벗겨진다
+		IF T:A >= 1 && T:A <= 10 || T:A == 25
+			TEQUIP:상의 = 0
+			TEQUIP:하의 = 0
+		ENDIF
+		
+		;벗으면 착의의 더러움이 리셋트 된다
+		X = 8 + A
+		STAIN:X = 0
+		CALL CLOTHES_STAIN
+	;옷을 입히는 경우
+	ELSE
+		;착용 조건이 채워지지 않았다(번호가 표시되어 있지 않다) 경우는 돌아온다
+		SIF X:Z == 0
+			GOTO INPUT_LOOP
+		
+		;스타킹·타이츠는 입을 때 마다 한 장 줄어든다. 스타킹 찌릿찌릿 플래그 초기화.
+		IF A == 1
+			IF T:1 == 5 || T:1 == 6
+				SIF T:1 == 5
+					ITEM:36 -= 1
+				SIF T:1 == 6
+					ITEM:37 -= 1
+				TFLAG:55 = 0
+			ENDIF
+		ENDIF
+		
+		;머리장식로동물귀장착 판정
+		IF A == 7
+			SIF Y == 1
+				TALENT:동물귀 = 11
+			SIF Y == 2
+				TALENT:동물귀 = 12
+			SIF Y == 3
+				TALENT:동물귀 = 13
+			SIF Y > 3 && Y < 9 && (TEQUIP:머리장식 == 1 || TEQUIP:머리장식 == 2 || TEQUIP:머리장식 == 3)
+				TALENT:동물귀 = 0
+		ENDIF
+		
+		;에이프런,아이마스크가 빗나갈 때입상 호출. A치를 LOCAL:1에 가격납.
+		LOCAL:1 = A
+		IF TEQUIP:특수1 == 2 && T:A != 2 && A == 0
+			SELECTCOM = 319
+			CALL COM319
+			CALL SP_CLOTHES
+		ENDIF
+		IF TEQUIP:특수3 == 2 && T:A != 2 && A == 8
+			SELECTCOM = 131
+			CALL COM131
+			CALL SP_CLOTHES
+		ENDIF
+		IF TEQUIP:속옷（아래） == 5 && T:A != 5 && A == 2
+			SELECTCOM = 133
+			CALL COM133
+			CALL SP_CLOTHES
+		ENDIF
+		A = LOCAL:1
+		
+		;벗겨지는 처리를 먼저 한 (분)편이 더러운 판정에는 좋을까
+		;상의를 입을 때전신상의가 벗겨진다
+		IF A == 5
+			TEQUIP:전신상의 = 0
+		ENDIF
+		;신발하를 입을 때신발가 벗겨진다
+		IF A == 1
+			TEQUIP:신발 = 0
+			;스타킹,타이츠,레깅스 때는 바지계도 벗겨진다
+			IF (TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6 || TEQUIP:특수2 == 7) && BOTTOMS(TARGET) >= 3
+				;세트 의상을 벗었을 때,이제(벌써) 다른 한쪽도 벗겨진다
+				SIF TEQUIP:하의 >= 1 && TEQUIP:하의 <= 10 || TEQUIP:하의 == 25
+					TEQUIP:상의 = 0
+				TEQUIP:하의 = 0
+			ENDIF
+		ENDIF
+		;속옷（아래）를 입을 때 바지계,스타킹,타이츠,레깅스와신발가 벗겨진다
+		IF A == 2
+			IF BOTTOMS(TARGET) >= 3
+				;세트 의상을 벗었을 때,이제(벌써) 다른 한쪽도 벗겨진다
+				SIF TEQUIP:하의 >= 1 && TEQUIP:하의 <= 10 || TEQUIP:하의 == 25
+					TEQUIP:상의 = 0
+				TEQUIP:하의 = 0
+			ENDIF
+			IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6 || TEQUIP:특수2 == 7
+				TEQUIP:특수2 = 0
+				TEQUIP:신발 = 0
+				IF TFLAG:55 == 0
+					SIF TEQUIP:특수2 == 5
+						ITEM:36 += 1
+					SIF TEQUIP:특수2 == 6
+						ITEM:37 += 1
+				ENDIF
+			ENDIF
+		ENDIF
+		;속옷（위）를 입을 때상의와전신상의가 벗겨진다
+		IF A == 3
+			SIF TEQUIP:상의 >= 1 && TEQUIP:상의 <= 10 || TEQUIP:상의 == 25
+				TEQUIP:하의 = 0
+			TEQUIP:상의 = 0
+			TEQUIP:전신상의 = 0
+			;넥타이와리본타이를 제외한다
+			TEQUIP:악세사리 -= TEQUIP:악세사리 & 4
+			TEQUIP:악세사리 -= TEQUIP:악세사리 & 8
+		ENDIF
+		;세트 의상을 입을 때,다른 세트 의상은 벗겨진다
+		IF A == 4 && ( TEQUIP:상의 >= 1 && TEQUIP:상의 <= 10 || TEQUIP:상의 == 25)
+				TEQUIP:상의 = 0
+		ELSEIF A == 5 && ( TEQUIP:하의 >= 1 && TEQUIP:하의 <= 10 || TEQUIP:하의 == 25)
+				TEQUIP:하의 = 0
+		ENDIF
+		
+		;덮어 씌우기 전에 옷의 더러움을 판정
+		CALL CLOTHES_STAIN
+		
+		TEQUIP:A = T:A
+		;세트 의상을 입었을 때,이제(벌써) 다른 한쪽도 입는다
+		IF T:A >= 1 && T:A <= 10 || T:A == 25
+			IF A == 4
+				TEQUIP:상의 = TEQUIP:하의
+			ELSE
+				TEQUIP:하의 = TEQUIP:상의
+			ENDIF
+		ENDIF
+		
+		;덮어 씌우는 처리의후에 텍스트를 부른다
+		CALL CLOTHES_MESSAGE
+	ENDIF
+	RESTART
+ENDIF
+
+
+
+;=======================================================
+;의상의 표시 제한
+;=======================================================
+@CLOTHES_CONTROL
+$CONTROL
+DRAWLINE
+PRINTL 
+PRINTL 【의상 표시 제한】
+
+PRINT [ 0] 전신상의　 
+IF CFLAG:121 & 1
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINT [ 1] 상의　　　 
+IF CFLAG:121 & 2
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINT [ 2] 하의　　　 
+IF CFLAG:121 & 4
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINT [ 3] 속옷（위）　 
+IF CFLAG:121 & 8
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINT [ 4] 속옷（아래）　 
+IF CFLAG:121 & 16
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINT [ 5] 신발하　　　 
+IF CFLAG:121 & 32
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINT [ 6] 특수의상　 
+IF CFLAG:121 & 64
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINT [ 7] 머리장식　 
+IF CFLAG:121 & 128
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINT [ 8] 얼굴 장식　　 
+IF CFLAG:121 & 256
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINT [ 9] 신발　　　　 
+IF CFLAG:121 & 512
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINT [10] 악세사리 
+IF CFLAG:121 & 1024
+	PRINT ×
+ELSE
+	PRINT ○
+ENDIF
+PRINTL 
+
+PRINTL 
+SIF CFLAG:121!= 2047
+	PRINTL [20] 모두 오프로 한다
+SIF CFLAG:121 & 2047
+	PRINTL [25] 모두 온으로 한다
+SIF (CFLAG:121 & 8) == 0 || (CFLAG:121 & 16) == 0 || (CFLAG:121 & 32) == 0 || (CFLAG:121 & 1) == 0 || (CFLAG:121 & 2) == 0 || (CFLAG:121 & 4) == 0
+	PRINTL [30] 의류의 표시를 오프로 한다
+SIF CFLAG:121 & 63
+	PRINTL [35] 의류의 표시를 온으로 한다
+SIF (CFLAG:121 & 64) == 0 || (CFLAG:121 & 128) == 0 || (CFLAG:121 & 256) == 0 || (CFLAG:121 & 512) == 0 || (CFLAG:121 & 1024) == 0
+	PRINTL [40] 장식품의 표시를 오프로 한다
+SIF CFLAG:121 & 1984
+	PRINTL [45] 장식품의 표시를 온으로 한다
+PRINTL 
+PRINTL [90] 현재의 표시 설정을 반전
+PRINTL [100] 돌아온다
+
+$INPUT_LOOP
+Z = 0
+INPUT
+IF RESULT >= 0 && RESULT <= 10
+	IF RESULT == 0
+		PRINT 전신상의
+		IF CFLAG:121 & 1
+			CFLAG:121 -= 1
+		ELSE
+			CFLAG:121 |= 1
+			Z = 1
+		ENDIF
+	ELSEIF RESULT == 1
+		PRINT 상의
+		IF CFLAG:121 & 2
+			CFLAG:121 -= 2
+		ELSE
+			CFLAG:121 |= 2
+			Z = 1
+		ENDIF
+	ELSEIF RESULT == 2
+		PRINT 하의
+		IF CFLAG:121 & 4
+			CFLAG:121 -= 4
+		ELSE
+			CFLAG:121 |= 4
+			Z = 1
+		ENDIF
+	ELSEIF RESULT == 3
+		PRINT 속옷（위）
+		IF CFLAG:121 & 8
+			CFLAG:121 -= 8
+		ELSE
+			CFLAG:121 |= 8
+			Z = 1
+		ENDIF
+	ELSEIF RESULT == 4
+		PRINT 속옷（아래）
+		IF CFLAG:121 & 16
+			CFLAG:121 -= 16
+		ELSE
+			CFLAG:121 |= 16
+			Z = 1
+		ENDIF
+	ELSEIF RESULT == 5
+		PRINT 신발하
+		IF CFLAG:121 & 32
+			CFLAG:121 -= 32
+		ELSE
+			CFLAG:121 |= 32
+			Z = 1
+		ENDIF
+	ELSEIF RESULT == 6
+		PRINT 특수의상
+		IF CFLAG:121 & 64
+			CFLAG:121 -= 64
+		ELSE
+			CFLAG:121 |= 64
+			Z = 1
+		ENDIF
+	ELSEIF RESULT == 7
+		PRINT 머리장식
+		IF CFLAG:121 & 128
+			CFLAG:121 -= 128
+		ELSE
+			CFLAG:121 |= 128
+			Z = 1
+		ENDIF
+	ELSEIF RESULT == 8
+		PRINT 얼굴 장식
+		IF CFLAG:121 & 256
+			CFLAG:121 -= 256
+		ELSE
+			CFLAG:121 |= 256
+			Z = 1
+		ENDIF
+	ELSEIF RESULT == 9
+		PRINT 신발
+		IF CFLAG:121 & 512
+			CFLAG:121 -= 512
+		ELSE
+			CFLAG:121 |= 512
+			Z = 1
+		ENDIF
+	ELSEIF RESULT == 10
+		PRINT 악세사리
+		IF CFLAG:121 & 1024
+			CFLAG:121 -= 1024
+		ELSE
+			CFLAG:121 |= 1024
+			Z = 1
+		ENDIF
+	ENDIF
+	SIF Z == 0
+		PRINTL 를 표시합니다
+	SIF Z == 1
+		PRINTL 의 표시를 제한합니다
+	GOTO CONTROL
+ELSEIF RESULT == 20
+	PRINTL 모든 의상을 표시합니다
+			CFLAG:121 |= 2047
+	GOTO CONTROL
+ELSEIF RESULT == 25
+	PRINTL 모든 의상의 표시를 제한합니다
+			CFLAG:121 = 0
+	GOTO CONTROL
+ELSEIF RESULT == 30
+	PRINTL 의류의 표시를 제한합니다
+			CFLAG:121 |= 63
+	GOTO CONTROL
+ELSEIF RESULT == 35
+	PRINTL 의류를 표시합니다
+		SIF CFLAG:121 & 1
+			CFLAG:121 -= 1
+		SIF CFLAG:121 & 2
+			CFLAG:121 -= 2
+		SIF CFLAG:121 & 4
+			CFLAG:121 -= 4
+		SIF CFLAG:121 & 8
+			CFLAG:121 -= 8
+		SIF CFLAG:121 & 16
+			CFLAG:121 -= 16
+		SIF CFLAG:121 & 32
+			CFLAG:121 -= 32
+	GOTO CONTROL
+ELSEIF RESULT == 40
+	PRINTL 장식품의 표시를 제한합니다
+			CFLAG:121 |= 1984
+	GOTO CONTROL
+ELSEIF RESULT == 45
+	PRINTL 장식품을 표시합니다
+		SIF CFLAG:121 & 64
+			CFLAG:121 -= 64
+		SIF CFLAG:121 & 128
+			CFLAG:121 -= 128
+		SIF CFLAG:121 & 256
+			CFLAG:121 -= 256
+		SIF CFLAG:121 & 512
+			CFLAG:121 -= 512
+		SIF CFLAG:121 & 1024
+			CFLAG:121 -= 1024
+	GOTO CONTROL
+
+ELSEIF RESULT == 90
+	PRINTL 표시 설정을 반전합니다
+	CALL CLOTHES_RE
+	GOTO CONTROL
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+
+
+;=======================================================
+;의상의 표시 제한을 반전한다
+;=======================================================
+@CLOTHES_RE
+IF CFLAG:121 & 1
+	CFLAG:121 -= 1
+ELSE
+	CFLAG:121 |= 1
+ENDIF
+IF CFLAG:121 & 2
+	CFLAG:121 -= 2
+ELSE
+	CFLAG:121 |= 2
+ENDIF
+IF CFLAG:121 & 4
+	CFLAG:121 -= 4
+ELSE
+	CFLAG:121 |= 4
+ENDIF
+IF CFLAG:121 & 8
+	CFLAG:121 -= 8
+ELSE
+	CFLAG:121 |= 8
+ENDIF
+IF CFLAG:121 & 16
+	CFLAG:121 -= 16
+ELSE
+	CFLAG:121 |= 16
+ENDIF
+IF CFLAG:121 & 32
+	CFLAG:121 -= 32
+ELSE
+	CFLAG:121 |= 32
+ENDIF
+IF CFLAG:121 & 64
+	CFLAG:121 -= 64
+ELSE
+	CFLAG:121 |= 64
+ENDIF
+IF CFLAG:121 & 128
+	CFLAG:121 -= 128
+ELSE
+	CFLAG:121 |= 128
+ENDIF
+IF CFLAG:121 & 256
+	CFLAG:121 -= 256
+ELSE
+	CFLAG:121 |= 256
+ENDIF
+IF CFLAG:121 & 512
+	CFLAG:121 -= 512
+ELSE
+	CFLAG:121 |= 512
+ENDIF
+IF CFLAG:121 & 1024
+	CFLAG:121 -= 1024
+ELSE
+	CFLAG:121 |= 1024
+ENDIF
+
+
+;=======================================================
+;착의 상태에 의해,조교중의 소스가 약간 변동한다
+;=======================================================
+@EQUIP_CLOTHES
+;착의 상태에 의한 소스를 부가(손 이외의 1개소 마다노출+10,미함락시반감+10)
+REPEAT 7
+	;손의 착의는 계산하지 않는다
+	SIF COUNT == 0
+		CONTINUE
+	;신발하의 착의는 계산하지 않는다
+	SIF COUNT == 1
+		CONTINUE
+	;상의는 코데체크 유효 때 계산하지 않는다
+	SIF COUNT == 5 && CODE_CHECK(TARGET)
+		CONTINUE
+	;전신상의는 코데체크 유효 때 계산하지 않는다
+	SIF COUNT == 6 && CODE_CHECK(TARGET)
+		CONTINUE
+	;남자는속옷（위）에 관한 계산은 하지 않는다
+	SIF COUNT == 3 && MALE(TARGET)
+		CONTINUE
+	IF TEQUIP:COUNT == 0
+		SOURCE:노출 += 10
+		;함락시는반감를 가산하지 않는다
+		SIF TALENT:연모 || TALENT:음란 || TALENT:복종 || TALENT:친애 || TALENT:창부 || TALENT:예속
+			CONTINUE
+		SOURCE:반발 += 10
+	ENDIF
+REND
+
+;더러워진 착의라면 일과소 마다불결+10
+P = 0
+O = 0
+REPEAT 9
+	P = COUNT + 8
+	SIF STAIN:P
+		O += 1
+REND
+IF TALENT:더러움무시
+	O = 0
+ELSEIF TALENT:악취둔감 || TALENT:도착적 || TALENT:수치심없음
+	TIMES O ,0.50
+ELSEIF TALENT:부끄럼쟁이 || TALENT:악취민감
+	TIMES O ,1.50
+ENDIF
+SOURCE:노출 += O*10
+
+RETURN 1
+
+
+;=======================================================
+;착의의 실행시의 메세지 처리
+;=======================================================
+@CLOTHES_MESSAGE
+
+
+;벗기는 경우
+IF TEQUIP:A == 0
+	;코스프레입상 호출
+	TFLAG:13 = 76
+	CALL KOJO_MESSAGE_EVENT
+	
+	C = NO:TARGET
+	CALL CLOTHES_NAME
+	PRINT 를
+	;표백함
+	IF A == 3 && T:3 == 3
+		PRINTW 풀었다
+	;머리장식와 특수장식,일부 장식품 같은 것
+	ELSEIF A == 7 || T:2 == 5 || A == 8 || A == 10
+		PRINTW 제외했다
+		;동물귀를 제외했다
+		SIF T:7 == 1 || T:7 == 2 || T:7 == 3
+			TALENT:동물귀 = 0
+	ELSE
+		PRINTW 벗겼다
+	ENDIF
+;덮어 씌우는 경우
+ELSE
+	;코스프레입상 호출
+	TFLAG:13 = 25
+	CALL KOJO_MESSAGE_EVENT
+	
+	C = NO:TARGET
+	CALL CLOTHES_NAME
+	PRINT 를
+	;정조대
+	IF T:2 == 5
+		PRINTW 자물쇠를 채웠다
+	;표백함
+	ELSEIF T:3 == 3
+		PRINTW 감았다
+	;머리장식와 속옷 상하와 특수장식. 안경도 넣어 보았다.
+	ELSEIF A == 0 || T:2 == 3 || (A == 3 && T:3 < 4) || A == 7 || A == 8 || A == 10
+		PRINTW 붙였다
+	ELSEIF A == 1 || A == 2 || A == 9 || (A == 4 && T:4 >= 11)
+		PRINTW 신게 했다
+	ELSE
+		PRINTW 덮어 씌웠다
+	ENDIF
+ENDIF
+
+
+;=======================================================
+;특수한 착의 상태의 표시 처리
+;전라(알몸 코트,알몸 백의,알몸 걸쳐입어,반나체,알몸 망토,알몸에이프런,알몸신발하)
+;속옷 모습,반나체（위）,반나체（아래）,노 팬츠,노브라
+;=======================================================
+@PRINT_CLOTHES
+VARSET T
+
+;여장 체크
+SIF TEQUIP_FEMALE(TARGET) && MALE(TARGET)
+	PRINT 【여장】
+
+;우선은 상반신의 코데체크
+;상반신이 외출에 참지 않는 것으로 있는 경우:전라,속옷 모습,반나체（위）
+IF !CODE_CHECK(TARGET)
+	;하의도 입지 않았다
+	IF TEQUIP:하의 == 0
+		;속옷 체크
+		;어느 쪽인지에서도,속옷은 분명하게 입고 있다
+		IF TEQUIP:속옷（아래） || (TEQUIP:속옷（아래） && TEQUIP:속옷（위） < 7)
+			PRINT 【속옷 모습】
+		;속옷도 입지 않았다
+		ELSEIF TEQUIP:속옷（아래） == 0
+			;코트라든지 입고 있을 때는 그쪽 우선. 반나체
+			IF TEQUIP:전신상의
+				IF TEQUIP:전신상의 == 5
+					PRINT 【알몸 코트】
+				ELSEIF TEQUIP:전신상의 == 6
+					PRINT 【알몸 백의】
+				ELSEIF TEQUIP:전신상의 == 10 || TEQUIP:전신상의 == 11
+					PRINT 【알몸 겉옷】
+				ELSE
+					PRINT 【반나체】
+				ENDIF
+			ELSE
+				IF TEQUIP:특수1 == 2
+					PRINT 【알몸에이프런】
+				ELSEIF TEQUIP:특수2
+					PRINT 【알몸신발하】
+				ELSEIF TEQUIP:악세사리 & 256
+					PRINT 【알몸 망토】
+				ELSE
+					PRINT 【전라】
+				ENDIF
+			ENDIF
+		ENDIF
+	;하의는 분명하게 입고 있다
+	ELSE
+		PRINT 【반나체（위）】
+	ENDIF
+;상반신을 외출할 수 있는 것의 경우,하의체크
+ELSE
+	;하의를 입지 않았다
+	IF TEQUIP:하의 == 0
+		PRINT 【반나체（아래）】
+	;하의도 분명하게 입고 있다
+	ELSE
+		;남자의 경우
+		IF MALE(TARGET)
+			;속옷을 입지 않았다
+			SIF TEQUIP:속옷（아래） == 0
+				PRINT 【노 팬츠】
+		;여자의 경우
+		ELSE
+			;양쪽 모두의 속옷을 입지 않았다
+			IF TEQUIP:속옷（아래） == 0 && (TEQUIP:속옷（위） == 0 || TEQUIP:속옷（위） >= 7)
+				PRINT 【노 팬츠＆노브라】
+			;위만 속옷을 입지 않았다
+			ELSEIF TEQUIP:속옷（위） == 0 || TEQUIP:속옷（위） >= 7
+				PRINT 【노브라】
+			;아래만 속옷을 입지 않았다
+			ELSEIF TEQUIP:속옷（아래） == 0
+				PRINT 【노 팬츠】
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;착의명 함수로부터 착의를 호출해 간다
+REPEAT 10
+	IF COUNT < 7
+		A = 6 - COUNT
+	ELSE
+		A = COUNT
+	ENDIF
+	
+	;세트 의상을 입고 있을 때,세트 의상（아래）은 표시하지 않는다
+	SIF A == 4 && ( TEQUIP:상의 >= 1 && TEQUIP:상의 <= 10 || TEQUIP:상의 == 25)
+		CONTINUE
+	IF TEQUIP:A
+		PRINT [
+		CALL CLOTHES_NAME
+		PRINT ]
+	ENDIF
+REND
+
+
+
+;=======================================================
+;개행 처리(전통적으로 era로 사용되고 있으므로 확실)
+;=======================================================
+@LINE_FEED
+E += 1
+IF E % 4 == 0
+	PRINTL 
+ENDIF
+
+
+
+;=======================================================
+;파라미터 변동이 있는 의상 때에 조교 턴 엔드와 같은 처리?
+;=======================================================
+@SP_CLOTHES
+CALL SOURCE_CHECK
+REPEAT 5
+	G = 21 + COUNT
+	TFLAG:G = 0
+REND
+REPEAT 19
+	SOURCE:COUNT = 0
+REND
+G = 0
+LOSEBASE:체력 = 0
+LOSEBASE:기력 = 0
+
+
+
+;=======================================================
+;서로 더러워지는 것이라면 정리해 처리 할 수 없을까
+;=======================================================
+@CLOTHES_STAIN
+B = 8 + A
+S = 0
+REPEAT 20
+	S = COUNT
+	;특수1 조건
+	IF A == 0
+		;장갑,에이프런 이외는 더러운 판정 없음
+		SIF T:0!= 1 && T:0!= 2
+			CONTINUE
+		;장갑는손의 더러움 이외 붙지 않는다
+		SIF T:0 == 1 && S != 2
+			CONTINUE
+		;에이프런에는가슴,페니스,속옷（아래）,속옷（위）,하의,상의,전신상의
+		IF T:0 == 2
+			SIF S != 3 && S != 4 && S != 13 && S != 14 && S != 15 && S != 16 && S != 17
+				CONTINUE
+		ENDIF
+	;신발시모조건
+	ELSEIF A == 1
+		;스타킹계는,페니스,바기나가 더러워져,속옷（아래）의 더러움도 가미
+		IF (T:A ==5 || T:A ==6) && S != 9 && S != 4 && S != 5 && S != 17
+			CONTINUE
+		;그 이외는발의 더러움 마셔
+		ELSEIF S != 9
+			CONTINUE
+		ENDIF
+	;속옷（아래） 조건
+	ELSEIF A == 2
+		;페니스,바기나의 더러움
+		SIF S != 4 && S != 5
+			CONTINUE
+	;속옷（위） 조건
+	ELSEIF A == 3
+		;가슴의 더러움
+		SIF S != 3
+			CONTINUE
+	;하의조건
+	ELSEIF A == 4
+		;페니스,바기나가 더러워져,속옷（아래）의 더러움
+		SIF S != 4 && S != 5 && S != 17
+			CONTINUE
+	;상의조건
+	ELSEIF A == 5
+		;가슴가 더러워져,속옷（위）의 더러움
+		SIF S != 3 && S != 16
+			CONTINUE
+	;전신상의조건
+	ELSEIF A == 6
+		;가슴가 더러워져,속옷（위）의 더러움
+		SIF S != 3 && S != 16
+			CONTINUE
+	;머리장식
+	ELSEIF A == 7
+		;머리카락의 더러움 이외 붙지 않는다
+		SIF S != 0
+			CONTINUE
+	;얼굴은 더러워질 예정 없음
+	ELSEIF A == 8
+		CONTINUE
+	;신발
+	ELSEIF A == 9
+		;발가 더러워져,신발하의 더러움
+		SIF S != 9 && S != 18
+			CONTINUE
+	ENDIF
+	M = TARGET
+	CALL CLOTHES_STAIN_2
+REND
+
+
+
+;=======================================================
+;옷 더럽혀 함수 독립 시켜 보았다(입우에우치로부터 호출등으로 용도 있을지도)
+;부착시키는 STAIN:S의 가부를 판정
+;=======================================================
+@CLOTHES_STAIN_2
+S:1 = 0
+S:2 = 0
+S:3 = 0
+;페니스·바기나·애널·질내·장내의 더러움
+IF S == 4 || S == 5 || S == 6 || S == 7 || S == 8
+	;속옷（아래）가 있을 때는 부착하지 않는다
+	SIF TEQUIP:속옷（아래）
+		RETURN
+	;덮어 씌우는 것이속옷（아래） 이외 때에,하의를 입고 있다
+	SIF A != 2 && TEQUIP:하의
+		RETURN
+;가슴의 더러움
+ELSEIF S == 3
+	;속옷（위）가 있을 때는 부착하지 않는다
+	SIF TEQUIP:속옷（위）
+		RETURN
+	;덮어 씌우는 것이속옷（위） 이외 때에,상의or전신상의를 입고 있다
+	SIF A != 3 && (TEQUIP:상의 || TEQUIP:전신상의)
+		RETURN
+;발의 더러움
+ELSEIF S == 9 && (TEQUIP:특수2 || TEQUIP:신발)
+	;신발하가 있을 때는 부착하지 않는다
+	SIF TEQUIP:특수2
+		RETURN
+	;부착시키는 것이신발하 이외 때에,신발를 신고 있다
+	SIF A != 1 && TEQUIP:신발
+		RETURN
+;신발하의 더러움
+ELSEIF S == 18
+	;신발가 있을 때 더러워지지 않는다
+	SIF TEQUIP:신발
+		RETURN
+	;신발하와 같은 더러움이발에 있을 때 안쪽의 더러움으로 간주한다
+	S:1 |= STAIN:발
+	S:2 = S:1 - STAIN:발장식
+	SIF S:2 > 0
+		S:3 = 1
+	SIF (S:1 & STAIN:발) == STAIN:발장식
+		RETURN
+;신발
+ELSEIF S == 19
+	;같은 더러움이신발하or발에 있을 때 안쪽의 더러움으로 간주한다
+	IF TEQUIP:특수2
+		S:1 |= STAIN:발장식
+	ELSE
+		S:1 |= STAIN:발
+	ENDIF
+	S:2 = S:1 - STAIN:신발
+	SIF S:2 > 0
+		S:3 = 1
+	SIF (S:1 & STAIN:신발) == STAIN:신발
+		RETURN
+;속옷（아래）
+ELSEIF S == 17
+	;하의가 있을 때는 더러워지지 않는다
+	SIF (TEQUIP:하의 || TEQUIP:전신상의)
+		RETURN
+	;같은 더러움이페니스,바기나,애널,질내에 있을 때 안쪽의 더러움으로 간주한다
+	S:1 |= STAIN:페니스
+	S:1 |= STAIN:바기나
+	S:1 |= STAIN:애널
+	S:1 |= STAIN:질내
+	S:2 = S:1 - STAIN:속옷（아래）
+	SIF S:2 > 0
+		S:3 = 1
+	SIF (S:1 & STAIN:속옷（아래）) == STAIN:속옷（아래）
+		RETURN
+;속옷（위）
+ELSEIF S == 16
+	;하의or전신상의가 있을 때는 더러워지지 않는다
+	SIF (TEQUIP:상의 || TEQUIP:전신상의)
+		RETURN
+	;같은 더러움이가슴에 있을 때 안쪽의 더러움으로 간주한다
+	S:1 |= STAIN:가슴
+	S:2 = S:1 - STAIN:속옷（위）
+	SIF S:2 > 0
+		S:3 = 1
+	SIF (S:1 & STAIN:속옷（위）) == STAIN:속옷（위）
+		RETURN
+;하의
+ELSEIF S == 15
+	;같은 더러움이페니스,바기나,애널,질내or속옷（아래）에 있을 때 안쪽의 더러움으로 간주한다
+	IF TEQUIP:속옷（아래）
+		S:1 |= STAIN:속옷（아래）
+	ELSE
+		S:1 |= STAIN:페니스
+		S:1 |= STAIN:바기나
+		S:1 |= STAIN:애널
+		S:1 |= STAIN:질내
+	ENDIF
+	S:2 = S:1 - STAIN:하의
+	SIF S:2 > 0
+		S:3 = 1
+	SIF (S:1 & STAIN:하의) == STAIN:하의
+		RETURN
+;상의
+ELSEIF S == 14
+	;같은 더러움이가슴or속옷（위）에 있을 때 안쪽의 더러움으로 간주한다
+	IF TEQUIP:속옷（위）
+		S:1 |= STAIN:속옷（아래）
+	ELSE
+		S:1 |= STAIN:가슴
+	ENDIF
+	S:2 = S:1 - STAIN:상의
+	SIF S:2 > 0
+		S:3 = 1
+	SIF (S:1 & STAIN:상의) == STAIN:상의
+		RETURN
+;전신상의
+ELSEIF S == 13
+	;같은 더러움이가슴or속옷（위）에 있을 때 안쪽의 더러움으로 간주한다
+	IF TEQUIP:속옷（위）
+		S:1 |= STAIN:속옷（아래）
+	ELSE
+		S:1 |= STAIN:가슴
+	ENDIF
+	S:2 = S:1 - STAIN:전신상의
+	SIF S:2 > 0
+		S:3 = 1
+	SIF (S:1 & STAIN:전신상의) == STAIN:전신상의
+		RETURN
+ENDIF
+
+IF S:3 == 1
+	STAIN:M:B |= S:2
+ELSE
+	STAIN:M:B |= STAIN:S
+ENDIF
+
+
+;애액·페니스·애널더러움은 제외하다
+SIF STAIN:B & 1
+	STAIN:B -= 1
+SIF STAIN:B & 2
+	STAIN:B -= 2
+SIF STAIN:B & 8
+	STAIN:B -= 8
+
+
+
+;=======================================================
+;입지 않은 옷에 더러움이 붙어 버리는 일이 있으므로 잠정 처치적인?
+;=======================================================
+@CLOTHES_STAIN_3
+SIF TEQUIP:머리장식 == 0
+	STAIN:10 = 0
+SIF TEQUIP:특수3 == 0
+	STAIN:11 = 0
+SIF TEQUIP:특수1 == 0
+	STAIN:12 = 0
+SIF TEQUIP:전신상의 == 0
+	STAIN:13 = 0
+SIF TEQUIP:상의 == 0
+	STAIN:14 = 0
+SIF TEQUIP:하의 == 0
+	STAIN:15 = 0
+SIF TEQUIP:속옷（위） == 0
+	STAIN:16 = 0
+SIF TEQUIP:속옷（아래） == 0
+	STAIN:17 = 0
+SIF TEQUIP:특수2 == 0
+	STAIN:18 = 0
+SIF TEQUIP:신발 == 0
+	STAIN:19 = 0
+
+;=======================================================
+;악세사리의 교체 함수
+;=======================================================
+@ACCESSORY_CHANGE
+
+IF Z >= 150
+	Y = 100
+	;다른 착의입상이 불려 가지 않게 T:X를 텅 비게
+	REPEAT 11
+		T:COUNT = 0
+	REND
+	T:10 = TEQUIP:악세사리
+	A = Z - 150
+	CALL ACCESSORY_BIT
+	IF A != 0
+		IF T:10 & Z
+			T:10 -= Z
+			Y = 150
+		ELSE
+			T:10 |= Z
+			Y = 160
+			;특수한 착탈 조건.
+			;넥타이와리본타이가 동시에 도착하지 않도록 한다
+			IF A == 3
+					T:10 -= T:10 & 8
+			ELSEIF A == 4
+					T:10 -= T:10 & 4
+			ENDIF
+		ENDIF
+	ELSE
+		T:10 = 0
+	ENDIF
+	;코스프레입상 호출 Y == 150 or160로 분기 시키면서 AorZ의 입력치를 지정하면입상을 표시할 수 있을 것
+	IF Y == 150
+		TFLAG:13 = 76
+	ELSEIF Y == 160
+		TFLAG:13 = 25
+	ENDIF
+	CALL KOJO_MESSAGE_EVENT
+	TEQUIP:악세사리 = T:10
+	C = NO:TARGET
+ENDIF
+
+
+
+;=======================================================
+;비트 연산의 만큼을 힘 기술로 취득하고 있지만 어때
+;=======================================================
+@ACCESSORY_BIT
+Z = 1
+IF A < 3
+	Z = A
+ELSE
+	REPEAT (A - 1)
+			Z *= 2
+	REND
+ENDIF
+
+
+
+
+;=======================================================
+;표시를 갖추기 위해서(때문에) 공백을 읽어들인다
+;=======================================================
+@CLOTHES_SPACE
+SIF S < 1
+	RETURN
+REPEAT S
+	PRINT  
+REND
+
+
+
+;=======================================================
+;코스프레셋트를 위해서(때문에),착용 조건을 채우고 있는 의상을 먼저 읽어들인다
+;=======================================================
+@CLOTHES_LIST2
+IF A < 7
+	C:3 = 6 - A
+ELSE
+	C:3 = A
+ENDIF
+D = B
+IF C:3 == 0 && B < 10
+	D = B
+ELSEIF C:3 == 0
+	D = ((B / 10) * 100) + (B % 10)
+ELSEIF B < 10
+	D += (C:3 * 10)
+ELSE
+	D += (C:3 * 100)
+ENDIF
+Z:D = 1
+
+
+
+;=======================================================
+;의류 명칭 호출을 위해서(때문에),현재의 복장을 한 번 보존해,TEQUIP:A를 0으로 한다
+;=======================================================
+@CLOTHES_LIST3
+C:2 = TEQUIP:A
+TEQUIP:A = 0
+T:A = B
+IF A < 7
+	C:3 = 6 - A
+ELSE
+	C:3 = A
+ENDIF
+IF C:3 == 0 && B < 10
+	PRINTFORM [ {B}] 
+ELSEIF C:3 == 0
+	B = ((B / 10) * 100) + (B % 10)
+	PRINTFORM [{B}]
+ELSEIF B < 10
+	B += (C:3 * 10)
+	PRINTFORM [{B}] 
+ELSE
+	B += (C:3 * 100)
+	PRINTFORM [{B}]
+ENDIF
+CALL CLOTHES_NAME
+CALL CLOTHES_SPACE
+CALL LINE_FEED
+X:B = 1
+TEQUIP:A = C:2
+T:A = 0
+COUNT = F
+
+

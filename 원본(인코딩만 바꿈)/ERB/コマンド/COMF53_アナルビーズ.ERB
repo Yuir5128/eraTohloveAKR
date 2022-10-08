@@ -1,0 +1,186 @@
+﻿;-------------------------------------------------
+;アナルビーズ
+;Ａ系調教コマンド
+;-------------------------------------------------
+@COM53
+
+PRINTL アナルビーズ
+STR:0 = アナルビーズ
+CALL KOJO_MESSAGE_COM
+
+;ストッキングびりびりフラグ
+IF TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6
+	TFLAG:55 = 1
+ENDIF
+
+;着脱の処理
+IF TEQUIP:アナルビーズ == 0
+	TEQUIP:アナルビーズ = 1
+ELSE
+	TEQUIP:アナルビーズ = 0
+ENDIF
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 20
+LOSEBASE:気力 += 80
+
+SOURCE:快Ａ += 200
+
+;装着時は快Aは下がる
+IF TEQUIP:アナルビーズ
+	TIMES SOURCE:快Ａ , 0.80
+ELSEIF TEQUIP:アナルビーズ == 0
+	TIMES SOURCE:快Ａ , 2.00
+ENDIF
+
+SOURCE:痛み += 200
+
+SOURCE:露出 += 50
+SOURCE:屈従 += 50
+SOURCE:逸脱 += 60
+SOURCE:反発 += 80
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 70
+
+;Aへの苦痛は先に処理しておく
+;EXP:Ａ経験をみる
+IF EXP:Ａ経験 < EXPLV:1
+	TIMES SOURCE:痛み , 3.00
+	TIMES SOURCE:反発 , 3.00
+ELSEIF EXP:Ａ経験 < EXPLV:2
+	TIMES SOURCE:痛み , 1.20
+	TIMES SOURCE:反発 , 2.00
+ELSEIF EXP:Ａ経験 < EXPLV:3
+	TIMES SOURCE:痛み , 0.80
+	TIMES SOURCE:反発 , 1.50
+ELSEIF EXP:Ａ経験 < EXPLV:4
+	TIMES SOURCE:痛み , 0.60
+	TIMES SOURCE:反発 , 1.20
+ELSEIF EXP:Ａ経験 < EXPLV:5
+	TIMES SOURCE:痛み , 0.40
+ELSEIF EXP:Ａ経験 >= EXPLV:5
+	TIMES SOURCE:痛み , 0.20
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	TIMES SOURCE:痛み , 1.20
+	TIMES SOURCE:反発 , 2.00
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	TIMES SOURCE:痛み , 1.00
+	TIMES SOURCE:反発 , 1.50
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	TIMES SOURCE:痛み , 0.60
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	TIMES SOURCE:痛み , 0.30
+ELSEIF PALAM:潤滑 >= PALAMLV:4
+	TIMES SOURCE:痛み , 0.20
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF TEQUIP:縄 == 0
+	EXP:Ａ経験 += 1
+	PRINTL Ａ経験＋１
+ELSEIF TEQUIP:縄 == 1
+	EXP:Ａ経験 += 2
+	PRINTL Ａ経験＋２
+ENDIF
+
+;ゲイ経験とか加算
+CALL COM_EXP(1)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+
+RETURN 1
+
+
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM53
+;アナルビーズ挿入中
+
+PRINTL ＜アナルビーズ挿入中＞
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+LOSEBASE:体力 += 10
+LOSEBASE:気力 += 30
+
+SOURCE:快Ａ += 75
+SOURCE:露出 += 25
+SOURCE:屈従 += 25
+SOURCE:逸脱 += 25
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 35
+
+;Aへの苦痛は先に処理しておく
+;EXP:Ａ経験をみる
+A = 100
+B = 25
+IF EXP:Ａ経験 < EXPLV:1
+	TIMES A , 3.00
+	TIMES B , 3.00
+ELSEIF EXP:Ａ経験 < EXPLV:2
+	TIMES A , 1.20
+	TIMES B , 2.00
+ELSEIF EXP:Ａ経験 < EXPLV:3
+	TIMES A , 0.80
+	TIMES B , 1.50
+ELSEIF EXP:Ａ経験 < EXPLV:4
+	TIMES A , 0.60
+	TIMES B , 1.20
+ELSEIF EXP:Ａ経験 < EXPLV:5
+	TIMES A , 0.40
+ELSEIF EXP:Ａ経験 >= EXPLV:5
+	TIMES A , 0.20
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	TIMES A , 1.20
+	TIMES B , 2.00
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	TIMES A , 1.00
+	TIMES B , 1.50
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	TIMES A , 0.60
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	TIMES A , 0.30
+ELSEIF PALAM:潤滑 >= PALAMLV:4
+	TIMES A , 0.20
+ENDIF
+SOURCE:痛み += A
+SOURCE:反発 += B
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+EXP:Ａ経験 += 1
+PRINTL Ａ経験＋１
+
+
+RETURN 1
+

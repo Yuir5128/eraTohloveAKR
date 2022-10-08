@@ -1,0 +1,910 @@
+﻿;-------------------------------------------------
+;일상 이벤트 실행 판정
+;-------------------------------------------------
+;방에 있다
+@DAILY_LIFE_ABLE_0
+;공범자는 불가
+SIF CFLAG:A:1 == 3
+	RETURN 0
+RETURN 1
+
+;노래연습
+@DAILY_LIFE_ABLE_1
+;가창기능가 없다
+SIF !ABL:A:가창기능
+	RETURN 0
+RETURN 1
+
+;
+;@DAILY_LIFE_ABLE_2
+;RETURN 1
+
+;마법의 연구를 하고 있다
+;@DAILY_LIFE_ABLE_3
+;미함락은 불가
+;SIF !KANRAKU(A)
+;	RETURN 0
+;[실의]는 불가
+;SIF TALENT:A:실의
+;	RETURN 0
+;마법을 사용할 수 있는 사람만,한편 마법의 연구를 할 것 같은 사람만
+;SELECTCASE NO:A
+;	;라이나,시온,루크,아르아,페리아,조라,악마응,밀크,피어,에스테라
+;	CASE 1,3,8,24,28,29,34,9,27,32
+;	CASEELSE
+;		RETURN 0
+;ENDSELECT
+;양팔이 없으면 불가
+;SIF TALENT:A:양팔결손 || TALENT:A:달마
+;	RETURN 0
+;RETURN 1
+
+;실험 같은 일을 하고 있다
+@DAILY_LIFE_ABLE_4
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[조제지식를 가지고 있지 않다]
+SIF !TALENT:A:조제지식
+	RETURN 0
+;양팔이 없으면 불가
+SIF TALENT:A:양팔결손 || TALENT:A:달마
+	RETURN 0
+RETURN 1
+
+;독서
+@DAILY_LIFE_ABLE_5
+;공범자는 불가
+SIF CFLAG:A:1 == 3
+	RETURN 0
+RETURN 1
+
+;오줌 흘리기
+@DAILY_LIFE_ABLE_6
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[실금버릇]를 갖고 있지 않다
+SIF !TALENT:A:실금버릇
+	RETURN 0
+RETURN 1
+
+;뜰에서 햇볕쬐기
+@DAILY_LIFE_ABLE_7
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;밤은 안돼
+SIF TIME
+	RETURN 0
+RETURN 1
+
+;지붕 위에서 웃고 있다
+@DAILY_LIFE_ABLE_8
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[요호][매혹][수수께끼의매력]를 어느 것도 가지고 있지 않다
+SIF !TALENT:A:요호 && !TALENT:A:매혹 && !TALENT:A:수수께끼의매력
+	RETURN 0
+RETURN 1
+
+;동물귀/뜰에서 휘청휘청 하고 있다
+@DAILY_LIFE_ABLE_9
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[동물귀]를 갖고 있지 않다
+SIF !TALENT:A:동물귀
+	RETURN 0
+;[유치]도[유아／유아퇴행]모모는 없다
+SIF !TALENT:A:유치 && !TALENT:A:유아／유아퇴행
+	RETURN 0
+RETURN 1
+
+;바느질
+@DAILY_LIFE_ABLE_10
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;봉사정신 4 이하 또한[헌신적]가 없을 때는 불가
+SIF ABL:A:봉사정신 <= 4 && !TALENT:A:헌신적
+	RETURN 0
+;양팔이 없으면 불가
+SIF TALENT:A:양팔결손 || TALENT:A:달마
+	RETURN 0
+RETURN 1
+
+;청소
+@DAILY_LIFE_ABLE_11
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;봉사정신 4 이하 또한[헌신적]가 아닐 때 불가
+SIF ABL:A:봉사정신 <= 4 && !TALENT:A:헌신적
+	RETURN 0
+;[더러움무시]라면 안돼
+SIF TALENT:A:더러움무시
+	RETURN 0
+RETURN 1
+
+;세탁
+@DAILY_LIFE_ABLE_12
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;봉사정신 4 이하 또한[헌신적]가 아닐 때 불가
+SIF ABL:A:봉사정신 <= 4 && !TALENT:A:헌신적
+	RETURN 0
+;밤은 안돼
+SIF TIME
+	RETURN 0
+RETURN 1
+
+;기원
+@DAILY_LIFE_ABLE_13
+;공범자는 불가
+SIF CFLAG:A:1 == 3
+	RETURN 0
+;하고 있는 것 같은 캐릭터만
+SELECTCASE NO:A
+	;이시키리마루,이마노츠루기,나마즈꼬리,골식,히라노,후,마에다,아키타,란,고코타이,아이젠,강설,소우산,쿠니히로,우라시마
+	CASE 7,11,27,29,31,33,39,41,45,47,61,79,81,99,103
+	CASEELSE
+		RETURN 0
+ENDSELECT
+RETURN 1
+
+;―
+@DAILY_LIFE_ABLE_14
+RETURN 1
+
+;댄싱
+@DAILY_LIFE_ABLE_15
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[눈에띄고싶음]가 없으면 불가
+SIF !TALENT:A:눈에띄고싶음
+	RETURN 0
+RETURN 1
+
+;밤에 화장실에
+@DAILY_LIFE_ABLE_16
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[유치][유아／유아퇴행]의 어느쪽이나 가지고 있지 않을 때 불가
+SIF !TALENT:A:유치 || !TALENT:A:유아／유아퇴행
+	RETURN 0
+;주인이[겁쟁이][유치][유아／유아퇴행]의 어느쪽이든을 가지고 있을 때 불가
+SIF TALENT:MASTER:겁쟁이 || TALENT:MASTER:유치 || TALENT:MASTER:유아／유아퇴행
+	RETURN 0
+;낮은 불가
+SIF !TIME
+	RETURN 0
+RETURN 1
+
+;나무에 오르고 있다
+@DAILY_LIFE_ABLE_17
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;밤은 안돼
+SIF TIME
+	RETURN 0
+;[눈에띄고싶음]나[낙관적]나[호기심]나[유치]나[유아／유아퇴행]가 없으면 불가
+SIF !TALENT:A:눈에띄고싶음 && !TALENT:A:낙관적 && !TALENT:A:호기심 && !TALENT:A:유치 && !TALENT:A:유아／유아퇴행
+	RETURN 0
+RETURN 1
+
+;손 타
+@DAILY_LIFE_ABLE_18
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인 2 있으면 불가
+SIF MARK:A:반발각인 >= 2
+	RETURN 0
+;[솔직함][반항적]의 어느쪽이든을 가지고 있지 않으면 불가
+SIF !TALENT:A:솔직함 && !TALENT:A:반항적
+	RETURN 0
+RETURN 1
+
+;뜰에서 놀고 있다
+@DAILY_LIFE_ABLE_19
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[유치][유아／유아퇴행]의 어느쪽이든을 가지고 있지 않으면 불가
+SIF !TALENT:A:유치 && !TALENT:A:유아／유아퇴행
+	RETURN 0
+RETURN 1
+
+;비디오 관상
+@DAILY_LIFE_ABLE_20
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;촬영한 비디오를 가지고 있지 않다
+SIF !CFLAG:A:20
+	RETURN 0
+RETURN 1
+
+;목욕탕 오름
+@DAILY_LIFE_ABLE_21
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[수치심없음]를 가지고 있지 않다
+SIF !TALENT:A:수치심없음
+	RETURN 0
+RETURN 1
+
+;사랑스러운 것을 보고 있다
+@DAILY_LIFE_ABLE_22
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[호기심][유치][유아／유아퇴행]를 가지고 있지 않다
+SIF !TALENT:A:호기심 && !TALENT:A:유치 && !TALENT:A:유아／유아퇴행
+	RETURN 0
+RETURN 1
+
+;집어 먹기
+@DAILY_LIFE_ABLE_23
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[유치][유아／유아퇴행][호기심]의 어느쪽이든을 가지고 있지 않으면 불가
+SIF !TALENT:A:유치 && !TALENT:A:유아／유아퇴행 && !TALENT:A:호기심
+	RETURN 0
+RETURN 1
+
+;다른 노예를 위로하고 있다
+@DAILY_LIFE_ABLE_24
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[낙관적][고무적]의 어느쪽이든을 가지고 있지 않으면 불가
+SIF !TALENT:A:낙관적 && !TALENT:A:고무적
+	RETURN 0
+;[비관적]나[실의]의 어느쪽이든을 가지는 캐릭터가 없으면 불가
+SIF DAILYLIFE_GETTALENT_1(26,162) < 0
+	RETURN 0
+RETURN 1
+
+;콧노래
+@DAILY_LIFE_ABLE_25
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[낙관적]를 가지고 있지 않으면 불가
+SIF !TALENT:A:낙관적
+	RETURN 0
+RETURN 1
+
+;한숨 하나
+@DAILY_LIFE_ABLE_26
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의][비관적]의 어느쪽이든을 가지고 있지 않으면 불가
+SIF !TALENT:A:실의 && !TALENT:A:비관적
+	RETURN 0
+RETURN 1
+
+;식사 당번
+@DAILY_LIFE_ABLE_27
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;요리기능도[요리고수]도 없으면 불가
+SIF !ABL:A:요리기능 && TALENT:A:요리고수
+	RETURN 0
+RETURN 1
+
+;나르시즘
+@DAILY_LIFE_ABLE_28
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[유아／유아퇴행]는 불가
+SIF TALENT:A:유아／유아퇴행
+	RETURN 0
+;[무관심]는 불가
+SIF TALENT:A:무관심
+	RETURN 0
+RETURN 1
+
+;평상시의 태도
+@DAILY_LIFE_ABLE_29
+;[실의][복종]나반발각인 3 이상의 언젠가가 아니면 불가
+SIF !TALENT:A:실의 && !TALENT:A:복종 && MARK:A:반발각인 < 3
+	RETURN 0
+RETURN 1
+
+;영양제
+@DAILY_LIFE_ABLE_30
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[조제지식]를 가지고 있지 않으면 불가
+SIF !TALENT:A:조제지식
+	RETURN 0
+RETURN 1
+
+;방으로부터 데리고 나간다
+@DAILY_LIFE_ABLE_31
+;복종함락(상대 묻지 않고)(이)가 아니면 불가
+SIF CFLAG:A:39!= 5 && CFLAG:A:39!= 8
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[무관심][감정부족][비관적][얌전함]의 어느 것도 없다
+SIF !TALENT:A:무관심 && !TALENT:A:감정부족 && !TALENT:A:비관적 && !TALENT:A:얌전함
+	RETURN 0
+RETURN 1
+
+;유치인 노예를 격려한다
+@DAILY_LIFE_ABLE_32
+;[유치][유아／유아퇴행]소유가 없다
+SIF DAILYLIFE_GETTALENT_1(150,151) == -1
+	RETURN 0
+;[헌신적]가 없고봉사정신 4 이하라면 안돼
+SIF !TALENT:A:헌신적 && ABL:A:봉사정신 <= 4
+	RETURN 0
+;[유치]라면 안돼
+SIF TALENT:A:유치
+	RETURN 0
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+RETURN 1
+
+;헌신적인 청소
+@DAILY_LIFE_ABLE_33
+;[헌신적]가 없고봉사정신 4 이하라면 안돼
+SIF !TALENT:A:헌신적 && ABL:A:봉사정신 <= 4
+	RETURN 0
+;[무관심]는봉사정신 5 이상 없으면 안돼
+SIF TALENT:A:무관심 && ABL:A:봉사정신 < 5
+	RETURN 0
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[더러움무시]라면 안돼
+SIF TALENT:A:더러움무시
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;도미노 쓰러뜨려
+@DAILY_LIFE_ABLE_34
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[고무적][헌신적]가 없으면 불가
+SIF !TALENT:A:고무적 && !TALENT:A:헌신적
+	RETURN 0
+RETURN 1
+
+;장난/함정
+@DAILY_LIFE_ABLE_35
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[반항적][건방짐][유치][호기심]의 모두 없으면 불가
+SIF !TALENT:A:반항적 && !TALENT:A:건방짐 && !TALENT:A:유치 && !TALENT:A:호기심
+	RETURN 0
+RETURN 1
+
+;장난/창고 고기잡이
+@DAILY_LIFE_ABLE_36
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[호기심]가 없으면 불가
+SIF !TALENT:A:호기심
+	RETURN 0
+;[유아／유아퇴행][유치]의 모두 없으면 불가
+SIF !TALENT:A:유아／유아퇴행 && !TALENT:A:유치
+	RETURN 0
+RETURN 1
+
+;유아／유아퇴행인 노예를 격려한다
+@DAILY_LIFE_ABLE_37
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[유아／유아퇴행]가 없다
+LOCAL = DAILYLIFE_GETTALENT_1(150)
+SIF LOCAL == -1
+	RETURN 0
+;[고무적]를 가지고 있지 않다
+SIF !TALENT:A:고무적
+	RETURN 0
+RETURN 1
+
+;페○라의 연습
+@DAILY_LIFE_ABLE_71
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;미함락 또한정액중독가 없고봉사정신 2 이하라면 불가
+SIF !KANRAKU(A) && !ABL:A:정액중독 && ABL:A:봉사정신 <= 3
+	RETURN 0
+RETURN 1
+
+;이케나이코트의 연습
+@DAILY_LIFE_ABLE_72
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;음란함락이 아니면 불가
+SIF TALENT:A:음란 || TALENT:A:창부
+	RETURN 0
+RETURN 1
+
+;SM플레이의 연습(밧줄)
+@DAILY_LIFE_ABLE_73
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;밧줄가 없다
+SIF !ITEM:밧줄
+	RETURN 0
+;[새드]가 아니다
+SIF !TALENT:A:새드
+	RETURN 0
+RETURN 1
+
+;SM플레이의 연습(애널고문)
+@DAILY_LIFE_ABLE_74
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;오나홀이 없다
+SIF !ITEM:전동오나홀
+	RETURN 0
+;음란함락이 아니면 불가
+SIF TALENT:A:음란 || TALENT:A:창부
+	RETURN 0
+RETURN 1
+
+;SM플레이의 연습(채찍,스팽킹)
+@DAILY_LIFE_ABLE_75
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[새드]가 아니다
+SIF !TALENT:A:새드
+	RETURN 0
+RETURN 1
+
+;조각조각 흩어지고촉수
+@DAILY_LIFE_ABLE_76
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;현재의 주인에게[금지된지식]없으면 안돼
+SIF !TALENT:MASTER:금지된지식
+	RETURN 0
+;촉수사역술가 없으면 안돼
+SIF !ITEM:촉수사역술
+	RETURN 0
+RETURN 1
+
+;모두와 함께/두 명의회화 1/반발·함락 소질
+@DAILY_LIFE_ABLE_100
+;외출장 캐릭터가 없다
+SIF DAILYLIFE_GETCHARA(1) == -1
+	RETURN 0
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;모두와 함께/설교
+@DAILY_LIFE_ABLE_101
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;설교하고 있는 것 같은 사람이 아니다
+SELECTCASE NO:A
+	;이시키리마루,1에,제약 기구 니키,촛대절
+	CASE 7,25,49,73
+	CASEELSE
+		RETURN 0
+ENDSELECT
+RETURN 1
+
+;모두와 함께/두 명의회화 2/궁합·형제
+@DAILY_LIFE_ABLE_102
+;외출장 캐릭터가 없다
+SIF DAILYLIFE_GETCHARA(1) == -1
+	RETURN 0
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;독서에 두근한다
+@DAILY_LIFE_ABLE_130
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[음란][창부][소악마]가 아니고,A가 주인의 사모 대상도 아니다
+SIF !TALENT:A:음란 && !TALENT:A:창부 && !TALENT:A:소악마 && CFLAG:MASTER:41!= NO:A
+	RETURN 0
+RETURN 1
+
+;식사에 두근한다
+@DAILY_LIFE_ABLE_131
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[음란][창부][소악마]가 아니고,A가 주인의 사모 대상도 아니다
+SIF !TALENT:A:음란 && !TALENT:A:창부 && !TALENT:A:소악마 && CFLAG:MASTER:41!= NO:A
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/쇼핑
+@DAILY_LIFE_ABLE_132
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;주인에 대해서연모함락이나예속
+SIF !TALENT:A:연모 && !TALENT:A:친애 && !TALENT:A:예속
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/귀청소
+@DAILY_LIFE_ABLE_133
+;[친애]가 없으면 불가
+SIF !TALENT:A:친애
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;양팔이 없으면 불가
+SIF TALENT:A:양팔결손 || TALENT:A:달마
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/욕실
+@DAILY_LIFE_ABLE_134
+;[친애]가 없으면 불가
+SIF !TALENT:A:친애
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;양팔이 없으면 불가
+SIF TALENT:A:양팔결손 || TALENT:A:달마
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/저녁 반주
+@DAILY_LIFE_ABLE_135
+;[친애]가 없으면 불가
+SIF !TALENT:A:친애
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;양팔이 없으면 불가
+SIF TALENT:A:양팔결손 || TALENT:A:달마
+	RETURN 0
+;낮은 불가
+SIF !TIME
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/요리
+@DAILY_LIFE_ABLE_136
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;주인에 대해서연모함락 하고 있지 않으면 불가
+SIF !TALENT:A:연모 && !TALENT:A:친애
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/데이트
+@DAILY_LIFE_ABLE_137
+;반발각인 3 있으면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;반지 플래그가 없으면 불가
+SIF !CFLAG:A:140
+	RETURN 0
+;[상사상애]가 없으면 불가
+SIF !TALENT:A:상사상애
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/신부 수업
+@DAILY_LIFE_ABLE_138
+;반발 3 이상이라면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]라면 불가
+SIF TALENT:A:실의
+	RETURN 0
+;주인에 대해서연모함락이 아니면 안돼
+SIF !TALENT:A:연모 && !TALENT:A:친애
+	RETURN 0
+;[헌신적]가 아니다
+SIF !TALENT:A:헌신적
+	RETURN 0
+RETURN 1
+
+;
+;@DAILY_LIFE_ABLE_139
+;RETURN 1
+
+;신부와의 한때/임산부를 돌본다
+@DAILY_LIFE_ABLE_140
+;[임신]가 아니다
+SIF !TALENT:A:임신
+	RETURN 0
+;주인과[상사상애]가 아니다
+SIF !TALENT:A:상사상애
+	RETURN 0
+;반발 3 이상이라면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/사진
+@DAILY_LIFE_ABLE_141
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;반발 3 이상이라면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]라면 불가
+SIF TALENT:A:실의
+	RETURN 0
+;카메라와필름를 가지고 있지 않다
+SIF !ITEM:카메라 || !ITEM:필름
+	RETURN 0
+;주인의 사모 대상이 A가 아니다
+SIF CFLAG:MASTER:41!= NO:A
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/반입
+@DAILY_LIFE_ABLE_142
+;반발 3 이상이라면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]라면 불가
+SIF TALENT:A:실의
+	RETURN 0
+;주인에 대해서연모·복종함락이 아니면 안돼
+SIF !TALENT:A:연모 && !TALENT:A:친애 && !TALENT:A:복종 && !TALENT:A:예속
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/과자 만들기
+@DAILY_LIFE_ABLE_143
+;반발 3 이상이라면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]라면 불가
+SIF TALENT:A:실의
+	RETURN 0
+;주인에 대해서연모함락이 아니면 안돼
+SIF !TALENT:A:연모 && !TALENT:A:친애
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/선잠
+@DAILY_LIFE_ABLE_144
+;반발 3 이상이라면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]라면 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[상사상애]가 아니면 안돼
+SIF !TALENT:A:상사상애
+	RETURN 0
+RETURN 1
+
+;신부와의 한때/느긋하게 쉼
+@DAILY_LIFE_ABLE_145
+;반발 3 이상이라면 불가
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]라면 불가
+SIF TALENT:A:실의
+	RETURN 0
+;[상사상애]가 아니면 안돼
+SIF !TALENT:A:상사상애
+	RETURN 0
+RETURN 1
+
+;검의손 넣고
+@DAILY_LIFE_ABLE_150
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;검의 연습/혼자서
+@DAILY_LIFE_ABLE_151
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;검의 연습/모두와 함께
+@DAILY_LIFE_ABLE_152
+;외출장 캐릭터가 없다
+SIF DAILYLIFE_GETCHARA(1) == -1
+	RETURN 0
+;미함락은 불가
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]는 불가
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;조교자 변경 기능/어프로치
+@DAILY_LIFE_ABLE_180
+;대상으로,주인 이외의 사모·공포 대상이 없는,또는 이벤트에 나올 수 있는 상태가 아니다
+SIF CFLAG:A:41 < 0 || CFLAG:A:41 == NO:MASTER
+	RETURN 0
+LOCAL = NO2(CFLAG:A:41)
+SIF !DAILYLIFE_CHARA(LOCAL)
+	RETURN 0
+RETURN 1
+
+;조교자 변경 기능/둘이서 낮잠
+@DAILY_LIFE_ABLE_181
+;대상으로,주인 이외의 사모·공포 대상이 없는,또는 이벤트에 나올 수 있는 상태가 아니다
+SIF CFLAG:A:41 < 0 || CFLAG:A:41 == NO:MASTER
+	RETURN 0
+LOCAL = NO2(CFLAG:A:41)
+SIF !DAILYLIFE_CHARA(LOCAL)
+	RETURN 0
+RETURN 1
+
+

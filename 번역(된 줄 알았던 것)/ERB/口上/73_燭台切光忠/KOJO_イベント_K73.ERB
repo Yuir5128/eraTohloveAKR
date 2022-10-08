@@ -1,0 +1,1420 @@
+﻿
+;==================================================
+;이벤트입상집(1,01을 캐릭터 번호에 치환한다) CFLAG 261~299를 사용
+;==================================================
+@KOJO_MESSAGE_EVENT_K73
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_EVENT_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	SIF NO:ASSI == Y1
+;	CALL KOJO_MESSAGE_EVENT_PY1_KZ
+;	RETURN 0
+;ENDIF
+
+
+;==================================================
+;아침 이벤트
+;==================================================
+;-------------------------------------------------
+;아침 페라 CFLAG:261
+;-------------------------------------------------
+IF TFLAG:13 == 1
+	PRINTFORML 아침,%CALLNAME%의 페라로 눈을 떴다
+
+
+
+;아이사이즈가 아니다
+SIF TALENT:MASTER:아이사이즈 == 0
+	PRINTFORML %CALLNAME%는 정액의 들러붙은 얼굴로 아침의 인사를 해 왔다
+
+
+	PRINTFORMW 「아… 일어나 버렸는지? 후후. 안녕」
+	CALL EVENT_MESSAGE
+	CFLAG:261 = 1
+ENDIF
+
+;-------------------------------------------------
+;아침파이즈리 CFLAG:262
+;-------------------------------------------------
+IF TFLAG:13 == 2
+	CALL EVENT_MESSAGE
+	PRINTFORMW 「응… 어떨까? 기분이 좋아…?」	
+	CFLAG:262 = 1
+ENDIF
+
+;-------------------------------------------------
+;아침기승위 CFLAG:263
+;-------------------------------------------------
+IF TFLAG:13 == 3
+	PRINTFORML 아침에 일어 나면 허리의 근처에 중량감을 느꼈다
+	IF TEQUIP:속옷（아래） == 5
+		PRINTFORML 정조대에 의해 자유를 빼앗긴%CALLNAME%가,해방를 요구하는 하반신을 문질러 발라 눈물을 흘리고 있었다…
+	ELSE
+		PRINTFORML 눈을 돌리면%CALLNAME%가 위에 걸쳐 허덕이고 있었다…
+	ENDIF
+
+	IF TEQUIP:속옷（아래） == 5
+		PRINTFORMW 「아,아웃,취해… 이것,취해…!」
+	ELSE
+		PRINTFORMW 「아,아읏…… 아,안녕,응읏…%UNICODE(0x2661)%」
+	ENDIF
+
+	CFLAG:263 = 1
+ENDIF
+
+;-------------------------------------------------
+;아침 요리 이벤트시 CFLAG:282
+;연애계 함락만
+;-------------------------------------------------
+IF TFLAG:13 == 23
+	PRINTFORMW 「후후,안녕. 아침 밥 되어있다」
+	CALL EVENT_MESSAGE
+	CFLAG:282 = 1
+ENDIF
+
+;-------------------------------------------------
+;아침풋잡 CFLAG:285 
+;-------------------------------------------------
+IF TFLAG:13 == 30
+	CALL EVENT_MESSAGE
+	PRINTFORML 「아… 과연 일어나 버렸는지? 후후,어때? 기분이 좋아?」
+	PRINTFORMW %CALLNAME%는 입맛을 다심을 하면서 (들)물어 왔다
+	CFLAG:285 = 1
+ENDIF
+
+;-------------------------------------------------
+;모닝 키스 CFLAG:286
+;-------------------------------------------------
+IF TFLAG:13 == 31
+	CALL EVENT_MESSAGE
+	IF NO:MASTER == 0
+		PRINTFORMW 「응,…… 안녕,주」
+	ELSEIF NO:MASTER == 116
+		PRINTFORM 「응,…… 안녕,
+					CALL PNAME_73_116
+		PRINTFORMW」
+	ELSEIF NO:MASTER == 130
+		PRINTFORM 「응,…… 안녕,
+					CALL PNAME_73_130
+		PRINTFORMW」
+	;00씨 불러. 초승달,우구이스마루,이시키리마루,지로타치,니혼고,히게키리,히자마루
+	;그 외. 00군 불러
+	ELSE
+		PRINTFORM 「응,…… 안녕,
+		;씨
+		SIF NO:MASTER == 7 || NO:MASTER == 55 || NO:MASTER == 107 || NO:MASTER == 112 || NO:MASTER == 134 || NO:MASTER == 136
+			PRINTFORM %CALLNAME:PLAYER%씨
+		;너
+		SIF NO:MASTER == 5 || NO:MASTER == 9 || NO:MASTER == 11 || NO:MASTER == 23 || NO:MASTER == 47 || NO:MASTER == 59 || NO:MASTER == 65 || NO:MASTER == 122 || NO:MASTER == 138 || NO:MASTER == 132
+			PRINTFORM %CALLNAME:PLAYER%너
+		SIF NO:MASTER == 3
+			PRINTFORM 초승달씨
+		SIF NO:MASTER == 19
+			PRINTFORM 아오에군
+		SIF NO:MASTER == 25
+			PRINTFORM 한평생군
+		SIF NO:MASTER == 27
+			PRINTFORM 나마즈미군
+		SIF NO:MASTER == 29
+			PRINTFORM 골식군
+		SIF NO:MASTER == 31
+			PRINTFORM 히라노군
+		SIF NO:MASTER == 33
+			PRINTFORM 아츠시군
+		SIF NO:MASTER == 39
+			PRINTFORM 마에다군
+		SIF NO:MASTER == 41
+			PRINTFORM 아키타군
+		SIF NO:MASTER == 43
+			PRINTFORM 하카타군
+		SIF NO:MASTER == 45
+			PRINTFORM 란쨩
+		SIF NO:MASTER == 49
+			PRINTFORM 제약 기구군
+		SIF NO:MASTER == 57
+			PRINTFORM 아카시군
+		SIF NO:MASTER == 61
+			PRINTFORM 아이젠군
+		SIF NO:MASTER == 67
+			PRINTFORM 물 길군
+		SIF NO:MASTER == 69
+			PRINTFORM 사다쨩
+		SIF NO:MASTER == 79
+			PRINTFORM 강설군
+		SIF NO:MASTER == 81
+			PRINTFORM 소우산군
+		SIF NO:MASTER == 83
+			PRINTFORM 사야쨩
+		SIF NO:MASTER == 85
+			PRINTFORM 카슈우군
+		SIF NO:MASTER == 87
+			PRINTFORM 야마토노가미군
+		SIF NO:MASTER == 89
+			PRINTFORM 명인군
+		SIF NO:MASTER == 91
+			PRINTFORM 이즈미마모루군
+		SIF NO:MASTER == 93
+			PRINTFORM 무츠 마모루군
+		SIF NO:MASTER == 95
+			PRINTFORM 야마우바절군
+		SIF NO:MASTER == 97
+			PRINTFORM 수도자군
+		SIF NO:MASTER == 99
+			PRINTFORM 호리카와군
+		SIF NO:MASTER == 101
+			PRINTFORM 하치스가군
+		SIF NO:MASTER == 103
+			PRINTFORM 우라시마군
+		SIF NO:MASTER == 105
+			PRINTFORM 장 소네군
+		SIF NO:MASTER == 118
+			PRINTFORM 하세베군
+		SIF NO:MASTER == 120
+			PRINTFORM 부동군
+		SIF NO:MASTER == 128
+			PRINTFORM 동타누키군
+		PRINTFORMW」
+	ENDIF
+	CFLAG:286 = 1
+ENDIF
+
+;-------------------------------------------------
+;아침 목욕 CFLAG:287 
+;-------------------------------------------------
+IF TFLAG:13 == 32
+	CALL EVENT_MESSAGE
+	IF TALENT:연모 || TALENT:친애
+		;(육체적인가 정신적으로) 작은 아이라면 반대로 씻어 준다
+		IF TALENT:작은체구 || TALENT:소인체형 || TALENT:유아／유아퇴행 || TALENT:유치
+			PRINTFORMW 「후훗,욕실 기분이 좋다… 후로 나도 너의 등 밀어 주네요」
+		;기교+봉사정신가 높으면 상대 있고
+		ELSEIF ABL:기교 + ABL:봉사정신 >= 7
+			PRINTFORMW 「몸가짐은 분명하게 정돈하지 않으면. 오르면머리카락도 말려 준다」
+		;기교가 낮으면 미묘한 마음
+		ELSE
+			PRINTFORML 「미안해요,기분 좋지 않았던 것 같다…」
+			PRINTFORMW 「다음은 기분이 좋다고 말하게 해 보이기 때문에,또 나와 함께 들어와 줄래?」
+		ENDIF
+	ELSEIF TALENT:음란 || TALENT:창부
+		PRINTFORML 「저기,기분이 좋아? 후후… 씻고 있을 뿐이니까,엣치한 기분이 되어서는 안돼?」
+		PRINTFORMW %CALLNAME%는 조롱하도록(듯이) 낄낄 웃고 있다
+	ELSEIF TALENT:복종 || TALENT:예속
+		PRINTFORMW 「몸가짐은 분명하게 정돈하지 않으면!」
+	ENDIF
+	CFLAG:287 = 1
+ENDIF
+
+;-------------------------------------------------
+;아침 3P CFLAG:288
+;-------------------------------------------------
+IF TFLAG:13 == 33
+	CALL EVENT_MESSAGE
+	CFLAG:288 = 1
+ENDIF
+
+;-------------------------------------------------
+;조음뇨 CFLAG:289
+;-------------------------------------------------
+IF TFLAG:13 == 34
+	CALL EVENT_MESSAGE
+	CFLAG:289 = 1
+ENDIF
+
+
+
+;==================================================
+;밤이벤트
+;==================================================
+;-------------------------------------------------
+;착유→밤이벤트로 변경 CFLAG:267
+;-------------------------------------------------
+IF TFLAG:13 == 7
+	CALL EVENT_MESSAGE
+	CFLAG:267 = 1
+ENDIF
+
+;-------------------------------------------------
+;요바이→밤이벤트로 변경(노예수) CFLAG:269
+;-------------------------------------------------
+IF TFLAG:13 == 9
+;	CALL EVENT_MESSAGE
+	PRINTFORML 조교가 끝나,%CALLNAME:PLAYER%가 잠자리에 들려고 했을 때,돌연%CALLNAME%가 방을 방문해 왔다
+	IF TEQUIP:속옷（아래） == 5
+		PRINTFORML 「저기… 이것을 취했으면 좋다. 부탁이야…」
+		PRINTFORML 열을 띤 신체를 주체 못했는지,%CALLNAME:PLAYER%에정조대를 제외하면 좋겠다고 간원 해 온다
+		PRINTFORML %CALLNAME:PLAYER%는 그것을 허가라고 는 하지 않았지만,그 대신에%CALLNAME%를 강하게 껴안아 잠에 들었다…
+	ELSE
+	PRINTFORML 「너가 아직 일어나고 있어 주어서 좋았어요. …… 무엇인가,신체가 뜨겁다…」
+	PRINTFORM 열정적이게 숨을 내쉬기 시작한%CALLNAME%는 %CALLNAME:PLAYER%를 밀어 넘어뜨려,
+	IF TALENT:남자 || (ABL:V감각 < ABL:A감각)
+		PRINT 엉덩이 구멍
+	ELSE
+		PRINT 밀호[蜜壺]
+	ENDIF
+	PRINTL 로페니스를 물어 격렬하게 허리를 쳐박기 시작했다
+	PRINTFORML 「앗,읏…… 아핫… 너의,기분 있고…%UNICODE(0x2661)%」
+	PRINTFORML 굶은 짐승의입는 군침을 방울져 떨어지게 해 노장[怒張]을 탐내,체내의 갈증을 달래고 있다
+	PRINTFORML 생각을 이룬 두 명은 연결된 채로 얼싸안아,깊은 잠에 떨어졌다…
+	ENDIF
+	CFLAG:269 = 1
+ENDIF
+
+;-------------------------------------------------
+;요바이 주인수 CFLAG:284
+;-------------------------------------------------
+IF TFLAG:13 == 27
+	CALL EVENT_MESSAGE
+	CFLAG:284 = 1
+ENDIF
+
+;-------------------------------------------------
+;밤주연 CFLAG:290 연모함락만
+;-------------------------------------------------
+IF TFLAG:13 == 35
+	;현주인 이외를 방문한다
+	IF K:0
+		PRINTFORML 밤,%CALLNAME%는 방을 빠져 나가,%CALLNAME:MASTER%의 원을 방문했다
+	;현주인의 아래를 방문한다
+	ELSE
+		PRINTFORML 조교가 끝나,%CALLNAME:MASTER%가 잠자리에 들려고 했을 때,돌연%CALLNAME%가 방을 방문해 왔다
+	ENDIF
+	PRINTFORML 「자기 전에 조금 어떨까?」
+	PRINTFORML %CALLNAME%는,둘이서 술이라도 마시려고 권해 왔다
+	;시험적으로 술꾼 무리의 반환. 테두리 잡기
+	;지로타치
+	SIF NO:MASTER == 134
+		PRINTFORML 『옷,좋구나. 너도 척척 삼켜』
+	PRINTFORMW 
+	;만취해 곁잠
+	IF TFLAG:405 == 2
+		PRINTFORML 즐거운 술에 시간을 잊어,문득%CALLNAME%를 보면 배를 젓기 시작하고 있다
+		PRINTFORML 
+		PRINTFORML %CALLNAME:MASTER%는 그대로%CALLNAME%를 껴안고 잠에 오르기로 했다…
+	;러브러브
+	ELSEIF TFLAG:405 == 5
+		PRINTFORML 「저기… 뭔가 신체가 달아올라 와 버렸어. 벗게 해 주지 않겠어…?」
+		PRINTFORML 취기에 눈을 물기를 띠게 한%CALLNAME%에 열정을 권해져 뜨거운 신체를 겹쳤다…
+	;주인공
+	ELSEIF TFLAG:405 == 8
+		PRINTFORML 「저기… 왠지 더운데. 벗게 해 주지 않겠어…?」
+		PRINTFORML 취기에 눈을 물기를 띠게 한%CALLNAME%에 열정을 권해져욕정 한 수컷의 체를 강압했다…
+	;주인수
+	ELSEIF TFLAG:405 == 9
+		PRINTFORML 「… 뭔가 신체가 달아올라 왔군요」
+		PRINTFORML 취기에 눈을 물기를 띠게 한%CALLNAME%에 열정을 권해져 뜨거운 신체를 겹쳤다…
+	;취기
+	ELSE
+		PRINTFORML 연회는 밤 늦게까지 계속되어,즐거운 시간을 보냈다…
+	ENDIF
+	CFLAG:290 = 1
+ENDIF
+
+;-------------------------------------------------
+;밤곁잠 CFLAG:291 연모 이외는체력 500 이하 때 만
+;-------------------------------------------------
+IF TFLAG:13 == 36
+;	CALL EVENT_MESSAGE
+	IF K:0
+		PRINTFORML 밤,%CALLNAME%는 방을 빠져 나가,%CALLNAME:MASTER%의 원을 방문했다
+	;현주인의 아래를 방문한다
+	ELSE
+		PRINTFORML 밤,%CALLNAME:MASTER%가 잠자리에 들려고 했을 때,%CALLNAME%가
+		IF BASE:0 < 500
+			PRINT 돌연 방을 방문해 왔다
+		ELSE
+			PRINT 잠옷 모습으로 방을 방문해 왔다
+		ENDIF
+	ENDIF
+	IF BASE:0 < 500
+		PRINTFORML 「그… 군과 함께 자고 싶다는…… 안돼,일까…?」
+		PRINTFORML 연일의 조교에,%CALLNAME%는 상당히 초췌한 모습이다
+		SIF NO:MASTER == 69
+			PRINTFORML 『좋아. 여기 와라,밋쨩』
+		SIF NO:MASTER == 116
+			PRINTFORML 『…… 온다면 와라』
+		SIF NO:MASTER == 118
+			PRINTFORML 『하아… 완전히,오늘 밤만이니까…』
+		SIF NO:MASTER == 49
+			PRINTFORML 『잘 수 없는 것인지? 어쩔 수 없구나… 오는거야,남편. 아침까지 껴안아 두어 주기 때문』
+		SIF NO:MASTER == 130
+			PRINTFORML 『일인잠을 할 수 없는 것인지? 하하,너는 어쩔 수 없는 아이다… 와』
+		PRINTFORML 탄식 한 %CALLNAME:MASTER%는%CALLNAME%를 껴안으면,
+		PRINTFORML 침대에 옆으로 놓아,둘이서 자에 올랐다…
+	ELSE
+		;촛대절이작은체구가 아닌＋주인이 쇼타
+		;구문 이것으로 맞고 있을까나
+		IF TALENT:작은체구 == 0 && (TALENT:PLAYER:작은체구 || TALENT:PLAYER:유치 || TALENT:PLAYER:유아／유아퇴행)
+			PRINTFORML 「자기 전에 그림책 읽어 줄까」
+			IF NO:MASTER == 49
+				PRINTFORML 『남편… 나를 아이 취급하는 것은 중지해 주어라』
+				PRINTFORML 「후후,미안해요. 그림책은 농담이야. 오늘 밤은 군과 함께 잠 싶었던 것이다」
+				PRINTFORML 눈썹 꼬리를 내리는%CALLNAME%를 %CALLNAME:MASTER%는 침대에 끌어들였다
+			ELSEIF NO:MASTER == 69
+				PRINTFORML 『무엇이다,밋쨩. 나의 일,아이 취급인가?』
+				PRINTFORML 「후후,미안해요. 그림책은 농담이야. 오늘 밤은 군과 함께 잠 싶었던 것이다」
+				PRINTFORML 눈썹 꼬리를 내리는%CALLNAME%를 %CALLNAME:MASTER%는 침대에 끌어들였다
+			ELSE
+				PRINTFORML %CALLNAME:MASTER%가 자 버릴 때까지,%CALLNAME%는 그림책을 읽어 주었다
+			ENDIF
+		ELSE
+			IF TALENT:소인체형 || TALENT:유아／유아퇴행 || TALENT:유치
+				PRINTFORML 「오늘 밤은 함께 자고 싶다라고 생각해. …… 안돼?」
+				PRINTFORML 혼자서 자는 것이 무서웠던 것 같고,외로운 것 같은 표정으로 %CALLNAME:MASTER%를 응시하고 있다
+			ELSEIF TALENT:반항적 || TALENT:프라이드높음 || TALENT:건방짐
+				PRINTFORML 「오늘 밤은 군과 함께 자고 싶다고 생각해. …… 안 되는가?」
+				PRINTFORM 강하게 행동하는%CALLNAME%도,침대 중(안)에서는
+;				SIF TALENT:소인체형
+;					PRINT 작은 신체로
+				PRINTFORML 꾹 %CALLNAME:MASTER%에 껴안아 왔다
+			ELSE
+				PRINTFORML 함께 자 주면,침대 중(안)에서%CALLNAME%는 기쁜듯이 %CALLNAME:MASTER%에 껴안아 왔다
+			ENDIF
+		ENDIF
+	ENDIF
+	CFLAG:291 = 1
+ENDIF
+
+;-------------------------------------------------
+;밤M플레이 CFLAG:292
+;-------------------------------------------------
+IF TFLAG:13 == 37
+;	CALL EVENT_MESSAGE
+;이번 이제(벌써) 조금 대사발
+	IF K:0
+		PRINTFORML 밤,%CALLNAME%는 방을 빠져 나가,%CALLNAME:PLAYER%의 원을 방문하면,
+	;현주인의 아래를 방문한다
+	ELSE
+		PRINTFORML 조교가 끝나,%CALLNAME:PLAYER%가 잠자리에 들려고 했을 때,돌연%CALLNAME%가 방을 방문해,
+	ENDIF
+	IF K:5 == 4
+		PRINTFORML 엉덩이를 내며,마음껏인 체하면 좋겠다고 졸라댔다
+		IF TALENT:MASTER:새드 || ABL:MASTER:새드끼 > 2
+			PRINTFORML %CALLNAME:PLAYER%가 몇차례(정도)만큼 엉덩이를 평손로 두드려 주면,
+			PRINTFORML %CALLNAME%는 마음 속으로부터 만발 한 것 같다…
+		ELSE
+			PRINTFORML %CALLNAME:PLAYER%가 당황하면서도 몇차례(정도)만큼 엉덩이를 평손로 두드려 주면,
+			PRINTFORML %CALLNAME%는 만발 한 것 같다…
+		ENDIF
+	ELSEIF K:5 == 1
+		PRINTFORML 기학의 흥분에 눈을 물기를 띠게 해 %CALLNAME:PLAYER%를 치려고 강요해 왔지만,
+		PRINTFORML %CALLNAME:PLAYER%는 반대로 밀어 넘어뜨려,처벌에 엉덩이를 마음껏 고정시켜두었다
+		PRINTFORML 「잇…!? 후,우구…… 응,아앗…%UNICODE(0x2661)%」
+		PRINTFORML %CALLNAME%는 면식모습이지만,그러던 중,과를 만들어 %CALLNAME:PLAYER%에 아첨하기 시작했다…
+	ELSEIF K:5 == 2
+		PRINTFORML 채찍로 마음껏 고정시켜두면 좋겠다고 졸라댔다
+		IF TALENT:MASTER:새드 || ABL:MASTER:새드끼 > 2
+			PRINTFORML %CALLNAME:PLAYER%가 몇차례(정도)만큼채찍로 고정시켜두어 주면,
+			PRINTFORML %CALLNAME%는 마음 속으로부터 만발 한 것 같다…
+		ELSE
+			PRINTFORML %CALLNAME:PLAYER%가 당황하면서도 몇차례(정도)만큼채찍로 고정시켜두어 주면,
+			PRINTFORML %CALLNAME%는 만발 한 것 같다…
+		ENDIF
+	ELSE
+		PRINTFORML 발를 빨게 했으면 좋겠다고 졸라댔다
+		IF TALENT:MASTER:새드 || ABL:MASTER:새드끼 > 2
+			PRINTFORML 손가락의 가랑이까지 정성스럽게 빨게 하고 나서,얼굴을 짓밟아 주면,
+			PRINTFORML %CALLNAME%는 마음 속으로부터 만발 한 것 같다…
+		ELSE
+			PRINTFORML %CALLNAME%는 손가락의 가랑이까지 정성스럽게 다 빨면,만발 한 것 같다…
+	ENDIF
+	CFLAG:292 = 1
+ENDIF
+ENDIF
+
+;-------------------------------------------------
+;밤S플레이 CFLAG:293
+;지문은 K:5==1스팽킹 =2채찍치는 것 =3발 빨고 =4 주인 M로 봉사 S플레이
+;-------------------------------------------------
+IF TFLAG:13 == 38
+	CALL EVENT_MESSAGE
+	CFLAG:293 = 1
+ENDIF
+
+;-------------------------------------------------
+;밤레즈비언 플레이 CFLAG:294돌입하지 않고 러브러브
+;-------------------------------------------------
+IF TFLAG:13 == 39
+	CALL EVENT_MESSAGE
+	CFLAG:294 = 1
+ENDIF
+
+;-------------------------------------------------
+;밤엿보기 CFLAG:295 연모·복종함락 하고 있을 때,다른 노예의 요바이를 엿보기
+;-------------------------------------------------
+IF TFLAG:13 == 40
+	CALL EVENT_MESSAGE
+	CFLAG:295 = 1
+ENDIF
+
+;-------------------------------------------------
+;밤수면중 CFLAG:296　
+;함락 하고 있으면,연모승손에 따라 잠,음란승손에 봉사와자위,복종발도로 잔다
+;함락 하고 있지 않으면 돌아간다
+;-------------------------------------------------
+IF TFLAG:13 == 41
+	CALL EVENT_MESSAGE
+	CFLAG:296 = 1
+ENDIF
+
+;-------------------------------------------------
+;밤NTR 플레이 CFLAG:297 연모·공포 대상이 주인→대상→누군가 때만
+;-------------------------------------------------
+IF TFLAG:13 == 42
+	PRINTFORM %CALLNAME:MASTER%는,
+	IF TALENT:MASTER:연모 || TALENT:MASTER:친애
+		PRINT 마음을 보낸다
+	ELSE
+		PRINT 맹종 한다
+	ENDIF
+	PRINTFORML %CALLNAME%가 방을 빠져 나가,어딘가를 방문하려고 하고 있는 일을 알아차렸다
+	PRINTFORMW 「읏,너,어째서 이런 시간에 있을까나?」
+	PRINTFORML 매복하고 하고 있던 %CALLNAME:MASTER%는%CALLNAME%를 캐묻는다
+	SIF NO:MASTER == 49
+		PRINTFORMW 『어디에 갈 생각이었던 것이야? 남편』
+	SIF NO:MASTER == 69
+		PRINTFORMW 『어디에 갈 생각이었어? 밋쨩』
+	SIF NO:MASTER == 130
+		PRINTFORMW 『어디에 갈 생각이었던 것이야? 광방』
+	SIF NO:MASTER == 116
+		PRINTFORMW 『너… 어디에 갈 생각이었던 것이다』
+	SIF NO:MASTER == 118
+		PRINTFORMW 『어디에 갈 생각이었어? 말해라』
+	PRINTFORMW 「… 너에게는 관계없지요」
+	PRINTFORML %CALLNAME%는 시작해 시치미 떼려고 했지만,%CALLNAME:U%의 이름을 내면,얌전하고 %CALLNAME:MASTER%의 방에 따라 왔다
+	IF TEQUIP:속옷（아래） == 5
+		PRINTFORML %CALLNAME:MASTER%는,%CALLNAME%가 어디에도 갈 수 없게,강하게 껴안아 잠에 올랐다…
+	ELSEIF K:5 == 5
+		PRINTFORML %CALLNAME:MASTER%는%CALLNAME%가 딴 곳에 가지 않고도 만발 할 수 있도록(듯이) 충분히 봉사해,강하게 껴안아 잠에 올랐다…
+	;노예수
+	ELSEIF K:5 == 8
+		;취미에 달렸다
+		PRINTFORML %CALLNAME:MASTER%는%CALLNAME%를 밀어 넘어뜨리면,일시 모면적으로 푼 비밀스런 장소에 노장[怒張]을 삽입했다
+		IF TALENT:남자
+			SIF ABL:A감각 < 2
+				PRINTFORMW 「우긋…!아프기 때문에… 적어도,천천히 넣어 주지 않을까…」
+			SIF ABL:A감각 > 3
+				PRINTFORMW 「우긋…!아우,앗,싫다……」
+			PRINTFORML %CALLNAME:MASTER%는질투에 몰아지는 대로,%CALLNAME%가
+			PRINTFORML 어디에도 갈 수 없게 아침까지 그 몸을 탐내면서 자리수…
+		ELSE
+			PRINTFORML 「아,싫다,싫다,그쪽은…!」
+			PRINTFORMW 사정의 조짐을 보인 %CALLNAME:MASTER%의페니스에,%CALLNAME%는 무서워한 표정을 보인다
+			PRINTFORMW 날뛰는%CALLNAME%를 억눌러,%CALLNAME:MASTER%는 귀두를 안쪽까지 밀어넣어사정 했다
+			PRINTFORML 「아… 아아…… 그런… 나와……」
+			PRINTFORML 어안이 벙벙히 하는%CALLNAME%를 강하게 껴안아,어디에도 갈 수 없게 아침까지 그 몸을 탐내면서 자리수…
+		ENDIF
+	;주인수
+	ELSEIF K:5 == 9
+		PRINTFORML %CALLNAME:MASTER%는%CALLNAME%의 노장[怒張]을 물면,
+		PRINTFORML 어디에도 갈 수 없게 아침까지 그 몸을 탐내면서 자리수…
+	ENDIF
+	CFLAG:297 = 1
+ENDIF
+
+;-------------------------------------------------
+;밤 3P CFLAG:298 
+;-------------------------------------------------
+IF TFLAG:13 == 43
+	CALL EVENT_MESSAGE
+	CFLAG:298 = 1
+ENDIF
+
+;-------------------------------------------------
+;밤자위 CFLAG:299
+;-------------------------------------------------
+IF TFLAG:13 == 44
+	CALL EVENT_MESSAGE
+	CFLAG:299 = 1
+ENDIF
+
+
+
+;==================================================
+;조교후이벤트
+;==================================================
+;-------------------------------------------------
+;조교후레즈비언 플레이 CFLAG:264
+;-------------------------------------------------
+IF TFLAG:13 == 4
+	CALL EVENT_MESSAGE
+	CFLAG:264 = 1
+ENDIF
+
+;-------------------------------------------------
+;조교후섹스 수·공공용 CFLAG:265
+;-------------------------------------------------
+IF TFLAG:13 == 5
+	CALL EVENT_MESSAGE
+	CFLAG:265 = 1
+ENDIF
+
+;-------------------------------------------------
+;조교후자위 CFLAG:268
+;-------------------------------------------------
+IF TFLAG:13 == 8
+	CALL EVENT_MESSAGE
+	CFLAG:268 = 1
+ENDIF
+
+
+
+;==================================================
+;조교중 이벤트
+;==================================================
+;-------------------------------------------------
+;강정신약의 반동 CFLAG:266
+;-------------------------------------------------
+IF TFLAG:13 == 6
+	CALL EVENT_MESSAGE
+	CFLAG:266 = 1
+ENDIF
+
+;-------------------------------------------------
+;찍은 비디오를 매각하는 CFLAG:278
+;-------------------------------------------------
+IF TFLAG:13 == 19
+	CALL EVENT_MESSAGE
+	PRINTFORML 「그,그것… 파,파는지…?」
+	PRINTFORMW %CALLNAME%는 부끄러운 듯이 말했다
+	CFLAG:278 = 1
+ENDIF
+
+;-------------------------------------------------
+;찍은 비디오를손바탕으로 남기는 CFLAG:500
+;-------------------------------------------------
+IF TFLAG:13 == 24
+	CALL EVENT_MESSAGE
+	PRINTFORML 「그,그런 것 남겨 어떻게 하지…?」
+	IF TALENT:음란 || TALENT:창부
+		PRINTFORMW %CALLNAME%는 열정적인 눈동자로 %CALLNAME:PLAYER%가 가지는 비디오를 응시하고 있다
+	ELSE
+		PRINTFORMW %CALLNAME%는 수치에 얼굴을 새빨갛게 해,%CALLNAME:PLAYER%가 가지는 비디오를 응시하고 있다
+	CFLAG:500 = 1
+ENDIF
+ENDIF
+
+
+;==================================================
+;노역
+;==================================================
+;-------------------------------------------------
+;정식포장마차시 CFLAG:275
+;-------------------------------------------------
+IF TFLAG:13 == 15
+	IF P >= 100
+		IF F == 1
+			PRINTFORML %CALLNAME%과의 정식포장마차로 낸 요리는,많은 손님으로부터 호평을 얻을 수 있었다
+			PRINTFORML 「맛있다고 말해 받을 수 있으면 만들기 보람이 있네요. 다음도 노력하자」
+			PRINTFORMW %CALLNAME%는 기쁜 듯하다
+		ELSE
+			PRINTFORML %CALLNAME%과의 정식포장마차로 낸 요리는,평소보다 매출이 좋지 않았던 것 같다…
+			PRINTFORML 「다음은 멋있게 결정하고 싶지요…!」
+			PRINTFORMW %CALLNAME%는 투지를 태우고 있는 것 같다
+		ENDIF
+	ELSEIF P >= 50
+		PRINTFORM %CALLNAME%과의 정식포장마차로 낸%LUNCH_NAME_DETAIL(TARGET)%
+		IF F == 1
+			PRINTFORML 는,꽤 호평이었던 것 같다
+			PRINTFORML 「맛있다고 말해 받을 수 있으면 만들기 보람이 있네요. 다음은 좀 더 노력하자」
+			PRINTFORMW %CALLNAME%는 기쁜 듯하다
+		ELSE
+			PRINTFORML 는,별로 평가가 되지 않았던 것 같다…
+			PRINTFORML 「다음은 멋있게 결정하고 싶지요…!」
+			PRINTFORMW %CALLNAME%는 투지를 태우고 있는 것 같다
+		ENDIF
+	ELSE
+		PRINTFORM %CALLNAME%과의 정식포장마차로 낸%LUNCH_NAME_DETAIL(TARGET)%
+		IF F == 1
+			PRINTFORML 는,그런대로의 평가를 얻을 수 있었다
+			PRINTFORML 「이것으로 만발 하고 있어서는 안 되지요. 다음은 좀 더 노력하자!」
+			PRINTFORMW %CALLNAME%는 투지를 태우고 있는 것 같다
+		ELSE
+			PRINTFORML 는,그다지 호평은 아니었던 것 같다…
+			PRINTFORML 「다음은 멋있게 결정하고 싶지요…!」
+			PRINTFORMW %CALLNAME%는 투지를 태우고 있는 것 같다
+		ENDIF
+	ENDIF
+
+	;랜덤 에로이 밴트
+	K:1 = RAND:50
+	IF K:1 == 0
+		DRAWLINE
+		PRINTFORML 
+		PRINTFORMW 「읏… 멈추어 주지 않겠는가…!」
+		PRINTFORMW 포장마차의 정리를 하고 있으면,뒤로부터%CALLNAME%의 목소리가 들렸다.
+		PRINTFORMW 보면,무려%CALLNAME%가 몇사람의 술주정꾼에게 둘러싸여,그 몸을 만지작거려지고 있다…
+		PRINTFORML 
+		PRINTL [0] 나가 돕는다
+		PRINTL [1] 당분간 모습을 본다
+		$INPUT_LOOP_STALL1
+		INPUT
+		;나가 돕는다
+		IF RESULT == 0
+			PRINTFORML 「앗… 너……」
+			PRINTFORML %CALLNAME:MASTER%가 나가 그 녀석들을 쫓아버리면,
+			IF TALENT:음란 || TALENT:창부
+				PRINTFORMW %CALLNAME%는 조금 유감스러운 얼굴을 해 정리하러 돌아와 버렸다…
+			ELSE
+				PRINTFORML %CALLNAME%는 안심한 것처럼 %CALLNAME:MASTER%에 몸을 맡겨 왔다…
+				PRINTFORMW 「도와 주어 기뻤어요… 고마워요」
+			ENDIF
+		;당분간 모습을 본다
+		ELSEIF RESULT == 1
+			K:1 = RAND:3
+			;간파해
+			IF K:1 == 0
+				PRINTFORML 이윽고 흥분한 남자가,자신의 육봉을 꺼내,%CALLNAME%의 눈앞에서 잡아당기기 시작한다.
+				PRINTFORML 
+				IF ABL:욕망 >= 5
+					PRINTFORMW 「아……」
+					PRINTFORMW 그 광경에,%CALLNAME%는 무심코 목을 울려 버리고 있다.
+					PRINTFORMW 하지만 남자들은 그 이상%CALLNAME%에는손를 내지 않고,승손에 그욕망만을 토해내 간다.
+					PRINTFORMW 이윽고 남자들이 만발 해 떠난후에는,
+					PRINTFORMW 오탁 투성이가 되어,주저앉는%CALLNAME%만이 남아 있었다…
+					JUEL:6 += 500
+				ELSE
+					PRINTFORMW 「야,아니……」
+					PRINTFORMW 어안이 벙벙히 하는%CALLNAME%의 앞에서,남자들은 혼자 또 혼자와욕망를 토해내 간다.
+					PRINTFORMW 이윽고 남자들이 만발 해 떠난후에는,
+					PRINTFORMW 오탁 투성이가 되어,주저앉는%CALLNAME%만이 남아 있었다…
+					PRINTFORMW 「…… 좀 더 빨리 오기를 원했다」
+					JUEL:11 += 200
+					JUEL:13 += 400
+				ENDIF
+				;의존도-10
+				EXP:정액경험 += 5
+				JUEL:7 += 600
+			;페라
+			ELSEIF K:1 == 1
+				IF (TALENT:음란 || TALENT:창부) || ABL:욕망 >= 5
+					PRINTFORMW 당분간 모습을 지켜보고 있으면,%CALLNAME%는 마지못해 말한 모습으로,
+					PRINTFORMW 눈앞에 내밀어진 남자의 육봉을 빨기 시작했다.
+					PRINTFORMW 「응응… 쥬룻…… 후앗…」
+					PRINTFORMW 이지만 그 눈동자는 완전하게 녹아,봉사에 쾌감을 느끼고 있는 것을 안다…
+					PRINTFORML 
+					PRINTFORML 
+					PRINTFORMW 남자들이 만발 해 떠난후로,%CALLNAME:MASTER%는 나가%CALLNAME%를 위로했다.
+					PRINTFORMW 어딘가 공허한 표정을 한%CALLNAME%의 몸은 오탁 투성이가 되어,손에는 지폐를 잡아지고 있다.
+					PRINTFORMW …… 그러한 가게는 아니지만…
+				ELSEIF ABL:욕망 >= 3
+					PRINTFORMW 「싫닷!그만두어라…!그만두어 줘…!」
+					PRINTFORMW %CALLNAME%는저항 하고 있지만,대단한 남자에게 몇사람에 걸려 억눌려져서는 이길 수 없다
+					PRINTFORMW 이윽고 체념했는지,눈앞에 내밀어진 남자의 육봉을 빨기 시작했다.
+					PRINTFORMW 「힛… 우우…… 쥬,… 후웃…」
+					PRINTFORMW %CALLNAME%는 눈에 눈물을 머금으면서,빨리 이 상황을 끝내려고 필사적으로 봉사를 계속하고 있다…
+					PRINTFORML 
+					PRINTFORML 
+					PRINTFORMW 남자들이 만발 해 떠난후로,%CALLNAME:MASTER%는 나가%CALLNAME%를 돕고 일으켰다.
+					PRINTFORMW 공허한 표정으로 주저앉는%CALLNAME%의 몸은 오탁 투성이가 되어,손에는 지폐를 잡아지고 있다.
+					PRINTFORMW …… 그러한 가게는 아니지만…
+					JUEL:11 += 400
+					JUEL:13 += 600
+				ELSE
+					PRINTFORMW 「싫닷!그만두어라…!그만두어 줘…!」
+					PRINTFORMW %CALLNAME%는저항 하고 있지만,대단한 남자에게 몇사람에 걸려 억눌려져서는 이길 수 없다.
+					PRINTFORMW 이윽고 눈앞에 남자의 육봉이 내밀어져 무리하게입를 막혀 버린다.
+					PRINTFORML 
+					PRINTFORMW 「읏…… 다아,아붓… 우구…!」
+					PRINTFORMW 남자들은 싫어하는%CALLNAME%의입를 사용해,번갈아 당신의욕망를 토해내 갔다.
+					PRINTFORMW %CALLNAME%는 눈에 눈물을 머금으면서,빨리 이 상황을 끝내려고 필사적으로 봉사를 계속하고 있다…
+					PRINTFORML 
+					PRINTFORML 
+					PRINTFORMW 남자들이 만발 해 떠난후로,%CALLNAME:MASTER%는 나가%CALLNAME%를 돕고 일으켰다.
+					PRINTFORMW 공허한 표정으로 방심하고 있는%CALLNAME%는 오탁 투성이가 되어,손에는 지폐를 잡아지고 있다.
+					PRINTFORMW …… 그러한 가게는 아니지만…
+					JUEL:11 += 800
+					JUEL:13 += 1200
+				ENDIF
+				PRINTFORML 
+				PRINTFORML ＄5000을손에 넣었습니다
+				MONEY += 5000
+				;의존도-10
+				CFLAG:2 -= 10
+				EXP:정액경험 += 10
+				JUEL:6 += 100
+				JUEL:7 += 1000
+				JUEL:8 += 2200
+				IF !EXP:윤간경험
+					PRINTFORML 윤간첫경험으로이상경험＋1
+					EXP:이상경험 += 1
+				ENDIF
+				;윤간경험
+				EXP:윤간경험 += 1
+			;윤간
+			ELSEIF K:1 == 2
+				PRINTFORMW 「싫닷!그만두어라…!그만두어 줘…!」
+				PRINTFORMW %CALLNAME%는저항 하고 있지만,대단한 남자에게 몇사람에 걸려 억눌려져서는 이길 수 없다.
+				PRINTFORMW 손로입를 막혀,지면에 밀어 넘어뜨려져 버린다.
+				PRINTFORMW 더욱은,키후에 다른 남자가 돌아 들어가,%CALLNAME%는 당장 범해질 것 같다…
+				PRINTFORML 
+				PRINTL [0] 나가 돕는다
+				PRINTL [1] 방관을 관철한다
+				PRINTL [2] 윤간에 참가한다
+				$INPUT_LOOP_STALL2
+				INPUT
+				;나가 돕는다
+				IF RESULT == 0
+					PRINTFORMW %CALLNAME:MASTER%는 당황해 나가,모인 남자들을 쫓아버렸다.
+					PRINTFORML 
+					PRINTFORMW 이지만,쭉 보고 있었던 것에%CALLNAME%는 깨닫고 있던 것 같다.
+					PRINTFORMW 「…… 도와 주었던 것에는 감사하지만,좀 더 빨리 도와 주어도 괜찮지 않았을까」
+					PRINTFORMW 움찔 어깨를 진동시킨 %CALLNAME:MASTER%를,%CALLNAME%의 시선이 쏘아 맞혔다…
+					;의존도-10
+					CFLAG:2 -= 10
+					JUEL:11 += 800
+					JUEL:13 += 1200
+				;방관을 관철한다
+				ELSEIF RESULT == 1
+					IF EXP:윤간경험 >= 20
+						K:1 = RAND:2
+						;발견된다
+						IF K:1 == 0
+							PRINTFORMW …… 그 때,이쪽을 본%CALLNAME%과 %CALLNAME:MASTER%가 시선이 마주쳤다.
+							PRINTFORMW 「…… 읏」
+							PRINTFORMW 매달리도록(듯이) 늘려진%CALLNAME%의손를 무시해,%CALLNAME:MASTER%는 빙글 등을 돌렸다…
+							PRINTFORMW 「읏…… 싫다,기다려,가지 말고…!」
+							PRINTFORML 
+							PRINTFORML 
+							PRINTFORMW 잠시 후 %CALLNAME:MASTER%가 돌아오면,남자들은 벌써 만발 해 돌아갔는지,
+							PRINTFORMW 거기에는 공허한 표정으로 방심하고 있는%CALLNAME%만이 남겨지고 있었다.
+							PRINTFORMW %CALLNAME%의 몸은,남자들의 오탁 투성이가 되어,근처에는 지폐나 동전이 흩어져 있다…
+							;의존도-50
+							CFLAG:2 -= 50
+						;발견되지 않는다
+						ELSEIF K:1 == 1
+							PRINTFORMW %CALLNAME%의저항의 소리가 그쳐,대신에 팡팡 허리를 쳐박는 소리가 들려 온다.
+							PRINTFORMW 「아웃…… 아니,앗… 싫다앗…!」
+							PRINTFORM 무리하게 범해지는고통
+							SIF ABL:마조끼 >= 3 || ABL:V감각 >= 3 || ABL:A감각 >= 3
+								PRINTFORM 와 저항할 수 없는 쾌감
+							PRINTFORMW 에 허덕이면서,
+							PRINTFORMW %CALLNAME%가 남자들에게 좋아해 승손 범해지는 것을,제대로 관찰했다…
+							PRINTFORML 
+							PRINTFORML 
+							PRINTFORMW 이윽고 만발 한 남자들이 떠난후에는,공허한 표정으로 방심하고 있는%CALLNAME%만이 남겨졌다.
+							PRINTFORMW 그 몸은 남자들의 오탁 투성이가 되어,근처에는 지폐나 동전이 흩어져 있다…
+							;의존도-30
+							CFLAG:2 -= 30
+						ENDIF
+					ELSE
+						PRINTFORM 「야… 싫닷… 살려,
+						SIF NO:MASTER == 0
+							PRINTFORM 주
+						SIF NO:MASTER == 116
+							CALL PNAME_73_116
+						SIF NO:MASTER == 130
+							CALL PNAME_73_130
+						;씨
+						SIF NO:MASTER == 7 || NO:MASTER == 55 || NO:MASTER == 107 || NO:MASTER == 112 || NO:MASTER == 134 || NO:MASTER == 136
+							PRINTFORM %CALLNAME:PLAYER%씨
+						;너
+						SIF NO:MASTER == 5 || NO:MASTER == 9 || NO:MASTER == 11 || NO:MASTER == 23 || NO:MASTER == 47 || NO:MASTER == 59 || NO:MASTER == 65 || NO:MASTER == 122 || NO:MASTER == 138 || NO:MASTER == 132
+							PRINTFORM %CALLNAME:PLAYER%너
+						SIF NO:MASTER == 3
+							PRINTFORM 초승달씨
+						SIF NO:MASTER == 19
+							PRINTFORM 아오에군
+						SIF NO:MASTER == 25
+							PRINTFORM 한평생군
+						SIF NO:MASTER == 27
+							PRINTFORM 나마즈미군
+						SIF NO:MASTER == 29
+							PRINTFORM 골식군
+						SIF NO:MASTER == 31
+							PRINTFORM 히라노군
+						SIF NO:MASTER == 33
+							PRINTFORM 아츠시군
+						SIF NO:MASTER == 39
+							PRINTFORM 마에다군
+						SIF NO:MASTER == 41
+							PRINTFORM 아키타군
+						SIF NO:MASTER == 43
+							PRINTFORM 하카타군
+						SIF NO:MASTER == 45
+							PRINTFORM 란쨩
+						SIF NO:MASTER == 49
+							PRINTFORM 제약 기구군
+						SIF NO:MASTER == 57
+							PRINTFORM 아카시군
+						SIF NO:MASTER == 61
+							PRINTFORM 아이젠군
+						SIF NO:MASTER == 67
+							PRINTFORM 물 길군
+						SIF NO:MASTER == 69
+							PRINTFORM 사다쨩
+						SIF NO:MASTER == 79
+							PRINTFORM 강설군
+						SIF NO:MASTER == 81
+							PRINTFORM 소우산군
+						SIF NO:MASTER == 83
+							PRINTFORM 사야쨩
+						SIF NO:MASTER == 85
+							PRINTFORM 카슈우군
+						SIF NO:MASTER == 87
+							PRINTFORM 야마토노가미군
+						SIF NO:MASTER == 89
+							PRINTFORM 명인군
+						SIF NO:MASTER == 91
+							PRINTFORM 이즈미마모루군
+						SIF NO:MASTER == 93
+							PRINTFORM 무츠 마모루군
+						SIF NO:MASTER == 95
+							PRINTFORM 야마우바절군
+						SIF NO:MASTER == 97
+							PRINTFORM 수도자군
+						SIF NO:MASTER == 99
+							PRINTFORM 호리카와군
+						SIF NO:MASTER == 101
+							PRINTFORM 하치스가군
+						SIF NO:MASTER == 103
+							PRINTFORM 우라시마군
+						SIF NO:MASTER == 105
+							PRINTFORM 장 소네군
+						SIF NO:MASTER == 118
+							PRINTFORM 하세베군
+						SIF NO:MASTER == 120
+							PRINTFORM 부동군
+						SIF NO:MASTER == 128
+							PRINTFORM 동타누키군
+						PRINTFORMW …!」
+						PRINTFORMW 모습의 안보이는 %CALLNAME:MASTER%를 필사적으로 부르는 소리를 들으면서,
+						PRINTFORMW %CALLNAME%가 남자들에게 좋아해 승손 범해지는 것을,제대로 관찰했다…
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORMW 이윽고 만발 한 남자들이 떠난후에는,공허한 표정으로 방심하고 있는%CALLNAME%만이 남겨졌다.
+						PRINTFORMW 그 몸은 남자들의 오탁 투성이가 되어,근처에는 지폐나 동전이 흩어져 있다…
+						;의존도-30
+						CFLAG:2 -= 30
+					ENDIF
+					PRINTFORML 
+					IF TALENT:처녀 && TEQUIP:속옷（아래） != 5
+						TALENT:처녀 = 0
+						PRINTFORML 처녀상실
+						PRINTFORML 이상한 행위에서의처녀상실로 %EXPNAME:50%+1
+						EXP:이상경험 += 1
+					ENDIF
+					IF TALENT:백버진
+						TALENT:백버진 = 0
+						PRINTFORML 백버진상실
+						PRINTFORML 이상한 행위에서의백버진상실로 %EXPNAME:50%+1
+						EXP:이상경험 += 1
+					ENDIF
+					IF !EXP:윤간경험
+						PRINTFORML 윤간첫경험으로이상경험＋1
+						EXP:이상경험 += 1
+					ENDIF
+					;윤간경험
+					EXP:윤간경험 += 1
+					;3만
+					MONEY += 30000
+					SIF VAGINA(TARGET) && TEQUIP:속옷（아래） != 5
+						EXP:V경험 += 5
+					EXP:A경험 += 5
+					EXP:절정경험 += 3
+					EXP:정액경험 += 16
+					EXP:고통쾌락경험 += 12
+					SIF VAGINA(TARGET) && TEQUIP:속옷（아래） != 5
+						JUEL:1 += 500
+					JUEL:2 += 500
+					JUEL:6 += 1000
+					JUEL:7 += 4000
+					JUEL:10 += 1200
+					JUEL:11 += 2000
+					JUEL:14 += 3000
+				;윤간에 참가한다
+				ELSEIF RESULT == 2
+					PRINTFORMW 나타난 %CALLNAME:MASTER%의 모습을 봐,%CALLNAME%가 도움을 요구해 온다.
+					PRINTFORMW 이지만 거기에는 무시해,%CALLNAME:MASTER%는 남자들에게 적당한 금액을 제시했다…
+					PRINTFORML 
+					PRINTFORMW 「!? 너,무슨 말을 해……… 아… 시,싫다,그만두어…!」
+					PRINTFORMW 놀라 다시저항를 시작한%CALLNAME%를,남자들과 함께 되어 다 범했다…
+					PRINTFORML 
+					IF TALENT:처녀 && TEQUIP:속옷（아래） != 5
+						TALENT:처녀 = 0
+						PRINTFORML 처녀상실
+						PRINTFORML 이상한 행위에서의처녀상실로 %EXPNAME:50%+1
+						EXP:이상경험 += 1
+					ENDIF
+					IF TALENT:백버진
+						TALENT:백버진 = 0
+						PRINTFORML 백버진상실
+						PRINTFORML 이상한 행위에서의백버진상실로 %EXPNAME:50%+1
+						EXP:이상경험 += 1
+					ENDIF
+					IF !EXP:윤간경험
+						PRINTFORML 윤간첫경험으로이상경험＋1
+						EXP:이상경험 += 1
+					ENDIF
+					;윤간경험
+					EXP:윤간경험 += 1
+					;5만
+					MONEY += 50000
+					SIF VAGINA(TARGET) && TEQUIP:속옷（아래） != 5
+						EXP:V경험 += 10
+					EXP:A경험 += 10
+					EXP:절정경험 += 8
+					EXP:정액경험 += 24
+					EXP:고통쾌락경험 += 22
+					SIF VAGINA(TARGET) && TEQUIP:속옷（아래） != 5
+						JUEL:1 += 1000
+					JUEL:2 += 1000
+					JUEL:6 += 2000
+					JUEL:7 += 4000
+					JUEL:10 += 800
+					JUEL:11 += 1500
+				ELSE
+					GOTO INPUT_LOOP_STALL2
+				ENDIF
+			ENDIF
+		ELSE
+			GOTO INPUT_LOOP_STALL1
+		ENDIF
+	ENDIF
+	CFLAG:275 = 1
+ENDIF
+
+;-------------------------------------------------
+;도검뢰무시 CFLAG:279
+;-------------------------------------------------
+IF TFLAG:13 == 20
+	PRINTFORMW 「멋지게 결정하고 싶지요!」
+	CALL EVENT_MESSAGE
+	CFLAG:279 = 1
+ENDIF
+
+;-------------------------------------------------
+;창관봉공시(나갈 때) CFLAG:276
+;-------------------------------------------------
+IF TFLAG:13 == 16
+	CALL EVENT_MESSAGE
+	CFLAG:276 = 1
+ENDIF
+
+;-------------------------------------------------
+;창관봉공시(돌아왔을 때)
+;-------------------------------------------------
+IF TFLAG:13 == 69
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;구경거리 오두막시 CFLAG:280
+;-------------------------------------------------
+IF TFLAG:13 == 21
+	CALL EVENT_MESSAGE
+	CFLAG:280 = 1
+ENDIF
+
+;-------------------------------------------------
+;렌탈시(나갈 때)
+;-------------------------------------------------
+IF TFLAG:13 == 68
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;렌탈시(돌아왔을 때) CFLAG:277
+;-------------------------------------------------
+IF TFLAG:13 == 17
+	CALL EVENT_MESSAGE
+	CFLAG:277 = 1
+ENDIF
+
+;-------------------------------------------------
+;공중 변소 플레이시 CFLAG:281
+;-------------------------------------------------
+IF TFLAG:13 == 22
+	CALL EVENT_MESSAGE
+
+;	IF B == 1
+;		PRINTFORML 뒤골목에 도착하면%CALLNAME%를 적당한 그늘에서
+;	ELSEIF B == 2
+;		PRINTFORML 공중 변소에 도착하면%CALLNAME%를 적당한 독실의 변기 위에서
+;	ELSEIF B == 3
+;		PRINTFORML 비밀 클럽에 도착하면%CALLNAME%를 클럽의 화장실에서
+;	ENDIF
+;	PRINTFORML 가랑이를 크게 넓히도록(듯이)해 앉게 해 거기서 대기하도록(듯이) 명령했다
+;	PRINTFORML …
+;	PRINTFORM 아무래도%CALLNAME%의육변기는
+;	IF B == 1
+;		PRINTFORM 호기심인 인간들
+;	ELSEIF B == 2
+;		PRINTFORM 부랑자들
+;	ELSEIF B == 3
+;		PRINTFORM 호사가들
+;	ENDIF
+;	PRINTFORML 에 호평이었던 것 같다…
+
+	CFLAG:281 = 1
+ENDIF
+
+;-------------------------------------------------
+;노예에게 요리를 만들게 한다
+;-------------------------------------------------
+IF TFLAG:13 == 26
+	CALL EVENT_MESSAGE
+	;최초부터 도시락을 먹을 때
+	IF K == 1 || K == 2
+	;주인이 도시락을 만들 때
+	ELSEIF K == 3
+	;밥후의 운동(성적인 의미로) 직전
+	ELSEIF K == 4
+	;독을 담아졌다
+	ELSEIF K == 5
+	;독을 간파했으므로 약점을 잡는 이벤트(궁합이 좋은 아이에게 먹이는 ver)
+	ELSEIF K == 6
+	;독을 간파했으므로 약점을 잡는 이벤트(캐묻는 ver)
+	ELSEIF K == 7
+	;독살되었다
+	ELSEIF K == 8
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;노예를 매각한다
+;-------------------------------------------------
+IF TFLAG:13 == 18
+	CALL EVENT_MESSAGE
+ENDIF
+
+
+
+;==================================================
+;아이템 구입시
+;노란환약는 아래쪽에 개별범위 있어. 여기에서는 쓰지 않는다
+;==================================================
+IF TFLAG:13 == 28
+	CALL EVENT_MESSAGE
+	SELECTCASE BOUGHT
+		;수
+		CASE 55
+		;공
+		CASE 56
+		;선인당고
+		CASE 60
+		;약의재료(후타)
+		CASE 61
+		;약의재료(소멸)
+		CASE 62
+		;푸른환약
+		CASE 63
+		;붉은환약
+		CASE 64
+		;풍유환
+		CASE 65
+		;축유환
+		CASE 66
+		;프롤락틴억제제
+		CASE 67
+		;3환계항우울제
+		CASE 68
+		;성전환약
+		CASE 70
+		;천사의기적
+		CASE 71
+		;악마의저주
+		CASE 72
+		;풍근환
+		CASE 73
+		;축근환
+		CASE 74
+		;포근환
+		CASE 75
+		;기억소거제
+		CASE 80
+		;되감기약
+		CASE 81
+		;배란유발제
+		CASE 82
+		;고성능피임구
+		CASE 83
+		;긴급피임약
+		CASE 85
+		;부적,부적극
+		CASE 96,97
+	ENDSELECT
+ENDIF
+
+
+
+;==================================================
+;의상 변경시 CFLAG:283(를 적당하게 적용) 
+;==================================================
+;----------------------------------------------
+;덮어 씌울 때의입상
+;----------------------------------------------
+IF TFLAG:13 == 25
+	CALL EVENT_MESSAGE
+	;일단 텐프레.
+	;전신상의의 백의를 입힌다
+	;IF T:6 == 6
+	;	PRINTFORMW 
+	;남자인데 여자의 모습을 시킨다
+	IF (TALENT:남자 || TALENT:반음반양) && (T:2 == 1 || T:2 == 4 || T:3 == 1 || T:3 == 2 || T:3 == 4 || T:3 == 5 || T:4 == 11 || (T:5 >= 1 && T:5 <= 6) || T:5 == 9 || T:5 == 12)
+		PRINTFORMW 「나에게 이런 모습 시켜도 즐겁지 않다고 생각하지만…」
+	ENDIF
+;----------------------------------------------
+;벗겼을 때의입상
+;----------------------------------------------
+ELSEIF TFLAG:13 == 76
+	CALL EVENT_MESSAGE
+	;속옷（아래）를 벗게 한다
+	;IF A == 2
+	;하카마를 벗게 한다
+	;ELSEIF A == 4 && T:4 == 18
+	;ENDIF
+ENDIF
+
+
+
+;==================================================
+;소질 취득시
+;==================================================
+;-------------------------------------------------
+;연모를 취득했다
+;-------------------------------------------------
+IF TFLAG:13 == 46
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;음란를 취득했다
+;-------------------------------------------------
+IF TFLAG:13 == 47
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;복종를 취득했다
+;-------------------------------------------------
+IF TFLAG:13 == 48
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;친애를 취득했다
+;-------------------------------------------------
+IF TFLAG:13 == 49
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;창부를 취득했다
+;-------------------------------------------------
+IF TFLAG:13 == 50
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;예속를 취득
+;-------------------------------------------------
+IF TFLAG:13 == 51
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;붕괴
+;-------------------------------------------------
+IF TFLAG:13 == 52
+	CALL EVENT_MESSAGE
+	;상사상애로 상대가 매각되었다
+	IF TFLAG:53 == 1
+	;임신가 원인으로붕괴 했다
+	ELSEIF TFLAG:53 == 2
+	;격렬한 조교에 의해붕괴 했다
+	ELSEIF TFLAG:53 == 3
+	;약에 의해붕괴 했다
+	ELSEIF TFLAG:53 == 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------
+;부적효과 발휘시(도검 부활)
+;-------------------------------------------
+IF TFLAG:13 == 72
+	CALL EVENT_MESSAGE
+	;상사상애로 상대가 매각되었다
+	IF TFLAG:53 == 1
+	;임신가 원인으로붕괴 했다
+	ELSEIF TFLAG:53 == 2
+	;격렬한 조교에 의해붕괴 했다
+	ELSEIF TFLAG:53 == 3
+	;약에 의해붕괴 했다
+	ELSEIF TFLAG:53 == 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;상사상애취득
+;-------------------------------------------------
+IF TFLAG:13 == 53
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;섹스중독취득
+;-------------------------------------------------
+IF TFLAG:13 == 55
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;자위광취득
+;-------------------------------------------------
+IF TFLAG:13 == 56
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;음란구멍취득
+;-------------------------------------------------
+IF TFLAG:13 == 57
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;항문광취득
+;-------------------------------------------------
+IF TFLAG:13 == 58
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;음란가슴취득
+;-------------------------------------------------
+IF TFLAG:13 == 59
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;즉각함락취득
+;-------------------------------------------------
+IF TFLAG:13 == 60
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;새드취득
+;-------------------------------------------------
+IF TFLAG:13 == 61
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;마조취득
+;-------------------------------------------------
+IF TFLAG:13 == 62
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;도S취득
+;-------------------------------------------------
+IF TFLAG:13 == 63
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;드 M취득
+;-------------------------------------------------
+IF TFLAG:13 == 64
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;실금버릇취득
+;-------------------------------------------------
+IF TFLAG:13 == 65
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;유아 퇴행 했다
+;-------------------------------------------------
+IF TFLAG:13 == 66
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;정통시
+;-------------------------------------------------
+IF TFLAG:13 == 70
+	CALL EVENT_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;방뇨 혹은 배변 했을 때 CFLAG:248
+;-------------------------------------------------
+IF TFLAG:13 == 71
+	CALL EVENT_MESSAGE
+	CFLAG:248 = 1
+ENDIF
+
+;-------------------------------------------------
+;미약의 효과가 끊어졌을 때 CFLAG:256
+;-------------------------------------------------
+IF TFLAG:13 == 73
+	CALL EVENT_MESSAGE
+	CFLAG:256 = 1
+ENDIF
+
+
+
+;==================================================
+;임신·출산·육아 관련
+;==================================================
+;-------------------------------------------------
+;황색의 환약 사용시 CFLAG:270
+;강제 유산
+;-------------------------------------------------
+IF TFLAG:13 == 10
+	CALL EVENT_MESSAGE
+	CFLAG:270 = 1
+ENDIF
+
+;-------------------------------------------------
+;임신발각시 CFLAG:271
+;-------------------------------------------------
+IF TFLAG:13 == 11
+	CALL EVENT_MESSAGE
+	CFLAG:271 = 1
+ENDIF
+
+;-------------------------------------------------
+;출산시 CFLAG:272
+;-------------------------------------------------
+IF TFLAG:13 == 12
+	CALL EVENT_MESSAGE
+	CFLAG:272 = 1
+ENDIF
+
+;-------------------------------------------------
+;육아실 CFLAG:273
+;-------------------------------------------------
+IF TFLAG:13 == 13
+	CALL EVENT_MESSAGE
+	CFLAG:273 = 1
+ENDIF
+
+;-------------------------------------------------
+;자립시 CFLAG:274
+;-------------------------------------------------
+IF TFLAG:13 == 14
+	CALL EVENT_MESSAGE
+	CFLAG:274 = 1
+ENDIF
+
+;-------------------------------------------------
+;아이도 조교하는 것을 선택한 CFLAG:501
+;-------------------------------------------------
+IF TFLAG:13 == 45
+	CALL EVENT_MESSAGE
+	CFLAG:501 = 1
+ENDIF
+
+

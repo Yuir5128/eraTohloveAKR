@@ -1,0 +1,697 @@
+﻿;====================================================================
+;汚れ処理がくそめんどくさかったのでまとめてみる
+;====================================================================
+@COM_STAIN
+A = 0
+B = 0
+S = 0
+T = 0
+X = 0
+Y = 0
+
+SELECTCASE SELECTCOM
+	;-------------------------------------------------
+	;調教者の手、胸、足⇔奴隷のＢＣ
+	;-------------------------------------------------
+	CASE 0,10,11,14,23,30,33 TO 36,41,51,140,141,160,161,162,240,242,246,500,501,502
+		SELECTCASE SELECTCOM
+			CASE 240
+				X = 3
+			CASE 242,246
+				X = 9
+			CASEELSE
+				X = 2
+		ENDSELECT
+		
+		SELECTCASE SELECTCOM
+			CASE 0
+				;上半身
+				IF TOPS(TARGET) == 3
+					A = 13
+				ELSEIF TEQUIP:上衣
+					A = 14
+				ELSEIF TEQUIP:下着（上）
+					A = 16
+				ELSE
+					A = 3
+				ENDIF
+				;下半身
+				IF BOTTOMS(TARGET) >= 4
+					A = 15
+				ELSEIF TEQUIP:下着（下） && !TEQUIP:貞操帯
+					A = 17
+				ELSEIF (TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6) && TFLAG:55 == 0
+					A = 18
+				ELSE
+					IF SELECTCOM == 140
+						A = 0
+					ELSEIF PENIS(TARGET)
+						A = 4
+					ELSE
+						A = 5
+					ENDIF
+				ENDIF
+			CASE 162
+				A = 6
+				B = 8
+			CASE 10,11,14,141,502
+				SIF SELECTCOM == 502
+					STAIN:胸 |= 16
+				
+				;上半身
+				IF TOPS(TARGET) == 3
+					A = 13
+				ELSEIF TEQUIP:上衣
+					A = 14
+				ELSEIF TEQUIP:下着（上）
+					A = 16
+				ELSE
+					A = 3
+				ENDIF
+			CASE 23,30,33,34,35,36,140,240,242,246
+				;下半身
+				IF BOTTOMS(TARGET) >= 4
+					A = 15
+				ELSEIF TEQUIP:下着（下） && !TEQUIP:貞操帯
+					A = 17
+				ELSEIF (TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6) && TFLAG:55 == 0
+					A = 18
+				ELSE
+					IF SELECTCOM == 140
+						A = 0
+					ELSEIF SELECTCOM == 246
+						A = 5
+						B = 6
+					ELSEIF PENIS(TARGET)
+						A = 4
+					ELSE
+						A = 5
+					ENDIF
+				ENDIF
+			CASE 41,160,500
+				A = 6
+			CASE 51,161,501
+				A = 8
+		ENDSELECT
+		
+		STAIN:PLAYER:X |= STAIN:A
+		STAIN:A |= STAIN:PLAYER:X
+		IF B > 0
+			STAIN:PLAYER:X |= STAIN:B
+			STAIN:B |= STAIN:PLAYER:X
+		ENDIF
+	;-------------------------------------------------
+	;調教者の口←奴隷の体
+	;-------------------------------------------------
+	CASE 18,31,40,50,241,280,282
+		IF SELECTCOM == 18
+			A = 3
+		ELSEIF SELECTCOM == 282
+			;靴を付けているとき
+			IF TEQUIP:靴
+				A = 19
+			;靴下を付けているとき
+			ELSEIF TEQUIP:特殊２
+				A = 18
+			ELSE
+				A = 9
+			ENDIF
+		ELSEIF SELECTCOM == 50
+			IF BOTTOMS(TARGET) >= 4
+				A = 15
+			ELSEIF (TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6) && TFLAG:55 == 0
+				A = 18
+			ELSEIF TEQUIP:下着（下）
+				A = 17
+			ELSE
+				A = 7
+			ENDIF
+		ELSE
+			IF BOTTOMS(TARGET) >= 4
+				A = 15
+			ELSEIF (TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6) && TFLAG:55 == 0
+				A = 18
+			ELSEIF TEQUIP:下着（下）
+				A = 17
+			ELSE
+				IF PENIS(TARGET)
+					A = 4
+				ELSE
+					A = 5
+				ENDIF
+			ENDIF
+		ENDIF
+		
+		;胸も使う
+		IF SELECTCOM == 241
+			X = 3
+		ENDIF
+		
+		STAIN:PLAYER:口 |= STAIN:A
+		SIF X > 0
+			STAIN:PLAYER:口 |= STAIN:A
+		STAIN:A = 0
+	;-------------------------------------------------
+	;レズプレイ
+	;-------------------------------------------------
+	CASE 1,243,244,245,503,504
+		;キス
+		IF SELECTCOM == 1 ||  SELECTCOM == 412
+			STAIN:口 |= STAIN:PLAYER:口
+			STAIN:PLAYER:口 |= STAIN:口
+		;乳の揉み合い
+		ELSEIF SELECTCOM == 243
+			IF TEQUIP:特殊１ == 1
+				X = 12
+			ELSE
+				X = 2
+			ENDIF
+			
+			;上半身
+			IF TOPS(TARGET) == 3
+				A = 13
+			ELSEIF TEQUIP:上衣
+				A = 14
+			ELSEIF TEQUIP:下着（上）
+				A = 16
+			ELSE
+				A = 3
+			ENDIF
+			
+			STAIN:A |= STAIN:PLAYER:手
+			STAIN:PLAYER:手 |= STAIN:A
+			STAIN:X |= STAIN:PLAYER:胸
+			STAIN:PLAYER:胸 |= STAIN:X
+		;貝合わせ
+		ELSEIF SELECTCOM == 244
+			STAIN:ヴァギナ |= STAIN:PLAYER:ヴァギナ
+			STAIN:PLAYER:ヴァギナ |= STAIN:ヴァギナ
+		;兜合わせ
+		ELSEIF SELECTCOM == 245
+			STAIN:ペニス |= STAIN:PLAYER:ペニス
+			STAIN:PLAYER:ペニス |= STAIN:ペニス
+			
+			;調教者に手があれば調教者の手を使う
+			IF !TALENT:PLAYER:両腕欠損 && !TALENT:PLAYER:達磨
+				STAIN:ペニス |= STAIN:PLAYER:手
+				STAIN:PLAYER:手 |= STAIN:ペニス
+			;調教者に手がなく、奴隷に手があれば奴隷の手を使う
+			ELSEIF !TALENT:両腕欠損 && !TALENT:達磨
+				IF TEQUIP:特殊１ == 1
+					X = 12
+				ELSE
+					X = 2
+				ENDIF
+				STAIN:X |= STAIN:PLAYER:ペニス
+				STAIN:PLAYER:ペニス |= STAIN:X
+			ENDIF
+		;シックスナイン
+		ELSEIF SELECTCOM == 503
+			IF PENIS(TARGET)
+				A = 4
+			ELSE
+				A = 5
+			ENDIF
+			IF PENIS(PLAYER)
+				X = 4
+			ELSE
+				X = 5
+			ENDIF
+			
+			STAIN:PLAYER:口 |= STAIN:A
+			STAIN:A = 0
+			STAIN:口 |= STAIN:PLAYER:X
+			STAIN:PLAYER:X = 0
+		;６９パイズリ
+		ELSEIF SELECTCOM == 504
+			STAIN:胸 |= STAIN:PLAYER:ペニス
+			STAIN:PLAYER:ペニス |= STAIN:胸
+			
+			STAIN:PLAYER:胸 |= STAIN:ペニス
+			STAIN:ペニス |= STAIN:PLAYER:胸
+		ENDIF
+	;-------------------------------------------------
+	;調教者の自慰
+	;-------------------------------------------------
+	CASE 226,227
+		IF SELECTCOM == 227
+			STAIN:PLAYER:手 |= STAIN:PLAYER:腸内
+			STAIN:PLAYER:腸内 |= STAIN:PLAYER:手
+			STAIN:PLAYER:手 |= STAIN:PLAYER:アナル
+			STAIN:PLAYER:アナル |= STAIN:PLAYER:手
+		ELSE
+			STAIN:PLAYER:手 |= STAIN:PLAYER:胸
+			STAIN:PLAYER:胸 |= STAIN:PLAYER:手
+			
+			;調教者の手⇔調教者のＣの汚れが移動
+			;ペニスがある
+			IF PENIS(PLAYER)
+				STAIN:PLAYER:手 |= STAIN:PLAYER:ペニス
+				STAIN:PLAYER:ペニス |= STAIN:PLAYER:手
+			ENDIF
+			;ヴァギナがある
+			IF VAGINA(PLAYER)
+				;攻めでない
+				IF !TALENT:PLAYER:攻め
+					STAIN:PLAYER:手 |= STAIN:PLAYER:膣内
+					STAIN:PLAYER:膣内 |= STAIN:PLAYER:手
+				ENDIF
+				STAIN:PLAYER:手 |= STAIN:PLAYER:ヴァギナ
+				STAIN:PLAYER:ヴァギナ |= STAIN:PLAYER:手
+			ENDIF
+		ENDIF
+	;-------------------------------------------------
+	;セックス系
+	;-------------------------------------------------
+	CASE 100 TO 106,110 TO 116,181,260 TO 265,270,271,430,431,440,441,507,508,526
+		SELECTCASE SELECTCOM
+			;主人×奴隷
+			CASE 100 TO 106,507,508
+				A = 6
+			;主人×奴隷
+			CASE 110 TO 116,181,526
+				A = 8
+				SIF SELECTCOM == 181
+					STAIN:腸内 |= 128
+			;奴隷×主人
+			CASE 260,261,262
+				X = 6
+			;奴隷×主人
+			CASE 263,264,265
+				X = 8
+			;助手×主人
+			CASE 270
+				X = 6
+			;助手×主人
+			CASE 271
+				X = 8
+			;奴隷×助手
+			CASE 430
+				Y = 6
+			;奴隷×助手
+			CASE 431
+				Y = 8
+			;主人×助手
+			CASE 440
+				Y = 6
+			;奴隷×助手
+			CASE 441
+				Y = 8
+		ENDSELECT
+		
+		SELECTCASE SELECTCOM
+			CASE 100 TO 106,110 TO 116,181,507,508,526
+				STAIN:PLAYER:4 |= STAIN:A
+				STAIN:A |= STAIN:PLAYER:4
+			CASE 260 TO 265
+				STAIN:PLAYER:X |= STAIN:ペニス
+				STAIN:ペニス |= STAIN:PLAYER:X
+			CASE 270,271
+				STAIN:PLAYER:X |= STAIN:ASSI:ペニス
+				STAIN:ASSI:ペニス |= STAIN:PLAYER:X
+			CASE 430,431
+				STAIN:ASSI:Y |= STAIN:ペニス
+				STAIN:ペニス |= STAIN:ASSI:Y
+			CASE 440,441
+				STAIN:ASSI:Y |= STAIN:PLAYER:ペニス
+				STAIN:PLAYER:ペニス |= STAIN:ASSI:Y
+		ENDSELECT
+		
+	;-------------------------------------------------
+	;奴隷の手（手袋）⇔奴隷のＢＶＡ
+	;-------------------------------------------------
+	CASE 3,4,5,6,7,8
+		;手袋をしている
+		IF TEQUIP:特殊１ == 1
+			X = 12
+		ELSE
+			X = 2
+		ENDIF
+		IF SELECTCOM == 3
+			A = 5
+		ELSEIF SELECTCOM == 4
+			;ペニスがあって、元がオトコならペニスを優先して使う
+			IF PENIS(TARGET) && MALE2(TARGET)
+				A = 4
+			ELSE
+				;ヴァギナが使える場合は指を入れる
+				IF TFLAG:56 == 1
+					A = 6
+				ELSE
+					A = 5
+				ENDIF
+			ENDIF
+		ELSEIF SELECTCOM == 5
+			A = 3
+		ELSEIF SELECTCOM == 6
+			A = 8
+		ELSEIF SELECTCOM == 7
+			IF !TEQUIP:バイブ && !TEQUIP:ローター挿入
+				A = 6
+			ENDIF
+			IF !TEQUIP:アナルバイブ && !TEQUIP:ローターＡ挿入 && !TEQUIP:アナルビーズ && !TEQUIP:拡張バルーン
+				B = 8
+			ENDIF
+		ELSEIF SELECTCOM == 8
+			A = 5
+		ENDIF
+		
+		IF A > 0
+			STAIN:X |= STAIN:A
+			STAIN:A |= STAIN:X
+		ENDIF
+		IF B > 0
+			STAIN:X |= STAIN:B
+			STAIN:B |= STAIN:X
+		ENDIF
+	;-------------------------------------------------
+	;奴隷の手、胸、股、足、髪⇔調教者のＣＶＡ
+	;-------------------------------------------------
+	CASE 70,73,74,76,80 TO 84,86,220,221,223,225,528
+		;アナル
+		IF SELECTCOM == 0
+			X = 5
+		;胸
+		ELSEIF SELECTCOM == 221
+			X = 3
+		;膣内
+		ELSEIF SELECTCOM == 223
+			X = 6
+		;腸内
+		ELSEIF SELECTCOM == 225
+			X = 8
+		;ペニス
+		ELSE
+			IF PENIS(PLAYER)
+				X = 4
+			ELSE
+				X = 5
+			ENDIF
+		ENDIF
+		
+		;胸
+		IF SELECTCOM == 73 || SELECTCOM == 74 || SELECTCOM == 84
+			A = 3
+		;股
+		ELSEIF SELECTCOM == 76
+			A = 5
+		;足
+		ELSEIF SELECTCOM == 80
+			;靴を付けているとき
+			IF TEQUIP:靴
+				A = 19
+			;靴下を付けているとき
+			ELSEIF TEQUIP:特殊２
+				A = 18
+			ELSE
+				A = 9
+			ENDIF
+		;髪
+		ELSEIF SELECTCOM == 81
+			A = 0
+		;尻
+		ELSEIF SELECTCOM == 83
+			IF TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6
+				A = 18
+			ELSE
+				A = 17
+			ENDIF
+		ELSE
+			;手袋をしている
+			IF TEQUIP:特殊１ == 1
+				A = 12
+			ELSE
+				A = 2
+			ENDIF
+		ENDIF
+		
+		STAIN:A |= STAIN:PLAYER:X
+		STAIN:PLAYER:X |= STAIN:A
+	;-------------------------------------------------
+	;奴隷の口←調教者の体
+	;-------------------------------------------------
+	CASE 71,72,75,77,85,87,222,224
+		IF SELECTCOM == 77
+			X = 2
+		ELSEIF SELECTCOM == 85
+			X = 9
+		ELSEIF SELECTCOM == 224
+			X = 7
+		ELSEIF SELECTCOM == 222
+			X = 5
+		ELSE
+			X = 4
+		ENDIF
+		
+		;胸も使う
+		IF SELECTCOM == 75
+			A = 3
+		ENDIF
+		
+		STAIN:口 |= STAIN:PLAYER:X
+		SIF A > 0
+			STAIN:A |= STAIN:PLAYER:X
+		STAIN:PLAYER:X = 0
+	;-------------------------------------------------
+	;飲尿
+	;-------------------------------------------------
+	CASE 184
+		STAIN:口 |= 128
+		;その場に尿がなければ主人が出す
+		IF TFLAG:66 == 0
+			IF PENIS(TARGET)
+				X = 4
+			ELSE
+				X = 5
+			ENDIF
+			
+			STAIN:PLAYER:X |= 128
+			STAIN:口 |= STAIN:PLAYER:X
+			
+			;奴隷がスカ中毒３／マゾっ気４+スカ中毒２だとＣorＶの汚れまで舐め取る
+			IF ABL:スカ中毒 >= 3 || (ABL:マゾっ気 >= 4 && ABL:スカ中毒 >= 2)
+				STAIN:PLAYER:X = 0
+			;逆にスカ中毒２以下／マゾっ気２以下だと零し、服に尿汚れがつく
+			ELSE
+				;装飾品
+				SIF TEQUIP:特殊１ == 1
+					STAIN:手袋 |= 128
+				
+				;上下衣類
+				SIF TEQUIP:全身上着
+					STAIN:全身上着 |= 128
+				;上半身
+				IF TEQUIP:上衣
+					STAIN:上衣 |= 128
+				ELSEIF TEQUIP:下着（上）
+					STAIN:下着（上） |= 128
+				ENDIF
+				;下半身
+				IF TEQUIP:下衣
+					STAIN:下衣 |= 128
+				ELSEIF TEQUIP:下着（下）
+					STAIN:下着（下） |= 128
+				ENDIF
+			ENDIF
+		ENDIF
+	;-------------------------------------------------
+	;食糞
+	;-------------------------------------------------
+	CASE 185
+		STAIN:口 |= 512
+	;-------------------------------------------------
+	;飲尿する
+	;-------------------------------------------------
+	CASE 285
+		STAIN:PLAYER:口 |= 128
+		IF PENIS(PLAYER)
+			A = 4
+		ELSE
+			A = 5
+		ENDIF
+		STAIN:PLAYER:口 |= STAIN:A
+	;-------------------------------------------------
+	;食糞する
+	;-------------------------------------------------
+	CASE 286
+		STAIN:PLAYER:口 |= 512
+		IF TFLAG:56 == 1
+			STAIN:PLAYER:口 |= STAIN:アナル
+			STAIN:アナル = 8
+		ENDIF
+	;-------------------------------------------------
+	;玩具装着時：触手の体液⇔奴隷の体
+	;-------------------------------------------------
+	CASE 13,17,22,32,43,54,60,132,180
+		SIF TEQUIP:触手 == 0
+			RETURN 0
+		
+		;胸
+		IF SELECTCOM == 13 || SELECTCOM == 17
+			A = 3
+		;ヴァギナ（クリトリス）
+		ELSEIF SELECTCOM == 22
+			A = 5
+		;ペニス
+		ELSEIF SELECTCOM == 32 || SELECTCOM == 60
+			A = 4
+		;膣内
+		ELSEIF SELECTCOM == 43
+			A = 6
+		;腸内
+		ELSEIF SELECTCOM == 54 || SELECTCOM == 180
+			A = 8
+		;口
+		ELSEIF SELECTCOM == 132
+			A = 1
+		ENDIF
+		
+		STAIN:A |= 32
+	;-------------------------------------------------
+	;触手の体液→奴隷の体全体
+	;-------------------------------------------------
+	CASE 130
+		SIF TEQUIP:触手 == 0
+			RETURN 0
+		
+		REPEAT 10
+			A = COUNT
+			STAIN:A |= 32
+		REND
+		
+		IF TEQUIP:特殊１ || TEQUIP:特殊２ || TEQUIP:下着（下） || TEQUIP:下着（上） || TEQUIP:下衣 || TEQUIP:上衣 || TEQUIP:全身上着 || TEQUIP:頭部装飾 || TEQUIP:特殊３ || TEQUIP:靴
+			REPEAT 10
+				A = COUNT + 10
+				IF A == 12
+					;手袋、エプロン以外は汚れ判定無し
+					SIF TEQUIP:特殊１ != 1 && TEQUIP:特殊１ != 2
+						CONTINUE
+				ENDIF
+				STAIN:A |= 32
+			REND
+		ENDIF
+	;-------------------------------------------------
+	;体全体の汚れを消す
+	;-------------------------------------------------
+	CASE 207,316,317,318
+		REPEAT 20
+			A = COUNT
+			STAIN:A = 0
+			STAIN:PLAYER:A = 0
+			SIF ASSI >= 0
+				STAIN:ASSI:A = 0
+		REND
+		
+		IF SELECTCOM != 207 && SELECTCOM != 315
+			IF TEQUIP:特殊１ || TEQUIP:特殊２ || TEQUIP:下着（下） || TEQUIP:下着（上） || TEQUIP:下衣 || TEQUIP:上衣 || TEQUIP:全身上着 || TEQUIP:頭部装飾 || TEQUIP:特殊３ || TEQUIP:靴
+				REPEAT 10
+					A = COUNT + 10
+					IF A == 12
+						;手袋、エプロン以外は汚れ判定無し
+						SIF TEQUIP:特殊１ != 1 && TEQUIP:特殊１ != 2
+							CONTINUE
+					ENDIF
+					STAIN:A |= 256
+				REND
+			ENDIF
+		ENDIF
+	;-------------------------------------------------
+	;髪に水汚れ
+	;-------------------------------------------------
+	CASE 157
+		STAIN:髪 |= 256
+		;上半身着てたら上も水汚れ
+		IF TEQUIP:全身上着 || TEQUIP:上衣
+			SIF TEQUIP:全身上着
+				TEQUIP:全身上着 |= 256
+			SIF TEQUIP:上衣
+				TEQUIP:上衣 |= 256
+		ELSEIF TEQUIP:下着（上）
+			TEQUIP:下着（上） |= 256
+		ENDIF
+	;-------------------------------------------------
+	;掻痒剤
+	;-------------------------------------------------
+	CASE 305
+		IF TEQUIP:触手
+			STAIN:胸 |= 1024
+			IF PENIS(TARGET)
+				STAIN:ペニス |= 1024
+			ELSE
+				STAIN:ヴァギナ |= 1024
+			ENDIF
+			STAIN:アナル |= 1024
+			STAIN:腸内 |= 1024
+			SIF VAGINA(TARGET)
+				STAIN:膣内 |= 1024
+		ELSE
+			;胸
+			IF TFLAG:56 == 0
+				STAIN:胸 |= 1024
+			;ＰorＶ
+			ELSEIF TFLAG:56 == 1
+				IF PENIS(TARGET)
+					STAIN:ペニス |= 1024
+				ELSE
+					STAIN:ヴァギナ |= 1024
+				ENDIF
+			;アナル
+			ELSEIF TFLAG:56 == 2
+				STAIN:アナル |= 1024
+				STAIN:腸内 |= 1024
+			;ヴァギナ
+			ELSEIF TFLAG:56 == 3
+				STAIN:膣内 |= 1024
+			;塗れるとこ全部
+			ELSEIF TFLAG:56 == 10
+				STAIN:胸 |= 1024
+				IF PENIS(TARGET)
+					STAIN:ペニス |= 1024
+				ELSE
+					STAIN:ヴァギナ |= 1024
+				ENDIF
+				STAIN:アナル |= 1024
+				STAIN:腸内 |= 1024
+				SIF VAGINA(TARGET)
+					STAIN:膣内 |= 1024
+			;自分の指
+			ELSEIF TFLAG:56 == 99
+				STAIN:PLAYER:手 |= 1024
+			ENDIF
+		ENDIF
+ENDSELECT
+
+SIF STAIN:膣内 > 0 && STAIN:ヴァギナ == 0
+	STAIN:ヴァギナ |= STAIN:膣内
+SIF STAIN:MASTER:膣内 > 0 && STAIN:MASTER:ヴァギナ == 0
+	STAIN:MASTER:ヴァギナ |= STAIN:MASTER:膣内
+SIF ASSI >= 0 && STAIN:ASSI:膣内 > 0 && STAIN:ASSI:ヴァギナ == 0
+	STAIN:ASSI:ヴァギナ |= STAIN:ASSI:膣内
+
+SIF STAIN:腸内 > 0 && STAIN:アナル == 0
+	STAIN:アナル |= STAIN:腸内
+SIF STAIN:MASTER:腸内 > 0 && STAIN:MASTER:アナル == 0
+	STAIN:MASTER:アナル |= STAIN:MASTER:腸内
+SIF ASSI >= 0 && STAIN:ASSI:腸内 > 0 && STAIN:ASSI:アナル == 0
+	STAIN:ASSI:アナル |= STAIN:ASSI:腸内
+
+STAIN:MASTER:ペニス |= 2
+STAIN:MASTER:ヴァギナ |= 1
+STAIN:MASTER:膣内 |= 1
+STAIN:MASTER:アナル |= 8
+STAIN:MASTER:腸内 |= 8
+
+IF ASSI >= 0
+	STAIN:ASSI:ペニス |= 2
+	STAIN:ASSI:ヴァギナ |= 1
+	STAIN:ASSI:膣内 |= 1
+	STAIN:ASSI:アナル |= 8
+	STAIN:ASSI:腸内 |= 8
+ENDIF
+
+STAIN:ペニス |= 2
+STAIN:ヴァギナ |= 1
+STAIN:膣内 |= 1
+STAIN:アナル |= 8
+STAIN:腸内 |= 8
+

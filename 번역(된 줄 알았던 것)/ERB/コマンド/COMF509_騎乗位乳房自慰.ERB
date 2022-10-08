@@ -1,0 +1,357 @@
+﻿;-------------------------------------------------
+;기승위유방자위
+;파생계 커맨드
+;-------------------------------------------------
+@COM509
+
+LOCALS = 
+SIF TEQUIP:비디오카메라
+	LOCALS =공개
+SIF TEQUIP:야외플레이
+	LOCALS =  %LOCALS%야외
+
+;기승위로부터의 파생의 경우
+IF PREVCOM == 106 || TFLAG:705 == 0
+	TFLAG:705 = 0
+	LOCALS = %LOCALS%승마 유방자위
+;기승위애널로부터의 파생의 경우(직접 커맨드를 지정했을 경우도 여기)
+ELSEIF PREVCOM == 116 || TFLAG:705 == 1
+	TFLAG:705 = 1
+	LOCALS = %LOCALS%애널승마 유방자위
+ENDIF
+
+STR:0 = %LOCALS%
+PRINTFORML %STR:0%
+
+SELECTCOM = 509
+CALL KOJO_MESSAGE_COM
+
+;실행자가 노예인 플래그
+TFLAG:28 = 1
+
+;스타킹 찌릿찌릿 플래그
+IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;사정게이지 체크
+;-------------------------------------------------
+B = 600
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 120
+LOSEBASE:기력 += 80
+
+SOURCE:쾌B += 80
+SIF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기
+	TIMES SOURCE:쾌B , 1.50
+
+SOURCE:애정 += 400
+
+;스킨십선호라면애정의 소스 추가
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+SOURCE:성행동 += 300
+SOURCE:성취감 += 300
+SOURCE:중독충족 += 400
+SOURCE:노출 += 200
+SOURCE:일탈 += 700
+SOURCE:반발 += 900
+;위 쪽으로 계산한 더러운 데이터
+SOURCE:불결 += Y*10 + 60
+;기승위로부터의 파생의 경우
+IF TFLAG:705 == 0
+	SOURCE:쾌V = 350
+	SOURCE:쾌C = 80
+	SOURCE:통증 = 500
+;기승위애널로부터의 파생의 경우
+ELSE
+	SOURCE:쾌A = 350
+	SOURCE:통증 = 800
+	SOURCE:일탈 += 100
+ENDIF
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 900
+
+;기승위로부터의 파생의 경우
+IF TFLAG:705 == 0
+	;정조관념소유로연모, 친애 가져 이외로는 항상반발의 소스를 추가한다(섹스계만)
+	SIF TALENT:정조관념 && !TALENT:연모 && !TALENT:친애
+		SOURCE:반발 += 1000
+	
+	;V에의고통는 먼저 처리해 둔다
+	;EXP:V경험를 본다(처녀의반감는 별도 처리필 보고인 것으로 생략)
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증, 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:반발, 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ENDIF
+
+	;PALAM:윤활를 본다
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증, 0.70
+		TIMES SOURCE:반발, 1.20
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증, 0.10
+	ENDIF
+;기승위애널로부터의 파생의 경우
+ELSE
+	;A에의고통는 먼저 처리해 둔다
+	;EXP:A경험를 본다
+	IF EXP:A경험 < EXPLV:1
+		TIMES SOURCE:통증, 3.00
+		TIMES SOURCE:반발, 3.00
+	ELSEIF EXP:A경험 < EXPLV:2
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 2.00
+	ELSEIF EXP:A경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:반발, 1.50
+	ELSEIF EXP:A경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.60
+		TIMES SOURCE:반발, 1.20
+	ELSEIF EXP:A경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:A경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.20
+	ENDIF
+
+	;PALAM:윤활를 본다
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 2.00
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증, 1.00
+		TIMES SOURCE:반발, 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증, 0.60
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증, 0.30
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증, 0.20
+	ENDIF
+ENDIF
+
+;중독에 의한중독충족의 소스는 먼저 처리해 둔다
+;섹스중독를 본다
+IF ABL:섹스중독 == 1
+	TIMES SOURCE:중독충족, 0.00
+ELSEIF ABL:섹스중독 == 2
+	TIMES SOURCE:중독충족, 0.30
+ELSEIF ABL:섹스중독 == 3
+	TIMES SOURCE:중독충족, 0.60
+ELSEIF ABL:섹스중독 == 4
+	TIMES SOURCE:중독충족, 0.90
+ELSEIF ABL:섹스중독 == 5
+	TIMES SOURCE:중독충족, 1.20
+ELSEIF ABL:섹스중독 == 6
+	TIMES SOURCE:중독충족, 1.50
+ELSEIF ABL:섹스중독 == 7
+	TIMES SOURCE:중독충족, 1.80
+ELSEIF ABL:섹스중독 == 8
+	TIMES SOURCE:중독충족, 2.30
+ELSEIF ABL:섹스중독 == 9
+	TIMES SOURCE:중독충족, 3.00
+ELSEIF ABL:섹스중독 >= 10
+	TIMES SOURCE:중독충족, 5.00
+ENDIF
+
+;자위중독를 본다
+IF ABL:자위중독 == 1
+	TIMES SOURCE:중독충족, 0.00
+ELSEIF ABL:자위중독 == 2
+	TIMES SOURCE:중독충족, 0.30
+ELSEIF ABL:자위중독 == 3
+	TIMES SOURCE:중독충족, 0.60
+ELSEIF ABL:자위중독 == 4
+	TIMES SOURCE:중독충족, 0.90
+ELSEIF ABL:자위중독 == 5
+	TIMES SOURCE:중독충족, 1.20
+ELSEIF ABL:자위중독 == 6
+	TIMES SOURCE:중독충족, 1.50
+ELSEIF ABL:자위중독 == 7
+	TIMES SOURCE:중독충족, 1.80
+ELSEIF ABL:자위중독 == 8
+	TIMES SOURCE:중독충족, 2.30
+ELSEIF ABL:자위중독 == 9
+	TIMES SOURCE:중독충족, 3.00
+ELSEIF ABL:자위중독 >= 10
+	TIMES SOURCE:중독충족, 5.00
+ENDIF
+
+;-------------------------------------------------
+;사정체크
+;-------------------------------------------------
+CALL SAMEN_CHECK(PLAYER, 1)
+
+;사정시의 처리
+IF E >= 1
+	;사정처 타입의 설정
+	IF TFLAG:705 == 0
+		TFLAG:703 = 1
+	ELSE
+		TFLAG:703 = 2
+	ENDIF
+	;사정처 선택의 가능·불가
+	TFLAG:704 = 1
+	;범용적인 처리는 이 함수로 실시한다
+	;(사정게이지의 재계산이나사정경험의 상승과 공통 부분의 표시)
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;노예의손(장갑)⇔노예의 B의 더러움이 이동
+;도구가 붙어 있으면 더러움은 이동하지 않는다
+IF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기
+ELSE
+	;장갑를 하고 있을 때
+	IF TEQUIP:특수 1 == 1
+		STAIN:장갑 |= STAIN:가슴
+		STAIN:가슴 |= STAIN:장갑
+	ELSE
+		;노예의 손가락⇔노예의 B의 더러움이 이동
+		STAIN:손 |= STAIN:가슴
+		STAIN:가슴 |= STAIN:손
+	ENDIF
+ENDIF
+
+;페니스밴드를 사용하는 경우, 더러움은 이동하지 않는다
+IF !PENIS(PLAYER)
+
+;기승위로부터의 파생의 경우
+;노예의 V와질내⇔조교자의 C의 더러움이 이동
+ELSEIF TFLAG:705 == 0
+	STAIN:질내 |= STAIN:PLAYER:페니스
+	STAIN:PLAYER:페니스 |= STAIN:질내
+	STAIN:바기나 |= STAIN:PLAYER:페니스
+	STAIN:PLAYER:페니스 |= STAIN:바기나
+
+;기승위애널로부터의 파생의 경우
+;노예의 A와장내⇔조교자의 C의 더러움이 이동
+ELSE
+	STAIN:장내 |= STAIN:PLAYER:페니스
+	STAIN:PLAYER:페니스 |= STAIN:장내
+	STAIN:애널 |= STAIN:PLAYER:페니스
+	STAIN:PLAYER:페니스 |= STAIN:애널
+ENDIF
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;비디오촬영시는 경험에 플러스
+IF TEQUIP:비디오카메라
+	EXP:자위경험 += 2
+	PRINTL 자위경험＋2
+	EXP:조교자위경험 += 2
+	PRINTL 조교자위경험＋2
+	
+	IF !EXP:공개자위 && !TALENT:음란 && !TALENT:창부
+		EXP:이상경험 += 1
+		PRINTL 공개자위첫경험으로이상경험＋1
+	ENDIF
+	EXP:공개자위 += 1
+	PRINTL 공개자위경험＋1
+ELSE
+	EXP:자위경험 += 1
+	PRINTL 자위경험＋1
+	EXP:조교자위경험 += 1
+	PRINTL 조교자위경험＋1
+ENDIF
+
+;기승위로부터의 파생의 경우
+;노예의 V와질내⇔조교자의 C의 더러움이 이동
+IF TFLAG:705 == 0
+	;V경험
+	EXP:V경험 += 3
+	PRINTL V경험＋3
+	
+	;조교자가말자지로 노예가소인체형였던 경우, V확장경험
+	IF TALENT:소인체형 && TALENT:PLAYER:말자지
+		IF EXP:V확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTL V확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:V확장경험 += 1
+		PRINTL V확장경험＋1
+	ENDIF
+;기승위애널로부터의 파생의 경우
+ELSE
+	;A경험
+	EXP:A경험 += 3
+	PRINTL A경험＋3
+	
+	;조교자가말자지로 노예가소인체형였던 경우, A확장경험
+	IF TALENT:소인체형 && TALENT:PLAYER:말자지
+		IF EXP:A확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTL A확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:A확장경험 += 1
+		PRINTL A확장경험＋1
+	ENDIF
+ENDIF
+
+;성교경험
+EXP:PLAYER:성교경험 += 1
+EXP:성교경험 += 1
+PRINTL 성교경험＋1
+
+;삽입경험
+EXP:PLAYER:삽입경험 += 1
+
+;게이경험라든지 가산
+CALL COM_EXP(7)
+
+;의존도 벡터
+TFLAG:33 = 1
+
+;의존도 보정치(연모로 2, 친애로 4)
+IF TALENT:연모 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ELSEIF TALENT:친애 && ASSIPLAY == 0
+	TFLAG:30 += 4
+ENDIF
+
+;봉사 쾌락 플래그
+TFLAG:100 = 1
+
+RETURN 1
+
+

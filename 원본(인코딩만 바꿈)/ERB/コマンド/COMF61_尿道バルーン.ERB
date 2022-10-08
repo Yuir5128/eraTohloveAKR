@@ -1,0 +1,423 @@
+﻿;-------------------------------------------------
+;尿道バルーン
+;Ｕ系コマンド
+;-------------------------------------------------
+@COM61
+
+PRINTL 尿道バルーン
+STR:0 = 尿道バルーン
+CALL KOJO_MESSAGE_COM
+
+;ストッキングびりびりフラグ
+IF TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6
+	TFLAG:55 = 1
+ENDIF
+
+;着脱の処理
+IF TEQUIP:尿道バルーン == 0
+	TEQUIP:尿道バルーン = 1
+ELSE
+	TEQUIP:尿道バルーン = 0
+ENDIF
+
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 80
+LOSEBASE:気力 += 150
+
+IF ABL:Ｃ感覚 == 0
+	SOURCE:快Ｃ += 80
+ELSEIF ABL:Ｃ感覚 == 1
+	SOURCE:快Ｃ += 250
+ELSEIF ABL:Ｃ感覚 == 2
+	SOURCE:快Ｃ += 600
+ELSEIF ABL:Ｃ感覚 == 3
+	SOURCE:快Ｃ += 1000
+ELSEIF ABL:Ｃ感覚 == 4
+	SOURCE:快Ｃ += 1300
+ELSE
+	SOURCE:快Ｃ += 1700
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	TIMES SOURCE:快Ｃ , 0.40
+	SOURCE:痛み += 1600
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	TIMES SOURCE:快Ｃ , 0.80
+	SOURCE:痛み += 1000
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	TIMES SOURCE:快Ｃ , 1.00
+	SOURCE:痛み += 600
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	TIMES SOURCE:快Ｃ , 1.40
+	SOURCE:痛み += 250
+ELSE
+	TIMES SOURCE:快Ｃ , 1.80
+	SOURCE:痛み += 120
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:欲情 < PALAMLV:1
+	TIMES SOURCE:快Ｃ , 0.80
+	TIMES SOURCE:屈従 , 0.60
+ELSEIF PALAM:欲情 < PALAMLV:2
+	TIMES SOURCE:快Ｃ , 0.90
+	TIMES SOURCE:屈従 , 0.80
+ELSEIF PALAM:欲情 < PALAMLV:3
+	TIMES SOURCE:快Ｃ , 1.00
+	TIMES SOURCE:屈従 , 1.00
+ELSEIF PALAM:欲情 < PALAMLV:4
+	TIMES SOURCE:快Ｃ , 1.10
+	TIMES SOURCE:屈従 , 1.20
+ELSE
+	TIMES SOURCE:快Ｃ , 1.20
+	TIMES SOURCE:屈従 , 1.40
+ENDIF
+
+;ABL:従順をみる
+IF ABL:従順 == 0
+	TIMES SOURCE:快Ｃ , 0.80
+ELSEIF ABL:従順 == 1
+	TIMES SOURCE:快Ｃ , 0.90
+ELSEIF ABL:従順 == 2
+	TIMES SOURCE:快Ｃ , 1.00
+ELSEIF ABL:従順 == 3
+	TIMES SOURCE:快Ｃ , 1.10
+ELSEIF ABL:従順 == 4
+	TIMES SOURCE:快Ｃ , 1.20
+ELSE
+	TIMES SOURCE:快Ｃ , 1.30
+ENDIF
+
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 600
+
+A = 160
+
+;EXP:Ｕ拡張経験をみる
+IF EXP:Ｕ拡張経験 < EXPLV:1
+	TIMES A , 3.00
+ELSEIF EXP:Ｕ拡張経験 < EXPLV:2
+	TIMES A , 2.50
+ELSEIF EXP:Ｕ拡張経験 < EXPLV:3
+	TIMES A , 2.00
+ELSEIF EXP:Ｕ拡張経験 < EXPLV:4
+	TIMES A , 1.00
+ELSEIF EXP:Ｕ拡張経験 < EXPLV:5
+	TIMES A , 0.80
+ELSE
+	TIMES A , 0.60
+ENDIF
+
+;臆病
+SIF TALENT:臆病
+	TIMES A , 2.00
+;感情乏しい
+SIF TALENT:感情乏しい
+	TIMES A , 0.60
+;小人体形
+SIF TALENT:小人体型
+	TIMES A , 2.00
+
+LOSEBASE:体力 += A
+LOSEBASE:気力 += A * 2
+
+SOURCE:露出 += 800
+SOURCE:中毒充足 += 500
+SOURCE:逸脱 += 1000
+
+;ABL:Ｃ感覚をみる
+IF ABL:Ｃ感覚 == 0
+	SOURCE:屈従 += 300
+ELSEIF ABL:Ｃ感覚 == 1
+	SOURCE:屈従 += 800
+ELSEIF ABL:Ｃ感覚 == 2
+	SOURCE:屈従 += 1400
+ELSEIF ABL:Ｃ感覚 == 3
+	SOURCE:屈従 += 1800
+ELSEIF ABL:Ｃ感覚 == 4
+	SOURCE:屈従 += 2100
+ELSE
+	SOURCE:屈従 += 2400
+ENDIF
+
+;ABL:マゾっ気をみる
+IF ABL:マゾっ気 == 0
+	SOURCE:痛み += 2000
+	SOURCE:不潔 += 1000
+	SOURCE:屈従 += 200
+	SOURCE:逸脱 += 1000
+	SOURCE:反発 += 2000
+ELSEIF ABL:マゾっ気 == 1
+	SOURCE:痛み += 1600
+	SOURCE:不潔 += 2000	
+	SOURCE:屈従 += 500
+	SOURCE:逸脱 += 1000
+	SOURCE:反発 += 1000
+ELSEIF ABL:マゾっ気 == 2
+	SOURCE:痛み += 1200
+	SOURCE:不潔 += 1000
+	SOURCE:屈従 += 800
+	SOURCE:逸脱 += 1000
+	SOURCE:反発 += 500
+ELSEIF ABL:マゾっ気 == 3
+	SOURCE:痛み += 800
+	SOURCE:不潔 += 1000
+	SOURCE:屈従 += 1200
+	SOURCE:逸脱 += 500
+	SOURCE:反発 += 100
+ELSEIF ABL:マゾっ気 == 4
+	SOURCE:痛み += 600
+	SOURCE:不潔 += 1000	
+	SOURCE:屈従 += 1500
+	SOURCE:逸脱 += 100
+	SOURCE:反発 += 0
+ELSE
+	SOURCE:痛み += 400
+	SOURCE:不潔 += 1000
+	SOURCE:屈従 += 2000
+	SOURCE:逸脱 += 50
+	SOURCE:反発 += 0
+ENDIF
+
+;EXP:Ｕ経験をみる
+IF EXP:Ｕ経験 < EXPLV:1
+	TIMES SOURCE:快Ｃ , 0.20
+	SOURCE:痛み += 8000
+ELSEIF EXP:Ｕ経験 < EXPLV:2
+	TIMES SOURCE:快Ｃ , 0.60
+	SOURCE:痛み += 3600
+ELSEIF EXP:Ｕ経験 < EXPLV:3
+	TIMES SOURCE:快Ｃ , 1.00
+	SOURCE:痛み += 1200
+ELSEIF EXP:Ｕ経験 < EXPLV:4
+	TIMES SOURCE:快Ｃ , 1.20
+	SOURCE:痛み += 300
+ELSEIF EXP:Ｕ経験 < EXPLV:5
+	TIMES SOURCE:快Ｃ , 1.40
+	SOURCE:痛み += 30
+ELSE
+	TIMES SOURCE:快Ｃ , 1.60
+	SOURCE:痛み += 0
+ENDIF
+
+;オトコ
+SIF TALENT:オトコ
+	TIMES SOURCE:痛み , 4.50
+;ふたなり
+SIF TALENT:ふたなり
+	TIMES SOURCE:痛み , 4.50
+;半陰半陽
+SIF TALENT:半陰半陽
+	TIMES SOURCE:痛み , 4.50
+;シーメール
+SIF TALENT:シーメール
+	TIMES SOURCE:痛み , 4.50
+;小人体形
+SIF TALENT:小人体型
+	TIMES SOURCE:痛み , 2.00
+
+
+;Ｃ敏感、鈍感をみる
+;快Ｃ自体のチェックは後でまとめてやる
+IF TALENT:Ｃ鈍感
+	TIMES SOURCE:痛み , 1.50
+	TIMES SOURCE:屈従 , 1.50
+	TIMES SOURCE:逸脱 , 1.50
+ELSEIF TALENT:Ｃ敏感
+	TIMES SOURCE:痛み , 0.60
+	TIMES SOURCE:屈従 , 0.60
+	TIMES SOURCE:逸脱 , 0.60
+ENDIF
+
+;処女で貞操観念
+SIF TALENT:処女 == 1 && TALENT:貞操観念
+	SOURCE:屈従 /= 3
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+EXP:Ｕ経験 += 3
+PRINTFORML Ｕ経験＋３
+
+EXP:Ｕ拡張経験 += 2
+PRINTFORML Ｕ拡張経験＋２
+
+;触手召喚時、触手経験のリセットをする
+SIF TEQUIP:触手 == 1
+	T = 0
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(服従で1、隷属で2）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+
+
+
+;--------------------------------------------------
+;尿道バルーン挿入中
+;--------------------------------------------------
+@EQUIP_COM61
+PRINTL ＜尿道バルーン挿入中＞
+
+LOSEBASE:体力 += 30
+LOSEBASE:気力 += 60
+
+;ABL:Ｃ感覚をみる
+IF ABL:Ｃ感覚 == 0
+	A = 80
+	B = 300
+ELSEIF ABL:Ｃ感覚 == 1
+	A = 250
+	B = 800
+ELSEIF ABL:Ｃ感覚 == 2
+	A = 600
+	B = 1400
+ELSEIF ABL:Ｃ感覚 == 3
+	A = 1000
+	B = 1800
+ELSEIF ABL:Ｃ感覚 == 4
+	A = 1300
+	B = 2100
+ELSE
+	A = 1700
+	B = 2400
+ENDIF
+
+;EXP:尿道経験をみる
+IF EXP:Ｕ経験 < EXPLV:1
+	TIMES A , 0.50
+	C = 2000
+ELSEIF EXP:Ｕ経験 < EXPLV:2
+	TIMES A , 1.00
+	C = 300
+ELSEIF EXP:Ｕ経験 < EXPLV:3
+	TIMES A , 1.10
+	C = 50
+ELSEIF EXP:Ｕ経験 < EXPLV:4
+	TIMES A , 1.20
+	C = 10
+ELSEIF EXP:Ｕ経験 < EXPLV:5
+	TIMES A , 1.40
+	C = 0
+ELSE
+	TIMES A , 1.60
+	C = 0
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	TIMES A , 0.40
+	C += 800
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	TIMES A , 0.80
+	C += 500
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	TIMES A , 1.00
+	C += 300
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	TIMES A , 1.40
+	C += 120
+ELSE
+	TIMES A , 1.80
+	C += 100
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:欲情 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:欲情 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:欲情 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:欲情 < PALAMLV:4
+	TIMES A , 1.10
+ELSE
+	TIMES A , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:従順 == 0
+	TIMES A , 0.80
+ELSEIF ABL:従順 == 1
+	TIMES A , 0.90
+ELSEIF ABL:従順 == 2
+	TIMES A , 1.00
+ELSEIF ABL:従順 == 3
+	TIMES A , 1.10
+ELSEIF ABL:従順 == 4
+	TIMES A , 1.20
+ELSE
+	TIMES A , 1.30
+ENDIF
+
+;オトコ
+SIF TALENT:オトコ
+	TIMES C , 4.50
+;ふたなり
+SIF TALENT:ふたなり
+	TIMES C , 4.50	
+;小人体形
+SIF TALENT:小人体型
+	TIMES C , 2.00
+
+;Ｃ敏感、鈍感をみる
+;快Ｃ自体のチェックは後でまとめてやる
+IF TALENT:Ｃ鈍感
+	TIMES A , 1.50
+	TIMES B , 1.50
+	TIMES C , 1.50
+ELSEIF TALENT:Ｃ敏感
+	TIMES A , 0.60
+	TIMES B , 0.60
+	TIMES C , 0.60
+ENDIF
+
+;処女で貞操観念
+SIF TALENT:処女 == 1 && TALENT:貞操観念
+	B /= 3
+
+SOURCE:快Ｃ += A
+SOURCE:屈従 += B
+SOURCE:痛み += C
+SOURCE:逸脱 += B
+
+
+EXP:Ｕ経験 += 2
+PRINTFORML Ｕ経験＋２
+EXP:Ｕ拡張経験 += 1
+PRINTFORML Ｕ拡張経験＋１
+
+;ゲイ経験とか加算
+CALL COM_EXP(1)
+
+SIF TEQUIP:触手
+	T += 2
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(服従で1、隷属で2）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+	
+RETURN 1
+
+

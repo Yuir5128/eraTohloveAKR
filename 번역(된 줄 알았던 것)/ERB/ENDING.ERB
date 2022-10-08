@@ -1,0 +1,464 @@
+﻿;프리 미션 종료 판정
+@EVENTTURNEND
+#LATER
+SIF FLAG:5 == 8
+	CALL FREE_MISSION_CHECK
+RETURN
+
+;오프닝
+@OPENING_START
+DRAWLINE
+
+MASTER = 0
+
+;주인공에 의해 분기 하는 오프닝입상 1
+CALL KOJO_PRE_OPENING_STORY
+
+;위로부터 RETURN 1하면, 데포의 오프닝은 컷
+SIF RESULT
+	RETURN 1
+
+
+REPEAT 62
+	A = COUNT+500
+	PRINTFORMSW STR:A
+REND
+
+PRINTFORMS STR:562
+A = FLAG:4+562
+PRINTFORMS STR:A
+PRINTFORMSW STR:566
+
+REPEAT 8
+	A = COUNT+567
+	PRINTFORMSW STR:A
+REND
+PRINTL 
+
+;주인공에 의해 분기 하는 오프닝입상 2
+CALL KOJO_POST_OPENING_STORY
+
+RETURN 1
+
+
+
+;튜토리얼
+@TUTORIAL
+
+PRINTFORML 
+PRINTFORML ―――튜토리얼―――
+PRINTFORMW 
+PRINTFORMW eraToLoveA에 어서 오십시오.
+PRINTFORMW 여기에서는, eraToLoveA를 공략하는데 있어서의 힌트를 설명해 갈 것입니다.
+PRINTL 
+$INPUT_LOOP
+PRINTFORML 표시하는 튜토리얼을 선택해 주세요.
+PRINTFORML [ 0] 게임의 「목적」에 대해
+PRINTFORML [ 1] 「난이도」는?
+PRINTFORML [ 2] 돈을 벌려면?
+PRINTFORML [ 3] 노예를 「함락」시키려면?
+PRINTFORML [ 4] 「연모」계 함락에 대해
+PRINTFORML [ 5] 「음란」계 함락에 대해
+PRINTFORML [ 6] 「복종」계 함락에 대해
+PRINTFORML [ 7] 그 외 주의점
+PRINTFORML [99] 튜토리얼을 종료한다
+INPUT
+IF RESULT == 0
+	PRINTFORMW 「eraToLoveA」는 「조교 SLG(시뮬레이션 게임)」입니다.
+	PRINTFORMW 게임의 플레이어는, 물론 당신.
+	PRINTFORMW 당신은 여기서 「주」로서, 「성 노예」를 기르는 일이 됩니다.
+	IF FLAG:5 == 9
+		PRINTFORMW 이번 선택된 「EXTRA 모드」는 이른바 「덤모드」이며,
+		PRINTFORMW 게임으로서의 「목적」은 설정되어 있지 않습니다.
+		PRINTFORMW 그러나, 그러니까, 할 수 있는 것은 많이 있습니다.
+		PRINTFORMW 부디, 도중에 내던지는 일 없이,
+		PRINTFORMW 「eraToLoveA」의 세계를 다 놀아 주세요.
+	ELSE
+		PRINTFORMW 기른 노예는, 당신의욕망를 채울 뿐(만큼)이 아닙니다.
+		PRINTFORMW 「노역」에 내 일하게 하거나 「매각」하거나……
+		PRINTFORMW 즉, 돈의 바탕으로 됩니다.
+		PRINTFORMW 「당신」의 목적은, 그렇게 돈을 버는 것.
+		PRINTFORMW 노예를 사용해 얻은 돈으로, 한층 더 자금을 모아 두고 가
+		PRINTFORMW 최종적으로는, 「100일」이내에 「100만고슈금」를 버는 것이 목적입니다.
+	ENDIF
+ELSEIF RESULT == 1
+	PRINTFORMW 「START」모드에는, 난이도가 설정되어 있습니다.
+	PRINTFORMW 난이도에 의해 조교의 하기 쉬움이나, 노역을 실시했을 경우의 수익,
+	PRINTFORMW 유지비의 보증 기간등, 여러가지 요소가 변화합니다.
+	PRINTFORMW 예를 들어 유지비에 관해서, 각각 설정된 기간중은,
+	PRINTFORMW 유지비로서의 돈이 들 것은 없습니다만,
+	PRINTFORMW 그 기간을 지나면, 노예의 유지비등으로, 매일 아침 소지 코우슈우금이 줄어들어 갑니다.
+	PRINTFORMW 소지 코우슈우금이 바닥을 다하면 게임 오버로 되기 때문에,
+	PRINTFORMW 우선은 제대로, 거기까지의 자금융통을 해 나갑시다.
+	PRINTFORMW 유지비의 보증 기간은 각각,
+	PRINTFORMW 「EASY」20일, 「NORMAL」15일, 「HARD」10일가 됩니다.
+	PRINTFORMW 「EXTRA 모드」에서는, 며칠 보내도 유지비가 걸릴 것은 없습니다.
+ELSEIF RESULT == 2
+	PRINTFORMW 돈을 버는 방법으로서 가장손취해 빠른 것은, 노예의 「매각」입니다.
+	PRINTFORMW 다만 「매각」한 노예는 타인의손에 건너는 일이 되어,
+	PRINTFORMW 기본적으로는, 또손 원래대로 돌아가 온다고 하는 일은 없습니다.
+	PRINTFORMW 노예를손 놓고 싶지 않다고 하는 경우는,
+	PRINTFORMW 기른 노예에게 「노역」을 실시하게 하는 것이 좋을 것입니다.
+	PRINTFORMW 「노역」은, 어느 정도 조교가 진행된 노예에게 실시하게 할 수가 있어
+	PRINTFORMW 노예를 「매각」하는 것보다도, 효율 좋게 돈을 벌 수가 있습니다.
+ELSEIF RESULT == 3
+	PRINTFORMW 조교를 반복해 가는 동안, 노예가 주요한 당신에 대해서,
+	PRINTFORMW 특수한 감정을 안는 경우가 있습니다.
+	PRINTFORMW 그것은 「함락 소질」이라고 불려 노예의 랭크 업이기도 합니다.
+	PRINTFORMW 주로 「함락」한 노예는, 보다솔직함에 주의 명령을 듣게 되어,
+	PRINTFORMW 여러가지 상황으로 유리하게 일하게 되겠지요.
+	PRINTFORMW 1입에 「조교」라고는 말해도, 그 내용은 여러가지이고,
+	PRINTFORMW 어떤 조교를 베풀까에 의해, 노예가 주로 안는 감정도 바뀌어 옵니다.
+	PRINTFORMW 노예에게 「맞춘다」도 「맞춘다」도 당신 나름입니다만,
+	PRINTFORMW 노예의 상황을 자주(잘) 관찰해, 적절한 조교를 실시하는 것이 큰 일입니다.
+	PRINTFORMW 또, 노예의 함락에는 한층 더 앞의 단계가 있습니다.
+	PRINTFORMW 벌써 함락 한 노예에게, 조교를 거듭하는 것에 의해 얻을 수 있기 때문에,
+	PRINTFORMW 함락 한 노예라도 방치하지 않고, 새로운 높은 곳을 목표로 해 주세요.
+ELSEIF RESULT == 4
+	PRINTFORMW 노예가 주인에 대해서, 희미한 연정을 안고 있는 상태입니다.
+	PRINTFORMW 주인을 그리워해, 조교에도 기쁨을 느끼게 되어 있습니다.
+	PRINTFORMW 이것을 얻기 위해서는, 당연, 노예에게 상냥하게 해 주는 것이 큰 일입니다.
+	PRINTFORMW 하드한 조교나, 타인의손를 빌리는 조교는,
+	PRINTFORMW 노예의 불신감을 높이는 일이 되기 때문에, 그다지 추천하지 않습니다.
+	PRINTFORMW 처음은애무등의애무계 커맨드를 넉넉하게 해, 어느 정도 자라면,
+	PRINTFORMW 수음나펠라치오등, 봉사계 커맨드로 의존도를 올려 갑시다.
+ELSEIF RESULT == 5
+	PRINTFORMW 항상 추잡한 일을 하고 있지 않으면 들어가지 않게 된 상태입니다.
+	PRINTFORMW 추잡한 (일)것은 적극적으로 실시하려고 하는 심리가 일하기 (위해)때문에,
+	PRINTFORMW 주인의 명령에는, 따를 의사를 나타내게 됩니다.
+	PRINTFORMW 이것을 얻기 위해서는, 우선은 어쨌든, 감도를 올려 줄 것입니다.
+	PRINTFORMW 비정상인 플레이나, 동성끼리에서의 성 경험 따위,
+	PRINTFORMW 여러가지 경험을 쌓게해 어떠한 쾌락도 향수할 수 있는 모습 합니다만,
+	PRINTFORMW 반발를 안기는 일도 많기 때문에, 최초부터 너무 하게는 주의.
+ELSEIF RESULT == 6
+	PRINTFORMW 주인을 「주인」으로서 인정해, 복종를 맹세한 상태입니다.
+	PRINTFORMW 반항할 의사가 약해지므로, 주인의 명령에는 우선 거역하지 않습니다.
+	PRINTFORMW 이것을 얻기 위해서는, 주인으로서의 위엄을 나타낼 필요가 있습니다.
+	PRINTFORMW 그 때문에밧줄나볼개그등으로 구속해, 자유를 빼앗거나
+	PRINTFORMW 스팽킹나채찍등의 SM계 커맨드로, 고통를 주는 등,
+	PRINTFORMW 하드한 조교로 의존도를 마이너스에 내려 가는 것이 큰 일입니다.
+	PRINTFORMW 비정상인 플레이도 적극적으로 실시해, 경험을 쌓게하면 좋을 것입니다.
+ELSEIF RESULT == 7
+	PRINTFORMW 게임내의 「만물상」에서는, 「소질」이나 「체력」를 변화시키는 등,
+	PRINTFORMW 편리한 아이템을 살 수 있는 일이 있습니다.
+	PRINTFORMW 다만, 그것들의 아이템은 노예에게 다대한 스트레스를 주기 (위해)때문에,
+	PRINTFORMW 노예를 부수고 싶지 않은 것이면, 빈번한 사용은 피합시다.
+	PRINTFORMW 또, 조교 개시시에는, 노예는 기본적으로 「옷」을 입고 있습니다.
+	PRINTFORMW 옷을 입은 채로는 실시할 수 없는 커맨드도 많으므로,
+	PRINTFORMW 커맨드가 적구나, 라고 생각하면 우선은 옷을 벗게 해 봐 주세요.
+	PRINTFORMW 하나 하나 벗게 하는 것이 귀찮다고 하는 경우에는,
+	PRINTFORMW 옵션으로부터, 착의 설정을 변경할 수도 있습니다.
+ELSEIF RESULT == 99
+	PRINTFORML 튜토리얼을 종료합니다.
+	PRINTFORMW 건투를 빕니다.
+	RETURN 0
+ENDIF
+PRINTL 
+GOTO INPUT_LOOP
+
+
+
+;===============================
+;엔딩 체크
+;===============================
+@ENDING_CHECK
+CALL MASTER_CHANGE_OFF
+PRINTL 납금의손단을 선택해 주세요(엔딩 내용이 변화합니다)
+PRINTL [0] - 직접 납입한다(통상 엔드)
+A = 0
+B = -1
+C = -1
+D = -1
+REPEAT CHARANUM
+	SIF TALENT:COUNT:연모 || TALENT:COUNT:음란 || TALENT:COUNT:복종 || TALENT:COUNT:친애 || TALENT:COUNT:창부 || TALENT:COUNT:예속
+		A += 1
+	SIF TALENT:COUNT:친애
+		B = COUNT
+	SIF TALENT:COUNT:창부
+		C = COUNT
+	SIF TALENT:COUNT:예속
+		D = COUNT
+REND
+
+;연모엔드
+SIF B >= 0 && FLAG:30 == 1
+	PRINTFORML [1] - %CALLNAME:B%에의 반지를 산다(연모엔드)
+;음란엔드
+SIF C >= 0 && FLAG:31 == 1
+	PRINTFORML [2] - %CALLNAME:C%에의바이브를 산다(음란엔드)
+;복종엔드
+SIF D >= 0 && FLAG:32 == 1
+	PRINTFORML [3] - %CALLNAME:D%에의 목걸이를 산다(복종엔드)
+;하렘 엔드
+SIF (B >= 0 || C >= 0 || D >= 0) && A >= 5
+	PRINTFORML [4] - 저택의 권리서를 산다(하렘 엔드)
+
+
+;특수 하렘 판정
+CALL ENDING_JUDGE
+
+PRINTL [100] 그만둔다
+
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSEIF RESULT == 0
+	MONEY -= 1000000
+	CALL ENDING_1
+ELSEIF RESULT == 1 && B >= 0 && FLAG:30 == 1
+	MONEY -= 1000000
+	TARGET = B
+	;클리어 회수+1
+	FLAG:41 += 1
+	CALL ENDING_2
+ELSEIF RESULT == 2 && C >= 0 && FLAG:31 == 1
+	MONEY -= 1000000
+	TARGET = C
+	;클리어 회수+1
+	FLAG:41 += 1
+	CALL ENDING_3
+ELSEIF RESULT == 3 && D >= 0 && FLAG:32 == 1
+	MONEY -= 1000000
+	TARGET = D
+	;클리어 회수+1
+	FLAG:41 += 1
+	CALL ENDING_4
+ELSEIF RESULT == 4 && (B >= 0 || C >= 0 || D >= 0) && A >= 5
+	MONEY -= 1000000
+	;클리어 회수+2
+	FLAG:41 += 2
+	CALL ENDING_5
+
+
+;특수 하렘 처리
+
+;왕을 자칭한다
+ELSEIF RESULT == 10 && (E:500 & 1)
+	MONEY -= 1000000
+	FLAG:41 += 3
+	CALL ENDING_HAREM10
+	CALL GAME_CONTINUE
+ELSEIF RESULT == 11 && (E:500 & 2)
+	MONEY -= 1000000
+	FLAG:41 += 3
+	CALL ENDING_HAREM11
+	CALL GAME_CONTINUE
+ELSEIF RESULT == 12 && (E:500 & 4)
+	MONEY -= 1000000
+	FLAG:41 += 3
+	CALL ENDING_HAREM12
+	CALL GAME_CONTINUE
+
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+;배드 엔드
+@BADENDING_1
+;주인공마다의 배드 엔드입상 1
+CALL KOJO_BAD1_ENDING_STORY
+
+SIF RESULT
+	GOTO BADENDING1
+
+DRAWLINE
+REPEAT 19
+	A = COUNT+1000
+	PRINTFORMSW STR:A
+REND
+$BADENDING1
+QUIT
+
+@BADENDING_2
+;주인공마다의 배드 엔드입상 2
+CALL KOJO_BAD2_ENDING_STORY
+
+SIF RESULT
+	GOTO BADENDING2
+
+DRAWLINE
+REPEAT 28
+	A = COUNT+1020
+	PRINTFORMSW STR:A
+REND
+$BADENDING2
+QUIT
+
+;굿 엔드
+;노멀 엔드
+@ENDING_1
+;주인공마다의 노멀 엔드입상
+CALL KOJO_NORMAL_ENDING_STORY
+
+SIF RESULT
+	GOTO NORMALENDING_CONTINUE
+
+DRAWLINE
+REPEAT 34
+	A = COUNT+1100
+	PRINTFORMSW STR:A
+REND
+$NORMALENDING_CONTINUE
+CALL GAME_CONTINUE
+
+;연모단체[單体] 엔드
+@ENDING_2
+SIF CFLAG:21 == 1
+	CALL KOJO_MESSAGE_ENDING
+SIF FLAG:5 == 9
+	RETURN 0
+
+DRAWLINE
+CALL ENDING_M_2
+CALL GAME_CONTINUE
+
+;음란단체[單体] 엔드
+@ENDING_3
+SIF CFLAG:21 == 1
+	CALL KOJO_MESSAGE_ENDING
+SIF FLAG:5 == 9
+	RETURN 0
+
+DRAWLINE
+CALL ENDING_M_3
+CALL GAME_CONTINUE
+
+;복종단체[單体] 엔드
+@ENDING_4
+SIF CFLAG:21 == 1
+	CALL KOJO_MESSAGE_ENDING
+SIF FLAG:5 == 9
+	RETURN 0
+
+DRAWLINE
+CALL ENDING_M_4
+CALL GAME_CONTINUE
+
+;하렘 엔드
+@ENDING_5
+REPEAT CHARANUM
+	IF CFLAG:COUNT:21 == 2
+		TARGET = COUNT
+		CALL KOJO_MESSAGE_ENDING
+	ENDIF
+	SIF FLAG:5 == 9
+		BREAK
+REND
+SIF FLAG:5 == 9
+	RETURN 0
+
+DRAWLINE
+CALL ENDING_M_5
+REPEAT 8
+	A = COUNT+1200
+	PRINTFORMSW STR:A
+REND
+;임신노예
+IF ABL:V감각 >= 5
+	B = 1220
+;애널노예
+ELSEIF ABL:A감각 >= 5 && TALENT:처녀
+	B = 1230
+;그 이외
+ELSE
+	B = 1210
+ENDIF
+REPEAT 6
+	A = COUNT+B
+	PRINTFORMSW STR:A
+REND
+PRINTFORMSW STR:1207
+PRINTFORMSW STR:1208
+CALL GAME_CONTINUE
+
+;??? 엔드
+@ENDING_0
+DRAWLINE
+REPEAT 75
+	A = COUNT+2000
+	PRINTFORMSW STR:A
+REND
+$INPUT_LOOP
+PRINTFORMSL STR:2075
+PRINTFORMSL STR:2076
+INPUT
+IF RESULT == 0
+	REPEAT 28
+		A = COUNT+2077
+		PRINTFORMSW STR:A
+	REND
+	QUIT
+ELSEIF RESULT == 1
+	REPEAT 10
+		A = COUNT+2105
+		PRINTFORMSW STR:A
+	REND
+	ABL:MASTER:기교 = 10
+	ABL:MASTER:새드끼 = 10
+	ABL:MASTER:촬영기능 = 10
+	FLAG:5 = 9
+	NOITEM = 1
+	MONEY += 10000000
+	TALENT:MASTER:혀놀림 = 1
+	TALENT:MASTER:바느질잘함 = 1
+	TALENT:MASTER:조제지식 = 1
+	TALENT:MASTER:더러움무시 = 1
+	TALENT:MASTER:새드 = 1
+	TALENT:MASTER:소악마 = 1
+	TALENT:MASTER:수수께끼의매력 = 1
+	TALENT:MASTER:광기 = 1
+	TALENT:MASTER:금지된지식 = 1
+	TALENT:MASTER:인기 = 1
+	TALENT:MASTER:절륜 = 1
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+@GAME_CONTINUE
+;클리어 플래그를 세운다
+FLAG:40 = 10
+FLAG:41 += 3
+PRINTL 게임을 계속합니까?
+PRINTC [0]끝난다
+PRINTC [1]계속한다
+PRINTL  
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	QUIT
+ELSEIF RESULT == 1
+	FLAG:5 = 9
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+RETURN 1
+
+
+
+
+;=============================================================================
+;엔딩 체크 처리 관련
+;길어진 것과 지금후의 확장성의 문제로 함수로서 독립선언해 본다
+;EXTRA나 주회 요소를 전제로 한 많은 사람 엔드는 여기에서는 처리하지 않는다
+;A~D는 통상 엔드 판정으로 사용하기 위해(때문에) 사용 불가
+;=============================================================================
+@ENDING_JUDGE
+
+
+
+REPEAT CHARANUM
+	SIF COUNT == MASTER
+		CONTINUE
+	;특수 하렘 엔드 판정
+	
+REND
+
+;특수 하렘 엔드 판정
+
+
+

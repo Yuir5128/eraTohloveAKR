@@ -1,0 +1,116 @@
+﻿;캐릭터 명칭 표시를 본명 표시로 전환하는 테스트
+@CHARANAME_PRINT_NATION
+;본명 표시 설정
+IF FLAG:43
+	FOR COUNT, 0, CHARANUM
+		;당신은 제외(이름 변경되고 있을지도 모르기 때문에)
+		SIF NO:COUNT == 0
+			CONTINUE
+		;아이, SP캐릭터는 제외
+		SIF (NO:COUNT >= 890 && NO:COUNT <= 899) || CFLAG:COUNT:0
+			CONTINUE
+		;존재하지 않는 캐릭터는 제외
+		SIF !EXISTCSV(NO:COUNT, 0)
+			CONTINUE
+		LOCAL = NO:COUNT
+		;본명의 긴 (분)편(아스르드·로우 랜드)
+		NAME:COUNT = %NAME_NATION(LOCAL)%
+		;본명의 짧은 (분)편(아스르드)
+		CALLNAME:COUNT = %CALLNAME_NATION(LOCAL)%
+	NEXT
+;현재의 이름 표시 설정
+ELSE
+	;CSV에 설정해 두는 캐릭터명의 호출
+	FOR COUNT, 0, CHARANUM
+		;당신은 제외(이름 변경되고 있을지도 모르기 때문에)
+		SIF NO:COUNT == 0
+			CONTINUE
+		;아이, SP캐릭터는 제외
+		SIF (NO:COUNT >= 890 && NO:COUNT <= 899) || CFLAG:COUNT:0
+			CONTINUE
+		;존재하지 않는 캐릭터는 제외
+		SIF !EXISTCSV(NO:COUNT, 0)
+			CONTINUE
+		LOCAL = NO:COUNT
+		CSVNAME LOCAL, 0
+		NAME:COUNT = %RESULTS%
+		CSVCALLNAME LOCAL, 0
+		CALLNAME:COUNT = %RESULTS%
+	NEXT
+ENDIF
+
+@NATION_NAME(ARG)
+IF FLAG:43
+	NAME:ARG = %NAME_NATION(NO:ARG)%
+	CALLNAME:ARG = %CALLNAME_NATION(NO:ARG)%
+ENDIF
+
+;-------------------------------------------------
+;함수명:NAME_NATION
+;개요:본명(풀네임) 호출 함수
+;인수:캐릭터 번호(NO의 (분)편)
+;반환값:본명(풀네임)
+;비고:
+;사용예:
+;-------------------------------------------------
+@NAME_NATION(ARG)
+#FUNCTIONS
+
+SELECTCASE ARG
+	;샘플
+	;CASE 3
+	;	RETURNF "미카즈키 무네치카"
+	CASEELSE
+		CSVNAME ARG, 0
+		RETURNF RESULTS
+ENDSELECT
+
+;-------------------------------------------------
+;함수명:CALLNAME_NATION
+;개요:본명(별명) 호출 함수
+;인수:캐릭터 번호(NO의 (분)편)
+;반환값:본명(별명)
+;비고:
+;사용예:
+;-------------------------------------------------
+@CALLNAME_NATION(ARG)
+#FUNCTIONS
+
+SELECTCASE ARG
+	;샘플
+	;CASE 3
+	;	RETURNF "할아범"
+	CASEELSE
+		CSVCALLNAME ARG, 0
+		RETURNF RESULTS
+ENDSELECT
+
+;-------------------------------------------------
+;함수명:NATION_OR_H(ARG)
+;개요:인명⇔국명 표시 변환 대응 제삼자명 호출 함수
+;인수:캐릭터 번호(NO의 (분)편)
+;반환값:이름
+;비고:
+;사용예:PRINTFORML 「%NATION_OR_H([[라이나]])%!」
+;	현명 표시때 = 「라이나!」
+;	본명 표시때 = 「페르나!」
+;사용예 2:PRINTFORML 「%NATION_OR_H(2, 1)%」
+;	현명시때 「로비노·바르가스」
+;-------------------------------------------------
+@NATION_OR_H(ARG, ARG:1)
+#FUNCTIONS
+;아이의 경우, 동료에게 있다면 이름을 부른다
+LOCAL = NO2(ARG)
+SIF LOCAL > -1 && ((ARG >= 890 && ARG <= 899) || CFLAG:LOCAL:0)
+	RETURNF CALLNAME:LOCAL
+IF FLAG:43
+	RETURNF CALLNAME_NATION(ARG)
+ELSE
+	IF ARG:1
+		CSVNAME ARG, 0
+	ELSE
+		CSVCALLNAME ARG, 0
+	ENDIF
+	RETURNF RESULTS
+ENDIF
+

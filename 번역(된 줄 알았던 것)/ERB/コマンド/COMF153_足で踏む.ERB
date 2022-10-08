@@ -1,0 +1,166 @@
+﻿;-------------------------------------------------
+;발로 밟는다
+;SM-하드계 커맨드
+;-------------------------------------------------
+@COM153
+
+PRINTL 발로 밟는다
+STR:0 = 발로 밟는다
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 80
+LOSEBASE:기력 += 40
+
+SOURCE:통증 += 1600
+SOURCE:두려움 += 1800
+SOURCE:굴복 += 800
+SOURCE:일탈 += 250
+SOURCE:반발 += 700
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;고통를 수반하지 않는마조끼 및마조의 처리는 먼저 해 둔다
+;마조끼를 본다
+IF ABL:마조끼 == 0
+	TIMES SOURCE:굴복, 0.80
+	SOURCE:액체 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:굴복, 1.00
+	SOURCE:액체 += 20
+	SOURCE:욕정 += 30
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:굴복, 1.20
+	SOURCE:액체 += 40
+	SOURCE:욕정 += 70
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:굴복, 1.40
+	SOURCE:액체 += 70
+	SOURCE:욕정 += 120
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:굴복, 1.50
+	SOURCE:액체 += 110
+	SOURCE:욕정 += 180
+ELSEIF ABL:마조끼 == 5
+	TIMES SOURCE:굴복, 1.70
+	SOURCE:액체 += 150
+	SOURCE:욕정 += 250
+ELSEIF ABL:마조끼 == 6
+	TIMES SOURCE:굴복, 1.90
+	SOURCE:액체 += 200
+	SOURCE:욕정 += 300
+ELSEIF ABL:마조끼 == 7
+	TIMES SOURCE:굴복, 2.10
+	SOURCE:액체 += 250
+	SOURCE:욕정 += 350
+ELSEIF ABL:마조끼 == 8
+	TIMES SOURCE:굴복, 2.30
+	SOURCE:액체 += 300
+	SOURCE:욕정 += 400
+ELSEIF ABL:마조끼 == 9
+	TIMES SOURCE:굴복, 2.50
+	SOURCE:액체 += 350
+	SOURCE:욕정 += 450
+ELSEIF ABL:마조끼 >= 10
+	TIMES SOURCE:굴복, 3.00
+	SOURCE:액체 += 500
+	SOURCE:욕정 += 500
+ENDIF
+
+;마조를 본다
+IF TALENT:마조
+	TIMES SOURCE:굴복, 2.50
+	TIMES SOURCE:액체, 1.20
+	TIMES SOURCE:욕정, 1.20
+ENDIF
+
+;TALENT:반항적를 본다
+IF TALENT:반항적 == 1
+	TIMES SOURCE:두려움, 0.75
+	TIMES SOURCE:굴복, 0.75
+	TIMES SOURCE:반발, 1.50
+ENDIF
+
+;TALENT:꿋꿋함를 본다
+IF TALENT:꿋꿋함 == 1
+	TIMES SOURCE:두려움, 0.75
+	TIMES SOURCE:반발, 2.50
+ENDIF
+
+;TALENT:프라이드높음를 본다
+IF TALENT:프라이드높음 == 1
+	TIMES SOURCE:두려움, 0.75
+	TIMES SOURCE:굴복, 1.50
+	TIMES SOURCE:반발, 2.00
+ENDIF
+
+;TALENT:건방짐를 본다
+IF TALENT:건방짐 == 1
+	TIMES SOURCE:두려움, 0.80
+	TIMES SOURCE:굴복, 0.80
+	TIMES SOURCE:반발, 1.80
+ENDIF
+
+;TALENT:프라이드낮음를 본다
+IF TALENT:프라이드낮음 == 1
+	TIMES SOURCE:두려움, 1.50
+	TIMES SOURCE:굴복, 0.75
+	TIMES SOURCE:반발, 0.75
+ENDIF
+
+;밧줄로 긴박중 때 효과 상승
+SIF TEQUIP:밧줄
+	TIMES SOURCE:두려움, 1.50
+
+;체격차이에 의해공포의 소스 추가
+CALL BUILD
+IF S == 3
+	TIMES SOURCE:두려움, 2.00
+ELSEIF S == 2
+	TIMES SOURCE:두려움, 1.50
+ELSEIF S == 1
+	TIMES SOURCE:두려움, 1.20
+ELSEIF S == 0
+	TIMES SOURCE:두려움, 1.00
+ELSEIF S == -3
+	TIMES SOURCE:두려움, 0.75
+ELSE
+	TIMES SOURCE:두려움, 0.90
+ENDIF
+
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;게이경험라든지 가산
+CALL COM_EXP(1)
+
+;애정경험(감소)
+IF (TALENT:연모 == 1 || TALENT:친애 == 1) && ASSIPLAY == 0 && EXP:애정경험 > 0
+	PRINTS EXPNAME:23
+	PRINTL -1
+	EXP:애정경험 -= 1
+ENDIF
+
+;의존도 벡터
+TFLAG:33 = 5
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+

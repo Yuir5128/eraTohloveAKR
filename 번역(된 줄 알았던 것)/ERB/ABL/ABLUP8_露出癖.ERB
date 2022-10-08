@@ -1,0 +1,168 @@
+﻿;노출벽의 가부
+@ISABLUP8
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:노출벽 >= 10
+	RETURN 0
+ELSEIF ABL:노출벽 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP8
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;노출벽
+@ABLUP8
+DRAWLINE
+IF ABL:노출벽 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:노출벽 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP8
+
+;LV3로부터 4에 올릴 때는이상경험필요(소질:[눈에띄고싶음]라면 무시할 수 있다)
+IF ABL:노출벽 == 3 && TALENT:눈에띄고싶음 == 0
+	PRINTFORML %EXPNAME:50%있어, 한편
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[눈에띄고싶음]라면 무시할 수 있다)
+ELSEIF ABL:노출벽 == 4 && TALENT:눈에띄고싶음 == 0
+	PRINTFORML %EXPNAME:50%3이상, 한편
+;LV8로부터 9에 올릴 때는이상경험 5 이상 필요(소질:[눈에띄고싶음]라면 무시할 수 있다)
+ELSEIF ABL:노출벽 == 8 && TALENT:눈에띄고싶음 == 0
+	PRINTFORML %EXPNAME:50%5이상, 한편
+ENDIF
+
+;욕망가 필요
+PRINTFORM %ABLNAME:1%{ABL:노출벽 + 1}LV이상, 한편
+
+PRINTFORM [0] - %PALAMNAME:9%의 구슬×{A}
+IF ABL:노출벽 < 2
+	PRINTFORM , %EXPNAME:2%1이상
+ELSE
+	PRINTFORM , %EXPNAME:11%1이상
+ENDIF
+PRINT ……
+
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+	SIF I & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:노출벽 += 1
+
+IF RESULT == 0
+	JUEL:수치 -= A
+ENDIF
+
+PRINTFORMW %ABLNAME:8%의 레벨이{ABL:노출벽}가 되었습니다
+
+;노출벽LVUP 판정
+@DECIDE_ABLUP8
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+J = 0
+K = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:노출벽 == 0
+	A = 100
+ELSEIF ABL:노출벽 == 1
+	A = 1000
+ELSEIF ABL:노출벽 == 2
+	A = 5000
+ELSEIF ABL:노출벽 == 3
+	A = 15000
+ELSEIF ABL:노출벽 == 4
+	A = 35000
+ELSEIF ABL:노출벽 == 5
+	A = 35000
+ELSEIF ABL:노출벽 == 6
+	A = 35000
+ELSEIF ABL:노출벽 == 7
+	A = 35000
+ELSEIF ABL:노출벽 == 8
+	A = 35000
+ELSEIF ABL:노출벽 == 9
+	A = 35000
+ENDIF
+
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+ENDIF
+
+;욕망가노출벽＋1 레벨이 아니면 안 된다
+IF ABL:욕망 < ABL:노출벽+1
+	;욕망가 불발
+	I |= 4
+ENDIF
+
+;LV3로부터 4에 올릴 때는이상경험필요(소질:[눈에띄고싶음]라면 무시할 수 있다)
+IF ABL:노출벽 == 3 && TALENT:눈에띄고싶음 == 0
+	IF EXP:이상경험 == 0
+		;이상경험가 불발
+		I |= 2
+	ENDIF
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[눈에띄고싶음]라면 무시할 수 있다)
+ELSEIF ABL:노출벽 == 4 && TALENT:눈에띄고싶음 == 0
+	IF EXP:이상경험 < 3
+		;이상경험가 불발
+		I |= 2
+	ENDIF
+;LV8로부터 9에 올릴 때는이상경험 5 이상 필요(소질:[눈에띄고싶음]라면 무시할 수 있다)
+ELSEIF ABL:노출벽 == 8 && TALENT:눈에띄고싶음 == 0
+	IF EXP:이상경험 < 5
+		;이상경험가 불발
+		I |= 2
+	ENDIF
+ENDIF
+
+;수치의 구슬로 올린다
+SIF JUEL:수치 < A
+	I |= 1
+IF ABL:노출벽 < 2
+	;절정경험가 필요
+	SIF EXP:절정경험 == 0
+		I |= 2
+ELSE
+	;조교자위경험가 필요
+	SIF EXP:조교자위경험 == 0
+		I |= 2
+ENDIF
+
+IF I == 0
+	Z = 1
+ENDIF
+
+RETURN 1
+

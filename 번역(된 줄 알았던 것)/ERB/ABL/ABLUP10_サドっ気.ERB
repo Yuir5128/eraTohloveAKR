@@ -1,0 +1,194 @@
+﻿;새드끼의 가부
+@ISABLUP10
+;연모, 친애, 복종, 예속는 MAXLV10
+IF ABL:새드끼 >= 10
+	RETURN 0
+ELSEIF ABL:새드끼 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP10
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;새드끼
+@ABLUP10
+DRAWLINE
+;연모, 친애, 복종, 예속는 MAXLV10
+IF ABL:새드끼 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:새드끼 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP10
+
+IF I & 8
+	PRINTW 상승 불가
+	RETURN 0
+ENDIF
+
+;복종함락
+IF TALENT:복종 || TALENT:예속
+	;기교가새드끼＋1 레벨이 아니면 안 된다
+	PRINTFORML %ABLNAME:2%{ABL:새드끼+1}LV이상, 한편
+ELSE
+	;욕망가새드끼＋1 레벨이 아니면 안 된다
+	PRINTFORML %ABLNAME:1%{ABL:새드끼+1}LV이상, 한편
+ENDIF
+
+;LV3로부터 4, 4에서 5에 올릴 때는이상경험필요(소질:[새드]라면 무시할 수 있다)
+IF ABL:새드끼 == 3 && TALENT:새드 == 0
+	PRINTFORML %EXPNAME:50%있어, 한편
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[새드]라면 무시할 수 있다)
+ELSEIF ABL:새드끼 == 4 && TALENT:새드 == 0
+	PRINTFORML %EXPNAME:50%3이상, 한편
+;LV8로부터 9에 올릴 때는이상경험 5 이상 필요(소질:[새드]라면 무시할 수 있다)
+ELSEIF ABL:새드끼 == 8 && TALENT:새드 == 0
+	PRINTFORML %EXPNAME:50%5이상, 한편
+ENDIF
+
+
+PRINTFORM [0] - %PALAMNAME:6%의 구슬×{A}, %EXPNAME:32%{B}이상, %EXPNAME:2%1이상……
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+	SIF I & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF RESULT != 0 && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:새드끼 += 1
+
+IF RESULT == 0
+	JUEL:욕정 -= A
+ENDIF
+
+PRINTFORMW %ABLNAME:10%의 레벨이{ABL:새드끼}가 되었습니다
+
+;새드끼LVUP 판정
+@DECIDE_ABLUP10
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+J = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:새드끼 == 0
+	A = 100
+	B = 5
+ELSEIF ABL:새드끼 == 1
+	A = 500
+	B = 10
+ELSEIF ABL:새드끼 == 2
+	A = 1500
+	B = 20
+ELSEIF ABL:새드끼 == 3
+	A = 3000
+	B = 50
+ELSEIF ABL:새드끼 == 4
+	A = 5000
+	B = 80
+ELSEIF ABL:새드끼 == 5
+	A = 8000
+	B = 100
+ELSEIF ABL:새드끼 == 6
+	A = 12000
+	B = 150
+ELSEIF ABL:새드끼 == 7
+	A = 15000
+	B = 200
+ELSEIF ABL:새드끼 == 8
+	A = 25000
+	B = 250
+ELSEIF ABL:새드끼 == 9
+	A = 30000
+	B = 350
+ENDIF
+
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+	TIMES B , 2.00
+ENDIF
+;새드
+IF TALENT:새드
+	TIMES A , 0.50
+	TIMES B , 0.50
+ENDIF
+
+;복종함락
+IF TALENT:복종 || TALENT:예속
+	;기교가새드끼＋1 레벨이 아니면 안 된다
+	IF ABL:기교 < ABL:새드끼 + 1
+		;기교가 불발
+		I |= 4
+	ENDIF
+ELSE
+	;욕망가새드끼＋1 레벨이 아니면 안 된다
+	IF ABL:욕망 < ABL:새드끼+1
+		;욕망가 불발
+		I |= 4
+	ENDIF
+ENDIF
+
+;LV3로부터 4, 4에서 5에 올릴 때는이상경험필요(소질:[새드]라면 무시할 수 있다)
+IF ABL:새드끼 == 3 && TALENT:새드 == 0
+	IF EXP:이상경험 == 0
+		;이상경험가 불발
+		I |= 2
+	ENDIF
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[새드]라면 무시할 수 있다)
+ELSEIF ABL:새드끼 == 4 && TALENT:새드 == 0
+	IF EXP:이상경험 < 3
+		;이상경험가 불발
+		I |= 2
+	ENDIF
+;LV8로부터 9에 올릴 때는이상경험 5 이상 필요(소질:[새드]라면 무시할 수 있다)
+ELSEIF ABL:새드끼 == 8 && TALENT:새드 == 0
+	IF EXP:이상경험 < 5
+		;이상경험가 불발
+		I |= 2
+	ENDIF
+ENDIF
+
+;욕정의 구슬로 올린다
+SIF JUEL:욕정 < A
+	I |= 1
+;가학쾌락경험가 필요한 경우
+SIF EXP:가학쾌락경험 < B
+	I |= 2
+
+SIF I == 0
+	Z = 1
+
+;조교자는 자동 상승만
+SIF CFLAG:1 == 3
+	I |= 8
+
+RETURN 1
+

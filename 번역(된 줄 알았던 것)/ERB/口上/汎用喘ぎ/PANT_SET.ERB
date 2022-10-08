@@ -1,0 +1,652 @@
+﻿
+;범용 허덕여 호출
+@PANT_VOICE_EX
+;선택한 커맨드가 허덕여 표시에 어울릴까 판정
+;노래하게 하고 있는데 허덕이기 시작하거나 하지 않도록
+CALL COMMON_KOJO_EX
+SELECTCASE RESULT
+	;약,주인마조계,스카계,장소 이동
+	CASE 0,13,14,15,18,19
+		RETURN 0
+ENDSELECT
+
+
+;허덕여 계통의 옵션/없음
+;PANT_E	= 0 :옵션 없음
+;		= 1 :절규계 허덕여 금지
+;		= 2 :보고 벚꽃어 모드
+;		= 3 :절규계 허덕여 금지＋보고 벚꽃어 모드
+;		= 4 :음어 모드
+;		= 5 :절규계 허덕여 금지＋음어 모드
+;		= 6 :보고 벚꽃어 모드＋음어 모드
+;		= 7 :절규계 허덕여 금지＋보고 벚꽃어 모드＋음어 모드
+PANT_E = 0
+
+;그 외 변수를 초기화
+;허덕여 회수 지정/없음
+PANT_F = 0
+;허덕여 패턴 지정/없음
+PANT_G = 0
+
+PANT_A = 0
+
+;공통의 것,특정의 조교자의 경우의 것,어느쪽이나 설정되어 있지 않다
+IF CFLAG:TARGET:632 == 0 && CFLAG:TARGET:634 == 0
+	CALL PANT_VOICE_REFERENCE
+	PANT_A = RESULT
+	PANT_E = RESULT:1
+	PANT_F = RESULT:2
+	PANT_G = RESULT:3
+ELSE
+	;특정의 조교자의 경우의 범용천희화 설정되어 있다
+	IF CFLAG:TARGET:634 % 10 >0
+		;LOCAL:1에 특정의 조교자의 종류를 격납(1. 심신자|2. 사모·공포 대상|3. 그 외 특정 캐릭터)
+		;LOCAL:2에 캐릭터의 고유 번호를 격납
+		LOCAL:1 = CFLAG:634 % 10
+		LOCAL:2 = CFLAG:634 / 10
+		
+		;조교자가 심신자나 사모·공포 대상이나 특정의 캐릭터 또한 그 경우의 범용 허덕여 설정이 설정되어 있다면,그것을 사용
+		IF (LOCAL:1 == 1 && NO:PLAYER == 0) || (LOCAL:1 == 2 && NO:PLAYER == CFLAG:41) || (LOCAL:1 == 3 && NO:PLAYER == LOCAL:2)
+			LOCAL = CFLAG:633
+		;그렇지 않으면 공통의 범용 허덕여 설정을 사용
+		ELSE
+			;공통의 범용 허덕여 설정이 설정되어 있지 않다
+			IF CFLAG:632 == 0
+				CALL PANT_VOICE_REFERENCE
+				PANT_A = RESULT
+				PANT_E = RESULT:1
+				PANT_F = RESULT:2
+				PANT_G = RESULT:3
+				LOCAL = PANT_A + PANT_E *10 + PANT_F *100 + PANT_G * 10000
+			ELSE
+				LOCAL = CFLAG:632
+			ENDIF
+		ENDIF
+	;공통의 범용 허덕여 설정만이 설정되어 있다
+	ELSE
+		LOCAL = CFLAG:632
+	ENDIF
+	
+	;사용하는 설정에 준거해 1의 위에 PANT_A,10의 위에 PANT_E,백천의 위에 PANT_F,만의 위에 PANT_G를 대입해 나간다
+	PANT_G = LOCAL / 10000
+	LOCAL = LOCAL - (PANT_G * 10000)
+	PANT_F = LOCAL / 100
+	LOCAL = LOCAL - (PANT_F * 100)
+	PANT_E = LOCAL / 10
+	LOCAL = LOCAL - (PANT_E * 10)
+	PANT_A = LOCAL
+ENDIF
+
+SIF !PANT_A
+	RETURN 0
+
+;범용 허덕여 호출
+CALL PANT_VOICE
+
+;-------------------------------------------------
+;범용천희화 설정되어 있지 않은 경우에 참조하는 함수
+;분할한 김에 A 뿐만이 아니라 E,F,G에 대해서도 반환값으로 참조할 수 있도록(듯이)
+;다만,주인이 조교자의 경우의 설정인가 어떤가는 반환값에서는 판단할 수 없다
+@PANT_VOICE_REFERENCE
+PANT_A = 0
+PANT_E = 0
+PANT_F = 0
+PANT_G = 0
+SELECTCASE NO:TARGET
+	;난폭
+	;초승달,소여우,이와토오시,이와토오시극,대전태,소하야,오니마루,이치고히토후리,후,후극,후 후지,제약 기구,오오카네히라,앵,아이젠,안정,안정극,부동,시시오,시시오극,츠루마루,츠루마루극,니혼고,니혼고극,미나이즈미,미나이즈미극,히젠,칙종,희학
+	CASE 3,5,9,10,13,15,21,25,33,34,35,49,53,55,61,87,88,120,122,123,130,131,136,137,154,155,168,198,202
+		PANT_A = 1
+		;소여우,이치고히토후리:주인상대만 경어
+		SIF (NO:TARGET == 5 || NO:TARGET == 25) && NO:PLAYER == 0
+			PANT_A = 4
+	;표준
+	;에 빌려 빚극,나키키츠네,나키키츠네,나마즈꼬리,나마즈꼬리극,호타루마루,호타루마루극,카슈우,카슈우극,호리카와,호리카와극,우라시마,우라시마극,히자마루,히자마루극,켄신,양지,토요마에,남해,마츠이,지장,타이코,무라쿠모
+	CASE 19,20,23,24,27,28,59,60,85,86,99,100,103,104,112,115,146,150,160,166,178,184,190,200
+		PANT_A = 2
+		;나마즈꼬리,호리카와,호리카와극:주인상대만 경어
+		SIF (NO:TARGET == 27 || NO:TARGET == 99 || NO:TARGET == 100) && NO:PLAYER == 0
+			PANT_A = 4
+	;부드러운
+	;시나노,란,부엌칼,부엌칼극,물길,물길극,귀갑,귀갑극,히게키리,히게키리극,지로,빨간콩,치요가네마루,치요가네마루극,챠탄나키리,쿠와나,청마,치가네마루
+	CASE 37,45,51,52,67,68,71,72,107,111,134,148,156,157,170,172,176,186
+		PANT_A = 3
+	;경어
+	;이마노츠루기,이마노츠루기극,염주환,히라노,마에다,아키타,아키타극,고코타이,고코타이극,무라마사,무라마사극,톤보키리,톤보키리극,강설,강설극,소우산,소우산극,털리,바구니손절,하쿠산,고금,장마
+	CASE 11,12,17,31,39,41,42,47,48,63,64,65,66,79,80,81,82,142,144,164,182,192
+		PANT_A = 4
+	;무사
+	;이시키리마루,이시키리마루극,골식,골식극,북종,촛대절,대반야,소용,사야,사야극,명인,카네상,카네상극,야마우바절,수도자,수도자극,하치스가,하치스가극,장 소네,장 소네극,오오쿠리카라,에 해 절,부동극,코가라스마루,동타누키,타로,오테기네,오테기네극,파형,정형,장의,네네키리마루,수심자,산쵸모,일광,치도리,한진,후쿠시마,칠성검,이나바
+	CASE 7,8,29,30,69,73,75,77,83,84,89,91,92,95,97,98,101,102,105,106,116,118,121,124,128,132,138,139,140,152,158,162,174,180,188,194,196,204,206,210
+		PANT_A = 6
+		;에 해 절:주인만 경어
+		SIF NO:TARGET == 118 && NO:PLAYER == 0
+			PANT_A = 4
+		;일광:산쵸모와 칙종과 희학에는 경어
+		SIF NO:TARGET == 188 && (NO:PLAYER == 180 || NO:PLAYER == 198 || NO:PLAYER == 202)
+			PANT_A = 4
+	;토사판
+	;무츠수
+	CASE 93
+		PANT_A = 5
+	;칸사이 사투리
+	;쿠니유키
+	CASE 57
+		PANT_A = 7
+	;하카타판
+	;하카타,하카타극
+	CASE 43,44
+		PANT_A = 8
+	CASEELSE
+		IF MALE(TARGET)
+			IF TALENT:반항적 || TALENT:건방짐
+				PANT_A = 1
+			ELSEIF TALENT:솔직함 || TALENT:얌전함
+				PANT_A = 3
+			ELSEIF TALENT:부끄럼쟁이
+				PANT_A = 4
+			ELSEIF TALENT:위압
+				PANT_A = 6
+			ELSE
+				PANT_A = 2
+			ENDIF
+		ELSE
+			IF TALENT:부끄럼쟁이
+				PANT_A = 4
+			ELSEIF TALENT:위압
+				PANT_A = 2
+			ELSE
+				PANT_A = 3
+			ENDIF
+		ENDIF
+ENDSELECT
+
+RETURN PANT_A,PANT_E,PANT_F,PANT_G
+
+;-------------------------------------------------
+;범용 허덕여 설정을손동으로 설정하기 위한 함수군
+;@PANT_VOICE_SETTING
+;메인의 함수 현재의 설정을 표시하거나 CFLAG에 격납하거나 한다
+;@PANT_VOICE_SET_A @PANT_VOICE_SET_E @PANT_VOICE_SET_F @PANT_VOICE_SET_G @PANT_VOICE_SET_CHARA
+;A E F G 및 특정의 상대등의 설정을하기 위한 함수
+;@PANT_VOICE_SET_LIST(ARG)
+;상 2개의 함수내에서 참조하기 위한 캐릭터 라인을 돌려주는 문중 함수
+
+;CFLAG:632보통 설정				(1의 위에 A,10의 위에 E,백천의 위에 F,만의 위에 G의 설정을 격납)
+;CFLAG:633 특정상대의 경우의 설정	(1의 위에 A,10의 위에 E,백천의 위에 F,만의 위에 G의 설정을 격납)
+;CFLAG:634 특정상대가 누군가를 격납한다(1의 위에 특정의 조교자의 종류,10백천의 위는 그 캐릭터의 고유 번호)
+
+;LOCAL는 일시적인 용기 대신
+;PVS_A로 캐릭터의입조,PVS_E로 옵션,PVS_F로 반복 회수,PVS_G로 패턴
+;PVS_C에 조교자를 한정한 허덕여 설정,의 상대의 종류(1. 심신자 2. 사모·공포 대상 3. 그 외 특정 캐릭터)
+;PVS_C_NUM에 PVS_C로 한정한 조교자의 캐릭터 고유 번호
+;-------------------------------------------------
+@PANT_VOICE_SETTING
+
+;PANT_VOICE_SET의 약어 CFLAG에 넣을 때까지 설정을 보유 한다
+#DIM DYNAMIC PVS_A
+#DIM DYNAMIC PVS_E
+#DIM DYNAMIC PVS_F
+#DIM DYNAMIC PVS_G
+
+;PANT_VOICE_SET_CHARA의 략상이 상대의 종류 아래가 고유 번호
+#DIM DYNAMIC PVS_C
+#DIM DYNAMIC PVS_C_NUM
+
+;PANT_VOICE_SET_00_LIST의 약문자열격납하는 녀석
+#DIMS DYNAMIC PVS_AL
+#DIMS DYNAMIC PVS_EL
+#DIMS DYNAMIC PVS_FL
+#DIMS DYNAMIC PVS_GL
+#DIMS DYNAMIC PVS_CL
+
+;설정해 있는 것이 공통이나 특정의 상대의 경우인지를 보유 한다
+#DIM DYNAMIC PVS
+
+$INPUT_PANT_SET
+
+;변수의 초기화
+PVS_A = 0
+PVS_E = 0
+PVS_F = 0
+PVS_G = 0
+
+PVS_C = 0
+PVS_C_NUM = 0
+
+PRINTFORML 범용천의 설정을 할 수 있습니다
+IF CFLAG:632 == 0
+PRINTFORML [0]범용천를 설정한다
+ELSE
+	PRINTFORML [1]범용천를 확인·삭제한다
+ENDIF
+IF CFLAG:633 == 0
+	PRINTFORML [2]특정의 조교자의 경우의 범용 허덕여 설정을 설정한다
+ELSE
+	PRINTFORML [3]특정의 조교자의 경우의 범용 허덕여 설정을 확인·삭제한다
+ENDIF
+PRINTFORML [100]돌아온다
+INPUT
+;설정을 확인한다
+IF (RESULT == 1 && CFLAG:632 > 0) || ( RESULT == 3 && CFLAG:633 > 0)
+	;공통의 설정을 확인한다
+	IF RESULT == 1
+		PVS = 1
+		LOCAL = CFLAG:632
+		PVS_C = 0
+	;특정의 상대의 것을 확인한다
+	ELSEIF RESULT == 3
+		PVS = 3
+		LOCAL = CFLAG:633
+		PVS_C = CFLAG:634 % 10
+		PVS_C_NUM = CFLAG:634 / 10
+	ENDIF
+	
+	;CFLAG 분해해 현재의 설정을 산출한다
+	PVS_G = LOCAL / 10000
+	LOCAL = LOCAL - (PVS_G * 10000)
+	PVS_F = LOCAL / 100
+	LOCAL = LOCAL - (PVS_F * 100)
+	PVS_E = LOCAL / 10
+	LOCAL = LOCAL - (PVS_E * 10)
+	PVS_A = LOCAL
+	
+	$INPUT_PANT_SET_MAIN_MENU
+	;설정으로부터 문자를 부른다
+	LOCAL = PVS_A
+		PVS_AL = %PANT_VOICE_SET_LIST(LOCAL)%
+	LOCAL = PVS_E + 20
+		PVS_EL = %PANT_VOICE_SET_LIST(LOCAL)%
+	LOCAL = PVS_G + 40
+		PVS_GL = %PANT_VOICE_SET_LIST(LOCAL)%
+	
+	;F의 설정은 아래의 문중 함수로 참조하지 않기 때문에후로 처리
+	LOCALS = {PVS_F}
+		PVS_FL = %LOCALS%
+	
+	;특정의 상대의 경우
+	IF PVS >= 2
+		IF PVS_C == 1
+			PVS_CL =심신자
+		ELSEIF PVS_C == 2
+			PVS_CL = %CSVNAME(PVS_C_NUM,0)% (사모·공포 대상)
+		ELSEIF PVS_C == 3
+			PVS_CL = %CSVNAME(PVS_C_NUM,0)%
+		ELSE
+			PVS_CL =지정 없음
+		ENDIF
+	ENDIF
+	
+	;메뉴 화면
+	PRINTL 
+	PRINTFORML 현재의 범용천의 설정은 이렇게 되어 있습니다
+		PRINTFORML 입조　　　　　%PVS_AL%
+		PRINTFORML 옵션　　%PVS_EL%
+		PRINTFORML 반복 회수　　　%PVS_FL% 회
+		PRINTFORML 허덕여 패턴 %PVS_GL%
+	SIF PVS_C > 0 || PVS >= 2
+		PRINTFORML 조교자　　　　%PVS_CL%
+	PRINTFORML 변경합니까?
+	PRINTFORML
+	PRINTFORML [0]설정하지 않고 돌아온다
+	PRINTFORML [1]입조를 변경한다
+	PRINTFORML [2]옵션을 변경한다
+	PRINTFORML [3]반복 회수를 변경한다
+	PRINTFORML [4]허덕여 패턴을 변경한다
+	SIF PVS_C > 0 || PVS >= 2
+		PRINTFORML [5]조교자를 변경한다
+	SIF CFLAG:632 > 0 || CFLAG:633 > 0
+		PRINTFORML [99]설정을 삭제한다
+	PRINTFORML [100]이것으로 좋다
+	INPUT
+	SELECTCASE RESULT
+		CASE 0 
+			RETURN 0
+		CASE 1
+			CALL PANT_VOICE_SET_A
+			PVS_A = RESULT
+			;설정하면,현재의 설정을 표시하는 개소로 나는 이하 같이
+			GOTO INPUT_PANT_SET_MAIN_MENU
+		CASE 2
+			CALL PANT_VOICE_SET_E
+			PVS_E = RESULT
+			GOTO INPUT_PANT_SET_MAIN_MENU
+		CASE 3
+			CALL PANT_VOICE_SET_F
+			PVS_F = RESULT
+			GOTO INPUT_PANT_SET_MAIN_MENU
+		CASE 4
+			CALL PANT_VOICE_SET_G
+			PVS_G = RESULT
+			GOTO INPUT_PANT_SET_MAIN_MENU
+		CASE 5
+			CALL PANT_VOICE_SET_CHARA
+			PVS_C = RESULT
+			PVS_C_NUM = RESULT:1
+			GOTO INPUT_PANT_SET_MAIN_MENU
+		CASE 99
+			PRINTFORML 설정을 삭제합니다
+			PRINTFORML 정말로 좋습니까?
+			PRINTFORML [0]삭제한다 
+			PRINTFORML [1]그만둔다
+			$INPUT_PANT_SET_DELETE
+			INPUT
+			IF RESULT == 0
+				;현재 확인하고 있는 설정이 특정의 상대의 것이었던 경우
+				IF PVS_C > 0
+					CFLAG:633 = 0
+					CFLAG:634 = 0
+				ELSE
+					CFLAG:632 = 0
+				ENDIF
+				PRINTFORML 설정을 삭제했습니다
+				GOTO INPUT_PANT_SET
+			ELSEIF RESULT == 1
+				GOTO INPUT_PANT_SET_MAIN_MENU
+			ELSE
+				GOTO INPUT_PANT_SET_DELETE
+			ENDIF
+		CASE 100
+			
+			;특정의 상대의 경우의 것을 설정해 있었는데,조교자가 지정없이 되어 있다
+			IF PVS >= 2 && PVS_C == 0
+				PRINTFORML 조교자가 「지정 없음」(이)가 되어 있습니다
+				PRINTFORML 현재의 설정을 조교자에게 묻지 않는,공통의 것으로 해 설정합니까?
+				SIF CFLAG:633 > 0
+					PRINTFORML (특정의 상대의 설정은 이전의 상태가 유지됩니다)
+				PRINTL [0]공통의 것으로 해 설정한다
+				PRINTL [1]다시 선택한다
+				$INPUT_PANT_SET_CHECK
+				INPUT
+				IF RESULT == 0
+					PVS = 1
+					PRINTFORM 공통의 것으로 해
+				ELSEIF RESULT == 1
+					GOTO INPUT_PANT_SET_MAIN_MENU
+				ELSE
+					GOTO INPUT_PANT_SET_CHECK
+				ENDIF
+			ENDIF
+			
+			PRINTFORML 범용천를 설정했습니다
+			PRINTL 
+			;여기서 처음으로 CFLAG로 설정을 격납해 나간다
+			
+			;공통의 것을 설정했다
+			IF PVS <= 1
+				SIF CFLAG:632 > 0
+					CFLAG:632 = 0
+				;1의 위에 A,10의 위에 E,백천의 위에 F,만의 위에 G를 격납
+				CFLAG:632 = PVS_A + (PVS_E * 10) + (PVS_F * 100) + (PVS_G * 10000)
+			
+			;특정의 상대의 것을 설정했다
+			ELSE
+				SIF CFLAG:633 > 0
+					CFLAG:633 = 0
+				SIF CFLAG:634 > 0
+					CFLAG:634 = 0
+				
+				;1의 위에 A,10의 위에 E,백천의 위에 F,만의 위에 G를 격납
+				CFLAG:633 = PVS_A + (PVS_E * 10) + (PVS_F * 100) + (PVS_G * 10000)
+				
+				;1의 위에 특정의 조교자의 종류,10백천의 위는 그 캐릭터의 고유 번호
+				CFLAG:634 = PVS_C + (PVS_C_NUM * 10)
+			ENDIF
+			
+			;특정의 상대의 경우의 것을 설정해 있어,공통의 것의 설정이되어 있지 않은 경우
+			IF PVS >= 2 && CFLAG:632 == 0
+				PRINTFORML 조교자를 묻지 않는,공통의 것의 설정이 없습니다
+				PRINTFORML 현재의 설정을 공통의 것으로 해 유용합니까?
+				PRINTL [0]공통의 것에도 유용한다
+				PRINTL [1]하지 않는다
+				$INPUT_PANT_SET_CHECK2
+				INPUT
+				IF RESULT == 0
+					PRINTL 공통의 것으로 해 범용천를 설정했습니다
+					CFLAG:632 = CFLAG:633
+				ELSEIF RESULT == 1
+					PRINTL 
+				ELSE
+					GOTO INPUT_PANT_SET_CHECK2
+				ENDIF
+			ENDIF
+			
+			GOTO INPUT_PANT_SET
+		CASEELSE
+			GOTO INPUT_PANT_SET_MAIN_MENU
+	ENDSELECT
+
+;처음부터 설정하는 경우는 반드시 A의입조로부터 설정
+ELSEIF (RESULT == 0 && CFLAG:632 ==0) || (RESULT == 2 && CFLAG:633 == 0)
+	
+	IF RESULT == 0
+		PVS = 0
+	ELSE
+		PVS = 2
+	ENDIF
+	PRINTFORML 범용천의 설정을 합니다
+		CALL PANT_VOICE_SET_A
+		PVS_A = RESULT
+		GOTO INPUT_PANT_SET_MAIN_MENU
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_PANT_SET
+ENDIF
+
+;A의 설정
+@PANT_VOICE_SET_A
+$INPUT_PANT_SET_A
+PRINTFORML 캐릭터의입조는 어떻게 합니까? (1-8)
+
+CALL PANT_VOICE_REFERENCE
+	LOCALS = %PANT_VOICE_SET_LIST(RESULT)%
+PRINTFORML 디폴트의 설정 %LOCALS%
+
+	;문자를 불러 반복으로 표시한다
+	FOR LOCAL,1,9
+		LOCALS = %PANT_VOICE_SET_LIST(LOCAL)%
+		PRINTFORML [{LOCAL}] %LOCALS%
+	NEXT
+	INPUT
+	SELECTCASE RESULT
+		CASE 1 TO 8
+			LOCAL = RESULT
+		CASEELSE
+			GOTO INPUT_PANT_SET_A
+	ENDSELECT
+	LOCALS = %PANT_VOICE_SET_LIST(LOCAL)%
+	PRINTFORMW 입조를%LOCALS%로 설정했습니다
+	RETURN RESULT
+
+;E의 설정
+@PANT_VOICE_SET_E
+$INPUT_PANT_SET_E
+PRINTFORML 옵션을 추가합니까? (0-7)
+
+CALL PANT_VOICE_REFERENCE
+	RESULT:1 += 20
+	LOCALS = %PANT_VOICE_SET_LIST(RESULT:1)%
+PRINTFORML 디폴트의 설정 %LOCALS%
+
+	;문자를 불러 반복으로 표시한다
+	FOR LOCAL,0,8
+		LOCAL:1 = LOCAL + 20
+		LOCALS = %PANT_VOICE_SET_LIST(LOCAL:1)%
+		PRINTFORML [{LOCAL}] %LOCALS%
+	NEXT
+	INPUT
+	SELECTCASE RESULT
+		CASE 0 TO 7
+			LOCAL:1 = RESULT + 20
+		CASEELSE
+			GOTO INPUT_PANT_SET_E
+	ENDSELECT
+	LOCALS = %PANT_VOICE_SET_LIST(LOCAL:1)%
+	PRINTFORMW 옵션을%LOCALS%로 설정했습니다
+	RETURN RESULT
+
+;F의 설정
+@PANT_VOICE_SET_F
+$INPUT_PANT_SET_F
+PRINTFORML 반복 회수는 어떻게 합니까? (0-10)
+
+CALL PANT_VOICE_REFERENCE
+	LOCALS = {RESULT:2}
+PRINTFORML 디폴트의 설정 %LOCALS%회
+
+	INPUT
+	SELECTCASE RESULT
+		CASE 0 TO 10
+			LOCAL = RESULT
+		CASEELSE
+			GOTO INPUT_PANT_SET_F
+	ENDSELECT
+	LOCALS = {LOCAL}
+	PRINTFORMW 반복 회수를%LOCALS%회로 설정했습니다
+	RETURN RESULT
+
+;G의 설정
+@PANT_VOICE_SET_G
+$INPUT_PANT_SET_G
+	PRINTFORML 허덕여 패턴은 어떻게 합니까? (0-7)
+	PRINTFORML 허덕여 패턴을 설정하면,감도나 소질에 관련되지 않고 설정한 패턴으로 허덕이게 됩니다
+	
+	CALL PANT_VOICE_REFERENCE
+	RESULT:3 += 40
+	LOCALS = %PANT_VOICE_SET_LIST(RESULT:3)%
+	PRINTFORML 디폴트의 설정 %LOCALS%
+
+	;문자를 불러 반복으로 표시한다
+	FOR LOCAL,0,8
+		LOCAL:1 = LOCAL + 40
+		LOCALS = %PANT_VOICE_SET_LIST(LOCAL:1)%
+		PRINTFORML [{LOCAL}] %LOCALS%
+	NEXT
+	INPUT
+	SELECTCASE RESULT
+		CASE 0 TO 7
+			LOCAL:1 = RESULT + 40
+		CASEELSE
+			GOTO INPUT_PANT_SET_G
+	ENDSELECT
+	LOCALS = %PANT_VOICE_SET_LIST(LOCAL:1)%
+	PRINTFORMW 허덕여 패턴을%LOCALS%로 설정했습니다
+	RETURN RESULT
+
+;특정의 조교자의 설정
+@PANT_VOICE_SET_CHARA
+$INPUT_PANT_SET_C
+PRINTFORML 특정의 조교자의 경우만의 허덕여 설정으로 합니까?
+PRINTFORML [0]지정하지 않는다
+PRINTFORML [1]조교자가 심신자
+;사모 공포 대상이 있는 경우
+SIF CFLAG:40 > 0
+	PRINTFORML [2]조교자가 사모·공포 대상
+PRINTFORML [3]조교자가 특정의 남사(1명만)
+INPUT
+	SELECTCASE RESULT
+		;지정하지 않는다
+		CASE 0
+			LOCAL = 0
+			LOCAL:1 = 0
+		;심신자
+		CASE 1
+			LOCAL = 1
+			LOCAL:1 = 0
+			PRINTFORML 심신자가 조교자의 경우로 설정했습니다
+		;사모·공포 대상
+		CASE 2
+			LOCAL = 2
+			LOCAL:1 = CFLAG:41
+			PRINTFORML %CSVNAME(LOCAL:1,0)%(사모·공포 대상)가 조교자의 경우로 설정했습니다
+		;특정의 남사(심신자나아이도 설정할 수 있다)
+		CASE 3
+			LOCAL = 3
+			PRINTFORML 조교자가 특정의 남사의 경우의 범용 허덕여 설정을 작성합니다
+			;손바탕으로 있는 캐릭터를 등록 번호순서에 표시한다
+			FOR LOCAL:3,0,CHARANUM
+				PRINTFORML [{LOCAL:3}]%CALLNAME:(LOCAL:3)%
+			NEXT
+			PRINTFORML [1000]돌아온다
+			$INPUT_PANT_SET_C_NUM
+			INPUT
+			IF RESULT == 1000
+				GOTO INPUT_PANT_SET_C
+			;없는 캐릭터라면 안돼
+			ELSEIF RESULT > LOCAL:3
+				GOTO INPUT_PANT_SET_C_NUM
+			;심신자(당신,은 항상 등록 번호가 0번)
+			ELSEIF RESULT == 0
+				LOCAL = 1
+				LOCAL:1 = 0
+				PRINTFORML 심신자가 조교자의 경우로 설정했습니다
+			ELSE
+				LOCAL:1 = NO:(RESULT)
+				PRINTFORML %CSVNAME(LOCAL:1,0)%가 조교자의 경우로 설정했습니다
+			ENDIF
+		CASEELSE
+			GOTO INPUT_PANT_SET_C
+	ENDSELECT
+	RETURN LOCAL,LOCAL:1
+
+;위에서 사용하는 캐릭터 라인 돌려줄 뿐(만큼)의 문중 함수
+@PANT_VOICE_SET_LIST(ARG)
+#FUNCTIONS
+SELECTCASE ARG
+	;여기로부터 PVS_AL A의 설정으로 참조한다
+	CASE 1
+		LOCALS =난폭
+	CASE 2
+		LOCALS =표준
+	CASE 3
+		LOCALS =부드러운
+	CASE 4
+		LOCALS =경어
+	CASE 5
+		LOCALS =토사판
+	CASE 6
+		LOCALS =무사
+	CASE 7
+		LOCALS =칸사이 사투리
+	CASE 8
+		LOCALS =하카타판
+	;여기로부터 PVS_EL E의 설정으로 참조한다
+	CASE 20
+		LOCALS =없음
+	CASE 21
+		LOCALS =절규계 허덕여 금지
+	CASE 22
+		LOCALS =보고 벚꽃어 모드
+	CASE 23
+		LOCALS =절규계 허덕여 금지＋보고 벚꽃어 모드
+	CASE 24
+		LOCALS =음어 모드
+	CASE 25
+		LOCALS =절규계 허덕여 금지＋음어 모드
+	CASE 26
+		LOCALS =보고 벚꽃어 모드＋음어 모드
+	CASE 27
+		LOCALS =절규계 허덕여 금지＋보고 벚꽃어 모드＋음어 모드
+	;여기로부터 PVS_GL G의 설정으로 참조한다
+	CASE 40
+		LOCALS =없음
+	CASE 41
+		LOCALS =약쾌감
+	CASE 42
+		LOCALS =쾌감 LV2
+	CASE 43
+		LOCALS =쾌감 LV3
+	CASE 44
+		LOCALS =쾌감 LV4
+	CASE 45
+		LOCALS = 고통LV1
+	CASE 46
+		LOCALS = 고통LV2
+	CASE 47
+		LOCALS = 입가 막히고 있다(볼개그·촉수입학중 이외)
+	CASEELSE
+		LOCALS =지정 없음
+ENDSELECT
+	RETURNF LOCALS
+

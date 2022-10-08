@@ -1,0 +1,248 @@
+﻿;-------------------------------------------------
+;스팽킹애널
+;파생계 커맨드
+;-------------------------------------------------
+@COM512
+
+PRINTL 스팽킹애널
+STR:0 = 스팽킹애널
+SELECTCOM = 512
+CALL KOJO_MESSAGE_COM
+
+;스타킹 찌릿찌릿 플래그
+IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;처녀상실 플래그
+SIF TALENT:백버진
+	TFLAG:161 |= 1
+;주인에 의한처녀상실
+SIF TALENT:백버진 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0
+	TFLAG:163 = 1
+
+;조교자가동정였던 경우의 상실 플래그
+SIF TALENT:PLAYER:동정
+	TFLAG:160 |= 2
+
+;-------------------------------------------------
+;사정게이지 체크
+;-------------------------------------------------
+B = 1500
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 80
+LOSEBASE:기력 += 120
+
+SOURCE:쾌A += 300
+
+SOURCE:애정 += 200
+
+;스킨십선호라면애정의 소스 추가
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+SOURCE:통증 += 1200
+
+SOURCE:두려움 += 400
+SOURCE:중독충족 += 200
+SOURCE:노출 += 50
+SOURCE:일탈 += 200
+SOURCE:반발 += 650
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+;고통의 파라미터에 의한고통의 소스 증가는 먼저 처리해 둔다
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증, 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증, 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증, 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증, 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증, 3.00
+ENDIF
+
+;소인체형로 조교자가거근나말자지의 경우, 고통와공포의 소스를 추가
+IF TALENT:소인체형
+	IF TALENT:PLAYER:거근
+		SOURCE:통증 += 200
+		SOURCE:두려움 += 500
+	ELSEIF TALENT:PLAYER:말자지
+		SOURCE:통증 += 500
+		SOURCE:두려움 += 1000
+	ENDIF
+ENDIF
+
+;조교자가말자지의 경우
+IF TALENT:PLAYER:말자지
+	;A확장경험일정 이상으로중독충족의 소스를 추가
+	IF EXP:A확장경험 >= 20
+		SOURCE:중독충족 += 500
+	;A확장경험일정 이하로고통와공포의 소스를 추가
+	ELSE
+		SOURCE:통증 += 500
+		SOURCE:두려움 += 1000
+	ENDIF
+ENDIF
+
+;A에의고통는 먼저 처리해 둔다
+;EXP:A경험를 본다
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:통증, 3.00
+	TIMES SOURCE:반발, 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:통증, 1.20
+	TIMES SOURCE:반발, 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:통증, 0.80
+	TIMES SOURCE:반발, 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:통증, 0.60
+	TIMES SOURCE:반발, 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:통증, 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:통증, 0.20
+ENDIF
+
+;PALAM:윤활를 본다
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증, 1.20
+	TIMES SOURCE:반발, 1.50
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증, 0.70
+	TIMES SOURCE:반발, 1.20
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증, 0.40
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증, 0.10
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증, 0.10
+ENDIF
+
+;중독에 의한중독충족의 소스는 먼저 처리해 둔다
+;섹스중독를 본다
+IF ABL:섹스중독 == 1
+	TIMES SOURCE:중독충족, 0.00
+ELSEIF ABL:섹스중독 == 2
+	TIMES SOURCE:중독충족, 0.30
+ELSEIF ABL:섹스중독 == 3
+	TIMES SOURCE:중독충족, 0.60
+ELSEIF ABL:섹스중독 == 4
+	TIMES SOURCE:중독충족, 0.90
+ELSEIF ABL:섹스중독 == 5
+	TIMES SOURCE:중독충족, 1.20
+ELSEIF ABL:섹스중독 == 6
+	TIMES SOURCE:중독충족, 1.50
+ELSEIF ABL:섹스중독 == 7
+	TIMES SOURCE:중독충족, 1.80
+ELSEIF ABL:섹스중독 == 8
+	TIMES SOURCE:중독충족, 2.30
+ELSEIF ABL:섹스중독 == 9
+	TIMES SOURCE:중독충족, 3.00
+ELSEIF ABL:섹스중독 >= 10
+	TIMES SOURCE:중독충족, 5.00
+ENDIF
+
+
+;-------------------------------------------------
+;사정체크
+;-------------------------------------------------
+CALL SAMEN_CHECK(PLAYER, 1)
+
+;사정시의 처리
+IF E >= 1
+	;사정처 타입의 설정
+	TFLAG:703 = 2
+	;사정처 선택의 가능·불가
+	TFLAG:704 = 1
+	;범용적인 처리는 이 함수로 실시한다
+	;(사정게이지의 재계산이나사정경험의 상승과 공통 부분의 표시)
+	CALL SAMEN_SHOOT
+ENDIF
+
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;노예의 A와장내⇔조교자의 C의 더러움이 이동
+;페니스밴드를 사용하는 경우, 더러움은 이동하지 않는다
+IF !PENIS(PLAYER)
+ELSE
+	STAIN:장내 |= STAIN:PLAYER:페니스
+	STAIN:PLAYER:페니스 |= STAIN:장내
+	STAIN:애널 |= STAIN:PLAYER:페니스
+	STAIN:PLAYER:페니스 |= STAIN:애널
+ENDIF
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;A경험
+EXP:A경험 += 2
+PRINTL A경험＋2
+
+;조교자가말자지로 노예가소인체형였던 경우, A확장경험
+IF TALENT:소인체형 && TALENT:PLAYER:말자지
+	IF EXP:A확장경험 == 0
+		EXP:이상경험 += 1
+		PRINTL A확장 첫경험으로이상경험＋1
+	ENDIF
+	EXP:A확장경험 += 1
+	PRINTL A확장경험＋1
+ENDIF
+
+;성교경험
+EXP:PLAYER:성교경험 += 1
+EXP:성교경험 += 1
+PRINTS EXPNAME:4
+PRINTL +1
+
+;삽입경험
+EXP:PLAYER:삽입경험 += 1
+
+;게이경험라든지 가산
+CALL COM_EXP(4)
+
+;애정경험
+IF TALENT:연모 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +1
+	EXP:애정경험 += 1
+ELSEIF TALENT:친애 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +2
+	EXP:애정경험 += 2
+ENDIF
+
+;의존도 벡터
+TFLAG:33 = 1
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+

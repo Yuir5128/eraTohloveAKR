@@ -1,0 +1,670 @@
+﻿;-------------------------------------------------
+;연결
+;파생계 커맨드
+;
+; 1:노예 V에 삽입	 2:노예 A에 삽입
+; 6:주인 V에 삽입	 7:주인 A에 삽입
+;11:조수V에 삽입	12:조수A에 삽입
+;-------------------------------------------------
+@COM519
+
+PRINTFORML 연결
+STR:0 =연결
+SELECTCOM = 519
+CALL KOJO_MESSAGE_COM
+
+;스타킹 찌릿찌릿 플래그
+IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+
+;처녀상실 플래그
+SIF (TALENT:처녀 || TALENT:재생처녀) && (TFLAG:40 == 1 || TFLAG:41 == 1)
+	TFLAG:19 |= 1
+;주인에 의한처녀상실
+SIF TALENT:처녀 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0 && TFLAG:40 == 1
+	TFLAG:20 = 1
+;처녀상실 플래그
+SIF TALENT:백버진 && (TFLAG:40 == 2 || TFLAG:41 == 2)
+	TFLAG:161 |= 1
+;주인에 의한처녀상실
+SIF TALENT:백버진 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0 && TFLAG:40 == 2
+	TFLAG:163 = 1
+
+;처녀상실 플래그
+SIF (TALENT:MASTER:처녀 || TALENT:MASTER:재생처녀) && (TFLAG:49 == 6 || TFLAG:41 == 6)
+	TFLAG:19 |= 2
+;처녀상실 플래그
+SIF TALENT:MASTER:백버진 && (TFLAG:49 == 7 || TFLAG:41 == 7)
+	TFLAG:161 |= 2
+
+;처녀상실 플래그
+SIF (TALENT:ASSI:처녀 || TALENT:ASSI:재생처녀) && (TFLAG:40 == 11 || TFLAG:49 == 11)
+	TFLAG:19 |= 3
+;처녀상실 플래그
+SIF TALENT:ASSI:백버진 && (TFLAG:40 == 12 || TFLAG:49 == 12)
+	TFLAG:161 |= 3
+
+
+;조교자가동정였던 경우의 상실 플래그
+SIF TALENT:동정 && (TFLAG:49 == 6 || TFLAG:49 == 7 || TFLAG:49 == 11 || TFLAG:49 == 12)
+	TFLAG:160 |= 1
+;주인에 의한 섹스로동정상실
+SIF TALENT:동정 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0 && (TFLAG:49 == 6 || TFLAG:49 == 7)
+	TFLAG:162 = 1
+
+;조교자가동정였던 경우의 상실 플래그
+SIF TALENT:PLAYER:동정 && (TFLAG:40 == 1 || TFLAG:40 == 2 || TFLAG:40 == 11 || TFLAG:40 == 12)
+	TFLAG:160 |= 2
+
+;조교자가동정였던 경우의 상실 플래그
+SIF TALENT:ASSI:동정 && (TFLAG:41 == 1 || TFLAG:41 == 2 || TFLAG:41 == 6 || TFLAG:41 == 7)
+	TFLAG:160 |= 3
+
+
+;-------------------------------------------------
+;사정게이지 체크(주인)
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_3PM
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:MASTER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:MASTER:사정 += B
+
+;-------------------------------------------------
+;사정게이지 체크(조수)
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_3PA
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:ASSI:9 > 0
+	B /= 20
+
+SIF PENIS(ASSI)
+	BASE:ASSI:사정 += B
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+LOSEBASE:체력 += 160
+LOSEBASE:기력 += 350
+
+;삽입하고 있는 부위에 의해, 소스의 수치가 변화한다
+;V에 삽입하고 있는 경우
+IF TFLAG:40 == 1 || TFLAG:41 == 1
+	SOURCE:쾌V += 200
+	SOURCE:성행동 += 100
+	SOURCE:통증 += 500
+ENDIF
+;A에 삽입하고 있는 경우
+IF TFLAG:40 == 2 || TFLAG:41 == 2
+	SOURCE:쾌A += 200
+	SOURCE:성행동 += 100
+	SOURCE:통증 += 800
+ENDIF
+;노예가 삽입하고 있는 경우
+IF TFLAG:49 == 6 || TFLAG:49 == 7 || TFLAG:49 == 11 || TFLAG:49 == 12
+	SOURCE:쾌C += 200
+	SOURCE:성행동 += 420
+	SOURCE:성취감 += 150
+ENDIF
+
+SOURCE:애정 += 100
+;스킨십선호라면애정의 소스 추가
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+SOURCE:성행동 += 100
+SOURCE:중독충족 += 500
+SOURCE:굴복 += 500
+SOURCE:일탈 += 500
+SOURCE:반발 += 500
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;정조관념소유로연모, 친애 가져 이외로는 항상반발의 소스를 추가한다(섹스계만)
+SIF TALENT:정조관념 && (TALENT:연모 == 0 && TALENT:친애 == 0)
+	SOURCE:반발 += 1000
+
+;V에 삽입하고 있는 경우
+IF TFLAG:40 == 1 || TFLAG:41 == 1
+	;처녀였던 경우는, 고통의 소스와반발의 소스를 추가한다
+	IF TALENT:처녀 == 1
+		SOURCE:통증 += 5500
+		SOURCE:반발 += 3000
+	ENDIF
+
+	;재생처녀였던 경우는, 고통의 소스와반발의 소스를 추가한다
+	IF TALENT:재생처녀 == 1
+		SOURCE:통증 += 5500
+		SOURCE:반발 += 1000
+	ENDIF
+	
+	;소인체형로 조교자가거근나말자지의 경우, 고통와공포의 소스를 추가
+	IF TALENT:소인체형
+		IF (TALENT:MASTER:거근 && TFLAG:40 == 1) || (TALENT:ASSI:거근 && TFLAG:41 == 1)
+			SOURCE:통증 += 200
+			SOURCE:두려움 += 500
+		ELSEIF (TALENT:MASTER:말자지 && TFLAG:40 == 1) || (TALENT:ASSI:말자지 && TFLAG:41 == 1)
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+
+	;조교자가말자지의 경우
+	IF (TALENT:MASTER:말자지 && TFLAG:40 == 1) || (TALENT:ASSI:말자지 && TFLAG:41 == 1)
+		;V확장경험일정 이상으로중독충족의 소스를 추가
+		IF EXP:V확장경험 >= 20
+			SOURCE:중독충족 += 500
+		;V확장경험일정 이하로고통와공포의 소스를 추가
+		ELSE
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+	
+	;V에의고통는 먼저 처리해 둔다
+	;EXP:V경험를 본다(처녀의반감는 별도 처리필 보고인 것으로 생략)
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증, 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:반발, 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ENDIF
+
+	;PALAM:윤활를 본다
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증, 0.70
+		TIMES SOURCE:반발, 1.20
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증, 0.10
+	ENDIF
+ENDIF
+
+;A에 삽입하고 있는 경우
+IF TFLAG:40 == 2 || TFLAG:41 == 2
+	
+	;소인체형로 조교자가거근나말자지의 경우, 고통와공포의 소스를 추가
+	IF TALENT:소인체형
+		IF (TALENT:MASTER:거근 && TFLAG:40 == 2) || (TALENT:ASSI:거근 && TFLAG:41 == 2)
+			SOURCE:통증 += 200
+			SOURCE:두려움 += 500
+		ELSEIF (TALENT:MASTER:말자지 && TFLAG:40 == 2) || (TALENT:ASSI:말자지 && TFLAG:41 == 2)
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+
+	;조교자가말자지의 경우
+	IF (TALENT:MASTER:말자지 && TFLAG:40 == 2) || (TALENT:ASSI:말자지 && TFLAG:41 == 2)
+		;A확장경험일정 이상으로중독충족의 소스를 추가
+		IF EXP:A확장경험 >= 20
+			SOURCE:중독충족 += 500
+		;A확장경험일정 이하로고통와공포의 소스를 추가
+		ELSE
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+	
+	;A에의고통는 먼저 처리해 둔다
+	;EXP:A경험를 본다
+	IF EXP:A경험 < EXPLV:1
+		TIMES SOURCE:통증, 3.00
+		TIMES SOURCE:반발, 3.00
+	ELSEIF EXP:A경험 < EXPLV:2
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 2.00
+	ELSEIF EXP:A경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:반발, 1.50
+	ELSEIF EXP:A경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.60
+		TIMES SOURCE:반발, 1.20
+	ELSEIF EXP:A경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:A경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.20
+	ENDIF
+
+	;PALAM:윤활를 본다
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 2.00
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증, 1.00
+		TIMES SOURCE:반발, 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증, 0.60
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증, 0.30
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증, 0.20
+	ENDIF
+ENDIF
+
+;섹스중독를 본다
+IF ABL:섹스중독 == 1
+	TIMES SOURCE:중독충족, 0.00
+ELSEIF ABL:섹스중독 == 2
+	TIMES SOURCE:중독충족, 0.30
+ELSEIF ABL:섹스중독 == 3
+	TIMES SOURCE:중독충족, 0.60
+ELSEIF ABL:섹스중독 == 4
+	TIMES SOURCE:중독충족, 0.90
+ELSEIF ABL:섹스중독 == 5
+	TIMES SOURCE:중독충족, 1.20
+ELSEIF ABL:섹스중독 == 6
+	TIMES SOURCE:중독충족, 1.50
+ELSEIF ABL:섹스중독 == 7
+	TIMES SOURCE:중독충족, 1.80
+ELSEIF ABL:섹스중독 == 8
+	TIMES SOURCE:중독충족, 2.30
+ELSEIF ABL:섹스중독 == 9
+	TIMES SOURCE:중독충족, 3.00
+ELSEIF ABL:섹스중독 >= 10
+	TIMES SOURCE:중독충족, 5.00
+ENDIF
+
+
+;-------------------------------------------------
+;사정체크 1(주인)
+;-------------------------------------------------
+CALL SAMEN_CHECK(MASTER, 1)
+
+;사정시의 처리
+IF E >= 1
+	IF TFLAG:40 == 1 || TFLAG:40 == 11
+		;사정처 타입의 설정
+		TFLAG:703 = 1
+		;사정처 선택의 가능·불가
+		TFLAG:704 = 0
+	ELSEIF TFLAG:40 == 2 || TFLAG:40 == 12
+		;사정처 타입의 설정
+		TFLAG:703 = 2
+		;사정처 선택의 가능·불가
+		TFLAG:704 = 0
+	ELSE
+		;사정처 타입의 설정
+		TFLAG:703 = 9
+		;사정처 선택의 가능·불가
+		TFLAG:704 = 0
+	ENDIF
+	;범용적인 처리는 이 함수로 실시한다
+	;(사정게이지의 재계산이나사정경험의 상승과 공통 부분의 표시)
+	CALL SAMEN_SHOOT
+ENDIF
+
+;촉수에범하게시킨다로 주인이사정 한 플래그
+IF TFLAG:41 == 6 || TFLAG:41 == 7
+	IF E == 2
+		TFLAG:7 = 4
+	ELSEIF E == 1
+		TFLAG:7 = 3
+	ENDIF
+ENDIF
+
+;조수를범한다로사정 한 플래그
+IF TFLAG:40 == 11 || TFLAG:40 == 12
+	IF E == 2
+		TFLAG:7 = 2
+	ELSEIF E == 1
+		TFLAG:7 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;사정체크 2(조수)
+;-------------------------------------------------
+CALL SAMEN_CHECK(ASSI)
+
+;사정시의 처리
+IF E >= 1
+	IF TFLAG:41 == 1 || TFLAG:41 == 6
+		;사정처 타입의 설정
+		TFLAG:703 = 1
+		;사정처 선택의 가능·불가
+		TFLAG:704 = 0
+	ELSEIF TFLAG:41 == 2 || TFLAG:41 == 7
+		;사정처 타입의 설정
+		TFLAG:703 = 2
+		;사정처 선택의 가능·불가
+		TFLAG:704 = 0
+	ELSE
+		;사정처 타입의 설정
+		TFLAG:703 = 6
+		;사정처 선택의 가능·불가
+		TFLAG:704 = 0
+	ENDIF
+	;범용적인 처리는 이 함수로 실시한다
+	;(사정게이지의 재계산이나사정경험의 상승과 공통 부분의 표시)
+	CALL SAMEN_SHOOT
+ENDIF
+
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+IF TFLAG:40 == 1 || TFLAG:41 == 1
+	;처녀의 경우, V와질내에 파과[破瓜]의 피의 더러움을 부가
+	IF TALENT:처녀 || TALENT:재생처녀
+		STAIN:질내 |= 64
+		STAIN:바기나 |= 64
+	ENDIF
+ENDIF
+IF TFLAG:40 == 11 || TFLAG:49 == 11
+	;처녀의 경우, V와질내에 파과[破瓜]의 피의 더러움을 부가
+	IF TALENT:ASSI:처녀 || TALENT:ASSI:재생처녀
+		STAIN:ASSI:질내 |= 64
+		STAIN:ASSI:바기나 |= 64
+	ENDIF
+ENDIF
+IF TFLAG:40 == 6 || TFLAG:41 == 6
+	;처녀의 경우, V와질내에 파과[破瓜]의 피의 더러움을 부가
+	IF TALENT:MASTER:처녀 || TALENT:MASTER:재생처녀
+		STAIN:MASTER:질내 |= 64
+		STAIN:MASTER:바기나 |= 64
+	ENDIF
+ENDIF
+
+;주인이 노예의 V에 삽입
+IF TFLAG:40 == 1 && PENIS(PLAYER)
+	STAIN:질내 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:질내
+	STAIN:바기나 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:바기나
+ENDIF
+
+;주인이 노예의 A에 삽입
+IF TFLAG:40 == 2 && PENIS(PLAYER)
+	STAIN:장내 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:장내
+	STAIN:애널 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:애널
+ENDIF
+
+;조수가 노예의 V에 삽입
+IF TFLAG:41 == 1 && PENIS(ASSI)
+	STAIN:바기나 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:바기나
+	STAIN:질내 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:질내
+ENDIF
+
+;조수가 노예의 A에 삽입
+IF TFLAG:41 == 2 && PENIS(ASSI)
+	STAIN:애널 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:애널
+	STAIN:장내 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:장내
+ENDIF
+
+;주인이 조수의 V에 삽입
+IF TFLAG:40 == 11 && PENIS(PLAYER)
+	STAIN:MASTER:페니스 |= STAIN:ASSI:바기나
+	STAIN:ASSI:바기나 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:ASSI:질내
+	STAIN:ASSI:질내 |= STAIN:MASTER:페니스
+ENDIF
+
+;주인이 조수의 A에 삽입
+IF TFLAG:40 == 12 && PENIS(PLAYER)
+	STAIN:MASTER:페니스 |= STAIN:ASSI:애널
+	STAIN:ASSI:애널 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:ASSI:장내
+	STAIN:ASSI:장내 |= STAIN:MASTER:페니스
+ENDIF
+
+;노예가 조수의 V에 삽입
+IF TFLAG:49 == 11 && PENIS(TARGET)
+	STAIN:페니스 |= STAIN:ASSI:바기나
+	STAIN:ASSI:바기나 |= STAIN:페니스
+	STAIN:페니스 |= STAIN:ASSI:질내
+	STAIN:ASSI:질내 |= STAIN:페니스
+ENDIF
+
+;노예가 조수의 A에 삽입
+IF TFLAG:49 == 12 && PENIS(TARGET)
+	STAIN:페니스 |= STAIN:ASSI:애널
+	STAIN:ASSI:애널 |= STAIN:페니스
+	STAIN:페니스 |= STAIN:ASSI:장내
+	STAIN:ASSI:장내 |= STAIN:페니스
+ENDIF
+
+;조수가 주인의 V에 삽입
+IF TFLAG:41 == 6 && PENIS(ASSI)
+	STAIN:ASSI:페니스 |= STAIN:MASTER:질내
+	STAIN:MASTER:질내 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:MASTER:바기나
+	STAIN:MASTER:바기나 |= STAIN:ASSI:페니스
+ENDIF
+
+;조수가 주인의 A에 삽입
+IF TFLAG:41 == 7 && PENIS(ASSI)
+	STAIN:ASSI:페니스 |= STAIN:MASTER:장내
+	STAIN:MASTER:장내 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:MASTER:애널
+	STAIN:MASTER:애널 |= STAIN:ASSI:페니스
+ENDIF
+
+;노예가 주인의 V에 삽입
+IF TFLAG:49 == 6 && PENIS(TARGET)
+	STAIN:페니스 |= STAIN:MASTER:질내
+	STAIN:MASTER:질내 |= STAIN:페니스
+	STAIN:페니스 |= STAIN:MASTER:바기나
+	STAIN:MASTER:바기나 |= STAIN:페니스
+ENDIF
+
+;노예가 주인의 A에 삽입
+IF TFLAG:49 == 7 && PENIS(TARGET)
+	STAIN:페니스 |= STAIN:MASTER:장내
+	STAIN:MASTER:장내 |= STAIN:페니스
+	STAIN:페니스 |= STAIN:MASTER:애널
+	STAIN:MASTER:애널 |= STAIN:페니스
+ENDIF
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;노예가 V에 삽입되고 있다
+IF TFLAG:4 == 2 || TFLAG:4 == 1
+	;조교자가말자지로 노예가소인체형였던 경우, V확장경험
+	IF TALENT:소인체형 && TALENT:MASTER:말자지 && TFLAG:40 == 1
+		IF EXP:V확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTFORML V확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:V확장경험 += 1
+		PRINTFORML V확장경험＋1
+	ENDIF
+	IF TALENT:소인체형 && TALENT:ASSI:말자지 && TFLAG:41 == 1
+		IF EXP:V확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTFORML V확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:V확장경험 += 1
+		PRINTFORML V확장경험＋1
+	ENDIF
+	EXP:V경험 += 1
+	PRINTFORML V경험＋1
+ENDIF
+
+;노예가 A에 삽입되고 있다
+IF TFLAG:4 == 2 || TFLAG:4 == 1
+	;조교자가말자지로 노예가소인체형였던 경우, A확장경험
+	IF TALENT:소인체형 && TALENT:MASTER:말자지 && TFLAG:40 == 2
+		IF EXP:A확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTFORML A확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:A확장경험 += 1
+		PRINTFORML A확장경험＋1
+	ENDIF
+	IF TALENT:소인체형 && TALENT:ASSI:말자지 && TFLAG:41 == 2
+		IF EXP:A확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTFORML A확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:A확장경험 += 1
+		PRINTFORML A확장경험＋1
+	ENDIF
+	EXP:A경험 += 1
+	PRINTFORML A경험＋1
+ENDIF
+
+;조수가 V에 삽입되고 있다
+IF TFLAG:4 == 11 || TFLAG:4 == 11
+	;조교자가말자지로 노예가소인체형였던 경우, V확장경험
+	IF TALENT:ASSI:소인체형 && TALENT:MASTER:말자지 && TFLAG:40 == 11
+		IF EXP:ASSI:V확장경험 == 0
+			EXP:ASSI:이상경험 += 1
+			PRINTFORML V확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:ASSI:V확장경험 += 1
+		PRINTFORML V확장경험＋1
+	ENDIF
+	IF TALENT:ASSI:소인체형 && TALENT:말자지 && TFLAG:49 == 11
+		IF EXP:ASSI:V확장경험 == 0
+			EXP:ASSI:이상경험 += 1
+			PRINTFORML V확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:ASSI:V확장경험 += 1
+		PRINTFORML V확장경험＋1
+	ENDIF
+	EXP:ASSI:V경험 += 1
+	PRINTFORML %CALLNAME:ASSI%의 V경험＋1
+ENDIF
+
+;조수가 A에 삽입되고 있다
+IF TFLAG:4 == 12 || TFLAG:4 == 12
+	;조교자가말자지로 노예가소인체형였던 경우, A확장경험
+	IF TALENT:ASSI:소인체형 && TALENT:MASTER:말자지 && TFLAG:40 == 12
+		IF EXP:ASSI:A확장경험 == 0
+			EXP:ASSI:이상경험 += 1
+			PRINTFORML A확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:ASSI:A확장경험 += 1
+		PRINTFORML A확장경험＋1
+	ENDIF
+	IF TALENT:ASSI:소인체형 && TALENT:말자지 && TFLAG:49 == 12
+		IF EXP:ASSI:A확장경험 == 0
+			EXP:ASSI:이상경험 += 1
+			PRINTFORML A확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:ASSI:A확장경험 += 1
+		PRINTFORML A확장경험＋1
+	ENDIF
+	EXP:ASSI:A경험 += 1
+	PRINTFORML %CALLNAME:ASSI%의 A경험＋1
+ENDIF
+
+;주인이 V에 삽입되고 있다
+IF TFLAG:4 == 6 || TFLAG:4 == 6
+	;조교자가말자지로 노예가소인체형였던 경우, V확장경험
+	IF TALENT:MASTER:소인체형 && TALENT:ASSI:말자지 && TFLAG:41 == 6
+		IF EXP:MASTER:V확장경험 == 0
+			EXP:MASTER:이상경험 += 1
+			PRINTFORML V확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:MASTER:V확장경험 += 1
+		PRINTFORML V확장경험＋1
+	ENDIF
+	IF TALENT:MASTER:소인체형 && TALENT:말자지 && TFLAG:49 == 6
+		IF EXP:MASTER:V확장경험 == 0
+			EXP:MASTER:이상경험 += 1
+			PRINTFORML V확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:MASTER:V확장경험 += 1
+		PRINTFORML V확장경험＋1
+	ENDIF
+	EXP:MASTER:V경험 += 1
+	PRINTFORML %CALLNAME:PLAYER%의 V경험＋1
+ENDIF
+
+;주인이 A에 삽입되고 있다
+IF TFLAG:4 == 7 || TFLAG:4 == 7
+	;조교자가말자지로 노예가소인체형였던 경우, A확장경험
+	IF TALENT:MASTER:소인체형 && TALENT:ASSI:말자지 && TFLAG:41 == 7
+		IF EXP:MASTER:A확장경험 == 0
+			EXP:MASTER:이상경험 += 1
+			PRINTFORML A확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:MASTER:A확장경험 += 1
+		PRINTFORML A확장경험＋1
+	ENDIF
+	IF TALENT:MASTER:소인체형 && TALENT:말자지 && TFLAG:49 == 6
+		IF EXP:MASTER:A확장경험 == 0
+			EXP:MASTER:이상경험 += 1
+			PRINTFORML A확장 첫경험으로이상경험＋1
+		ENDIF
+		EXP:MASTER:A확장경험 += 1
+		PRINTFORML A확장경험＋1
+	ENDIF
+	EXP:MASTER:A경험 += 1
+	PRINTFORML %CALLNAME:PLAYER%의 A경험＋1
+ENDIF
+
+;주인이 노예나 조수의 V나 A에 삽입하고 있다
+SIF TFLAG:40 == 1 || TFLAG:40 == 2 || TFLAG:40 == 11 || TFLAG:40 == 12
+	EXP:MASTER:삽입경험 += 1
+	
+;조수가 노예나 주인의 V나 A에 삽입하고 있다
+SIF TFLAG:41 == 1 || TFLAG:41 == 2 || TFLAG:41 == 6 || TFLAG:41 == 7
+	EXP:ASSI:삽입경험 += 1
+
+;노예가 주인이나 조수의 V나 A에 삽입하고 있다
+SIF TFLAG:49 == 6 || TFLAG:49 == 7 || TFLAG:49 == 11 || TFLAG:49 == 12
+	EXP:삽입경험 += 1
+
+
+EXP:성교경험 += 2
+PRINTFORML %CALLNAME%의성교경험＋2
+
+EXP:ASSI:성교경험 += 2
+PRINTFORML %CALLNAME:ASSI%의성교경험＋2
+
+EXP:MASTER:성교경험 += 2
+PRINTFORML %CALLNAME:PLAYER%의성교경험＋2
+
+
+;게이경험라든지 가산
+CALL COM_EXP(7)
+
+;의존도 벡터
+TFLAG:33 = 1
+
+
+RETURN 1
+
+

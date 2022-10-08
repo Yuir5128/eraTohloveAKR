@@ -1,0 +1,2329 @@
+﻿;====================================================================
+;노예 쇼
+;노예를 스테이지에 서게 해, 그 수익을 얻는다
+;서게 하는 스테이지에 의해, 플레이의 내용이 바뀝니다
+@PROMISCUOUS_SEX_LIVE
+;====================================================================
+;사용하는 일시 변수의 초기화
+A = 0
+B = 0
+S = 0
+V = 0
+C = 0
+D = 0
+J = 0
+F = 0
+CFLAG:A:13 = 0
+CFLAG:A:14 = 0
+CFLAG:A:15 = 0
+CFLAG:A:16 = 0
+CFLAG:A:17 = 0
+CFLAG:A:18 = 0
+CFLAG:A:19 = 0
+
+;--------------------------------------------------------
+;쇼의 선택
+;--------------------------------------------------------
+PRINTL 노예를 서게 하는 쇼의 종류를 선택해 주세요
+	PRINTL [  0]   - 스트립 쇼
+SIF BASE:A:체력 > 800
+	PRINTL [  1]   - 난교 라이브
+SIF BASE:A:체력 > 1000
+	PRINTL [  2]   - SM쇼
+SIF BASE:A:체력 > 1200
+	PRINTL [  3]   - 고문 쇼
+SIF BASE:A:체력 > 1500 && !TALENT:A:공
+	PRINTL [  4]   - 수간쇼
+	PRINTL [100] - 그만둔다
+DRAWLINE
+$INPUT_LOOP2
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSEIF RESULT == 0
+	DRAWLINE
+	PRINTL 【 스트립 쇼 】
+	PRINTL 무대에 선 노예가, 옷을 벗어 가는 모습을 감상할 수 있습니다.
+	PRINTL 무희에는 절대로손를 접하지 말아 주세요.
+	PRINTL 
+	PRINTL ■ 기본 서비스
+	PRINTL 　:[올 누드] [자위 감상]
+	PRINTL 
+	PRINTL ■ 선택되고 있는 추가 옵션
+	PRINTL 　:＜이용 가능한 옵션은 없습니다＞
+	PRINTL 
+	DRAWLINE
+	PRINTFORML 스트립 쇼로 좋습니까?
+	PRINTFORML [  0]   - 네
+	PRINTFORML [100]   - 역시 멈춘다
+	$INPUT_LOOP3
+	INPUT
+	IF RESULT == 100
+		RETURN 0
+	ELSEIF RESULT == 0
+		B = 1
+	ELSE
+		GOTO INPUT_LOOP3
+	ENDIF
+ELSEIF RESULT == 1 && BASE:A:체력 > 800
+	DRAWLINE
+	PRINTL 【 난교 라이브 】
+	PRINTL 쇼/라이브란 이름뿐의 난교 파티입니다.
+	PRINTL 공수 묻지 않고, 여러가지 (분)편에게 즐길 수 있습니다.
+	PRINTL 
+	PRINTL ■ 기본 서비스
+	PRINTL 　:[복수인 플레이] [삽입] [애널fuck] [역섹스]
+	PRINTL 
+	PRINTL ■ 선택되고 있는 추가 옵션
+	PRINT 　:
+	
+	SIF (FLAG:160 & 1) == 0
+		FONTSTYLE 4
+	PRINT [처녀관통]
+	FONTSTYLE LOCAL:4
+	PRINT  
+	
+	SIF (FLAG:160 & 2) == 0
+		FONTSTYLE 4
+	PRINT [백버진관통]
+	FONTSTYLE LOCAL:4
+	PRINT  
+	
+	SIF (FLAG:160 & 4) == 0
+		FONTSTYLE 4
+	PRINTL [동정 먹어]
+	FONTSTYLE LOCAL:4
+	
+	PRINTL 
+	DRAWLINE
+	PRINTFORML 난교 라이브로 좋습니까?
+	PRINTFORML [  0]   - 네
+	PRINTFORML [ 99]   - 옵션을 선택한다
+	PRINTFORML [100]  - 역시 멈춘다
+	$INPUT_LOOP4
+	INPUT
+	IF RESULT == 100
+		RETURN 0
+	ELSEIF RESULT == 99
+		CALL OPTION_WORK
+		CALL PROMISCUOUS_SEX_LIVE
+	ELSEIF RESULT == 0
+		B = 2
+	ELSE
+		GOTO INPUT_LOOP4
+	ENDIF
+ELSEIF RESULT == 2 && BASE:A:체력 > 1000
+	DRAWLINE
+	PRINTL 【 SM쇼 】
+	PRINTL S와 M가 무대에 서, 플레이를 실시하는 모습을 감상할 수 있는 쇼입니다.
+	PRINTL 옵션에 따라서는, 통상보다 하드한 플레이를 감상할 수 있을지도.
+	PRINTL 
+	PRINTL ■ 기본 서비스
+	PRINTL 　:[삽입] [애널fuck] [역섹스] [역조교]
+	PRINTL 　:[소프트 SM(수치 고문이나 구속, 고통를 주는 플레이를 포함한다)
+	PRINTL 
+	PRINTL ■ 선택되고 있는 추가 옵션
+	PRINT 　:
+	
+	SIF (FLAG:160 & 1) == 0
+		FONTSTYLE 4
+	PRINT [처녀관통]
+	FONTSTYLE LOCAL:4
+	PRINT  
+	
+	SIF (FLAG:160 & 2) == 0
+		FONTSTYLE 4
+	PRINT [백버진관통]
+	FONTSTYLE LOCAL:4
+	PRINT  
+	
+	SIF (FLAG:160 & 4) == 0
+		FONTSTYLE 4
+	PRINTL [동정 먹어]
+	FONTSTYLE LOCAL:4
+	
+	PRINT 　:
+	
+	SIF (FLAG:160 & 8) == 0
+		FONTSTYLE 4
+	PRINT [하도SM]
+	FONTSTYLE LOCAL:4
+	PRINT  
+	
+	SIF (FLAG:160 & 192) == 0
+		FONTSTYLE 4
+	PRINT [성수 플레이]
+	FONTSTYLE LOCAL:4
+	PRINT  
+	
+	SIF (FLAG:160 & 768) == 0
+		FONTSTYLE 4
+	PRINTL [황금 플레이]
+	FONTSTYLE LOCAL:4
+	
+	PRINTL 
+	DRAWLINE
+	PRINTFORML SM쇼로 좋습니까?
+	PRINTFORML [  0]   - 네
+	PRINTFORML [ 99]   - 옵션을 선택한다
+	PRINTFORML [100]   - 역시 멈춘다
+	$INPUT_LOOP5
+	INPUT
+	IF RESULT == 100
+		RETURN 0
+	ELSEIF RESULT == 99
+		CALL OPTION_WORK
+		CALL PROMISCUOUS_SEX_LIVE
+	ELSEIF RESULT == 0
+		B = 3
+	ELSE
+		GOTO INPUT_LOOP5
+	ENDIF
+ELSEIF RESULT == 3 && BASE:A:체력 > 1200
+	DRAWLINE
+	PRINTL 【 고문 쇼 】
+	PRINTL S와 M가 무대에 서, 플레이를 실시하는 모습을 감상할 수 있는 쇼입니다.
+	PRINTL 통상의 SM쇼보다 하드한 플레이(고문)가 메인을 위해서(때문에),
+	PRINTL 기본적으로는 성행위나, 쾌락을 수반하는 플레이는 행해지지 않습니다.
+	PRINTL 
+	PRINTL ■ 기본 서비스
+	PRINTL 　:[하도SM(채찍/촛불/바늘/삼각목마etc)] [역조교]
+	PRINTL 
+	PRINTL ■ 선택되고 있는 추가 옵션
+	PRINT 　:
+	
+	SIF (FLAG:160 & 192) == 0
+		FONTSTYLE 4
+	PRINT [성수 플레이]
+	FONTSTYLE LOCAL:4
+	PRINT  
+	
+	SIF (FLAG:160 & 768) == 0
+		FONTSTYLE 4
+	PRINTL [황금 플레이]
+	FONTSTYLE LOCAL:4
+	
+	PRINTL 
+	DRAWLINE
+	PRINTFORML 고문 쇼로 좋습니까?
+	PRINTFORML [  0]   - 네
+	PRINTFORML [ 99]   - 옵션을 선택한다
+	PRINTFORML [100]   - 역시 멈춘다
+	$INPUT_LOOP6
+	INPUT
+	IF RESULT == 100
+		RETURN 0
+	ELSEIF RESULT == 99
+		CALL OPTION_WORK
+		CALL PROMISCUOUS_SEX_LIVE
+	ELSEIF RESULT == 0
+		B = 4
+	ELSE
+		GOTO INPUT_LOOP6
+	ENDIF
+ELSEIF RESULT == 4 && BASE:A:체력 > 1500
+	DRAWLINE
+	PRINTL 【 수간쇼 】
+	PRINTL 노예와 짐승이 서로 섞이는 모습을 감상할 수가 있는 쇼입니다.
+	PRINTL 손나입를 사용한 봉사의 외, 삽입되는 모습도 감상할 수 있습니다.
+	PRINTL 
+	PRINTL ■ 기본 서비스
+	PRINTL 　:[수간] [성적 봉사 전반] [삽입] [애널fuck]
+	PRINTL 
+	PRINTL ■ 선택되고 있는 추가 옵션
+	PRINT 　:
+	
+	SIF (FLAG:160 & 1) == 0
+		FONTSTYLE 4
+	PRINT [처녀관통]
+	FONTSTYLE LOCAL:4
+	PRINT  
+	
+	SIF (FLAG:160 & 2) == 0
+		FONTSTYLE 4
+	PRINTL [백버진관통]
+	FONTSTYLE LOCAL:4
+	
+	PRINTL 
+	DRAWLINE
+	PRINTFORML 수간쇼로 좋습니까?
+	PRINTFORML [  0]   - 네
+	PRINTFORML [ 99]   - 옵션을 선택한다
+	PRINTFORML [100]   - 역시 멈춘다
+	$INPUT_LOOP7
+	INPUT
+	IF RESULT == 100
+		RETURN 0
+	ELSEIF RESULT == 99
+		CALL OPTION_WORK
+		CALL PROMISCUOUS_SEX_LIVE
+	ELSEIF RESULT == 0
+		B = 5
+	ELSE
+		GOTO INPUT_LOOP7
+	ENDIF
+ELSE
+	GOTO INPUT_LOOP2
+ENDIF
+
+
+;--------------------------------------------------------
+;쇼에 내는 노예를 선택
+;--------------------------------------------------------
+PRINTL 구경거리 오두막에 내는 노예를 선택해 주세요
+REPEAT CHARANUM
+	SIF COUNT == MASTER
+		CONTINUE
+	SIF CFLAG:COUNT:1 < 2
+		CONTINUE
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+	C = COUNT
+	CALL CHECK_CHILD_CARE
+	SIF RESULT == 1
+		CONTINUE
+	SIF (CFLAG:COUNT:151 & 8) && BASE:COUNT:체력 > 500
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%
+REND
+PRINTL [1000] - 돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+ELSEIF RESULT == MASTER
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:1 < 2
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:12 > 0
+	GOTO INPUT_LOOP
+ELSEIF ((CFLAG:RESULT:151 & 8) == 0) || BASE:RESULT:체력 <= 500
+	GOTO INPUT_LOOP
+ELSE
+	A = RESULT
+ENDIF
+
+SIF A == 0
+	RETURN 0
+
+
+;--------------------------------------------------------
+;피임구와정조대의 선택
+;--------------------------------------------------------
+IF B == 2 || B == 3 || B == 5
+	PRINTL 
+	PRINTL 피임구/eV조대의 설정을 선택해 주세요
+	PRINT □ 현재 상태… 
+	SIF TEQUIP:A:정조대
+		PRINT [정조대장착중] 
+	SIF CFLAG:A:108
+		PRINT [피임결계 유효] 
+	SIF !CFLAG:A:108 && !TEQUIP:A:정조대
+		PRINT 피임구는 선택되고 있지 않습니다
+	PRINTL 
+	PRINTL [ 0] - 피임하지 않는다
+	PRINTL [ 1] - 콘돔를 착용
+	SIF MONEY > 2000
+		PRINTL [ 2] - 피임결계(￥-2000)
+	SIF ITEM:30
+		PRINTL [ 3] - 정조대(C·V사용 불가/매상 DOWN↓)
+	PRINTL [100] - 돌아온다
+		$INPUT_LOOP_SKIN
+	INPUT
+	IF RESULT == 100
+		RETURN 0
+	ELSEIF RESULT == 0
+		J = 0
+		IF TEQUIP:A:정조대 || CFLAG:A:108
+			SIF TEQUIP:A:정조대
+				PRINT [정조대]를 제외해
+			SIF TEQUIP:A:정조대 && CFLAG:A:108
+				PRINT ,
+			SIF CFLAG:A:108
+				PRINT [피임결계]의 효과를 지움
+			PRINTL
+			ELSE
+			PRINTL 피임 조치를 하지 않고 노역을 실시하게 합니다
+		ENDIF
+		TEQUIP:A:정조대 = 0
+		CFLAG:A:108 = 0
+		IF TALENT:A:쉬메일 || (!TALENT:오메가 && MALE(A))
+		ELSE
+			PRINTL 질내사정되면임신를 할 가능성이 있습니다
+		ENDIF
+	ELSEIF RESULT == 1
+		J = 1
+		PRINTL [콘돔]의 착용을 의무화 합니다
+	ELSEIF RESULT == 2 && MONEY > 2000
+		J = 2
+		SIF TEQUIP:A:정조대
+			PRINT [정조대]를 제외해,
+		PRINTL [피임결계]를 사용합니다
+		TEQUIP:A:정조대 = 0
+		CFLAG:A:108 = 1
+		MONEY -= 2000
+	ELSEIF RESULT == 3 && ITEM:30
+		J = 3
+		IF TEQUIP:A:정조대
+			PRINTL [정조대]를 장착한 채로 노역을 실시하게 합니다
+		ELSE
+			PRINTL [정조대]를 장착시킵니다
+			TEQUIP:A:정조대 = 1
+		ENDIF
+	ELSE
+		GOTO INPUT_LOOP_SKIN
+	ENDIF
+ENDIF
+
+;--------------------------------------------------------
+;노예의 능력, 소질에 의한 배율 계산
+;--------------------------------------------------------
+;금액의 계산
+;ABL에 의한 기초치 계산
+V = 0
+;ABL:순종를 본다
+IF ABL:A:순종 == 0
+	V = 0
+ELSEIF ABL:A:순종 == 1
+	V = 1000
+ELSEIF ABL:A:순종 == 2
+	V = 1500
+ELSEIF ABL:A:순종 == 3
+	V = 2000
+ELSEIF ABL:A:순종 == 4
+	V = 2800
+ELSEIF ABL:A:순종 == 5
+	V = 3600
+ELSEIF ABL:A:순종 == 6
+	V = 4500
+ELSEIF ABL:A:순종 == 7
+	V = 5500
+ELSEIF ABL:A:순종 == 8
+	V = 6700
+ELSEIF ABL:A:순종 == 9
+	V = 8000
+ELSE
+	V = 12000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:0%{ABL:A:순종}LV +{V}
+S += V
+
+
+;ABL:욕망를 본다
+IF ABL:A:욕망 == 0
+	V = 0
+ELSEIF ABL:A:욕망 == 1
+	V = 1200
+ELSEIF ABL:A:욕망 == 2
+	V = 1800
+ELSEIF ABL:A:욕망 == 3
+	V = 2500
+ELSEIF ABL:A:욕망 == 4
+	V = 3300
+ELSEIF ABL:A:욕망 == 5
+	V = 4200
+ELSEIF ABL:A:욕망 == 6
+	V = 5200
+ELSEIF ABL:A:욕망 == 7
+	V = 6300
+ELSEIF ABL:A:욕망 == 8
+	V = 7500
+ELSEIF ABL:A:욕망 == 9
+	V = 8800
+ELSE
+	V = 10000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:1%{ABL:A:욕망}LV +{V}
+S += V
+
+
+;ABL:기교를 본다
+IF ABL:A:기교 == 0
+	V = 0
+ELSEIF ABL:A:기교 == 1
+	V = 800
+ELSEIF ABL:A:기교 == 2
+	V = 1200
+ELSEIF ABL:A:기교 == 3
+	V = 1700
+ELSEIF ABL:A:기교 == 4
+	V = 2300
+ELSEIF ABL:A:기교 == 5
+	V = 3000
+ELSEIF ABL:A:기교 == 6
+	V = 3800
+ELSEIF ABL:A:기교 == 7
+	V = 4600
+ELSEIF ABL:A:기교 == 8
+	V = 5500
+ELSEIF ABL:A:기교 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:2%{ABL:A:기교}LV +{V}
+S += V
+
+
+;ABL:봉사정신를 본다
+IF ABL:A:봉사정신 == 0
+	V = 0
+ELSEIF ABL:A:봉사정신 == 1
+	V = 1200
+ELSEIF ABL:A:봉사정신 == 2
+	V = 1800
+ELSEIF ABL:A:봉사정신 == 3
+	V = 2500
+ELSEIF ABL:A:봉사정신 == 4
+	V = 3300
+ELSEIF ABL:A:봉사정신 == 5
+	V = 4200
+ELSEIF ABL:A:봉사정신 == 6
+	V = 5200
+ELSEIF ABL:A:봉사정신 == 7
+	V = 6300
+ELSEIF ABL:A:봉사정신 == 8
+	V = 7500
+ELSEIF ABL:A:봉사정신 == 9
+	V = 8800
+ELSE
+	V = 12000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:7%{ABL:A:봉사정신}LV +{V}
+S += V
+
+
+;ABL:노출벽를 본다
+IF ABL:A:노출벽 == 0
+	V = 0
+ELSEIF ABL:A:노출벽 == 1
+	V = 800
+ELSEIF ABL:A:노출벽 == 2
+	V = 1200
+ELSEIF ABL:A:노출벽 == 3
+	V = 1700
+ELSEIF ABL:A:노출벽 == 4
+	V = 2300
+ELSEIF ABL:A:노출벽 == 5
+	V = 3000
+ELSEIF ABL:A:노출벽 == 6
+	V = 3800
+ELSEIF ABL:A:노출벽 == 7
+	V = 4600
+ELSEIF ABL:A:노출벽 == 8
+	V = 5500
+ELSEIF ABL:A:노출벽 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+;스트립 쇼, 난교 라이브 때는 1.2배
+SIF B == 1 || B == 2
+	TIMES V , 1.20
+SIF V > 0
+	PRINTFORML %ABLNAME:8%{ABL:A:노출벽}LV +{V}
+S += V
+
+;ABL:마조끼를 본다
+IF ABL:A:마조끼 == 0
+	V = 0
+ELSEIF ABL:A:마조끼 == 1
+	V = 1000
+ELSEIF ABL:A:마조끼 == 2
+	V = 1500
+ELSEIF ABL:A:마조끼 == 3
+	V = 2100
+ELSEIF ABL:A:마조끼 == 4
+	V = 2800
+ELSEIF ABL:A:마조끼 == 5
+	V = 3600
+ELSEIF ABL:A:마조끼 == 6
+	V = 4500
+ELSEIF ABL:A:마조끼 == 7
+	V = 5500
+ELSEIF ABL:A:마조끼 == 8
+	V = 6700
+ELSEIF ABL:A:마조끼 == 9
+	V = 8000
+ELSE
+	V = 10000
+ENDIF
+;SM쇼, 고문 쇼, 수간쇼 때는 1.2배
+SIF B == 3 || B == 4 || B == 5
+	TIMES V , 1.20
+SIF V > 0
+	PRINTFORML %ABLNAME:9%{ABL:A:마조끼}LV +{V}
+S += V
+
+
+;ABL:C감각를 본다
+IF ABL:A:C감각 == 0
+	V = 0
+ELSEIF ABL:A:C감각 == 1
+	V = 800
+ELSEIF ABL:A:C감각 == 2
+	V = 1200
+ELSEIF ABL:A:C감각 == 3
+	V = 1700
+ELSEIF ABL:A:C감각 == 4
+	V = 2300
+ELSEIF ABL:A:C감각 == 5
+	V = 3000
+ELSEIF ABL:A:C감각 == 6
+	V = 3800
+ELSEIF ABL:A:C감각 == 7
+	V = 4600
+ELSEIF ABL:A:C감각 == 8
+	V = 5500
+ELSEIF ABL:A:C감각 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+;스트립, 고문에서는 사용하지 않는다
+SIF B == 1 || B == 4
+	V = 0
+;정조대 붙고 있으면 0에
+SIF TEQUIP:A:속옷（아래） == 5
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:3%{ABL:A:C감각}LV +{V}
+S += V
+
+
+;ABL:B감각를 본다
+IF ABL:A:B감각 == 0
+	V = 0
+ELSEIF ABL:A:B감각 == 1
+	V = 800
+ELSEIF ABL:A:B감각 == 2
+	V = 1200
+ELSEIF ABL:A:B감각 == 3
+	V = 1700
+ELSEIF ABL:A:B감각 == 4
+	V = 2300
+ELSEIF ABL:A:B감각 == 5
+	V = 3000
+ELSEIF ABL:A:B감각 == 6
+	V = 3800
+ELSEIF ABL:A:B감각 == 7
+	V = 4600
+ELSEIF ABL:A:B감각 == 8
+	V = 5500
+ELSEIF ABL:A:B감각 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+;스트립, 고문에서는 사용하지 않는다
+SIF B == 1 || B == 4
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:6%{ABL:A:B감각}LV +{V}
+S += V
+
+
+;ABL:V감각를 본다
+IF ABL:A:V감각 == 0
+	V = 0
+ELSEIF ABL:A:V감각 == 1
+	V = 800
+ELSEIF ABL:A:V감각 == 2
+	V = 1200
+ELSEIF ABL:A:V감각 == 3
+	V = 1700
+ELSEIF ABL:A:V감각 == 4
+	V = 2300
+ELSEIF ABL:A:V감각 == 5
+	V = 3000
+ELSEIF ABL:A:V감각 == 6
+	V = 3800
+ELSEIF ABL:A:V감각 == 7
+	V = 4600
+ELSEIF ABL:A:V감각 == 8
+	V = 5500
+ELSEIF ABL:A:V감각 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+;스트립, 고문에서는 사용하지 않는다
+SIF B == 1 || B == 4
+	V = 0
+;공, 정조대, V가 없을 때, 0에
+SIF TALENT:A:공 || TEQUIP:A:정조대 || !VAGINA(A)
+	V = 0
+;처녀＋관통 옵션 무효 때, 0에
+SIF (FLAG:160 & 1) == 0 && (TALENT:A:처녀 || TALENT:A:재생처녀)
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:4%{ABL:A:V감각}LV +{V}
+S += V
+
+;ABL:A감각를 본다
+IF ABL:A:A감각 == 0
+	V = 0
+ELSEIF ABL:A:A감각 == 1
+	V = 800
+ELSEIF ABL:A:A감각 == 2
+	V = 1200
+ELSEIF ABL:A:A감각 == 3
+	V = 1700
+ELSEIF ABL:A:A감각 == 4
+	V = 2300
+ELSEIF ABL:A:A감각 == 5
+	V = 3000
+ELSEIF ABL:A:A감각 == 6
+	V = 3800
+ELSEIF ABL:A:A감각 == 7
+	V = 4600
+ELSEIF ABL:A:A감각 == 8
+	V = 5500
+ELSEIF ABL:A:A감각 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+;공라면 0에
+SIF TALENT:A:공
+	V = 0
+;스트립, 고문에서는 사용하지 않는다
+SIF B == 1 || B == 4
+	V = 0
+;백버진＋관통 옵션 무효 때, 0에
+SIF (FLAG:160 & 2) == 0 && TALENT:A:백버진
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:5%{ABL:A:A감각}LV +{V}
+S += V
+
+
+;ABL:새드끼를 본다
+IF ABL:A:새드끼 == 0
+	V = 0
+ELSEIF ABL:A:새드끼 == 1
+	V = 800
+ELSEIF ABL:A:새드끼 == 2
+	V = 1200
+ELSEIF ABL:A:새드끼 == 3
+	V = 1700
+ELSEIF ABL:A:새드끼 == 4
+	V = 2300
+ELSEIF ABL:A:새드끼 == 5
+	V = 3000
+ELSEIF ABL:A:새드끼 == 6
+	V = 3800
+ELSEIF ABL:A:새드끼 == 7
+	V = 4600
+ELSEIF ABL:A:새드끼 == 8
+	V = 5500
+ELSEIF ABL:A:새드끼 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+;스트립, 수간쇼에서는 S 하지 않는다
+SIF B == 1 || B == 5
+	V = 0
+;고문 쇼에서는 대보정
+SIF B == 4
+	TIMES V , 2.00
+;SM쇼에서는 보정
+SIF B == 3
+	TIMES V , 1.50
+SIF V > 0
+	PRINTFORML %ABLNAME:10%{ABL:A:새드끼}LV +{V}
+S += V
+
+
+;ABL:자위중독를 본다
+IF ABL:A:자위중독 == 0
+	V = 0
+ELSEIF ABL:A:자위중독 == 1
+	V = 1500
+ELSEIF ABL:A:자위중독 == 2
+	V = 2200
+ELSEIF ABL:A:자위중독 == 3
+	V = 3000
+ELSEIF ABL:A:자위중독 == 4
+	V = 3900
+ELSEIF ABL:A:자위중독 == 5
+	V = 4900
+ELSEIF ABL:A:자위중독 == 6
+	V = 6000
+ELSEIF ABL:A:자위중독 == 7
+	V = 7200
+ELSEIF ABL:A:자위중독 == 8
+	V = 8500
+ELSEIF ABL:A:자위중독 == 9
+	V = 10000
+ELSE
+	V = 14000
+ENDIF
+;스트립 쇼 때만
+SIF B != 1
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:16%{ABL:A:정액중독}LV +{V}
+S += V
+
+
+;ABL:정액중독를 본다
+IF ABL:A:정액중독 == 0
+	V = 0
+ELSEIF ABL:A:정액중독 == 1
+	V = 1500
+ELSEIF ABL:A:정액중독 == 2
+	V = 2200
+ELSEIF ABL:A:정액중독 == 3
+	V = 3000
+ELSEIF ABL:A:정액중독 == 4
+	V = 3900
+ELSEIF ABL:A:정액중독 == 5
+	V = 4900
+ELSEIF ABL:A:정액중독 == 6
+	V = 6000
+ELSEIF ABL:A:정액중독 == 7
+	V = 7200
+ELSEIF ABL:A:정액중독 == 8
+	V = 8500
+ELSEIF ABL:A:정액중독 == 9
+	V = 10000
+ELSE
+	V = 14000
+ENDIF
+SIF B == 1 || B == 4
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:16%{ABL:A:정액중독}LV +{V}
+S += V
+
+
+
+;ABL:섹스중독를 본다
+IF ABL:A:섹스중독 == 0
+	V = 0
+ELSEIF ABL:A:섹스중독 == 1
+	V = 1500
+ELSEIF ABL:A:섹스중독 == 2
+	V = 2200
+ELSEIF ABL:A:섹스중독 == 3
+	V = 3000
+ELSEIF ABL:A:섹스중독 == 4
+	V = 3900
+ELSEIF ABL:A:섹스중독 == 5
+	V = 4900
+ELSEIF ABL:A:섹스중독 == 6
+	V = 6000
+ELSEIF ABL:A:섹스중독 == 7
+	V = 7200
+ELSEIF ABL:A:섹스중독 == 8
+	V = 8500
+ELSEIF ABL:A:섹스중독 == 9
+	V = 10000
+ELSE
+	V = 14000
+ENDIF
+;스트립, 고문 쇼 때는 0에
+SIF B == 1 || B == 4
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:18%{ABL:A:섹스중독}LV +{V}
+S += V
+
+
+IF ABL:A:스캇중독 == 0
+	V = 0
+ELSEIF ABL:A:스캇중독 == 1
+	V = 1500
+ELSEIF ABL:A:스캇중독 == 2
+	V = 2200
+ELSEIF ABL:A:스캇중독 == 3
+	V = 3000
+ELSEIF ABL:A:스캇중독 == 4
+	V = 3900
+ELSEIF ABL:A:스캇중독 == 5
+	V = 4900
+ELSEIF ABL:A:스캇중독 == 6
+	V = 6000
+ELSEIF ABL:A:스캇중독 == 7
+	V = 7200
+ELSEIF ABL:A:스캇중독 == 8
+	V = 8500
+ELSEIF ABL:A:스캇중독 == 9
+	V = 10000
+ELSE
+	V = 14000
+ENDIF
+;스트립, 난교, 수간는 스카 하지 않는다
+SIF B == 1 || B == 2 || B == 5
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:22%{ABL:A:스캇중독}LV +{V}
+S += V
+
+;--------------------------------------------------------
+;노예의 소질을 계산
+F = 0
+V = 100
+;--------------------------------------------------------
+;소질에 의한 매각액수 보정치 계산
+;TALENT:처녀를 본다
+IF TALENT:A:처녀
+	F = 100
+	V += 100
+	PRINTFORML %TALENTNAME:0% ＋{F}%
+ENDIF
+;TALENT:재생처녀를 본다
+IF TALENT:A:재생처녀
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:1% ＋{F}%
+ENDIF
+;TALENT:백버진를 본다
+IF TALENT:A:백버진
+	F = 100
+	V += 100
+	PRINTFORML %TALENTNAME:161% ＋{F}%
+ENDIF
+;소질에 의한 증감
+;함락 소질
+;연모
+IF TALENT:A:연모
+	F = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:3% －{F}%
+ENDIF
+;음란
+IF TALENT:A:음란
+	F = 50
+	V += 50
+	PRINTFORML %TALENTNAME:4% ＋{F}%
+ENDIF
+;복종
+IF TALENT:A:복종
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:5% ＋{F}%
+ENDIF
+;친애
+IF TALENT:A:친애
+	F = 80
+	V -= 80
+	PRINTFORML %TALENTNAME:6% －{F}%
+ENDIF
+;창부
+IF TALENT:A:창부
+	F = 100
+	V += 100
+	PRINTFORML %TALENTNAME:7% ＋{F}%
+ENDIF
+;예속
+IF TALENT:A:예속
+	F = 60
+	V += 60
+	PRINTFORML %TALENTNAME:8% ＋{F}%
+ENDIF
+
+;그 외 소질
+;겁쟁이
+IF TALENT:A:겁쟁이
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:10% －{F}%
+ENDIF
+;반항적
+IF TALENT:A:반항적
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:11% ＋{F}%
+ENDIF
+;꿋꿋함
+IF TALENT:A:꿋꿋함
+	F = 40
+	V += 40
+	PRINTFORML %TALENTNAME:12% ＋{F}%
+ENDIF
+;솔직함
+IF TALENT:A:솔직함
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:13% －{F}%
+ENDIF
+;얌전함
+IF TALENT:A:얌전함
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:14% －{F}%
+ENDIF
+;프라이드높음
+IF TALENT:A:프라이드높음
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:15% ＋{F}%
+ENDIF
+;건방짐
+IF TALENT:A:건방짐
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:16% ＋{F}%
+ENDIF
+;프라이드낮음
+IF TALENT:A:프라이드낮음
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:17% －{F}%
+ENDIF
+;츤데레
+IF TALENT:A:츤데레
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:18% ＋{F}%
+ENDIF
+;자제심
+IF TALENT:A:자제심
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:20% ＋{F}%
+ENDIF
+;무관심
+IF TALENT:A:무관심
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:21% －{F}%
+ENDIF
+;감정부족
+IF TALENT:A:감정부족
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:22% －{F}%
+ENDIF
+;호기심
+IF TALENT:A:호기심
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:23% ＋{F}%
+ENDIF
+;보수적
+IF TALENT:A:보수적
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:24% ＋{F}%
+ENDIF
+;일선을넘지않음
+IF TALENT:A:일선을넘지않음
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:27% ＋{F}%
+ENDIF
+;눈에띄고싶음
+IF TALENT:A:눈에띄고싶음
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:28% ＋{F}%
+ENDIF
+;정조관념
+IF TALENT:A:정조관념
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:30% ＋{F}%
+ENDIF
+;정조무관심
+IF TALENT:A:정조무관심
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:31% －{F}%
+ENDIF
+;해방
+IF TALENT:A:해방
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:33% ＋{F}%
+ENDIF
+;부끄럼쟁이
+IF TALENT:A:부끄럼쟁이
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:35% ＋{F}%
+ENDIF
+;수치심없음
+IF TALENT:A:수치심없음
+	F = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:36% －{F}%
+ENDIF
+;고통에강함
+IF TALENT:A:고통에강함
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:40% －{F}%
+ENDIF
+;고통에약함
+IF TALENT:A:고통에약함
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:41% ＋{F}%
+ENDIF
+;젖기쉬움
+IF TALENT:A:젖기쉬움
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:42% ＋{F}%
+ENDIF
+;젖기어려움
+IF TALENT:A:젖기어려움
+	F = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:43% －{F}%
+ENDIF
+;습득빠름
+IF TALENT:A:습득빠름
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:50% ＋{F}%
+ENDIF
+;습득느림
+IF TALENT:A:습득느림
+	F = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:51% －{F}%
+ENDIF
+;혀놀림
+IF TALENT:A:혀놀림
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:52% ＋{F}%
+ENDIF
+;독약내성
+IF TALENT:A:독약내성
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:56% －{F}%
+ENDIF
+;실금버릇
+IF TALENT:A:실금버릇
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:57% ＋{F}%
+ENDIF
+;자위하기쉬움
+IF TALENT:A:자위하기쉬움
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:60% ＋{F}%
+ENDIF
+;악취둔감
+IF TALENT:A:악취둔감
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:61% －{F}%
+ENDIF
+;악취민감
+IF TALENT:A:악취민감
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:62% ＋{F}%
+ENDIF
+;헌신적
+IF TALENT:A:헌신적
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:63% ＋{F}%
+ENDIF
+;더러움무시
+IF TALENT:A:더러움무시
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:64% －{F}%
+ENDIF
+;쾌감에솔직
+IF TALENT:A:쾌감에솔직
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:70% －{F}%
+ENDIF
+;쾌감을부정
+IF TALENT:A:쾌감을부정
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:71% ＋{F}%
+ENDIF
+;즉각함락
+IF TALENT:A:즉각함락
+	F = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:73% －{F}%
+ENDIF
+;자위광
+IF TALENT:A:자위광
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:74% ＋{F}%
+ENDIF
+;음란구멍
+IF TALENT:A:음란구멍
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:75% ＋{F}%
+ENDIF
+;항문광
+IF TALENT:A:항문광
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:76% ＋{F}%
+ENDIF
+;음란가슴
+IF TALENT:A:음란가슴
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:77% ＋{F}%
+ENDIF
+;섹스광
+IF TALENT:A:섹스광
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:78% ＋{F}%
+ENDIF
+;도착적
+IF TALENT:A:도착적
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:80% ＋{F}%
+ENDIF
+;남자혐오
+IF TALENT:A:남자혐오
+	F = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:82% －{F}%
+ENDIF
+;새드
+IF TALENT:A:새드
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:83% ＋{F}%
+ENDIF
+;마조
+IF TALENT:A:마조
+	F = 40
+	V += 40
+	PRINTFORML %TALENTNAME:84% ＋{F}%
+ENDIF
+;맹신
+IF TALENT:A:맹신
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:86% ＋{F}%
+ENDIF
+;여자혐오
+IF TALENT:A:여자혐오
+	F = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:88% －{F}%
+ENDIF
+;소악마
+IF TALENT:A:소악마
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:87% ＋{F}%
+ENDIF
+;요호
+IF TALENT:A:요호
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:91% ＋{F}%
+ENDIF
+;매력
+IF TALENT:A:매력
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:92% ＋{F}%
+ENDIF
+;수수께끼의매력
+IF TALENT:A:수수께끼의매력
+	F = 100
+	V += 100
+	PRINTFORML %TALENTNAME:94% ＋{F}%
+ENDIF
+;C둔감(감각이 4이상이라면 무효)
+IF TALENT:A:C둔감 && ABL:A:C감각 < 4
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:101% －{F}%
+ENDIF
+;C민감(감각이 3 미만이라면 무효)
+IF TALENT:A:C민감 && ABL:A:C감각 >= 3
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:102% ＋{F}%
+ENDIF
+;V둔감(감각이 4이상이라면 무효)
+IF TALENT:A:V둔감 && ABL:A:V감각 < 4
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:103% －{F}%
+ENDIF
+;V민감(감각이 3 미만이라면 무효)
+IF TALENT:A:V민감 && ABL:A:V감각 >= 3
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:104% ＋{F}%
+ENDIF
+;A둔감(감각이 4이상이라면 무효)
+IF TALENT:A:A둔감 && ABL:A:A감각 < 4
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:105% －{F}%
+ENDIF
+;A민감(감각이 3 미만이라면 무효)
+IF TALENT:A:A민감 && ABL:A:A감각 >= 3
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:106% ＋{F}%
+ENDIF
+;B둔감(감각이 4이상이라면 무효)
+IF TALENT:A:B둔감 && ABL:A:B감각 < 4
+	F = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:107% －{F}%
+ENDIF
+;B민감(감각이 3 미만이라면 무효)
+IF TALENT:A:B민감 && ABL:A:B감각 >= 3
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:108% ＋{F}%
+ENDIF
+;빈유
+IF TALENT:A:빈유
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:109% －{F}%
+ENDIF
+;절벽
+IF TALENT:A:절벽
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:110% ＋{F}%
+ENDIF
+;거유
+IF TALENT:A:거유
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:111% ＋{F}%
+ENDIF
+;폭유
+IF TALENT:A:폭유
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:112% ＋{F}%
+ENDIF
+;함몰유두
+IF TALENT:A:함몰유두
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:120% ＋{F}%
+ENDIF
+;회복빠름
+IF TALENT:A:회복빠름
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:130% ＋{F}%
+ENDIF
+;회복느림
+IF TALENT:A:회복느림
+	F = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:131% －{F}%
+ENDIF
+;흡혈귀
+IF TALENT:A:흡혈귀
+	F = 30
+	V += 30
+	PRINTFORML %TALENTNAME:132% ＋{F}%
+ENDIF
+;동물귀
+IF TALENT:A:동물귀
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:143% ＋{F}%
+ENDIF
+;인기
+IF TALENT:A:인기
+	F = 50
+	V += 50
+	PRINTFORML %TALENTNAME:145% ＋{F}%
+ENDIF
+;불사신
+IF TALENT:A:불사신
+	F = 70
+	V += 70
+	PRINTFORML %TALENTNAME:147% ＋{F}%
+ENDIF
+;모유체질
+IF TALENT:A:모유체질
+	F = 20
+	V += 20
+	PRINTFORML %TALENTNAME:149% ＋{F}%
+ENDIF
+;발정기
+IF TALENT:A:발정기
+	F = 10
+	V += 10
+	PRINTFORML %TALENTNAME:171% ＋{F}%
+ENDIF
+;극
+IF TALENT:A:극
+	F = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:180% ＋{F}%
+ENDIF
+
+;보정치가 0 이하의 경우는 1으로 한다
+SIF V < 0
+	V = 1
+
+PRINTFORML 최종 배율 {V}%
+
+;보정치의 적용
+S *= V
+S /= 100
+
+;붕괴, 광기, 임신는 보수를 꽤 낮게 한다(순종에 의해,80%까지 회복)
+IF TALENT:A:붕괴 || TALENT:A:광기 || TALENT:A:임신
+PRINTL 
+	IF TALENT:A:붕괴
+		S *= ABL:A:순종
+		TIMES S , 0.08
+		Z = ABL:A:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:9% ×{Z}%
+	ELSEIF TALENT:A:광기
+		S *= ABL:A:순종
+		TIMES S , 0.08
+		Z = ABL:A:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:141% ×{Z}%
+	ELSEIF TALENT:A:임신
+		S *= ABL:A:순종
+		TIMES S , 0.08
+		Z = ABL:A:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:153% ×{Z}%
+	ENDIF
+PRINTL 
+ENDIF
+
+
+;난이도 처리
+;EASY
+IF FLAG:4 == 1
+	PRINTFORML 난이도:EASY ×120%
+	TIMES S , 1.20
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES S , 1.00
+;HARD
+ELSEIF FLAG:4 == 3
+	PRINTFORML 난이도:HARD ×80%
+	TIMES S , 0.80
+ENDIF
+
+;콘돔의 경우는 패널티 보정이 걸린다
+SIF J == 1
+	TIMES S , 0.80
+
+;정조대 붙어있는 경우 패널티
+SIF TEQUIP:A:정조대
+	TIMES S , 0.60
+
+;쇼의 종류에 의한 보정
+;스트립 쇼
+IF B == 1
+	TIMES S , 0.50
+;난교 라이브
+ELSEIF B == 2
+	TIMES S , 0.80
+;SM쇼
+ELSEIF B == 3
+	TIMES S , 1.00
+;고문 쇼
+ELSEIF B == 4
+	TIMES S , 1.20
+;수간쇼
+ELSEIF B == 5
+	TIMES S , 1.50
+ENDIF
+
+IF S > 0
+	PRINTFORMW 이윤은{S}고슈금정도를 전망할 수 있습니다
+ELSE
+	PRINTFORMW 이윤을 전망할 수 없기 때문에, 구경거리 오두막에의 출전을 중지합니다
+	RETURN 0
+ENDIF
+
+
+;========================================================
+;노예 쇼를 실행할까?
+;========================================================
+IF B == 1
+	PRINTFORML %CALLNAME:A%를 스트립 쇼에 서게 합니까?
+ELSEIF B == 2
+	PRINTFORML %CALLNAME:A%를 난교 라이브에 냅니까?
+ELSEIF B == 3
+	PRINTFORML %CALLNAME:A%를 SM쇼에 서게 합니까?
+ELSEIF B == 4
+	PRINTFORML %CALLNAME:A%를 고문 쇼에 서게 합니까?
+ELSEIF B == 5
+	PRINTFORML %CALLNAME:A%를수간쇼에 서게 합니까?
+ENDIF
+PRINTL [0] -   실행한다
+PRINTL [100] - 그만둔다
+$INPUT_LOOP_6
+INPUT
+IF RESULT == 0
+	IF B == 1
+		PRINTFORML %CALLNAME:A%를 스트립 쇼에 서게 합니다
+	ELSEIF B == 2
+		PRINTFORML %CALLNAME:A%를 난교 라이브에 냅니다
+	ELSEIF B == 3
+		PRINTFORML %CALLNAME:A%를 SM쇼에 서게 합니다
+	ELSEIF B == 4
+		PRINTFORML %CALLNAME:A%를 고문 쇼에 서게 합니다
+	ELSEIF B == 5
+		PRINTFORML %CALLNAME:A%를수간쇼에 서게 합니다
+	ENDIF
+	
+	;이 타이밍에 플레이 내용을 판정합니다
+	CALL SEX_LIVE_PLAY_CHECK
+	
+	;이벤트입상의 표시
+	U = 0
+	IF ASSI >= 0
+		SIF ASSI == A
+			U = 1
+	ENDIF
+	T = TARGET
+	TARGET = A
+	TFLAG:13 = 21
+	CALL KOJO_MESSAGE_EVENT
+	TARGET = T
+	SIF U
+		ASSI = A
+ELSEIF RESULT == 100
+	RETURN 0
+ELSEIF RESULT != 0
+	GOTO INPUT_LOOP_6
+ENDIF
+
+
+
+;========================================================
+;경험의 가산 처리와 표시
+;========================================================
+PRINTFORML 
+PRINTFORML 【%CALLNAME:A%의 경험과 구슬】
+
+
+;--------------------------------------------------------
+;피사경험는 절대 넣는다
+Q = 0
+V = 0
+;--------------------------------------------------------
+;스트립 쇼
+IF B == 1
+	Q = ABL:A:노출벽+ABL:A:욕망
+	SIF CFLAG:A:162
+		Q *= 2
+;난교 라이브
+ELSEIF B == 2
+	Q = ABL:A:가창기능+ABL:A:욕망
+	
+	EXP:A:라이브경험 += Q/3
+	PRINTFORML 라이브경험＋{Q/3}
+;SM쇼, 고문 쇼
+ELSEIF B == 3 || B == 4
+	;노예공
+	IF LOCAL:2
+		Q = ABL:A:새드끼+ABL:A:기교
+	ELSE
+		Q = ABL:A:마조끼+ABL:A:봉사정신
+	ENDIF
+;수간쇼
+ELSEIF B == 5
+	Q = ABL:A:봉사정신+ABL:A:욕망
+ENDIF
+
+SIF Q < 1
+	Q = 1
+
+EXP:A:피사경험 += Q
+PRINTFORML 피사경험＋{Q}
+V += Q
+
+;--------------------------------------------------------
+;가창경험
+Q = 0
+;--------------------------------------------------------
+IF B == 2
+	;가창경험
+	Q = ABL:A:가창기능*8
+	EXP:A:가창경험 += Q
+	PRINTFORML 가창경험＋{Q}
+ENDIF
+
+
+;--------------------------------------------------------
+;자위경험는 스트립 쇼만
+Q = 0
+C = 0
+E = 0
+F = 0
+H = 0
+;--------------------------------------------------------
+IF CFLAG:A:162
+	Q = (ABL:A:노출벽+ABL:A:자위중독)/2
+	SIF Q < 1
+		Q = 1
+	EXP:A:조교자위경험 += Q
+	PRINTFORML 조교자위경험＋{Q}
+	EXP:A:공개자위 += Q
+	PRINTFORML 공개자위＋{Q}
+	V += Q
+	
+	;오나니하는 개소 판정
+	;공라면 C를 사용하려고 한다
+	IF LOCAL:2
+		;정조대가 있으면 B가 된다
+		IF TEQUIP:A:정조대
+			H += Q
+		;없으면 보통으로 C
+		ELSE
+			C += Q
+		ENDIF
+	;수라면 일단 전부 사용하려고 한다
+	ELSE
+		;B감각가 있으면 B를 사용한다
+		SIF ABL:A:B감각
+			H += Q
+		;A감각가 있으면, A를 사용한다
+		SIF ABL:A:A감각
+			F += Q
+		;정조대가 없으면 C, V에도손를 낸다
+		IF TEQUIP:A:정조대
+			;페니스가 있으면페니스
+			SIF PENIS(A)
+				C += Q
+			;바기나가 있으면바기나
+			IF (!TALENT:처녀 && VAGINA(TARGET)) || EXP:V경험 >= 20
+				E += Q
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;--------------------------------------------------------
+;봉사계(난교 라이브, SM쇼, 수간쇼)
+Q = 0
+R = 0
+;--------------------------------------------------------
+IF CFLAG:A:160 || CFLAG:A:161
+	Q = ABL:A:봉사정신+ABL:A:욕망
+	R = ABL:A:봉사정신+ABL:A:기교
+	
+	EXP:A:펠라경험 += Q
+	PRINTFORML 펠라경험＋{Q}
+	
+	EXP:A:정액경험 += R
+	PRINTFORML 정액경험＋{R}
+	
+	EXP:A:봉사쾌락경험 += Q+R
+	PRINTFORML 봉사쾌락경험＋{Q+R}
+ENDIF
+
+;--------------------------------------------------------
+;쾌락계─노예공(난교 라이브, SM쇼)(정조대 붙어 있으면 쾌락 얻을 수 없다)
+L = 0
+U = 0
+Q = 0
+;--------------------------------------------------------
+;C =회수와쾌C의 주용
+IF LOCAL:2 && CFLAG:A:165 && !TEQUIP:A:정조대
+	C += (ABL:A:욕망+ABL:A:기교)/2
+	SIF C < 1
+		C = 1
+	
+	;U =절정 회수 보존
+	U += C/3
+	
+	;습득의 주용
+	Q += (CFLAG:A:169+CFLAG:A:170)*(ABL:A:욕망+1)
+	;쾌C의 주용
+	C += C*(ABL:A:C감각+1)
+ENDIF
+
+;E =회수와쾌V의 주용
+IF !TEQUIP:A:정조대 && VAGINA(A) && CFLAG:A:163
+	E += (ABL:A:V감각+ABL:A:욕망)/2 
+	
+	;U =절정 회수 보존
+	U += E/3
+	
+	EXP:A:V경험 += E
+	PRINTFORML %EXPNAME:0%＋{E}
+	
+	;쾌V의 주용
+	E += E*(ABL:A:V감각+1)
+ENDIF
+
+;F =회수와쾌A의 주용
+IF CFLAG:A:164 || CFLAG:A:178
+	;A섹스, 관장플레이
+	F += (ABL:A:A감각+ABL:A:욕망)/2
+	F += CFLAG:A:178
+	
+	;U =절정 회수 보존
+	U += F/3
+	
+	EXP:A:A경험 += F
+	PRINTFORML %EXPNAME:1%＋{F}
+	
+	;쾌A의 주용
+	F += F*(ABL:A:A감각+1)
+		
+	;고통의 주용
+	SIF CFLAG:A:178
+		D += CFLAG:A:178
+ENDIF
+
+;L = 성교경험
+;수간쇼 때는 넣지 않는다
+IF (CFLAG:A:163 || CFLAG:A:164 || CFLAG:A:165) && (B == 2 || B == 3)
+	;발정기라면 보너스
+	SIF CFLAG:A:163
+		L += (ABL:A:욕망+ABL:A:기교)/2 + TALENT:A:발정기
+	SIF CFLAG:A:164
+		L += (ABL:A:V감각+ABL:A:욕망)/2 + TALENT:A:발정기
+	SIF CFLAG:A:165
+		L += (ABL:A:A감각+ABL:A:욕망)/2 + TALENT:A:발정기
+	
+	EXP:A:성교경험 += L
+	PRINTFORML 성교경험＋{L}
+	
+	IF CFLAG:A:165
+		EXP:A:삽입경험 += L
+		PRINTFORML 삽입경험＋{L}
+	ENDIF
+	
+	;동정상실역섹스때만
+	IF CFLAG:A:165
+		IF B == 2
+			PRINTFORML 난교 라이브로동정상실
+		ELSEIF B == 3
+			PRINTFORML SM쇼로동정상실
+		ENDIF
+		EXP:A:이상경험 += 1
+		TALENT:A:동정 = 0
+		CSTR:A:11 =창관봉공
+		
+		;불쾌의 구슬
+		SIF TALENT:A:연모
+			G += E+F
+		SIF TALENT:A:친애
+			G += (E+F)*2
+	ENDIF
+	
+	;처녀상실
+	IF E > 0 && TALENT:A:처녀
+		IF B == 2
+			PRINTFORML 난교 라이브로처녀상실
+		ELSEIF B == 3
+			PRINTFORML SM쇼로처녀상실
+		ENDIF
+		PRINTFORML %EXPNAME:50%＋1
+		EXP:A:이상경험 += 1
+		TALENT:A:처녀 = 0
+		CSTR:A:10 =노예 쇼
+	ELSEIF E > 0 && TALENT:A:재생처녀
+		IF B == 2
+			PRINTFORML 난교 라이브로재생처녀상실
+		ELSEIF B == 3
+			PRINTFORML SM쇼로재생처녀상실
+		ENDIF
+		TALENT:A:재생처녀 = 0
+	ENDIF
+	
+	;질내사정경험
+	IF E && CFLAG:A:163 && (CFLAG:A:108 == 0 || TEQUIP:A:정조대 == 0)
+		EXP:A:질내사정경험 += E/3
+		;창관 따위의 손님과 노예 사이의 나카타씨 카운트용
+		CFLAG:A:105 += E/3
+		PRINTFORML %EXPNAME:5%＋{E/3}
+		
+		;불쾌의 구슬
+		SIF TALENT:A:연모
+			G += (E+F)*2
+		SIF TALENT:A:친애
+			G += (E+F)*3
+	ENDIF
+	
+	;백버진상실
+	IF F > 0 && TALENT:A:백버진
+		IF B == 2
+			PRINTFORML 난교 라이브로백버진상실
+		ELSEIF B == 3
+			PRINTFORML SM쇼로백버진상실
+		ENDIF
+		PRINTFORML %EXPNAME:50%＋1
+		EXP:A:이상경험 += 1
+		TALENT:A:백버진 = 0
+		CSTR:A:12 =노예 쇼
+	ENDIF
+	
+	;장경험
+	IF F && CFLAG:A:164 && CFLAG:A:108 == 0
+		EXP:A:장내사정경험 += F/3
+		;창관 따위의 손님과 노예 사이의 나카타씨 카운트용
+		CFLAG:A:705 += F/3
+		PRINTFORML %EXPNAME:14%＋{F/3}
+		
+		;불쾌의 구슬
+		SIF TALENT:A:연모
+			G += (E+F)*2
+		SIF TALENT:A:친애
+			G += (E+F)*3
+	ENDIF
+	
+	;U =절정 회수 보존
+	U += L/3
+ENDIF
+
+;U =절정 회수
+IF U
+	EXP:A:절정경험 += U
+	PRINTFORML 절정경험＋{U}
+	
+	IF PENIS(A)
+		IF TALENT:A:아이사이즈
+			EXP:A:허공사정경험 += U
+			PRINTFORML 허공사정경험＋{U}
+		ELSEIF TEQUIP:A:정조대
+			EXP:A:사정경험 += U/2
+			PRINTFORML 사정경험＋{U/2}
+		ELSE
+			EXP:A:사정경험 += U
+			PRINTFORML 사정경험＋{U}
+		ENDIF
+	ENDIF
+ENDIF
+
+V += U
+
+;--------------------------------------------------------
+;윤간경험
+;--------------------------------------------------------
+IF CFLAG:A:173 || CFLAG:A:174
+	IF EXP:A:윤간경험 == 0
+		EXP:A:이상경험 += 1
+		PRINTL 윤간첫경험으로이상경험＋1
+	ENDIF
+	EXP:A:윤간경험 += 3
+	PRINTFORML 윤간경험＋3
+ENDIF
+
+;--------------------------------------------------------
+;수간경험
+;--------------------------------------------------------
+IF CFLAG:A:175
+	;수간 첫체험에 의해이상경험
+	IF EXP:A:수간경험 == 0
+		EXP:A:이상경험 += 1
+		PRINTL 수간첫경험으로이상경험＋1
+	ENDIF
+	EXP:A:수간경험 += 3
+	PRINTFORML 수간경험＋3
+ENDIF
+
+;--------------------------------------------------------
+;SM계
+;기학, 고통쾌락경험(SM쇼, 고문 쇼)
+L = 0
+;--------------------------------------------------------
+;공
+IF CFLAG:A:170 || CFLAG:A:172
+	L += ABL:A:새드끼+ABL:A:기교
+	
+	IF ABL:A:새드끼 >= 8 || TALENT:A:새드 == 2
+		L *= 3
+	ELSEIF ABL:A:새드끼 >= 5 || TALENT:A:새드
+		L *= 2
+	ELSEIF ABL:A:새드끼 >= 3
+	ELSEIF ABL:A:새드끼 == 2 || TALENT:A:소악마
+		L /= 2
+	ELSEIF ABL:A:새드끼 == 1
+		L /= 3
+	ELSE
+		L /= 5
+	ENDIF
+	
+	IF L > 0
+		EXP:A:가학쾌락경험 += L
+		PRINTFORML 가학쾌락경험＋{L}
+	ENDIF
+	
+	;습득의 주용
+	Q += L*(ABL:A:새드끼+1)
+ENDIF
+
+;수
+L = 0
+IF CFLAG:A:169 || CFLAG:A:171
+	L += ABL:A:마조끼+ABL:A:봉사정신
+	
+	EXP:A:속박경험 += (ABL:A:마조끼+ABL:A:봉사정신)/2
+	PRINTFORML 속박경험＋{(ABL:A:마조끼+ABL:A:봉사정신)/2}
+	
+	IF ABL:A:마조끼 >= 8 || TALENT:A:마조 == 2
+		L *= 3
+	ELSEIF ABL:A:마조끼 >= 5 || TALENT:A:마조
+		L *= 2
+	ELSEIF ABL:A:마조끼 >= 3
+	ELSEIF ABL:A:마조끼 == 2 || TALENT:A:도착적
+		L /= 2
+	ELSEIF ABL:A:마조끼 == 1
+		L /= 3
+	ELSE
+		L /= 5
+	ENDIF
+	
+	IF L > 0
+		EXP:A:고통쾌락경험 += L
+		PRINTFORML 고통쾌락경험＋{L}
+	ENDIF
+	
+	;습득의 주용
+	Q += L*(ABL:A:마조끼+1)
+	
+	;고통, 공포의 주용
+	D += L
+ENDIF
+
+
+;--------------------------------------------------------
+;스카계(SM쇼, 고문 쇼)
+G = 0
+L = 0
+R = 0
+;--------------------------------------------------------
+IF CFLAG:A:176 || CFLAG:A:177 || CFLAG:A:178 || CFLAG:A:179
+	;식분플레이
+	IF CFLAG:A:179
+		EXP:A:식분경험 += (ABL:A:마조끼+ABL:A:스캇중독)/3
+		PRINTFORML 식분경험＋{(ABL:A:마조끼+ABL:A:스캇중독)/3}
+		R += (ABL:A:마조끼+ABL:A:스캇중독)/3
+		
+		;불쾌의 구슬
+		G += (10-ABL:A:스캇중독)*5
+	ENDIF
+	
+	;관장플레이
+	IF CFLAG:A:178
+		;하도SM는 수가 증가한다
+		IF CFLAG:A:171
+			L = ABL:A:마조끼+ABL:A:스캇중독
+			R += ABL:A:마조끼+ABL:A:스캇중독
+			
+			;고통, 공포의 주용
+			D += L*2
+		ELSE
+			L = (ABL:A:마조끼+ABL:A:스캇중독)/2
+			R += (ABL:A:마조끼+ABL:A:스캇중독)/2
+			
+			;고통, 공포의 주용
+			D += L
+		ENDIF
+		
+		EXP:A:관장경험 += L
+		PRINTFORML 관장경험＋{L}
+		EXP:A:배변경험 += L
+		PRINTFORML 배변경험＋{L}
+		
+		;불쾌의 구슬
+		G += (10-ABL:A:스캇중독)*2
+		V += L*5
+	ENDIF
+	
+	;음뇨플레이
+	IF CFLAG:A:177
+		L = (ABL:A:마조끼+ABL:A:스캇중독)/2
+		R += (ABL:A:마조끼+ABL:A:스캇중독)/2
+		
+		EXP:A:음뇨경험 += L
+		PRINTFORML 음뇨경험＋{L}
+		
+		;불쾌의 구슬
+		G += (10-ABL:A:스캇중독)*2
+	ENDIF
+	
+	;방뇨 감상
+	IF CFLAG:A:176
+		L = (ABL:A:마조끼+ABL:A:노출벽)/3
+		R += (ABL:A:마조끼+ABL:A:노출벽)/3
+		
+		EXP:A:배뇨경험 += L
+		PRINTFORML 배뇨경험＋{L}
+		
+		;불쾌의 구슬
+		G += 10-ABL:A:스캇중독
+		V += L*3
+	ENDIF
+	
+	EXP:A:스캇경험 += R
+	PRINTFORML 스캇경험＋{R}
+ENDIF
+
+;--------------------------------------------------------
+;수치보정
+;--------------------------------------------------------
+IF B == 1
+	V += 5
+ELSEIF B == 2
+	V += 2
+ELSEIF B == 3
+	V += 3
+ELSEIF B == 4
+	V += 5
+ELSE
+	V += 1
+ENDIF
+
+IF TALENT:A:부끄럼쟁이
+	V *= 2
+ELSEIF TALENT:A:수치심없음
+	V /= 2
+ENDIF
+SIF V < 1
+	V = 1
+
+
+;--------------------------------------------------------
+;구슬
+;--------------------------------------------------------
+IF C > 0
+	JUEL:A:쾌C += C*50
+	PRINTFORML 쾌C의 구슬＋{C*50}
+ENDIF
+IF E > 0
+	JUEL:A:쾌V += E*30
+	PRINTFORML 쾌V의 구슬＋{E*30}
+ENDIF
+IF F > 0
+	JUEL:A:쾌A += F*30
+	PRINTFORML 쾌A의 구슬＋{F*30}
+ENDIF
+IF H > 0
+	JUEL:A:쾌B += H*30
+	PRINTFORML 쾌B의 구슬＋{H*30}
+ENDIF
+
+JUEL:A:순종 += B*100
+PRINTFORML 순종의 구슬＋{B*100}
+
+JUEL:A:습득 += Q*35
+PRINTFORML 습득의 구슬＋{Q*35}
+
+IF V > 0
+	JUEL:A:수치 += V*50
+	PRINTFORML 수치의 구슬＋{V*50}
+ENDIF
+
+IF TEQUIP:A:정조대
+	JUEL:A:욕정 += B*200+1000
+	PRINTFORML 욕정의 구슬＋{B*200+1000}
+ELSE
+	JUEL:A:욕정 += B*50
+	PRINTFORML 욕정의 구슬＋{B*50}
+ENDIF
+
+IF D > 0
+	JUEL:A:고통 += D*30
+	PRINTFORML 고통의 구슬＋{D*30}
+	JUEL:A:공포 += D*15
+	PRINTFORML 공포의 구슬＋{D*15}
+ENDIF
+IF G > 0
+	JUEL:A:불쾌 += G*50
+	PRINTFORML 불쾌의 구슬＋{G*50}
+ENDIF
+
+IF D > 0 || G > 0 || E > 0 || F > 0
+	JUEL:A:부정 += ((D+G+E+F)*100) /ABL:A:순종
+	PRINTFORML 부정의 구슬＋{((D+G+E+F)*200) /ABL:A:순종}
+ENDIF
+
+
+;-----------------------------
+;스트레스, 금욕 포인트
+Q = 0
+R = 0
+;-----------------------------
+;스트립 쇼
+IF B == 1
+	BASE:A:체력 -= 300
+	Q = 1
+	R = 30
+;난교 라이브
+ELSEIF B == 2
+	BASE:A:체력 -= 500
+	Q = 3
+	R = 50
+;SM쇼
+ELSEIF B == 3
+	BASE:A:체력 -= 800
+	Q = 5
+	R = 20
+;고문 쇼
+ELSEIF B == 4
+	BASE:A:체력 -= 1000
+	Q = 8
+	R = 0
+;수간쇼
+ELSEIF B == 5
+	BASE:A:체력 -= 1200
+	Q = 10
+	R = 10
+ENDIF
+
+;금욕 포인트
+IF TEQUIP:A:정조대
+	CFLAG:A:602 += R
+	SIF TALENT:PLAYER:천리안
+		PRINTFORML 금욕 포인트＋{R}
+ELSE
+	CFLAG:A:602 = 0
+ENDIF
+
+;스트레스치의 부가
+CFLAG:A:10 += Q
+SIF TALENT:PLAYER:천리안
+	PRINTFORML 피로도＋{Q}
+
+
+;-----------------------------
+;보수액의 가산
+;-----------------------------
+;최후에 금액의 가산
+PRINTFORMW 쇼의 수익으로 해서{S}고슈금를 얻었습니다
+MONEY += S
+
+DRAWLINE
+
+;휴게 플래그를 세운다
+FLAG:0 = 1
+BEGIN TURNEND
+
+
+
+
+
+
+;====================================================================
+;플레이 내용의 판정
+;====================================================================
+@SEX_LIVE_PLAY_CHECK
+
+CFLAG:A:160 = 0
+CFLAG:A:161 = 0
+CFLAG:A:162 = 0
+CFLAG:A:163 = 0
+CFLAG:A:164 = 0
+CFLAG:A:165 = 0
+CFLAG:A:166 = 0
+CFLAG:A:167 = 0
+CFLAG:A:168 = 0
+CFLAG:A:169 = 0
+CFLAG:A:170 = 0
+CFLAG:A:171 = 0
+CFLAG:A:172 = 0
+CFLAG:A:173 = 0
+CFLAG:A:174 = 0
+CFLAG:A:175 = 0
+CFLAG:A:176 = 0
+CFLAG:A:177 = 0
+CFLAG:A:178 = 0
+CFLAG:A:179 = 0
+
+;노예의수(LOCAL:1)공(LOCAL:2) 보존
+IF B == 5
+	LOCAL:1 = 1
+ELSEIF B == 4
+	IF ABL:A:새드끼 > ABL:A:마조끼
+		LOCAL:2 = 1
+	ELSEIF ABL:A:마조끼 > ABL:A:새드끼
+		LOCAL:1 = 1
+	ELSE
+		IF !RAND:5
+			LOCAL:2 = 1
+		ELSE
+			LOCAL:1 = 1
+		ENDIF
+	ENDIF
+ELSE
+	IF TALENT:A:공
+		LOCAL:2 = 1
+	ELSEIF TALENT:A:수 || TALENT:A:오메가
+		LOCAL:1 = 1
+	ELSE
+		IF !RAND:5
+			LOCAL:2 = 1
+		ELSE
+			LOCAL:1 = 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;--------------------------------
+;수간
+;--------------------------------
+SIF B == 5
+	CFLAG:A:175 += 1
+
+;--------------------------------
+;자위
+;--------------------------------
+SIF B == 1 && (ABL:A:노출벽 >= 4 || ABL:A:자위중독 >= 2)
+	CFLAG:A:162 += 1
+
+;--------------------------------
+;복수인 플레이
+;--------------------------------
+;노예수
+IF B == 2 && LOCAL:1
+	CFLAG:A:173 += 1
+;노예공
+ELSEIF B == 2 && LOCAL:2
+	CFLAG:A:174 += 1
+ENDIF
+
+;--------------------------------
+;SM계
+;--------------------------------
+;고문 쇼는 절대 하도SM
+IF B == 4
+	;노예 S
+	IF LOCAL:2
+		CFLAG:A:172 += 1
+	;노예 M
+	ELSE
+		CFLAG:A:171 += 1
+	ENDIF
+;SM쇼는 옵션과 노예 S의 경우 노예의 S기분으로 변동
+ELSEIF B == 3
+	;옵션이 없으면 절대 소프트
+	IF (FLAG:160 & 8) == 0
+		IF LOCAL:2
+			CFLAG:A:170 += 1
+		ELSE
+			CFLAG:A:169 += 1
+		ENDIF
+	;노예 S 때
+	ELSEIF LOCAL:2
+		;새드끼 4 이상 있으면 하드하게
+		IF ABL:A:새드끼 >= 4
+			CFLAG:A:172 += 1
+		ELSE
+			CFLAG:A:170 += 1
+		ENDIF
+	;노예 M 때
+	ELSE
+		;마조끼 4 이상 있다, 혹은 랜덤 1/5으로 하드하게
+		IF ABL:A:마조끼 >= 4 || !RAND:4
+			CFLAG:A:171 += 1
+		ELSE
+			CFLAG:A:169 += 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;--------------------------------
+;스카계
+;--------------------------------
+;식분플레이는 하도SM로, 노예 M로, 옵션 있을 때만 랜덤
+SIF CFLAG:A:171 && FLAG:160 & 512 && !RAND:3
+	CFLAG:A:179 += 1
+
+;관장플레이는 하도SM계라면 절대 있다. 소프트라면 랜덤
+SIF (B == 4 && !RAND:3) || (B == 3 && !RAND:5)
+	CFLAG:A:178 += 1
+
+;음뇨플레이는 하도SM로, 노예 M로, 옵션 있을 때 만
+SIF CFLAG:A:171 && FLAG:160 & 128 && !RAND:3
+	CFLAG:A:177 += 1
+
+;방뇨 감상은 소프트 SM 때만 랜덤(관장가 있으면 절대)
+SIF CFLAG:A:178 || (B == 3 && !RAND:3)
+	CFLAG:A:176 += 1
+
+
+;--------------------------------
+;섹스계
+;--------------------------------
+;난교 라이브, SM쇼, 수간쇼
+IF B == 2 || B == 3 || B == 5
+	;노예공
+	IF LOCAL:2
+		;노예동정로 옵션이 없으면 안돼
+		IF TALENT:A:동정 && (FLAG:160 & 4) == 0
+		ELSE
+			CFLAG:A:165 += 1
+			;-----------------------
+			;동정 먹어
+			;-----------------------
+			SIF TALENT:A:동정 && (FLAG:160 & 4)
+				CFLAG:A:168 += 1
+		ENDIF
+	;노예수
+	ELSE
+		;바기나 없는, 혹은 노예처녀로 옵션이 없으면 안돼
+		IF !VAGINA(A) || ((TALENT:A:처녀 || TALENT:A:재생처녀) && (FLAG:160 & 1) == 0)
+		ELSE
+			CFLAG:A:163 += 1
+			;-----------------------
+			;처녀간통
+			;-----------------------
+			SIF (TALENT:A:처녀 || TALENT:A:재생처녀) && (FLAG:160 & 1)
+				CFLAG:A:166 += 1
+		ENDIF
+		
+		;노예처녀로 옵션이 없으면 안돼
+		;여자라면 랜덤 3/4이지만, 관장가 있었을 경우는 실전 있어
+		IF (TALENT:A:백버진 && (FLAG:160 & 2) == 0) || (!CFLAG:A:178 && (VAGINA(A) && RAND:3 > 0))
+		ELSE
+			CFLAG:A:164 += 1
+			;-----------------------
+			;백버진간통
+			;-----------------------
+			SIF TALENT:A:백버진 && (FLAG:160 & 2)
+				CFLAG:A:167 += 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;--------------------------------
+;성적 봉사는 난교 라이브, SM쇼, 수간쇼라면 절대 있다
+;--------------------------------
+IF B == 2 || B == 3 || B == 5
+	;노예공
+	IF LOCAL:2
+		CFLAG:A:161 += 1
+	;노예수
+	ELSE
+		CFLAG:A:160 += 1
+	ENDIF
+ENDIF
+
+
+

@@ -1,0 +1,313 @@
+﻿
+
+@SHOW_INFO_PALAM
+F = 0
+REPEAT 15
+
+;파라미터를 표시하는 순번을 정렬한다
+
+IF COUNT == 0
+;쾌C
+	A = 0
+ELSEIF COUNT == 1
+;쾌V
+	A = 1
+ELSEIF COUNT == 2
+;쾌A
+	A = 2
+ELSEIF COUNT == 3
+;쾌B
+	A = 3
+ELSEIF COUNT == 4
+;윤활
+	A = 4
+ELSEIF COUNT == 5
+;순종
+	A = 5
+ELSEIF COUNT == 6
+;욕정
+	A = 6
+ELSEIF COUNT == 7
+;굴복
+	A = 7
+ELSEIF COUNT == 8
+;습득
+	A = 8
+ELSEIF COUNT == 9
+;수치
+	A = 9
+ELSEIF COUNT == 10
+;고통
+	A = 10
+ELSEIF COUNT == 11
+;공포
+	A = 11
+ELSEIF COUNT == 12
+;반감
+	A = 12
+ELSEIF COUNT == 13
+;불쾌
+	A = 13
+ELSEIF COUNT == 14
+;억울
+	A = 14
+ENDIF
+
+
+;현재의 파라미터 레벨을 B에 대입
+IF PALAM:A < PALAMLV:1
+	B = 0
+ELSEIF PALAM:A < PALAMLV:2
+	B = 1
+ELSEIF PALAM:A < PALAMLV:3
+	B = 2
+ELSEIF PALAM:A < PALAMLV:4
+	B = 3
+ELSEIF PALAM:A < PALAMLV:5
+	B = 4
+ELSEIF PALAM:A < PALAMLV:6
+	B = 5
+ELSEIF PALAM:A < PALAMLV:7
+	B = 6
+ELSEIF PALAM:A < PALAMLV:8
+	B = 7
+ELSEIF PALAM:A < PALAMLV:9
+	B = 8
+ELSE
+	B = 9
+ENDIF
+
+;파라미터의 이름·파라미터 레벨·게이지를 표시
+IF PALAM:A == 0
+	GOTO SHOW_INFO_PALAM_NUM_END
+ELSE
+	SETCOLOR 0xC0C0C0 - (B*2048)
+	SIF COUNT == 4
+		SETCOLOR 0xB0B0B0 + (B*328965)
+	PRINTFORM 　%PALAMNAME:A%Lv{B}
+	RESETCOLOR
+	PRINTFORM %UNICODE(0x0208D)%
+ENDIF
+
+;파라미터 레벨이 9이상이라면 불필요한 처리는 날린다
+IF B >= 9
+	SETCOLOR 0xFF8866
+	SIF COUNT == 4
+		SETCOLOR 0xDDDDDD
+	PRINTFORM %UNICODE(0x2583)*8%
+	RESETCOLOR
+	GOTO SHOW_INFO_PALAM_END2
+ENDIF
+
+;파라미터 레벨마다의 반응을 일으키는 최소의 물리량의 8분의 1을 1 메모리로 한다
+;C = PALAM:A/(PALAMLV:(B+1)/8)
+E = B+1
+N = 1
+
+;Lv9 이하에서의 처리(덧쓰기)↑if내에의 goto를 eramaker로 할 수 없기 때문에
+C = (PALAM:A-PALAMLV:B)/((PALAMLV:E-PALAMLV:B)/8)
+
+;↓의 comment out 한 부분을 되돌리면, 파라미터 표시의 게이지가
+;↓파라미터의 총량을 기준으로 한 것으로부터,
+;↓현재의 레벨→다음의 레벨에 필요한 양을 기준으로 한 것이 됩니다.
+;↓예를 들면, 파라미터가 5000(레벨 3) 때는 이런 느낌에.
+;↓ 종래 [****>>>>] Now:5000 / Next:10000(총량으로서 필요한 10000이 기준)
+;↓ 이것[**>>>>>>] Now:2000 / Next: 7000(LV3→LV4에 필요한 7000이 기준)
+
+;C = (PALAM:A-PALAMLV:B)/((PALAMLV:E-PALAMLV:B)/8)
+
+D = 8-C
+
+$SHOW_INFO_PALAM_COL
+SIF C <= 0
+	GOTO SHOW_INFO_PALAM_D2
+IF B >= 0
+	IF COUNT == 4
+		SETCOLOR 0xC0C0C0
+	ELSEIF COUNT <= 3
+		SETCOLOR 0x7070C0
+	ELSEIF COUNT <= 8
+		SETCOLOR 0x70C070
+	ELSEIF COUNT <= 11
+		SETCOLOR 0xC07070
+	ELSE
+		SETCOLOR 0xC070C0
+	ENDIF
+	PRINTFORM %UNICODE(0x2583)%
+	RESETCOLOR
+ENDIF
+C -= 1
+GOTO SHOW_INFO_PALAM_COL
+
+;모이지 않은 부분에 1 Lv하의 기호를 표시
+$SHOW_INFO_PALAM_D2
+SIF D <= 0
+	GOTO SHOW_INFO_PALAM_END2
+IF B >= 0
+	IF COUNT == 4
+		;윤활를 다소 알기 쉽고
+		SETCOLOR 0xFFFFFF
+		PRINTFORM %UNICODE(0x2581)%
+	ELSEIF 4 >=  COUNT
+		SETCOLOR 0x553300
+		PRINTFORM %UNICODE(0x2581)%
+	ELSEIF 12 <= COUNT
+		SETCOLOR 0x103040
+		PRINTFORM %UNICODE(0x2583)%
+	ELSE
+		SETCOLOR 0x103040
+		PRINTFORM %UNICODE(0x2583)%
+	ENDIF
+	RESETCOLOR
+ENDIF
+D -= 1
+GOTO SHOW_INFO_PALAM_D2
+
+$SHOW_INFO_PALAM_END2
+SIF COUNT <= 3 && EX:COUNT > 0
+	SETCOLOR 0xFF9999
+PRINTFORM %UNICODE(0x208E)%
+RESETCOLOR
+;윤활치에 의한 마찰 0 표기(이만큼 특수)
+;IF A == 3 && PALAM:A >= 20000
+;	PRINT 마찰 0
+;	GOTO SHOW_INFO_PALAM_NUM_END
+;ENDIF
+
+;↓↓↓↓kMGT 표시↓↓↓↓
+A = PALAM:A
+B = 0
+;6자리수까지 노멀
+IF A > 999999
+	;k킬로(1000)
+	A /= 1000
+	B += 1
+	IF A > 99999
+		;M메가(백만)
+		A /= 1000
+		B += 1
+		;2^31 ≒ 21억 = 2100M = 2.1G
+		;eramaker의 32 비트 정수라면 메가까지로 충분히
+		IF A > 99999
+			;G기가(10억)
+			A /= 1000
+			B += 1
+			IF A > 99999
+				;T테라(조)
+				A /= 1000
+				B += 1
+				IF A > 99999
+					;P페타(천조)
+					A /= 1000
+					B += 1
+					;2^63 ≒ 920경 = 9200P = 9.2E
+					;Emuera의 64 비트 정수에서도 페타까지로 충분히
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;수치의 자리수에 응해 간격을 조정
+SIF A < 10
+	PRINT  
+SIF A < 100
+	PRINT  
+SIF A < 1000
+	PRINT  
+SIF A < 10000
+	PRINT  
+;접미어가 들어간다면 1개줄인다
+SIF A < 100000 && B == 0
+	PRINT  
+
+PRINTFORM {A}
+IF B == 1
+	PRINT k
+ELSEIF B == 2
+	PRINT M
+ELSEIF B == 3
+	PRINT G
+ELSEIF B == 4
+	PRINT T
+ELSEIF B == 5
+	PRINT P
+ENDIF
+;↑↑↑↑kMGT 표시↑↑↑↑
+
+;↓↓↓↓통상 표시↓↓↓↓
+;
+;	;수치의 자리수에 응해 간격을 조정
+;	SIF PALAM:A < 10
+;		PRINT  
+;	SIF PALAM:A < 100
+;		PRINT  
+;	SIF PALAM:A < 1000
+;		PRINT  
+;	SIF PALAM:A < 10000
+;		PRINT  
+;	SIF PALAM:A < 100000
+;		PRINT  
+;	;수치를 표시·999999를 넘으면 999999
+;	IF PALAM:A > 999999
+;		PRINT 999999
+;	ELSE
+;		PRINTFORM {PALAM:A}
+;	ENDIF
+;
+;↑↑↑↑통상 표시↑↑↑↑
+
+RESETCOLOR
+
+;3회 마다 개행
+F += 1
+SIF F%3 == 0
+	PRINTL 
+
+$SHOW_INFO_PALAM_NUM_END
+
+REND
+
+SIF F == 0
+	PRINTL 
+SIF F%3!= 0
+	PRINTL 
+
+;=============================================================================
+;PRINT_MARK (각인)와의 교체
+@SHOW_INFO_MARK(ARG)
+REPEAT 4
+	PRINTFORM %MARKNAME:COUNT%:LV{MARK:ARG:COUNT} 
+	BAR MARK:ARG:COUNT, 3, 3
+	
+	;최후의 루프 이외에서는 간격을 연다
+	SIF COUNT < 3
+		PRINT 　
+REND
+PRINTL 
+
+
+;=============================================================================
+;SHOW_JUEL 의 주표시부분을 독립한 함수에
+@SHOW_INFO_JUEL(ARG)
+PRINTL □ 구슬 □-----------------------------------------------------------------------
+VARSET LOCAL
+FOR LOCAL:1, 0, 16
+	LOCAL = LOCAL:1
+	SIF LOCAL:1 == 15
+		LOCAL = 100
+	SIF TALENT:ARG:공 && (LOCAL == 1 || LOCAL == 2)
+		CONTINUE
+	PRINTFORM 　%PALAMNAME:LOCAL%의 구슬:{JUEL:ARG:LOCAL, 7}
+	LOCAL:2++
+		IF LOCAL:2 % 4 == 0
+		PRINTL 
+	ELSE
+		PRINT 　
+	ENDIF
+NEXT
+;최후의 루프로 개행하고 있지 않았으면, 여기서 개행해 둔다
+SIF LOCAL:2 % 4!= 0
+	PRINTL 
+
+

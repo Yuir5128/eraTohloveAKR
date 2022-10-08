@@ -1,0 +1,351 @@
+﻿;-------------------------------------------------
+;触手両穴拡張
+;触手系コマンド
+;-------------------------------------------------
+
+;聞こえるか?こちらは新世代触手。
+;あまり時間が無いのでよく聞いてくれ。
+;奴をイかせるためには君の助けが必要だ。
+;我々は別々の穴から同時に挿入し、
+;2箇所の性感帯で互いに1回ずつ絶頂させなければならない。
+;無論、どちらか片方だけでは駄目だ。2人とも成功しない限り、我々に未来は無い。
+;……選択の余地はなさそうだな。
+;よし、行くぞ！
+
+;-------------------------------------------------
+@COM368
+
+PRINTL 触手両穴拡張
+STR:0 = 触手両穴拡張
+
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 300
+LOSEBASE:気力 += 450
+
+IF EXP:触手経験 < EXPLV:1
+	TIMES LOSEBASE:体力 , 1.10
+	TIMES LOSEBASE:気力 , 2.00
+ELSEIF EXP:触手経験 < EXPLV:2
+	TIMES LOSEBASE:体力 , 0.90
+	TIMES LOSEBASE:気力 , 1.80
+ELSEIF EXP:触手経験 < EXPLV:3
+	TIMES LOSEBASE:体力 , 0.80
+	TIMES LOSEBASE:気力 , 1.50
+ELSEIF EXP:触手経験 < EXPLV:4
+	TIMES LOSEBASE:体力 , 0.70
+	TIMES LOSEBASE:気力 , 1.20
+ELSEIF EXP:触手経験 < EXPLV:5
+	TIMES LOSEBASE:体力 , 0.60
+	TIMES LOSEBASE:気力 , 1.00
+ELSE
+	TIMES LOSEBASE:体力 , 0.50
+	TIMES LOSEBASE:気力 , 0.50
+ENDIF
+
+;ABL:Ｖ感覚をみる
+IF ABL:Ｖ感覚 == 0
+	SOURCE:快Ｖ += 40
+ELSEIF ABL:Ｖ感覚 == 1
+	SOURCE:快Ｖ += 150
+ELSEIF ABL:Ｖ感覚 == 2
+	SOURCE:快Ｖ += 400
+ELSEIF ABL:Ｖ感覚 == 3
+	SOURCE:快Ｖ += 1000
+ELSEIF ABL:Ｖ感覚 == 4
+	SOURCE:快Ｖ += 1700
+ELSE
+	SOURCE:快Ｖ += 2200
+ENDIF
+
+;EXP:Ｖ経験をみる
+IF EXP:Ｖ経験 < EXPLV:1
+	TIMES SOURCE:快Ｖ , 0.20
+ELSEIF EXP:Ｖ経験 < EXPLV:2
+	TIMES SOURCE:快Ｖ , 0.60
+ELSEIF EXP:Ｖ経験 < EXPLV:3
+	TIMES SOURCE:快Ｖ , 1.00
+ELSEIF EXP:Ｖ経験 < EXPLV:4
+	TIMES SOURCE:快Ｖ , 1.20
+ELSEIF EXP:Ｖ経験 < EXPLV:5
+	TIMES SOURCE:快Ｖ , 1.40
+ELSE
+	TIMES SOURCE:快Ｖ , 1.60
+ENDIF
+
+;ABL:Ａ感覚をみる
+IF ABL:Ａ感覚 == 0
+	SOURCE:快Ａ += 10
+ELSEIF ABL:Ａ感覚 == 1
+	SOURCE:快Ａ += 30
+ELSEIF ABL:Ａ感覚 == 2
+	SOURCE:快Ａ += 500
+ELSEIF ABL:Ａ感覚 == 3
+	SOURCE:快Ａ += 1000
+ELSEIF ABL:Ａ感覚 == 4
+	SOURCE:快Ａ += 1700
+ELSE
+	SOURCE:快Ａ += 2200
+ENDIF
+
+;EXP:Ａ経験をみる
+IF EXP:Ａ経験 < EXPLV:1
+	TIMES SOURCE:快Ａ , 0.10
+ELSEIF EXP:Ａ経験 < EXPLV:2
+	TIMES SOURCE:快Ａ , 0.30
+ELSEIF EXP:Ａ経験 < EXPLV:3
+	TIMES SOURCE:快Ａ , 0.50
+ELSEIF EXP:Ａ経験 < EXPLV:4
+	TIMES SOURCE:快Ａ , 1.00
+ELSEIF EXP:Ａ経験 < EXPLV:5
+	TIMES SOURCE:快Ａ , 1.40
+ELSE
+	TIMES SOURCE:快Ａ , 1.60
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	TIMES SOURCE:快Ｖ , 0.20
+	TIMES SOURCE:快Ａ , 0.20
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	TIMES SOURCE:快Ｖ , 0.60
+	TIMES SOURCE:快Ａ , 0.40
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	TIMES SOURCE:快Ｖ , 1.00
+	TIMES SOURCE:快Ａ , 0.60
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	TIMES SOURCE:快Ｖ , 1.30
+	TIMES SOURCE:快Ａ , 1.00
+ELSE
+	TIMES SOURCE:快Ｖ , 1.60
+	TIMES SOURCE:快Ａ , 1.30
+ENDIF
+
+SOURCE:痛み += 2200
+SOURCE:液体 += 2800
+SOURCE:欲情 += 500
+SOURCE:露出 += 2500
+SOURCE:屈従 += 2700
+SOURCE:逸脱 += 7500
+SOURCE:恐れ += 2300
+
+
+;ABL:Ａ感覚をみる
+IF ABL:Ａ感覚 == 0
+	SOURCE:屈従 += 100
+ELSEIF ABL:Ａ感覚 == 1
+	SOURCE:屈従 += 700
+ELSEIF ABL:Ａ感覚 == 2
+	SOURCE:屈従 += 1500
+ELSEIF ABL:Ａ感覚 == 3
+	SOURCE:屈従 += 3000
+ELSEIF ABL:Ａ感覚 == 4
+	SOURCE:屈従 += 5000
+ELSE
+	SOURCE:屈従 += 8000
+ENDIF
+
+;EXP:Ｖ経験をみる
+IF EXP:Ｖ経験 < EXPLV:1
+	SOURCE:痛み += 20000
+	SOURCE:液体 += 2000
+ELSEIF EXP:Ｖ経験 < EXPLV:2
+	SOURCE:痛み += 300
+ELSEIF EXP:Ｖ経験 < EXPLV:3
+	SOURCE:痛み += 50
+ELSEIF EXP:Ｖ経験 < EXPLV:4
+	SOURCE:痛み += 10
+ELSEIF EXP:Ｖ経験 < EXPLV:5
+	SOURCE:痛み += 0
+ELSE
+	SOURCE:痛み += 0
+ENDIF
+
+;EXP:Ａ経験をみる
+IF EXP:Ａ経験 < EXPLV:1
+	SOURCE:痛み += 5000
+	SOURCE:反発 += 1000
+ELSEIF EXP:Ａ経験 < EXPLV:2
+	SOURCE:痛み += 2000
+	SOURCE:反発 += 1000
+ELSEIF EXP:Ａ経験 < EXPLV:3
+	SOURCE:痛み += 2000
+	SOURCE:反発 += 1000
+ELSEIF EXP:Ａ経験 < EXPLV:4
+	SOURCE:痛み += 2000
+	SOURCE:反発 += 1000
+ELSEIF EXP:Ａ経験 < EXPLV:5
+	SOURCE:痛み += 1000
+	SOURCE:反発 += 200
+ELSE
+	SOURCE:反発 += 600
+ENDIF
+
+;触手経験を見る
+IF EXP:触手経験 < EXPLV:1
+	SOURCE:痛み += 1000
+ELSEIF EXP:触手経験 < EXPLV:2
+	SOURCE:痛み += 800
+ELSEIF EXP:触手経験 < EXPLV:3
+	SOURCE:痛み += 500
+ELSEIF EXP:触手経験 < EXPLV:4
+	SOURCE:痛み += 100
+ELSEIF EXP:触手経験 < EXPLV:5
+	SOURCE:痛み += 50
+ENDIF
+
+;触手経験を見る
+IF EXP:触手経験 < EXPLV:1
+	SOURCE:中毒充足 += 1500
+	TIMES SOURCE:恐れ , 0.50
+ELSEIF EXP:触手経験 < EXPLV:2
+	SOURCE:中毒充足 += 1700
+	TIMES SOURCE:恐れ , 0.80
+ELSEIF EXP:触手経験 < EXPLV:3
+	SOURCE:中毒充足 += 2000
+ELSEIF EXP:触手経験 < EXPLV:4
+	SOURCE:中毒充足 += 2500
+	TIMES A , 1.20
+ELSEIF EXP:触手経験 < EXPLV:5
+	SOURCE:中毒充足 += 3300
+	TIMES SOURCE:恐れ , 1.50
+ELSE
+	SOURCE:中毒充足 += 4200
+	TIMES SOURCE:恐れ , 1.80
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	SOURCE:反発 += 1000
+	SOURCE:痛み += 1900
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	SOURCE:反発 += 800
+	SOURCE:痛み += 1250
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	SOURCE:反発 += 600
+	SOURCE:痛み += 1000
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	SOURCE:反発 += 200
+	SOURCE:痛み += 200
+ELSE
+	TIMES SOURCE:痛み , 0.10
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:欲情 < PALAMLV:1
+	TIMES SOURCE:屈従 , 0.60
+ELSEIF PALAM:欲情 < PALAMLV:2
+	TIMES SOURCE:屈従 , 0.80
+ELSEIF PALAM:欲情 < PALAMLV:3
+	TIMES SOURCE:屈従 , 1.00
+ELSEIF PALAM:欲情 < PALAMLV:4
+	TIMES SOURCE:屈従 , 1.20
+ELSE
+	TIMES SOURCE:屈従 , 1.40
+ENDIF
+
+;ABL:従順をみる
+IF ABL:従順 == 0
+	TIMES SOURCE:欲情 , 0.60
+	TIMES SOURCE:反発, 2.00
+ELSEIF ABL:従順 == 1
+	TIMES SOURCE:欲情 , 0.80
+	TIMES SOURCE:反発, 1.20
+ELSEIF ABL:従順 == 2
+	TIMES SOURCE:欲情 , 1.00
+	TIMES SOURCE:反発, 1.00
+ELSEIF ABL:従順 == 3
+	TIMES SOURCE:欲情 , 1.20
+	TIMES SOURCE:反発, 0.60
+ELSEIF ABL:従順 == 4
+	TIMES SOURCE:欲情 , 1.40
+	TIMES SOURCE:反発, 0.30
+ELSE
+	TIMES SOURCE:欲情 , 1.60
+	TIMES SOURCE:反発, 0.10
+ENDIF
+
+;小人体形
+SIF TALENT:小人体型
+	TIMES SOURCE:痛み , 3.00
+
+;Ａ敏感、鈍感をみる
+;快Ａ自体のチェックは後でまとめてやる
+IF TALENT:Ａ鈍感
+	TIMES SOURCE:痛み , 1.50
+	TIMES SOURCE:反発 , 1.50
+	TIMES SOURCE:屈従 , 1.50
+	TIMES SOURCE:逸脱 , 1.50
+ELSEIF TALENT:Ａ敏感
+	TIMES SOURCE:痛み , 0.60
+	TIMES SOURCE:反発 , 0.60
+	TIMES SOURCE:屈従 , 0.60
+	TIMES SOURCE:逸脱 , 0.60
+ENDIF
+
+;貞操観念
+IF TALENT:貞操観念
+	IF TALENT:再生処女 == 1
+		TIMES SOURCE:欲情 , 0.60
+		TIMES SOURCE:反発, 5.00
+	ELSE
+		TIMES SOURCE:欲情 , 0.60
+		TIMES SOURCE:反発, 1.80
+	ENDIF
+;貞操無頓着
+ELSEIF TALENT:貞操無頓着
+	IF TALENT:再生処女 == 1
+		TIMES SOURCE:反発, 0.50
+	ELSE
+		TIMES SOURCE:反発, 0.30
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;汚れ処理
+STAIN:アナル |= 32
+STAIN:腸内 |= 32
+STAIN:ヴァギナ |= 32
+STAIN:膣内 |= 32
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF EXP:Ｖ拡張経験 == 0 && EXP:Ａ拡張経験 == 0
+	EXP:異常経験 += 2
+	PRINTL 拡張初経験で異常経験＋2
+ELSEIF EXP:Ｖ拡張経験 == 0 || EXP:Ａ拡張経験 == 0
+	EXP:異常経験 += 1
+	PRINTL 拡張初経験で異常経験＋1
+ENDIF
+EXP:Ｖ経験 += 25
+EXP:Ａ経験 += 25
+PRINTL Ｖ経験＋25
+PRINTL Ａ経験＋25
+EXP:Ｖ拡張経験 += 2
+EXP:Ａ拡張経験 += 2
+PRINTL Ｖ拡張経験＋2
+PRINTL Ａ拡張経験＋2
+
+;触手装着中は依存度ベクトル強制変更
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(服従で1、隷属で2　強制変更なので、これまでの数値をリセット）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 = 4
+ENDIF
+
+RETURN 1
+
+

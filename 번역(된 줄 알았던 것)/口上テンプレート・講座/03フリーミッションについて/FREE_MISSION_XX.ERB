@@ -1,0 +1,109 @@
+﻿;프리 미션의 이름과 클리어 조건,XX에는 미션 번호를 넣는다(머리에 0을 붙이지 않아도 괜찮다)
+;사용시는 XX 를 미션 번호(1자리수라면 머리 0 없음)에 치환해 주세요
+@FREE_MISSION_NAME_XX
+;프리 미션 타이틀을 입력
+SAVESTR:XX = 
+
+PRINTFORM [XX]
+PRINTFORMS SAVESTR:XX
+PRINTFORML  (클리어 조건의 개요)
+
+
+
+;XX에는 미션의 번호를 넣는다(머리에 0을 붙이지 않아도 괜찮다)
+@FREE_MISSION_START_XX
+
+;목표의 곳에 표시하는 캐릭터 라인을 입력(2행 이상의 경우는 아래쪽에 직접 쓰는 것이 좋을지도)
+SAVESTR:0 = 
+
+;아이템 구입 불가
+REPEAT 45
+	ITEMSALES:COUNT = 0
+REND
+
+;봉인 추가 커맨드의 사용 설정
+;키스한다
+;FLAG:70 = 1
+;아무것도안한다
+;FLAG:71 = 1
+;손가락삽입
+;FLAG:72 = 1
+;좌위(1 대면 2 배면 3 대면＋배면해방)
+;FLAG:73 = 
+;이뇨제
+;FLAG:74 = 1
+;목욕탕플레이
+;FLAG:75 = 1
+;W페라
+;FLAG:76 = 1
+;피스트계(1V 2A 3A＋V＋양구멍)
+;FLAG:77 = 
+;촉수관장
+;FLAG:78 = 1
+;캐릭터 고유 커맨드(각 자리수로 판정,1 흡혈,10 어둠,100반령,1000 시리코다마)
+;FLAG:79 = 
+;고성능 아이템
+;FLAG:80 = 1
+
+;초기 자금을 갖게하는 경우
+;MONEY = 
+
+;아이템을 갖게하는 경우(조교 아이템은 1,소비 아이템은 개수)
+;ITEM: = 
+
+;주인의 능력,소질을 변화시키는 경우
+;ABL:MASTER: = 
+;TALENT:MASTER: = 
+
+;조교 대상으로 하는 캐릭터의 캐릭터 번호를 YY에 넣는다
+ADDCHARA YY
+TARGET = 1
+
+DRAWLINE
+;조교 대상으로 하는 캐릭터의 이름을 넣는다
+PRINTFORML -　
+PRINTFORMW - 하지만 조교 가능하게 되었습니다.
+DRAWLINE
+PRINTFORM 　~ FREE MISSION {FLAG:22}　　　
+PRINTFORMS SAVESTR:XX
+PRINTFORML 　~
+PRINTFORML 　
+PRINTFORM 목표:
+PRINTFORMSW SAVESTR:0
+
+
+
+@FREE_MISSION_SALEITEM_CHECK_XX
+;SHOP에 구입할 수 있는 아이템을 추가하는 경우
+;ITEMSALES: = 
+
+
+
+@FREE_MISSION_CONFIRM_XX
+PRINTFORM 목표:
+PRINTFORMSW SAVESTR:0
+
+
+
+
+@FREE_MISSION_CHECK_XX
+IF DAY >= 
+	L = 0
+	;소질의 취득을 조건으로 하는 경우
+	REPEAT CHARANUM
+		SIF TALENT:COUNT:
+			L += 1
+	REND
+	IF L >= 
+		PRINTFORMW - 목표 달성
+		PRINTFORMW -　
+		PRINTFORMW -　
+		PRINTFORMW -　　　　　　　　　　　　　　　　　　　SEE YOU NEXT DREAM...
+	ELSE
+		PRINTFORMW 
+		PRINTFORMW 　　　　　　　　―― 목표 실패
+		PRINTFORMW 　　　　　　　　　　　
+		PRINTFORMW 　　　　　　　　　　　
+	ENDIF
+	CALL GAME_END
+ENDIF

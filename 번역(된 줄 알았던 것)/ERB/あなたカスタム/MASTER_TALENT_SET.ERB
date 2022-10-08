@@ -1,0 +1,777 @@
+﻿@ANATA_TALENT_SET(ARG)
+;MASTER_CUSTOM2 관련의 추가 처리
+CFLAG:ARG:1 = 3
+PRINTFORML 플레이어의 스테이터스를 커스텀 할 수 있습니다.
+PRINTL 변경하고 싶은 항목을 선택해 주세요. (극단적인 커스텀에 의해,
+PRINTL 난이도가 크게 바뀌는 경우도 있기 때문에 조심해 주세요.)
+PRINTL 
+PRINTL 설정 모드를 선택해 주세요
+PRINTL [0] 간이판　　[1] 상세판
+$INPUT_LOOP
+INPUT
+IF !RESULT
+	JUMP MASTER_CUSTOM(ARG)
+ELSEIF RESULT == 1
+	JUMP MASTER_CUSTOM2(ARG)
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+@MASTER_CUSTOM(ARG)
+;"당신"의 소질을 선택한다
+;2주목 이후 선택할 수 있는 소질이 증가한다
+ABL:ARG:게이끼 = 0
+PRINTL 
+PRINTFORML %NAME:ARG%의 성별을 가르쳐 주세요
+PRINTL [0] 남
+PRINTL [1] 녀
+IF FLAG:41 > 0
+	PRINTL [2] 후타나리(남성 타입)
+	PRINTL [3] 후타나리(여성 타입)
+ENDIF
+$INPUT_LOOP01
+INPUT
+IF RESULT == 0
+ELSEIF RESULT == 1
+	TALENT:ARG:남자 = 0
+ELSEIF RESULT == 2 && FLAG:41 > 0
+	TALENT:ARG:남자 = 0
+	TALENT:ARG:반음반양 = 1
+ELSEIF RESULT == 3 && FLAG:41 > 0
+	TALENT:ARG:남자 = 0
+	TALENT:ARG:후타나리 = 1
+ELSE
+	GOTO INPUT_LOOP01
+ENDIF
+;바이, 여자혐오, 남자혐오
+PRINTL 
+PRINTFORML %NAME:ARG%는…
+PRINTL [0]양쪽 모두 안된다
+PRINTL [1]거기까지도 아니다
+IF FLAG:41 > 0
+	PRINTL [2]오히려 남자는 싫어
+	PRINTL [3]오히려 여자는 싫어
+ENDIF
+$INPUT_LOOP_02
+INPUT
+IF RESULT == 0
+	TALENT:ARG:바이 = 1
+	SIF TALENT:ARG:남자
+		ABL:ARG:게이끼 = 2
+	SIF MALE(ARG) == 0
+		ABL:ARG:레즈끼 = 2
+ELSEIF RESULT == 1
+	TALENT:ARG:바이 = 0
+	ABL:ARG:기교 += 1
+ELSEIF RESULT == 2 && FLAG:41 > 0
+	TALENT:ARG:남자혐오 = 1
+	IF MALE(ARG) == 0
+		ABL:ARG:레즈끼 = 2
+	ELSE
+		ABL:ARG:욕망 += 1
+	ENDIF
+ELSEIF RESULT == 3 && FLAG:41 > 0
+	TALENT:ARG:여자혐오 = 1
+	IF MALE(ARG)
+		ABL:ARG:게이끼 = 2
+	ELSE
+		ABL:ARG:욕망 += 1
+	ENDIF
+ELSE
+	GOTO INPUT_LOOP_02
+ENDIF
+;처녀계 소질의 설정
+IF FLAG:41 > 0
+	ABL:ARG:기교 = 0
+	IF TALENT:ARG:남자 == 0
+		PRINTFORML %NAME:ARG%는처녀입니까?
+		PRINTL [0] 네
+		PRINTL [1] 실은 다릅니다
+		$INPUT_LOOP03
+		INPUT
+		IF RESULT == 0
+			TALENT:ARG:처녀 = 1
+		ELSEIF RESULT == 1
+			ABL:ARG:기교 += 1
+		ELSE
+			GOTO INPUT_LOOP03
+		ENDIF
+	ENDIF
+	IF PENIS(ARG)
+		PRINTFORML %NAME:ARG%는동정입니까?
+		PRINTL [0] …… 네
+		PRINTL [1] 실은 다릅니다
+		$INPUT_LOOP04
+		INPUT
+		IF RESULT == 0
+			TALENT:ARG:동정 = 1
+		ELSEIF RESULT == 1
+			ABL:ARG:기교 += 1
+		ELSE
+			GOTO INPUT_LOOP04
+		ENDIF
+	ENDIF
+	PRINTFORML %NAME:ARG%는백버진입니까?
+	PRINTL [0] 네
+	PRINTL [1] 실은 다릅니다
+	$INPUT_LOOP05
+	INPUT
+	IF RESULT == 0
+		TALENT:ARG:백버진 = 1
+	ELSEIF RESULT == 1
+		ABL:ARG:기교 += 1
+	ELSE
+		GOTO INPUT_LOOP05
+	ENDIF
+ELSE
+	PRINTFORML %NAME:ARG%는 맑고 깨끗한 몸입니까?
+	PRINTL [0] 네
+	PRINTL [1] 경험풍부입니다
+	$INPUT_LOOP06
+	INPUT
+	IF RESULT == 0
+		SIF VAGINA(ARG)
+			TALENT:ARG:처녀 = 1
+		SIF PENIS(ARG)
+			TALENT:ARG:동정 = 1
+		TALENT:ARG:백버진 = 1
+		ABL:ARG:기교 = 1
+	ELSEIF RESULT == 1
+		ABL:ARG:기교 = 2
+	ELSE
+		GOTO INPUT_LOOP06
+	ENDIF
+ENDIF
+;체형의 설정
+IF MALE(ARG) == 0
+	PRINTFORML 가슴의 크기는?
+	SIF FLAG:41 > 0
+		PRINTL [0] 가슴? 그게 뭐야 맛있는거야?
+	PRINTL [1] 조금 조심스럽습니다
+	PRINTL [2] 보통일까
+	PRINTL [3] 자신 있어
+	SIF FLAG:41 > 0
+		PRINTL [4] 조금 너무 클 정도입니다
+	$INPUT_LOOP07
+	INPUT
+	IF RESULT == 0 && FLAG:41 > 0
+		TALENT:ARG:절벽 = 1
+	ELSEIF RESULT == 1
+		TALENT:ARG:빈유 = 1
+	ELSEIF RESULT == 2
+	ELSEIF RESULT == 3
+		TALENT:ARG:거유 = 1
+	ELSEIF RESULT == 4 && FLAG:41 > 0
+		TALENT:ARG:폭유 = 1
+	ELSE
+		GOTO INPUT_LOOP07
+	ENDIF
+ENDIF
+IF PENIS(ARG)
+	PRINTFORML 페니스의 크기는?
+	SIF FLAG:41 > 0
+		PRINTL [0] 꼬마님입니다……
+	PRINTL [1] …… 조금 조심스럽습니다
+	PRINTL [2] 보통일까
+	PRINTL [3] 자신 있어
+	SIF FLAG:41 > 0
+		PRINTL [4] 조금 이상한 정도 큽니다
+	$INPUT_LOOP08
+	INPUT
+	IF RESULT == 0 && FLAG:41 > 0
+		TALENT:ARG:아이사이즈 = 1
+	ELSEIF RESULT == 1
+		TALENT:ARG:단소 = 1
+	ELSEIF RESULT == 2
+	ELSEIF RESULT == 3
+		TALENT:ARG:거근 = 1
+	ELSEIF RESULT == 4 && FLAG:41 > 0
+		TALENT:ARG:말자지 = 1
+	ELSE
+		GOTO INPUT_LOOP08
+	ENDIF
+ENDIF
+PRINTL 체형은……
+SIF FLAG:41 > 0
+	PRINTL [0] 아직아이입니다
+PRINTL [1] 몸집이 작습니다
+PRINTL [2] 남들 수준입니다
+PRINTL [3] 체격에는 자신이 있습니다
+$INPUT_LOOP09
+INPUT
+IF RESULT == 0 && FLAG:41 > 0
+	TALENT:ARG:소인체형 = 1
+ELSEIF RESULT == 1
+	TALENT:ARG:작은체구 = 1
+ELSEIF RESULT == 2
+ELSEIF RESULT == 3
+	TALENT:ARG:큰체구 = 1
+ELSE
+	GOTO INPUT_LOOP09
+ENDIF
+
+;취미적 소질 부가를 스킵 할지 어떨지
+PRINTL 조금 질문이 길어집니다만, 교제합니까?
+PRINTL [0]얼마든지 와라
+PRINTL [1]그만둔다
+$INPUT_LOOP10
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP10
+IF RESULT == 1
+	IF FLAG:41 > 0
+		ABL:ARG:기교 += 1
+		GOTO TALENT_SET_EX
+	ELSE
+		ABL:ARG:새드끼 += 1
+		GOTO TALENT_SET_END
+	ENDIF
+ENDIF
+;성격 설정
+;겁쟁이
+PRINTL 모르는 사람에게 말을 걸 수 있으면……
+PRINTL [0]수 대답한다
+PRINTL [1]우선 도망친다
+$INPUT_LOOP11
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP11
+TALENT:ARG:겁쟁이 = RESULT
+
+;반항적와츤데레
+PRINTL 츤데레입니까?
+PRINTL [0]그것은 없다
+PRINTL [1]데레는 없다
+IF MALE(ARG)
+	PRINTL [2], 그렇게 바보 같은 일!
+ELSE
+	PRINTL [2], 그렇지 않아요!
+ENDIF
+$INPUT_LOOP12
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP12
+TALENT:ARG:반항적 = RESULT != 0
+TALENT:ARG:츤데레 = (RESULT & 2) == 2
+
+;솔직함
+SIF TALENT:ARG:반항적
+	GOTO JUMP_1
+PRINTL 는, 솔직함라는 일이구나?
+PRINTL [0]너무 단락적이다
+PRINTL [1]네
+$INPUT_LOOP13
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP13
+TALENT:ARG:솔직함 = RESULT
+$JUMP_1
+
+;꿋꿋함
+PRINTL 무슨 일에게도 굴하지 않아?
+PRINTL [0]접히기 십상
+PRINTL [1]그렇게 있을 생각
+$INPUT_LOOP14
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP14
+TALENT:ARG:꿋꿋함 = RESULT
+
+;얌전함
+PRINTL 얌전함라고 말해져?
+PRINTL [0]그렇게는
+PRINTL [1]자주(잘) 말해진다
+$INPUT_LOOP15
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP15
+TALENT:ARG:얌전함 = RESULT
+
+;건방짐
+PRINTL 건방짐라는 것은?
+PRINTL [0]그렇게는
+PRINTL [1]자주(잘) 말해진다
+$INPUT_LOOP16
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP16
+TALENT:ARG:건방짐 = RESULT
+
+;자제심
+PRINTL 자신을 스스로 제지당해?
+PRINTL [0]그런 것 할 수 없다
+PRINTL [1]할 수 있다
+$INPUT_LOOP17
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP17
+TALENT:ARG:자제심 = RESULT
+
+;감정부족
+PRINTL 감정의 표현은……
+PRINTL [0]쉽게
+PRINTL [1]잘 전해지지 않는다
+$INPUT_LOOP18
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP18
+TALENT:ARG:감정부족 = RESULT
+
+;프라이드높음/낮다
+PRINTL 자신의 프라이드는……
+PRINTL [0]적당히
+PRINTL [1]제일 대사
+PRINTL [2]개에게 먹여라
+$INPUT_LOOP19
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP19
+TALENT:ARG:프라이드높음 = RESULT & 1
+TALENT:ARG:프라이드낮음 = (RESULT & 2) == 2
+
+;보수적와호기심와무관심
+PRINTL 아주 새로운 것에는……
+PRINTL [0]기분이 내키면
+PRINTL [1]뭐든지손를 낸다
+PRINTL [2]손를 내지 않는다
+PRINTL [3]그런 것 아무래도 좋다
+$INPUT_LOOP20
+INPUT
+IF RESULT == 1
+	TALENT:ARG:호기심 = 1
+	ABL:ARG:기교 += 1
+ELSEIF RESULT == 2
+	TALENT:ARG:보수적 = 1
+ELSEIF RESULT == 3
+	TALENT:ARG:무관심 = 1
+ELSEIF RESULT != 0
+	GOTO INPUT_LOOP20
+ENDIF
+
+;낙관적와비관적
+PRINTL 연애 영화를 보고 있으면……
+PRINTL [0]처가 신경이 쓰인다
+PRINTL [1]해피엔드가 된다
+PRINTL [2]어차피 배드 엔드야
+$INPUT_LOOP21
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP21
+TALENT:ARG:낙관적 = RESULT & 1
+TALENT:ARG:비관적 = (RESULT & 2) == 2
+
+;일선을넘지않음
+PRINTL 인과의 관계는……
+PRINTL [0]신경쓰지 않는다
+PRINTL [1]거리를 두어 버린다
+$INPUT_LOOP22
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP22
+TALENT:ARG:일선을넘지않음 = RESULT
+
+;눈에띄고싶음
+PRINTL 눈에 띄는 일은……
+PRINTL [0]싫지 않다
+PRINTL [1]00쨩 보고 있어─?
+$INPUT_LOOP23
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP23
+TALENT:ARG:눈에띄고싶음 = RESULT
+SIF RESULT == 1
+	ABL:ARG:노출벽 += 2
+
+;정조관념와정조무관심
+PRINTL 엣치한 일은……
+PRINTL [0]이 사람 저 사람 상관하는 것은 문제
+PRINTL [1]결혼 첫날밤에
+PRINTL [2]하고 싶을 때에 한다
+$INPUT_LOOP24
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP24
+TALENT:ARG:정조관념 = RESULT & 1
+TALENT:ARG:정조무관심 = (RESULT & 2) == 2
+SIF RESULT == 2
+	ABL:ARG:기교 += 1
+
+;억압와해방
+PRINTL 자신의 기분은……
+PRINTL [0]편해질 수 있는 정도로
+PRINTL [1]넣어 둔다
+PRINTL [2]누설
+$INPUT_LOOP25
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP25
+TALENT:ARG:억압 = RESULT & 1
+TALENT:ARG:해방 = (RESULT & 2) == 2
+SIF RESULT == 2
+	ABL:ARG:마조끼 += 2
+
+;저항
+PRINTL 체념은……
+PRINTL [0]중요
+PRINTL [1]나빠
+$INPUT_LOOP26
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP26
+TALENT:ARG:저항 = RESULT
+
+;부끄럼쟁이와수치심없음
+PRINTL 남의 앞에서 벗거나 든지는……
+PRINTL [0]할 수 없는 것도 아니다
+PRINTL [1]부끄러워서 무리
+PRINTL [2]괜찮아
+$INPUT_LOOP27
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP27
+TALENT:ARG:부끄럼쟁이 = RESULT & 1
+TALENT:ARG:수치심없음 = (RESULT & 2) == 2
+SIF RESULT == 1
+	ABL:ARG:요리기능 += 1
+
+;고통에강함/강하다
+PRINTL 아픈 것은……
+PRINTL [0]을 좋아하지 않아
+PRINTL [1]용서해 주었으면 합니다
+PRINTL [2]익숙해져 있습니다
+$INPUT_LOOP28
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP28
+TALENT:ARG:고통에강함 = RESULT & 1
+TALENT:ARG:고통에약함 = (RESULT & 2) == 2
+
+;젖기쉬움/어렵다
+PRINTL 젖기쉬움?
+PRINTL [0]보통이라고 생각한다
+PRINTL [1]그런 생각이 든다
+PRINTL [2]오히려 역일까
+$INPUT_LOOP29
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP29
+TALENT:ARG:젖기쉬움 = RESULT & 1
+TALENT:ARG:젖기어려움 = (RESULT & 2) == 2
+
+;습득빠름/늦다
+PRINTL 기억은……
+PRINTL [0]보통이라고 생각한다
+PRINTL [1]좋다
+PRINTL [2]어? 어제 뭐 했던가?
+$INPUT_LOOP30
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP30
+TALENT:ARG:습득빠름 = RESULT & 1
+TALENT:ARG:습득느림 = (RESULT & 2) == 2
+
+;악취둔감/민감
+PRINTL 방의 청소는……
+PRINTL [0]적당히
+PRINTL [1]게으름 피우기 십상
+PRINTL [2]세세하게
+$INPUT_LOOP31
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP31
+TALENT:ARG:악취둔감 = RESULT & 1
+TALENT:ARG:악취민감 = (RESULT & 2) == 2
+SIF RESULT == 2
+	ABL:ARG:요리기능 += 1
+
+;쾌감에솔직/의부정
+PRINTL 기분 좋은 일은……
+PRINTL [0]좋은 것도 나쁜 것도 없다
+PRINTL [1]좋은 일
+PRINTL [2]엣치한 것은 안 된다고 생각합니다!
+$INPUT_LOOP32
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP32
+TALENT:ARG:쾌감에솔직 = RESULT & 1
+TALENT:ARG:쾌감을부정 = (RESULT & 2) == 2
+
+;자위하기쉬움
+PRINTL 스스로 하는 것은……
+PRINTL [0]남들 수준 정도에는
+PRINTL [1]많은…… 일지도
+$INPUT_LOOP33
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP33
+TALENT:ARG:자위하기쉬움 = RESULT
+IF RESULT == 1
+	EXP:ARG:자위경험 += RAND:11 + 30
+ELSE
+	EXP:ARG:자위경험 += RAND:10 + 1
+ENDIF
+
+;중독되기쉬움
+PRINTL 무언가에 빠져 있어 버리면……
+PRINTL [0]그런데도 절도는 지킨다
+PRINTL [1] 그만둘 수 없는, 멈추지 않는다
+$INPUT_LOOP34
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP34
+TALENT:ARG:중독되기쉬움 = RESULT
+
+;도착적
+PRINTL 보통 일에는 흥미없어?
+PRINTL [0]그런 일 없다
+PRINTL [1]물론
+$INPUT_LOOP35
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP35
+TALENT:ARG:도착적 = RESULT
+
+;요리치, 요리고수
+PRINTL 요리는 이익?
+PRINTL [0] 남들 수준에는
+PRINTL [1] 요리라면 맡겨!
+PRINTL [2] 왠지 부엌에 서지 말라고 말해진다
+$INPUT_LOOP36
+INPUT
+IF RESULT == 0
+	EXP:ARG:가사경험 += 10
+ELSEIF RESULT == 1
+	TALENT:ARG:요리고수 = 1
+	ABL:ARG:요리기능 += 2
+	EXP:ARG:가사경험 += 50
+ELSEIF RESULT == 2
+	TALENT:ARG:요리치 = 1
+	ABL:ARG:요리기능 = 0
+	EXP:ARG:가사경험 = 0
+ELSE
+	GOTO INPUT_LOOP32
+ENDIF
+
+;스킨십
+PRINTL 인과 서로 접하는 것 라는 좋아?
+PRINTL [0] 별로 싫지 않다
+PRINTL [1] 항상 누군가와 들러붙고 있고 싶다
+PRINTL [2] 너무 손대어지고 싶지 않다
+$INPUT_LOOP37
+INPUT
+IF RESULT == 0
+ELSEIF RESULT == 1
+	TALENT:ARG:스킨십선호 = 1
+	EXP:ARG:봉사쾌락경험 += 5
+ELSEIF RESULT == 2
+	TALENT:ARG:스킨십불편 = 1
+	EXP:ARG:속박경험 = 5
+ELSE
+	GOTO INPUT_LOOP37
+ENDIF
+
+;여자좋아, 남자좋아, 아이좋아
+PRINTL 정직, 00이라면 뭐든지 좋다
+PRINTL [0] 그러한 것은 어떨까라고 생각합니다!
+SIF TALENT:ARG:여자혐오 == 0
+	PRINTL [1] 여자 너무 좋아!
+SIF TALENT:ARG:남자혐오 == 0
+	PRINTL [2] 남자 너무 좋아!
+PRINTL [3] 작으면……
+$INPUT_LOOP46
+INPUT
+IF RESULT == 0
+	ABL:ARG:요리기능 += 1
+ELSEIF RESULT == 1 && TALENT:ARG:여자혐오 == 0
+	TALENT:ARG:여자좋아 = 1
+	SIF MALE(ARG) == 0
+		ABL:ARG:레즈끼 += 1
+ELSEIF RESULT == 2 && TALENT:ARG:남자혐오 == 0
+	TALENT:ARG:남자좋아 = 1
+	SIF MALE(ARG)
+		ABL:ARG:게이끼 += 1
+ELSEIF RESULT == 3
+	TALENT:ARG:아이좋아 = 1
+	SIF FLAG:41 > 0
+		TALENT:ARG:금지된지식 = 1
+ELSE
+	GOTO INPUT_LOOP46
+ENDIF
+
+SIF FLAG:41 == 0
+	GOTO TALENT_SET_END
+
+;게임 밸런스와 관계되는 소질 설정(2주째 이후)
+$TALENT_SET_EX
+;게임 밸런스와 관계되는 소질을 스킵 할까
+PRINTL 나머지의 질문은 난이도 바뀌어 버리지만……
+PRINTL [0]얼마든지 와라
+PRINTL [1]그만둔다
+$INPUT_LOOP38
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP38
+IF RESULT == 1
+	ABL:ARG:마조끼 += 1
+	GOTO TALENT_SET_END
+ENDIF
+
+;새드/소악마/마조
+PRINTL 괴롭히는 것은……
+PRINTL [0]나쁜 일입니다
+PRINTL [1]정말 좋아합니다
+PRINTL [2]오히려 괴롭혀 주세요
+$INPUT_LOOP39
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP39
+SIF RESULT == 1
+	CALL TALENT_SET_S(ARG)
+TALENT:ARG:마조 = (RESULT & 2) == 2
+SIF RESULT == 2
+	ABL:ARG:마조끼 += 2
+
+;유치
+PRINTL 아이 같은 성격?
+PRINTL [0]설마
+PRINTL [1]?
+$INPUT_LOOP40
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP40
+;TALENT:소악마 = RESULT & 1
+TALENT:ARG:유치 = RESULT & 1
+
+;회복빠름/늦다
+PRINTL 자신의체력에 대해……
+PRINTL [0]평균적
+PRINTL [1]건강하다고 생각한다
+PRINTL [2]병약할지도
+$INPUT_LOOP41
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2
+	GOTO INPUT_LOOP41
+TALENT:ARG:회복빠름 = RESULT & 1
+TALENT:ARG:회복느림 = (RESULT & 2) == 2
+
+;헌신적
+PRINTL 인에 힘쓰는 것이라는 좋아?
+PRINTL [0] 오히려 다하여지고 싶다
+PRINTL [1] 사는 보람입니다
+$INPUT_LOOP42
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP42
+TALENT:ARG:헌신적 = RESULT & 1
+
+;치료
+PRINTL 의료에 자세했다거나 합니까?
+PRINTL [0] 그렇지도 않다
+PRINTL [1] 의외로 자세합니다
+$INPUT_LOOP43
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP43
+TALENT:ARG:치료 = RESULT & 1
+
+;고무적
+PRINTL 프레이!프레이!
+PRINTL [0] 네, 의미 모른다
+PRINTL [1] 체체체!
+$INPUT_LOOP44
+INPUT
+SIF RESULT != 0 && RESULT != 1
+	GOTO INPUT_LOOP44
+TALENT:ARG:고무적 = RESULT & 1
+
+;동물귀
+PRINTL 왕왕!
+PRINTL [0] 아니, 의미 모른다
+PRINTL [1] 왕!
+PRINTL [2] 아!
+PRINTL [3] 공!
+$INPUT_LOOP45
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2 && RESULT != 3
+	GOTO INPUT_LOOP45
+SIF RESULT == 1 || RESULT == 2 || RESULT == 3
+	TALENT:ARG:동물귀 = 1
+
+
+$TALENT_SET_END
+;!;CALL INPUT_ANATA_NAME(ARG)
+
+
+@TALENT_SET_S(ARG)
+;새드/소악마
+PRINTFORML 무서워하게 해, 혼내주는 것과
+PRINTFORML 녹진녹진 녹게 해, 사랑스럽게 울릴 수 있는 것과
+PRINTFORML 어느 쪽을 좋아해?
+PRINTL [0] 다시 합니다
+PRINTL [1] 혼내주고 싶다
+PRINTL [2] 울려지고 싶다
+PRINTL [3] 양쪽 모두!양쪽 모두!
+$INPUT_LOOP_1
+INPUT
+SIF RESULT != 0 && RESULT != 1 && RESULT != 2 && RESULT != 3
+	GOTO INPUT_LOOP_1
+TALENT:ARG:새드 = RESULT & 1
+TALENT:ARG:소악마 = (RESULT & 2) == 2
+SIF RESULT == 1 || RESULT == 3
+	ABL:ARG:새드끼 += 2
+
+@INPUT_ANATA_NAME(ARG)
+PRINTFORML %NAME:ARG%의 이름을 변경합니까?
+PRINTL [0] 그대로 좋다
+PRINTL [1] 변경한다
+$INPUT_LOOP_ANATA_NAME1
+INPUT
+IF RESULT == 0
+	RETURN 0
+ELSEIF RESULT == 1
+	PRINTL 이름을 입력해 주세요
+	INPUTS
+	NAME:ARG = %RESULTS%
+	CALLNAME:ARG = %RESULTS%
+	PRINTFORML 이름은 %NAME:ARG%입니다
+	PRINTL 이것으로 좋습니까?
+	PRINTL [0] 네
+	PRINTL [1] 잘못했습니다
+	$INPUT_LOOP_ANATA_NAME2
+	INPUT
+	SIF RESULT != 0 && RESULT != 1
+		GOTO INPUT_LOOP_ANATA_NAME2
+	SIF RESULT == 1
+		CALL INPUT_ANATA_NAME(ARG)
+	CALL INPUT_ANATA_CALLNAME(ARG)
+ELSE
+	GOTO INPUT_LOOP_ANATA_NAME1
+ENDIF
+
+@INPUT_ANATA_CALLNAME(ARG)
+PRINTFORML %NAME:ARG%에 닉네임을 붙입니까?
+PRINTL [0] 아니오 좋습니다
+PRINTL [1] 부디 붙이고 싶습니다
+$INPUT_LOOP_ANATA_CALLNAME1
+INPUT
+IF RESULT == 0
+	RETURN 0
+ELSEIF RESULT == 1
+	PRINTL 닉네임을 입력해 주세요
+	INPUTS
+	CALLNAME:ARG = %RESULTS%
+	PRINTFORML 닉네임은 %CALLNAME:ARG%입니다
+	PRINTL 이것으로 좋습니까?
+	PRINTL [0] 네
+	PRINTL [1] 잘못했습니다
+	$INPUT_LOOP_ANATA_CALLNAME2
+	INPUT
+	SIF RESULT != 0 && RESULT != 1
+		GOTO INPUT_LOOP_ANATA_CALLNAME2
+	SIF RESULT == 1
+		CALL INPUT_ANATA_CALLNAME(ARG)
+ELSE
+	GOTO INPUT_LOOP_ANATA_CALLNAME1
+ENDIF
+

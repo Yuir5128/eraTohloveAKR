@@ -1,0 +1,1011 @@
+﻿;=================================================
+;커뮤니케이션계 커맨드 FIRSTTIME(300~309)
+;=================================================
+;-------------------------------------------------
+;COM200,회화 FIRSTTIME(300)
+;-------------------------------------------------
+@KOJO_COM_K174_200
+;#DIM DYNAMIC KAIWA = -1
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	;분기 쓸 수 있을 때까지 일단 연주한다
+	;녹고 강도구가 붙어 있다 뇨의변의구역질가 있다
+	SIF (CFLAG:5005 & 16) || ALLCHECK(TARGET) || (BASE:4 > 10 || BASE:6 > 10 || BASE:8 > 10)
+		RETURN LOCAL
+
+	;두려움
+	IF (CFLAG:5005 & 64)
+		PRINTFORML 『…… 이라고 말하는 것이 있었지만,수심자는 어떻게 생각해?』
+		;반발
+		IF (CFLAG:5005 & 32)
+			PRINTFORML 「………. 잘 모르는구나」
+			PRINTFORML %CALLNAME%는 무뚝뚝하게 그렇게 말한 채 침묵을 지키고 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 1
+					PRINTFORML 「어아,아 그렇다\@(CFLAG:5005 & 1)? 사#사\@에는 뭐라고도……」
+				CASE 0
+					PRINTFORML 「아,아니\@(CFLAG:5005 & 1)? 사#사\@는 별로…… 앗아아,물론 청마의 의견도 좋다고 생각하는,?」
+			ENDSELECT
+			PRINTFORML 어느 쪽이라고도 붙지 않는 대답을 반복하는%CALLNAME%는,방금전부터 침착하지 않은 모습으로 신체를 비비고 있다
+			PRINTFORML 아무래도 이상하게 긴장시켜 버린 것 같다…
+			;덤
+			SOURCE:두려움 += 10
+		ENDIF
+		RETURN LOCAL
+	ENDIF
+	
+	;반발 반발 녹고
+	IF (CFLAG:5005 & 32) || (CFLAG:5005 & 128)
+		PRINTFORML 「……….」
+		SIF (CFLAG:5005 & 128)
+			PRINT 신체를 머뭇머뭇 시켰다
+		PRINTFORML %CALLNAME%는 숙인 채로 입다물고 있다
+		RETURN LOCAL
+	ENDIF
+	
+	;미함락 또한굴복각인 3 없었으면 이하는 읽지 않는다
+	SIF !KANRAKU(TARGET) && MARK:굴복각인!= 3
+		RETURN LOCAL
+	
+	SIF KANRAKU(TARGET) > 3
+		RETURN LOCAL
+	
+	SIF RAND:2 == 0
+		RETURN LOCAL
+	
+	;써 내기인 것으로 1종 밖에 없다
+	SELECTCASE RAND:1
+		CASE 0
+			;KAIWA = 0
+			PRINTW 
+			PRINTFORML 모처럼인 것으로,%CALLNAME:PLAYER%에 대해서 들어 보았다
+			PRINTL
+			PRINTFORML 「청마의 일을 어떻게 생각하고 있을까?」
+			PRINTL 
+			;음란 창부 굉장히 평화 굉장히 굉장히 평화
+			IF KANRAKU(TARGET) == 2
+				PRINTFORML 「그렇다…… 역시 친구가 아닌가?」
+				;하트풀음란
+				IF (CFLAG:5001 & 1) && TALENT:음란
+					PRINTFORML 「함께 있어 마음 좋고,격려가 되는 거기에,궁합도 좋다」
+					PRINTFORML 「………. 지금 것은 마음이 맞는다고 하는 의미이니까」
+					PRINTFORML 『괜찮아 알고 있어』
+				ELSE
+					PRINTFORML 「함께 있어 마음 좋고,발견이 있는 거기에,궁합도 좋다」
+					PRINTFORML 「물론,마음 뿐만이 아니라 신체의 궁합도다」
+					PRINTFORML 「청마는 둘도 없는 친구다」
+				ENDIF
+				RETURN LOCAL
+			;연모 친애
+			ELSEIF KANRAKU(TARGET) == 1
+				;하트풀 연모
+				IF (CFLAG:5001 & 1) && TALENT:연모
+					PRINTFORML 「청마는 중요한 친구다」
+					PRINTFORML 「…… 응 어쩐지 재차 말로 하면,부끄럽다」
+					PRINTFORML 그렇게 말하는%CALLNAME%의 뺨은 조금 붉은 빛을 띠고 있었다
+				;하트풀친애
+				ELSEIF (CFLAG:5001 & 1) && TALENT:친애
+					PRINTFORML 「청마는\@TALENT:상사상애? 연인#소중한 사람\@으로,둘도 없는 친구다」
+					PRINTFORML 「너를 만날 수 있어 정말로 좋았다」
+					SIF TALENT:상사상애
+						PRINTFORML 「…… 청마 정말 좋아하다」
+					PRINTFORML 그렇게 말해 이쪽에 미소짓는%CALLNAME%에 끌려,%CALLNAME:MASTER%도 얼굴을 벌어지게 했다
+				;거의 불온
+				ELSEIF (CFLAG:5001 & 2)
+					;망집연모√의연모
+					IF TALENT:연모 && (CFLAG:5001 & 8)
+						PRINTFORML 「…… 그러한 청마는 어떻게 생각하고 있지?」
+						PRINTFORML %CALLNAME%는,반대로 이쪽에 질문해 왔다
+						PRINTFORML 왠지 함부로 앞쪽으로 기움 자세가 되어 있어,이쪽을 응시해 오는 시선이 조금 무섭다…
+					ELSEIF TALENT:연모
+						PRINTFORML 「…… 나는,친구라고 생각하고 있다」
+						PRINTFORML 얼굴을 숙이게 해 응하는%CALLNAME%는,\@TALENT:달마 || TALENT:양팔결손? 신체를 굳어지게 하고 있는#그손를 딱딱하게 잡고 있다\@
+					;네가 바란다면 엔드기독
+					ELSEIF TALENT:친애 && (CFLAG:5001 & 32)
+						PRINTFORML 「물론,둘도 없는 친구다」
+						PRINTFORML 「청마의 없는 세계 같은거 생각할 수 없어」
+						PRINTFORML %CALLNAME%는 태연하게 그렇게 단언해,도취한 눈동자로 이쪽을 응시하고 있다
+					;망집연모√의친애
+					ELSEIF TALENT:친애 && (CFLAG:5001 & 8)
+						PRINTFORML 「청마의 친구는,나지요?」
+						PRINTFORML 『? 그렇네』
+						PRINTFORML 「아아,좋았던…… 나도 같아 청마는 둘도 없는 친구다」
+						PRINTFORML 「그러니까 만약\@(CFLAG:5002& 64)? 청마에 버려지면#청마가 없어지면\@,나는……」
+						PRINTFORML 탁해진 눈으로 투덜투덜 뭔가를 계속 중얼거리는 %CALLNAME%를,당황해 달랬습니다
+					;진우루트 친애 반발 3 취득이 끝난 상태
+					ELSEIF TALENT:친애 && (CFLAG:5002 & 8)
+						PRINTFORML 「…… 물론 친구라고 생각하고 있겠어」
+						PRINTFORML %CALLNAME%는 미소를 띄우고 있지만,어딘가 그 눈은 힘이 빠지지 않았었다
+					ELSEIF TALENT:친애
+						PRINTFORML 「그렇다…… 청마는,둘도 없는 친구다」
+						PRINTFORML 「지금부터 먼저 무엇이 있어도,너의 근처에 있고 싶다고 생각하고 있다」
+						PRINTFORML 「…… 무엇인가,재차 말로 하면 부끄럽다」
+						PRINTFORML 뺨을 붉게 하면서도,%CALLNAME%는 부드럽게 이쪽에 미소짓고 있다
+					ENDIF
+				ENDIF
+				RETURN LOCAL
+			;복종 예속
+			ELSEIF KANRAKU(TARGET) == 3
+				;하트풀복종
+				IF (CFLAG:5001 & 1) && TALENT:복종
+					PRINTFORML 「청마는 매우 중요한 친구다」
+					PRINTFORML 「…… 그러니까,앞으로도 옆에 두어 받을 수 있으면 기쁘다」
+					PRINTFORML %CALLNAME%는 얼굴을 붉게 하면서도,이쪽을 곧바로 응시하고 있다
+				;하트풀예속
+				ELSEIF (CFLAG:5001 & 1) && TALENT:예속
+					PRINTFORML 「청마는 매우 중요한 친구로,나의 경애 하는 상대다」
+					PRINTFORML 「지금부터 앞도 쭉 청마와 함께 있고 싶다고 생각하고 있다」
+					PRINTFORML %CALLNAME%는 이쪽을 곧바로 응시해,밝은 얼굴로 그렇게 전해 왔다
+				ELSEIF (CFLAG:5001 & 2)
+					;망집복종√의복종
+					IF TALENT:복종 && (CFLAG:5001 & 16)
+						PRINTFORML 「나는,아니……,어떻게 라고 말해져도……,……….」
+						PRINTFORML %CALLNAME%는 말이 막혀,마침내 그대로 침묵을 지켜 버렸다
+					;진우루트 복종
+					ELSEIF TALENT:복종
+						PRINTFORML 「청마는,친구다 지금도 옛날도 변함없다」
+						PRINTFORML %CALLNAME%는 드물게 이쪽에 얼굴을 향하여 말하고 있지만,그 표정은 딱딱했다
+					;망집복종√의예속
+					ELSEIF TALENT:예속 && (CFLAG:5001 & 16)
+						PRINTFORML 「나에게 있어,청마는 친구다」
+						PRINTFORML 「그러니까,앞으로도 나로 많이 기분 좋아졌으면 좋겠다」
+						PRINTFORML 「청마의 도움이 되는 것이,나의 무엇보다의 행복하다」
+						PRINTFORML %CALLNAME%는 심취해 버린 눈동자로 이쪽을 응시하고 있다…
+					;진우루트 예속
+					ELSEIF TALENT:예속
+						PRINTFORML 「청마는 나의 남편으로,친구다」
+						PRINTFORML %CALLNAME%는 이쪽을 곧바로 봐,간결하게 그렇게 대답했다
+					ENDIF
+				ENDIF
+				RETURN LOCAL
+			ELSEIF KANRAKU(TARGET) == 0
+				;여기에 오는 시점에서굴복 3는 붙어 있다
+				;미함락 하트풀
+				IF (CFLAG:5001 & 1)
+					PRINTFORML 「응…… 그렇다 역시,친구가 아닌가?」
+					PRINTFORML 「돌연 이런 질문을 해 어떻게 한 것이야?」
+					PRINTFORML %CALLNAME%는 이상할 것 같은 얼굴을 하고 있다
+				;미함락 진우루트 망집 플래그 온
+				ELSEIF (CFLAG:5001 & 2) && (CFLAG:5002 & 4)
+					PRINTFORML 「청마는 친구,라고 생각하고 있지만……,」
+					PRINTFORML 「청마는 어때? 그,나와 같은 기분인가?」
+					PRINTFORML 불안에%CALLNAME%는 이쪽의 모습을 살펴 오지만,%CALLNAME:MASTER%는 무언으로 미소만을 돌려주었다
+					CFLAG:10 += 1
+				;미함락 진우루트
+				ELSEIF (CFLAG:5001 & 2)
+					PRINTFORML 「청마의 일은,그것은…… 역시…… 친구,라고 생각하고 있지만……」
+					PRINTFORML %CALLNAME%는 애매한 모습으로입 가지고 있다
+				ENDIF
+				RETURN LOCAL
+			ENDIF
+	ENDSELECT
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM201,선물 FIRSTTIME(301)
+;무엇을 주고 있을까? 하,커맨드 폴더내선물의 항목에 들어가 있습니다
+;스스로 주는 것을 결정하고 싶은 경우,CALL TRAIN_MESSAGE_COLOR를 지워,스스로 쓴다
+;-------------------------------------------------
+@KOJO_COM_K174_201
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	;웃는 얼굴
+	IF TFLAG:17 == 1
+	;음식
+	ELSEIF TFLAG:17 == 2
+	;일용품
+	ELSEIF TFLAG:17 == 3
+	;악세사리
+	ELSEIF TFLAG:17 == 4
+	;복
+	ELSEIF TFLAG:17 == 5
+	;고가의 물건
+	ELSEIF TFLAG:17 == 6
+	;특별한선물(Extra 모드 엔딩용)
+	ELSEIF TFLAG:17 == 7
+		;인게이지 링
+		IF CFLAG:5100 == 1
+		;오더 메이드바이브
+		ELSEIF CFLAG:5101 == 1
+		;오더 메이드 목걸이
+		ELSEIF CFLAG:5102 == 1
+		ENDIF
+	;경장
+	ELSEIF TFLAG:17 == 11
+	;프로미스 링
+	ELSEIF TFLAG:17 == 50
+	ENDIF
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM202,스킨십 FIRSTTIME(302)
+;순애계 바리안트로 해라
+;-------------------------------------------------
+@KOJO_COM_K174_202
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	;두려움이라면 연주한다
+	IF (CFLAG:5005 & 64)
+		PRINTFORML %CALLNAME:PLAYER%는스킨십를 꾀하려고,%CALLNAME%에 접했다
+		PRINTFORMW %CALLNAME%는 신체를 굳어지게 해 숨을 삼키고 있다…
+		;덤
+		SOURCE:두려움 += 20
+		RETURN LOCAL
+	ENDIF
+
+	;반발라면 연주한다
+	IF (CFLAG:5005 & 32)
+		PRINTFORML %CALLNAME:PLAYER%는%CALLNAME%과의스킨십를 꾀했다
+		PRINTFORMW %CALLNAME%는 무반응을 관철하고 있다…
+		RETURN LOCAL
+	ENDIF
+	
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	PRINTW
+	
+	;망집 플래그 온 혹은 진우루트복종예속라면 스트레스치 감소
+	SIF (CFLAG:5005 & 4) || ((CFLAG:5001 & 2) && (TALENT:복종 || TALENT:예속))
+		CFLAG:10 -= 1
+	
+	;진우루트복종예속라면 이하 연주한다
+	SIF (CFLAG:5001 & 2) && (TALENT:복종 || TALENT:예속)
+		RETURN LOCAL
+	
+	;녹고 강
+	IF (CFLAG:5005 & 16)
+		PRINTFORML %CALLNAME%를 껴안아 보았다
+		PRINTFORML 「……….」
+		PRINTFORML 무언인 채,%CALLNAME%도 껴안고 돌려주는 것도,어딘지 모르게 침착하지 않은 모습이다
+		PRINTFORML 「청마이것도 좋지만…… \@(CFLAG:5005 & 1)? 사#사\@는,」
+		;정면 안아라면 귀,후안아라면 팔의 이미지
+		PRINTFORML 말해,%CALLNAME%는 %CALLNAME:MASTER%의\@RAND:2 == 0? 이#완\@에 가볍게 키스를 한다
+		PRINTFORML 「좀 더 다른 일을 하고 싶은,라고 할까……」
+		RETURN LOCAL
+	ENDIF
+	
+	;아마 여기가 제일 평화로워 러브러브 하고 있다
+	SELECTCASE RAND:10
+		CASE 9
+			PRINTFORML %CALLNAME%의 뺨을 반죽해 보았다
+			PRINTFORML 「청마그것,즐거운가?」
+			PRINTFORML 『응』
+			PRINTFORML 당분간의 사이,%CALLNAME%의 뺨을 오로지 쫄깃쫄깃 계속 반죽했다
+		CASE 8
+			PRINTFORML %CALLNAME%의 뺨을 반죽해 보았다
+			PRINTFORML 「청마?」
+			PRINTFORML 당황한 모습의%CALLNAME%에 상관하지 않고,%CALLNAME:MASTER%는 오로지 무언으로 뺨을 계속 반죽한다
+			PRINTFORML 「그쪽이 그 기분이라면……,」
+			PRINTFORML %CALLNAME%도 대항해 이쪽의 뺨을 반죽해 왔다
+			PRINTFORML 「이,이것은,꽤……!」
+			PRINTFORML %CALLNAME%는 타인의 뺨을 반죽하는 쾌감에 눈을 뜬 것 같다…
+		CASE 7
+			PRINTFORML %CALLNAME%의손를 잡아 보았다
+			PRINTFORML 「어떻게 한 것이다 돌연?」
+			PRINTFORML 『무엇인가,잡아 보고 싶어진 것이다』
+			PRINTFORML 「그런가」
+			PRINTFORML 부끄러워한%CALLNAME%도,손를 잡아 돌려주어 왔다
+		CASE 6
+			PRINTFORML %CALLNAME%의손를 잡아 보았다
+			PRINTFORML 「청마의손는 따뜻한데」
+			PRINTFORML 『수심자의손도 따뜻해』
+			PRINTFORML 당분간의 사이,손를 서로 잡고 있었다
+		CASE 5
+			PRINTFORML %CALLNAME%를 껴안아 보았다
+			PRINTFORML 「청마?」
+			PRINTFORML 당황한 모습을 보이는%CALLNAME%를 더욱 강하게 껴안으면,%CALLNAME%도 껴안고 돌려주어 왔다
+			PRINTFORML 당분간의 사이,무언으로 서로 껴안고 있었다
+		CASE 4
+			PRINTFORML %CALLNAME%를 껴안아 보았다
+			PRINTFORML 「청마?」
+			PRINTFORML 이상한 것 같게 하면서도,%CALLNAME%도 껴안고 돌려주어 왔다
+			PRINTFORML 『당분간,이대로 좋아?』
+			PRINTFORML 「…… 아아」
+			PRINTFORML %CALLNAME%가 더욱 강하게 껴안고 돌려주면,%CALLNAME:MASTER%도 고의로에 힘을 집중했다
+		CASE 3
+			PRINTFORML %CALLNAME%를 껴안아 보았다
+			PRINTFORML 그리고,그대로 들이마셔 보았다
+			PRINTFORML 「응?」
+			PRINTFORML -후~―
+			PRINTFORML 「저,저것 혹시 들이마시지 않은가?」
+			PRINTFORML 들이마시는─는―
+			PRINTFORML 「엣또……,……….」
+			PRINTFORML 당분간의 사이,%CALLNAME%는 무언으로 들이마셔지고 있었다
+		CASE 2
+			PRINTFORML %CALLNAME%를 껴안아 보았다
+			PRINTFORML 「청마?」
+			PRINTFORML 이상할 것 같은 소리를 지르는 %CALLNAME%
+			PRINTFORML 『수심자 성분의 충전중』
+			PRINTFORML 「풋,아하하 충전은,무엇이다 그것은 청마는 재미있는 말을 하지마」
+			PRINTFORML 웃으면서도%CALLNAME%는 %CALLNAME:MASTER%를 껴안고 돌려주어 왔다
+		CASE 1
+			PRINTFORML %CALLNAME%에 맛사지(건전)를 해 보았다
+			PRINTFORMW 엎드려 받아,열중하고 있는 것 같은 개소를 오로지 비비어 간다
+			PRINTFORML 「읏… 응,우…… 하,읏…」
+			PRINTFORMW ……….
+			PRINTFORML 「앗…… 거기…,……」
+			PRINTFORMW ……………….
+			PRINTFORML 「아,아아아……… 하,아…,좋다……」
+			PRINTFORML ……………………….
+		CASEELSE
+			PRINTFORML %CALLNAME%의 쿠로코의 수를 세어 보았다
+			PRINTFORML 「그,그런 곳에 쿠로코는 없다!」
+			PRINTFORML 『보지 않으면 모를 것이다? 자,벗기를 원하는데』
+	ENDSELECT
+	PRINTW
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM203,느긋하게한다 FIRSTTIME(303)
+;-------------------------------------------------
+@KOJO_COM_K174_203
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	;무서워해,반발라면 연주한다
+	SIF (CFLAG:5005 & 64) || (CFLAG:5005 & 32)
+		RETURN LOCAL
+	
+	PRINT 당분간의 사이,
+	
+	SELECTCASE RAND:3
+		CASE 2
+			IF !(TALENT:달마 || TALENT:양팔결손 || TALENT:PLAYER:달마 || TALENT:PLAYER:양팔결손) && RAND:2 == 0
+				PRINT 손를 서로 잡아
+			ELSE
+				PRINT 다가붙어
+			ENDIF
+		CASE 1
+			PRINT 창 밖을 바라보면서
+		CASEELSE
+			PRINT 침대 위에서
+	ENDSELECT
+	
+	SELECTCASE RAND:4
+		CASE 3
+			PRINTL 뒹굴뒹굴 하고 있었다
+		CASE 2
+			PRINTL 얘기를 해 시간을 보냈다
+		CASE 1
+			PRINTL 선잠을 했다
+		CASEELSE
+			PRINTL 멍하니 시간을 보냈다
+	ENDSELECT
+	
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM204,가사 FIRSTTIME(304)
+;-------------------------------------------------
+@KOJO_COM_K174_204
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM205,노래연습 FIRSTTIME(305)
+;-------------------------------------------------
+@KOJO_COM_K174_205
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM206,선물시킨다 FIRSTTIME(306)
+;-------------------------------------------------
+@KOJO_COM_K174_206
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM207,데이트간다 FIRSTTIME(307)
+;-------------------------------------------------
+@KOJO_COM_K174_207
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	;노출데이트
+	IF TFLAG:17 == 2
+	;보통 데이트
+	ELSE
+	ENDIF
+ENDIF
+RETURN LOCAL
+
+;=================================================
+;애무시킨다계 커맨드 FIRSTTIME(320~329)
+;=================================================
+;-------------------------------------------------
+;COM220,애무시킨다 FIRSTTIME(320)
+;-------------------------------------------------
+@KOJO_COM_K174_220
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM221,가슴을주무르게한다 FIRSTTIME(321)
+;-------------------------------------------------
+@KOJO_COM_K174_221
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM222,커닐링구스강제 FIRSTTIME(322)
+;-------------------------------------------------
+@KOJO_COM_K174_222
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM223,손가락삽입시킨다 FIRSTTIME(323)
+;-------------------------------------------------
+@KOJO_COM_K174_223
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM224,애널핥기강제 FIRSTTIME(324)
+;-------------------------------------------------
+@KOJO_COM_K174_224
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM225,애널애무시킨다 FIRSTTIME(325)
+;-------------------------------------------------
+@KOJO_COM_K174_225
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM226,자위과시한다 FIRSTTIME(326)
+;-------------------------------------------------
+@KOJO_COM_K174_226
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM227,자위과시한다 FIRSTTIME(327)
+;-------------------------------------------------
+@KOJO_COM_K174_227
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM228,벗겨보여주기 FIRSTTIME(328)
+;-------------------------------------------------
+@KOJO_COM_K174_228
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	;반발 혹은 미함락
+	IF (CFLAG:5005 & 32) || !KANRAKU(TARGET)
+		PRINTFORM %CALLNAME%는
+			;반발 녹고 혹은 녹고 강
+			SIF (CFLAG:5005 & 128) || (CFLAG:5005 & 16)
+				PRINTFORMW 목을 울리면서도,
+		PRINTFORML %CALLNAME:PLAYER%의페니스로부터 얼굴을 피하고 있다
+	;녹고 강 혹은음란창부
+	ELSEIF (CFLAG:5005 & 16) || KANRAKU(TARGET) == 2
+		PRINTFORM %CALLNAME%는
+			SIF KANRAKU(TARGET) == 1 || KANRAKU(TARGET) == 2
+				PRINT 넋을 잃은 눈으로
+		PRINTFORML 입를 반쯤 열려 있는 상태에시켜,%CALLNAME:PLAYER%의페니스에 넋을 잃고 보고 있다
+	ENDIF
+	
+ENDIF
+RETURN LOCAL
+
+;=================================================
+;역봉사·레즈비언 플레이계 커맨드 FIRSTTIME(340~349)
+;=================================================
+;-------------------------------------------------
+;COM240,파이즈리한다 FIRSTTIME(340)
+;-------------------------------------------------
+@KOJO_COM_K174_240
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM241,파이즈리펠라한다 FIRSTTIME(341)
+;-------------------------------------------------
+@KOJO_COM_K174_241
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM242,풋잡한다 FIRSTTIME(342)
+;-------------------------------------------------
+@KOJO_COM_K174_242
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM243,가슴을비빈다 FIRSTTIME(343)
+;-------------------------------------------------
+@KOJO_COM_K174_243
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM244,조개비비기 FIRSTTIME(344)
+;-------------------------------------------------
+@KOJO_COM_K174_244
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM245,장대비비기 FIRSTTIME(345)
+;-------------------------------------------------
+@KOJO_COM_K174_245
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;=================================================
+;노예×주인 섹스계 커맨드 FIRSTTIME(360~369)
+;=================================================
+;-------------------------------------------------
+;COM260,정상위시킨다 FIRSTTIME(360)
+;-------------------------------------------------
+@KOJO_COM_K174_260
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM261,후배위시킨다 FIRSTTIME(361)
+;-------------------------------------------------
+@KOJO_COM_K174_261
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM262,기승위 시키는 FIRSTTIME(362)
+;-------------------------------------------------
+@KOJO_COM_K174_262
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM263,정상위애널시킨다 FIRSTTIME(363)
+;-------------------------------------------------
+@KOJO_COM_K174_263
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM264,후배위애널시킨다 FIRSTTIME(364)
+;-------------------------------------------------
+@KOJO_COM_K174_264
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM265,기승위애널 시키는 FIRSTTIME(365)
+;-------------------------------------------------
+@KOJO_COM_K174_265
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;=================================================
+;조수×주인 섹스 커맨드 FIRSTTIME(370~379)
+;=================================================
+;-------------------------------------------------
+;COM270,촉수에범하게시킨다 FIRSTTIME(370)
+;-------------------------------------------------
+@KOJO_COM_K174_270
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM271,촉수에A를범하게시킨다 FIRSTTIME(371)
+;-------------------------------------------------
+@KOJO_COM_K174_271
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;=================================================
+;주인마조계 커맨드 FIRSTTIME(380~389)
+;=================================================
+;-------------------------------------------------
+;COM280,이라마치오시킨다 FIRSTTIME(380)
+;-------------------------------------------------
+@KOJO_COM_K174_280
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM281,매도당한다 FIRSTTIME(381)
+;-------------------------------------------------
+@KOJO_COM_K174_281
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM282,발을핥는다 FIRSTTIME(382)
+;-------------------------------------------------
+@KOJO_COM_K174_282
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM283,얻어맞는다 FIRSTTIME(383)
+;-------------------------------------------------
+@KOJO_COM_K174_283
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM284,채찍으로맞는다 FIRSTTIME(384)
+;-------------------------------------------------
+@KOJO_COM_K174_284
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM285,음뇨한다 FIRSTTIME(385)
+;-------------------------------------------------
+@KOJO_COM_K174_285
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+;-------------------------------------------------
+;COM286,식분한다 FIRSTTIME(386)
+;-------------------------------------------------
+@KOJO_COM_K174_286
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	;지문 호출(칼라 변경 대응)
+	CALL TRAIN_MESSAGE_COLOR
+	
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+RETURN LOCAL
+
+

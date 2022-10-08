@@ -1,0 +1,126 @@
+﻿;-------------------------------------------------
+;촛불고문
+;SM계 커맨드
+;-------------------------------------------------
+@COM144
+
+PRINTL 촛불고문
+STR:0 = 촛불고문
+CALL KOJO_MESSAGE_COM
+
+;사용한 아이템 줄인다
+ITEM:46 -= 1
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;성기
+IF TFLAG:56 == 1
+	IF TEQUIP:지하실
+		;소비체력, 기력
+		LOSEBASE:체력 += 100
+		LOSEBASE:기력 += 125
+		
+		SOURCE:통증 += 4000
+	ELSE
+		;소비체력, 기력
+		LOSEBASE:체력 += 75
+		LOSEBASE:기력 += 100
+		
+		SOURCE:통증 += 2500
+	ENDIF
+	SOURCE:쾌C += 100
+;설
+ELSEIF TFLAG:56 == 3
+	IF TEQUIP:지하실
+		;소비체력, 기력
+		LOSEBASE:체력 += 75
+		LOSEBASE:기력 += 100
+		
+		SOURCE:통증 += 2500
+	ELSE
+		;소비체력, 기력
+		LOSEBASE:체력 += 50
+		LOSEBASE:기력 += 80
+		
+		SOURCE:통증 += 2000
+	ENDIF
+;유두
+ELSEIF TFLAG:56 == 2
+	IF TEQUIP:지하실
+		;소비체력, 기력
+		LOSEBASE:체력 += 50
+		LOSEBASE:기력 += 80
+		
+		SOURCE:통증 += 2500
+	ELSE
+		;소비체력, 기력
+		LOSEBASE:체력 += 30
+		LOSEBASE:기력 += 50
+		
+		SOURCE:통증 += 1000
+	ENDIF
+	SOURCE:쾌B += 100
+ELSE
+	IF TEQUIP:지하실
+		;소비체력, 기력
+		LOSEBASE:체력 += 30
+		LOSEBASE:기력 += 50
+		
+		SOURCE:통증 += 1000
+	ELSE
+		;소비체력, 기력
+		LOSEBASE:체력 += 10
+		LOSEBASE:기력 += 30
+		
+		SOURCE:통증 += 700
+	ENDIF
+ENDIF
+
+SOURCE:두려움 += 700
+;지하실에 있으면두려움의 소스 추가
+SIF TEQUIP:지하실
+	TIMES SOURCE:두려움, 1.50
+
+SOURCE:일탈 += 150
+SOURCE:반발 += 700
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;고통의 파라미터에 의한고통의 소스 증가는 먼저 처리해 둔다
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증, 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증, 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증, 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증, 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증, 3.00
+ENDIF
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;게이경험라든지 가산
+CALL COM_EXP(2)
+
+;의존도 벡터
+TFLAG:33 = 3
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+

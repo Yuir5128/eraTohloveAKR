@@ -1,0 +1,677 @@
+﻿;EVENT_A.ERB、EVENT_ABILITY、能力や素質の変化イベント
+@EVENTCHECK_ABL
+SIF TARGET >= 0
+	CALL EVENTCHECK_T
+SIF MASTER >= 0
+	CALL EVENTCHECK_M
+SIF ASSI >= 0
+	CALL EVENTCHECK_A
+
+;調教者変更拡張用・恋慕対象記録フラグ判定
+;もし記録されている思慕・畏怖対象が現在のマスターではない場合、一時的に解除（日付変更イベ飛ばしのため
+CALL MASTER_CHANGE_OFF
+
+
+;---------------------------------------------------------
+;陥落素質
+;---------------------------------------------------------
+;陥落素質の多重取得を封印
+@EVENTCHECK_T
+IF !TALENT:恋慕 && !TALENT:淫乱 && !TALENT:服従 && !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属 && !TALENT:崩壊 && !TALENT:失意
+	;被調教経験の合計からマスター調教の経験を引いて助手調教経験を算出
+	A = 0
+	REPEAT FLAG:44
+		B = COUNT + 1099
+		A += CFLAG:B
+	REND
+	LOCAL = NO:MASTER + 1099
+	A -= CFLAG:LOCAL
+
+	;恋慕：従順、奉仕精神3以上+屈服刻印Lv3+反発刻印Lv0+奉仕快楽経験200以上+依存度1000以上+異常経験2未満+現在のマスターからの被調教経験1000以上
+	IF ABL:従順 >= 3 && ABL:奉仕精神 >= 3 && MARK:屈服刻印 == 3 && MARK:反発刻印 == 0 && EXP:奉仕快楽経験 >= 200 && CFLAG:2 >= 1000 && EXP:異常経験 < 2 && CFLAG:(NO:MASTER + 1099) >= 1000
+		TFLAG:13 = 46
+		CALL KOJO_MESSAGE_EVENT
+		SIF TARGET < 0
+			RETURN 0
+		PRINTFORMW %NAME:TARGET%は【恋慕】を得た
+		PRINTL 　
+		TALENT:恋慕 = 1
+		FLAG:30 += 1
+		;調教者変更拡張用・恋慕対象記録フラグ
+		CFLAG:41 =  NO:MASTER
+		CFLAG:40 = 1
+		CFLAG:39 = 3
+
+		CALL RELATION_CHECK(LOCAL)
+	ENDIF
+
+	;淫乱：欲望3以上+CVAB感覚合計10以上+快楽刻印Lv3+屈服刻印Lv3+反発刻印Lv0+絶頂経験50以上+異常経験3以上or異常経験1以上+助手調教経験1000以上or助手調教経験2000以上
+	IF ABL:欲望 >= 3 && ABL:Ｃ感覚+ABL:Ｖ感覚+ABL:Ａ感覚+ABL:Ｂ感覚 >= 10 && MARK:快楽刻印 == 3 && MARK:屈服刻印 == 3 && MARK:反発刻印 == 0 && EXP:絶頂経験 >= 50 && !TALENT:恋慕
+		IF EXP:異常経験 >= 3 || (EXP:異常経験 >= 1 && A >= 1000) || A >= 2000
+			TFLAG:13 = 47
+			CALL KOJO_MESSAGE_EVENT
+			SIF TARGET < 0
+				RETURN 0
+			PRINTFORMW %NAME:TARGET%は【淫乱】を得た
+			PRINTL 　
+			TALENT:淫乱 = 1
+			FLAG:31 += 1
+			CFLAG:39 = 4
+			CALL RELATION_CHECK(LOCAL)
+		ENDIF
+	ENDIF
+
+	;服従：従順、マゾっ気3以上+CAVB感覚10未満+屈服刻印Lv3+反発刻印Lv0+苦痛快楽経験+緊縛経験200以上+依存度-1000以下+異常経験2以上
+	I = CFLAG:2 * -1
+	IF ABL:従順 >= 3 && ABL:マゾっ気 >= 3 && ABL:Ｃ感覚+ABL:Ｖ感覚+ABL:Ａ感覚+ABL:Ｂ感覚 < 10 && MARK:屈服刻印 == 3 && MARK:反発刻印 == 0 && EXP:苦痛快楽経験+EXP:緊縛経験 >= 200 && I >= 1000 && EXP:異常経験 >= 2
+		TFLAG:13 = 48
+		CALL KOJO_MESSAGE_EVENT
+		SIF TARGET < 0
+			RETURN 0
+		PRINTFORMW %NAME:TARGET%は【服従】を得た
+		PRINTL 　
+		TALENT:服従 = 1
+		FLAG:32 += 1
+		;調教者変更拡張用・畏怖対象記録フラグ
+		CFLAG:41 =  NO:MASTER
+		CFLAG:40 = 1
+		CFLAG:39 = 5
+
+		CALL RELATION_CHECK(LOCAL)
+	ENDIF
+
+ENDIF
+
+
+IF !TALENT:親愛 && !TALENT:娼婦 && !TALENT:隷属 && !TALENT:崩壊
+	;被調教経験の合計からマスター調教の経験を引いて助手調教経験を算出
+	A = 0
+	REPEAT FLAG:44
+		B = COUNT + 1099
+		A += CFLAG:B
+	REND
+	M = NO:MASTER + 1099
+	A -= CFLAG:M
+
+	;親愛:従順、奉仕精神5以上+反発刻印Lv0+愛情経験200以上+奉仕快楽経験400以上+依存度3000以上+異常経験5未満+現在のマスターからの被調教経験1500以上
+	IF ABL:従順 >= 5 && ABL:奉仕精神 >= 5 && MARK:反発刻印 == 0 && EXP:愛情経験 >= 200 && EXP:奉仕快楽経験 >= 400 && CFLAG:2 >= 3000 && EXP:異常経験 < 5 && CFLAG:(NO:MASTER + 1099) >= 1500
+		TFLAG:13 = 49
+		CALL KOJO_MESSAGE_EVENT
+		SIF TARGET < 0
+			RETURN 0
+		PRINTFORMW %NAME:TARGET%は【親愛】を得た
+		TALENT:恋慕 = 0
+		TALENT:淫乱 = 0
+		TALENT:服従 = 0
+		TALENT:親愛 = 1
+		CFLAG:39 = 6
+		;調教者変更用の
+		IF CFLAG:MASTER:39 == 6 && CFLAG:MASTER:41 == NO:TARGET && TALENT:MASTER:相愛 == 0 && TALENT:相愛 == 0
+			PRINTL 
+			TFLAG:13 = 53
+			CALL KOJO_MESSAGE_EVENT
+			SIF TARGET < 0
+				RETURN 0
+			PRINTFORMW %NAME:MASTER%と%NAME:TARGET%は【相愛】になった
+			TALENT:MASTER:相愛 = 1
+			TALENT:相愛 = 1
+			CFLAG:39 = 165
+			CFLAG:MASTER:39 = 165
+		ENDIF
+		PRINTL 　
+	ENDIF
+	;娼婦：欲望5以上+CVAB感覚合計20以上+反発刻印Lv0+絶頂経験200以上+異常経験6以上or異常経験4以上+助手調教経験2000以上or異常経験3以上+助手調教経験3000以上
+	IF ABL:欲望 >= 5 && ABL:Ｃ感覚+ABL:Ｖ感覚+ABL:Ａ感覚+ABL:Ｂ感覚 >= 20 && MARK:反発刻印 == 0 && EXP:絶頂経験 >= 200
+		IF EXP:異常経験 >= 6 || (EXP:異常経験 >= 4 && A >= 2000) || (EXP:異常経験 >= 3 && A >= 3000)
+			TFLAG:13 = 50
+			CALL KOJO_MESSAGE_EVENT
+			SIF TARGET < 0
+				RETURN 0
+			PRINTFORMW %NAME:TARGET%は【娼婦】を得た
+			PRINTL 　
+			TALENT:恋慕 = 0
+			TALENT:淫乱 = 0
+			TALENT:服従 = 0
+			TALENT:娼婦 = 1
+			CFLAG:39 = 7
+		ENDIF
+	ENDIF
+
+	;隷属：従順、マゾっ気5以上+CAVB感覚15未満+反発刻印Lv0+苦痛快楽経験+緊縛経験500以上+依存度-3000以下+異常経験5以上
+	I = CFLAG:2 * -1
+	IF ABL:従順 >= 5 && ABL:マゾっ気 >= 5 && ABL:Ｃ感覚+ABL:Ｖ感覚+ABL:Ａ感覚+ABL:Ｂ感覚 < 15 && MARK:反発刻印 == 0 && EXP:苦痛快楽経験+EXP:緊縛経験 >= 500 && I >= 3000 && EXP:異常経験 >= 5
+		TFLAG:13 = 51
+		CALL KOJO_MESSAGE_EVENT
+		SIF TARGET < 0
+			RETURN 0
+		PRINTFORMW %NAME:TARGET%は【隷属】を得た
+		PRINTL 　
+		TALENT:恋慕 = 0
+		TALENT:淫乱 = 0
+		TALENT:服従 = 0
+		TALENT:隷属 = 1
+		CFLAG:39 = 8
+	ENDIF
+
+ENDIF
+
+;---------------------------------------------------------
+;その他奴隷の素質および能力
+;---------------------------------------------------------
+LOCAL:1 = 1000 + NO:TARGET
+;特殊性感素質、前周回で獲得経験が無ければ一つしか取得はできない（重複した場合は上から優先）
+;セックス中毒4以上、性交経験250以上、絶頂経験200以上
+IF ABL:セックス中毒 >= 4 && EXP:性交経験 >= 250 && EXP:絶頂経験 >= 200 && ((!TALENT:自慰狂い && !TALENT:淫壺 && !TALENT:尻穴狂い && !TALENT:淫乳 && !TALENT:セックス狂) || (FLAG:(LOCAL:1) & 1 && !TALENT:セックス狂))
+	TFLAG:13 = 55
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【セックス狂】を得た
+	PRINTL 　
+	TALENT:セックス狂 = 1
+	FLAG:(LOCAL:1) |= 1
+ENDIF
+;自慰狂い：Ｃ感覚5以上、調教自慰経験+自慰経験300以上、絶頂経験200以上
+IF ABL:Ｃ感覚 >= 5 && EXP:調教自慰経験+EXP:自慰経験 >= 300 && EXP:絶頂経験 >= 200 && ((!TALENT:自慰狂い && !TALENT:淫壺 && !TALENT:尻穴狂い && !TALENT:淫乳 && !TALENT:セックス狂) || (FLAG:(LOCAL:1) & 16 && !TALENT:自慰狂い))
+	TFLAG:13 = 56
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【自慰狂い】を得た
+	PRINTL 　
+	TALENT:自慰狂い = 1
+	FLAG:(LOCAL:1) |= 16
+ENDIF
+
+;淫壺：Ｖ感覚5以上、Ｖ経験400以上、絶頂経験200以上
+IF ABL:Ｖ感覚 >= 5 && EXP:Ｖ経験 >= 400 && EXP:絶頂経験 >= 200 && ((!TALENT:自慰狂い && !TALENT:淫壺 && !TALENT:尻穴狂い && !TALENT:淫乳 && !TALENT:セックス狂) || (FLAG:(LOCAL:1) & 8 && !TALENT:淫壺))
+	TFLAG:13 = 57
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【淫壺】を得た
+	PRINTL 　
+	TALENT:淫壺 = 1
+	FLAG:(LOCAL:1) |= 8
+ENDIF
+
+;尻穴狂い：Ａ感覚5以上、Ａ経験400以上、絶頂経験200以上
+IF ABL:Ａ感覚 >= 5 && EXP:Ａ経験 >= 400 && EXP:絶頂経験 >= 200 && ((!TALENT:自慰狂い && !TALENT:淫壺 && !TALENT:尻穴狂い && !TALENT:淫乳 && !TALENT:セックス狂) || (FLAG:(LOCAL:1) & 4 && !TALENT:尻穴狂い))
+	TFLAG:13 = 58
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【尻穴狂い】を得た
+	PRINTL 　
+	TALENT:尻穴狂い = 1
+	FLAG:(LOCAL:1) |= 4
+ENDIF
+
+;淫乳：Ｂ感覚5以上、噴乳経験+Ｂ射精経験150以上、絶頂経験200以上
+IF ABL:Ｂ感覚 >= 5 && (EXP:噴乳経験+EXP:Ｂ射精経験 ) >= 150 && EXP:絶頂経験 >= 200 && ((!TALENT:自慰狂い && !TALENT:淫壺 && !TALENT:尻穴狂い && !TALENT:淫乳 && !TALENT:セックス狂) || (FLAG:(LOCAL:1) & 2 && !TALENT:淫乳))
+	TFLAG:13 = 59
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【淫乳】を得た
+	PRINTL 　
+	TALENT:淫乳 = 1
+	FLAG:(LOCAL:1) |= 2
+ENDIF
+
+;即落ち：淫系素質コンプ
+IF !TALENT:即落ち && TALENT:自慰狂い && TALENT:淫壺 && TALENT:尻穴狂い && TALENT:淫乳 && TALENT:セックス狂
+	TFLAG:13 = 60
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【即落ち】を得た
+	PRINTL 　
+	TALENT:即落ち = 1
+	FLAG:(LOCAL:1) |= 32
+ENDIF
+
+;特殊性癖素質
+;サド：サドっ気Lv5以上、嗜虐快楽経験３００以上
+IF ABL:サドっ気 >= 5 && EXP:嗜虐快楽経験 >= 300 && TALENT:サド == 0
+	TFLAG:13 = 61
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【サド】を得た
+	PRINTL 　
+	TALENT:サド = 1
+;ドＳ：サドっ気Lv８以上、嗜虐快楽経験１０００以上
+ELSEIF ABL:サドっ気 >= 8 && EXP:嗜虐快楽経験 >= 1000 && TALENT:サド == 1
+	TFLAG:13 = 63
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【ドＳ】を得た
+	PRINTL 　
+	TALENT:サド = 2
+ENDIF
+
+;マゾ：マゾっ気Lv5以上、苦痛快楽経験３００以上
+IF ABL:マゾっ気 >= 5 && EXP:苦痛快楽経験 >= 300 && TALENT:マゾ == 0
+	TFLAG:13 = 62
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【マゾ】を得た
+	PRINTL 　
+	TALENT:マゾ = 1
+;ドＭ：マゾっ気Lv８以上、苦痛快楽経験１０００以上
+ELSEIF ABL:マゾっ気 >= 8 && EXP:苦痛快楽経験 >= 1000 && TALENT:マゾ == 1
+	TFLAG:13 = 64
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【ドＭ】を得た
+	PRINTL 　
+	TALENT:マゾ = 2
+ENDIF
+
+;舌使い：フェラ経験200以上、精飲絶頂経験50以上もしくは精液中毒Lv４以上
+IF EXP:フェラ経験 >= 200 && (EXP:精飲絶頂経験 >= 50 || ABL:精液中毒 >= 4) && TALENT:舌使い == 0
+	TFLAG:13 = 80
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%は【舌使い】を得た
+	PRINTL 　
+	TALENT:舌使い = 1
+ENDIF
+
+;---------------------------------------------------------
+;主人の素質および能力
+;---------------------------------------------------------
+@EVENTCHECK_M
+;主人の技巧：調教経験が20、100、250、400、600のたびに上昇、Lv５まで
+;素質：習得早い、指さばき、謎の魅力、禁断の知識のいずれかがあるときLv１０まで
+;調教経験が、1000、1500、2000、3000、5000のたびに上昇
+IF TALENT:MASTER:習得早い || TALENT:MASTER:指さばき || TALENT:MASTER:謎の魅力 || TALENT:MASTER:禁断の知識
+	IF EXP:MASTER:調教経験 >= 5000 && ABL:MASTER:技巧 <= 9
+		ABL:MASTER:技巧 = 10
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:2%が{ABL:MASTER:技巧}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:調教経験 >= 3000 && ABL:MASTER:技巧 <= 8
+		ABL:MASTER:技巧 = 9
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:2%が{ABL:MASTER:技巧}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:調教経験 >= 2000 && ABL:MASTER:技巧 <= 7
+		ABL:MASTER:技巧 = 8
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:2%が{ABL:MASTER:技巧}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:調教経験 >= 1500 && ABL:MASTER:技巧 <= 6
+		ABL:MASTER:技巧 = 7
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:2%が{ABL:MASTER:技巧}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:調教経験 >= 1000 && ABL:MASTER:技巧 <= 5
+		ABL:MASTER:技巧 = 6
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:2%が{ABL:MASTER:技巧}に上がった
+		PRINTL 　
+	ENDIF
+ENDIF
+IF EXP:MASTER:調教経験 >= 600 && ABL:MASTER:技巧 <= 4
+	ABL:MASTER:技巧 = 5
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:2%が{ABL:MASTER:技巧}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:調教経験 >= 400 && ABL:MASTER:技巧 <= 3
+	ABL:MASTER:技巧 = 4
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:2%が{ABL:MASTER:技巧}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:調教経験 >= 250 && ABL:MASTER:技巧 <= 2
+	ABL:MASTER:技巧 = 3
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:2%が{ABL:MASTER:技巧}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:調教経験 >= 100 && ABL:MASTER:技巧 <= 1
+	ABL:MASTER:技巧 = 2
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:2%が{ABL:MASTER:技巧}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:調教経験 >= 20 && ABL:MASTER:技巧 <= 0
+	ABL:MASTER:技巧 = 1
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:2%が{ABL:MASTER:技巧}に上がった
+	PRINTL 　
+ENDIF
+
+;主人のサドっ気：嗜虐快楽経験が10、20、50、100、200のたびに上昇、Lv５まで
+;【サド】があるとき、Lv１０まで、嗜虐快楽経験300、500、700、1000、2000で上昇
+IF TALENT:MASTER:サド
+	IF EXP:MASTER:嗜虐快楽経験 >= 2000 && ABL:MASTER:サドっ気 <= 9
+		ABL:MASTER:サドっ気 = 10
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:10%が{ABL:MASTER:サドっ気}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:嗜虐快楽経験 >= 1000 && ABL:MASTER:サドっ気 <= 8
+		ABL:MASTER:サドっ気 = 9
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:10%が{ABL:MASTER:サドっ気}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:嗜虐快楽経験 >= 700 && ABL:MASTER:サドっ気 <= 7
+		ABL:MASTER:サドっ気 = 8
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:10%が{ABL:MASTER:サドっ気}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:嗜虐快楽経験 >= 500 && ABL:MASTER:サドっ気 <= 6
+		ABL:MASTER:サドっ気 = 7
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:10%が{ABL:MASTER:サドっ気}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:嗜虐快楽経験 >= 300 && ABL:MASTER:サドっ気 <= 5
+		ABL:MASTER:サドっ気 = 6
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:10%が{ABL:MASTER:サドっ気}に上がった
+		PRINTL 　
+	ENDIF
+ENDIF
+IF EXP:MASTER:嗜虐快楽経験 >= 200 && ABL:MASTER:サドっ気 <= 4
+	ABL:MASTER:サドっ気 = 5
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:10%が{ABL:MASTER:サドっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:嗜虐快楽経験 >= 100 && ABL:MASTER:サドっ気 <= 3
+	ABL:MASTER:サドっ気 = 4
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:10%が{ABL:MASTER:サドっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:嗜虐快楽経験 >= 50 && ABL:MASTER:サドっ気 <= 2
+	ABL:MASTER:サドっ気 = 3
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:10%が{ABL:MASTER:サドっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:嗜虐快楽経験 >= 20 && ABL:MASTER:サドっ気 <= 1
+	ABL:MASTER:サドっ気 = 2
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:10%が{ABL:MASTER:サドっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:嗜虐快楽経験 >= 10 && ABL:MASTER:サドっ気 <= 0
+	ABL:MASTER:サドっ気 = 1
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:10%が{ABL:MASTER:サドっ気}に上がった
+	PRINTL 　
+ENDIF
+
+;主人のマゾっ気：苦痛快楽経験が10、20、50、100、200のたびに上昇、Lv５まで
+;【マゾ】があるとき、Lv１０まで、苦痛快楽経験300、500、700、1000、2000で上昇
+IF TALENT:MASTER:マゾ
+	IF EXP:MASTER:苦痛快楽経験 >= 2000 && ABL:MASTER:マゾっ気 <= 9
+		ABL:MASTER:マゾっ気 = 10
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:9%が{ABL:MASTER:マゾっ気}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:苦痛快楽経験 >= 1000 && ABL:MASTER:マゾっ気 <= 8
+		ABL:MASTER:マゾっ気 = 9
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:9%が{ABL:MASTER:マゾっ気}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:苦痛快楽経験 >= 700 && ABL:MASTER:マゾっ気 <= 7
+		ABL:MASTER:マゾっ気 = 8
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:9%が{ABL:MASTER:マゾっ気}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:苦痛快楽経験 >= 500 && ABL:MASTER:マゾっ気 <= 6
+		ABL:MASTER:マゾっ気 = 7
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:9%が{ABL:MASTER:マゾっ気}に上がった
+		PRINTL 　
+	ELSEIF EXP:MASTER:苦痛快楽経験 >= 300 && ABL:MASTER:マゾっ気 <= 5
+		ABL:MASTER:マゾっ気 = 6
+		PRINTFORMW %NAME:MASTER%の%ABLNAME:9%が{ABL:MASTER:マゾっ気}に上がった
+		PRINTL 　
+	ENDIF
+ENDIF
+IF EXP:MASTER:苦痛快楽経験 >= 200 && ABL:MASTER:マゾっ気 <= 4
+	ABL:MASTER:マゾっ気 = 5
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:9%が{ABL:MASTER:マゾっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:苦痛快楽経験 >= 100 && ABL:MASTER:マゾっ気 <= 3
+	ABL:MASTER:マゾっ気 = 4
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:9%が{ABL:MASTER:マゾっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:苦痛快楽経験 >= 50 && ABL:MASTER:マゾっ気 <= 2
+	ABL:MASTER:マゾっ気 = 3
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:9%が{ABL:MASTER:マゾっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:苦痛快楽経験 >= 20 && ABL:MASTER:マゾっ気 <= 1
+	ABL:MASTER:マゾっ気 = 2
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:9%が{ABL:MASTER:マゾっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:苦痛快楽経験 >= 10 && ABL:MASTER:マゾっ気 <= 0
+	ABL:MASTER:マゾっ気 = 1
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:9%が{ABL:MASTER:マゾっ気}に上がった
+	PRINTL 　
+ENDIF
+
+;主人の撮影技能：撮影経験が10、30、60、100、150のたびに上昇、Lv５まで
+IF EXP:MASTER:撮影経験 >= 150 && ABL:MASTER:撮影技能 <= 4
+	ABL:MASTER:撮影技能 = 5
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:13%が{ABL:MASTER:撮影技能}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:撮影経験 >= 100 && ABL:MASTER:撮影技能 <= 3
+	ABL:MASTER:撮影技能 = 4
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:13%が{ABL:MASTER:撮影技能}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:撮影経験 >= 60 && ABL:MASTER:撮影技能 <= 2
+	ABL:MASTER:撮影技能 = 3
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:13%が{ABL:MASTER:撮影技能}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:撮影経験 >= 30 && ABL:MASTER:撮影技能 <= 1
+	ABL:MASTER:撮影技能 = 2
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:13%が{ABL:MASTER:撮影技能}に上がった
+	PRINTL 　
+ELSEIF EXP:MASTER:撮影経験 >= 10 && ABL:MASTER:撮影技能 <= 0
+	ABL:MASTER:撮影技能 = 1
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:13%が{ABL:MASTER:撮影技能}に上がった
+	PRINTL 　
+ENDIF
+
+;主人の絶倫：調教者の射精経験が200以上で取得
+IF EXP:MASTER:射精経験 >= 200 && TALENT:MASTER:絶倫 == 0 && TALENT:MASTER:オトコ == 1
+	PRINTFORMW %NAME:MASTER%は【絶倫】を身につけた
+	TALENT:MASTER:絶倫 = 1
+ENDIF
+
+;主人の謎の魅力：恋慕･服従にした奴隷の数が5人以上
+B = 0
+REPEAT CHARANUM
+	A = COUNT
+	SIF CFLAG:A:40 && CFLAG:A:41 == NO:MASTER
+		B += 1
+REND
+IF B >= 5 && TALENT:MASTER:謎の魅力 == 0
+	PRINTFORMW %NAME:MASTER%は【謎の魅力】を身につけた
+	TALENT:MASTER:謎の魅力 = 1
+ENDIF
+
+;指さばき：技巧５以上、陥落ルート各一人以上いること
+;B = 0
+;C = 0
+;D = 0
+;更に調教者変更がオンの場合に制限
+;REPEAT CHARANUM
+;	A = COUNT
+;	SIF (TALENT:A:恋慕 || TALENT:A:親愛) && CFLAG:A:40 && CFLAG:A:41 == NO:MASTER
+;		B += 1
+;	SIF (TALENT:A:服従 || TALENT:A:隷属) && CFLAG:A:40 && CFLAG:A:41 == NO:MASTER
+;		C += 1
+;	SIF TALENT:A:淫乱 || TALENT:A:娼婦
+;		D += 1
+;REND
+;IF ABL:MASTER:技巧 >= 5 && B && C && D && TALENT:MASTER:指さばき == 0
+;	PRINTFORMW %NAME:MASTER%は【指さばき】を身につけた
+;	TALENT:MASTER:指さばき = 1
+;ENDIF
+
+;主人のサド：サドっ気がLv5以上、嗜虐快楽経験300以上でサド
+IF ABL:MASTER:サドっ気 >= 5 && EXP:MASTER:嗜虐快楽経験 >= 300 && !TALENT:MASTER:サド
+	PRINTFORMW %NAME:MASTER%は【サド】を身につけた
+	TALENT:MASTER:サド = 1
+;主人のドＳ：サドっ気Lv８以上、嗜虐快楽経験１０００以上、技巧Lv８以上、ドМでない
+ELSEIF ABL:MASTER:サドっ気 >= 8 && EXP:MASTER:嗜虐快楽経験 >= 1000 && ABL:MASTER:技巧 >= 4 && TALENT:MASTER:サド == 1
+	PRINTFORMW %NAME:MASTER%は【ドＳ】を身につけた
+	TALENT:MASTER:サド = 2
+ENDIF
+
+;主人のマゾ：マゾっ気がLv5以上、苦痛快楽経験300以上でサド
+IF ABL:MASTER:マゾっ気 >= 5 && EXP:MASTER:苦痛快楽経験 >= 300 && !TALENT:MASTER:マゾ
+	PRINTFORMW %NAME:MASTER%は【マゾ】を身につけた
+	TALENT:MASTER:マゾ = 1
+;主人のドＭ：マゾっ気Lv８以上、苦痛快楽経験１０００以上、ドＳでない
+ELSEIF ABL:MASTER:マゾっ気 >= 8 && EXP:MASTER:苦痛快楽経験 >= 1000 && TALENT:MASTER:マゾ == 1
+	PRINTFORMW %NAME:MASTER%は【ドМ】を身につけた
+	TALENT:MASTER:マゾ = 2
+ENDIF
+
+SIF TARGET > 0 && CFLAG:MASTER:1 == 3
+	CALL YEARN_FOR
+
+;主人のスカ中毒：スカ経験１０以上
+IF EXP:MASTER:スカ経験 >= 10 && ABL:MASTER:スカ中毒 == 0
+	ABL:MASTER:スカ中毒 = 1
+	PRINTFORMW %NAME:MASTER%の%ABLNAME:22%が{ABL:MASTER:スカ中毒}に上がった
+ENDIF
+;---------------------------------------------------------
+;助手の素質および能力
+;---------------------------------------------------------
+@EVENTCHECK_A
+;助手の技巧：調教経験が20、100、250、400、600のたびに上昇、Lv５まで
+IF EXP:ASSI:調教経験 >= 600 && ABL:ASSI:技巧 <= 4
+	ABL:ASSI:技巧 = 5
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:2%が{ABL:ASSI:技巧}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:調教経験 >= 400 && ABL:ASSI:技巧 <= 3
+	ABL:ASSI:技巧 = 4
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:2%が{ABL:ASSI:技巧}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:調教経験 >= 250 && ABL:ASSI:技巧 <= 2
+	ABL:ASSI:技巧 = 3
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:2%が{ABL:ASSI:技巧}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:調教経験 >= 100 && ABL:ASSI:技巧 <= 1
+	ABL:ASSI:技巧 = 2
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:2%が{ABL:ASSI:技巧}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:調教経験 >= 20 && ABL:ASSI:技巧 <= 0
+	ABL:ASSI:技巧 = 1
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:2%が{ABL:ASSI:技巧}に上がった
+	PRINTL 　
+ENDIF
+
+;助手のサドっ気：嗜虐快楽経験が10、20、50、100、200のたびに上昇、Lv５まで
+IF EXP:ASSI:嗜虐快楽経験 >= 200 && ABL:ASSI:サドっ気 <= 4
+	ABL:ASSI:サドっ気 = 5
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:10%が{ABL:ASSI:サドっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:嗜虐快楽経験 >= 100 && ABL:ASSI:サドっ気 <= 3
+	ABL:ASSI:サドっ気 = 4
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:10%が{ABL:ASSI:サドっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:嗜虐快楽経験 >= 50 && ABL:ASSI:サドっ気 <= 2
+	ABL:ASSI:サドっ気 = 3
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:10%が{ABL:ASSI:サドっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:嗜虐快楽経験 >= 20 && ABL:ASSI:サドっ気 <= 1
+	ABL:ASSI:サドっ気 = 2
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:10%が{ABL:ASSI:サドっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:嗜虐快楽経験 >= 10 && ABL:ASSI:サドっ気 <= 0
+	ABL:ASSI:サドっ気 = 1
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:10%が{ABL:ASSI:サドっ気}に上がった
+	PRINTL 　
+ENDIF
+
+;助手のマゾっ気：苦痛快楽経験が10、20、50、100、200のたびに上昇、Lv５まで
+IF EXP:ASSI:苦痛快楽経験 >= 200 && ABL:ASSI:マゾっ気 <= 4
+	ABL:ASSI:マゾっ気 = 5
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:9%が{ABL:ASSI:マゾっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:苦痛快楽経験 >= 100 && ABL:ASSI:マゾっ気 <= 3
+	ABL:ASSI:マゾっ気 = 4
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:9%が{ABL:ASSI:マゾっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:苦痛快楽経験 >= 50 && ABL:ASSI:マゾっ気 <= 2
+	ABL:ASSI:マゾっ気 = 3
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:9%が{ABL:ASSI:マゾっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:苦痛快楽経験 >= 20 && ABL:ASSI:マゾっ気 <= 1
+	ABL:ASSI:マゾっ気 = 2
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:9%が{ABL:ASSI:マゾっ気}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:苦痛快楽経験 >= 10 && ABL:ASSI:マゾっ気 <= 0
+	ABL:ASSI:マゾっ気 = 1
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:9%が{ABL:ASSI:マゾっ気}に上がった
+	PRINTL 　
+ENDIF
+
+;助手の撮影技能：撮影経験が10、30、60、100、150のたびに上昇、Lv５まで
+IF EXP:ASSI:撮影経験 >= 150 && ABL:ASSI:撮影技能 <= 4
+	ABL:ASSI:撮影技能 = 5
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:13%が{ABL:ASSI:撮影技能}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:撮影経験 >= 100 && ABL:ASSI:撮影技能 <= 3
+	ABL:ASSI:撮影技能 = 4
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:13%が{ABL:ASSI:撮影技能}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:撮影経験 >= 60 && ABL:ASSI:撮影技能 <= 2
+	ABL:ASSI:撮影技能 = 3
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:13%が{ABL:ASSI:撮影技能}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:撮影経験 >= 30 && ABL:ASSI:撮影技能 <= 1
+	ABL:ASSI:撮影技能 = 2
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:13%が{ABL:ASSI:撮影技能}に上がった
+	PRINTL 　
+ELSEIF EXP:ASSI:撮影経験 >= 10 && ABL:ASSI:撮影技能 <= 0
+	ABL:ASSI:撮影技能 = 1
+	PRINTFORMW %NAME:ASSI%の%ABLNAME:13%が{ABL:ASSI:撮影技能}に上がった
+	PRINTL 　
+ENDIF
+
+;助手のサド：サドっ気がLv４以上、嗜虐快楽経験300以上でサド
+IF ABL:ASSI:サドっ気 >= 4 && EXP:ASSI:嗜虐快楽経験 >= 300 && TALENT:ASSI:サド == 0
+	PRINTFORMW %CALLNAME:ASSI%の様子がおかしい
+	PRINTFORML %CALLNAME:ASSI%は人を痛めつける喜びに目覚めたようだ
+	PRINTFORMW %NAME:ASSI%は【サド】を身につけた
+	TALENT:ASSI:サド = 1
+;助手のドＳ：サドっ気Lv８以上、嗜虐快楽経験１０００以上、技巧Lv８以上、ドМでない
+ELSEIF ABL:ASSI:サドっ気 >= 8 && EXP:ASSI:嗜虐快楽経験 >= 1000 && ABL:ASSI:技巧 >= 4 && TALENT:ASSI:サド == 1 && TALENT:ASSI:マゾ < 2
+	PRINTFORMW %CALLNAME:ASSI%のこちらを見る目がおかしい
+	PRINTFORML %CALLNAME:ASSI%は人を痛めつけ、虐げることにすっかり夢中のようだ
+	PRINTFORMW %NAME:ASSI%は【ドＳ】を得た
+	PRINTL 　
+	TALENT:ASSI:サド = 2
+ENDIF
+
+;助手のマゾ：マゾっ気がLv４以上、苦痛快楽経験300以上でマゾ
+IF ABL:ASSI:マゾっ気 >= 4 && EXP:ASSI:苦痛快楽経験 >= 300 && TALENT:ASSI:マゾ == 0
+	PRINTFORMW %CALLNAME:ASSI%の様子がおかしい
+	PRINTFORML %CALLNAME:ASSI%は体を痛めつけられる喜びに目覚めたようだ
+	PRINTFORMW %NAME:ASSI%は【マゾ】を身につけた
+	PRINTL 　
+	TALENT:ASSI:マゾ = 1
+;助手のドＭ：マゾっ気Lv８以上、苦痛快楽経験１０００以上、ドＳでない
+ELSEIF ABL:ASSI:マゾっ気 >= 8 && EXP:ASSI:苦痛快楽経験 >= 1000 && TALENT:ASSI:マゾ == 1 && TALENT:ASSI:サド < 2
+	PRINTFORMW %CALLNAME:ASSI%のこちらを見る目がおかしい
+	PRINTFORML %CALLNAME:ASSI%は虐げられ、苦痛を味わうことにすっかり夢中のようだ
+	PRINTFORMW %NAME:ASSI%は【ドＭ】を得た
+	PRINTL 　
+	TALENT:ASSI:マゾ = 2
+ENDIF
+
+
+
+;助手ごとのレズ経験もしくはゲイ経験判定関数
+;CFLAGに格納された数値から最もレズ経験もしくはゲイ経験を多く得た助手によるレズ経験もしくはゲイ経験をCに格納する
+@DECIDE_RELATION
+C = 0
+REPEAT FLAG:44
+	A = 1099+COUNT
+	IF CFLAG:A > C
+		C = CFLAG:A
+		X = COUNT
+	ENDIF
+REND
+
+;相性変動チェック
+;淫乱で主人以上に絡みが多い助手がいる場合はその助手と、それ以外は主人との相性が良くなるようにしてみた
+;マイナスが多い程大変なのでご褒美的に数値が反転する（助手の場合のみ、相手の相性も変動するtohoAの仕様を継承）
+@RELATION_CHECK(ARG)
+CALL DECIDE_RELATION
+IF NO:MASTER != X && C > CFLAG:ARG && RELATION:X < 100 && TALENT:淫乱
+	Y = RELATION:X
+	Z = 200 - Y
+	SIF Z == 200
+		Z = 120
+	RELATION:X = Z
+	REPEAT CHARANUM
+		SIF NO:COUNT == X
+			W = COUNT
+	REND
+	T = NO:TARGET
+	SIF RELATION:W:T < Z
+		RELATION:W:T = Z
+	IF ASSI >= 0
+		IF ASSI == W
+			PRINTFORMW %CALLNAME%は%CALLNAME:W%に艶かしい視線を送っていた
+		ELSE
+			PRINTFORMW %CALLNAME%は%CALLNAME:W%の名を切なそうに呟いていた
+		ENDIF
+	ELSE
+		PRINTFORMW %CALLNAME%は%CALLNAME:W%の名を切なそうに呟いていた
+	ENDIF
+	PRINTFORMW %CALLNAME%と%CALLNAME:W%の相性が{RELATION:X}％になりました
+ELSE
+	X = NO:MASTER
+	SIF RELATION:X == 0 || RELATION:X > 100
+		RETURN 0
+	Y = RELATION:X
+	Z = 200 - Y
+	RELATION:X = Z
+	PRINTFORMW %CALLNAME%の%CALLNAME:MASTER%に対する相性が{RELATION:X}％になりました
+ENDIF
+
+

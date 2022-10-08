@@ -1,0 +1,98 @@
+﻿※구템플릿을 신판입상 기능으로 사용하기 위해서
+
+●1. 「입상 파일의 존재 판정」아래에 이하의 부분을 추가
+
+;*************************************************
+;입상 존재 판정하는 김에입상 실렉터
+;*************************************************
+@SELECTER_KX1(ARG:0,ARG:1)
+;NO가 1의 캐릭터와의 교섭 전용,예를 들어 KOJO_NO1_EVENT_K○_0등이 불린다
+;SIF NO:MASTER == 1
+;	RESULTS = _NO1
+
+;연모함락시 전용,예를 들어 KOJO_LOVE_EVENT_K○_0등이 불린다
+;SIF TALENT:ARG:연모 || TALENT:ARG:친애
+;	RESULTS = _LOVE
+
+;조수를 조교자로 하고 있을 때 전용,예를 들어 KOJO_APLAYER_K○_0등이 불린다
+;	RESULTS = _APLAYER
+
+;미리 CFLAG에 적당한 값을 할당하면 실렉터라고 해도 시중든다
+;IF !CFLAG:(ARG):1000
+;	PRINTL 어느입상을 이용합니까?
+;	PRINTL [1] - 입상 1
+;	PRINTL [2] - 입상 2
+;	$INPUT_LOOP
+;	INPUT
+;	IF RESULT = 1 || RESULT == 2
+;		CFLAG:(ARG):1000 = RESULT
+;	ELSE
+;		GOTO INPUT_LOOP
+;	ENDIF
+;ENDIF
+;RESULTS:1 = _{CFLAG:(ARG):1000}
+;이 경우는 선택에 응해@KOJO_1_EVENT_K○_0,@KOJO_2_EVENT_K○_0이 불린다
+;RESULTS에 아무것도 대입하지 않으면@KOJO_EVENT_K○_0이 불린다
+
+;커맨드입상은 신템플릿을 사용한다
+;SIF ARG:1 == 1
+;	RETURN 1
+
+;파라미터 변화입상은 신템플릿을 사용한다
+;SIF ARG:1 == 2
+;	RETURN 1
+
+;조교 개시시입상은 신템플릿을 사용한다
+;SIF ARG:1 == 3
+;	RETURN 1
+
+;조교 종료시입상은 신템플릿을 사용한다
+;SIF ARG:1 == 4
+;	RETURN 1
+
+;이벤트입상은 신템플릿을 사용한다
+;SIF ARG:1 == 5
+;	RETURN 1
+
+;엔딩입상은 신템플릿을 사용한다
+;SIF ARG == 6
+;	RETURN 1
+
+;구템플릿을 사용한다
+RETURN 2
+
+;신템플릿을 사용한다
+;RETURN 1
+
+
+
+●2. @EVENTTRAIN 이하의 부분을 다음과 같이 개서
+
+;--------------------------------------------------
+;EVENTTRAIN 관계(X1를 캐릭터 번호에 치환)
+;조교 개시시의 대사 CFLAG 201~219를 사용
+;--------------------------------------------------
+@EVENTTRAIN
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF NO:TARGET != X1
+	RETURN 0
+
+@KOJO_EVENTTRAIN_KX1
+
+
+
+●3. @EVENTEND 이하의 부분을 다음과 같이 개서
+
+;-------------------------------------------------
+;EVENTEND 관계(X1를 캐릭터 번호에 치환)
+;조교 종료시의 대사
+;-------------------------------------------------
+@EVENTEND
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF NO:TARGET != X1
+	RETURN 0
+@KOJO_EVENTEND_KX1
+
+

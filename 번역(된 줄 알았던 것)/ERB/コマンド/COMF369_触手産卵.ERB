@@ -1,0 +1,421 @@
+﻿;-------------------------------------------------
+;촉수산란
+;촉수계 커맨드
+;-------------------------------------------------
+@COM369
+
+PRINTL 촉수산란
+STR:0 = 촉수산란
+
+;착탈의 처리
+IF TEQUIP:촉수질내산란 == 0
+	TFLAG:56 = 2
+	TEQUIP:바이브 = 1
+	TEQUIP:촉수질내산란 += 1
+ELSE
+	PRINTL 어떻게 합니까?
+	;V확장경험가 적으면 알은 추가 불가능
+	IF EXP:V확장경험 >= 500 && TEQUIP:촉수질내산란 < 6
+		PRINTL [0] 한층 더 알을 낳게 한다
+	ELSEIF EXP:V확장경험 >= 200 && TEQUIP:촉수질내산란 < 5
+		PRINTL [0] 한층 더 알을 낳게 한다
+	ELSEIF EXP:V확장경험 >= 50 && TEQUIP:촉수질내산란 < 4
+		PRINTL [0] 한층 더 알을 낳게 한다
+	ELSEIF EXP:V확장경험 >= 20 && TEQUIP:촉수질내산란 < 3
+		PRINTL [0] 한층 더 알을 낳게 한다
+	ELSEIF EXP:V확장경험 >= 4 && TEQUIP:촉수질내산란 < 2
+		PRINTL [0] 한층 더 알을 낳게 한다
+	ENDIF
+	IF TEQUIP:촉수장내산란 && TEQUIP:촉수질내산란
+		PRINTL [1] 질전만 뽑아 준다
+		PRINTL [2] 양쪽 모두의 마개를 뽑아 준다
+	ELSE
+		PRINTL [1] 뽑아 준다
+	ENDIF
+	$INPUT_LOOP_enema
+	INPUT
+	;한층 더 알을 낳게 한다
+	IF RESULT == 0
+		TFLAG:56 = 3
+		TEQUIP:촉수질내산란 += 1
+	;다른 한쪽만 뽑아 준다
+	ELSEIF RESULT == 1
+		IF TEQUIP:촉수장내산란 && TEQUIP:촉수질내산란
+			TFLAG:56 = 1
+		ELSE
+			TFLAG:56 = 0
+		ENDIF
+	;양쪽 모두의 마개를 뽑아 준다
+	ELSEIF RESULT == 2
+		TFLAG:56 = 0
+	ELSE
+		GOTO INPUT_LOOP_enema
+	ENDIF
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+
+;소비체력, 기력
+LOSEBASE:체력 += 100
+LOSEBASE:기력 += 150
+
+IF EXP:촉수경험 < EXPLV:1
+	TIMES LOSEBASE:체력, 1.10
+	TIMES LOSEBASE:기력, 2.00
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES LOSEBASE:체력, 0.90
+	TIMES LOSEBASE:기력, 1.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES LOSEBASE:체력, 0.80
+	TIMES LOSEBASE:기력, 1.50
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES LOSEBASE:체력, 0.70
+	TIMES LOSEBASE:기력, 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES LOSEBASE:체력, 0.60
+	TIMES LOSEBASE:기력, 1.00
+ELSE
+	TIMES LOSEBASE:체력, 0.50
+	TIMES LOSEBASE:기력, 0.50
+ENDIF
+
+;ABL:V감각를 본다
+IF ABL:V감각 == 0
+	SOURCE:쾌V += 80
+ELSEIF ABL:V감각 == 1
+	SOURCE:쾌V += 250
+ELSEIF ABL:V감각 == 2
+	SOURCE:쾌V += 600
+ELSEIF ABL:V감각 == 3
+	SOURCE:쾌V += 1000
+ELSEIF ABL:V감각 == 4
+	SOURCE:쾌V += 1300
+ELSE
+	SOURCE:쾌V += 1700
+ENDIF
+
+;PALAM:윤활를 본다
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:쾌V , 0.40
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:쾌V , 0.80
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:쾌V , 1.00
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:쾌V , 1.40
+ELSE
+	TIMES SOURCE:쾌V , 1.80
+ENDIF
+
+;ABL:V감각를 본다
+IF ABL:V감각 == 0
+	SOURCE:굴복 += 300
+ELSEIF ABL:V감각 == 1
+	SOURCE:굴복 += 800
+ELSEIF ABL:V감각 == 2
+	SOURCE:굴복 += 1400
+ELSEIF ABL:V감각 == 3
+	SOURCE:굴복 += 1800
+ELSEIF ABL:V감각 == 4
+	SOURCE:굴복 += 2100
+ELSE
+	SOURCE:굴복 += 2400
+ENDIF
+
+;ABL:마조끼를 본다
+IF ABL:마조끼 < 1
+	SOURCE:통증 += 2000
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 200
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 2000
+ELSEIF ABL:마조끼 <2
+	SOURCE:통증 += 1600
+	SOURCE:불결 += 2000
+	SOURCE:굴복 += 500
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 1000
+ELSEIF ABL:마조끼 < 3
+	SOURCE:통증 += 1200
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 800
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 500
+ELSEIF ABL:마조끼 < 4
+	SOURCE:통증 += 800
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 1200
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 100
+ELSEIF ABL:마조끼 < 5
+	SOURCE:통증 += 600
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 1500
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 0
+ELSE
+	SOURCE:통증 += 400
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 2000
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 0
+ENDIF
+
+;PALAM:윤활를 본다
+IF PALAM:윤활 < PALAMLV:1
+	SOURCE:통증 += 800
+ELSEIF PALAM:윤활 < PALAMLV:2
+	SOURCE:통증 += 500
+ELSEIF PALAM:윤활 < PALAMLV:3
+	SOURCE:통증 += 300
+ELSEIF PALAM:윤활 < PALAMLV:4
+	SOURCE:통증 += 120
+ELSE
+	SOURCE:통증 += 100
+ENDIF
+
+;소인 체형
+SIF TALENT:소인체형
+	TIMES SOURCE:통증, 2.00
+
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;정조관념소유로연모, 친애 가져 이외로는 항상반발의 소스를 추가한다(섹스계만)
+SIF TALENT:정조관념 && (TALENT:연모 == 0 && TALENT:친애 == 0)
+	SOURCE:반발 += 1000
+
+;V민감, 둔감을 본다
+;쾌V 자체의 체크는후로 정리해 준다
+IF TALENT:V둔감
+	TIMES SOURCE:통증, 1.50
+	TIMES SOURCE:굴복, 1.50
+	TIMES SOURCE:일탈, 1.50
+ELSEIF TALENT:V민감
+	TIMES SOURCE:통증, 0.60
+	TIMES SOURCE:굴복, 0.60
+	TIMES SOURCE:일탈, 0.60
+ENDIF
+
+SIF TALENT:처녀 == 1 && TALENT:정조관념
+	SOURCE:굴복 /= 3
+
+PRINTL 
+PRINTL V경험＋10
+EXP:V경험 += 10
+T = 1
+
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+STAIN:질내 |= 32
+
+
+RETURN 1
+
+
+;--------------------------------------------------
+;촉수질내산란중
+;--------------------------------------------------
+@EQUIP_COM369
+PRINTL ＜촉수질내산란중＞
+CALL EQUIP_MESSAGE_COM307
+
+LOSEBASE:체력 += 30
+LOSEBASE:기력 += 50
+
+A = 110
+B = 90
+
+;촉수경험
+IF EXP:촉수경험 < EXPLV:1
+	TIMES A , 1.00
+	TIMES B , 1.40
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES A , 0.90
+	TIMES B , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES A , 0.80
+	TIMES B , 1.00
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES A , 0.70
+	TIMES B , 0.80
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES A , 0.60
+	TIMES B , 0.60
+ELSE
+	TIMES A , 0.50
+	TIMES B , 0.40
+ENDIF
+
+;ABL:V감각를 본다
+IF ABL:V감각 == 0
+	A = 80
+	B = 300
+ELSEIF ABL:V감각 == 1
+	A = 250
+	B = 800
+ELSEIF ABL:V감각 == 2
+	A = 600
+	B = 1400
+ELSEIF ABL:V감각 == 3
+	A = 1000
+	B = 1800
+ELSEIF ABL:V감각 == 4
+	A = 1300
+	B = 2100
+ELSE
+	A = 1700
+	B = 2400
+ENDIF
+
+;EXP:V경험를 본다
+IF EXP:V경험 < EXPLV:1
+	TIMES A , 0.50
+	C = 2000
+ELSEIF EXP:V경험 < EXPLV:2
+	TIMES A , 1.00
+	C = 300
+ELSEIF EXP:V경험 < EXPLV:3
+	TIMES A , 1.10
+	C = 50
+ELSEIF EXP:V경험 < EXPLV:4
+	TIMES A , 1.20
+	C = 10
+ELSEIF EXP:V경험 < EXPLV:5
+	TIMES A , 1.40
+	C = 0
+ELSE
+	TIMES A , 1.60
+	C = 0
+ENDIF
+
+;PALAM:윤활를 본다
+IF PALAM:윤활 < PALAMLV:1
+	TIMES A , 0.40
+	C += 800
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES A , 0.80
+	C += 500
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES A , 1.00
+	C += 300
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES A , 1.40
+	C += 120
+ELSE
+	TIMES A , 1.80
+	C += 100
+ENDIF
+
+;PALAM:욕정를 본다
+IF PALAM:욕정 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:욕정 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:욕정 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:욕정 < PALAMLV:4
+	TIMES A , 1.10
+ELSE
+	TIMES A , 1.20
+ENDIF
+
+;ABL:순종를 본다
+IF ABL:순종 == 0
+	TIMES A , 0.80
+ELSEIF ABL:순종 == 1
+	TIMES A , 0.90
+ELSEIF ABL:순종 == 2
+	TIMES A , 1.00
+ELSEIF ABL:순종 == 3
+	TIMES A , 1.10
+ELSEIF ABL:순종 == 4
+	TIMES A , 1.20
+ELSE
+	TIMES A , 1.30
+ENDIF
+
+;소인 체형
+SIF TALENT:소인체형
+	TIMES C , 2.00
+
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;정조관념소유로연모, 친애 가져 이외로는 항상반발의 소스를 추가한다(섹스계만)
+SIF TALENT:정조관념 && (TALENT:연모 == 0 && TALENT:친애 == 0)
+	SOURCE:반발 += 1000
+
+;V민감, 둔감을 본다
+;쾌V 자체의 체크는후로 정리해 준다
+IF TALENT:V둔감
+	TIMES SOURCE:통증, 1.50
+	TIMES SOURCE:굴복, 1.50
+	TIMES SOURCE:일탈, 1.50
+ELSEIF TALENT:V민감
+	TIMES SOURCE:통증, 0.60
+	TIMES SOURCE:굴복, 0.60
+	TIMES SOURCE:일탈, 0.60
+ENDIF
+
+SOURCE:쾌V += A
+SOURCE:굴복 += B
+SOURCE:통증 += C
+SOURCE:일탈 += B*2
+SOURCE:두려움 += B
+
+EXP:V경험 += 3
+PRINTL V경험＋3
+SIF TEQUIP:촉수
+	T += 1
+;촉수장착중은 의존도 벡터 강제 변경
+;의존도 벡터
+TFLAG:33 = 5
+
+;의존도 보정치(복종로 1, 예속로 2 강제 변경인 것으로, 이것까지의 수치를 리셋트)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 = 4
+ENDIF
+
+
+;--------------------------------------------------
+;장착시 메세지
+;--------------------------------------------------
+@EQUIP_MESSAGE_COM307
+SIF FLAG:6 == 0
+	RETURN 0
+
+PRINTL 
+PRINTFORML %CALLNAME%는 자궁에촉수의 알을 밀어넣어져 마개를 된 상태로 꾸짖어지고 있다
+PRINTL 
+IF ABL:마조끼 == 0
+	PRINTFORMW %CALLNAME%는 격통의 너무, 소리도 나오지 않는 것 같다…
+ELSEIF ABL:마조끼 == 1
+	PRINTFORM %CALLNAME%는 비지땀을 띄우고
+	SIF TEQUIP:밧줄 == 0
+		PRINT , 크게 부푼 복부에손를 더해져라
+	PRINTW 라고 있다.
+ELSEIF ABL:마조끼 == 2
+	PRINTFORM %CALLNAME%는 괴로운 듯한 표정을 하면서도, 얼굴을 홍조 시키고 크게 부풀어 오른 자신의 배를
+	IF TEQUIP:밧줄
+		PRINTW 계속 보고 있다
+	ELSE
+		PRINTW 비비고 있다
+	ENDIF
+ELSEIF ABL:마조끼 == 3
+	PRINTFORMW %CALLNAME%는 배란감에 시달리면서도, 때때로 황홀로 한 표정을 띄우고 있다
+ELSEIF ABL:마조끼 == 4
+	PRINTFORMW %CALLNAME%는 넋을 잃은 표정을 띄워, 배란감과 복통을 즐기고 있다
+ELSE
+	PRINTFORML 크게 부풀어 오르고 있는%CALLNAME%의 뱃속에서는
+	PRINTL 호흡에에 맞추어 대굴대굴알이 움직이고 있는 것 같다
+	PRINTFORMW 알이 자궁의 벽을 세게 긁고 있는지, 때때로%CALLNAME%는 음란한 비명을 지르고 있다……
+ENDIF
+

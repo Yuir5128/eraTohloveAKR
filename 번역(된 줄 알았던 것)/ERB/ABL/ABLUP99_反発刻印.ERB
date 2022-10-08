@@ -1,0 +1,107 @@
+﻿;반발각인를 지워 보는 테스트
+;사용하는 경우는↓을 ABL.ERB의 「PRINTL [100] 능력치 업의 종료」전에 삽입하는 것
+;PRINTFORML [99]%MARKNAME:3%-{MARK:반발각인}LV
+;
+;TRACHECK.ERB도 만지작거리면 재차굴복각인가 붙거나 하지 않기 때문에 요시
+;●개변전
+;IF A >= 500 && A < 1200 && MARK:반발각인 <= 0
+;	MARK:반발각인 = 1
+;●개변후
+;IF A >= 500 && A < 1200 && MARK:4 <= 0
+;	MARK:반발각인 = 1
+;	MARK:4 = 1
+;●이상의 내용을 3 LV의 3개소로 하는 것
+;상기가 모르는 or 알아도 주지 않는 경우에 재차굴복각인 붙었을 경우의 폐해는 보증하기 어렵습니다
+
+
+@ISABLUP99
+IF MARK:반발각인 <= 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP99
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+@ABLUP99
+DRAWLINE
+IF MARK:반발각인 <= 0
+	PRINTW 반발각인는 없습니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP99
+
+
+;반발각인Lv와 같은 Lv의굴복각인가 필요
+PRINTFORM %MARKNAME:3%{MARK:반발각인}LV이상, 한편
+
+;반발각인Lv와 같은 Lv의순종가 필요
+PRINTFORM %ABLNAME:0%{MARK:반발각인}LV이상, 한편
+
+PRINTFORM [0] - %PALAMNAME:7%의 보석×{A}……
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 보석불발 
+	SIF I & 2
+		PRINT 각인불발 
+	SIF I & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+INPUT
+IF RESULT != 0 && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+MARK:반발각인 -= 1
+
+JUEL:굴복 -= A
+
+PRINTFORMW %MARKNAME:3%의 레벨이{MARK:반발각인}가 되었습니다
+;
+@DECIDE_ABLUP99
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF MARK:반발각인 == 1
+	A = 1000
+ELSEIF MARK:반발각인 == 2
+	A = 3000
+ELSEIF MARK:반발각인 >= 3
+	A = 5000
+ENDIF
+
+;반발각인Lv와 같은 Lv의굴복각인가 필요
+SIF MARK:반발각인 > MARK:굴복각인
+	I |= 2
+
+;반발각인Lv와 같은 Lv의순종가 필요
+SIF MARK:반발각인 > ABL:순종
+	I |= 4
+
+;굴복의 보석으로 줄인다
+SIF JUEL:굴복 < A
+	I |= 1
+
+IF I == 0
+	Z = 1
+ENDIF
+

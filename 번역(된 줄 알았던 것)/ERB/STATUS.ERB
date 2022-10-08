@@ -1,0 +1,195 @@
+﻿@STATUS
+;표시 조건이 채워졌을 때에 D = 1으로 해, 먼저 한 번 판정을 실시한다.
+D = 0
+REPEAT CHARANUM
+	C = COUNT
+	;노역중의 캐릭터
+	IF CFLAG:C:12
+		D = 1
+	ELSEIF TALENT:C:발정기
+		D = 1
+	ELSE
+		;육아 방으로 이동하고 있는 캐릭터
+		CALL CHECK_CHILD_CARE
+		IF RESULT == 1
+			D = 1
+		ELSEIF TALENT:COUNT:임신
+			D = 1
+		ENDIF
+	ENDIF
+REND
+
+IF D == 1 && (FLAG:26 & 1) == 0
+	PRINTL [STATUS]
+	REPEAT CHARANUM
+		C = COUNT
+		;노역중의 캐릭터
+		IF CFLAG:C:12
+			SIF CFLAG:C:12 == 1
+				PRINTFORML %CALLNAME:COUNT%는 렌탈중입니다
+			SIF CFLAG:C:12 == 2
+				PRINTFORML %CALLNAME:COUNT%는 창관에 있습니다
+			SIF CFLAG:C:12 == 3
+					PRINTFORML %CALLNAME:COUNT%는손맞댐중입니다
+			SIF CFLAG:C:12 == 4
+					PRINTFORML %CALLNAME:COUNT%는 하타 당번중입니다
+			SIF CFLAG:C:12 == 5
+					PRINTFORML %CALLNAME:COUNT%는 말당번중입니다
+			SIF CFLAG:C:12 == 6
+					PRINTFORML %CALLNAME:COUNT%는 수행중입니다
+		ELSEIF TALENT:COUNT:발정기
+			PRINTFORML %CALLNAME:COUNT%는발정기입니다
+		ELSE
+			;육아 방으로 이동하고 있는 캐릭터
+			CALL CHECK_CHILD_CARE
+			IF RESULT == 1
+				PRINTFORML %CALLNAME:COUNT%는 육아 방에 있습니다
+			ELSEIF TALENT:COUNT:임신 && (CFLAG:C:110 - DAY) < 7
+				PRINTFORML %CALLNAME:COUNT%는 이제 곧 출산입니다
+			ELSEIF TALENT:COUNT:임신
+				PRINTFORML %CALLNAME:COUNT%는임신중입니다
+			ENDIF
+		ENDIF
+	REND
+ENDIF
+
+D = 0
+C = MASTER
+REPEAT CHARANUM
+	MASTER = COUNT
+	CALL MASTERBIRTHDAY
+	SIF B:1 == 1
+		D = 1
+	SIF B:1 == 2
+		D = 1
+REND
+MASTER = C
+
+IF FLAG:80 == 12
+	IF FLAG:81 >= 17 && FLAG:81 <= 25
+		D = 1
+	ENDIF
+ENDIF
+IF FLAG:80 == 1 && FLAG:81 == 1
+		D = 1
+ELSEIF FLAG:80 == 12
+	IF FLAG:81 >= 26
+		D = 1
+	ENDIF
+ENDIF
+
+IF FLAG:80 == 10 && FLAG:81 == 31
+		D = 1
+ENDIF
+
+IF FLAG:80 == 2 && FLAG:81 == 14
+		D = 1
+ENDIF
+IF FLAG:80 == 3 && FLAG:81 == 14
+		D = 1
+ENDIF
+
+IF D == 1 && (FLAG:26 & 2) == 0
+	PRINTL [SCHEDULE]
+	C = MASTER
+	REPEAT CHARANUM
+		MASTER = COUNT
+		CALL MASTERBIRTHDAY
+		SIF B:1 == 1
+			PRINTFORML %NAME:COUNT%의 생일입니다
+		SIF B:1 == 2
+			PRINTFORML %NAME:COUNT%는 이제 곧 생일입니다
+	REND
+	MASTER = C
+
+	CALL LUNAR_AGE
+
+	IF FLAG:80 == 1
+		IF FLAG:81 == 1
+			PRINTL 오늘부터 신년입니다
+		ELSEIF FLAG:81 == 7
+			PRINTL 오늘은 인일의 명절입니다
+		ENDIF
+	ENDIF
+
+	IF FLAG:80 == 2
+		IF FLAG:81 == 3
+			PRINTL 오늘은 절분입니다
+		ELSEIF FLAG:81 == 14
+			PRINTL 오늘은 발렌타인데이입니다
+		ENDIF
+	ENDIF
+
+	SIF FLAG:80 == 3 && FLAG:81 == 14
+		PRINTL 오늘은 화이트 데이입니다
+
+	SIF FLAG:80 == 4 && FLAG:81 == 1
+		PRINTL 오늘은 만우절입니다
+
+	SIF FLAG:80 == 7 && FLAG:81 == 7
+		PRINTL 오늘은 칠석입니다
+
+	SIF FLAG:80 == 9 && FLAG:81 == 15
+		PRINTL 오늘은 보름입니다
+
+	SIF FLAG:80 == 10 && FLAG:81 == 31
+		PRINTL 오늘은 할로윈입니다
+
+	IF FLAG:80 == 12
+		IF FLAG:81 >= 17 && FLAG:81 <= 23
+			PRINTL 이제 곧 크리스마스입니다
+		ELSEIF FLAG:81 == 24
+			PRINTL 오늘은 크리스마스 이브입니다
+		ELSEIF FLAG:81 == 25
+			PRINTL 오늘은 크리스마스입니다
+		ELSEIF FLAG:81 >= 26
+			PRINTL 이제 곧 신년입니다
+		ELSEIF FLAG:81 == 31
+			PRINTL 오늘은 그믐날입니다
+		ENDIF
+	ENDIF
+
+	SIF X == 14 && TIME != 0
+		PRINTL 오늘 밤은 만월입니다
+ENDIF
+
+
+@LUNAR_AGE
+;서기 A년 B월 C일의 월령 X
+;사양상 2025년을 기점으로서 산출한다
+;어떻게 생각해도 헛됨 기능이겠지 이것……
+IF  FLAG:83 < 4
+	A = 2025 + FLAG:83
+	B = FLAG:80
+	IF B < 3
+		B += 12
+		A -= 1
+	ENDIF
+	Y = A / 4
+	Z = ((13 * B) + 8) / 5
+	X = (A + Y - 15 + Z + FLAG:81) % 7
+	FLAG:82 = X
+	SIF FLAG:80 < 3
+		A += 1
+	FLAG:83 = A
+ELSE
+	A =  FLAG:83
+ENDIF
+
+;무엇에 사용할 수 있는지 모릅니다만 만월(X = 14)때에 「오늘은 달이 예쁘네요」(이)든지
+;초생달(X = 0) 때에 「암흑 같은거 트스큐아리 지나다!」든지…… 안된다 도움이 되지 않는다.
+;얌전하고 음력 이벤트 산출에 사용할 수 밖에 없는 것인지…… 아이디어 모집중.
+;네등전에서 경단 관련의 이벤트시에 사용하고 있습니다
+X = 0
+IF FLAG:80 == 1 || FLAG:80 == 3
+	B = 0
+ELSEIF FLAG:80 == 2 || FLAG:80 == 4 || FLAG:80 == 5
+	B = 2
+ELSE
+	B = FLAG:80 - 2
+ENDIF
+C = FLAG:81
+X = (((A - 11) % 19) * 11 + B + C) % 30
+
+
+

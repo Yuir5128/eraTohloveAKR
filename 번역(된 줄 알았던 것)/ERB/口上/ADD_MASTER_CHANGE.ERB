@@ -1,0 +1,462 @@
+﻿;================================================================================================
+;조교자 변경 기능용의 함수군입니다
+;CFLAG:39~41을 이용하고 있습니다
+;================================================================================================
+
+;사모·공포 대상의 등록 번호를 조사한다
+;R에 검색 대상의 등록 번호를 대입해 CALL
+;사모·공포 대상의 캐릭터 고유 번호를 「M」에,함락 소질을 「N」에 돌려준다(【상사상애】의 경우는 L에 1을 돌려줍니다)
+;또,미함락시에는 직전의 조교자의 캐릭터 고유 번호를 「M」에 돌려준다(N는-1이 되므로 미함락 분기 할 수 있습니다)
+;등록 번호를 모를 때는 먼저 응구분 처리응의 「CALL NO」등으로 조사해 주세요
+;실의/붕괴의 경우 「N」에 이전의 함락 소질이 들어간다
+@MASTER_SEARCH
+M = -1
+N = -1
+L = -1
+SIF R < 0 || R > CHARANUM
+	RETURN
+;미함락시/음란루트는 「직전의 조교자」를 M에 돌려준다
+IF !CFLAG:R:40
+	SIF CFLAG:R:41 < -99
+		M = (CFLAG:R:41 + 100) * -1
+	SIF CFLAG:R:39 > 0
+		N = CFLAG:R:39
+ELSE
+	N = CFLAG:R:39
+	SIF CFLAG:R:39 == 165
+		L = 1
+	M = CFLAG:R:41
+ENDIF
+
+@EVENTTRAIN
+IF TARGET > -1
+	CALL MASTER_CHANGE_ON
+	;미함락시/음란루트
+	IF !CFLAG:40
+		M = -100 - (NO:MASTER)
+		IF CFLAG:41!= M
+			;전회 조교자와 주인이 바뀌면 의존도 보정
+			IF CFLAG:2 > 0
+				;EASY로 변동 없음,NOMAL로 작은 변화동,HARD로 변동
+				IF FLAG:4 == 2
+					CFLAG:2 -= 20
+				ELSEIF FLAG:4 == 3
+					CFLAG:2 -= 50
+				ENDIF
+				SIF CFLAG:2 < 0
+					CFLAG:2 = 0
+			ELSEIF CFLAG:2 < 0
+				;EASY로 변동 없음,NOMAL로 작은 변화동,HARD로 변동
+				IF FLAG:4 == 2
+					CFLAG:2 += 20
+				ELSEIF FLAG:4 == 3
+					CFLAG:2 += 50
+				ENDIF
+				SIF CFLAG:2 > 0
+					CFLAG:2 = 0
+			ENDIF
+		ENDIF
+	ENDIF
+	;만약 기록되고 있는 사모·공포 대상이 현재의 마스터가 아닌 경우,일시적으로 해제
+	CALL MASTER_CHANGE_OFF
+	;피조교경험의 합계로부터 마스터 조교의 경험을 당겨 조수조교경험를 산출
+	A = 0
+	REPEAT 500
+		B = COUNT + 1099
+		A += CFLAG:B
+	REND
+	M = NO:MASTER + 1099
+	A -= CFLAG:M
+	;순종 5 이상으로실의가 없어진다
+	IF TALENT:실의 && ABL:순종 > 4
+		PRINTFORMW %CALLNAME:TARGET%는 조금씩 마음의 상처를 달래고 있는 것 같다……
+		PRINTFORMW %CALLNAME:TARGET%는【실의】상태로부터 빠져 나갔다
+		TALENT:실의 = 0
+	;실의의 값이 짝수 때,의존치 변동폭 900이상 or음란조건으로실의가 가벼워진다
+	;이론상,다른 처리로실의의 값이 변동하지 않는 한 1회 밖에 표시되지 않게 될 것
+	ELSEIF TALENT:실의 && (TALENT:실의 % 2) == 0 && (CFLAG:2 > 900 || CFLAG:2 < -900 || ((ABL:욕망 >= 3 && ABL:C감각+ABL:V감각+ABL:A감각+ABL:B감각 >= 10 && MARK:쾌락각인 == 3 && MARK:굴복각인 == 3 && MARK:반발각인 == 0 && EXP:절정경험 >= 50) && (EXP:이상경험 >= 3 || (EXP:이상경험 >= 1 && A >= 1000) || A >= 2000)))
+		PRINTFORMW %CALLNAME:TARGET%는 조금씩 마음의 상처를 달래고 있는 것 같다……
+		TALENT:실의 /= 2
+	ENDIF
+ENDIF
+
+
+;조교 종료후,다시 사모·공포 부여(재취득 방지)
+@EVENTTURNEND
+#PRI
+CALL MASTER_CHANGE_ON
+IF TARGET > -1
+	SIF !CFLAG:40
+		CFLAG:41 = -100 - (NO:MASTER)
+ENDIF
+
+;일자 변경 이벤트 종료후,다시 사모·공포 부여
+@EVENTSHOP
+CALL MASTER_CHANGE_ON
+
+@MASTER_CHANGE_ON
+IF TARGET > -1
+	IF TALENT:붕괴 || TALENT:실의
+		CFLAG:41 = -1
+		CFLAG:40 = 0
+	ENDIF
+	IF CFLAG:40 && !TALENT:연모 && !TALENT:복종 && !TALENT:친애 && !TALENT:예속
+		;상사상애 때의 처리
+		IF CFLAG:39 == 165
+			TALENT:상사상애 = 1
+			TALENT:친애 = 1
+		ELSE
+			TALENT:(CFLAG:39) = 1
+		ENDIF
+	ENDIF
+ENDIF
+;조교자의 (분)편의상사상애판정
+IF CFLAG:MASTER:39 == 165
+	TALENT:MASTER:상사상애 = 1
+	TALENT:MASTER:친애 = 1
+ENDIF
+
+@MASTER_CHANGE_OFF
+IF TARGET > -1
+	;붕괴,실의
+	IF TALENT:붕괴 || TALENT:실의
+		CFLAG:41 = -1
+		CFLAG:40 = 0
+	ENDIF
+	LOCAL = CFLAG:41
+	IF NO:MASTER != LOCAL
+		TALENT:연모 = 0
+		TALENT:복종 = 0
+		TALENT:친애 = 0
+		TALENT:예속 = 0
+		TALENT:상사상애 = 0
+	ENDIF
+ENDIF
+;조교자의 (분)편의상사상애판정
+IF TARGET > -1
+	IF CFLAG:MASTER:41!= NO:TARGET && TALENT:MASTER:상사상애
+		TALENT:MASTER:상사상애 = 0
+		TALENT:MASTER:친애 = 0
+	ENDIF
+ENDIF
+
+@SELECT_MASTER
+DRAWLINE
+PRINTFORML 현재【%NAME:MASTER%】가 주인
+PRINTL 이번은 누구를 주인으로 합니까?
+DRAWLINE
+CALL LIFE_LIST(1)
+PRINTL  [1000]돌아온다
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+ELSEIF RESULT == MASTER
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:12 > 0
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:1 < 2
+	GOTO INPUT_LOOP
+ELSE
+	C = RESULT
+	CALL CHECK_CHILD_CARE
+	SIF RESULT == 1
+		GOTO INPUT_LOOP
+ENDIF
+
+;처리를 빠져 왔을 때,전마스터에 CFLAG:1이 붙어 있지 않은 경우 본래의 주인으로 간주해 「공범자」의 취급으로 한다
+SIF CFLAG:MASTER:1 == 0
+	CFLAG:MASTER:1 = 3
+
+MASTER = C
+
+SIF MASTER == TARGET
+	TARGET = -1
+SIF MASTER == ASSI
+	ASSI = -1
+
+;일상 이벤트에 있어서의 사모·공포 대상의 판정
+@DAILY_LIFE_MASTER_CHANGE
+LOCAL = TARGET
+REPEAT CHARANUM
+	SIF COUNT == MASTER
+		CONTINUE
+	TARGET = COUNT
+	CALL MASTER_CHANGE_ON
+	SIF D
+		CALL MASTER_CHANGE_OFF
+REND
+TARGET = LOCAL
+
+@LIFE_LIST_MASTER_CHANGE
+IF TALENT:X:반음반양 || TALENT:X:후타나리
+	SETCOLOR 0x999999
+	PRINT 쌍
+ENDIF
+IF TALENT:X:컨트보이
+	SETCOLOR 0x8491c3
+	PRINTFORM 상♂하♀
+ELSEIF TALENT:X:쉬메일
+	SETCOLOR 0xcc7eb1
+	PRINTFORM 상♀하♂
+ELSEIF MALE(X)
+	SETCOLOR 0x8491c3
+	PRINTFORM ♂ 
+ELSE
+	SETCOLOR 0xcc7eb1
+	PRINTFORM ♀ 
+ENDIF
+RESETCOLOR
+;처녀·동정·백버진보유자를 특별 취급 해 본다
+IF ((VAGINA(X) && TALENT:X:처녀) || (PENIS(X) && TALENT:X:동정)) && TALENT:X:백버진
+	PRINT 순결 
+;그 이외는 부가가치의 높은처녀우선으로 표시
+ELSEIF TALENT:X:처녀 || TALENT:X:재생처녀
+	PRINT 처녀 
+ELSEIF TALENT:X:동정
+	PRINT 동정 
+ENDIF
+SIF TALENT:X:붕괴
+	PRINT 붕괴
+IF CFLAG:X:41 >= 0 && CFLAG:X:40
+	IF TALENT:X:(CFLAG:X:39)
+		IF TALENT:X:상사상애
+			PRINT 상사상애
+		ELSEIF TALENT:X:연모
+			PRINT 연모
+		ELSEIF TALENT:X:친애
+			PRINT 친애
+		ELSEIF TALENT:X:복종
+			PRINT 복종
+		ELSE
+			PRINT 예속
+		ENDIF
+		PRINTFORM (\@ CFLAG:X:39 == 165? ⇔ # ⇒ \@%CALLNAME:GETCHARA(CFLAG:X:41)%)
+	ENDIF
+ELSEIF TALENT:X:음란
+	PRINT 음란
+ELSEIF TALENT:X:창부
+	PRINT 창부
+ELSEIF CFLAG:X:1 == 2
+	PRINT 매각·조수가능
+ELSEIF CFLAG:X:1 == 1
+	PRINT 매각 가능
+ENDIF
+SIF CFLAG:X:0
+	PRINT EX
+
+;매각시
+@SELLOUT_MASTER_CHANGE
+CALL MASTER_CHANGE_OFF
+M = 0
+N = 0
+O = 0
+P = 0
+Q = 0
+R = 0
+REPEAT CHARANUM
+	N = COUNT
+	IF CFLAG:N:41 == NO:TARGET && (CFLAG:N:39 == 3 || CFLAG:N:39 == 6 || CFLAG:N:39 == 165 || CFLAG:N:39 == 5 || CFLAG:N:39 == 8)
+		P += 1
+		IF CFLAG:N:39 == 3
+			CFLAG:N:10 += 50
+		ELSEIF CFLAG:N:39 == 5
+			CFLAG:N:10 += 10
+		ELSEIF CFLAG:N:39 == 6
+			CFLAG:N:10 += 50
+		ELSEIF CFLAG:N:39 == 165
+			CFLAG:N:10 += 70
+		ELSEIF CFLAG:N:39 == 8
+			CFLAG:N:10 += 20
+		ENDIF
+		SIF CFLAG:N:10 > 99
+			CFLAG:N:10 = 99
+		SIF CFLAG:M:10 < CFLAG:N:10
+			M = N
+	ENDIF
+REND
+;매각 캐릭터에게 사모를 대고 있는 캐릭터에게 스트레스치 가산
+IF P
+	PRINTL 
+	PRINTFORM %CALLNAME%과 사이가 좋았던 %CALLNAME:M%
+	SIF P > 1
+		PRINT 들
+	PRINTW 의 모습이 이상하다
+	PRINTFORM %CALLNAME%가 매각되었다고 하는 사실에,%CALLNAME:M%
+	SIF P > 1
+		PRINT 들
+	PRINT 의 정신은
+	SIF CFLAG:M:10 > 80
+		PRINT 매우
+	PRINTW 불안정하게 되어 있는 것 같다
+	IF CFLAG:M:10 >= 100
+		TFLAG:13 = 52
+		;입카미분기플래그
+		TFLAG:53 = 1
+		LOCAL = TARGET
+		LOCAL:1 = ASSI
+		ASSI = TARGET
+		TARGET = M
+		M = LOCAL
+		CALL KOJO_MESSAGE_EVENT
+		M = TARGET
+		TARGET = LOCAL
+		ASSI = LOCAL:1
+		;부적가 있으면 부활
+		IF CFLAG:M:693 || CFLAG:M:694
+			TFLAG:13 = 72
+			CALL KOJO_MESSAGE_EVENT
+			IF CFLAG:M:694
+				CFLAG:M:10 = 0
+				CFLAG:M:694 -= 1
+			ELSE
+				CFLAG:M:10 = 90
+				CFLAG:M:693 -= 1
+			ENDIF
+		ELSE
+			TALENT:M:친애 = 0
+			TALENT:M:붕괴 = 1
+			TALENT:M:상사상애 = 0
+			CFLAG:M:40 = 0
+			CFLAG:M:41 = -1
+			CFLAG:M:10 = 0
+		ENDIF
+	ENDIF
+ENDIF
+M = 0
+N = 0
+;매각 캐릭터를 사모·공포 대상으로 하고 있던 캐릭터로부터 소질 소거와 의존치 리셋트
+REPEAT CHARANUM
+	N = COUNT
+	IF CFLAG:N:41 == NO:TARGET && (CFLAG:N:39 == 3 || CFLAG:N:39 == 6 || CFLAG:N:39 == 165 || CFLAG:N:39 == 5 || CFLAG:N:39 == 8)
+		PRINTFORM %CALLNAME:N%는【
+		IF CFLAG:N:39 == 3
+			PRINT 연모
+			M = 23
+		ELSEIF CFLAG:N:39 == 5
+			PRINT 복종
+			M = 15
+		ELSEIF CFLAG:N:39 == 6
+			PRINT 친애
+			M = 54
+		ELSEIF CFLAG:N:39 == 165
+			PRINT 상사상애
+			M = 54
+		ELSEIF CFLAG:N:39 == 8
+			PRINT 예속
+			M = 38
+		ENDIF
+		PRINTW 】를 잃어,【실의】를 얻었다
+		;EASY로 변동 없음,NOMAL로 작은 변화동,HARD로 변동
+		IF FLAG:4 == 2
+			M += 12
+		ELSEIF FLAG:4 == 3
+			M += 24
+		ENDIF
+		;애정경험
+		EXP:N:애정경험 = 0
+		;순종
+		ABL:N:순종 = 0
+		;【실의】
+		TALENT:N:실의 = M
+		;의존도
+		CFLAG:N:2 = 0
+
+		CFLAG:N:40 = 0
+		CFLAG:N:41 = -1
+		TALENT:N:연모 = 0
+		TALENT:N:복종 = 0
+		TALENT:N:친애 = 0
+		TALENT:N:상사상애 = 0
+		TALENT:N:붕괴 = 0
+		;사모 대상의 캐릭터 번호를 기록
+		CFLAG:N:38 = NO:TARGET
+	ENDIF
+REND
+;공범자로부터 사모·집착 대상 리셋트
+REPEAT CHARANUM
+	N = COUNT
+	IF CFLAG:N:41 == NO:TARGET && CFLAG:N:1 == 3
+		CFLAG:N:41 = -1
+		CFLAG:N:40 = 0
+	ENDIF
+REND
+
+
+;공범자의 집착 대상 세트
+@YEARN_FOR
+;마스터가 간 조교를 산출한다
+A = 0
+B = 0
+C = 1099 + NO:MASTER
+D = 0
+;타겟의,마스터로부터의조교경험가 1000이상이 아니면 안돼
+SIF CFLAG:TARGET:C < 1000
+	RETURN
+;벌써 집착 고정한 캐릭터가 있다(프로미스 링을 주고 있다)(와)과 안돼
+SIF CFLAG:MASTER:140
+	RETURN
+REPEAT CHARANUM
+	B = COUNT
+	A += CFLAG:B:C
+REND
+D = A
+;전조교경험의 70%이상을 차지하면 집착 대상으로 해 세트 된다
+TIMES A ,0.7
+;전조교경험의 50% 이하가 되면 집착 대상이 해제된다
+TIMES D ,0.50
+B = -100 - (NO:TARGET)
+;타겟으로 대한 조교가,마스터가 간 전조교의 70%이상이다
+IF A < CFLAG:TARGET:C && CFLAG:MASTER:41 <= 0 && CFLAG:MASTER:41!= B
+	PRINTFORMW ……%CALLNAME%를 보고 있으면,%CALLNAME:MASTER%의 마음은 왜일까 떠드는 것 같다
+	PRINTL 
+	PRINTL [0]지나친 생각이다
+	PRINTL [1]인정한다
+	$INPUT_LOOP
+	INPUT
+	;세트 하지 않으면,-(100+캐릭터 번호)가 대입되어 계속해 같은 캐릭터에게 선택지가 나오지 않게 된다
+	IF RESULT == 0
+		PRINTFORMW %CALLNAME:MASTER%는 그 감정을 잊기로 했다……
+		CFLAG:MASTER:41 = B
+	;세트 하면,캐릭터 번호가 대입된 이후 집착 대상으로 해 다루어진다(사모·공포 대상과 취급은 같이)
+	ELSEIF RESULT == 1
+		PRINTFORMW %CALLNAME:MASTER%는 그 감정을 인정하기로 했다……
+		CFLAG:MASTER:41 = NO:TARGET
+		CFLAG:MASTER:40 = 1
+		CFLAG:MASTER:39 = 6
+		;조교자 변경용의
+		IF CFLAG:TARGET:39 == 6 && CFLAG:TARGET:41 == NO:MASTER && TALENT:MASTER:상사상애 == 0 && TALENT:상사상애 == 0
+			PRINTL 
+			TFLAG:13 = 53
+			CALL KOJO_MESSAGE_EVENT
+			SIF TARGET < 0
+				RETURN 0
+			PRINTFORMW %NAME:MASTER%과 %NAME:TARGET%는【상사상애】가 되었다
+			TALENT:MASTER:상사상애 = 1
+			TALENT:상사상애 = 1
+			CFLAG:39 = 165
+			CFLAG:MASTER:39 = 165
+		ENDIF
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ELSEIF D > CFLAG:TARGET:C && CFLAG:MASTER:41 == NO:TARGET && CFLAG:MASTER:1 == 3
+	PRINTFORMW %CALLNAME:MASTER%는%CALLNAME%에의 집착을 잃었다……
+	CFLAG:MASTER:41 = -1
+	CFLAG:MASTER:40 = 0
+	;조교자 변경용의
+	IF CFLAG:TARGET:39 == 165 && CFLAG:TARGET:41 == NO:MASTER && TALENT:MASTER:상사상애 && TALENT:상사상애 
+		PRINTL 
+		SIF TARGET < 0
+			RETURN 0
+		PRINTFORMW %NAME:MASTER%과 %NAME:TARGET%는【상사상애】를 잃었다
+		TALENT:MASTER:상사상애 = 0
+		TALENT:상사상애 = 0
+		CFLAG:39 = 6
+		CFLAG:MASTER:39 = 0
+	ENDIF
+ENDIF
+

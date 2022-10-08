@@ -1,0 +1,245 @@
+﻿;処女童貞モード
+@VIRGIN_MODE(ARG)
+SIF !FLAG:155
+	RETURN 0
+SIF VAGINA(ARG)
+	TALENT:ARG:処女 = 1
+TALENT:ARG:再生処女 = 0
+SIF PENIS(ARG)
+	TALENT:ARG:童貞 = 1
+TALENT:ARG:バックバージン = 1
+
+ABL:ARG:Ｖ感覚 = 0
+ABL:ARG:Ａ感覚 = 0
+EXP:ARG:Ｖ経験 = 0
+EXP:ARG:Ａ経験 = 0
+EXP:ARG:性交経験 = 0
+EXP:ARG:膣射経験 = 0
+EXP:ARG:Ｖ射精経験 = 0
+EXP:ARG:Ａ射精経験 = 0
+EXP:ARG:Ｖ拡張経験 = 0
+EXP:ARG:Ａ拡張経験 = 0
+EXP:ARG:出産経験 = 0
+
+
+;キャラ購入の前提条件
+;戻り値が１だとARGのキャラが購入可能
+@CHARA_BUY_PRE(ARG)
+#FUNCTION
+LOCAL = 1
+;極男士は非表示
+;髭切・膝丸の極
+SIF ARG == 111 || ARG == 115
+	LOCAL = 0
+
+;長曽祢まで
+IF ARG >= 1 && ARG <= 106
+	;キャラ固有番号が偶数なら極
+	SIF ARG % 2 == 0
+		LOCAL = 0
+;大倶利伽羅から
+ELSEIF ARG >= 116
+	;キャラ固有番号が奇数なら極
+	SIF ARG % 2 == 1
+		LOCAL = 0
+ENDIF
+
+SIF FLAG:41
+	LOCAL = 1
+
+RETURNF LOCAL
+
+;＜～が購入可能になりました＞
+@CHARA_BUY_PRE2(ARG)
+LOCALS = 
+LOCAL = 0
+
+IF EXISTCSV(ARG + 1, 0)
+	;髭切　特
+	IF ARG == 107
+		IF CHARA_BUY_PRE(111)
+			;LOCALS = %CSVNAME(111, 0)%
+			LOCAL = 1
+		ENDIF
+	;膝丸　特
+	ELSEIF ARG == 112
+		IF CHARA_BUY_PRE(115)
+			;LOCALS = %CSVNAME(115, 0)%
+			LOCAL = 1
+		ENDIF
+	;長曽祢まで　ARGが奇数なら特
+	ELSEIF ( ARG >= 1 && ARG <= 106 ) && ( ARG % 2 == 1)
+		IF CHARA_BUY_PRE(ARG + 1)
+			LOCALS = %CSVNAME(ARG + 1, 0)%
+			LOCAL = 1
+		ENDIF
+	;大倶利伽羅から　ARGが偶数なら特
+	ELSEIF ( ARG >= 116 ) && ( ARG % 2 == 0)
+		IF CHARA_BUY_PRE(ARG + 1)
+			LOCALS = %CSVNAME(ARG + 1, 0)%
+			LOCAL = 1
+		ENDIF
+	ENDIF
+	
+	SIF STRLENS(LOCALS)
+		PRINTFORMW ＜%LOCALS%が購入可能になりました＞
+ENDIF
+
+@CHARA_SELLING_PRICE(ARG)
+#FUNCTIONS
+LOCAL:1 = 100
+FOR LOCAL, 0, 210
+	CSVTALENT ARG, LOCAL, 0
+	IF RESULT
+		SELECTCASE LOCAL
+			;処女、隷属
+			CASE 0,8
+				LOCAL:1 += 100
+			;娼婦
+			CASE 7
+				LOCAL:1 += 60
+			;服従、魅力、謎の魅力
+			CASE 5,92,94
+				LOCAL:1 += 50
+			;気丈、マゾ
+			CASE 12,84
+				LOCAL:1 += 40
+			;淫乱、一線越えない、献身的、快感の否定、淫壺、淫乳、セックス狂、サド
+			;妄信、Ｃ敏感、Ｖ敏感、Ａ敏感、Ｂ敏感、爆乳、不死身、絶倫
+			CASE 4,27,47,63,71,75,77,78,83,86,102,104,106,108,112,147
+				LOCAL:1 += 30
+			;再生処女、反抗的、プライド高い、生意気、ツンデレ、自制心、貞操観念、痛みに強い
+			;汚臭敏感、自慰狂い、尻穴狂い、小悪魔、妖狐、人気、巨乳、陥没乳首、回復早い、母乳体質
+			CASE 1,11,15,16,18,20,30,41,62,74,76,87,91,111,120,130,145,149
+				LOCAL:1 += 20
+			;好奇心、保守的、目立ちたがり、舌使い、解放、恥じらい、濡れやすい、習得早い、おもらし癖
+			;自慰しやすい、即落ち、倒錯的、指さばき、小人体型、馬並み、極、達磨
+			CASE 23,24,28,33,35,42,50,52,57,58,60,73,80,117,142,180,204
+				LOCAL:1 += 10
+			;半陰半陽、ふたなり、動物耳、カントボーイ、シーメール、神技
+			CASE 137,139,143,172,173,181
+				LOCAL:1 += 5
+			;恥薄い、濡れにくい、習得遅い、男嫌い、女嫌い、絶壁、片脚欠損
+			CASE 35,43,51,82,88,110,202
+				LOCAL:1 -= 10
+			;臆病、素直、大人しい、プライド低い、メンヘラ、無関心、感情乏しい、貞操無頓着、痛みに弱い
+			;薬毒耐性、汚臭鈍感、汚れ無視、貧乳、回復遅い
+			CASE 10,13,14,17,21,22,31,38,40,56,61,64,109,131
+				LOCAL:1 -= 20
+			;快感に素直、Ｃ鈍感、Ｖ鈍感、Ａ鈍感、Ｂ鈍感、幼児／幼児退行、片腕欠損、両足欠損
+			CASE 70,101,103,105,107,150,200,203
+				LOCAL:1 -= 30
+			;恋慕、両腕欠損
+			CASE 3,201
+				LOCAL:1 -= 50
+			;親愛
+			CASE 6
+				LOCAL:1 -= 80
+		ENDSELECT
+	ENDIF
+NEXT
+
+IF LOCAL:1 >= 210
+	LOCALS = Ａ
+ELSEIF LOCAL:1 >= 170
+	LOCALS = Ｂ
+ELSEIF LOCAL:1 >= 120
+	LOCALS = Ｃ
+ELSEIF LOCAL:1 >= 70
+	LOCALS = Ｄ
+ELSE
+	LOCALS = Ｅ
+ENDIF
+RETURNF LOCALS
+
+@CHARA_DIFFICULTY(ARG)
+#FUNCTIONS
+LOCAL:1 = 0
+FOR LOCAL, 0, 200
+	CSVTALENT ARG, LOCAL, 0
+	IF RESULT
+		SELECTCASE LOCAL
+			;抑圧、抵抗
+			CASE 32,34
+				LOCAL:1 += 15
+			;プライド高い、男嫌い、女嫌い、快感の否定、小人体型
+			CASE 15,71,82,88,142
+				LOCAL:1 += 14
+			;反抗的、オトコ
+			CASE 11,140
+				LOCAL:1 += 4
+			;生意気、感情乏しい
+			CASE 16,22
+				LOCAL:1 += 3
+			;処女、気丈、自制心、一線越えない、貞操観念、Ｃ鈍感、Ｂ鈍感
+			CASE 0,12,20,27,30,101,107
+				LOCAL:1 += 2
+			;無関心、保守的、恥じらい、濡れにくい、薬毒耐性、習得遅い、猫舌、汚臭敏感
+			;回復遅い
+			CASE 21,24,35,43,54,56,62,131
+				LOCAL:1 += 1
+			;大人しい、威圧、楽観的、目立ちたがり、貞操無頓着、恥薄い、弱味、濡れやすい、習得早い
+			;自慰しやすい、汚臭鈍感、汚れ無視、倒錯的、回復早い、Ａ敏感、Ｖ敏感
+			CASE 14,19,25,28,31,36,37,42,50,60,61,64,80,103,106,130
+				LOCAL:1 -= 1
+			;プライド低い、メンヘラ、好奇心、献身的、快感に素直、Ｃ敏感、Ｂ敏感
+			CASE 17,23,38,63,70,102,108
+				LOCAL:1 -= 2
+			;解放
+			CASE 34
+				LOCAL:1 -= 5
+			;素直
+			CASE 13
+				LOCAL:1 -= 6
+		ENDSELECT
+	ENDIF
+NEXT
+;体力
+LOCAL:2 = CSVBASE(ARG, 0, 0)
+IF LOCAL:2 < 600
+	LOCAL:1 += 25
+ELSEIF LOCAL:2 < 800
+	LOCAL:1 += 14
+ELSEIF LOCAL:2 < 1100
+	LOCAL:1 += 1
+ELSEIF LOCAL:2 < 2000
+ELSEIF LOCAL:2 < 2500
+	LOCAL:1 -= 1
+ELSE
+	LOCAL:1 -= 2
+ENDIF
+;気力
+LOCAL:2 = CSVBASE(ARG, 1, 0)
+IF LOCAL:2 < 600
+	LOCAL:1 += 14
+ELSEIF LOCAL:2 < 800
+	LOCAL:1 += 1
+ELSEIF LOCAL:2 < 1800
+ELSE
+	LOCAL:1 -= 1
+ENDIF
+;従順Lv
+LOCAL:1 -= 8 * CSVABL(ARG,0,0)
+;欲望Lv
+LOCAL:1 -= 4 * CSVABL(ARG,1,0)
+;技巧Lv
+LOCAL:1 -= CSVABL(ARG,2,0)
+;奉仕精神Lv
+LOCAL:1 -= 3 * CSVABL(ARG,7,0)
+;異常経験あり
+SIF CSVEXP(ARG,50,0)
+	LOCAL:1 -= 2
+
+IF LOCAL:1 >= 30
+	LOCALS = Ａ
+ELSEIF LOCAL:1 >= 20
+	LOCALS = Ｂ
+ELSEIF LOCAL:1 >= 10
+	LOCALS = Ｃ
+ELSEIF LOCAL:1 >= 0
+	LOCALS = Ｄ
+ELSE
+	LOCALS = Ｅ
+ENDIF
+RETURNF LOCALS
+

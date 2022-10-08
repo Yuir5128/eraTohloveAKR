@@ -1,0 +1,779 @@
+﻿;============================================================
+;LUNCH_STALL.ERB　定食屋台
+@LUNCH_STALL
+;============================================================
+;使用する一時変数の初期化
+A = 0
+B = 0
+S = 0
+V = 0
+C = 0
+D = 0
+
+DRAWLINE
+IF TIME == 0
+	PRINTL 【定食屋台（昼の部）】
+	PRINTL お酒は注文不可、ソフトドリンク＆フードオンリーの健全な屋台です。
+	PRINTL 給仕へのお触りなど、セクハラは絶対ＮＧ！！
+	PRINTL 
+	PRINTL ■ 基本サービス
+	PRINTL 　：[ソフトドリンク各種] [フード各種]
+	PRINTL 
+	PRINTL ■ 選択されている追加オプション
+	PRINTL 　：＜利用可能なオプションはありません＞
+ELSE
+	PRINTL 【定食屋台（夜の部）】
+	PRINTL お酒も注文可、ちょっとエッチなサービス付きの夜の屋台です。
+	PRINTL 給仕とのおしゃべりや、簡単なボディタッチはもちろん、
+	PRINTL チラ見せや簡単なご奉仕まで、お客様のご要望にお応えします。
+	PRINTL ただし、本番行為は絶対ＮＧですのでご注意下さい。
+	PRINTL 
+	PRINTL ■ 基本サービス
+	PRINTL 　：[おしゃべり] [パンチラ] [乳見せ]
+	PRINTL 　：[ご奉仕] [ぶっかけ] [ごっくん] [ボディタッチ]
+	PRINTL 
+	PRINTL ■ 選択されている追加オプション
+	PRINTL 　：＜利用可能なオプションはありません＞
+ENDIF
+PRINTL 
+DRAWLINE
+
+;--------------------------------------------------------
+;一緒に屋台に出る奴隷を選択
+;--------------------------------------------------------
+PRINTL 一緒に屋台を出す奴隷を選択してください
+REPEAT CHARANUM
+	SIF COUNT == MASTER
+		CONTINUE
+	SIF CFLAG:COUNT:1 < 2
+		CONTINUE
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+	C = COUNT
+	CALL CHECK_CHILD_CARE
+	SIF RESULT == 1
+		CONTINUE
+	SIF (CFLAG:COUNT:151 & 1) && BASE:COUNT:体力 > 800
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%
+REND
+PRINTL [1000] - 戻る
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+ELSEIF RESULT == MASTER
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:1 < 2
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:12 > 0
+	GOTO INPUT_LOOP
+ELSEIF ((CFLAG:RESULT:151 & 1) == 0) || BASE:RESULT:体力 <= 800
+	GOTO INPUT_LOOP
+ELSE
+	A = RESULT
+ENDIF
+
+
+;--------------------------------------------------------
+;他の屋台実行可能キャラによるお手伝い
+;--------------------------------------------------------
+CALL LUNCH_STALL_SUP
+
+
+;--------------------------------------------------------
+;報酬額に直結するものを計算（補正含む）
+;--------------------------------------------------------
+;奴隷の料理技能と家事経験のレベルによって、料理の内容と値段の基礎値が上昇
+;ABL:料理技能をみる
+IF ABL:A:料理技能 == 0
+	S += 0
+ELSE
+	S += ABL:A:料理技能*800
+ENDIF
+SIF S
+	PRINTFORML %ABLNAME:12%{ABL:A:料理技能}LV +{S}
+
+;家事経験による補正
+IF EXP:A:家事経験 < EXPLV:1
+	D += 10
+ELSEIF EXP:A:家事経験 < EXPLV:2
+	D += 200
+ELSEIF EXP:A:家事経験 < EXPLV:3
+	D += 800
+ELSEIF EXP:A:家事経験 < EXPLV:4
+	D += 1800
+ELSEIF EXP:A:家事経験 < EXPLV:5
+	D += 3000
+ELSE
+	D += 5000
+ENDIF
+	PRINTFORML %EXPNAME:61%{EXP:A:家事経験} +{D}
+S += D
+
+
+;--------------------------------------------------------
+;奴隷の能力、素質による倍率計算
+;--------------------------------------------------------
+V = 100
+;ABL:A:従順をみる
+IF ABL:A:従順 == 0
+	C = 0
+ELSEIF ABL:A:従順 == 1
+	C = 10
+ELSEIF ABL:A:従順 == 2
+	C = 20
+ELSEIF ABL:A:従順 == 3
+	C = 30
+ELSEIF ABL:A:従順 == 4
+	C = 40
+ELSEIF ABL:A:従順 == 5
+	C = 50
+ELSEIF ABL:A:従順 == 6
+	C = 60
+ELSEIF ABL:A:従順 == 7
+	C = 70
+ELSEIF ABL:A:従順 == 8
+	C = 80
+ELSEIF ABL:A:従順 == 9
+	C = 90
+ELSE
+	C = 100
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:0%{ABL:A:従順}LV +{C}％
+V += C
+
+;ABL:A:欲望をみる
+IF ABL:A:欲望 == 0
+	C = 0
+ELSEIF ABL:A:欲望 == 1
+	C = 10
+ELSEIF ABL:A:欲望 == 2
+	C = 20
+ELSEIF ABL:A:欲望 == 3
+	C = 30
+ELSEIF ABL:A:欲望 == 4
+	C = 40
+ELSEIF ABL:A:欲望 == 5
+	C = 50
+ELSEIF ABL:A:欲望 == 6
+	C = 60
+ELSEIF ABL:A:欲望 == 7
+	C = 70
+ELSEIF ABL:A:欲望 == 8
+	C = 80
+ELSEIF ABL:A:欲望 == 9
+	C = 90
+ELSE
+	C = 100
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:1%{ABL:A:欲望}LV +{C}％
+V += C
+
+;ABL:A:技巧をみる
+IF ABL:A:技巧 == 0
+	C = 0
+ELSEIF ABL:A:技巧 == 1
+	C = 5
+ELSEIF ABL:A:技巧 == 2
+	C = 10
+ELSEIF ABL:A:技巧 == 3
+	C = 15
+ELSEIF ABL:A:技巧 == 4
+	C = 20
+ELSEIF ABL:A:技巧 == 5
+	C = 25
+ELSEIF ABL:A:技巧 == 6
+	C = 30
+ELSEIF ABL:A:技巧 == 7
+	C = 35
+ELSEIF ABL:A:技巧 == 8
+	C = 40
+ELSEIF ABL:A:技巧 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:2%{ABL:A:技巧}LV +{C}％
+V += C
+
+;ABL:A:奉仕精神をみる
+IF ABL:A:奉仕精神 == 0
+	C = 0
+ELSEIF ABL:A:奉仕精神 == 1
+	C = 5
+ELSEIF ABL:A:奉仕精神 == 2
+	C = 10
+ELSEIF ABL:A:奉仕精神 == 3
+	C = 15
+ELSEIF ABL:A:奉仕精神 == 4
+	C = 20
+ELSEIF ABL:A:奉仕精神 == 5
+	C = 25
+ELSEIF ABL:A:奉仕精神 == 6
+	C = 30
+ELSEIF ABL:A:奉仕精神 == 7
+	C = 35
+ELSEIF ABL:A:奉仕精神 == 8
+	C = 40
+ELSEIF ABL:A:奉仕精神 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+IF C > 0
+	PRINTFORML %ABLNAME:7%{ABL:A:奉仕精神}LV +{C}％
+ENDIF
+V += C
+
+
+;--------------------------------------------------------
+;奴隷の素質を計算
+;--------------------------------------------------------
+;陥落素質
+;恋慕
+IF TALENT:A:恋慕
+	C = 100
+	V += 100
+	PRINTFORML %TALENTNAME:3% ＋{C}％
+ENDIF
+;淫乱
+IF TALENT:A:淫乱
+	C = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:4% －{C}％
+ENDIF
+;服従
+IF TALENT:A:服従
+	C = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:5% ＋{C}％
+ENDIF
+;親愛
+IF TALENT:A:親愛
+	C = 200
+	V += 200
+	PRINTFORML %TALENTNAME:6% ＋{C}％
+ENDIF
+;娼婦
+IF TALENT:A:娼婦
+	C = 60
+	V -= 60
+	PRINTFORML %TALENTNAME:7% －{C}％
+ENDIF
+;隷属
+IF TALENT:A:隷属
+	C = 100
+	V -= 100
+	PRINTFORML %TALENTNAME:8% ＋{C}％
+ENDIF
+
+
+
+;その他素質
+;臆病
+IF TALENT:A:臆病
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:10% ＋{C}％
+ENDIF
+;反抗的
+IF TALENT:A:反抗的
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:11% －{C}％
+ENDIF
+;気丈
+IF TALENT:A:気丈
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:12% ＋{C}％
+ENDIF
+;素直
+IF TALENT:A:素直
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:13% ＋{C}％
+ENDIF
+;大人しい
+IF TALENT:A:大人しい
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:14% ＋{C}％
+ENDIF
+;プライド高い
+IF TALENT:A:プライド高い
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:15% －{C}％
+ENDIF
+;生意気
+IF TALENT:A:生意気
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:16% －{C}％
+ENDIF
+;プライド低い
+IF TALENT:A:プライド低い
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:17% ＋{C}％
+ENDIF
+;ツンデレ
+IF TALENT:A:ツンデレ
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:18% ＋{C}％
+ENDIF
+;自制心
+IF TALENT:A:自制心
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:20% ＋{C}％
+ENDIF
+;無関心
+IF TALENT:A:無関心
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:21% －{C}％
+ENDIF
+;感情乏しい
+IF TALENT:A:感情乏しい
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:22% －{C}％
+ENDIF
+;一線越えない
+IF TALENT:A:一線越えない
+	C = 15
+	V += 15
+	PRINTFORML %TALENTNAME:27% ＋{C}％
+ENDIF
+;目立ちたがり
+IF TALENT:A:目立ちたがり
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:28% ＋{C}％
+ENDIF
+;貞操観念
+IF TALENT:A:貞操観念
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:30% ＋{C}％
+ENDIF
+;貞操無頓着
+IF TALENT:A:貞操無頓着
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:31% －{C}％
+ENDIF
+;メシマズ
+IF TALENT:A:メシマズ
+	C = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:44% －{C}％
+ENDIF
+;習得早い
+IF TALENT:A:習得早い
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:50% ＋{C}％
+ENDIF
+;習得遅い
+IF TALENT:A:習得遅い
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:51% －{C}％
+ENDIF
+;料理上手
+IF TALENT:A:料理上手
+	C = 40
+	V += 40
+	PRINTFORML %TALENTNAME:59% ＋{C}％
+ENDIF
+;献身的
+IF TALENT:A:献身的
+	C = 15
+	V += 15
+	PRINTFORML %TALENTNAME:63% ＋{C}％
+ENDIF
+;男嫌い
+IF TALENT:A:男嫌い
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:82% －{C}％
+ENDIF
+;妄信
+IF TALENT:A:妄信
+	C = 15
+	V += 15
+	PRINTFORML %TALENTNAME:86% ＋{C}％
+ENDIF
+;小悪魔
+IF TALENT:A:小悪魔
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:87% ＋{C}％
+ENDIF
+;女嫌い
+IF TALENT:A:女嫌い
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:88% －{C}％
+ENDIF
+;妖狐
+IF TALENT:A:妖狐
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:91% ＋{C}％
+ENDIF
+;魅力
+IF TALENT:A:魅力
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:92% ＋{C}％
+ENDIF
+;謎の魅力
+IF TALENT:A:謎の魅力
+	C = 50
+	V += 50
+	PRINTFORML %TALENTNAME:94% ＋{C}％
+ENDIF
+;貧乳
+IF TALENT:A:貧乳
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:109% －{C}％
+ENDIF
+;絶壁
+IF TALENT:A:絶壁
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:110% －{C}％
+ENDIF
+;巨乳
+IF TALENT:A:巨乳
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:111% ＋{C}％
+ENDIF
+;爆乳
+IF TALENT:A:爆乳
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:112% ＋{C}％
+ENDIF
+;吸血鬼
+IF TALENT:A:吸血鬼
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:132% －{C}％
+ENDIF
+;動物耳
+IF TALENT:A:動物耳
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:143% ＋{C}％
+ENDIF
+;人気
+IF TALENT:A:人気
+	C = 25
+	V += 25
+	PRINTFORML %TALENTNAME:145% ＋{C}％
+ENDIF
+;妊娠
+IF TALENT:A:妊娠
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:153% ＋{C}％
+ENDIF
+;母性
+IF TALENT:A:母性
+	C = 60
+	V += 60
+	PRINTFORML %TALENTNAME:155% ＋{C}％
+ENDIF
+;極
+IF TALENT:A:極
+	C = 50
+	V += 50
+	PRINTFORML %TALENTNAME:180% ＋{C}％
+ENDIF
+
+
+;補正値が0以下の場合は1にする
+SIF V < 0
+	V = 1
+
+	PRINTFORML 最終倍率 {V}％
+
+;補正値の適用
+S *= V
+S /= 100
+
+;崩壊,狂気は利潤をかなり低くする（従順によって、80％まで回復）
+IF TALENT:A:崩壊 || TALENT:A:狂気
+PRINTL 
+	IF TALENT:A:崩壊
+		S *= ABL:A:従順
+		TIMES S , 0.08
+		Z = ABL:A:従順
+		Z *= 8
+		PRINTFORML %TALENTNAME:9% ×{Z}％
+	ELSEIF TALENT:A:狂気
+		S *= ABL:A:従順
+		TIMES S , 0.08
+		Z = ABL:A:従順
+		Z *= 8
+		PRINTFORML %TALENTNAME:141% ×{Z}％
+	ENDIF
+PRINTL 
+ENDIF
+
+;難易度処理
+;EASY
+IF FLAG:4 == 1
+	PRINTFORML 難易度:EASY ×120％
+	TIMES S , 1.20
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES S , 1.00
+;HARD
+ELSEIF FLAG:4 == 3
+	PRINTFORML 難易度:HARD ×80％
+	TIMES S , 0.80
+ENDIF
+
+
+;--------------------------------------------------------
+;定食屋台を実行するか？
+;--------------------------------------------------------
+IF S > 0
+	PRINTFORMW 利潤は{S}朱程度が見込めます
+ELSE
+	PRINTFORMW 利潤が見込めないため、定食屋台を中止します
+	RETURN 0
+ENDIF
+PRINTFORML %CALLNAME:A%と定食屋台を実行しますか？
+PRINTL [0] -   実行する
+PRINTL [100] - やめる
+$INPUT_LOOP_3
+INPUT
+IF RESULT == 0
+	PRINTFORML %CALLNAME:A%と定食屋台を出しました
+	
+	;評判判定
+	;料理の成否がそのまま評判判定になる
+	CALL LUNCH_RESULT(A)
+	;メインがうまくいかなかった場合はサポートの成否判定見る
+	SIF F == 0
+		CALL LUNCH_RESULT(E)
+	
+	;イベント口上呼び出し
+	U = 0
+	IF ASSI >= 0
+		SIF ASSI == A
+			U = 1
+	ENDIF
+	T = TARGET
+	TARGET = A
+	TFLAG:13 = 15
+	CALL KOJO_MESSAGE_EVENT
+	TARGET = T
+	SIF U
+		ASSI = A
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP_3
+ENDIF
+
+
+
+;====================================================================
+;定食屋台の経験とか判定
+;====================================================================
+PRINTFORML 
+PRINTFORML 【%CALLNAME:A%の経験と珠】
+
+;--------------------------------------------------------
+;家事経験　習得の珠は後で加算
+Q = 0
+R = 0
+R:1 = 0
+;--------------------------------------------------------
+Q = ABL:A:料理技能*8
+R += ABL:A:料理技能*5
+EXP:A:家事経験 += Q
+PRINTFORML %CALLNAME:A%の%EXPNAME:61%＋{Q}
+
+IF E
+	Q = ABL:E:料理技能*8
+	R:1 += ABL:E:料理技能*5
+	EXP:E:家事経験 += Q
+	PRINTFORML %CALLNAME:E%の%EXPNAME:61%＋{Q}
+ENDIF
+
+
+;--------------------------------------------------------
+;露出系（パンチラ、乳見せ）
+Q = 0
+;--------------------------------------------------------
+IF TIME != 0
+	Q += (ABL:A:露出癖+ABL:A:奉仕精神)/2
+ENDIF
+
+
+;--------------------------------------------------------
+;奉仕系（手コキ、フェラ、素股、パイズリ、ぶっかけ）
+B = 0
+F = 0
+G = 0
+;--------------------------------------------------------
+IF TIME != 0
+	;奉仕回数
+	B = ABL:A:技巧+ABL:A:奉仕精神
+	;ぶっかけ
+	F += B/3
+	;不快指数
+	G += B/2
+	;習得加算
+	R += B
+ENDIF
+
+
+
+;--------------------------------------------------------
+;お触り（ボディタッチ）
+B = 0
+C = 0
+H = 0
+;--------------------------------------------------------
+IF TIME != 0
+	B += ABL:A:Ｂ感覚*3
+	SIF !TEQUIP:A:貞操帯
+		C += ABL:A:Ｃ感覚*3
+	;絶頂成否
+	H = (B+C)/10
+	;不快指数
+	G += (B+C)/2
+ENDIF
+
+;--------------------------------------------------------
+;実際の珠とか経験加算
+;--------------------------------------------------------
+;フェラ経験、精液経験、奉仕快楽経験
+IF F > 0
+	EXP:A:フェラ経験 += F
+	PRINTFORML フェラ経験＋{F}
+	EXP:A:精液経験 += F
+	PRINTFORML 精液経験＋{F}
+	EXP:A:奉仕快楽経験 += F*ABL:A:奉仕精神
+	PRINTFORML 奉仕快楽経験＋{F*ABL:A:奉仕精神}
+ENDIF
+
+;快楽系
+IF B || C || H
+	;快Ｂの珠
+	IF B
+		JUEL:A:快Ｂ += B*30
+		PRINTFORML 快Ｂの珠＋{B*30}
+	ENDIF
+	;快Ｃの珠
+	IF C
+		JUEL:A:快Ｃ += C*30
+		PRINTFORML 快Ｃの珠＋{C*30}
+	ENDIF
+	;絶頂関連
+	IF H
+		EXP:A:絶頂経験 += H
+		PRINTFORML 絶頂経験＋{H}
+		;射精成否
+		IF PENIS(A)
+			IF TALENT:A:子供サイズ
+				EXP:A:空射精経験 += H
+				PRINTFORML 空射精経験＋{H}
+			ELSEIF TEQUIP:A:貞操帯
+				EXP:A:射精経験 += H/2
+				PRINTFORML 射精経験＋{H/2}
+			ELSE
+				EXP:A:射精経験 += H
+				PRINTFORML 射精経験＋{H}
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;恭順の珠
+D = ABL:A:従順+ABL:A:奉仕精神+ABL:A:料理技能
+JUEL:A:恭順 += D*30
+PRINTFORML 恭順の珠＋{D*30}
+
+;欲情の珠
+IF B > 0 || C > 0 || Q > 0
+	JUEL:A:欲情 += (B+C+Q)*10
+	PRINTFORML 欲情の珠＋{(B+C+Q)*10}
+ENDIF
+
+;習得の珠
+IF R > 0
+	JUEL:A:習得 += R*15
+	PRINTFORML %CALLNAME:A%の習得の珠＋{R*15}
+ENDIF
+IF E && R:1
+	JUEL:E:習得 += (R:1)*15
+	PRINTFORML %CALLNAME:E%の習得の珠＋{(R:1)*15}
+ENDIF
+
+;恥情の珠
+IF Q > 0
+	JUEL:A:恥情 += Q*30
+	PRINTFORML 恥情の珠＋{Q*30}
+ENDIF
+;不快の珠
+IF (TALENT:A:親愛 || TALENT:A:恋慕) && G
+	JUEL:A:不快 += G*5
+	PRINTFORML 不快の珠＋{G*5}
+ENDIF
+
+
+;体力の減少と禁欲
+BASE:A:体力 -= 200+(H*10)
+
+;貞操帯ついてたら夜は禁欲ポイント増加
+IF TEQUIP:A:貞操帯 && TIME != 0
+	CFLAG:A:602 += H
+	SIF TALENT:MASTER:千里眼
+		PRINTFORML 禁欲ポイント＋{H}
+ENDIF
+
+;ストレス
+CFLAG:A:10 -= G/10
+SIF TALENT:MASTER:千里眼
+	PRINTFORML 疲労度－{G/10}
+
+
+
+;--------------------------------------------------------
+;金額計算
+;--------------------------------------------------------
+IF TIME != 0 && F
+	S += F*200
+ENDIF
+
+
+PRINTFORMW 定食屋台で料理を売った結果、{S}朱の利潤が得られた
+MONEY += S
+
+
+DRAWLINE
+
+;休憩フラグを立てる
+FLAG:0 = 1
+BEGIN TURNEND
+
+

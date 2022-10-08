@@ -1,0 +1,25 @@
+﻿【erahetaA용 주인공입상 템플릿】
+
+【개요】
+주인에게 "당신"이외의 열매 꼭지 리어 캐릭터를 선택했을 때에
+입상을 표시하기 위한 템플릿입니다.
+START 모드의 오프닝과 엔딩시에입상을 표시할 수가 있습니다
+
+【내용물】
+·@KOJO_PRE_OPENING_STORY_KX1 오프닝입상 1
+	디폴트의 오프닝의 앞에 표시되어 RETURN 0의 comment out를 해제하면
+	데포 OP와@KOJO_POST_OPENING_STORY_KX1의 내용은 표시되지 않는다
+·@KOJO_POST_OPENING_STORY_KX1 오프닝입상 2
+	디폴트의 오프닝의후에 표시된다
+	@KOJO_PRE_OPENING_STORY_KX1의 RETURN 0의 comment out를 해제하고 있으면 표시되지 않는다
+·@KOJO_BAD1_ENDING_STORY_KX1 배드 엔드 1입상
+	기한 초과 엔드시에 표시된다
+·@KOJO_BAD2_ENDING_STORY_KX1 배드 엔드 2입상
+	자금불발엔드시에 표시된다	
+·@KOJO_NORMAL_ENDING_STORY_KX1 노멀 엔드입상
+	
+
+【사용법】
+X1를 주인으로 하는 캐릭터의 캐릭터 번호에 치환해 주세요
+사용하지 않는 부분은 comment out 해 두면 좋다고 생각합니다
+

@@ -1,0 +1,2362 @@
+﻿@SOURCE_CHECK
+;-------------------------------------------------
+;남은 시간의 감소 처리
+;-------------------------------------------------
+SELECTCASE SELECTCOM
+	;경구속, 약, 술, 이동계(야외플레이 이외), 촉수소환/송환, 촉수구욕는 줄어들지 않는다.
+	CASE 131 TO 134, 300 TO 306, 310, 312, 313, 315, 316, 319, 323, 340, 350
+	;데이트
+	CASE 207
+		TFLAG:74 -= 20
+	;가구로한다, 기다리거나가사, 노래연습, 비디오감상, 윤간
+	CASE 150, 203, 204, 205, 311, 322
+		TFLAG:74 -= 5
+	;섹스계는-3. 뽑지 않는 플래그가 있는 경우는-1
+	CASE 100 TO 106, 110 TO 116, 181, 260 TO 265, 270, 271, 405, 406, 430, 431, 440, 441, 507 TO 515, 517 TO 526
+		IF TFLAG:60
+			TFLAG:74 -= 1
+		ELSE
+			TFLAG:74 -= 3
+		ENDIF
+	;그 이외
+	CASEELSE
+		TFLAG:74 -= 1
+ENDSELECT
+;-------------------------------------------------
+;하드한 커맨드로 SUN값을 깎을 수 있다
+;-------------------------------------------------
+SELECTCASE SELECTCOM
+	;고문/낙인/한쪽팔절단/한쪽다리절단/발치
+	CASE 151, 156, 390 TO 392
+		;조교자에 대해서복종함락, 도M이외
+		SIF !TALENT:복종 && !TALENT:예속 && TALENT:마조!= 2
+			CFLAG:10 += 5
+	;식분시킨다/식분한다
+	CASE 185, 286
+		;식분경험 30 미만으로마조가 아닌지, 도M가 아니다
+		SIF (EXP:식분경험 < 30 && !TALENT:마조) || TALENT:마조!= 2
+			CFLAG:10 += 3
+	;촉수계
+	CASE 340 TO 370
+		;촉수경험 50 미만 또한이상경험 3 이하 또한 함락 하고 있지 않다
+		SIF EXP:촉수경험 < 50 && EXP:이상경험 <= 3 && !KANRAKU2(TARGET)
+			CFLAG:10 += 1
+	;윤간
+	CASE 322
+		;음란복종함락 하고 있지 않다
+		SIF KANRAKU2(TARGET) < 2
+			CFLAG:10 += 5
+ENDSELECT
+;-------------------------------------------------
+;커맨드 실행시의뇨의상승
+;-------------------------------------------------
+;원래뇨의가 없는 경우는 오르지 않아
+IF BASE:뇨의 >= 60
+	SELECTCASE SELECTCOM
+		;C·P·V계 커맨드
+		CASE 20 TO 44, 404
+			BASE:뇨의 += 5
+		;U계 커맨드
+		CASE 60 TO 61
+			BASE:뇨의 += 30
+		;충격을 주는 커맨드(경도)
+		;스팽킹, 젖스팽킹, 촛불, 가구로한다
+		CASE 140, 141, 144, 150
+			BASE:뇨의 += 3
+		;충격을 주는 커맨드(중증)
+		;A섹스계, 채찍, 바늘, 삼각목마, 고문, 목조르기, 낙인
+		CASE 110 TO 116, 142, 143, 145, 151, 155, 156, 404
+			BASE:뇨의 += 10
+		;직접 공격
+		;발로 밟는다, 배빵
+		CASE 153, 154
+			BASE:뇨의 += 50
+	ENDSELECT
+ENDIF
+;-------------------------------------------------
+;커맨드 실행시의변의상승
+;-------------------------------------------------
+;원래변의가 없는 경우는 오르지 않아
+IF BASE:변의 >= 60
+	SELECTCASE SELECTCOM
+		;A계 커맨드
+		CASE 50 TO 56, 404
+			BASE:변의 += 5
+		;충격을 주는 커맨드(경도)
+		;스팽킹, 젖스팽킹, 촛불, 가구로한다
+		CASE 140, 141, 144, 150
+			BASE:변의 += 3
+		;충격을 주는 커맨드(중증)
+		;A섹스계, 채찍, 바늘, 삼각목마, 고문, 목조르기, 낙인
+		CASE 110 TO 116, 142, 143, 145, 151, 155, 156, 404
+			BASE:변의 += 10
+		;직접 공격
+		;발로 밟는다, 배빵
+		CASE 153, 154
+			BASE:변의 += 50
+	ENDSELECT
+ENDIF
+
+;-------------------------------------------------
+;커맨드 실행시의구역질상승
+;-------------------------------------------------
+;원래구역질가 없는 경우는 오르지 않아
+IF BASE:구역질 >= 60
+	SELECTCASE SELECTCOM
+		;입를 사용하는 커맨드
+		CASE 1, 71, 75, 77, 222, 224, 407, 411, 412, 420, 516
+			BASE:구역질 += 5
+		;섹스계, A섹스계
+		CASE 100 TO 106, 110 TO 116, 260 TO 265, 405, 406, 430, 431, 507 TO 515, 517 TO 527
+			BASE:구역질 += 10
+		;충격을 주는 커맨드(경도)
+		;스팽킹, 젖스팽킹, 촛불, 가구로한다
+		CASE 140, 141, 144, 150
+			BASE:구역질 += 5
+		;충격을 주는 커맨드(중증)
+		;이마라치오, 채찍, 바늘, 삼각목마, 고문, 목조르기, 낙인
+		CASE 72, 110 TO 116, 142, 143, 145, 151, 155, 156, 404
+			BASE:구역질 += 10
+		;직접 공격
+		;발로 밟는다, 배빵
+		CASE 153, 154
+			BASE:구역질 += 50
+	ENDSELECT
+ENDIF
+
+;-------------------------------------------------
+;바이브등 붙이고 있을 뿐 아이템의 체크
+;-------------------------------------------------
+CALL EQUIP_CHECK
+;-------------------------------------------------
+;주인, 동성, 조교자의 능력의 처리
+;-------------------------------------------------
+CALL SOURCE_SEX_CHECK
+CALL PLAYER_SKILL_CHECK
+
+;-------------------------------------------------
+;처녀상실의 처리
+;-------------------------------------------------
+CALL LOST_VIRGIN
+;-------------------------------------------------
+;동정상실의 처리
+;-------------------------------------------------
+CALL LOST_VIRGIN_DT
+;-------------------------------------------------
+;백버진상실의 처리
+;-------------------------------------------------
+CALL LOST_VIRGIN_BACK
+
+
+;-------------------------------------------------
+;의존도 체크
+;-------------------------------------------------
+CALL MASTER_DEPENDENCE_CHECK
+
+;-------------------------------------------------
+;기교의 체크
+;-------------------------------------------------
+CALL TECHNIQUE_CHECK
+
+;-------------------------------------------------
+;윤활로 옷을 더럽혔는지의 체크
+;-------------------------------------------------
+CALL JUNKATU_TYAKUI
+
+;-------------------------------------------------
+;뇨의·변의게이지의 체크
+;-------------------------------------------------
+CALL DEFECATION_CHECK
+
+;-------------------------------------------------
+;구역질게이지의 체크
+;-------------------------------------------------
+CALL NAUSEA_CHECK
+
+
+;-------------------------------------------------
+;【실의】체크
+;-------------------------------------------------
+SIF TALENT:실의
+	SOURCE:반발 += ((TALENT:실의 * 5) / 2)
+
+;-------------------------------------------------
+;쾌C의 소스
+;-------------------------------------------------
+;C민감와 C둔감는 여기서 처리
+SIF TALENT:C둔감
+	TIMES SOURCE:쾌C , 0.50
+SIF TALENT:C민감
+	TIMES SOURCE:쾌C , 1.50
+
+;가려움증약 사용하고 있는 경우, 쾌감이 튄다
+SIF STAIN:4 & 1024 || STAIN:5 & 1024
+	TIMES SOURCE:쾌C , 2.00
+
+;C감각
+SIF ABL:C감각 == 0
+	TIMES SOURCE:쾌C , 0.50
+SIF ABL:C감각 == 1
+	TIMES SOURCE:쾌C , 1.50
+SIF ABL:C감각 == 2
+	TIMES SOURCE:쾌C , 2.00
+SIF ABL:C감각 == 3
+	TIMES SOURCE:쾌C , 3.00
+SIF ABL:C감각 == 4
+	TIMES SOURCE:쾌C , 4.50
+SIF ABL:C감각 == 5
+	TIMES SOURCE:쾌C , 6.00
+SIF ABL:C감각 == 6
+	TIMES SOURCE:쾌C , 8.00
+SIF ABL:C감각 == 7
+	TIMES SOURCE:쾌C , 10.00
+SIF ABL:C감각 == 8
+	TIMES SOURCE:쾌C , 12.00
+SIF ABL:C감각 == 9
+	TIMES SOURCE:쾌C , 13.50
+SIF ABL:C감각 >= 10
+	TIMES SOURCE:쾌C , 15.00
+
+LOCAL = SOURCE:쾌C
+
+;PALAM:욕정를 본다
+SIF PALAM:욕정 < PALAMLV:1
+	TIMES LOCAL , 0.80
+SIF PALAM:욕정 < PALAMLV:2
+	TIMES LOCAL , 1.00
+SIF PALAM:욕정 < PALAMLV:3
+	TIMES LOCAL , 1.20
+SIF PALAM:욕정 < PALAMLV:4
+	TIMES LOCAL , 1.50
+SIF PALAM:욕정 >= PALAMLV:4
+	TIMES LOCAL , 1.80
+
+LOCAL:1 = SOURCE:쾌C
+
+;ABL:욕망를 본다
+SIF ABL:욕망 == 0
+	TIMES LOCAL:1, 0.50
+SIF ABL:욕망 == 1
+	TIMES LOCAL:1, 0.60
+SIF ABL:욕망 == 2
+	TIMES LOCAL:1, 0.70
+SIF ABL:욕망 == 3
+	TIMES LOCAL:1, 0.80
+SIF ABL:욕망 == 4
+	TIMES LOCAL:1, 0.90
+SIF ABL:욕망 == 5
+	TIMES LOCAL:1, 1.00
+SIF ABL:욕망 == 6
+	TIMES LOCAL:1, 1.05
+SIF ABL:욕망 == 7
+	TIMES LOCAL:1, 1.10
+SIF ABL:욕망 == 8
+	TIMES LOCAL:1, 1.15
+SIF ABL:욕망 == 9
+	TIMES LOCAL:1, 1.20
+SIF ABL:욕망 >= 10
+	TIMES LOCAL:1, 1.40
+
+UP:쾌C += LOCAL
+UP:욕정 += LOCAL:1
+
+;-------------------------------------------------
+;쾌V의 소스
+;-------------------------------------------------
+;V민감와 V둔감는 여기서 처리
+SIF TALENT:V둔감
+	TIMES SOURCE:쾌V , 0.50
+SIF TALENT:V민감
+	TIMES SOURCE:쾌V , 1.50
+
+;가려움증약 사용하고 있는 경우, 쾌감이 튄다
+SIF STAIN:6 & 1024 || STAIN:5 & 1024
+	TIMES SOURCE:쾌V , 2.00
+
+;V감각
+SIF ABL:V감각 == 0
+	TIMES SOURCE:쾌V , 0.50
+SIF ABL:V감각 == 1
+	TIMES SOURCE:쾌V , 1.50
+SIF ABL:V감각 == 2
+	TIMES SOURCE:쾌V , 2.00
+SIF ABL:V감각 == 3
+	TIMES SOURCE:쾌V , 3.00
+SIF ABL:V감각 == 4
+	TIMES SOURCE:쾌V , 4.50
+SIF ABL:V감각 == 5
+	TIMES SOURCE:쾌V , 6.00
+SIF ABL:V감각 == 6
+	TIMES SOURCE:쾌V , 8.00
+SIF ABL:V감각 == 7
+	TIMES SOURCE:쾌V , 10.00
+SIF ABL:V감각 == 8
+	TIMES SOURCE:쾌V , 12.00
+SIF ABL:V감각 == 9
+	TIMES SOURCE:쾌V , 13.00
+SIF ABL:V감각 >= 10
+	TIMES SOURCE:쾌V , 15.00
+
+;EXP:V경험를 본다
+SIF EXP:V경험 < EXPLV:1
+	TIMES SOURCE:쾌V , 0.50
+SIF EXP:V경험 < EXPLV:2
+	TIMES SOURCE:쾌V , 0.60
+SIF EXP:V경험 < EXPLV:3
+	TIMES SOURCE:쾌V , 1.00
+SIF EXP:V경험 < EXPLV:4
+	TIMES SOURCE:쾌V , 1.20
+SIF EXP:V경험 < EXPLV:5
+	TIMES SOURCE:쾌V , 1.40
+SIF EXP:V경험 >= EXPLV:5
+	TIMES SOURCE:쾌V , 1.60
+
+;PALAM:윤활를 본다
+SIF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:쾌V , 0.10
+SIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:쾌V , 0.40
+SIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:쾌V , 1.00
+SIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:쾌V , 1.40
+SIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:쾌V , 1.80
+
+LOCAL = SOURCE:쾌V
+
+;PALAM:욕정를 본다
+SIF PALAM:욕정 < PALAMLV:1
+	TIMES LOCAL , 0.60
+SIF PALAM:욕정 < PALAMLV:2
+	TIMES LOCAL , 0.80
+SIF PALAM:욕정 < PALAMLV:3
+	TIMES LOCAL , 1.00
+SIF PALAM:욕정 < PALAMLV:4
+	TIMES LOCAL , 1.50
+SIF PALAM:욕정 >= PALAMLV:4
+	TIMES LOCAL , 2.00
+
+LOCAL:1 = SOURCE:쾌V
+
+;ABL:욕망를 본다
+SIF ABL:욕망 == 0
+	TIMES LOCAL:1, 0.50
+SIF ABL:욕망 == 1
+	TIMES LOCAL:1, 0.60
+SIF ABL:욕망 == 2
+	TIMES LOCAL:1, 0.70
+SIF ABL:욕망 == 3
+	TIMES LOCAL:1, 0.80
+SIF ABL:욕망 == 4
+	TIMES LOCAL:1, 0.90
+SIF ABL:욕망 == 5
+	TIMES LOCAL:1, 1.00
+SIF ABL:욕망 == 6
+	TIMES LOCAL:1, 1.05
+SIF ABL:욕망 == 7
+	TIMES LOCAL:1, 1.10
+SIF ABL:욕망 == 8
+	TIMES LOCAL:1, 1.15
+SIF ABL:욕망 == 9
+	TIMES LOCAL:1, 1.20
+SIF ABL:욕망 >= 10
+	TIMES LOCAL:1, 1.40
+
+;소인체형
+IF TALENT:소인체형
+	TIMES LOCAL , 0.80
+	TIMES LOCAL:1, 1.20
+	UP:습득 += LOCAL:1/2
+ENDIF
+
+UP:쾌V += LOCAL
+UP:욕정 += LOCAL:1
+;-------------------------------------------------
+;쾌A의 소스
+;-------------------------------------------------
+;A민감와 A둔감는 여기서 처리
+SIF TALENT:A둔감
+	TIMES SOURCE:쾌A , 0.50
+SIF TALENT:A민감
+	TIMES SOURCE:쾌A , 1.50
+
+;가려움증약 사용하고 있는 경우, 쾌감이 튄다
+SIF STAIN:7 & 1024 || STAIN:8 & 1024
+	TIMES SOURCE:쾌A , 2.00
+
+;A감각
+SIF ABL:A감각 == 0
+	TIMES SOURCE:쾌A , 0.50
+SIF ABL:A감각 == 1
+	TIMES SOURCE:쾌A , 1.50
+SIF ABL:A감각 == 2
+	TIMES SOURCE:쾌A , 2.00
+SIF ABL:A감각 == 3
+	TIMES SOURCE:쾌A , 3.00
+SIF ABL:A감각 == 4
+	TIMES SOURCE:쾌A , 4.50
+SIF ABL:A감각 == 5
+	TIMES SOURCE:쾌A , 6.00
+SIF ABL:A감각 == 6
+	TIMES SOURCE:쾌A , 8.00
+SIF ABL:A감각 == 7
+	TIMES SOURCE:쾌A , 10.00
+SIF ABL:A감각 == 8
+	TIMES SOURCE:쾌A , 12.00
+SIF ABL:A감각 == 9
+	TIMES SOURCE:쾌A , 13.50
+SIF ABL:A감각 >= 10
+	TIMES SOURCE:쾌A , 15.00
+
+;EXP:A경험를 본다
+SIF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:쾌A , 0.10
+SIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:쾌A , 0.30
+SIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:쾌A , 0.50
+SIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:쾌A , 1.00
+SIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:쾌A , 1.40
+SIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:쾌A , 1.60
+
+;PALAM:윤활를 본다
+SIF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:쾌A , 0.10
+SIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:쾌A , 0.40
+SIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:쾌A , 1.00
+SIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:쾌A , 1.40
+SIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:쾌A , 1.80
+
+LOCAL = SOURCE:쾌A
+
+;PALAM:욕정를 본다
+;쾌A는 그다지 PALAM:욕정에서는 차이가 나지 않는다
+SIF PALAM:욕정 < PALAMLV:1
+	TIMES LOCAL , 0.80
+SIF PALAM:욕정 < PALAMLV:2
+	TIMES LOCAL , 1.00
+SIF PALAM:욕정 < PALAMLV:3
+	TIMES LOCAL , 1.20
+SIF PALAM:욕정 < PALAMLV:4
+	TIMES LOCAL , 1.40
+SIF PALAM:욕정 >= PALAMLV:4
+	TIMES LOCAL , 1.60
+
+LOCAL:1= SOURCE:쾌A
+
+;ABL:욕망를 본다
+SIF ABL:욕망 == 0
+	TIMES LOCAL:1, 0.50
+SIF ABL:욕망 == 1
+	TIMES LOCAL:1, 0.60
+SIF ABL:욕망 == 2
+	TIMES LOCAL:1, 0.70
+SIF ABL:욕망 == 3
+	TIMES LOCAL:1, 0.80
+SIF ABL:욕망 == 4
+	TIMES LOCAL:1, 0.90
+SIF ABL:욕망 == 5
+	TIMES LOCAL:1, 1.00
+SIF ABL:욕망 == 6
+	TIMES LOCAL:1, 1.05
+SIF ABL:욕망 == 7
+	TIMES LOCAL:1, 1.10
+SIF ABL:욕망 == 8
+	TIMES LOCAL:1, 1.15
+SIF ABL:욕망 == 9
+	TIMES LOCAL:1, 1.20
+SIF ABL:욕망 >= 10
+	TIMES LOCAL:1, 1.40
+
+;소인체형
+IF TALENT:소인체형
+	TIMES LOCAL , 0.50
+	TIMES LOCAL:1, 1.50
+ENDIF
+
+;쾌A의 소스가 0이상으로처녀로정조관념 때, 굴복의 소스를 3 분의 1으로 한다
+IF EXP:V경험 == 0 && TALENT:정조관념 && SOURCE:쾌A > 0
+	SOURCE:굴복 /= 3
+ENDIF
+
+UP:쾌A += LOCAL
+UP:욕정 += LOCAL:1
+;-------------------------------------------------
+;쾌B의 소스
+;-------------------------------------------------
+;B민감와 B둔감는 여기서 처리
+SIF TALENT:B둔감
+	TIMES SOURCE:쾌B , 0.50
+SIF TALENT:B민감
+	TIMES SOURCE:쾌B , 1.50
+
+;함몰유두
+IF TALENT:함몰유두
+	;욕정의 PLAMLV3 이상
+	IF PALAM:욕정 >= PALAMLV:3
+		TIMES SOURCE:쾌B , 1.50
+	ELSE
+		TIMES SOURCE:쾌B , 0.50
+	ENDIF
+ENDIF
+
+;가려움증약 사용하고 있는 경우, 쾌감이 튄다
+SIF STAIN:3 & 1024
+	TIMES SOURCE:쾌B , 2.00
+
+;B감각
+SIF ABL:B감각 == 0
+	TIMES SOURCE:쾌B , 0.50
+SIF ABL:B감각 == 1
+	TIMES SOURCE:쾌B , 1.50
+SIF ABL:B감각 == 2
+	TIMES SOURCE:쾌B , 2.00
+SIF ABL:B감각 == 3
+	TIMES SOURCE:쾌B , 3.00
+SIF ABL:B감각 == 4
+	TIMES SOURCE:쾌B , 4.50
+SIF ABL:B감각 == 5
+	TIMES SOURCE:쾌B , 6.00
+SIF ABL:B감각 == 6
+	TIMES SOURCE:쾌B , 8.00
+SIF ABL:B감각 == 7
+	TIMES SOURCE:쾌B , 10.00
+SIF ABL:B감각 == 8
+	TIMES SOURCE:쾌B , 12.00
+SIF ABL:B감각 == 9
+	TIMES SOURCE:쾌B , 13.50
+SIF ABL:B감각 >= 10
+	TIMES SOURCE:쾌B , 15.00
+
+LOCAL = SOURCE:쾌B
+
+;PALAM:욕정를 본다
+SIF PALAM:욕정 < PALAMLV:1
+	TIMES LOCAL , 0.80
+SIF PALAM:욕정 < PALAMLV:2
+	TIMES LOCAL , 1.00
+SIF PALAM:욕정 < PALAMLV:3
+	TIMES LOCAL , 1.20
+SIF PALAM:욕정 < PALAMLV:4
+	TIMES LOCAL , 1.50
+SIF PALAM:욕정 >= PALAMLV:4
+	TIMES LOCAL , 1.80
+
+LOCAL:1= SOURCE:쾌B
+
+;ABL:욕망를 본다
+SIF ABL:욕망 == 0
+	TIMES LOCAL:1, 0.50
+SIF ABL:욕망 == 1
+	TIMES LOCAL:1, 0.60
+SIF ABL:욕망 == 2
+	TIMES LOCAL:1, 0.70
+SIF ABL:욕망 == 3
+	TIMES LOCAL:1, 0.80
+SIF ABL:욕망 == 4
+	TIMES LOCAL:1, 0.90
+SIF ABL:욕망 == 5
+	TIMES LOCAL:1, 1.00
+SIF ABL:욕망 == 6
+	TIMES LOCAL:1, 1.05
+SIF ABL:욕망 == 7
+	TIMES LOCAL:1, 1.10
+SIF ABL:욕망 == 8
+	TIMES LOCAL:1, 1.15
+SIF ABL:욕망 == 9
+	TIMES LOCAL:1, 1.20
+SIF ABL:욕망 >= 10
+	TIMES LOCAL:1, 1.40
+
+;소인체형
+IF TALENT:소인체형
+	TIMES LOCAL , 1.50
+	TIMES LOCAL:1, 1.20
+	UP:윤활 += LOCAL:1/2
+ENDIF
+
+;B민감가 없는가 B감각 3 이하의 때, B로 이키 힘들어진다
+SIF (!TALENT:B민감 || ABL:B감각 <= 2) && PALAM:쾌B >= PALAMLV:4
+	TIMES LOCAL , 0.30
+
+UP:쾌B += LOCAL
+UP:욕정 += LOCAL:1
+;-------------------------------------------------
+;같은 커맨드의 연속 실행에 의한 상하의 처리(쾌락계)
+;-------------------------------------------------
+IF SELECTCOM == PREVCOM
+	;UP:쾌C, UP:쾌V , UP:쾌A, UP:쾌B는 절정에 관련되므로 먼저 처리되어 있다
+	UP:쾌C /= 2
+	UP:쾌V /= 2
+	UP:쾌A /= 2
+	UP:쾌B /= 2
+ENDIF
+
+;-------------------------------------------------
+;기력 0에 의한 상하의 처리(쾌락계)
+;-------------------------------------------------
+IF BASE:기력 <= 0
+	;UP:쾌C, UP:쾌V , UP:쾌A, UP:쾌B는 절정에 관련되므로 먼저 처리되어 있다
+	UP:쾌C /= 2
+	UP:쾌V /= 2
+	UP:쾌A /= 2
+	UP:쾌B /= 2
+ENDIF
+
+;-------------------------------------------------
+;궁합에 의한 상하의 처리(쾌락계)
+;-------------------------------------------------
+R = NO:PLAYER
+SIF RELATION:R == 0
+	LOCAL:2 = 100
+;여자좋아, 남자좋아, 아이좋아
+IF (TALENT:여자좋아 && MALE(PLAYER) == 0 && TALENT:PLAYER:소인체형 == 0) || (TALENT:남자좋아 && MALE(PLAYER) && TALENT:PLAYER:소인체형 == 0) || (TALENT:아이좋아 && TALENT:PLAYER:소인체형)
+	IF RELATION:R == 0
+		C = 150
+	ELSE
+		C = RELATION:R + 50
+		SIF C > 200
+			C = 200
+	ENDIF
+;남자혐오, 여자혐오(연모함락으로 무효)
+ELSEIF (TALENT:남자혐오 && MALE(PLAYER) && (TALENT:연모 == 0 && TALENT:친애 == 0)) || (TALENT:여자혐오 && MALE(PLAYER) == 0 && (TALENT:연모 == 0 && TALENT:친애 == 0))
+	IF RELATION:R == 0
+		C = 50
+	ELSE
+		C = RELATION:R - 50
+		SIF C <= 0
+		C = 10
+	ENDIF
+ELSE
+	C = RELATION:R
+ENDIF
+IF C != 0
+	UP:쾌C *= C
+	UP:쾌C /= 100
+	UP:쾌V *= C
+	UP:쾌V /= 100
+	UP:쾌A *= C
+	UP:쾌A /= 100
+	UP:쾌B *= C
+	UP:쾌B /= 100
+ENDIF
+
+;-------------------------------------------------
+;쾌감을부정는, 쾌소스의 수치에 응해, 억울증가(음란, 창부로 무효)
+;-------------------------------------------------
+SIF TALENT:쾌감을부정 && !TALENT:음란 && !TALENT:창부
+	SOURCE:울굴 += (UP:쾌C+UP:쾌V +UP:쾌A+UP:쾌B)/10
+
+;-------------------------------------------------
+;소질 따위에 의한 상하의 처리(쾌락계)
+;-------------------------------------------------
+;미약
+IF TEQUIP:미약
+	TIMES UP:쾌C , 2.00
+	TIMES UP:쾌V , 2.00
+	TIMES UP:쾌A , 2.00
+	TIMES UP:쾌B , 2.00
+ENDIF
+
+;가려움증약
+IF ZUIKI(TARGET)
+	TIMES UP:쾌C , 2.00
+	TIMES UP:쾌V , 2.00
+	TIMES UP:쾌A , 2.00
+	TIMES UP:쾌B , 2.00
+ENDIF
+
+;이뇨제
+IF TEQUIP:이뇨제
+	TIMES UP:쾌C , 0.70
+	TIMES UP:쾌V , 0.70
+	TIMES UP:쾌A , 0.70
+	TIMES UP:쾌B , 0.70
+ENDIF
+
+;꽐라플레이
+IF TEQUIP:꽐라플레이
+	;사케 혹은 사케·맥주를 마신알콜쓰레기
+	IF TFLAG:76 == 3 || (TALENT:알콜쓰레기 && TFLAG:76!= 1)
+		TIMES UP:쾌C , 0.50
+		TIMES UP:쾌V , 0.50
+		TIMES UP:쾌A , 0.50
+		TIMES UP:쾌B , 0.50
+	;맥주
+	ELSEIF TFLAG:76 == 2
+		TIMES UP:쾌C , 0.70
+		TIMES UP:쾌V , 0.70
+		TIMES UP:쾌A , 0.70
+		TIMES UP:쾌B , 0.70
+	;감주
+	ELSE
+		;술꾼를 가지지 않는다
+		IF !TALENT:술꾼
+			TIMES UP:쾌C , 0.90
+			TIMES UP:쾌V , 0.90
+			TIMES UP:쾌A , 0.90
+			TIMES UP:쾌B , 0.90
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;함락 소질
+;-------------------------------------------------
+;음란
+IF TALENT:음란
+	TIMES UP:쾌C , 1.20
+	TIMES UP:쾌V , 1.20
+	TIMES UP:쾌A , 1.20
+	TIMES UP:쾌B , 1.20
+ENDIF
+
+;창부
+IF TALENT:창부
+	TIMES UP:쾌C , 1.50
+	TIMES UP:쾌V , 1.50
+	TIMES UP:쾌A , 1.50
+	TIMES UP:쾌B , 1.50
+ENDIF
+
+;-------------------------------------------------
+;소질
+;-------------------------------------------------
+;자제심
+IF TALENT:자제심
+	TIMES UP:쾌C , 0.70
+	TIMES UP:쾌V , 0.90
+	TIMES UP:쾌A , 1.00
+	TIMES UP:쾌B , 0.70
+ENDIF
+
+;즉각함락
+IF TALENT:즉각함락
+	TIMES UP:쾌C , 2.00
+	TIMES UP:쾌V , 2.00
+	TIMES UP:쾌A , 2.00
+	TIMES UP:쾌B , 2.00
+ENDIF
+;자위광
+SIF TALENT:자위광
+	TIMES UP:쾌C , 1.20
+;음란구멍
+SIF TALENT:음란구멍
+	TIMES UP:쾌V , 1.20
+;항문광
+SIF TALENT:항문광
+	TIMES UP:쾌A , 1.20
+;음란가슴
+SIF TALENT:음란가슴
+	TIMES UP:쾌B , 1.20
+;섹스광
+IF TALENT:섹스광 && (SEXPLAY(TARGET) || SELECTCOM == 430 || SELECTCOM == 431 || SELECTCOM == 405 || SELECTCOM == 406)
+	TIMES UP:쾌C , 1.20
+	TIMES UP:쾌V , 1.20
+	TIMES UP:쾌A , 1.20
+	TIMES UP:쾌B , 1.20
+ENDIF
+;포경
+SIF TALENT:포경
+	TIMES UP:쾌C , 0.90
+;남자
+IF TALENT:남자
+	TIMES UP:쾌A , 1.30
+ENDIF
+
+;경험풍부
+IF TALENT:경험풍부
+	IF ABL:PLAYER:기교 > 8
+		TIMES UP:쾌C , 1.20
+		TIMES UP:쾌V , 1.20
+		TIMES UP:쾌A , 1.20
+		TIMES UP:쾌B , 1.20
+	ELSEIF ABL:PLAYER:기교 < 3
+		TIMES UP:쾌C , 0.20
+		TIMES UP:쾌V , 0.20
+		TIMES UP:쾌A , 0.20
+		TIMES UP:쾌B , 0.20
+	ELSEIF ABL:PLAYER:기교 < 5
+		TIMES UP:쾌C , 0.50
+		TIMES UP:쾌V , 0.50
+		TIMES UP:쾌A , 0.50
+		TIMES UP:쾌B , 0.50
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;난이도에 의한 상하의 처리(쾌락계)
+;-------------------------------------------------
+;EASY
+IF FLAG:4 == 1
+	TIMES UP:쾌C , 1.60
+	TIMES UP:쾌V , 1.60
+	TIMES UP:쾌A , 1.60
+	TIMES UP:쾌B , 1.60
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES UP:쾌C , 1.20
+	TIMES UP:쾌V , 1.20
+	TIMES UP:쾌A , 1.20
+	TIMES UP:쾌B , 1.20
+;HARD
+ELSEIF FLAG:4 == 3
+	TIMES UP:쾌C , 0.80
+	TIMES UP:쾌V , 0.80
+	TIMES UP:쾌A , 0.80
+	TIMES UP:쾌B , 0.80
+ENDIF
+
+
+;손가락삽입의 길들여 특수 효과용 처리, V경험이 0때는 쾌V는 99로 최대로 한다
+;LOCAL = UP:쾌V + PALAM:쾌V
+;IF LOCAL >= 100 && EXP:V경험 == 0
+;	UP:쾌V = 0
+;	PALAM:쾌V = 99
+;ENDIF
+;-------------------------------------------------
+;애액 처리
+;-------------------------------------------------
+LOCAL = UP:쾌C + UP:쾌V + UP:쾌A + UP:쾌B
+;쾌C＋쾌V＋쾌A＋쾌B가 합해 100이상 상승이라면 그 20%의액체의 소스가 더해진다
+IF LOCAL > 100
+	;젖기쉬움와젖기어려움는 여기서 처리
+	SIF TALENT:젖기쉬움
+		TIMES LOCAL , 3.00
+	SIF TALENT:젖기어려움
+		TIMES LOCAL , 0.40
+	SOURCE:액체 += LOCAL / 5
+ENDIF
+
+;-------------------------------------------------
+;강정신약에 의한 절정 캔슬
+;-------------------------------------------------
+SIF TEQUIP:강정신약 > 1
+	CALL ECST_CANCEL
+
+;-------------------------------------------------
+;절정 체크
+;-------------------------------------------------
+CALL ORGASM_ADD_CHECK
+;-------------------------------------------------
+;노예에게페니스가 있는 경우의 C절정＆사정체크
+;-------------------------------------------------
+CALL TARGET_EJAC_CORGASM_CHECK
+
+;-------------------------------------------------
+;절정 처리
+;-------------------------------------------------
+CALL ORGASM_ADD
+;-------------------------------------------------
+;조교 대상의사정처리
+;-------------------------------------------------
+CALL TARGET_EJAC_CHECK
+
+;-------------------------------------------------
+;조교 대상의사정체크(분유)
+;-------------------------------------------------
+CALL TARGET_MILK_CHECK
+
+;-------------------------------------------------
+;애정의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:애정
+
+;ABL:순종를 본다
+SIF ABL:순종 == 0
+	TIMES LOCAL , 0.10
+SIF ABL:순종 == 1
+	TIMES LOCAL , 0.50
+SIF ABL:순종 == 2
+	TIMES LOCAL , 1.00
+SIF ABL:순종 == 3
+	TIMES LOCAL , 1.50
+SIF ABL:순종 == 4
+	TIMES LOCAL , 2.00
+SIF ABL:순종 == 5
+	TIMES LOCAL , 2.50
+SIF ABL:순종 == 6
+	TIMES LOCAL , 3.00
+SIF ABL:순종 == 7
+	TIMES LOCAL , 3.50
+SIF ABL:순종 == 8
+	TIMES LOCAL , 4.00
+SIF ABL:순종 == 9
+	TIMES LOCAL , 5.00
+SIF ABL:순종 >= 10
+	TIMES LOCAL , 6.00
+
+LOCAL:1 = SOURCE:애정
+
+;욕망를 본다
+SIF ABL:욕망 == 0
+	TIMES LOCAL:1, 0.00
+SIF ABL:욕망 == 1
+	TIMES LOCAL:1, 0.40
+SIF ABL:욕망 == 2
+	TIMES LOCAL:1, 0.80
+SIF ABL:욕망 == 3
+	TIMES LOCAL:1, 1.20
+SIF ABL:욕망 == 4
+	TIMES LOCAL:1, 1.60
+SIF ABL:욕망 == 5
+	TIMES LOCAL:1, 2.00
+SIF ABL:욕망 == 6
+	TIMES LOCAL:1, 2.40
+SIF ABL:욕망 == 7
+	TIMES LOCAL:1, 2.80
+SIF ABL:욕망 == 8
+	TIMES LOCAL:1, 3.20
+SIF ABL:욕망 == 9
+	TIMES LOCAL:1, 3.60
+SIF ABL:욕망 >= 10
+	TIMES LOCAL:1, 5.00
+
+UP:순종 += LOCAL
+UP:욕정 += LOCAL:1
+;-------------------------------------------------
+;성행동의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:성행동
+
+;ABL:기교를 본다
+SIF ABL:기교 == 0
+	TIMES LOCAL , 0.60
+SIF ABL:기교 == 1
+	TIMES LOCAL , 1.20
+SIF ABL:기교 == 2
+	TIMES LOCAL , 1.80
+SIF ABL:기교 == 3
+	TIMES LOCAL , 2.40
+SIF ABL:기교 == 4
+	TIMES LOCAL , 3.00
+SIF ABL:기교 == 5
+	TIMES LOCAL , 3.60
+SIF ABL:기교 == 6
+	TIMES LOCAL , 4.20
+SIF ABL:기교 == 7
+	TIMES LOCAL , 4.80
+SIF ABL:기교 == 8
+	TIMES LOCAL , 5.40
+SIF ABL:기교 == 9
+	TIMES LOCAL , 6.00
+SIF ABL:기교 >= 10
+	TIMES LOCAL , 7.00
+
+;ABL:봉사정신를 본다
+SIF ABL:봉사정신 == 0
+	TIMES LOCAL , 0.60
+SIF ABL:봉사정신 == 1
+	TIMES LOCAL , 0.80
+SIF ABL:봉사정신 == 2
+	TIMES LOCAL , 1.00
+SIF ABL:봉사정신 == 3
+	TIMES LOCAL , 1.20
+SIF ABL:봉사정신 == 4
+	TIMES LOCAL , 1.40
+SIF ABL:봉사정신 == 5
+	TIMES LOCAL , 1.70
+SIF ABL:봉사정신 == 6
+	TIMES LOCAL , 2.00
+SIF ABL:봉사정신 == 7
+	TIMES LOCAL , 2.40
+SIF ABL:봉사정신 == 8
+	TIMES LOCAL , 2.80
+SIF ABL:봉사정신 == 9
+	TIMES LOCAL , 4.00
+SIF ABL:봉사정신 >= 10
+	TIMES LOCAL , 5.00
+
+UP:습득 += LOCAL
+;-------------------------------------------------
+;달성의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:성취감
+
+;ABL:순종를 본다
+SIF ABL:순종 == 0
+	TIMES LOCAL , 0.50
+SIF ABL:순종 == 1
+	TIMES LOCAL , 1.00
+SIF ABL:순종 == 2
+	TIMES LOCAL , 1.50
+SIF ABL:순종 == 3
+	TIMES LOCAL , 2.00
+SIF ABL:순종 == 4
+	TIMES LOCAL , 2.50
+SIF ABL:순종 == 5
+	TIMES LOCAL , 3.00
+SIF ABL:순종 == 6
+	TIMES LOCAL , 3.50
+SIF ABL:순종 == 7
+	TIMES LOCAL , 4.00
+SIF ABL:순종 == 8
+	TIMES LOCAL , 4.50
+SIF ABL:순종 == 9
+	TIMES LOCAL , 5.00
+SIF ABL:순종 >= 10
+	TIMES LOCAL , 6.00
+
+;ABL:봉사정신를 본다
+SIF ABL:봉사정신 == 0
+	TIMES LOCAL , 0.00
+SIF ABL:봉사정신 == 1
+	TIMES LOCAL , 0.50
+SIF ABL:봉사정신 == 2
+	TIMES LOCAL , 1.00
+SIF ABL:봉사정신 == 3
+	TIMES LOCAL , 1.50
+SIF ABL:봉사정신 == 4
+	TIMES LOCAL , 2.00
+SIF ABL:봉사정신 == 5
+	TIMES LOCAL , 2.50
+SIF ABL:봉사정신 == 6
+	TIMES LOCAL , 3.00
+SIF ABL:봉사정신 == 7
+	TIMES LOCAL , 3.50
+SIF ABL:봉사정신 == 8
+	TIMES LOCAL , 4.00
+SIF ABL:봉사정신 == 9
+	TIMES LOCAL , 4.50
+SIF ABL:봉사정신 >= 10
+	TIMES LOCAL , 6.00
+
+UP:순종 += LOCAL
+;-------------------------------------------------
+;통증의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:통증
+LOCAL:1 = SOURCE:통증
+LOCAL:2 = SOURCE:통증/20
+
+;마조끼
+SIF ABL:마조끼 == 0
+	TIMES LOCAL:1, 0.00
+SIF ABL:마조끼 == 1
+	TIMES LOCAL:1, 0.10
+SIF ABL:마조끼 == 2
+	TIMES LOCAL:1, 0.20
+SIF ABL:마조끼 == 3
+	TIMES LOCAL:1, 0.30
+SIF ABL:마조끼 == 4
+	TIMES LOCAL:1, 0.45
+SIF ABL:마조끼 == 5
+	TIMES LOCAL:1, 0.60
+SIF ABL:마조끼 == 6
+	TIMES LOCAL:1, 0.75
+SIF ABL:마조끼 == 7
+	TIMES LOCAL:1, 0.90
+SIF ABL:마조끼 == 8
+	TIMES LOCAL:1, 1.20
+SIF ABL:마조끼 == 9
+	TIMES LOCAL:1, 1.50
+SIF ABL:마조끼 >= 10
+	TIMES LOCAL:1, 3.00
+
+;소인체형
+IF TALENT:소인체형
+	TIMES LOCAL , 2.00
+	TIMES LOCAL:1, 0.75
+ENDIF
+
+;조교자가【새드, 도S】
+SELECTCASE TALENT:PLAYER:새드
+	CASE 1
+		TIMES LOCAL:1, 1.50
+	CASE 2
+		TIMES LOCAL:1, 2.50
+ENDSELECT
+
+;겁쟁이
+SIF TALENT:겁쟁이
+	TIMES LOCAL:2, 2.00
+
+;마조끼가 있으면 PALAM:욕정도 오른다
+;그 때 조교자가【새드】라면 효과적
+;고통에 응해공포의 소스가 증가한다
+UP:고통 += LOCAL
+UP:욕정 += LOCAL:1
+UP:공포 += LOCAL:2
+;-------------------------------------------------
+;두려움의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:두려움
+
+;ABL:순종를 본다(공포보다는 공포에 가깝다고 해석)
+SIF ABL:순종 == 0
+	TIMES LOCAL , 1.00
+SIF ABL:순종 == 1
+	TIMES LOCAL , 1.50
+SIF ABL:순종 == 2
+	TIMES LOCAL , 2.00
+SIF ABL:순종 == 3
+	TIMES LOCAL , 2.50
+SIF ABL:순종 == 4
+	TIMES LOCAL , 3.00
+SIF ABL:순종 == 5
+	TIMES LOCAL , 3.50
+SIF ABL:순종 == 6
+	TIMES LOCAL , 4.00
+SIF ABL:순종 == 7
+	TIMES LOCAL , 4.50
+SIF ABL:순종 == 8
+	TIMES LOCAL , 5.00
+SIF ABL:순종 == 9
+	TIMES LOCAL , 5.50
+SIF ABL:순종 >= 10
+	TIMES LOCAL , 7.00
+
+;조교자가[위압](붕괴나감정부족경우는 무효)
+SIF TALENT:PLAYER:위압 && !TALENT:붕괴 && !TALENT:감정부족
+	TIMES LOCAL, 1.50
+
+UP:공포 += LOCAL
+;-------------------------------------------------
+;중독충족의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:중독충족
+LOCAL:1 = SOURCE:중독충족
+
+;욕망
+IF ABL:욕망 == 0
+	TIMES LOCAL , 0.40
+	TIMES LOCAL:1, 0.50
+ELSEIF ABL:욕망 == 1
+	TIMES LOCAL , 0.60
+	TIMES LOCAL:1, 0.70
+ELSEIF ABL:욕망 == 2
+	TIMES LOCAL , 0.80
+	TIMES LOCAL:1, 0.90
+ELSEIF ABL:욕망 == 3
+	TIMES LOCAL , 1.00
+	TIMES LOCAL:1, 1.10
+ELSEIF ABL:욕망 == 4
+	TIMES LOCAL , 1.20
+	TIMES LOCAL:1, 1.30
+ELSEIF ABL:욕망 == 5
+	TIMES LOCAL , 1.40
+	TIMES LOCAL:1, 1.50
+ELSEIF ABL:욕망 == 6
+	TIMES LOCAL , 1.60
+	TIMES LOCAL:1, 1.70
+ELSEIF ABL:욕망 == 7
+	TIMES LOCAL , 1.80
+	TIMES LOCAL:1, 1.90
+ELSEIF ABL:욕망 == 8
+	TIMES LOCAL , 2.00
+	TIMES LOCAL:1, 2.10
+ELSEIF ABL:욕망 == 9
+	TIMES LOCAL , 2.20
+	TIMES LOCAL:1, 2.30
+ELSEIF ABL:욕망 >= 10
+	TIMES LOCAL , 2.50
+	TIMES LOCAL:1, 2.70
+ENDIF
+
+UP:순종 += LOCAL
+UP:욕정 += LOCAL:1
+;-------------------------------------------------
+;액체의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:액체
+SIF VAGINA(TARGET)
+	LOCAL = LOCAL / 2
+;소인체형
+IF TALENT:소인체형 && TALENT:PLAYER:소인체형 == 0
+	SIF SELECTCOM != 60 && SELECTCOM != 300
+		TIMES LOCAL , 0.40
+ENDIF
+
+UP:윤활 += LOCAL
+;-------------------------------------------------
+;욕정의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:욕정
+
+;욕망를 본다
+SIF ABL:욕망 == 0
+	TIMES LOCAL , 0.00
+SIF ABL:욕망 == 1
+	TIMES LOCAL , 0.40
+SIF ABL:욕망 == 2
+	TIMES LOCAL , 0.80
+SIF ABL:욕망 == 3
+	TIMES LOCAL , 1.20
+SIF ABL:욕망 == 4
+	TIMES LOCAL , 1.60
+SIF ABL:욕망 == 5
+	TIMES LOCAL , 2.00
+SIF ABL:욕망 == 6
+	TIMES LOCAL , 2.40
+SIF ABL:욕망 == 7
+	TIMES LOCAL , 2.80
+SIF ABL:욕망 == 8
+	TIMES LOCAL , 3.20
+SIF ABL:욕망 == 9
+	TIMES LOCAL , 3.60
+SIF ABL:욕망 >= 10
+	TIMES LOCAL , 5.00
+
+UP:욕정 += LOCAL
+;-------------------------------------------------
+;순종의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:순종
+
+;ABL:순종를 본다
+SIF ABL:순종 == 0
+	TIMES LOCAL , 0.50
+SIF ABL:순종 == 1
+	TIMES LOCAL , 0.80
+SIF ABL:순종 == 2
+	TIMES LOCAL , 1.00
+SIF ABL:순종 == 3
+	TIMES LOCAL , 1.20
+SIF ABL:순종 == 4
+	TIMES LOCAL , 1.40
+SIF ABL:순종 == 5
+	TIMES LOCAL , 1.60
+SIF ABL:순종 == 6
+	TIMES LOCAL , 1.80
+SIF ABL:순종 == 7
+	TIMES LOCAL , 2.00
+SIF ABL:순종 == 8
+	TIMES LOCAL , 2.40
+SIF ABL:순종 == 9
+	TIMES LOCAL , 3.00
+SIF ABL:순종 >= 10
+	TIMES LOCAL , 5.00
+
+UP:순종 += LOCAL
+;-------------------------------------------------
+;노출의 소스
+;-------------------------------------------------
+;부끄럼쟁이와수치심없음는 여기서 처리
+SIF TALENT:부끄럼쟁이
+	TIMES SOURCE:노출, 2.00
+SIF TALENT:수치심없음
+	TIMES SOURCE:노출, 0.50
+
+;윤활업의 50%를노출의 소스에 가세한다
+;다만액체추가의 소스의 만큼은 당긴다
+SOURCE:노출 += (UP:윤활-SOURCE:액체) / 2
+SIF SOURCE:노출 < 0
+	SOURCE:노출 = 0
+LOCAL = SOURCE:노출
+
+;ABL:노출벽를 본다
+SIF ABL:노출벽 == 0
+	TIMES LOCAL , 0.00
+SIF ABL:노출벽 == 1
+	TIMES LOCAL , 0.10
+SIF ABL:노출벽 == 2
+	TIMES LOCAL , 0.20
+SIF ABL:노출벽 == 3
+	TIMES LOCAL , 0.40
+SIF ABL:노출벽 == 4
+	TIMES LOCAL , 0.60
+SIF ABL:노출벽 == 5
+	TIMES LOCAL , 0.80
+SIF ABL:노출벽 == 6
+	TIMES LOCAL , 1.00
+SIF ABL:노출벽 == 7
+	TIMES LOCAL , 1.20
+SIF ABL:노출벽 == 8
+	TIMES LOCAL , 1.40
+SIF ABL:노출벽 == 9
+	TIMES LOCAL , 1.60
+SIF ABL:노출벽 >= 10
+	TIMES LOCAL , 2.00
+
+LOCAL:1 = SOURCE:노출
+
+;PALAM:수치를 본다
+;부끄러움을 느끼면 느낄수록 너무 부끄럽지 않게 된다
+IF PALAM:수치 < PALAMLV:1
+	TIMES LOCAL:1, 1.00
+ELSEIF PALAM:수치 < PALAMLV:2
+	TIMES LOCAL:1, 0.90
+ELSEIF PALAM:수치 < PALAMLV:3
+	TIMES LOCAL:1, 0.80
+ELSEIF PALAM:수치 < PALAMLV:4
+	TIMES LOCAL:1, 0.70
+ELSEIF PALAM:수치 >= PALAMLV:4
+	TIMES LOCAL:1, 0.60
+ENDIF
+
+
+UP:욕정 += LOCAL
+UP:수치 += LOCAL:1
+
+
+;-------------------------------------------------
+;굴복의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:굴복
+
+;ABL:순종를 본다
+SIF ABL:순종 == 0
+	TIMES LOCAL , 0.50
+SIF ABL:순종 == 1
+	TIMES LOCAL , 1.00
+SIF ABL:순종 == 2
+	TIMES LOCAL , 1.50
+SIF ABL:순종 == 3
+	TIMES LOCAL , 2.00
+SIF ABL:순종 == 4
+	TIMES LOCAL , 2.50
+SIF ABL:순종 == 5
+	TIMES LOCAL , 3.00
+SIF ABL:순종 == 6
+	TIMES LOCAL , 3.50
+SIF ABL:순종 == 7
+	TIMES LOCAL , 4.00
+SIF ABL:순종 == 8
+	TIMES LOCAL , 4.50
+SIF ABL:순종 == 9
+	TIMES LOCAL , 5.00
+SIF ABL:순종 >= 10
+	TIMES LOCAL , 6.00
+
+;ABL:봉사정신를 본다
+SIF ABL:봉사정신 == 0
+	TIMES LOCAL , 1.00
+SIF ABL:봉사정신 == 1
+	TIMES LOCAL , 1.50
+SIF ABL:봉사정신 == 2
+	TIMES LOCAL , 2.00
+SIF ABL:봉사정신 == 3
+	TIMES LOCAL , 2.50
+SIF ABL:봉사정신 == 4
+	TIMES LOCAL , 3.00
+SIF ABL:봉사정신 == 5
+	TIMES LOCAL , 3.50
+SIF ABL:봉사정신 == 6
+	TIMES LOCAL , 4.00
+SIF ABL:봉사정신 == 7
+	TIMES LOCAL , 4.50
+SIF ABL:봉사정신 == 8
+	TIMES LOCAL , 5.00
+SIF ABL:봉사정신 == 9
+	TIMES LOCAL , 5.50
+SIF ABL:봉사정신 >= 10
+	TIMES LOCAL , 7.00
+
+UP:굴복 += LOCAL
+
+;-------------------------------------------------
+;불결의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:불결
+
+;ABL:순종를 본다
+SIF ABL:순종 == 0
+	TIMES LOCAL , 1.00
+SIF ABL:순종 == 1
+	TIMES LOCAL , 0.90
+SIF ABL:순종 == 2
+	TIMES LOCAL , 0.80
+SIF ABL:순종 == 3
+	TIMES LOCAL , 0.70
+SIF ABL:순종 == 4
+	TIMES LOCAL , 0.60
+SIF ABL:순종 == 5
+	TIMES LOCAL , 0.50
+SIF ABL:순종 == 6
+	TIMES LOCAL , 0.40
+SIF ABL:순종 == 7
+	TIMES LOCAL , 0.30
+SIF ABL:순종 == 8
+	TIMES LOCAL , 0.20
+SIF ABL:순종 == 9
+	TIMES LOCAL , 0.10
+SIF ABL:순종 >= 10
+	TIMES LOCAL , 0.00
+
+UP:불쾌 += LOCAL
+
+;-------------------------------------------------
+;울굴의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:울굴
+
+;ABL:순종를 본다
+SIF ABL:순종 == 0
+	TIMES LOCAL , 1.00
+SIF ABL:순종 == 1
+	TIMES LOCAL , 0.80
+SIF ABL:순종 == 2
+	TIMES LOCAL , 0.60
+SIF ABL:순종 == 3
+	TIMES LOCAL , 0.40
+SIF ABL:순종 == 4
+	TIMES LOCAL , 0.30
+SIF ABL:순종 == 5
+	TIMES LOCAL , 0.20
+SIF ABL:순종 == 6
+	TIMES LOCAL , 0.10
+SIF ABL:순종 == 7
+	TIMES LOCAL , 0.08
+SIF ABL:순종 == 8
+	TIMES LOCAL , 0.06
+SIF ABL:순종 == 9
+	TIMES LOCAL , 0.04
+SIF ABL:순종 >= 10
+	TIMES LOCAL , 0.00
+
+;ABL:욕망를 본다
+SIF ABL:욕망 == 0
+	TIMES LOCAL , 1.00
+SIF ABL:욕망 == 1
+	TIMES LOCAL , 0.90
+SIF ABL:욕망 == 2
+	TIMES LOCAL , 0.80
+SIF ABL:욕망 == 3
+	TIMES LOCAL , 0.70
+SIF ABL:욕망 == 4
+	TIMES LOCAL , 0.60
+SIF ABL:욕망 == 5
+	TIMES LOCAL , 0.50
+SIF ABL:욕망 == 6
+	TIMES LOCAL , 0.40
+SIF ABL:욕망 == 7
+	TIMES LOCAL , 0.30
+SIF ABL:욕망 == 8
+	TIMES LOCAL , 0.20
+SIF ABL:욕망 == 9
+	TIMES LOCAL , 0.10
+SIF ABL:욕망 >= 10
+	TIMES LOCAL , 0.00
+
+UP:억울 += LOCAL
+
+;-------------------------------------------------
+;일탈의 소스
+;-------------------------------------------------
+;호기심와보수적는 여기서 처리
+SIF TALENT:호기심
+	TIMES SOURCE:일탈, 0.80
+SIF TALENT:보수적
+	TIMES SOURCE:일탈, 2.00
+
+LOCAL = SOURCE:일탈
+
+;ABL:순종를 본다
+SIF ABL:순종 == 0
+	TIMES LOCAL , 1.00
+SIF ABL:순종 == 1
+	TIMES LOCAL , 0.80
+SIF ABL:순종 == 2
+	TIMES LOCAL , 0.60
+SIF ABL:순종 == 3
+	TIMES LOCAL , 0.40
+SIF ABL:순종 == 4
+	TIMES LOCAL , 0.30
+SIF ABL:순종 == 5
+	TIMES LOCAL , 0.20
+SIF ABL:순종 == 6
+	TIMES LOCAL , 0.10
+SIF ABL:순종 == 7
+	TIMES LOCAL , 0.08
+SIF ABL:순종 == 8
+	TIMES LOCAL , 0.06
+SIF ABL:순종 == 9
+	TIMES LOCAL , 0.04
+SIF ABL:순종 >= 10
+	TIMES LOCAL , 0.00
+
+;ABL:마조끼를 본다
+SIF ABL:마조끼 == 0
+	TIMES LOCAL , 1.00
+SIF ABL:마조끼 == 1
+	TIMES LOCAL , 0.90
+SIF ABL:마조끼 == 2
+	TIMES LOCAL , 0.80
+SIF ABL:마조끼 == 3
+	TIMES LOCAL , 0.70
+SIF ABL:마조끼 == 4
+	TIMES LOCAL , 0.60
+SIF ABL:마조끼 == 5
+	TIMES LOCAL , 0.50
+SIF ABL:마조끼 == 6
+	TIMES LOCAL , 0.40
+SIF ABL:마조끼 == 7
+	TIMES LOCAL , 0.30
+SIF ABL:마조끼 == 8
+	TIMES LOCAL , 0.20
+SIF ABL:마조끼 == 9
+	TIMES LOCAL , 0.10
+SIF ABL:마조끼 >= 10
+	TIMES LOCAL , 0.00
+
+UP:반감 += LOCAL
+
+;-------------------------------------------------
+;반감의 소스
+;-------------------------------------------------
+LOCAL = SOURCE:반발
+
+;ABL:순종를 본다
+SIF ABL:순종 == 0
+	TIMES LOCAL , 1.00
+SIF ABL:순종 == 1
+	TIMES LOCAL , 0.80
+SIF ABL:순종 == 2
+	TIMES LOCAL , 0.60
+SIF ABL:순종 == 3
+	TIMES LOCAL , 0.40
+SIF ABL:순종 == 4
+	TIMES LOCAL , 0.30
+SIF ABL:순종 == 5
+	TIMES LOCAL , 0.20
+SIF ABL:순종 == 6
+	TIMES LOCAL , 0.10
+SIF ABL:순종 == 7
+	TIMES LOCAL , 0.08
+SIF ABL:순종 == 8
+	TIMES LOCAL , 0.06
+SIF ABL:순종 == 9
+	TIMES LOCAL , 0.04
+SIF ABL:순종 >= 10
+	TIMES LOCAL , 0.00
+
+;ABL:봉사정신를 본다
+SIF ABL:봉사정신 == 0
+	TIMES LOCAL , 1.00
+SIF ABL:봉사정신 == 1
+	TIMES LOCAL , 0.90
+SIF ABL:봉사정신 == 2
+	TIMES LOCAL , 0.80
+SIF ABL:봉사정신 == 3
+	TIMES LOCAL , 0.70
+SIF ABL:봉사정신 == 4
+	TIMES LOCAL , 0.60
+SIF ABL:봉사정신 == 5
+	TIMES LOCAL , 0.50
+SIF ABL:봉사정신 == 6
+	TIMES LOCAL , 0.40
+SIF ABL:봉사정신 == 7
+	TIMES LOCAL , 0.30
+SIF ABL:봉사정신 == 8
+	TIMES LOCAL , 0.20
+SIF ABL:봉사정신 == 9
+	TIMES LOCAL , 0.10
+SIF ABL:봉사정신 >= 10
+	TIMES LOCAL , 0.00
+
+;ABL:마조끼를 본다
+SIF ABL:마조끼 == 0
+	TIMES LOCAL , 1.00
+SIF ABL:마조끼 == 1
+	TIMES LOCAL , 0.90
+SIF ABL:마조끼 == 2
+	TIMES LOCAL , 0.80
+SIF ABL:마조끼 == 3
+	TIMES LOCAL , 0.70
+SIF ABL:마조끼 == 4
+	TIMES LOCAL , 0.60
+SIF ABL:마조끼 == 5
+	TIMES LOCAL , 0.50
+SIF ABL:마조끼 == 6
+	TIMES LOCAL , 0.40
+SIF ABL:마조끼 == 7
+	TIMES LOCAL , 0.30
+SIF ABL:마조끼 == 8
+	TIMES LOCAL , 0.20
+SIF ABL:마조끼 == 9
+	TIMES LOCAL , 0.10
+SIF ABL:마조끼 >= 10
+	TIMES LOCAL , 0.00
+
+UP:반감 += LOCAL
+
+;-------------------------------------------------
+;소질 따위에 의한 상하의 처리
+;-------------------------------------------------
+;-------------------------------------------------
+;장비계(약등)
+;-------------------------------------------------
+;미약
+IF TEQUIP:미약
+	TIMES UP:순종, 1.20
+	TIMES UP:욕정, 2.00
+	TIMES UP:굴복, 1.20
+	TIMES UP:불쾌, 0.75
+ENDIF
+
+;가려움증약
+IF ZUIKI(TARGET)
+	TIMES UP:순종, 1.20
+	TIMES UP:욕정, 2.00
+	TIMES UP:굴복, 1.20
+	TIMES UP:불쾌, 0.75
+ENDIF
+
+;이뇨제
+IF TEQUIP:이뇨제
+	TIMES UP:순종, 0.80
+	TIMES UP:욕정, 0.80
+	TIMES UP:수치, 1.20
+	TIMES UP:반감, 1.50
+	TIMES UP:불쾌, 1.20
+ENDIF
+
+;꽐라플레이
+IF TEQUIP:꽐라플레이
+	;사케 혹은 사케·맥주를 마신알콜쓰레기
+	IF TFLAG:76 == 3 || (TALENT:알콜쓰레기 && TFLAG:76!= 1)
+		TIMES UP:굴복, 0.50
+		TIMES UP:습득, 0.50
+		TIMES UP:불쾌, 0.50
+	;맥주
+	ELSEIF TFLAG:76 == 2
+		TIMES UP:굴복, 0.70
+		TIMES UP:습득, 0.70
+		TIMES UP:불쾌, 0.70
+	;감주
+	ELSE
+		;술꾼를 가지지 않는다
+		IF !TALENT:술꾼
+			TIMES UP:굴복, 0.90
+			TIMES UP:습득, 0.90
+			TIMES UP:불쾌, 0.90
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;함락 소질
+;-------------------------------------------------
+;연모
+IF TALENT:연모 && ASSIPLAY == 0
+	TIMES UP:순종, 1.50
+	TIMES UP:굴복, 2.00
+	TIMES UP:반감, 0.50
+	TIMES UP:불쾌, 0.50
+ELSEIF TALENT:연모 && ASSIPLAY > 0
+	TIMES UP:순종, 0.80
+	TIMES UP:반감, 1.20
+	TIMES UP:불쾌, 1.20
+ENDIF
+
+;음란
+IF TALENT:음란
+	TIMES UP:순종, 1.20
+	TIMES UP:굴복, 1.20
+	TIMES UP:반감, 0.80
+	TIMES UP:불쾌, 0.80
+	TIMES UP:억울, 0.40
+ENDIF
+
+;복종
+IF TALENT:복종
+	TIMES UP:순종, 0.50
+	TIMES UP:굴복, 2.00
+	TIMES UP:공포, 1.50
+	TIMES UP:반감, 0.50
+ENDIF
+
+;친애
+IF TALENT:친애 && ASSIPLAY == 0
+	TIMES UP:순종, 2.00
+	TIMES UP:굴복, 3.00
+	TIMES UP:반감, 0.20
+	TIMES UP:불쾌, 0.20
+	TIMES UP:억울, 0.50
+ELSEIF TALENT:친애 && ASSIPLAY > 0
+	TIMES UP:순종, 0.80
+	TIMES UP:반감, 1.20
+	TIMES UP:불쾌, 1.20
+ENDIF
+
+;창부
+IF TALENT:창부
+	TIMES UP:순종, 1.50
+	TIMES UP:굴복, 1.50
+	TIMES UP:반감, 0.60
+	TIMES UP:불쾌, 0.60
+	TIMES UP:억울, 0.30
+ENDIF
+
+;예속
+IF TALENT:예속
+	TIMES UP:순종, 0.20
+	TIMES UP:굴복, 2.50
+	TIMES UP:공포, 3.00
+	TIMES UP:반감, 0.25
+	TIMES UP:불쾌, 0.25
+	TIMES UP:억울, 0.25
+ENDIF
+
+;-------------------------------------------------
+;소질
+;-------------------------------------------------
+;겁쟁이
+IF TALENT:겁쟁이
+	TIMES UP:공포, 1.20
+	TIMES UP:반감, 1.20
+ENDIF
+
+;반항적(복종, 예속로 무효)
+IF TALENT:반항적 && (TALENT:복종 == 0 && TALENT:예속 == 0)
+	TIMES UP:순종, 0.80
+	TIMES UP:굴복, 0.80
+	TIMES UP:반감, 1.20
+ENDIF
+;꿋꿋함
+IF TALENT:꿋꿋함
+	TIMES UP:순종, 0.80
+	TIMES UP:욕정, 0.80
+	TIMES UP:굴복, 0.80
+	TIMES UP:공포, 0.80
+	TIMES UP:반감, 1.20
+	TIMES UP:억울, 1.20
+ENDIF
+;솔직함
+IF TALENT:솔직함
+	TIMES UP:순종, 1.20
+	TIMES UP:반감, 0.80
+ENDIF
+;얌전함
+IF TALENT:얌전함
+	TIMES UP:순종, 0.80
+	TIMES UP:반감, 0.80
+ENDIF
+;프라이드높음
+IF TALENT:프라이드높음
+	TIMES UP:굴복, 0.80
+	TIMES UP:공포, 0.80
+	TIMES UP:반감, 1.20
+ENDIF
+;건방짐
+IF TALENT:건방짐
+	TIMES UP:순종, 0.80
+	TIMES UP:굴복, 0.80
+	TIMES UP:반감, 1.20
+ENDIF
+;프라이드낮음
+IF TALENT:프라이드낮음
+	TIMES UP:굴복, 1.20
+	TIMES UP:공포, 1.20
+	TIMES UP:반감, 0.80
+ENDIF
+;츤데레
+IF TALENT:츤데레
+	;함락 소질이 있는 경우와 없는 경우로 변화한다
+	IF TALENT:연모 || TALENT:음란 || TALENT:복종 || TALENT:친애 || TALENT:창부 || TALENT:예속
+		TIMES UP:순종, 1.20
+		TIMES UP:굴복, 1.20
+		TIMES UP:반감, 0.80
+	ELSE
+		TIMES UP:순종, 0.80
+		TIMES UP:굴복, 0.80
+		TIMES UP:반감, 1.20
+	ENDIF
+ENDIF
+
+;위압(함락 하고 있으면 무효)
+IF TALENT:위압 && !TALENT:연모 && !TALENT:친애 && !TALENT:음란 && !TALENT:창부 && !TALENT:복종 && !TALENT:예속
+	TIMES UP:굴복, 0.80
+	TIMES UP:공포, 0.80
+	TIMES UP:반감, 1.20
+ENDIF
+
+;자제심
+IF TALENT:자제심
+	TIMES UP:굴복, 0.80
+	TIMES UP:공포, 0.80
+	TIMES UP:반감, 1.20
+ENDIF
+;무관심
+IF TALENT:무관심
+	TIMES UP:순종, 0.80
+	TIMES UP:욕정, 0.80
+	TIMES UP:굴복, 0.80
+	TIMES UP:공포, 0.80
+	TIMES UP:반감, 0.80
+ENDIF
+;감정부족
+IF TALENT:감정부족
+	TIMES UP:순종, 0.80
+	TIMES UP:욕정, 0.80
+	TIMES UP:굴복, 0.80
+	TIMES UP:수치, 0.80
+	TIMES UP:공포, 0.80
+	TIMES UP:반감, 0.80
+	TIMES UP:불쾌, 0.80
+	TIMES UP:억울, 0.80
+ENDIF
+;호기심
+SIF TALENT:호기심
+	TIMES UP:습득, 1.20
+;보수적
+SIF TALENT:보수적
+	TIMES UP:습득, 0.80
+;낙관적
+SIF TALENT:낙관적
+	TIMES UP:억울, 0.80
+;비관적
+SIF TALENT:비관적
+	TIMES UP:억울, 1.20
+;눈에띄고싶음
+SIF TALENT:눈에띄고싶음
+	TIMES UP:순종, 1.20
+
+;억압
+IF TALENT:억압
+	TIMES UP:욕정, 0.80
+	TIMES UP:반감, 1.20
+	TIMES UP:억울, 1.20
+ENDIF
+;해방
+IF TALENT:해방
+	TIMES UP:욕정, 1.20
+	TIMES UP:굴복, 1.20
+ENDIF
+;저항
+IF TALENT:저항
+	TIMES UP:순종, 0.80
+	TIMES UP:반감, 1.20
+	TIMES UP:억울, 1.20
+ENDIF
+
+;고통에강함
+SIF TALENT:고통에강함
+	TIMES UP:고통, 1.20
+;고통에약함
+SIF TALENT:고통에약함
+	TIMES UP:고통, 0.80
+
+;습득빠름
+SIF TALENT:습득빠름
+	TIMES UP:습득, 1.20
+;습득느림
+SIF TALENT:습득느림
+	TIMES UP:습득, 0.80
+
+;헌신적
+SIF TALENT:헌신적
+	TIMES UP:굴복, 1.20
+
+;쾌감에솔직
+SIF TALENT:쾌감에솔직
+	TIMES UP:욕정, 1.20
+;쾌감을부정(음란, 창부로 무효)
+SIF TALENT:쾌감을부정 && (TALENT:음란 == 0 && TALENT:창부 == 0)
+	TIMES UP:욕정, 0.80
+;즉각함락
+IF TALENT:즉각함락
+	TIMES UP:순종, 2.00
+	TIMES UP:욕정, 2.00
+	TIMES UP:굴복, 2.00
+	TIMES UP:습득, 2.00
+	TIMES UP:수치, 2.00
+	TIMES UP:공포, 2.00
+	TIMES UP:반감, 0.50
+	TIMES UP:불쾌, 0.50
+	TIMES UP:억울, 0.50
+ENDIF
+;자위광
+SIF TALENT:자위광
+	TIMES UP:욕정, 1.20
+;음란구멍
+SIF TALENT:음란구멍
+	TIMES UP:순종, 1.20
+;항문광
+SIF TALENT:항문광
+	TIMES UP:굴복, 1.20
+;음란가슴
+SIF TALENT:음란가슴
+	TIMES UP:수치, 1.20
+;섹스광
+IF TALENT:섹스광 && (SEXPLAY(TARGET) || SELECTCOM == 430 || SELECTCOM == 431 || SELECTCOM == 405 || SELECTCOM == 406)
+	TIMES UP:순종, 1.20
+	TIMES UP:욕정, 1.20
+	TIMES UP:굴복, 1.20
+	TIMES UP:수치, 1.20
+ENDIF
+
+;도착적
+IF TALENT:도착적
+	TIMES UP:굴복, 1.20
+	TIMES UP:수치, 1.20
+ENDIF
+
+;새드, 도S
+SELECTCASE TALENT:새드
+	CASE 1
+		TIMES UP:굴복, 0.90
+		TIMES UP:공포, 0.90
+	CASE 2
+		TIMES UP:굴복, 0.80
+		TIMES UP:공포, 0.80
+ENDSELECT
+
+;마조, 도M
+SELECTCASE TALENT:마조
+	CASE 1
+		TIMES UP:굴복, 1.10
+		TIMES UP:공포, 1.10
+		TIMES UP:억울, 0.90
+	CASE 2
+		TIMES UP:굴복, 1.20
+		TIMES UP:공포, 1.20
+		TIMES UP:억울, 0.80
+ENDSELECT
+
+;맹신
+IF TALENT:맹신
+	TIMES UP:굴복, 1.20
+	TIMES UP:반감, 0.80
+ENDIF
+
+;포경
+SIF TALENT:포경
+	TIMES UP:불쾌, 1.20
+	
+;경험풍부
+IF TALENT:경험풍부
+	IF ABL:PLAYER:기교 > 8
+		TIMES UP:수치, 1.20
+		TIMES UP:공포, 1.20
+		TIMES UP:반감, 1.20
+		TIMES UP:억울, 1.20
+	ELSEIF ABL:PLAYER:기교 < 3
+		TIMES UP:수치, 0.20
+		TIMES UP:공포, 0.20
+		TIMES UP:반감, 0.20
+		TIMES UP:억울, 0.20
+		TIMES UP:18, 2.00
+	ELSEIF ABL:PLAYER:기교 < 5
+		TIMES UP:수치, 0.50
+		TIMES UP:공포, 0.50
+		TIMES UP:반감, 0.50
+		TIMES UP:억울, 0.50
+		TIMES UP:18, 1.50
+	ENDIF
+ENDIF
+
+;발정기
+IF TALENT:발정기
+	TIMES UP:윤활, 1.50
+	TIMES UP:욕정, 2.00
+	TIMES UP:굴복, 1.20
+	TIMES UP:고통, 0.80
+	;미함락이라면
+	IF !TALENT:연모 && !TALENT:친애 && !TALENT:음란 && !TALENT:창부 && !TALENT:복종 && !TALENT:예속
+		TIMES UP:억울, 1.20
+	ENDIF
+
+ENDIF
+;-------------------------------------------------
+;그 외
+;-------------------------------------------------
+;고통각인
+IF MARK:고통각인 == 3
+	TIMES UP:고통, 1.30
+	TIMES UP:공포, 1.30
+ELSEIF MARK:고통각인 == 2
+	TIMES UP:고통, 1.20
+	TIMES UP:공포, 1.20
+ELSEIF MARK:고통각인 == 1
+	TIMES UP:고통, 1.10
+	TIMES UP:공포, 1.10
+ENDIF
+
+;쾌락각인
+IF MARK:쾌락각인 == 3
+	TIMES UP:욕정, 1.30
+	TIMES UP:습득, 1.30
+ELSEIF MARK:쾌락각인 == 2
+	TIMES UP:욕정, 1.20
+	TIMES UP:습득, 1.20
+ELSEIF MARK:쾌락각인 == 1
+	TIMES UP:욕정, 1.10
+	TIMES UP:습득, 1.10
+ENDIF
+
+;굴복각인
+IF MARK:굴복각인 == 3
+	TIMES UP:순종, 1.30
+	TIMES UP:굴복, 1.30
+ELSEIF MARK:굴복각인 == 2
+	TIMES UP:순종, 1.20
+	TIMES UP:굴복, 1.20
+ELSEIF MARK:굴복각인 == 1
+	TIMES UP:순종, 1.10
+	TIMES UP:굴복, 1.10
+ENDIF
+
+;반발각인
+IF MARK:반발각인 >= 3
+	TIMES UP:순종, 0.10
+	TIMES UP:반감, 1.30
+ELSEIF MARK:반발각인 == 2
+	TIMES UP:순종, 0.40
+	TIMES UP:반감, 1.20
+ELSEIF MARK:반발각인 == 1
+	TIMES UP:순종, 0.60
+	TIMES UP:반감, 1.10
+ENDIF
+
+;-------------------------------------------------
+;난이도 따위에 의한 상하의 처리
+;-------------------------------------------------
+;EASY
+IF FLAG:4 == 1
+	TIMES UP:윤활, 1.60
+	TIMES UP:순종, 1.60
+	TIMES UP:욕정, 1.60
+	TIMES UP:굴복, 1.60
+	TIMES UP:습득, 1.60
+	TIMES UP:수치, 1.60
+	TIMES UP:고통, 1.60
+	TIMES UP:공포, 1.60
+	TIMES UP:반감, 0.80
+	TIMES UP:불쾌, 0.80
+	TIMES UP:억울, 0.80
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES UP:윤활, 1.20
+	TIMES UP:순종, 1.20
+	TIMES UP:욕정, 1.20
+	TIMES UP:굴복, 1.20
+	TIMES UP:습득, 1.20
+	TIMES UP:수치, 1.20
+	TIMES UP:고통, 1.20
+	TIMES UP:공포, 1.20
+	TIMES UP:반감, 1.20
+	TIMES UP:불쾌, 1.20
+	TIMES UP:억울, 1.20
+;HARD
+ELSEIF FLAG:4 == 3
+	TIMES UP:윤활, 0.80
+	TIMES UP:순종, 0.80
+	TIMES UP:욕정, 0.80
+	TIMES UP:굴복, 0.80
+	TIMES UP:습득, 0.80
+	TIMES UP:수치, 0.80
+	TIMES UP:고통, 0.80
+	TIMES UP:공포, 0.80
+	TIMES UP:반감, 1.60
+	TIMES UP:불쾌, 1.60
+	TIMES UP:억울, 1.60
+ENDIF
+
+;-------------------------------------------------
+;궁합에 의한 상하의 처리
+;-------------------------------------------------
+R = NO:PLAYER
+;여자좋아, 남자좋아, 아이좋아
+IF (TALENT:여자좋아 && MALE(PLAYER) == 0 && TALENT:PLAYER:소인체형 == 0) || (TALENT:남자좋아 && MALE(PLAYER) && TALENT:PLAYER:소인체형 == 0) || (TALENT:아이좋아 && TALENT:PLAYER:소인체형)
+	IF RELATION:R == 0
+		LOCAL:2 = 150
+	ELSE
+		LOCAL:2 = RELATION:R + 50
+		SIF LOCAL:2 > 200
+			LOCAL:2 = 200
+	ENDIF
+;남자혐오, 여자혐오(연모함락으로 무효)
+ELSEIF (TALENT:남자혐오 && MALE(PLAYER) && (TALENT:연모 == 0 && TALENT:친애 == 0)) || (TALENT:여자혐오 && MALE(PLAYER) == 0 && (TALENT:연모 == 0 && TALENT:친애 == 0))
+	IF RELATION:R == 0
+		LOCAL:2 = 50
+	ELSE
+		LOCAL:2 = RELATION:R - 50
+		SIF LOCAL:2 <= 0
+		LOCAL:2 = 10
+	ENDIF
+ELSE
+	LOCAL:2 = RELATION:R
+ENDIF
+IF LOCAL:2!= 0
+	UP:욕정 *= LOCAL:2
+	UP:욕정 /= 100
+	UP:굴복 *= LOCAL:2
+	UP:굴복 /= 100
+	UP:수치 *= LOCAL:2
+	UP:수치 /= 100
+	UP:반감 *= 100
+	UP:반감 /= LOCAL:2
+	UP:불쾌 *= 100
+	UP:불쾌 /= LOCAL:2
+	UP:억울 *= 100
+	UP:억울 /= LOCAL:2
+ENDIF
+
+;-------------------------------------------------
+;같은 커맨드의 연속 실행에 의한 상하의 처리
+;-------------------------------------------------
+IF SELECTCOM == PREVCOM
+	;UP:쾌C, UP:쾌V , UP:쾌A, UP:쾌B는 절정에 관련되므로 먼저 처리되어 있다
+	UP:순종 /= 2
+	UP:욕정 /= 2
+	UP:굴복 /= 2
+	UP:습득 /= 2
+	UP:수치 /= 2
+	UP:고통 /= 2
+	UP:공포 /= 2
+ENDIF
+
+;-------------------------------------------------
+;기력 0에 의한 상하의 처리
+;-------------------------------------------------
+IF BASE:기력 <= 0
+	;PRINTL ★기력 0★
+	;UP:쾌C, UP:쾌V , UP:쾌A, UP:쾌B는 절정에 관련되므로 먼저 처리되어 있다
+	UP:순종 /= 2
+	UP:욕정 /= 2
+	UP:굴복 /= 2
+	UP:수치 /= 2
+	UP:공포 /= 2
+	UP:억울 /= 2
+
+	LOSEBASE:체력 *= 2
+	LOSEBASE:체력 += 80
+ENDIF
+
+;-------------------------------------------------
+;고통로부터 오는체력·기력의 감소
+;-------------------------------------------------
+D = UP:고통/20
+;ABL:마조끼를 본다
+IF ABL:마조끼 == 0
+	TIMES D , 1.00
+ELSEIF ABL:마조끼 == 1
+	TIMES D , 0.95
+ELSEIF ABL:마조끼 == 2
+	TIMES D , 0.90
+ELSEIF ABL:마조끼 == 3
+	TIMES D , 0.80
+ELSEIF ABL:마조끼 == 4
+	TIMES D , 0.65
+ELSE
+	TIMES D , 0.50
+ENDIF
+;고통에강함
+SIF TALENT:고통에강함
+	TIMES D , 1.20
+;고통에약함
+SIF TALENT:고통에약함
+	TIMES D , 0.80
+
+LOSEBASE:체력 += D
+LOSEBASE:기력 += D
+
+;-------------------------------------------------
+;체력·기력의 감소
+;-------------------------------------------------
+;조교자가[위압]소유라고 피로 한다(상위 함락·붕괴·감정부족라면 무효)
+IF TALENT:PLAYER:위압 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속 && !TALENT:붕괴 && !TALENT:감정부족
+	TIMES LOSEBASE:체력, 1.10
+	TIMES LOSEBASE:기력, 1.10
+ENDIF
+IF ZUIKI(TARGET)
+	TIMES LOSEBASE:체력, 1.20
+	TIMES LOSEBASE:기력, 1.20
+ENDIF
+BASE:체력 -= LOSEBASE:체력
+IF BASE:체력 < 0
+	BASE:체력 = 0
+ELSEIF BASE:체력 > MAXBASE:체력
+	BASE:체력 = MAXBASE:체력
+ENDIF
+BASE:기력 -= LOSEBASE:기력
+IF BASE:기력 < 0
+	BASE:기력 = 0
+ELSEIF BASE:기력 > MAXBASE:기력
+	BASE:기력 = MAXBASE:기력
+ENDIF
+;-------------------------------------------------
+;고통쾌락경험, 봉사쾌락경험의 체크
+;-------------------------------------------------
+CALL EXP_GOT_CHECK
+
+;-------------------------------------------------
+;섹스시의 삽입 계속 플래그
+;TFLAG:31 =이번 조교로처녀상실
+;-------------------------------------------------
+TFLAG:60 = 0
+SIF (SEXPLAY(TARGET) == 1 || SEXPLAY(TARGET) == 2) && !TFLAG:31 && CFLAG:TARGET:106 == 0
+	TFLAG:60 = 1
+
+;-------------------------------------------------
+;조교자의사정시의입상
+;-------------------------------------------------
+CALL KOJO_MESSAGE_PALAMCNG_A
+;-------------------------------------------------
+;사정플래그는 여기서 초기화
+;-------------------------------------------------
+CFLAG:TARGET:106 = 0
+;-------------------------------------------------
+;촉수의사정시의입상
+;-------------------------------------------------
+CALL KOJO_MESSAGE_PALAMCNG_E
+;-------------------------------------------------
+;노예의 절정시의입상
+;-------------------------------------------------
+CALL KOJO_MESSAGE_PALAMCNG_B
+;-------------------------------------------------
+;절정시의 방뇨 처리
+;-------------------------------------------------
+CALL ORGASM_ADD_URINE
+
+
+;=======================================================
+;입지 않은 옷에 더러움이 붙어 버리는 일이 있으므로 잠정 처치적인?
+;=======================================================
+CALL CLOTHES_STAIN_3
+
+;-------------------------------------------------
+;조교후의입상
+;-------------------------------------------------
+CALL KOJO_MESSAGE_PALAMCNG_C
+;-------------------------------------------------
+;파라미터 변동에 의한입상
+;-------------------------------------------------
+CALL KOJO_MESSAGE_PALAMCNG_D
+
+;-------------------------------------------------
+;미약의 효과가 끊어졌을 때
+;-------------------------------------------------
+;효과가 끊어진다
+IF TFLAG:69 >= 10
+	TEQUIP:미약 = 0
+	TFLAG:13 = 73
+	CALL KOJO_MESSAGE_EVENT
+	TFLAG:69 = 0
+ENDIF
+
+;-------------------------------------------------
+;실금입상도 여기에 들어갈 수 있어 본다
+;-------------------------------------------------
+IF TFLAG:58 || TFLAG:68
+	TFLAG:13 = 71
+	CALL KOJO_MESSAGE_EVENT
+ENDIF
+
+;-------------------------------------------------
+;구토입상
+;-------------------------------------------------
+IF TFLAG:75
+	TFLAG:13 = 78
+	CALL KOJO_MESSAGE_EVENT
+ENDIF
+
+;-------------------------------------------
+;윤간후
+;-------------------------------------------
+IF SELECTCOM == 322
+	TFLAG:13 = 77
+	CALL KOJO_MESSAGE_EVENT
+ENDIF
+
+;-------------------------------------------------
+;각인 취득의 체크
+;-------------------------------------------------
+CALL MARK_GOT_CHECK
+;-------------------------------------------------
+;각인 취득에 의한입상
+;-------------------------------------------------
+CALL KOJO_MESSAGE_MARKCNG
+
+;-------------------------------------------------
+;커맨드 실행후의입상
+;-------------------------------------------------
+CALL KOJO_MESSAGE_COMEND
+
+;-------------------------------------------------
+;순종상승에 의한[저항]의 소멸 체크
+;-------------------------------------------------
+CALL JUJUN_UP_CHECK
+
+;-------------------------------------------------
+;조교 소스의 표시
+;-------------------------------------------------
+CALL SHOW_SOURCE
+
+;-------------------------------------------------
+;수치 변동의 표시
+;-------------------------------------------------
+;궁합
+R = NO:PLAYER
+SIF RELATION:R == 0
+	LOCAL:2 = 100
+;여자좋아, 남자좋아, 아이좋아
+IF (TALENT:여자좋아 && MALE(PLAYER) == 0 && TALENT:PLAYER:소인체형 == 0) || (TALENT:남자좋아 && MALE(PLAYER) && TALENT:PLAYER:소인체형 == 0) || (TALENT:아이좋아 && TALENT:PLAYER:소인체형)
+	IF RELATION:R == 0
+		LOCAL:2 = 150
+	ELSE
+		LOCAL:2 = RELATION:R + 50
+		SIF LOCAL:2 > 200
+			LOCAL:2 = 200
+	ENDIF
+;남자혐오, 여자혐오(연모함락으로 무효)
+ELSEIF (TALENT:남자혐오 && MALE(PLAYER) && (TALENT:연모 == 0 && TALENT:친애 == 0)) || (TALENT:여자혐오 && MALE(PLAYER) == 0 && (TALENT:연모 == 0 && TALENT:친애 == 0))
+	IF RELATION:R == 0
+		LOCAL:2 = 50
+	ELSE
+		LOCAL:2 = RELATION:R - 50
+		SIF LOCAL:2 <= 0
+		LOCAL:2 = 10
+	ENDIF
+ELSE
+	LOCAL:2 = RELATION:R
+ENDIF
+SIF LOCAL:2!= 0
+	PRINTFORML ＜궁합{C/100}. {C%100}배＞
+
+;같은 커맨드의 연속 실행
+SIF SELECTCOM == PREVCOM
+	PRINTL ＜동일 커맨드 연속 실행＞
+
+;이번 커맨드를 「전회의 커맨드」라고 한다
+PREVCOM = SELECTCOM
+
+;전회의 조교자가 조수인가 주인인가
+IF ASSIPLAY
+	TFLAG:50 = 1
+ELSE
+	TFLAG:50 = 0
+ENDIF
+
+;기력 0
+SIF BASE:기력 <= 0
+	PRINTL ★기력 0★
+
+;체력·기력의 감소
+PRINT 체력-
+PRINTV LOSEBASE:체력
+PRINT  기력-
+PRINTVL LOSEBASE:기력
+
+;-------------------------------------------------
+;사정후의 재장전 처리
+;-------------------------------------------------
+REPEAT CHARANUM
+	SIF CFLAG:COUNT:9 > 0
+		CFLAG:COUNT:9 -= 1
+REND
+
+;-------------------------------------------------
+;파라미터의 상승＆표시(DOWN도 여기서)
+;-------------------------------------------------
+IF FLAG:153 == 0
+	UPCHECK
+ELSE
+	CALL UPCHECK_ANIME
+ENDIF
+
+;-------------------------------------------------
+;조교자의 주겟트
+;-------------------------------------------------
+CALL PLAYER_JUEL_GET
+
+

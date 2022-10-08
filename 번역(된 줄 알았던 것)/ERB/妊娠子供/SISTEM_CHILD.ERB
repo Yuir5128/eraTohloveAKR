@@ -1,0 +1,579 @@
+﻿;=============================================================================
+;아이패치의 제처리
+;=============================================================================
+;-------------------------------------------------
+;아이탄생 판정 처리
+;인수 0은 모친,인수 1은 부친,인수 2는 유모
+;-------------------------------------------------
+@CHILD_CHECK(ARG:0,ARG:1,ARG:2)
+PRINTL 
+;아이를 추가
+LOCAL = 0
+LOCAL:1 = 0
+$SELECTER
+IF !LOCAL || LOCAL == 890
+	LOCAL = 890 + RAND:10
+ELSE
+	LOCAL--
+ENDIF
+FOR LOCAL:2,1,CHARANUM
+	SIF LOCAL == NO:(LOCAL:2)
+		LOCAL:1 = 1
+NEXT
+SIF LOCAL:1
+	GOTO SELECTER
+ADDCHARA LOCAL
+LOCAL = CHARANUM-1
+CALL CHILD_PLUS(LOCAL,ARG:0,ARG:1,ARG:2)
+
+@CHILD_PLUS(ARG:0,ARG:1,ARG:2,ARG:3)
+;부친과 모친에게아이의 수＋
+CFLAG:(ARG:1):112 += 1
+SIF ARG:2 > -1
+	CFLAG:(ARG:2):113 += 1
+
+;육아중의 친자식의 고유 번호:육아 방폐[放棄]의 경우는 유모에 넣는다
+SIF !ARG:3
+	CFLAG:(ARG:1):114 = NO:ARG
+;아이에,길러 받는 어머니 or양모의 고유 번호를 넣는다
+CFLAG:ARG:115 = NO:(ARG:1)
+SIF ARG:3
+	CFLAG:ARG:115 = NO:(ARG:3)
+;성장 플래그를 넣는다
+CFLAG:ARG:116 = DAY
+
+;아이에 부친과 모친의 캐릭터 번호/이름을 넣는다
+CFLAG:(ARG:0):1001 = NO:(ARG:1)
+CSTR:(ARG:0):3 = %CALLNAME:(ARG:1)%
+STRLENS CSTR:(ARG:1):2
+IF RESULT
+	CFLAG:ARG:1004 = CFLAG:(ARG:1):1000
+	CSTR:ARG:6 = %CSTR:(ARG:1):2%
+ELSE
+	CFLAG:ARG:1004 = -1
+ENDIF
+STRLENS CSTR:(ARG:1):3
+IF RESULT
+	CFLAG:ARG:1005 = CFLAG:(ARG:1):1001
+	CSTR:ARG:7 = %CSTR:(ARG:1):3%
+ELSE
+	CFLAG:ARG:1005 = -1
+ENDIF
+IF ARG:2 > -1
+	CFLAG:(ARG:0):1000 = NO:(ARG:2)
+	CSTR:(ARG:0):2 = %CALLNAME:(ARG:2)%
+	STRLENS CSTR:(ARG:2):2
+	IF RESULT
+		CFLAG:ARG:1002 = CFLAG:(ARG:2):1000
+		CSTR:ARG:4 = %CSTR:(ARG:2):2%
+	ELSE
+		CFLAG:ARG:1002 = -1
+	ENDIF
+	STRLENS CSTR:(ARG:2):3
+	IF RESULT
+		CFLAG:ARG:1003 = CFLAG:(ARG:2):1001
+		CSTR:ARG:5 = %CSTR:(ARG:2):3%
+	ELSE
+		CFLAG:ARG:1003 = -1
+	ENDIF
+ENDIF
+
+;성별
+IF ARG:1 == MASTER || ARG:2 == MASTER
+	LOCALS:1 =아가씨
+ELSE
+	LOCALS:1 =여자 아이
+ENDIF
+IF !RAND:250
+	TALENT:(ARG):후타나리 = 1
+	IF ARG:1 == MASTER || ARG:2 == MASTER
+		LOCALS:1 =아가씨
+	ELSE
+		LOCALS:1 =여자 아이
+	ENDIF
+ELSEIF !RAND:249
+	TALENT:(ARG):반음반양 = 1
+	IF ARG:1 == MASTER || ARG:2 == MASTER
+		LOCALS:1 =아들
+	ELSE
+		LOCALS:1 =사내 아이
+	ENDIF
+ELSEIF !RAND:248
+	TALENT:(ARG):컨트보이 = 1
+	IF ARG:1 == MASTER || ARG:2 == MASTER
+		LOCALS:1 =아들
+	ELSE
+		LOCALS:1 =사내 아이
+	ENDIF
+ELSEIF !RAND:247
+	TALENT:(ARG):쉬메일 = 1
+	IF ARG:1 == MASTER || ARG:2 == MASTER
+		LOCALS:1 =아가씨
+	ELSE
+		LOCALS:1 =여자 아이
+	ENDIF
+ELSEIF !RAND:2
+	TALENT:(ARG):남자 = 1
+	IF ARG:1 == MASTER || ARG:2 == MASTER
+		LOCALS:1 =아들
+	ELSE
+		LOCALS:1 =사내 아이
+	ENDIF
+ENDIF
+
+;기력체력의 처리
+MAXBASE:(ARG):체력 = MAXBASE:(ARG:1):체력 / 120 * 100
+SIF MAXBASE:(ARG):체력 < 1100
+	MAXBASE:(ARG):체력 = 1000
+MAXBASE:(ARG):기력 = MAXBASE:(ARG:1):기력 / 60 * 50
+SIF MAXBASE:(ARG):기력 < 550
+	MAXBASE:(ARG):기력 = 500
+BASE:(ARG):체력 = MAXBASE:(ARG):체력
+BASE:(ARG):기력 = MAXBASE:(ARG):기력
+
+;순종의 처리,낳은 부모의반발각인가 적을 정도 최초부터순종
+ABL:(ARG):순종 = 3 - MARK:(ARG:1):반발각인
+SIF ABL:(ARG):순종 < 0
+	ABL:(ARG):순종 = 0
+
+;유전의 처리
+;↓최초부터 붙어 있는 것
+;처녀/동정/후처녀
+REPEAT 180
+	SIF COUNT < 10 || (COUNT >= 74 && COUNT <= 78) || COUNT == 85 || COUNT == 137 || COUNT == 139 || COUNT == 140 || COUNT == 149 || (COUNT >= 153 && COUNT <= 155) || (COUNT >= 157 && COUNT <= 159) || COUNT == 162 || COUNT == 165
+		CONTINUE
+	IF RAND:5 > 1 && ARG:2 > -1 && TALENT:(ARG:2):COUNT
+		TALENT:(ARG):COUNT = 1
+	ELSEIF RAND:5 > 1 && TALENT:(ARG:1):COUNT
+		TALENT:(ARG):COUNT = 1
+	ELSEIF !RAND:10 && (COUNT == 92 || COUNT == 93 || COUNT == 94 || (COUNT >= 101 && COUNT <= 108))
+		TALENT:ARG:COUNT = 1
+	ELSE
+		TALENT:ARG:COUNT = 0
+	ENDIF
+REND
+
+CALL CHILD_TALENT_SET(ARG)
+
+;궁합 결정
+FOR LOCAL,0,500
+	IF RELATION:(ARG:1):LOCAL > 100 || (RELATION:(ARG:1):LOCAL < 100 && RELATION:(ARG:1):LOCAL != 0)
+		RELATION:ARG:LOCAL = (RELATION:(ARG:1):LOCAL) / 2 + 50
+		SIF RELATION:ARG:LOCAL > 200
+			RELATION:ARG:LOCAL = 200
+	ENDIF
+NEXT
+
+;부모와의 궁합 좋다
+RELATION:ARG:(NO:(ARG:1)) = 200
+RELATION:(ARG:1):(NO:ARG) = 200
+IF ARG:2 > -1
+	RELATION:ARG:(NO:(ARG:2)) = 200
+	RELATION:(ARG:2):(NO:ARG) = 150
+ENDIF
+IF ARG:3
+	RELATION:ARG:(NO:(ARG:3)) = 200
+	RELATION:(ARG:3):(NO:ARG) = 150
+ENDIF
+
+;모친이 주인으로 부친이 있는지,유모에 맡지 않았다
+;IF ARG:1 == MASTER
+;	IF ARG:2 > -1
+;		PRINTFORML %CALLNAME:(ARG:2)%에 %LOCALS:1%의 이름을 붙여 받습니까?
+;		PRINTL 
+;		PRINTL [0] 네
+;		PRINTL [1] 스스로 붙입니다
+;		$INPUT_LOOP1
+;		INPUT
+;		IF RESULT == 0
+;			CALL CHILD_NAME(ARG,ARG:2)
+;			LOCAL = RESULT
+;		ELSEIF RESULT == 1
+;			LOCAL = 1
+;		ELSE
+;			GOTO INPUT_LOOP1
+;		ENDIF
+;	ELSE
+;		LOCAL = 0
+;	ENDIF
+;ELSEIF !ARG:3
+;	PRINTFORML %CALLNAME:(ARG:1)%에 %LOCALS:1%의 이름을 붙여 받습니까?
+;	PRINTL 
+;	PRINTL [0] 네
+;	PRINTL [1] 스스로 붙입니다
+;	$INPUT_LOOP2
+;	INPUT
+;	IF RESULT == 0
+;		CALL CHILD_NAME(ARG,ARG:1)
+;		LOCAL = RESULT
+;	ELSEIF RESULT == 1
+;		LOCAL = 1
+;	ELSE
+;		GOTO INPUT_LOOP2
+;	ENDIF
+;ELSE
+	LOCAL = 1
+;ENDIF
+
+IF LOCAL
+	$CHILDNAME_INPUT1
+	PRINTFORML %LOCALS:1%의 이름을 입력해 주세요
+	INPUTS
+	NAME:ARG = %RESULTS%
+	CALLNAME:ARG = %RESULTS%
+	PRINTFORML %LOCALS:1%의 이름을 %NAME:ARG%로 결정했습니다
+	PRINTFORMW 좋습니까?
+	PRINTL 
+	PRINTFORML [0] %NAME:ARG%로 좋다
+	PRINTL [1] 한번 더 생각한다
+	$INPUT_LOOP3
+	INPUT
+	IF RESULT == 0
+	ELSEIF RESULT == 1
+		GOTO CHILDNAME_INPUT1
+	ELSE
+		GOTO INPUT_LOOP3
+	ENDIF
+	PRINTL 
+	PRINTFORML %NAME:ARG%에 닉네임을 붙입니까?
+	PRINTL 
+	PRINTL [0] 네
+	PRINTL [1] 아니오
+	$INPUT_LOOP4
+	INPUT
+	IF RESULT == 0
+		$CHILDNAME_INPUT2
+		PRINTFORML %LOCALS%의 닉네임을 입력해 주세요
+		INPUTS
+		CALLNAME:ARG = %RESULTS%
+		PRINTFORML %NAME:ARG%의 닉네임을 %CALLNAME:ARG%로 결정했습니다
+		PRINTFORMW 좋습니까?
+		PRINTL 
+		PRINTFORML [0] %CALLNAME:ARG%로 좋다
+		PRINTL [1] 한번 더 생각한다
+		PRINTL [2] 이름으로부터 다시 생각한다
+		$INPUT_LOOP5
+		INPUT
+		IF RESULT == 0
+		ELSEIF RESULT == 1
+			GOTO CHILDNAME_INPUT2
+		ELSEIF RESULT == 2
+			GOTO CHILDNAME_INPUT1
+		ELSE
+			GOTO INPUT_LOOP5
+		ENDIF
+	ELSEIF RESULT == 1
+	ELSE
+		GOTO INPUT_LOOP4
+	ENDIF
+ENDIF
+;아이의 비표시 플래그
+CFLAG:ARG:26 = 1
+;부친과 모친에게아이의 이름 기록
+IF STRLENS(CSTR:(ARG:1):13)
+	CSTR:(ARG:1):13 = %CSTR:(ARG:1):13%,%CALLNAME:ARG%
+ELSE
+	CSTR:(ARG:1):13 = %CALLNAME:ARG%
+ENDIF
+IF ARG:2 > -1
+	IF STRLENS(CSTR:(ARG:2):13)
+		CSTR:(ARG:2):13 = %CSTR:(ARG:2):13%,%CALLNAME:ARG%
+	ELSE
+		CSTR:(ARG:2):13 = %CALLNAME:ARG%
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;아이의 소질 처리
+;-------------------------------------------------
+@CHILD_TALENT_SET(ARG)
+;처녀계 소질을 붙인다
+SIF PENIS(ARG)
+	TALENT:ARG:동정 = 1
+SIF VAGINA(ARG)
+	TALENT:ARG:처녀 = 1
+
+TALENT:ARG:백버진 = 1
+
+;랜덤으로유치
+SIF !RAND:3
+	TALENT:ARG:유치 = 1
+
+;지식이 없기 때문에 소거
+;조제지식/금지된지식
+TALENT:ARG:조제지식 = 0
+TALENT:ARG:금지된지식 = 0
+
+;후 하늘적인 것을 소거
+;도S/도M
+SIF TALENT:ARG:새드 == 2
+	TALENT:ARG:새드 = 1
+SIF TALENT:ARG:마조 == 2
+	TALENT:ARG:마조 = 1
+
+;서로 지운다
+;반항적⇔솔직함
+IF TALENT:ARG:반항적 && TALENT:ARG:솔직함
+	IF !RAND:2
+		TALENT:ARG:반항적 = 0
+	ELSE
+		TALENT:ARG:솔직함 = 0
+	ENDIF
+ENDIF
+
+;프라이드높음⇔프라이드낮음
+IF TALENT:ARG:프라이드높음 && TALENT:ARG:프라이드낮음
+	IF !RAND:2
+		TALENT:ARG:프라이드높음 = 0
+	ELSE
+		TALENT:ARG:프라이드낮음 = 0
+	ENDIF
+ENDIF
+
+;무관심⇔호기심
+IF TALENT:ARG:무관심 && TALENT:ARG:호기심
+	IF !RAND:2
+		TALENT:ARG:무관심 = 0
+	ELSE
+		TALENT:ARG:호기심 = 0
+	ENDIF
+ENDIF
+
+;낙관적⇔비관적
+IF TALENT:ARG:낙관적 && TALENT:ARG:비관적
+	IF !RAND:2
+		TALENT:ARG:낙관적 = 0
+	ELSE
+		TALENT:ARG:비관적 = 0
+	ENDIF
+ENDIF
+
+;정조관념⇔정조무관심
+IF TALENT:ARG:정조관념 && TALENT:ARG:정조무관심
+	IF !RAND:2
+		TALENT:ARG:정조관념 = 0
+	ELSE
+		TALENT:ARG:정조무관심 = 0
+	ENDIF
+ENDIF
+
+;억압⇔해방
+IF TALENT:ARG:억압 && TALENT:ARG:해방
+	IF !RAND:2
+		TALENT:ARG:억압 = 0
+	ELSE
+		TALENT:ARG:해방 = 0
+	ENDIF
+ENDIF
+
+;부끄럼쟁이⇔수치심없음
+IF TALENT:ARG:부끄럼쟁이 && TALENT:ARG:수치심없음
+	IF !RAND:2
+		TALENT:ARG:부끄럼쟁이 = 0
+	ELSE
+		TALENT:ARG:수치심없음 = 0
+	ENDIF
+ENDIF
+
+;고통에강함⇔고통에약함
+IF TALENT:ARG:고통에강함 && TALENT:ARG:고통에약함
+	IF !RAND:2
+		TALENT:ARG:고통에강함 = 0
+	ELSE
+		TALENT:ARG:고통에약함 = 0
+	ENDIF
+ENDIF
+
+;젖기쉬움⇔젖기어려움
+IF TALENT:ARG:젖기쉬움 && TALENT:ARG:젖기어려움
+	IF !RAND:2
+		TALENT:ARG:젖기쉬움 = 0
+	ELSE
+		TALENT:ARG:젖기어려움 = 0
+	ENDIF
+ENDIF
+
+;요리치⇔요리고수
+IF TALENT:ARG:요리치 && TALENT:ARG:요리고수
+	IF !RAND:2
+		TALENT:ARG:요리치 = 0
+	ELSE
+		TALENT:ARG:요리고수 = 0
+	ENDIF
+ENDIF
+
+;습득빠름⇔습득느림
+IF TALENT:ARG:습득빠름 && TALENT:ARG:습득느림
+	IF !RAND:2
+		TALENT:ARG:습득빠름 = 0
+	ELSE
+		TALENT:ARG:습득느림 = 0
+	ENDIF
+ENDIF
+
+;악취둔감⇔악취민감
+IF TALENT:ARG:악취둔감 && TALENT:ARG:악취민감
+	IF !RAND:2
+		TALENT:ARG:악취둔감 = 0
+	ELSE
+		TALENT:ARG:악취민감 = 0
+	ENDIF
+ENDIF
+
+;스킨십선호⇔스킨십불편
+IF TALENT:ARG:스킨십선호 && TALENT:ARG:스킨십불편
+	IF !RAND:2
+		TALENT:ARG:스킨십선호 = 0
+	ELSE
+		TALENT:ARG:스킨십불편 = 0
+	ENDIF
+ENDIF
+
+;쾌감에솔직⇔쾌감을부정
+IF TALENT:ARG:쾌감에솔직 && TALENT:ARG:쾌감을부정
+	IF !RAND:2
+		TALENT:ARG:쾌감에솔직 = 0
+	ELSE
+		TALENT:ARG:쾌감을부정 = 0
+	ENDIF
+ENDIF
+
+;바이⇔남자혐오/여자혐오
+IF TALENT:ARG:바이 && (TALENT:ARG:남자혐오 || TALENT:ARG:여자혐오)
+	IF !RAND:2
+		TALENT:ARG:바이 = 0
+	ELSE
+		TALENT:ARG:남자혐오 = 0
+		TALENT:ARG:여자혐오 = 0
+	ENDIF
+ENDIF
+
+;가슴의 크기계 소질
+IF TALENT:ARG:빈유
+	LOCAL:(LOCAL:4) = 109
+	LOCAL:4++
+ENDIF
+IF TALENT:ARG:절벽
+	LOCAL:(LOCAL:4) = 110
+	LOCAL:4++
+ENDIF
+IF TALENT:ARG:거유
+	LOCAL:(LOCAL:4) = 111
+	LOCAL:4++
+ENDIF
+IF TALENT:ARG:폭유
+	LOCAL:(LOCAL:4) = 112
+	LOCAL:4++
+ENDIF
+IF LOCAL:4
+	LOCAL:5 = RAND:(LOCAL:4)
+	SIF LOCAL:(LOCAL:5) != 109
+		TALENT:ARG:빈유 = 0
+	SIF LOCAL:(LOCAL:5) != 110
+		TALENT:ARG:절벽 = 0
+	SIF LOCAL:(LOCAL:5) != 111
+		TALENT:ARG:거유 = 0
+	SIF LOCAL:(LOCAL:5) != 112
+		TALENT:ARG:폭유 = 0
+ENDIF
+IF !RAND:2
+	TALENT:ARG:빈유 = 0
+	TALENT:ARG:절벽 = 0
+	TALENT:ARG:거유 = 0
+	TALENT:ARG:폭유 = 0
+ENDIF
+
+;고추의 크기계 소질
+IF TALENT:ARG:아이사이즈
+	LOCAL:(LOCAL:4) = 114
+	LOCAL:4++
+ENDIF
+IF TALENT:ARG:단소
+	LOCAL:(LOCAL:4) = 115
+	LOCAL:4++
+ENDIF
+IF TALENT:ARG:거근
+	LOCAL:(LOCAL:4) = 116
+	LOCAL:4++
+ENDIF
+IF TALENT:ARG:말자지
+	LOCAL:(LOCAL:4) = 117
+	LOCAL:4++
+ENDIF
+IF LOCAL:4
+	LOCAL:5 = RAND:(LOCAL:4)
+	SIF LOCAL:(LOCAL:5) != 114
+		TALENT:ARG:아이사이즈 = 0
+	SIF LOCAL:(LOCAL:5) != 115
+		TALENT:ARG:단소 = 0
+	SIF LOCAL:(LOCAL:5) != 116
+		TALENT:ARG:거근 = 0
+	SIF LOCAL:(LOCAL:5) != 117
+		TALENT:ARG:말자지 = 0
+ENDIF
+IF !RAND:3
+	TALENT:ARG:아이사이즈 = 0
+	TALENT:ARG:단소 = 0
+	TALENT:ARG:거근 = 0
+	TALENT:ARG:말자지 = 0
+ENDIF
+SIF !RAND:2
+	TALENT:ARG:음모없음 = 1
+SIF !RAND:2
+	TALENT:ARG:포경 = 1
+
+;체형 소질
+IF TALENT:ARG:작은체구
+	LOCAL:(LOCAL:4) = 100
+	LOCAL:4++
+ENDIF
+IF TALENT:ARG:큰체구
+	LOCAL:(LOCAL:4) = 113
+	LOCAL:4++
+ENDIF
+IF TALENT:ARG:소인체형
+	LOCAL:(LOCAL:4) = 142
+	LOCAL:4++
+ENDIF
+IF LOCAL:4
+	LOCAL:5 = RAND:(LOCAL:4)
+	SIF LOCAL:(LOCAL:5) != 100
+		TALENT:ARG:작은체구 = 0
+	SIF LOCAL:(LOCAL:5) != 113
+		TALENT:ARG:큰체구 = 0
+	SIF LOCAL:(LOCAL:5) != 142
+		TALENT:ARG:소인체형 = 0
+ENDIF
+IF !RAND:2
+	TALENT:ARG:작은체구 = 0
+	TALENT:ARG:큰체구 = 0
+	TALENT:ARG:소인체형 = 0
+ENDIF
+
+;회복빠름⇔회복느림
+IF TALENT:ARG:회복빠름 && TALENT:ARG:회복느림
+	IF !RAND:2
+		TALENT:ARG:회복빠름 = 0
+	ELSE
+		TALENT:ARG:회복느림 = 0
+	ENDIF
+ENDIF
+
+;남자혐오⇔남자좋아
+IF TALENT:ARG:남자혐오 && TALENT:ARG:남자좋아
+	IF !RAND:2
+		TALENT:ARG:남자혐오 = 0
+	ELSE
+		TALENT:ARG:남자좋아 = 0
+	ENDIF
+ENDIF
+
+;여자혐오⇔여자좋아
+IF TALENT:ARG:여자혐오 && TALENT:ARG:여자좋아
+	IF !RAND:2
+		TALENT:ARG:여자혐오 = 0
+	ELSE
+		TALENT:ARG:여자좋아 = 0
+	ENDIF
+ENDIF
+

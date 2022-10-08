@@ -1,0 +1,941 @@
+﻿
+;==================================================
+;@KOJO_MESSAGE_PALAMCNG 관계(1을 캐릭터 번호에 치환)
+;파라미터 변화 따위를 트리거로 한입상 CFLAG 221~260을 사용
+;==================================================
+;-------------------------------------------------
+;@KOJO_MESSAGE_PALAMCNG_A(X를 캐릭터 번호에 치환)
+;조교자의사정를 트리거로 한입상
+;-------------------------------------------------
+@KOJO_MESSAGE_PALAMCNG_A_K49
+;조수가 조교했을 때에입상을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;볼개그착용시에는 지문을 표시해입상을 스킵 한다
+;IF TEQUIP:볼개그 && SELECTCOM != 107
+;	CALL PALAM_MESSAGE_A
+;	RETURN 0
+;ENDIF
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_PALAMCNG_A_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_PALAMCNG_A_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+;=================================================
+;조교자의사정시의 텍스트
+;=================================================
+;-------------------------------------------------
+;사정개소 변경시의 텍스트 유효시는 여기서 함수 종료 CFLAG:221~230
+;-------------------------------------------------
+IF CFLAG:106
+	CALL PALAM_MESSAGE_A
+	;머리카락
+	IF CFLAG:106 == 1
+		CFLAG:221 = 1
+	;안
+	ELSEIF CFLAG:106 == 2
+		;함락이 끝난 상태
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:222 < 3 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF TEQUIP:8 == 1
+					PRINTFORMW 「전,안보인다」
+					PRINTFORMW %CALLNAME%는 안경과 얼굴로부터 방울져 떨어지는 백탁액을 닦은 손가락을입에 넣어,혀를 보이고 사등 소리를 내 빨고 있다
+				ELSE
+					PRINTFORMW 「대장,뭐야,진흙진흙이 아닌가」
+					PRINTFORMW %CALLNAME%는 얼굴로부터 백탁액을 방울져 떨어지게 하면서 %CALLNAME:MASTER%를 가볍게 노려보았다
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:222 = 3
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:222 < 2 || FLAG:7 == 2)
+			IF ASSI > 0 && ASSIPLAY
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 
+			ENDIF
+			CFLAG:222 = 2
+		;그 이외
+		ELSEIF CFLAG:222 < 1 || FLAG:7 == 2
+			PRINTFORMW 
+		ENDIF
+		CFLAG:222 = 1
+	;가슴
+	ELSEIF CFLAG:106 == 3
+		CFLAG:223 = 1
+	;복
+	ELSEIF CFLAG:106 == 4
+		CFLAG:224 = 1
+	;액
+	ELSEIF CFLAG:106 == 5
+		CFLAG:225 = 1
+	;허벅지
+	ELSEIF CFLAG:106 == 6
+		;함락이 끝난 상태
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:222 < 2 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「대장,나의 다리,좋아하구나?」
+				PRINTFORMW 가는 넙적다리에 걸쳐진 백탁을,쿡쿡 웃으면서%CALLNAME%는 발라 펼치는 것처럼 만지작거리고 있다
+			ENDIF
+			CFLAG:226 = 2
+		;그 이외
+		ELSEIF CFLAG:222 < 1 || FLAG:7 == 2
+			PRINTFORMW 「…… 아니,코코가 좋으면 좋지만……」
+		ENDIF
+		CFLAG:226 = 1
+	;균열
+	ELSEIF CFLAG:106 == 7
+		CFLAG:227 = 1
+	;고
+	ELSEIF CFLAG:106 == 8
+		CFLAG:228 = 1
+	;고무
+	ELSEIF CFLAG:106 == 9
+		;섹스로사정 한편,애널섹스 이외를 실행시
+		IF TFLAG:2 > 0 && SELECTCOM != 110 && SELECTCOM != 111 && SELECTCOM != 112 && SELECTCOM != 113 && SELECTCOM != 114 && SELECTCOM != 115 && SELECTCOM != 116
+			CFLAG:229 = 1
+		ELSE
+			CFLAG:230 = 1
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;손,입 이외로사정 CFLAG:231
+;TFLAG:9 == 1은사정,2는 대량사정
+;대응 커맨드는 키스,스마타,풋잡,애널강제 봉사,더블스마타
+;-------------------------------------------------
+IF TFLAG:9 == 1 || TFLAG:9 == 2
+	CALL PALAM_MESSAGE_A
+	CFLAG:231 = 1
+ENDIF
+
+;-------------------------------------------------
+;조수를범한다로사정 CFLAG:232
+;-------------------------------------------------
+IF TFLAG:7 > 0
+	CALL PALAM_MESSAGE_A
+ENDIF
+
+;-------------------------------------------------
+;입로사정 CFLAG:233
+;-------------------------------------------------
+IF TFLAG:0 > 0
+	CALL PALAM_MESSAGE_A
+	;함락이 끝난+정액중독 3L 혹은봉사정신 5L
+	IF (ABL:봉사정신 >= 5 || ABL:정액중독 >= 3) && KANRAKU(TARGET) && (CFLAG:233 < 3 || FLAG:7 == 2)
+		IF ASSI > 0 && ASSIPLAY
+			PRINTFORMW 「우읏!많이 나왔지 않은가」
+			PRINTFORMW %CALLNAME%는 과시하는 것처럼 내민 혀로부터 정액을 늘어뜨리면,휴지로수 닦았다
+		ELSE
+			PRINTFORMW 「응응%UNICODE(0x2661)% ,우우…… 응%UNICODE(0x2661)% 구%UNICODE(0x2661)%」
+			PRINTFORMW %CALLNAME%는 물기를 띤 눈을 도연[陶然]히 시키면서 목 안에 나온 정액을 삼켜 갔다……
+		ENDIF
+		CFLAG:233 = 3
+	;함락이 끝난 상태
+	ELSEIF KANRAKU(TARGET) && (CFLAG:233 < 2 || FLAG:7 == 2)
+		IF ASSI > 0 && ASSIPLAY
+		ELSE
+			PRINTFORMW 「히,줄고%UNICODE(0x2661)%」
+			PRINTFORMW %CALLNAME%는 나온 백탁을,입를 열고 %CALLNAME:PLAYER%에 보이고 나서 목을 울려 삼켰다
+		ENDIF
+		CFLAG:233 = 2
+	;그 이외
+	ELSEIF CFLAG:233 < 1 || FLAG:7 == 2
+		CFLAG:233 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;손로사정 CFLAG:234
+;-------------------------------------------------
+IF TFLAG:1 > 0
+	CALL PALAM_MESSAGE_A
+	IF ASSI > 0 && ASSIPLAY
+	ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		PRINTFORMW 「응%UNICODE(0x2661)% 대장의 진하구나……%UNICODE(0x2661)%」
+		PRINTFORMW 손의 히등에수 멈춘 백탁을%CALLNAME%는 열심히 빨아내고 있다…
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:234 = 1
+ENDIF
+
+;-------------------------------------------------
+;가슴로사정 CFLAG:235
+;-------------------------------------------------
+IF TFLAG:34 > 0
+	CALL PALAM_MESSAGE_A
+	CFLAG:235 = 1
+ENDIF
+
+;-------------------------------------------------
+;발로사정 CFLAG:236
+;-------------------------------------------------
+IF TFLAG:16 > 0
+	CALL PALAM_MESSAGE_A
+	CFLAG:236 = 1
+ENDIF
+
+;-------------------------------------------------
+;섹스로사정 CFLAG:237 CFLAG:238
+;-------------------------------------------------
+IF TFLAG:2 > 0
+	CALL PALAM_MESSAGE_A
+	;애널섹스계
+	IF SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116
+		;함락이 끝난 상태
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:237 < 4 || FLAG:7 == 2)
+			;연모,친애
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;조금 약삭빠르다
+					IF PALAM:욕정 > 30000
+						IF RAND:2 == 0
+							PRINTFORML 「아%UNICODE(0x2661)% 아,뜨거운 것,가득 온%UNICODE(0x2661)%%UNICODE(0x2661)% 뜨거운,임신해 버려 %UNICODE(0x2661)%」
+						ELSE
+							PRINTFORML 「좀 더%UNICODE(0x2661)% 도미 실마리,좀 더 나의 안에 내 주어라 %UNICODE(0x2661)%」
+							PRINTFORMW 「대장의,아 %UNICODE(0x2661)% 도미 실마리의 정액 좀 더…… 값%UNICODE(0x2661)%」
+						ENDIF
+						PRINTFORMW %CALLNAME:TARGET%의 아누스는 정액에 반응해 더욱 짜내려고 수축을 반복하고 있다……
+					ELSE
+						IF RAND:3 == 0
+							PRINTFORML 「…… 은 %UNICODE(0x2661)% …… 야,조금,이제 무리…!」
+							PRINTFORMW 「더,더 이상,들어가지 않아… 흘러넘치는……%UNICODE(0x2661)%」
+						ELSEIF RAND:2 == 0
+							PRINTFORMW 「도미 실마리,코코에 내 주고 %UNICODE(0x2661)%%UNICODE(0x2661)% 꺾어져가,가장 안쪽의 곳에 %UNICODE(0x2661)%」
+						ELSE
+							PRINTFORMW 「아%UNICODE(0x2661)% 아%UNICODE(0x2661)% 아직 나와…… 아,안쪽까지 가득%UNICODE(0x2661)%」
+						ENDIF
+						PRINTFORMW 고오에 느끼는 정액의 뜨거움에,%CALLNAME%는 도연 하고 있다……
+					ENDIF
+				ELSE
+					PRINTFORMW 「아%UNICODE(0x2661)% 아%UNICODE(0x2661)% 아직 나와…… 아,안쪽까지 가득%UNICODE(0x2661)%」
+				ENDIF
+			;음란,창부
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+			;복종,예속
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+			ENDIF
+			CFLAG:237 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:237 < 3 || FLAG:7 == 2)
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「아,%UNICODE(0x2661)% 아직 나와……」
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「응,많이 나왔지 않은가,도미 실마리%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 「%UNICODE(0x2661)% …… 아,열… 좋다……%UNICODE(0x2661)%」
+			ENDIF
+			CFLAG:237 = 3
+		;그 이외
+		ELSEIF CFLAG:237 < 2 || FLAG:7 == 2
+			PRINTFORMW 「쿠,우우……」
+		ENDIF
+		CFLAG:237 = 2
+	;섹스계
+	ELSE
+		;함락이 끝난 상태
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:238 < 4 || FLAG:7 == 2)
+			;연모,친애
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF PALAM:욕정 > 50000
+						PRINTFORMW 「도미 실마리를 좋아하는 사람,정말 좋아하다 %UNICODE(0x2661)% 좀 더 (안)중 내!있고 묻는 안쪽까지 대장의 것으로 해 주어라 %UNICODE(0x2661)%」
+					ELSE
+						IF RAND:2 == 0
+							PRINTFORML 「아,아아…… 아 %UNICODE(0x2661)% …… 굉장하구나,등 응……%UNICODE(0x2661)%」
+							PRINTFORMW 「태응중앙대학장의 자식으로 가득하다…… 앗,응%UNICODE(0x2661)%」
+						ELSE
+							PRINTFORMW 「후아,상관없기 때문에 충분히 따라 주어라,도미 실마리%UNICODE(0x2661)%」
+						ENDIF
+					ENDIF
+				ELSE
+					PRINTFORMW 
+				ENDIF
+			;음란,창부
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+			;복종,예속
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+			ENDIF
+			CFLAG:238 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:238 < 3 || FLAG:7 == 2)
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「후아…… 아,열… 좋다……%UNICODE(0x2661)%」
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「아%UNICODE(0x2661)% 대장의 자식…… 쿨렁쿨렁 말해들……」
+			ELSE
+				PRINTFORMW 「아,응읏!안쪽,뜨겁다……」
+			ENDIF
+			CFLAG:238 = 3
+		;그 이외
+		ELSEIF CFLAG:238 < 2 || FLAG:7 == 2
+			PRINTFORMW 
+		CFLAG:238 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;역섹스로사정 시킨 CFLAG:239
+;-------------------------------------------------
+IF (SELECTCOM == 260 || SELECTCOM == 261 || SELECTCOM == 262 || SELECTCOM == 263 || SELECTCOM == 264 || SELECTCOM == 265) && TFLAG:10 > 0
+	CALL PALAM_MESSAGE_A
+	CFLAG:239 = 1
+ENDIF
+
+;-------------------------------------------------
+;조교자 하늘사정 CFLAG:239
+;-------------------------------------------------
+IF TFLAG:164 > 0
+	CALL PALAM_MESSAGE_A
+	CFLAG:239 = 1
+ENDIF
+
+
+
+;==================================================
+;@KOJO_MESSAGE_PALAMCNG_E(X를 캐릭터 번호에 치환)
+;촉수의사정를 트리거로 한입상
+;==================================================
+@KOJO_MESSAGE_PALAMCNG_E_K49
+;조수가 조교했을 때에입상을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;볼개그착용시에는 지문을 표시해입상을 스킵 한다
+;IF TEQUIP:볼개그 &&  SELECTCOM != 107
+;	CALL PALAM_MESSAGE_E
+;	RETURN 0
+;ENDIF
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_PALAMCNG_E_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_PALAMCNG_E_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+;=================================================
+;촉수의사정시의 텍스트
+;=================================================
+;-------------------------------------------------
+;촉수가사정 CFLAG:240
+;-------------------------------------------------
+IF TFLAG:15 >0
+	CALL PALAM_MESSAGE_E
+	CFLAG:240 = 1
+ENDIF
+
+
+
+;==================================================
+;@KOJO_MESSAGE_PALAMCNG_B관계(X를 캐릭터 번호에 치환)
+;노예의 절정을 트리거로 한입상
+;==================================================
+@KOJO_MESSAGE_PALAMCNG_B_K49
+;조수가 조교했을 때에입상을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;볼개그착용시에는 지문을 표시해입상을 스킵 한다
+;IF TEQUIP:볼개그 &&  SELECTCOM != 107
+;	CALL PALAM_MESSAGE_B
+;	RETURN 0
+;ENDIF
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_PALAMCNG_B_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_PALAMCNG_B_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+;=================================================
+;노예의 절정시의 텍스트
+;=================================================
+;-------------------------------------------------
+;미약의 효과 발동시
+;-------------------------------------------------
+IF TEQUIP:미약 == 1 && FLAG:29 == 0
+ENDIF
+
+;-------------------------------------------------
+;처음으로 C절정 CFLAG:241
+;-------------------------------------------------
+IF NOWEX:0 > 0 && CFLAG:241 == 0
+	CFLAG:241 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로 V절정 CFLAG:242
+;-------------------------------------------------
+IF NOWEX:1 > 0 && CFLAG:242 == 0
+	CFLAG:242 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로 A절정 CFLAG:243
+;-------------------------------------------------
+IF NOWEX:2 > 0 && CFLAG:243 == 0
+	CFLAG:243 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로 B절정 CFLAG:244
+;-------------------------------------------------
+IF NOWEX:3 > 0 && CFLAG:244 == 0
+	CFLAG:244 = 1
+ENDIF
+
+;-------------------------------------------------
+;절정 CFLAG:245 CFLAG:246
+;개인적으로는 여기와사정 되는 곳 메워지고 있으면입상 운용 충분히라고 생각한다.
+;나중에 오면 조교 전후근처가 있으면 즐겁다. 그렇지만 스스로 쓰는 것 어렵다w
+;-------------------------------------------------
+;강절정
+IF TFLAG:29 > 1
+	CALL PALAM_MESSAGE_B
+	;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:245 < 4 || FLAG:7 == 2)
+		;연모,친애
+		IF TALENT:3 || TALENT:6
+			;섹스계 커맨드로 V절정
+			IF  NOWEX:1 && (SELECTCOM == 100 || SELECTCOM == 101 || SELECTCOM == 102 || SELECTCOM == 103 || SELECTCOM == 104 || SELECTCOM == 105 || SELECTCOM == 106 || SELECTCOM == 507 || SELECTCOM == 508 || SELECTCOM == 510) || (SELECTCOM == 509 && TFLAG:40 == 1)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF RAND:2 == 0
+					PRINTFORMW 「하앗,히아,아는 %UNICODE(0x2661)% 좋은,기분 좋은 %UNICODE(0x2661)% 대장 도미 서점%UNICODE(0x2661)%」
+				ELSE
+					PRINTFORMW 「도미 서점,좋은%UNICODE(0x2661)% 안쪽에,두는,심…… 아후,아 아 %UNICODE(0x2661)%%UNICODE(0x2661)%」
+				ENDIF
+			ELSE
+				PRINTFORMW 「히이앗!아,아이참,아,아아아아앗!!」
+			ENDIF
+			;애널섹스로 절정
+			ELSEIF SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116 || SELECTCOM == 526
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF RAND:3 == 0
+						PRINTFORML 「아아아앗,머,머리,새하얗게………%UNICODE(0x2661)% 아,도미 실마리 좀 더…,주어%UNICODE(0x2661)%」
+					ELSEIF RAND:2 == 0
+						PRINTFORMW 「아,아핫,도미 실마리%UNICODE(0x2661)% 히,아,아아 아%UNICODE(0x2661)%」
+					ELSE
+						PRINTFORML 「안쪽,그런,도미 실마리,나%UNICODE(0x2661)% 아,거기,나,아아 아 %UNICODE(0x2661)%」
+					ENDIF
+				ELSE
+					PRINTFORMW 「안쪽에,심…… 아후,아 %UNICODE(0x2661)%%UNICODE(0x2661)%」
+				ENDIF
+				PRINTFORMW 강렬한 쾌감이었는가,%CALLNAME:TARGET%는 간후도 피쿤 피쿤과 지체를 경련시키고 있다.
+			ELSE
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF RAND:2 == 0
+						PRINTFORMW 「아,아핫,도미 실마리%UNICODE(0x2661)% 히,아,아아 아%UNICODE(0x2661)%」
+					ELSE
+						PRINTFORMW 「대장,아아아앗,나,이상해지는 %UNICODE(0x2661)% 이제(벌써),도…… 아 아%UNICODE(0x2661)%%UNICODE(0x2661)%」
+					ENDIF
+				ELSE
+					PRINTFORMW 「앗앗,아%UNICODE(0x2661)% ,아아앗!」
+				ENDIF
+			ENDIF
+		;음란,창부
+		ELSEIF TALENT:4 || TALENT:7
+			PRINTFORMW 
+		;복종,예속
+		ELSEIF TALENT:5 || TALENT:8
+			PRINTFORMW 
+		ENDIF
+		CFLAG:245 = 4
+	;굴복각인Lv3
+	ELSEIF MARK:2 == 3 && (CFLAG:245 < 3 || FLAG:7 == 2)
+		;애널섹스로 강절정
+		IF SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116 || SELECTCOM == 526
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「아%UNICODE(0x2661)% ,아아앗!」
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「아,아핫,도미 서점%UNICODE(0x2661)% 히,아,아아 아%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 「앗앗,아%UNICODE(0x2661)% ,아아앗!」
+			ENDIF
+		ELSE
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「도,도 나,아%UNICODE(0x2661)% 아,아아 아%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 「히긋,아,힛!!이런,이것,아아 아%UNICODE(0x2661)%」
+			ENDIF
+		ENDIF
+		CFLAG:245 = 3
+	;그 이외
+	ELSEIF CFLAG:245 < 2 || FLAG:7 == 2
+		PRINTFORMW 「히긋,아,힛!!이런,이것,아아 아%UNICODE(0x2661)%」
+		CFLAG:245 = 2
+	ENDIF
+;절정
+ELSEIF TFLAG:29 > 0
+	CALL PALAM_MESSAGE_B
+	;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:246 < 4 || FLAG:7 == 2)
+		;연모,친애
+		IF TALENT:3 || TALENT:6
+			;섹스계 커맨드로 V절정
+			IF  NOWEX:1 && (SELECTCOM == 100 || SELECTCOM == 101 || SELECTCOM == 102 || SELECTCOM == 103 || SELECTCOM == 104 || SELECTCOM == 105 || SELECTCOM == 106 || SELECTCOM == 507 || SELECTCOM == 508 || SELECTCOM == 510) || (SELECTCOM == 509 && TFLAG:40 == 1)
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF RAND:2 == 0
+						PRINTFORMW 「아웃,응응%UNICODE(0x2661)% 아,좋앗!!대장,도미 실마리%UNICODE(0x2661)%」
+					ELSE
+						PRINTFORMW 「아!나,나,아앗!!대장미안하닷,선행…… 아%UNICODE(0x2661)%」
+					ENDIF
+				ELSE
+					PRINTFORMW 
+				ENDIF
+			;애널섹스로 절정
+			ELSEIF SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116 || SELECTCOM == 526
+				IF NO:MASTER == 0 || (ASSI > 0 && ASSIPLAY && NO:ASSI == 0)
+					IF RAND:4 == 0
+						PRINTFORMW 「앗앗,아하,좋은 %UNICODE(0x2661)%%UNICODE(0x2661)% 굉장한 좋은거야 대장%UNICODE(0x2661)%」
+						PRINTFORMW 「우아,가는,으로부터,대장도 함께 %UNICODE(0x2661)%」
+					ELSEIF RAND:3 == 0
+						PRINTFORMW 「응%UNICODE(0x2661)% 아,쿳,핫,도미 실마리%UNICODE(0x2661)% …… 좋은 %UNICODE(0x2661)%%UNICODE(0x2661)%」
+					ELSEIF RAND:2 == 0
+						PRINTFORMW 「읏아아아…… 안쪽,울퉁불퉁 와 있는 것,견딜 수 없는%UNICODE(0x2661)% 도미 실마리,대장,나 이제(벌써) %UNICODE(0x2661)%」
+					ELSE
+						PRINTFORMW 「하앗,하앗…… 굉장히,좋았어요. 도미 실마리%UNICODE(0x2661)%」
+					ENDIF
+				ELSE
+					PRINTFORMW 「아앗……,나이제(벌써)!!」
+				ENDIF
+				PRINTFORMW 절정을 맞이한 %CALLNAME:TARGET%는,침대에 엎드린 채로 숨을 거칠게 하고 있다.
+			;자위절정
+			ELSEIF SELECTCOM == 4 || SELECTCOM == 5 || SELECTCOM == 6 || SELECTCOM == 7
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF RAND:2 == 0
+						PRINTFORMW 「아%UNICODE(0x2661)% 아,아아 아 %UNICODE(0x2661)% 는,대장,보지 말고 손대어 주어라……!」
+					ELSE
+						PRINTFORMW 「후아아,도미 실마리%UNICODE(0x2661)% 대장,갖고 싶다……,부,부탁하기 때문에,읏후,앙,아 아%UNICODE(0x2661)%」
+					ENDIF
+				ENDIF
+			;섹스시 제외한바이브 사용해 절정.
+			ELSEIF (TEQUIP:애널바이브 || TEQUIP:바이브) && ((SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116 || SELECTCOM == 526 || SELECTCOM == 100 || SELECTCOM == 101 || SELECTCOM == 102 || SELECTCOM == 103 || SELECTCOM == 104 || SELECTCOM == 105 || SELECTCOM == 106 || SELECTCOM == 507 || SELECTCOM == 508 || SELECTCOM == 510) == 0)
+				SIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「아웃,아아 %UNICODE(0x2661)% 응,대장,도미 실마리,나혼자서 가는 것,싫다고의!」
+			;그 외
+			ELSE
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF RAND:3 == 0
+						PRINTFORMW 「응읏!아아아아아앗,도미 실마리,좋아!」
+					ELSEIF RAND:2 == 0
+						PRINTFORMW 「아핫……%UNICODE(0x2661)% ……%UNICODE(0x2661)%」
+					ELSE
+						 PRINTFORML 「최,최고%UNICODE(0x2661)% 도미 실마리,기분 좋은거야%UNICODE(0x2661)%%UNICODE(0x2661)%」
+					ENDIF
+				ELSE
+					IF RAND:2 == 0
+						PRINTFORMW 「아핫……%UNICODE(0x2661)% ……%UNICODE(0x2661)%」
+					ELSE
+						PRINTFORMW 
+					ENDIF
+				ENDIF
+			ENDIF
+		;음란,창부
+		ELSEIF TALENT:4 || TALENT:7
+			PRINTFORMW 
+			PRINTFORMW 
+		;복종,예속
+		ELSEIF TALENT:5 || TALENT:8
+			PRINTFORMW 
+		ENDIF
+		CFLAG:246 = 4
+	;굴복각인Lv3
+	ELSEIF MARK:2 == 3 && (CFLAG:246 < 3 || FLAG:7 == 2)
+		;애널섹스로 절정
+		IF SELECTCOM == 110 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 115 || SELECTCOM == 116 || SELECTCOM == 526
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「쿳……%UNICODE(0x2661)% 아아 아!」
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF RAND:2 == 0
+					PRINTFORMW 「도미 실마리,아,아후,아아 아 %UNICODE(0x2661)%」
+				ELSE
+					PRINTFORMW 「하앗,하앗… 굉장히,좋았어요. 도미 실마리%UNICODE(0x2661)%」
+				ENDIF
+			ELSE
+				IF RAND:3 == 0
+					PRINTFORMW 「앗,심…… 응응응%UNICODE(0x2661)%%UNICODE(0x2661)%」
+				ELSEIF RAND:2 == 0
+					PRINTFORMW 「읏,젠장,앗!힛,아아아앗!!」
+				ELSE
+					PRINTFORMW
+				ENDIF
+			ENDIF
+		ELSE
+			IF RAND:3 == 0
+					PRINTFORML 「읏!아,쿳,아%UNICODE(0x2661)%」
+				ELSEIF RAND:2 == 0
+					PRINTFORML 「응응,아,후……!」
+				ELSE
+					PRINTFORMW 「쿳……%UNICODE(0x2661)% 아아 아!」
+				ENDIF
+		ENDIF
+		CFLAG:246 = 3
+	;그 이외
+	ELSEIF CFLAG:246 < 2 || FLAG:7 == 2
+		PRINTFORML 「응,후……!」
+		PRINTFORMW %CALLNAME:TARGET%가,훈와 몸을 진동시킨다. 아무래도 절정을 맞이한 것 같다.
+		CFLAG:246 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;사정 CFLAG:247
+;
+;-------------------------------------------------
+;사정 하고 있다
+IF TFLAG:10 > 0
+;함락이 끝난 상태
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:247 < 3 || FLAG:7 == 2)
+		IF SELECTCOM == 260 || SELECTCOM == 261 || SELECTCOM == 262 || SELECTCOM == 263 || SELECTCOM == 265 || SELECTCOM == 280 || SELECTCOM == 430 || SELECTCOM == 431
+			PRINTFORML 「아앗,%CALLNAME:PLAYER%,나오는 %UNICODE(0x2661)%%UNICODE(0x2661)%」
+		ELSE
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF RAND:2 == 0
+					PRINTFORML 「아 %UNICODE(0x2661)% 아,나%UNICODE(0x2661)%%UNICODE(0x2661)%」
+				ELSE
+					PRINTFORMW 「응아%UNICODE(0x2661)% 아%UNICODE(0x2661)% 나오는……%UNICODE(0x2661)%」
+				ENDIF
+			ELSE
+				PRINTFORMW 「…… 아후… 우,우우……%UNICODE(0x2661)%」
+			ENDIF
+		ENDIF
+		CFLAG:247 = 3
+	;굴복각인Lv3
+	ELSEIF MARK:2 == 3 && (CFLAG:246 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「…… 아후… 우,우우……%UNICODE(0x2661)%」
+		CFLAG:247 = 2
+	;그 이외
+	ELSEIF CFLAG:247 < 1 || FLAG:7 == 2
+		PRINTFORML 「쿠………」
+		PRINTFORMW 기세 좋게 내뿜은 백탁에 %CALLNAME:TARGET%는 얼굴을 비뚤어지게 하고 있다…
+		CFLAG:247 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;드라이 오르가즘
+;-------------------------------------------------
+;하늘사정 하고 있다
+IF NOWEX:41
+	IF RAND:2 == 0
+		PRINTFORMW 「읏아,후아아아앗!」
+	ELSE
+		PRINTFORMW 「!!히읏,나,나%UNICODE(0x2661)%」
+	ENDIF
+	CALL PALAM_MESSAGE_A3
+ENDIF
+
+;-------------------------------------------------
+;하늘사정 ※리본패치에 의한 추가
+;-------------------------------------------------
+;하늘사정 하고 있다
+IF NOWEX:40
+	CALL PALAM_MESSAGE_A2
+	;하늘사정회 7이상
+	IF TFLAG:802 & 32768
+		PRINTFORMW 「히,히긋,아아아아앗!부탁한다,이제(벌써),나,나……」
+	;하늘사정 3회이상
+	ELSEIF TFLAG:802 & 4096
+	;하늘사정 1회이상
+	ELSEIF TFLAG:802 & 1024
+	ENDIF
+	;하늘사정의 회수를 카운트
+	IF TFLAG:802 & 32768
+		TFLAG:802 |= 65536
+	ELSEIF TFLAG:802 & 16384
+		TFLAG:802 |= 32768
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 65536
+	ELSEIF TFLAG:802 & 8192
+		TFLAG:802 |= 16384
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 32768
+	ELSEIF TFLAG:802 & 4096
+		TFLAG:802 |= 8192
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 16384
+	ELSEIF TFLAG:802 & 2048
+		TFLAG:802 |= 4096
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 8192
+	ELSEIF TFLAG:802 & 1024
+		TFLAG:802 |= 2048
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 4096
+	ELSE
+		TFLAG:802 |= 1024
+		SIF TFLAG:10 >= 2
+			TFLAG:802 |= 2048
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;분유 CFLAG:248
+;-------------------------------------------------
+;분유 하고 있다
+IF TFLAG:11 > 0
+	CFLAG:247 = 1
+ENDIF
+
+
+
+;==================================================
+;@KOJO_MESSAGE_PALAMCNG_C관계(X를 캐릭터 번호에 치환)
+;조교후의 변화를 트리거로 한입상
+;==================================================
+@KOJO_MESSAGE_PALAMCNG_C_K49
+;조수가 조교했을 때에입상을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;볼개그착용시에는 지문을 표시해입상을 스킵 한다
+IF TEQUIP:볼개그 &&  SELECTCOM != 107
+	CALL PALAM_MESSAGE_C
+	RETURN 0
+ENDIF
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_PALAMCNG_C_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_PALAMCNG_C_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;=================================================
+;조교후의 텍스트
+;=================================================
+;-------------------------------------------------
+;처녀상실(처녀만)
+;-------------------------------------------------
+IF TFLAG:3 > 0
+	CALL PALAM_MESSAGE_C
+	;연모나친애 또한 주인의 섹스에 의한처녀상실
+	IF TFLAG:20
+		PRINTFORMW 「도미 실마리%UNICODE(0x2661)% 어때? 초물[初物]의 맛은」
+		PRINTFORMW 최고라고 대답하면,그것은 좋았다,라고%CALLNAME%는 웃었다
+	;그 이외때에처녀상실
+	ELSE
+		;함락이 끝난 상태
+		IF TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8
+			PRINTFORMW 「어째서 대장……」
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3
+			PRINTFORMW 「우…… 과연,통……」
+			PRINTFORMW 작은 질입는 육봉을 삐걱삐걱에 먹어 짜,빼고 꽂기 하는 것도 큰 일이었다
+		;그 이외
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;동정상실
+;-------------------------------------------------
+IF TFLAG:160 == 1
+	CALL PALAM_MESSAGE_C
+ENDIF
+
+;-------------------------------------------------
+;백버진상실
+;-------------------------------------------------
+IF TFLAG:161 == 1
+	CALL PALAM_MESSAGE_C
+	IF TFLAG:163
+		PRINTFORMW 「나전부 할테니까. 남기지 않고 먹어,전부 대장의 것으로 해 주어라」
+		PRINTFORMW 남기면 바치 맞히겠어,라고 목까지 붉게 물들이면서%CALLNAME%는 미소를 띄웠다……
+	ELSE
+		PRINTFORMW 「우웃!퍼,퍼져 버린다,이제 들어가지 않는다고!」
+	ENDIF
+ENDIF
+
+
+
+;==================================================
+;@KOJO_MESSAGE_PALAMCNG_D관계(X를 캐릭터 번호에 치환)
+;파라미터 변화를 트리거로 한입상
+;==================================================
+@KOJO_MESSAGE_PALAMCNG_D_K49
+;조수가 조교했을 때에입상을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;볼개그착용시에는 지문을 표시해입상을 스킵 한다
+IF TEQUIP:볼개그 &&  SELECTCOM != 107
+	CALL PALAM_MESSAGE_D
+	RETURN 0
+ENDIF
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_PALAMCNG_D_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_PALAMCNG_D_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;=================================================
+;파라미터 변화시의 텍스트
+;=================================================
+;-------------------------------------------------
+;처음으로윤활가 LV3 넘은 CFLAG:249
+;-------------------------------------------------
+P = PALAM:4 + UP:4
+IF P > PALAMLV:4 && CFLAG:249 == 0
+	CALL PALAM_MESSAGE_D
+	;로션를 사용했을 경우
+	IF SELECTCOM == 180
+	;그 이외
+	ELSE
+	ENDIF
+	CFLAG:249 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로욕정가 LV2 넘은 CFLAG:250
+;-------------------------------------------------
+P = PALAM:6 + UP:6
+IF P > PALAMLV:2 && CFLAG:250 == 0
+	CALL PALAM_MESSAGE_D
+	;미약를 사용했을 경우
+	IF SELECTCOM == 181
+	;그 이외
+	ELSE
+	ENDIF
+	CFLAG:250 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로굴복가 LV3 넘은 CFLAG:251
+;-------------------------------------------------
+P = PALAM:7 + UP:7
+IF P > PALAMLV:3 && CFLAG:251 == 0
+	CALL PALAM_MESSAGE_D
+	CFLAG:251 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로순종가 LV3 넘은 CFLAG:252
+;-------------------------------------------------
+P = PALAM:5 + UP:5
+IF P > PALAMLV:3 && CFLAG:252 == 0
+	CFLAG:252 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로공포가 LV3 넘은 CFLAG:253
+;-------------------------------------------------
+P = PALAM:11 + UP:11
+IF P > PALAMLV:3 && CFLAG:253 == 0
+	CALL PALAM_MESSAGE_D
+	CFLAG:253 = 1
+ENDIF
+
+
+
+;=================================================
+;@KOJO_MESSAGE_MARKCNG 관계(X를 캐릭터 번호에 치환)
+;각인 변동을 트리거로 한입상
+;각인 변동후에입상을 발동합니다
+;=================================================
+@KOJO_MESSAGE_MARKCNG_K49
+;조수가 조교했을 때에입상을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0 
+;볼개그착용시에는 지문을 표시해입상을 스킵 한다
+IF TEQUIP:볼개그 &&  SELECTCOM != 107
+	CALL MARK_MESSAGE
+	RETURN 0
+ENDIF
+SIF TFLAG:22!= 3 && TFLAG:23!= 3 && TFLAG:24!= 13 && TFLAG:24!= 23 && TFLAG:24!= 33 && TFLAG:21!= 3
+	CALL MARK_MESSAGE
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL KOJO_MESSAGE_MARKCNG_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL KOJO_MESSAGE_MARKCNG_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;-------------------------------------------------
+;조교중에체력 0가 되었을 경우
+;-------------------------------------------------
+IF BASE:0 <= 0
+ENDIF
+
+;-------------------------------------------------
+;고통각인Lv3
+;-------------------------------------------------
+IF TFLAG:22 == 3
+	CALL MARK_MESSAGE_A
+ENDIF
+
+;-------------------------------------------------
+;쾌락각인Lv3
+;-------------------------------------------------
+IF TFLAG:23 == 3
+ENDIF
+
+;-------------------------------------------------
+;굴복각인Lv3
+;-------------------------------------------------
+IF TFLAG:24 == 13 || TFLAG:24 == 23 || TFLAG:24 == 33
+	CALL MARK_MESSAGE_S
+	;쾌락에 의한굴복
+	IF TFLAG:24 == 13
+	;공포와고통에 의한굴복
+	ELSEIF TFLAG:24 == 23
+	;굴복와순종에 의한굴복
+	ELSEIF TFLAG:24 == 33
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;반발각인Lv3
+;-------------------------------------------------
+IF TFLAG:21 == 3
+	CALL MARK_MESSAGE_R
+ENDIF
+
+

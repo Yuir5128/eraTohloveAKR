@@ -1,0 +1,1383 @@
+﻿;--------------------------------------------------
+;「ぱんくしょん」v1.05　「ぱるぷれーと」向け汎用関数ファイル
+;無断再配布ＯＫ、その際改変は不可。追記は元の機能を損なわない範囲でお願いします
+;
+;erahetaAに無理矢理移植する際に、使用フラグの違いなどでバグの元となる部分を削除・改変しています。
+;ぱるぷれーと作者様、ごめんなさい。
+
+;eraToloveA02私家版配布時に使用してないもの、警告出てたものをコメントアウト
+;--------------------------------------------------
+;↓ぱるぷれーと以外でも使用できる追加関数群↓
+;--------------------------------------------------
+;登録番号抽出関数@NO
+;Rに検索対象のキャラ番号を入れてCALL。
+;手元の全キャラと照合して登録番号を変数Mに返します。
+;手元にいない場合、M == -1が返ります。
+;--------------------------------------------------
+;NOが予約語で警告出るのでコメントアウト
+[SKIPSTART]
+@NO
+M = -1
+REPEAT CHARANUM
+	SIF NO:COUNT == R
+		M = COUNT
+REND
+RETURN M
+[SKIPEND]
+;コメントアウトここまで
+
+;登録番号抽出関数@NO2
+;@NOを式中関数にしただけです
+@NO2(ARG)
+#FUNCTION
+FOR LOCAL, 0, CHARANUM
+	SIF NO:LOCAL == ARG
+		RETURNF LOCAL
+NEXT
+RETURNF -1
+
+;RELATIONが予約語で警告出るのでコメントアウト
+[SKIPSTART]
+;--------------------------------------------------
+;相性検索関数@RELATION
+;Rに検索対象（要：手元に居ること。居ない場合ADDCHARAしてから）のキャラ番号、Sに検索条件を入れてCALL。
+;Sの値は0で指定しない、1でいないキャラのみ選ぶ、2でいるキャラのみ選ぶ
+;パルスィで指定なしの場合R = 79、S = 0してからCALL RELATION
+;全キャラとの相性を検索して、最も相性の良い相手を抽出します。
+;そのキャラが手元にいれば登録番号が変数Mに。
+;いてもいなくてもキャラ番号が変数L、キャラ名がSTR:300、呼び名がSTR:301に返ります。
+;そのキャラとの相性が100以下ならRESULTに0、101～199だと1、200以上だと2を返します。
+;つまりRESULT == 0は「相性のいいキャラは指定した範囲には居ません」の意
+;同値のキャラがいるとランダムに選ばれます。
+;現状、明らかにオカズにしそうにない人形やランダムキャラ（87番以降）はサーチから外しています
+;自分用の機能ですが、思い出し自慰のオカズを探すときにでも使ってください……苦しいかな。
+;--------------------------------------------------
+@RELATION
+;検索対象の登録番号を抽出
+CALL NO
+U = M
+L = 0
+;手元から検索
+IF S == 2
+	M = -1
+	REPEAT CHARANUM
+		A = NO:COUNT
+		;同値の場合ランダムで残す
+		IF RELATION:U:A == RELATION:U:L
+			D = RAND:2
+			IF D == 0
+				L = NO:COUNT
+				M = COUNT
+			ENDIF
+		;後に引いたほうが大きい場合それを保存
+		ELSEIF RELATION:U:A > RELATION:U:L
+			L = NO:COUNT
+			M = COUNT
+		ENDIF
+	REND
+	;数値に応じてRETURN
+	SIF RELATION:U:L > 199
+		RETURN 2
+	SIF RELATION:U:L > 100
+		RETURN 1
+	RETURN 0
+ENDIF
+
+
+;=========================================================
+;全体から検索
+;相性を総検索しキャラ番号と相性値を抽出
+;↓100は暫定。今後キャラ数が増えたらもっと増やしてもＯＫ？
+;ただし現状88回以降は無意味
+;=========================================================
+REPEAT FLAG:44
+	B = RELATION:U:L
+	C = RELATION:U:COUNT
+	;同値の場合ランダムで残す
+	IF B == C
+		D = RAND:2
+		IF D == 0
+			M = 0
+			R = COUNT
+			SIF S == 1
+				CALL NO
+			SIF M < 1
+				L = R
+			COUNT = R
+		ENDIF
+	;後に引いたほうが大きい場合それを保存
+	ELSEIF C > B
+		M = 0
+		R = COUNT
+		SIF S == 1
+			CALL NO
+		SIF M < 1
+			L = R
+		COUNT = R
+	ENDIF
+REND
+;名前と登録番号を取得
+CALL LOSTNAME
+R = L
+CALL NO
+
+;数値に応じてRETURN
+SIF RELATION:U:L > 199
+	RETURN 2
+SIF RELATION:U:L > 100
+	RETURN 1
+RETURN 0
+
+[SKIPEND]
+;コメントアウトここまで
+
+;--------------------------------------------------
+;不在キャラ名獲得関数@LOSTNAME
+;対象のキャラ番号を引数に入れてCALLする
+;この場にいないキャラの番号から名前・あだ名・刀種・刀派を取得する。
+;eraToloveA02私家版に伴い式中関数にしました
+
+;獲得した名前はSTR:300、あだ名は301、刀種が302、刀派が303に格納されます。
+;誰にも当てはまらなかった場合RESULTに0、それ以外の場合は刀種を返す
+
+;刀剣乱舞用にRESULTが
+;「1=人間、2=短刀、3=脇差、4=打刀、5=太刀、6=大太刀、7=槍、8=薙刀、9＝剣
+;12=極短刀、13=極脇差、14=極打刀、15=極太刀、16=極大太刀、17=極槍、18=極薙刀、19=極剣」
+;刀派
+;1=三条　2=三池　3=青江　4=粟田口　5=古備前　6=来　7=村正　8=貞宗　9=長船
+;10=左文字　11=兼定　12=堀川　13=虎徹　14=虎徹…？　15=江　16=正宗　17=福岡一文字　18=豊後国行平
+;--------------------------------------------------
+@LOSTNAME(ARG)
+#FUNCTION
+
+#DIM DYNAMIC 刀種
+#DIM DYNAMIC 刀派
+
+;CSVが定義されていないキャラ
+IF EXISTCSV(ARG,0) == 0
+	STR:300 = 誰か
+	STR:301 = 誰か
+	RETURNF 0
+ENDIF
+
+;名前
+STR:300 = CSVNAME(ARG,0)
+
+;あだ名
+STR:301 =  CSVCALLNAME(ARG,0)
+
+;刀種
+刀種 = CSVCFLAG(ARG,30,0)
+SELECTCASE 刀種
+	CASE 1
+		STR:302 = 人間
+	CASE 2
+		STR:302 = 短刀
+	CASE 3
+		STR:302 = 脇差
+	CASE 4
+		STR:302 = 打刀
+	CASE 5
+		STR:302 = 太刀
+	CASE 6
+		STR:302 = 大太刀
+	CASE 7
+		STR:302 = 槍
+	CASE 8
+		STR:302 = 薙刀
+	CASE 9
+		STR:302 = 剣
+	CASE 12
+		STR:302 = 極短刀
+	CASE 13
+		STR:302 = 極脇差
+	CASE 14
+		STR:302 = 極打刀
+	CASE 15
+		STR:302 = 極太刀
+	CASE 16
+		STR:302 = 極大太刀
+	CASE 17
+		STR:302 = 極槍
+	CASE 18
+		STR:302 = 極薙刀
+	CASE 19
+		STR:302 = 極剣
+ENDSELECT
+
+;刀派
+刀派 = CSVCFLAG(ARG,31,0)
+SELECTCASE 刀派
+	CASE 0
+		STR:303  = なし
+	CASE 1
+		STR:303 = 三条
+	CASE 2
+		STR:303 = 三池
+	CASE 3
+		STR:303 = 青江
+	CASE 4
+		STR:303 = 粟田口
+	CASE 5
+		STR:303 = 古備前
+	CASE 6
+		STR:303 = 来
+	CASE 7
+		STR:303 = 村正
+	CASE 8
+		STR:303 = 貞宗
+	CASE 9
+		STR:303 = 長船
+	CASE 10
+		STR:303 = 左文字
+	CASE 11
+		STR:303 = 兼定
+	CASE 12
+		STR:303 = 堀川
+	CASE 13
+		STR:303 = 虎徹
+	CASE 14
+		STR:303 = 虎徹…？
+	CASE 15
+		STR:303 = 江
+	CASE 16
+		STR:303 = 正宗
+	CASE 17
+		STR:303 = 福岡一文字
+	CASE 18
+		STR:303 = 豊後国行平
+ENDSELECT
+
+RETURNF 刀種
+
+;以下使ってないのでここからコメントアウト
+[SKIPSTART]
+;--------------------------------------------------
+;以下、ぱるぷれーと搭載機能の処理のための関数群。
+;ほかへ流用する場合はちょっと、利用価値が低いと思われます。
+;CFLAG等独特に食うため、およそ流用できる形で作られていません。ごめんなさい。
+;主にぱるぷれーとの目玉？になる「面識管理機能」「オナ禁機能」で使用します。
+;--------------------------------------------------
+;面識検索関数@MENSIKI
+;Rに検索対象のキャラ番号を入れてCALL。
+;パルスィの場合R = 79してからCALL MENSIKI
+;全キャラとの面識を検索して、最も深い関係のある相手の登録番号を変数Mに返します。
+;同等の面識のキャラが居る場合はランダムに１人選ばれます。
+;面識の内容をNに返すので、それを利用して口上の分岐ができます。
+;口上主の650台CFLAGを使います。キャラ数増えてきたら機能しないかもしれません。
+;650台CFLAGと同じ表記で、Nの値が（1原作で面識、2奴隷同士で面識、3口上主がが相手を調教した、
+;4相手が口上主を調教した、5お互い調教した、6口上主が調教して処女を奪った、7処女を奪って調教もされた）の意。
+;数字が高い方が残りやすくなります。面識度1のキャラはこの場に居ないことが多いので、いる人を優先します。
+;最終的に選ばれた相手がこの場に居ない場合はMに-1を返します。
+;面識度1のキャラしかいなかった場合を除けば、M < 0は対象のキャラが売られたという意味になります（現状では）
+;面識度1のキャラしかいなかった場合はN == 1、M < 0になります。
+;どちらの場合でも、キャラ名はSTR:300、呼び名はSTR:301に格納されます。
+;--------------------------------------------------
+@MENSIKI
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+N = 0
+;検索対象の登録番号を抽出
+CALL NO
+U = M
+;面識判定を総検索しキャラ番号と面識度を抽出
+;↓100は暫定。今後キャラ数が増えたらもっと増やしてもＯＫ？
+REPEAT FLAG:44
+	B = 650+COUNT
+	C = CFLAG:U:B
+	;同じ面識度の相手引いた
+	;その２人の面識度が１（原作面識or嫉妬イベント）
+	;相性が良いほうを保存。同じなら1/2で残す
+	IF N == C && C == 1
+		F = RELATION:U:E
+		G = RELATION:U:COUNT
+		SIF F == 0
+			F = 100
+		SIF G == 0
+			G = 100
+		IF F == G
+			D = RAND:2
+			SIF D == 0
+				E = COUNT
+		ELSEIF G > F
+			E = COUNT
+		ENDIF
+	;２以上で同値の場合1/2で残す
+	ELSEIF N == C
+		D = RAND:2
+		SIF D == 0
+			E = COUNT
+	;面識度の高い相手引いたら3/4で残す
+	ELSEIF C > N
+		D = RAND:4
+		SIF D != 0
+			E = COUNT
+		SIF D != 0
+			N = C
+	ENDIF
+REND
+
+;登録番号へコンバート
+R = E
+CALL NO
+
+;不在キャラ名取得関数をコール
+;キャラ番号はL、名前はSTR:300、呼び名はSTR:301に出力
+L = E
+CALL LOSTNAME
+
+
+;RESULT=0で不在キャラを引いたことが判別可能（N == 1を条件にするのも良い動作）
+SIF M < 0
+	RETURN 0
+RETURN 1
+
+;--------------------------------------------------
+;自慰我慢関数@SELFPLAY
+;事前にRに口上主のキャラ番号、Sに確率補正、Tに上限を入力してCALL。
+;例）パルスィで、確率+5％、上限40％の我慢シチュの場合
+;R = 79
+;S = 5
+;T = 40
+;CALL SELFPLAY
+;の４行を書けばＯＫです
+;我慢できたら0・できなければ1をRESULTに返します
+;「ぱるぷれーと」のオナ禁機能用に設計してあり、
+;口上主のCFLAG208を「現在のオナ禁継続日数（０ならオナ禁していない）」として使用します。
+;調教後自慰以外のオナ禁判定はここを使う感じにします
+;--------------------------------------------------
+@SELFPLAY
+;(日数*3)+(自慰中毒Lv*10)-(従順*5)％の確率で我慢できずにオナ禁失敗
+;従順4自慰中毒3で3日目なら19％　これに各素質補正と呼び出し元の補正を加える
+;ただし上限50％まで。調整適当
+
+CALL NO
+A = M
+
+;基礎確率
+C = CFLAG:A:208
+B = ABL:A:サドっ気
+D = ABL:A:従順
+C = C*3
+B = B*10
+D = D*5
+C = C+B-D
+;補正値Sを加える（どれだけ我慢できない状況だったか）
+C += S
+
+;自慰しやすい持ちなら+10％
+SIF TALENT:A:自慰しやすい
+	C += 10
+;淫乱なら+5％
+SIF TALENT:A:尻穴狂い
+	C += 5
+;恥薄い・解放・ふたなり・中毒しやすい持ちなら+2％
+SIF TALENT:A:恥薄い
+	C += 2
+SIF TALENT:A:解放
+	C += 2
+SIF TALENT:A:121
+	C += 2
+SIF TALENT:A:中毒しやすい
+	C += 2
+;恥じらい・自制心・抑圧持ちなら-5％
+SIF TALENT:A:恥じらい
+	C -= 5
+SIF TALENT:A:自制心
+	C -= 5
+SIF TALENT:A:抑圧
+	C -= 5
+;Ｃ敏感（鈍感）なら+2％（-2％）
+SIF TALENT:A:Ｃ敏感
+	C += 2
+SIF TALENT:A:Ｃ鈍感
+	C -= 2
+;上限を超えたら切り捨てる
+SIF C > T
+	C = T
+
+;我慢できたら0、できなければ1を返して戻る
+B = RAND:100
+SIF C > B
+	RETURN 1
+RETURN 0
+
+
+;--------------------------------------------------
+;調教後自慰関数@SELFPLAY_2
+;調教後自慰は計算式が↑のと別なので独立させました。
+;事前にRに口上主のキャラ番号を入力してCALL。
+;例）パルスィの場合
+;@SELF_KOJO_K79の下のIF TFLAG:13 == 1の中のどこかで
+;R = 79
+;CALL SELFPLAY_2
+;の２行を書けばＯＫです
+;現状の仕様では、確率補正と上限の指定はできません。
+;我慢できたら0・できなければ1をRESULTに返します
+;「ぱるぷれーと」のオナ禁機能用に設計してあり、
+;口上主のCFLAG208を「現在のオナ禁継続日数（０ならオナ禁していない）」として使用します。
+;調教後自慰以外のオナ禁判定はここを使う感じにします
+;--------------------------------------------------
+@SELFPLAY_2
+;調教後自慰のオナ禁判定は通常と違う形式を使います
+;(今回の調教後自慰回数*10)+(自慰中毒レベル*10)+(オナ禁日数*3)-(従順*5)
+;の確率でイってしまいオナ禁失敗となる
+;3回自慰・自慰中毒2・3日目・従順4なら39％。ただし最低10％・最大で75％。
+CALL NO
+A = M
+
+C = CFLAG:208
+B = A+ABL:サドっ気
+D = ABL:従順
+C = C*3
+B = B*10
+D = D*5
+C = C+B-D
+;自慰しやすい持ちなら+15％
+SIF TALENT:A:自慰しやすい
+	C += 15
+;淫乱なら+10％
+SIF TALENT:A:尻穴狂い
+	C += 10
+;恥薄い・解放・ふたなり・中毒しやすい持ちなら+5％
+SIF TALENT:A:恥薄い
+	C += 5
+SIF TALENT:A:解放
+	C += 5
+SIF TALENT:A:121
+	C += 5
+SIF TALENT:A:中毒しやすい
+	C += 5
+;恥じらい・自制心・抑圧持ちなら-10％
+SIF TALENT:A:恥じらい
+	C -= 10
+SIF TALENT:A:自制心
+	C -= 10
+SIF TALENT:A:抑圧
+	C -= 10
+;Ｃ敏感（鈍感）なら+5％（-5％）
+SIF TALENT:A:Ｃ敏感
+	C += 5
+SIF TALENT:A:Ｃ鈍感
+	C -= 5
+;最大値の処理
+;初日は計算結果に-15％し、かつ最大20％、それ以降は最大50％。最低10％
+IF CFLAG:A:208 == 1
+	C -= 15
+	SIF C > 20
+		C = 30
+ENDIF
+SIF C > 50
+	C = 50
+SIF C < 10
+	C = 10
+
+;我慢できたら0、できなければ1を返して戻る
+B = RAND:100
+SIF C > B
+	RETURN 1
+RETURN 0
+
+
+;--------------------------------------------------
+;自慰判定関数@SELFPLAY_3
+;事前にRに口上主のキャラ番号を入力してCALL。
+;ただし@EVENTTURNEND、#PRIの下に置くこと
+;日付変更時のオナ禁判定を行い、我慢できたらRESULT0、できなければ1を返して戻ります
+;処理されなかったときは2を返します。
+;--------------------------------------------------
+@SELFPLAY_3
+;夜しか処理しない
+SIF TIME == 0
+	RETURN 2
+;口上主の登録番号を抽出
+CALL NO
+;口上主が居ない場合処理しない
+SIF M < 1
+	RETURN 2
+;口上主がオナ禁していない場合処理しない
+SIF CFLAG:M:208 == 0
+	RETURN 2
+;口上主を調教していた場合処理しない
+IF NO:TARGET == R && FLAG:0 == 0
+	;オナ禁日数カウントを＋１する
+	CFLAG:M:208 += 1
+	A = 3
+	CALL SELFPLAY_4
+	DRAWLINE
+	RETURN 2
+ENDIF
+;調教対象ではないか休憩した場合、夜ならオナ禁失敗判定へ
+;基本確率に+5％の補正
+S = 5
+;確率上限50％
+T = 50
+;自分が助手をしていた場合、補正+20上限60に変更される
+;調教シーンを思い出してシちゃうイメージで
+IF ASSI > 0 && FLAG:0 == 0
+	IF NO:ASSI == 79
+		S = 20
+		T = 60
+	ENDIF
+ENDIF
+CALL SELFPLAY
+SIF RESULT == 1
+	RETURN 1
+;オナ禁日数カウントを＋１する
+CFLAG:M:208 += 1
+RETURN 0
+
+;--------------------------------------------------
+;自慰結果関数@SELFPLAY_4
+;事前にRに口上主のキャラ番号、Aにオナ禁の成否（0で成功、1で失敗、2で中断、3でウェイトなし成功、4でオナ禁開始）を入力してCALL。
+;オナ禁の結果を表示する。
+;--------------------------------------------------
+@SELFPLAY_4
+CALL NO
+SIF A != 3
+	WAIT
+IF A == 0 || A == 3
+	SIF CFLAG:M:208 > CFLAG:M:207
+		CFLAG:M:207 = CFLAG:M:208
+	PRINTFORML （%CALLNAME:M%のオナ禁：{CFLAG:M:208}日目）
+	PRINTFORML （現在の記録：{CFLAG:M:207}日）
+ELSEIF A == 4
+	CFLAG:M:208 = 1
+	PRINTFORML （%CALLNAME:M%がオナ禁を始めました）
+ELSE
+	SIF CFLAG:M:208 > CFLAG:M:207
+		CFLAG:M:207 = CFLAG:M:208
+	PRINTFORM （%CALLNAME:M%のオナ禁：{CFLAG:M:208}日目にて
+	SIF A == 1
+		PRINTFORML 終了）
+	SIF A == 2
+		PRINTFORML 中断）
+	PRINTFORML （現在の記録：{CFLAG:M:207}日）
+	CFLAG:M:208 = 0
+ENDIF
+SIF A != 3
+	WAIT
+RETURN 0
+
+
+;--------------------------------------------------------
+;見学自慰関数@SELFPLAY_5
+;@KOJO_MESSAGE_COM_ASSI_X1の下でRに口上主のキャラ番号を入れてCALL
+;見学時（助手として付いているが、調教者が主人であるとき）に行われるオナ禁判定。
+;コマンドに応じた補正値と最大値を持ってオナ禁関数を呼びに行きます
+;要するに、見せつけられて我慢できなくなっちゃう判定
+;我慢できたらRESULT0、できなければ1を返して戻ります
+;オナ禁していない場合もやや数値を緩めて判定を行います。
+;奴隷と主人の行為に嫉妬する助手を演出するなどにどうぞ。心底パルスィ用の機能。
+;--------------------------------------------------------
+@SELFPLAY_5
+IF ASSIPLAY == 0 && NO:MASTER != R
+	;上限30　補正10のコマンド群（自慰誘発　高）
+	;対面座位・背面座位・自慰・注射系・挿入責め系
+	IF SELECTCOM == 24 || SELECTCOM == 25 || SELECTCOM == 3 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 255 || SELECTCOM == 256
+		IF CFLAG:ASSI:208 >= 1
+			S = 10
+			T = 30
+		ELSE
+			S = 20
+			T = 50
+		ENDIF
+		CALL SELFPLAY
+		SIF RESULT == 1
+			RETURN 1
+	RETURN 0
+	;上限20　補正0のコマンド群（自慰誘発　中）
+	;ローター～背面座位アナル・騎乗位～騎乗位アナル・浣腸～電極・媚薬
+	ELSEIF (SELECTCOM >= 10 && SELECTCOM <= 29) || (SELECTCOM >= 34 && SELECTCOM <= 36) || (SELECTCOM >= 46 && SELECTCOM <= 49) || SELECTCOM == 51
+		IF CFLAG:ASSI:208 >= 1
+			S = 0
+			T = 20
+		ELSE
+			S = 10
+			T = 40
+		ENDIF
+		CALL SELFPLAY
+		SIF RESULT == 1
+			RETURN 1
+	;上限15　補正-10のコマンド群（自慰誘発　低）
+	;残る大半
+	ELSEIF SELECTCOM <= 33 || SELECTCOM == 80 || SELECTCOM == 85 || SELECTCOM >= 130
+		IF CFLAG:ASSI:208 >= 1
+			S = -10
+			T = 15
+		ELSE
+			S = 0
+			T = 25
+		ENDIF
+		CALL SELFPLAY
+		SIF RESULT == 1
+			RETURN 1
+	ENDIF
+ENDIF
+RETURN 0
+
+
+;--------------------------------------------------
+;調教対象保存関数@TARGETSAVE
+;Rに口上主のキャラ番号を入れ、主に@EVENTENDの下でCALL
+;対象のCFLAG:717に前回調教した相手のキャラ番号を保存します。
+;また、「口上主（調教対象）→助手」と「口上主（助手）→調教対象」の面識判定も更新、口上主のCFLAG:650~を使用
+;--------------------------------------------------
+@TARGETSAVE
+CALL NO
+;口上主がいる場合
+IF M > 0
+	;調教したキャラを保存
+	CFLAG:M:719 = NO:TARGET
+	;口上主が助手として前回調教したキャラ番号をリセット
+	;助手として入った直後でなく間を空けても口上を変える場合は↓の行をコメントアウト
+	CFLAG:M:717 = 0
+ENDIF
+;助手がいる場合面識判定を更新
+IF ASSI > 0
+	;口上主が助手の場合
+	IF NO:ASSI == 1
+		A = 650+NO:TARGET
+		SIF CFLAG:ASSI:A <= 1
+			CFLAG:ASSI:A = 2
+		;口上主が助手として前回調教したキャラ番号として保存
+		CFLAG:ASSI:717 = NO:TARGET
+	;口上主が調教対象の場合
+	ELSEIF NO:TARGET == 1
+		A = 650+NO:ASSI
+		SIF CFLAG:TARGET:A <= 1
+			CFLAG:TARGET:A = 2
+	ENDIF
+ENDIF
+RETURN 0
+
+
+;--------------------------------------------------
+;助手プレイ内容保存関数@ASSIDATA
+;対象の@KOJO_MESSAGE_COM_ASSI_X1の下でCALL
+;対象が助手として調教にどの程度関わったかをCFLAG:211～215に保存します。
+;211（前回の調教で調教者として一度以上調教コマンドを実行した）
+;212（1=助手として奴隷の処女を奪った、2=加えてその奴隷が恋慕、3と4はそれぞれ1と2と同じで、口上主がペニスを使用）
+;213（口上主が助手として処女を奪った数の累計）
+;214（1=助手であった口上主の処女を主人が奪った、2=奴隷に奪わせた）
+;215（助手としての仕事がどの程度あったか。
+;	0は一切出番なし、1はカメラのみ、2は軽い行為参加、3は奴隷同士の行為、4は主人との行為、5はそもそも奴隷がオトコ）
+;また、「口上主（助手）→調教対象」の面識判定も更新、口上主のCFLAG:650台を使用
+;--------------------------------------------------
+@ASSIDATA
+;主人が選択するコマンドで助手の出番があったか記録
+;騎乗位する・助手（のアナルを）を犯させる・３Ｐ（奴隷同士の行為）
+IF SELECTCOM == 400 || SELECTCOM == 401 || SELECTCOM == 402 || SELECTCOM == 403 || SELECTCOM == 404 || SELECTCOM == 405 || SELECTCOM == 406 || SELECTCOM == 407 || SELECTCOM == 430 || SELECTCOM == 431 || SELECTCOM == 515 || SELECTCOM == 517 || SELECTCOM == 518 || SELECTCOM == 519 || SELECTCOM == 520 || SELECTCOM == 521 || SELECTCOM == 522 || SELECTCOM == 523 || SELECTCOM == 524 || SELECTCOM == 525
+	;プレイ内容更新
+	SIF CFLAG:ASSI:215 <= 2
+		CFLAG:ASSI:215 = 3
+	;相手がオトコ
+	SIF TALENT:オトコ
+		CFLAG:ASSI:215 = 5
+	;助手（口上主）が処女でＶ挿入（奴隷に奪われた）
+	SIF TALENT:ASSI:処女 && (SELECTCOM == 430)
+		CFLAG:ASSI:214 = 2
+;助手を犯す／助手にアナルを犯される（主人との行為）
+ELSEIF SELECTCOM == 440 || SELECTCOM == 441 || SELECTCOM == 270 || SELECTCOM == 271
+	;プレイ内容更新
+	SIF CFLAG:ASSI:215 <= 3
+		CFLAG:ASSI:215 = 4
+	;助手（口上主）が処女でＶ挿入（主人に捧げた）
+	SIF TALENT:ASSI:処女 && SELECTCOM == 440
+		CFLAG:ASSI:214 = 1
+;ダブルフェラ、ダブルパイズリ、ダブル素股、二本フェラ（軽めの行為）
+ELSEIF SELECTCOM == 420 || SELECTCOM == 421 || SELECTCOM == 422 || SELECTCOM == 516
+	;プレイ内容更新
+	SIF CFLAG:ASSI:215 <= 1
+		CFLAG:ASSI:215 = 2
+;ビデオカメラ（撮影担当やらされていると解釈）
+ELSEIF SELECTCOM == 310 && FLAG:22 == 2
+	;プレイ内容更新
+	SIF CFLAG:ASSI:215 == 0
+		CFLAG:ASSI:215 = 1
+ENDIF
+
+;処女喪失の記録
+IF TALENT:処女
+	;正常位・後背位・騎乗位（ペニス使用）
+	IF (SELECTCOM == 100 || SELECTCOM == 101 || SELECTCOM == 106) && (TALENT:ASSI:121 || TALENT:ASSI:122 || TALENT:ASSI:包茎)
+		SIF TALENT:嫉妬
+			CFLAG:ASSI:212 = 4
+		SIF TALENT:嫉妬 == 0
+			CFLAG:ASSI:212 = 3
+		CFLAG:ASSI:213 += 1
+		A = 650+NO:TARGET
+		IF CFLAG:ASSI:A == 5
+			CFLAG:ASSI:A = 7
+		ELSEIF CFLAG:ASSI:A <= 4
+			CFLAG:ASSI:A = 6
+		ENDIF
+	;バイブ・正常位・後背位・指挿入れ
+	ELSEIF SELECTCOM == 43 || SELECTCOM == 100 || SELECTCOM == 101 || SELECTCOM == 41
+		SIF TALENT:嫉妬
+			CFLAG:ASSI:212 = 2
+		SIF TALENT:嫉妬 == 0
+			CFLAG:ASSI:212 = 1
+		CFLAG:ASSI:213 += 1
+		A = 650+NO:TARGET
+		IF CFLAG:ASSI:A == 5
+			CFLAG:ASSI:A = 7
+		ELSEIF CFLAG:ASSI:A <= 4
+			CFLAG:ASSI:A = 6
+		ENDIF
+	ENDIF
+ENDIF
+
+;面識判定の更新
+IF ASSIPLAY
+	CFLAG:211 = 1
+	A = 650+NO:TARGET
+	IF CFLAG:ASSI:A == 4
+		CFLAG:ASSI:A = 5
+	ELSEIF CFLAG:ASSI:A <= 2
+		CFLAG:ASSI:A = 3
+	ENDIF
+ENDIF
+RETURN 0
+
+
+;--------------------------------------------------
+;助手プレイ面識保存関数@ASSIDATA_2
+;対象の@KOJO_MESSAGE_COM_X1の下でCALL
+;対象が助手に調教された際、その助手との面識判定を更新します。
+;「口上主（調教対象）→助手」の面識判定を更新、口上主のCFLAG:650台を使用
+;--------------------------------------------------
+@ASSIDATA_2
+IF ASSI > 0
+	IF ASSIPLAY
+		A = 650+NO:ASSI
+		IF CFLAG:TARGET:A == 3
+			CFLAG:TARGET:A = 5
+		ELSEIF CFLAG:TARGET:A == 6
+			CFLAG:TARGET:A = 7
+		ELSEIF CFLAG:TARGET:A <= 2
+			CFLAG:TARGET:A = 4
+		ENDIF
+	ENDIF
+ENDIF
+RETURN 0
+[SKIPEND]
+;コメントアウトここまで
+
+
+;--------------------------------------------------
+;装備品口上補完関数@EQUIPTEXTのeraheta用改変
+;装備品に応じた補完メッセージを口上の後に表示して、臨場感を心持ち高めます。
+;--------------------------------------------------
+@EQUIPTEXT
+R:1 = 0
+R:2 = 0
+R:3 = 0
+R:4 = 0
+R:5 = 0
+
+;薬品類、酒類、尿意、便意、吐き気
+SIF TEQUIP:媚薬 || TEQUIP:酩酊プレイ || ZUIKI(TARGET) || BASE:尿意 >= 60 || BASE:便意 >= 60 || BASE:吐き気 >= 60
+	R:1 = 1
+
+;挿入（Ｖ）系
+SIF TEQUIP:ローター挿入 || TEQUIP:バイブ || TEQUIP:触手膣内産卵
+	R:2 += 1
+
+;挿入（Ａ）系
+SIF TEQUIP:ローターＡ挿入 || TEQUIP:アナルビーズ || TEQUIP:アナルバイブ || TEQUIP:拡張バルーン || TEQUIP:触手腸内産卵
+	R:2 += 1
+
+;Ｂ系
+SIF TEQUIP:ニプルキャップ || TEQUIP:乳首クリップ || TEQUIP:搾乳機 || TEQUIP:触手乳腺挿入
+	R:3 = 1
+
+;Ｃ系
+SIF TEQUIP:クリキャップ || TEQUIP:陰核クリップ || TEQUIP:電動オナホール || TEQUIP:カテーテル || TEQUIP:尿道バルーン
+	R:4 = 1
+
+;薬品類、尿意、便意
+IF R:1
+	SIF TEQUIP:酩酊プレイ
+		PRINTFORM 酔い
+	SIF TEQUIP:酩酊プレイ && TEQUIP:媚薬 && (ZUIKI(TARGET) || BASE:尿意 >= 60 || BASE:便意 >= 60 || BASE:吐き気 >= 60)
+		PRINTFORM と
+	SIF TEQUIP:媚薬
+		PRINTFORM 薬物による欲情
+	SIF TEQUIP:媚薬 && (ZUIKI(TARGET) || BASE:尿意 >= 60 || BASE:便意 >= 60 || BASE:吐き気 >= 60)
+		PRINTFORM と
+	IF ZUIKI(TARGET) && (BASE:尿意 >= 60 || BASE:便意 >= 60)
+		PRINTFORM 耐えがたい痒み、排泄感
+	ELSEIF ZUIKI(TARGET)
+		PRINTFORM 耐えがたい痒み
+	ELSEIF BASE:尿意 >= 60 && BASE:便意 >= 60
+		PRINTFORM 抗いがたい尿意、便意
+	ELSEIF BASE:尿意 >= 60
+		PRINTFORM 抗いがたい尿意
+	ELSEIF BASE:便意 >= 60
+		PRINTFORM 抗いがたい便意
+	ELSEIF BASE:吐き気 >= 60
+		PRINTFORM 抗いがたい吐き気
+	ENDIF
+	PRINTFORM に苛まれる
+ENDIF
+
+;何かあれば
+IF R:1 || R:2 || R:3 || R:4 || TEQUIP:三角木馬
+	PRINTFORM %CALLNAME%
+	;挿入系
+	IF R:2
+		PRINTFORM の
+	ELSE
+		PRINTFORM は、
+	ENDIF
+ENDIF
+
+;Ｖ系（ローター挿入、バイブ、触手膣内産卵、助手Ｖ愛撫、助手Ｖ挿入）
+IF TEQUIP:ローター挿入 || TEQUIP:バイブ || TEQUIP:触手膣内産卵
+	PRINTFORM ヴァギナでは、
+	;ローター挿入
+	SIF TEQUIP:ローター挿入
+		PRINTFORM ローターが小刻みに震えて
+	;バイブ
+	SIF TEQUIP:バイブ && !TEQUIP:触手
+		PRINTFORM バイブが低音で唸って
+	;触手挿入
+	SIF TEQUIP:バイブ && TEQUIP:触手
+		PRINTFORM ぬめる触手がうねって
+	;触手膣内産卵
+	SIF TEQUIP:触手膣内産卵
+		PRINTFORM 赤い媚肉の間から卵の姿が覗いて
+	IF R:2 > 1
+		PRINTFORML おり、
+	ELSE
+		PRINTFORMW いる……
+	ENDIF
+ENDIF
+
+;Ａ系（ローターＡ挿入、アナルバイブ、アナルビーズ、拡張バルーン、触手腸内産卵、助手Ａ愛撫、助手Ａ挿入
+IF TEQUIP:ローターＡ挿入 || TEQUIP:アナルバイブ || TEQUIP:アナルビーズ || TEQUIP:拡張バルーン || TEQUIP:触手腸内産卵
+	PRINTFORM アナルでは、
+	;ローターＡ挿入
+	SIF TEQUIP:ローターＡ挿入
+		PRINTFORM ローターが小刻みに震えて
+	;アナルバイブ
+	SIF TEQUIP:アナルバイブ && !TEQUIP:触手
+		PRINTFORM アナルバイブが低音で唸って
+	;アナル触手
+	SIF TEQUIP:アナルバイブ && TEQUIP:触手
+		PRINTFORM 細身の触手が小菊を貪って
+	;アナルビーズ
+	SIF TEQUIP:アナルビーズ
+		PRINTFORM ビーズがキチキチと軋み合って
+	;拡張バルーン
+	SIF TEQUIP:拡張バルーン
+		PRINTFORM 風船が菊穴をあり得ない大きさへと拡張して
+	;触手腸内産卵
+	SIF TEQUIP:触手腸内産卵
+		PRINTFORM 腹を一杯に膨らませて収まりきらない卵が姿を覗かせて
+	PRINTFORMW いる……
+ENDIF
+
+;三角木馬
+IF TEQUIP:三角木馬
+	PRINTFORM 木馬に乗せられ
+	IF R:3 || R:4
+		PRINTFORM たまま
+	ELSE
+		PRINTFORML たまま責められている……
+	ENDIF
+ELSEIF R:1 && !R:2 && !R:3 && !R:4
+	IF ZUIKI(TARGET)
+		PRINTFORM ひっきりなしに身体を揺すっ
+	ELSEIF BASE:尿意 >= 60 || BASE:便意 >= 60 || BASE:吐き気 >= 60
+		PRINTFORM 身体を小刻みに震わせ
+	ENDIF
+	IF TEQUIP:媚薬 && ZUIKI(TARGET)
+		PRINTFORM て、
+	ELSEIF TEQUIP:媚薬 && (BASE:尿意 >= 60 || BASE:便意 >= 60)
+		PRINTFORM 、
+	ENDIF
+	SIF TEQUIP:媚薬
+		PRINTFORM 潤んだ瞳で情欲を堪え
+	SIF TEQUIP:酩酊プレイ
+		PRINTFORM 顔を赤くし
+	PRINTFORML ている…
+ENDIF
+
+SIF R:2 && (R:3 || R:4)
+	PRINTFORM さらには
+
+;Ｂ系（ニプルキャップ、乳首クリップ、搾乳機、助手Ｂ愛撫、触手乳腺挿入
+IF R:3
+	;ニプルキャップ
+	IF TEQUIP:ニプルキャップ && !TEQUIP:触手
+		PRINTFORM 玩具に乳首を吸いだされ、
+	;触手乳首責め
+	ELSEIF TEQUIP:ニプルキャップ && TEQUIP:触手
+		PRINTFORM 触手の口に乳首を嬲られ、
+	;乳首クリップ
+	ELSEIF TEQUIP:乳首クリップ
+		PRINTFORM 乳首にクリップを挟まれ、
+	;搾乳機
+	ELSEIF TEQUIP:搾乳機 && TEQUIP:触手
+		PRINTFORM うごめく触手に母乳を搾られ、
+	;触手搾乳
+	ELSEIF TEQUIP:搾乳機 && !TEQUIP:触手
+		PRINTFORM 吸われるまま母乳を搾られ、
+	;触手乳腺挿入
+	ELSEIF TEQUIP:触手乳腺挿入
+		PRINTFORM 糸のような触手に乳腺を犯され、
+	ENDIF
+	SIF !R:4
+		PRINTFORMW 色気を増している……
+ENDIF
+
+;Ｃ・Ｐ系（クリキャップ、陰核クリップ、電動オナホール、カテーテル、尿道バルーン、助手Ｃ愛撫）
+IF R:4
+	;クリキャップ
+	IF TEQUIP:クリキャップ && !TEQUIP:触手
+		PRINTFORM 陰核を玩具で膨張させ
+	;触手クリ責め
+	ELSEIF TEQUIP:クリキャップ && TEQUIP:触手
+		PRINTFORM 触手の先に執拗に陰核を嬲られ
+	;陰核クリップ
+	ELSEIF TEQUIP:陰核クリップ
+		PRINTFORM 陰核をクリップで挟まれ
+	;電動オナホール
+	ELSEIF TEQUIP:電動オナホール && !TEQUIP:触手
+		PRINTFORM ぬめる筒にペニスを包まれ
+	;触手ペニス責め
+	ELSEIF TEQUIP:電動オナホール && TEQUIP:触手
+		PRINTFORM 触手にペニスを扱き上げられ
+	;カテーテル
+	ELSEIF TEQUIP:カテーテル && !TEQUIP:触手
+		PRINTFORM カテーテルに尿道を犯され
+	;触手尿道挿入
+	ELSEIF TEQUIP:カテーテル && TEQUIP:触手
+		PRINTFORM 細い触手に尿道まで犯され
+	;尿道バルーン
+	ELSEIF TEQUIP:尿道バルーン
+		PRINTFORM 風船に徐々に尿道を拡張され
+	ENDIF
+	PRINTFORMW 、快楽に震えている……
+ENDIF
+
+;シチュ系（羞恥プレイ、ビデオ撮影）
+IF TEQUIP:羞恥プレイ || TEQUIP:ビデオカメラ
+	PRINTFORM その姿は
+	;羞恥プレイ
+	SIF TEQUIP:羞恥プレイ
+		PRINTFORM 鏡に映り、%CALLNAME%を惑わし
+	SIF TEQUIP:羞恥プレイ && TEQUIP:ビデオカメラ
+		PRINTFORM つつ
+	;ビデオ
+	SIF TEQUIP:ビデオカメラ
+		PRINTFORM 淡々とテープに録画され
+	PRINTFORMW ている……
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------------
+;助手に任せるコマンド
+;--------------------------------------------------
+@ASSI_SELECT_TRAIN
+;ランダム選択による行き先がすべて実行できない場合は戻すので。
+VARSET LOCAL
+
+;助手の能力により実行値を決定
+;助手が奴隷に対して恋慕陥落している
+IF CFLAG:ASSI:40 > -1 && (CFLAG:ASSI:39 == 3 || CFLAG:ASSI:39 == 6 || CFLAG:ASSI:39 == 165) && CFLAG:ASSI:41 == NO:TARGET
+	;キスする、正常位、対面座位＋
+	LOCAL:1++
+	LOCAL:100++
+	LOCAL:110++
+	LOCAL:104++
+	LOCAL:114++
+	;奴隷に[マゾ]が無ければ加虐系－
+	IF !TALENT:マゾ
+		LOCAL:140--
+		LOCAL:141--
+		LOCAL:142--
+		LOCAL:143--
+		LOCAL:144--
+		LOCAL:145--
+		LOCAL:151--
+		LOCAL:152--
+		LOCAL:153--
+		LOCAL:154--
+		IF !TEQUIP:射精止め
+			LOCAL:134--
+		ELSE
+			LOCAL:134++
+		ENDIF
+		LOCAL:150--
+		LOCAL:314--
+		LOCAL:155--
+		LOCAL:242--
+		LOCAL:72--
+		LOCAL:160--
+		LOCAL:161--
+		LOCAL:162--
+		LOCAL:180--
+		LOCAL:181--
+		LOCAL:182--
+		LOCAL:183--
+		LOCAL:184--
+		LOCAL:185--
+		LOCAL:380--
+		LOCAL:381--
+		LOCAL:382--
+		LOCAL:383--
+		LOCAL:156--
+		LOCAL:16--
+		LOCAL:25--
+		LOCAL:44--
+		LOCAL:56--
+		LOCAL:224--
+		LOCAL:61--
+		LOCAL:62--
+		IF !TEQUIP:触手
+			LOCAL:340--
+		ELSE
+			LOCAL:340++
+		ENDIF
+		LOCAL:280--
+		LOCAL:281--
+		LOCAL:282--
+		LOCAL:283--
+		LOCAL:284--
+		LOCAL:285--
+		LOCAL:286--
+	ENDIF
+ENDIF
+;[無関心]があれば何もしない＋
+SIF TALENT:ASSI:無関心
+	LOCAL:2++
+;[習得早い][抑圧][汚臭敏感][スキンシップ苦手]で道具系＋
+IF TALENT:ASSI:習得早い || TALENT:ASSI:抑圧 || TALENT:ASSI:汚臭敏感 || TALENT:ASSI:スキンシップ苦手
+	LOCAL:12++
+	SIF !TEQUIP:ニプルキャップ
+		LOCAL:13++
+	SIF !TEQUIP:乳首クリップ
+		LOCAL:15++
+	SIF !TEQUIP:搾乳機
+		LOCAL:17++
+	LOCAL:20++
+	LOCAL:21++
+	SIF !TEQUIP:クリキャップ
+		LOCAL:22++
+	SIF !TEQUIP:陰核クリップ
+		LOCAL:24++
+	SIF !TEQUIP:電動オナホール
+		LOCAL:32++
+	SIF !TEQUIP:ローター挿入
+		LOCAL:42++
+	SIF !TEQUIP:バイブ
+		LOCAL:43++
+	SIF !TEQUIP:ローターＡ挿入
+		LOCAL:52++
+	SIF !TEQUIP:アナルバイブ
+		LOCAL:54++
+	SIF !TEQUIP:アナルビーズ
+		LOCAL:53++
+	SIF !TEQUIP:カテーテル
+		LOCAL:60++
+ENDIF
+;[保守的][スキンシップ好き]で道具系－
+IF TALENT:ASSI:保守的 || TALENT:ASSI:スキンシップ好き
+	LOCAL:12--
+	SIF !TEQUIP:ニプルキャップ
+		LOCAL:13--
+	SIF !TEQUIP:乳首クリップ
+		LOCAL:15--
+	SIF !TEQUIP:搾乳機
+		LOCAL:17--
+	LOCAL:20--
+	LOCAL:21--
+	SIF !TEQUIP:クリキャップ
+		LOCAL:22--
+	SIF !TEQUIP:陰核クリップ
+		LOCAL:24--
+	SIF !TEQUIP:電動オナホール
+		LOCAL:32--
+	SIF !TEQUIP:ローター挿入
+		LOCAL:42--
+	SIF !TEQUIP:バイブ
+		LOCAL:43--
+	SIF !TEQUIP:ローターＡ挿入
+		LOCAL:52--
+	SIF !TEQUIP:アナルバイブ
+		LOCAL:54--
+	SIF !TEQUIP:アナルビーズ
+		LOCAL:53--
+	SIF !TEQUIP:カテーテル
+		LOCAL:60--
+ENDIF
+;[汚臭敏感][スキンシップ苦手]で汚れそうなの－
+IF TALENT:ASSI:汚臭敏感 || TALENT:ASSI:スキンシップ苦手
+	LOCAL:40--
+	LOCAL:31--
+	LOCAL:50--
+	LOCAL:51--
+	LOCAL:18--
+	LOCAL:282--
+ENDIF
+;[好奇心][献身的][スキンシップ好き]で愛撫系＋
+IF TALENT:ASSI:好奇心 || TALENT:ASSI:献身的 || TALENT:ASSI:スキンシップ好き
+	LOCAL:0++
+	LOCAL:40++
+	LOCAL:31++
+	LOCAL:41++
+	LOCAL:50++
+	LOCAL:51++
+	LOCAL:10++
+	LOCAL:11++
+	LOCAL:14++
+	LOCAL:30++
+	LOCAL:1++
+	LOCAL:242++
+	LOCAL:243++
+	LOCAL:244++
+	LOCAL:245++
+	LOCAL:282++
+ENDIF
+;[目立ちたがり][プライド高い][生意気]で奉仕系＋
+IF TALENT:ASSI:目立ちたがり || TALENT:ASSI:プライド高い || TALENT:ASSI:生意気
+	LOCAL:70++
+	LOCAL:71++
+	LOCAL:73++
+	LOCAL:74++
+	LOCAL:75++
+	LOCAL:76++
+	LOCAL:77++
+	LOCAL:81++
+	LOCAL:82++
+	LOCAL:83++
+	LOCAL:85++
+	LOCAL:220++
+	LOCAL:221++
+ENDIF
+;[プライド高い]で足扱き－、足コキする＋
+IF TALENT:ASSI:プライド高い
+	LOCAL:80--
+	LOCAL:282++
+ENDIF
+;部位陥落素質があれば奉仕させる
+IF TALENT:ASSI:即落ち || TALENT:ASSI:自慰狂い
+	LOCAL:226++
+ENDIF
+IF TALENT:ASSI:即落ち || TALENT:ASSI:淫壺
+	LOCAL:260++
+	LOCAL:261++
+	LOCAL:262++
+ENDIF
+IF TALENT:ASSI:即落ち || TALENT:ASSI:尻穴狂い
+	LOCAL:224++
+	LOCAL:263++
+	LOCAL:264++
+	LOCAL:265++
+ENDIF
+IF TALENT:ASSI:即落ち || TALENT:ASSI:淫乳
+	LOCAL:317++
+	LOCAL:243++
+	LOCAL:220++
+	LOCAL:221++
+ENDIF
+IF TALENT:ASSI:即落ち || TALENT:ASSI:セックス狂 || TALENT:ASSI:貞操無頓着
+	LOCAL:100++
+	LOCAL:101++
+	LOCAL:102++
+	LOCAL:103++
+	LOCAL:104++
+	LOCAL:105++
+	LOCAL:106++
+	LOCAL:110++
+	LOCAL:111++
+	LOCAL:112++
+	LOCAL:113++
+	LOCAL:114++
+	LOCAL:115++
+	LOCAL:116++
+	LOCAL:260++
+	LOCAL:261++
+	LOCAL:262++
+	LOCAL:263++
+	LOCAL:264++
+	LOCAL:265++
+ENDIF
+IF TALENT:ASSI:貞操観念
+	LOCAL:100--
+	LOCAL:101--
+	LOCAL:102--
+	LOCAL:103--
+	LOCAL:104--
+	LOCAL:105--
+	LOCAL:106--
+	LOCAL:110--
+	LOCAL:111--
+	LOCAL:112--
+	LOCAL:113--
+	LOCAL:114--
+	LOCAL:115--
+	LOCAL:116--
+	LOCAL:260--
+	LOCAL:261--
+	LOCAL:262--
+	LOCAL:263--
+	LOCAL:264--
+	LOCAL:265--
+ENDIF
+;[サド][狂気]で加虐＋、無ければハード加虐に－
+IF TALENT:ASSI:サド || TALENT:ASSI:狂気
+	SIF !TEQUIP:縄
+		LOCAL:130++
+	SIF !TEQUIP:アイマスク
+		LOCAL:131++
+	SIF !TEQUIP:ボールギャグ
+		LOCAL:132++
+	SIF !TEQUIP:貞操帯
+		LOCAL:133++
+	SIF !TEQUIP:射精止め
+		LOCAL:134++
+	LOCAL:140++
+	LOCAL:141++
+	LOCAL:142++
+	LOCAL:143++
+	LOCAL:144++
+	SIF !TEQUIP:三角木馬
+		LOCAL:145++
+	LOCAL:150++
+	LOCAL:151++
+	LOCAL:152++
+	LOCAL:153++
+	LOCAL:154++
+	LOCAL:155++
+	LOCAL:156++
+	LOCAL:160++
+	LOCAL:161++
+	LOCAL:162++
+	LOCAL:180++
+	LOCAL:181++
+	LOCAL:182++
+	LOCAL:183++
+	SIF !TEQUIP:乳首クリップ
+		LOCAL:15++
+	SIF !TEQUIP:陰核クリップ
+		LOCAL:24++
+	LOCAL:33++
+	SIF !TEQUIP:拡張バルーン
+		LOCAL:55++
+	SIF !TEQUIP:尿道バルーン
+		LOCAL:61++
+ELSE
+	SIF !TEQUIP:縄
+		LOCAL:130--
+	SIF !TEQUIP:アイマスク
+		LOCAL:131--
+	SIF !TEQUIP:ボールギャグ
+		LOCAL:132--
+	SIF !TEQUIP:貞操帯
+		LOCAL:133--
+	SIF !TEQUIP:射精止め
+		LOCAL:134--
+	LOCAL:140--
+	LOCAL:141--
+	LOCAL:142--
+	LOCAL:143--
+	LOCAL:144--
+	SIF !TEQUIP:三角木馬
+		LOCAL:145--
+	LOCAL:150--
+	LOCAL:151--
+	LOCAL:152--
+	LOCAL:153--
+	LOCAL:154--
+	LOCAL:155--
+	LOCAL:156--
+	LOCAL:160--
+	LOCAL:161--
+	LOCAL:162--
+	LOCAL:180--
+	LOCAL:181--
+	LOCAL:182--
+	LOCAL:183--
+	SIF !TEQUIP:乳首クリップ
+		LOCAL:15--
+	SIF !TEQUIP:陰核クリップ
+		LOCAL:24--
+	LOCAL:33--
+	SIF !TEQUIP:拡張バルーン
+		LOCAL:55--
+	SIF !TEQUIP:尿道バルーン
+		LOCAL:61--
+ENDIF
+;[マゾ]で被虐＋、無ければ被虐－
+IF TALENT:ASSI:マゾ
+	LOCAL:280++
+	LOCAL:281++
+	LOCAL:282++
+	LOCAL:283++
+	LOCAL:284++
+	LOCAL:285++
+	LOCAL:286++
+ELSE
+	LOCAL:280--
+	LOCAL:281--
+	LOCAL:282--
+	LOCAL:283--
+	LOCAL:284--
+	LOCAL:285--
+	LOCAL:286--
+ENDIF
+
+;奴隷の能力で補正
+;[威圧]で奉仕－
+IF TALENT:威圧
+	LOCAL:70--
+	LOCAL:71--
+	LOCAL:73--
+	LOCAL:74--
+	LOCAL:75--
+	LOCAL:76--
+	LOCAL:77--
+	LOCAL:81--
+	LOCAL:82--
+	LOCAL:83--
+	LOCAL:85--
+	LOCAL:220--
+	LOCAL:221--
+ENDIF
+
+;実行値以上のコマンドにランダム上乗せ
+FOR LOCAL:400, 0, 350
+	SIF LOCAL:(LOCAL:400) > -1
+		LOCAL:(LOCAL:400) += RAND:2
+NEXT
+
+FOR LOCAL:400, 0, 350
+	IF LOCAL:(LOCAL:400) > -1 && (LOCAL:(LOCAL:401) < LOCAL:(LOCAL:400) || (!LOCAL:402 || (LOCAL:(LOCAL:401) == LOCAL:(LOCAL:400) && !RAND:4)))
+		STRLENS TRAINNAME:(LOCAL:400)
+		SIF RESULT <= 0
+			CONTINUE
+		CALLFORM COM_ABLE{LOCAL:400}
+		IF RESULT
+			LOCAL:401 = LOCAL:400
+			LOCAL:402++
+		ENDIF
+	ENDIF
+NEXT
+
+IF !LOCAL:402
+	PRINTFORML %CALLNAME:ASSI%には、特にやりたい調教はないようです…
+	RETURN 999
+ENDIF
+TFLAG:406 = 1
+RETURN LOCAL:401
+

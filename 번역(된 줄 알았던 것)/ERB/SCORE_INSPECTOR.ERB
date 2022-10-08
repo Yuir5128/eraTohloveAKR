@@ -1,0 +1,353 @@
+﻿;-------------------------------------------------
+;평정 함수 감사관 플레이용
+;캐릭터의입상의, 커맨드 실행시의 파일로@SCORING_COM
+;절정시의 파일로@SCORING_PALAMCNG를 호출해 주세요
+;-------------------------------------------------
+;-------------------------------------------------
+;커맨드마다 호출하는 함수
+;-------------------------------------------------
+@SCORING_COM
+#DIM DYNAMIC ADD_SCORE = 0
+
+
+;범용 허덕여 용무의 커맨드 분류 함수를 사용한다
+CALL COMMON_KOJO_EX
+LOCAL = RESULT
+
+;섹스 관련만
+;A인가 V인지를 먼저 판정해 LOCAL의 값을 변경
+IF LOCAL == 5
+	SIF SEXPLAY(TARGET) == 1
+		LOCAL = 2
+	SIF SEXPLAY(TARGET) == 2
+		LOCAL = 3
+ENDIF
+
+SELECTCASE LOCAL
+	;C쾌감
+	CASE 1
+		SIF TALENT:C민감
+			ADD_SCORE += 1
+		SIF TALENT:자위광
+			ADD_SCORE += 1
+		
+		IF ABL:C감각 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:C감각 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:C감각 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;V쾌감 V섹스
+	CASE 2
+		SIF TALENT:V민감
+			ADD_SCORE += 1
+		SIF TALENT:음란구멍
+			ADD_SCORE += 1
+		
+		IF ABL:V감각 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:V감각 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:V감각 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;A쾌감 A섹스
+	CASE 3
+		SIF TALENT:A민감
+			ADD_SCORE += 1
+		SIF TALENT:항문광
+			ADD_SCORE += 1
+		
+		IF ABL:A감각 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:A감각 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:A감각 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;B쾌감
+	CASE 4
+		SIF TALENT:B민감
+			ADD_SCORE += 1
+		SIF TALENT:함몰유두
+			ADD_SCORE += 1
+		SIF TALENT:음란가슴
+			ADD_SCORE += 1
+		
+		IF ABL:B감각 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:B감각 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:B감각 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;수치
+	CASE 7
+		SIF TALENT:부끄럼쟁이
+			ADD_SCORE += 1
+		SIF TALENT:마조
+			ADD_SCORE += 1
+		
+		IF ABL:마조끼 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:마조끼 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:마조끼 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;가학 고통쾌락 굴욕
+	CASE 8, 10, 17
+		SIF TALENT:마조
+			ADD_SCORE += 1
+		SIF TALENT:프라이드높음
+			ADD_SCORE += 1
+		
+		IF ABL:마조끼 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:마조끼 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:마조끼 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;봉사 쾌락 봉사
+	CASE 9, 20
+		SIF TALENT:헌신적
+			ADD_SCORE += 1
+		
+		IF ABL:봉사정신 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:봉사정신 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:봉사정신 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;주인마조
+	CASE 14
+		SIF TALENT:새드
+			ADD_SCORE += 1
+		
+		IF ABL:새드끼 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:새드끼 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:새드끼 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;스카
+	CASE 15
+		IF ABL:스캇중독 >= 5
+			ADD_SCORE += 3
+		ELSEIF ABL:스캇중독 >= 4
+			ADD_SCORE += 2
+		ELSEIF ABL:스캇중독 >= 3
+			ADD_SCORE += 1
+		ENDIF
+ENDSELECT
+
+;이하는 세세한 조건별
+;긴박
+IF BIND_CHECK_A(TARGET)
+	IF EXP:속박경험 >= EXPLV:5
+		ADD_SCORE += 3
+	ELSEIF EXP:속박경험 >= EXPLV:4
+		ADD_SCORE += 2
+	ELSEIF EXP:속박경험 >= EXPLV:3
+		ADD_SCORE += 1
+	ENDIF
+ENDIF
+
+;노출 수치 촬영 감상
+IF TEQUIP:비디오카메라 || TEQUIP:야외플레이 || TEQUIP:수치플레이 || (SELECTCOM == 311 || SELECTCOM == 312)
+	SIF TALENT:부끄럼쟁이
+		ADD_SCORE += 1
+	
+	IF ABL:노출벽 >= 8
+		ADD_SCORE += 3
+	ELSEIF ABL:노출벽 >= 5
+		ADD_SCORE += 2
+	ELSEIF ABL:노출벽 >= 3
+		ADD_SCORE += 1
+	ENDIF
+ENDIF
+
+;섹스계역섹스계
+SELECTCASE SELECTCOM
+	CASE 100 TO 119, 260 TO 265, 430, 431, 506 TO 523, 526
+		SIF TALENT:섹스광
+			ADD_SCORE += 1
+		SIF TALENT:정조관념
+			ADD_SCORE += 1
+		
+		
+		IF ABL:섹스중독 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:섹스중독 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:섹스중독 >= 3
+			ADD_SCORE += 1
+		ENDIF
+ENDSELECT
+
+SELECTCASE SELECTCOM
+	;정액계
+	CASE 71, 72, 75, 86, 87, 410, 412, 420, 503, 504
+		SIF TALENT:악취민감
+			CFLAG:506 += 1
+		SIF TALENT:요리고수
+			ADD_SCORE += 1
+			
+		IF ABL:정액중독 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:정액중독 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:정액중독 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;자위계
+	CASE 3 TO 8, 509
+		SIF TALENT:자위하기쉬움
+			ADD_SCORE += 1
+		SIF  TALENT:자위광
+			ADD_SCORE += 1
+		SIF TALENT:프라이드높음
+			ADD_SCORE += 1
+		
+		IF ABL:자위중독 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:자위중독 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:자위중독 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;모유계
+	CASE 17, 18
+		SIF TALENT:모유체질
+			ADD_SCORE += 1
+		SIF TALENT:모성
+			ADD_SCORE += 1
+		
+		IF ABL:착유중독 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:착유중독 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:착유중독 >= 3
+			ADD_SCORE += 1
+		ENDIF
+ENDSELECT
+
+;함락 소질별로 점(독단과 편견으로 썩둑 분류)
+SELECTCASE SELECTCOM
+	;연모 친애 조교자가 사모 대상이 아닌 경우를 포함한다
+	;봉사계 커뮤니케이션계 러브러브 하고 있는 커맨드
+	CASE 0, 1, 70, 71, 73 TO 77, 200 TO 207, 317 TO 319
+		SIF CFLAG:39 == 6 || CFLAG:39 == 165
+			ADD_SCORE += 2
+		SIF CFLAG:39 == 3
+			ADD_SCORE += 1
+	
+	;음란 창부
+	;B C V A 섹스계 기분이 좋은 계의 커맨드
+	CASE 10 TO 59, 100 TO 119, 500 TO 510
+		SIF CFLAG:39 == 7
+			ADD_SCORE += 2
+		SIF CFLAG:39 == 4
+			ADD_SCORE += 1
+	
+	;복종 예속 조교자가 사모 대상이 아닌 경우를 포함한다
+	;SM계 하드한 봉사계 하드한 섹스계 우선 하드한 커맨드
+	CASE 80 TO 87, 130 TO 162, 380 TO 383, 511 TO 514
+		SIF CFLAG:39 == 8
+			ADD_SCORE += 2
+		SIF CFLAG:39 == 5
+			ADD_SCORE += 1
+	
+ENDSELECT
+
+RETURN ADD_SCORE
+
+;-------------------------------------------------
+;절정시 따위에 호출하는 함수
+;-------------------------------------------------
+@SCORING_PALAMCNG
+#DIM DYNAMIC ADD_SCORE
+
+;지금 얼마나 절정 하고 있을까 CVAB 0~32? 점이 점
+ADD_SCORE += NOWEX:0 + NOWEX:1 + NOWEX:2 + NOWEX:3
+
+;분유 사정 강제정음절정 하늘사정 드라이오가니즘
+ADD_SCORE += NOWEX:4 + NOWEX:5 + NOWEX:13 + NOWEX:40 + NOWEX:41
+
+;소질 별개로 점
+;부위 개발계 소질이 있는 곳개 거기서 절정 0~4점이 점
+SIF TALENT:자위광 && NOWEX:0
+	ADD_SCORE += 1
+
+SIF TALENT:음란구멍 && NOWEX:1
+	ADD_SCORE += 1
+	
+SIF TALENT:항문광 && NOWEX:2
+	ADD_SCORE += 1
+
+SIF TALENT:음란가슴 && NOWEX:3
+	ADD_SCORE += 1
+
+;섹스광는 섹스에서의 절정에서 점
+SIF TALENT:섹스광 && ((SEXPLAY(TARGET) == 1 && NOWEX:0)|| (SEXPLAY(TARGET) == 2 && NOWEX:2) || (SEXPLAY(TARGET) > 2 && NOWEX:1))
+	ADD_SCORE += 1
+
+;즉각함락는 CVAB의 어디선가 절정에서 점
+SIF TALENT:즉각함락 && (NOWEX:0 || NOWEX:1 || NOWEX:2 || NOWEX:3)
+	ADD_SCORE += 1
+
+;V민감 한편 거기서 절정에서 점
+SIF TALENT:V민감 && NOWEX:0
+	ADD_SCORE += 1
+
+;C민감 한편 거기서 절정에서 점
+SIF TALENT:C민감 && NOWEX:1
+	ADD_SCORE += 1
+
+;A민감 한편 거기서 절정에서 점
+SIF TALENT:A민감 && NOWEX:2
+	ADD_SCORE += 1
+
+;B민감 한편 거기서 절정에서 점
+SIF TALENT:B민감 && NOWEX:3
+	ADD_SCORE += 1
+
+;악취민감 또한강제정음절정로 점
+SIF TALENT:악취민감 && NOWEX:13
+	ADD_SCORE += 1
+
+;마조 또한 하늘사정나 드라이오가니즘으로 점드 M라면 한층 더 점
+SIF TALENT:마조 && (NOWEX:40 || NOWEX:41)
+	ADD_SCORE += TALENT:마조
+
+;모성 또한 분유 혹은 모성 또한 B절정에서 점
+SIF TALENT:모성 && (NOWEX:3 || NOWEX:4)
+	ADD_SCORE += 1
+
+;임신 또한 VA섹스에서의 VA절정에서 점
+SIF TALENT:임신 && ((SEXPLAY(TARGET) == 1 && NOWEX:0)|| (SEXPLAY(TARGET) == 2 && NOWEX:2))
+	ADD_SCORE += 1
+
+;능력 이상건
+;현재 없음
+
+;경험 이상건
+;그 부위에서 첫절정
+SIF NOWEX:0 > 0 && CFLAG:241 == 0
+	ADD_SCORE += NOWEX:0
+
+SIF NOWEX:1 > 0 && CFLAG:242 == 0
+	ADD_SCORE += NOWEX:1
+
+SIF NOWEX:2 > 0 && CFLAG:243 == 0
+	ADD_SCORE += NOWEX:2
+
+SIF NOWEX:3 > 0 && CFLAG:244 == 0
+	ADD_SCORE += NOWEX:3
+
+RETURN ADD_SCORE
+

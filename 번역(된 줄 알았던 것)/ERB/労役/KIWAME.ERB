@@ -1,0 +1,277 @@
+﻿;====================================================================
+;KIWAME.ERB 극수행
+;수행에 낸 캐릭터는 4일 구속된다
+;====================================================================
+@KIWAME
+;수행에 가는 남사의 등록 번호
+#DIM DYNAMIC TOKU = -1
+
+DRAWLINE
+PRINTL 【 극수행 】
+PRINTL 
+PRINTL 노예를극가 되기 위한 수행에 가게 한다
+PRINTL 4일후에 귀환
+PRINTL
+PRINTL 지금의 능력·경험 따위를 계승한 채로에극로 진화합니다
+PRINTL 그러나 이하는극의 것으로 덧쓰기됩니다
+PRINTL 이름·별명·도종·소질
+PRINTL ※후 하늘적으로 취득한 소질, 개체차이로 얻은 소질은 인계됩니다
+PRINTL 
+DRAWLINE
+PRINTL 
+
+;--------------------------------------------------------
+;수행에 가게 하는 노예를 선택
+;--------------------------------------------------------
+PRINTL
+PRINTL 수행에 가게 하는 남사를 선택해 주세요
+
+REPEAT CHARANUM
+	;수행할 수 있는 플래그가 서 있지 않은 남사는 표시하지 않는다
+	SIF (CFLAG:COUNT:151 & 512) == 0
+		CONTINUE
+	
+	PRINTFORML [{COUNT}]%CALLNAME:COUNT%
+REND
+PRINTL [999] - 돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 999
+	RETURN 0
+ELSEIF (CFLAG:RESULT:151 & 512) == 0
+	GOTO INPUT_LOOP
+ELSE
+	;선택된 남사의 등록 번호를 대입
+	TOKU = RESULT
+	PRINTFORML %CALLNAME:RESULT%를 수행에 가게 합니까?
+	PRINTL [0] 네
+	PRINTL [999] 돌아온다
+	$INPUT_LOOP_2
+	INPUT
+	IF RESULT == 0
+		
+	ELSEIF RESULT == 999
+		TOKU = -1
+		RETURN 0
+	ELSE
+		GOTO INPUT_LOOP_2
+	ENDIF
+ENDIF
+
+;--------------------------------------------------------
+;수행에 가게 한다
+;--------------------------------------------------------
+PRINTFORML %CALLNAME:TOKU%가, 수행에 여행을 떠났습니다
+
+;노역 플래그를 수행으로 설정
+CFLAG:TOKU:12 = 6
+
+;귀환 일시를 보유 해 둔다
+CFLAG:TOKU:13 = DAY + 4
+
+;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+LOCAL = TARGET
+TARGET = TOKU
+TFLAG:13 = 86
+;이벤트입상(수행 출발시)
+CALL KOJO_MESSAGE_EVENT
+TARGET = LOCAL
+
+;수행에 간 남사가 조교 대상이나 조수의 경우는, 조교 대상이나 조수로부터 제외한다
+SIF TOKU == TARGET
+	TARGET = -1
+SIF TOKU == ASSI
+	ASSI = -1
+
+;내번개시가 끝난 플래그(수행=8)를 세운다
+FLAG:161 |= 8
+
+PRINTL 
+
+;====================================================================
+;기간시의 처리
+;====================================================================
+@END_KIWAME
+;수행에 간 남사의 등록 번호(TOKU도 KIWAME도 같은 것이 들어간다)
+#DIM DYNAMIC TOKU = -1
+#DIM DYNAMIC KIWAME = -1
+
+REPEAT CHARANUM
+	IF CFLAG:COUNT:12 == 6
+		TOKU = COUNT
+		KIWAME = COUNT
+	ENDIF
+REND
+
+DRAWLINE
+PRINTFORMW %CALLNAME:TOKU%의 수행이 종료했습니다
+
+
+;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+LOCAL = TARGET
+TARGET = TOKU
+TFLAG:13 = 86
+;이벤트입상의 표시(수행 귀환시)
+;여기서 불리는입상은 특남사의 것이 불린다
+;지장이 있는 것 같으면극남사의 것 부르도록(듯이) 처리 바꿉니다
+TFLAG:13 = 87
+CALL KOJO_MESSAGE_EVENT
+PRINTL 
+TARGET = LOCAL
+
+;극남사의 캐릭터 추가 부분
+;새롭게 개체차이는 붙지 않는다
+CALL KIWAME_SYUGYOU(KIWAME)
+
+;내번개시가 끝난 플래그(수행=8)를 떨어뜨린다
+SIF FLAG:161 & 8
+	FLAG:161 -= 8
+
+;플래그의 리셋트
+CFLAG:TOKU:12 = 0
+
+DRAWLINE
+
+;-------------------------------------------------
+;함수명:KIWAME_SYUGYOU
+;개요:특남사의 능력·경험·구슬·각인·CFLAG·일부의 소질 따위를
+;극남사에게 계승하게 한다
+;인수:ARG ==구입한극남사의 등록 번호
+;반환값:특남사의 등록 번호
+;비고:특남사의 고유 번호를 변경해 데이터를 이어받게 한다
+;이름 별명 도종플래그 소질만극남사의 CSV의 것으로 덧쓰기한다
+;※특으로후 하늘적으로 취득한 소질·개체차이의 소질은 이어받는다
+
+;특의 NO를극의 것으로 덧쓰기해 처리하고 있습니다
+;-------------------------------------------------
+@KIWAME_SYUGYOU(ARG)
+#DIM DYNAMIC TOKU
+#DIM DYNAMIC KIWAME
+#DIM DYNAMIC TOKU_NO
+#DIM DYNAMIC KIWAME_NO
+
+
+;각종 변수의 대입
+;특남사의 캐릭터 고유 번호를 격납
+TOKU_NO = NO:ARG
+
+;극남사의 캐릭터 고유 번호를 격납
+;히게키리극
+IF (NO:ARG) == 107
+	KIWAME_NO = 111
+;히자마루극
+ELSEIF (NO:ARG) == 112
+	KIWAME_NO = 115
+;그 이외는 특의 고유 번호+1가극의 고유 번호
+ELSE
+	KIWAME_NO = NO:ARG + 1
+ENDIF
+
+;극남사의 등록 번호를 격납
+;처리를 알기 쉽게하기 위해(때문에) TOKU와 KIWAME로 나누고 있습니다만, 같은 값이 들어가 있습니다
+TOKU = NO2(TOKU_NO)
+KIWAME = NO2(TOKU_NO)
+
+;특남사의 등록 번호에 들어가있는 캐릭터의 고유 번호를, 극의 고유 번호로 변경한다
+;(NO:KIWAME = KIWAME_NO와 처리적으로는 같음)
+NO:TOKU = KIWAME_NO
+
+;이름 별명에극의 것을 대입한다
+NAME:KIWAME = %CSVNAME(KIWAME_NO)%
+CALLNAME:KIWAME = %CSVCALLNAME(KIWAME_NO)%
+
+;도종플래그를 원의 값으로+10해, 극의 것으로 변경한다
+CFLAG:KIWAME:도종 += 10
+
+;소질
+;루프에 들어가기 전의 시점이라고, 극남사는 특남사의 소질을 그대로 계승하고 있다
+;극남사의 CSV로 설정되어 있는 소질은(특남사와 중복 하고 있지 않는 한) 가지고 있지 않다
+;COUNT =소질의 번호
+REPEAT 205
+	;특남사의 CSV로 설정되어 있어, 극남사의 CSV로 설정되어 있지 않은 소질은 삭제한다
+	SIF CSVTALENT(TOKU_NO, COUNT, 0) == 1 && CSVTALENT(KIWAME_NO, COUNT, 0) == 0
+		TALENT:KIWAME:COUNT = 0
+	
+	;특남사의 CSV로 설정되어 있지 않아서, 극남사의 CSV로 설정되어 있는 소질은 취득한다
+	SIF CSVTALENT(TOKU_NO, COUNT, 0) == 0 && CSVTALENT(KIWAME_NO, COUNT, 0) == 1
+		TALENT:KIWAME:COUNT = 1
+	
+	;특남사·극남사의 CSV에 중복 해 설정되어 있는 소질은 아무것도 처리하지 않는다
+	;특남사·극남사의 CSV의 어느 쪽에도 설정되어 있지 않은 소질은 아무것도 처리하지 않는다
+		;개체차이로 얻은 소질은 남겨지고 있을 것
+REND
+
+;해당의극남사 이외의 캐릭터에 대한 처리
+;COUNT =캐릭터 등록 번호
+REPEAT CHARANUM
+	;해당의극남사는 연주한다
+	SIF COUNT == KIWAME
+		CONTINUE
+	
+	;사모 공포 대상 기록 플래그 CFLAG:41
+	SIF CFLAG:COUNT:41 == TOKU_NO
+		CFLAG:COUNT:41 = KIWAME_NO
+	;낳는 아이의 부친이 누군가 CFLAG:111
+	SIF CFLAG:COUNT:111 == TOKU_NO
+		CFLAG:COUNT:111 = KIWAME_NO
+	;육아중의 친자식의 고유 번호 CFLAG:114 여기에 남사의 고유 번호가 들어가는 일은 없어?
+	SIF CFLAG:COUNT:114 == TOKU_NO
+		CFLAG:COUNT:114 = KIWAME_NO
+	;길러 받고 있는 어머니 OR양모의 고유 번호 CFLAG:115
+	SIF CFLAG:COUNT:115 == TOKU_NO
+		CFLAG:COUNT:115 = KIWAME_NO
+	;조교자를 한정한 범용 허덕여 설정, 의 조교자 기록용 CFLAG:634
+	IF CFLAG:COUNT:634 /10 ==  TOKU_NO
+		CFLAG:COUNT:634 = CFLAG:COUNT:634 - (TOKU_NO * 10)
+		CFLAG:COUNT:634 = CFLAG:COUNT:634 + (KIWAME_NO * 10)
+	ENDIF
+	;부친의 캐릭터 고유 번호 CFLAG:1000
+	SIF CFLAG:COUNT:1000 == TOKU_NO
+		CFLAG:COUNT:1000 = KIWAME_NO
+	;모친의 캐릭터 고유 번호 CFLAG:1001
+	SIF CFLAG:COUNT:1001 == TOKU_NO
+		CFLAG:COUNT:1001 = KIWAME_NO
+	;아버지의 아버지의 캐릭터 고유 번호 CFLAG:1002
+	SIF CFLAG:COUNT:1002 == TOKU_NO
+		CFLAG:COUNT:1002 = KIWAME_NO
+	;아버지의 어머니의 캐릭터 고유 번호 CFLAG:1003
+	SIF CFLAG:COUNT:1003 == TOKU_NO
+		CFLAG:COUNT:1003 = KIWAME_NO
+	;어머니의 아버지의 캐릭터 고유 번호 CFLAG:1004
+	SIF CFLAG:COUNT:1004 == TOKU_NO
+		CFLAG:COUNT:1004 = KIWAME_NO
+	;어머니의 어머니의 캐릭터 고유 번호 CFLAG:1005
+	SIF CFLAG:COUNT:1005 == TOKU_NO
+		CFLAG:COUNT:1005 = KIWAME_NO
+	;조수경험 보관(캐릭터 고유 번호+1099) CFLAG:1099~2098
+	CFLAG:COUNT:(KIWAME_NO + 1099) = CFLAG:COUNT:(TOKU_NO + 1099)
+	CFLAG:COUNT:(TOKU_NO + 1099) = 0
+	;조수안면 플래그(캐릭터 고유 번호+2099) CFLAG:2099~3098 
+	CFLAG:COUNT:(KIWAME_NO + 2099) = CFLAG:COUNT:(TOKU_NO + 2099)
+	CFLAG:COUNT:(TOKU_NO + 2099) = 0
+	
+	;상대로부터 특캐릭터에게로의 궁합이 100이상 또한 CSV에서는 100보다 작은 경우
+	;후 하늘적으로 궁합이 올랐을 때, 이것으로 계승할 수 있을 것
+	IF RELATION:COUNT:(TOKU_NO) > 100 && CSVRELATION(NO:COUNT, NO:TOKU, 0) < 100
+		RELATION:COUNT:(KIWAME_NO) = RELATION:COUNT:(TOKU_NO)
+	ENDIF
+REND
+
+
+;특의 구입 플래그를 부활시킨다
+ITEMSALES:(199 + TOKU_NO) = 1
+
+;극의 구입 플래그를 2에
+ITEMSALES:(199 + KIWAME_NO) = 2
+
+
+;즉각함락관련 플래그의 처리
+FLAG:(1099 + KIWAME_NO) = FLAG:(1099 + TOKU_NO)
+FLAG:(1099 + TOKU_NO) = 0
+
+;특남사의 등록 번호(=극남사의 등록 번호)를 반환값으로 한다(일단)
+RETURN TOKU
+
+
+
+

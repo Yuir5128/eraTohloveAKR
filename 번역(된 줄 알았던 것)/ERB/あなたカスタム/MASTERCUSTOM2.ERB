@@ -1,0 +1,710 @@
+﻿;R로부터 이식
+@MASTER_CUSTOM2(ARG)
+;-----------------------------------------------------------
+;표시부분
+;-----------------------------------------------------------
+PRINTFORML %CALLNAME:ARG%의 스테이터스를 설정 할 수 있습니다.
+PRINTL 변경하고 싶은 항목을 선택해 주세요.
+PRINTW (극단인 설정에 의해 난이도가 크게 바뀌는 경우도 있기 때문에 주의해 주세요)
+PRINTL 
+WHILE 1
+	DRAWLINE
+	LOCAL:1 = 0
+	LOCAL:2 = GETCOLOR()
+	LOCAL:4 = GETSTYLE()
+	PRINT 이름: 
+	PRINTBUTTON @"[{LOCAL:1, 2}] %NAME:ARG%", LOCAL:1++
+	PRINT 　　　호명: 
+	PRINTBUTTON @"[{LOCAL:1, 2}] %CALLNAME:ARG%", LOCAL:1++
+	PRINTL 
+	PRINTL □ 소질 □-----------------------------------------------------------------------
+	PRINT 성별: 
+	SETCOLOR MALE(ARG) == 0? 0x00FF00 # 0xA0A0A0
+	PRINTBUTTON @"[{LOCAL:1, 2}] 여자 아이      　　", LOCAL:1++
+	SETCOLOR TALENT:ARG:후타나리? 0x00FF00 # 0xA0A0A0
+	PRINTFORM [{LOCAL:1++, 2}] %TALENTNAME:139, 12, LEFT%　　
+	SETCOLOR TALENT:ARG:반음반양? 0x00FF00 # 0xA0A0A0
+	PRINTFORM [{LOCAL:1++, 2}] %TALENTNAME:137, 12, LEFT%　　
+	SETCOLOR TALENT:ARG:남자? 0x00FF00 # 0xA0A0A0
+	PRINTFORML [{LOCAL:1++, 2}] %TALENTNAME:140, 12, LEFT%
+	SETCOLOR LOCAL:2
+
+	PRINT 　　　 
+	SETCOLOR !TALENT:ARG:수 && !TALENT:ARG:공? 0x00FF00 # 0xA0A0A0
+	PRINTBUTTON @"[{LOCAL:1, 2}] 리바      　　　", LOCAL:1++
+	SETCOLOR TALENT:ARG:수? 0x00FF00 # 0xA0A0A0
+	PRINTFORM [{LOCAL:1++, 2}] %TALENTNAME:157, 12, LEFT%　　
+	SETCOLOR TALENT:ARG:공? 0x00FF00 # 0xA0A0A0
+	PRINTFORML [{LOCAL:1++, 2}] %TALENTNAME:158, 12, LEFT%　　
+	SETCOLOR LOCAL:2
+	
+	PRINT 　　　 
+	SETCOLOR TALENT:ARG:처녀? 0x00FF00 # 0xA0A0A0
+	SIF TALENT:ARG:남자
+		FONTSTYLE 4
+	PRINTBUTTON @"[{LOCAL:1, 2}] 처녀      　　　", LOCAL:1++
+	FONTSTYLE LOCAL:4
+	SETCOLOR TALENT:ARG:동정? 0x00FF00 # 0xA0A0A0
+	SIF MALE(ARG) == 0
+		FONTSTYLE 4
+	PRINTFORM [{LOCAL:1++, 2}] %TALENTNAME:160, 12, LEFT%　　
+	FONTSTYLE LOCAL:4
+	SETCOLOR TALENT:ARG:백버진? 0x00FF00 # 0xA0A0A0
+	PRINTFORML [{LOCAL:1++, 2}] %TALENTNAME:161, 12, LEFT%　　
+	SETCOLOR LOCAL:2
+
+	LOCAL:3 = 4
+	PRINT 성격: 
+	FOR LOCAL, 10, 169
+		IF LOCAL == 10
+			;처음은 PRINTBUTTON를 사용하지 않으면, 『성격:』이라고 들러붙는다
+			LOCAL:3--
+			SETCOLOR TALENT:ARG:LOCAL ? 0x00FF00 # 0xA0A0A0
+			PRINTBUTTON @"[{LOCAL:1, 2}] %GET_TALENTNAME(ARG, LOCAL), 12, LEFT%", LOCAL:1++
+			CONTINUE
+		ELSEIF LOCAL == 70
+		ELSEIF LOCAL:3
+			;공백
+			PRINT 　
+		ELSE
+			;개행
+			PRINTL 
+			PRINT 　　　 
+			LOCAL:3 = 4
+		ENDIF
+		LOCAL:3--
+		SETCOLOR TALENT:ARG:LOCAL ? 0x00FF00 # 0xA0A0A0
+		PRINTFORM [{LOCAL:1++, 2}] %GET_TALENTNAME(ARG, LOCAL), 12, LEFT%
+		;성격으로 분류되지 않는 소질을 날린다
+		SELECTCASE LOCAL
+			CASE 18, 28
+				LOCAL += 1
+			CASE 36
+				LOCAL += 26
+			CASE 66 
+				LOCAL += 3
+			CASE 71
+				LOCAL += 10
+			CASE 82
+				LOCAL += 4
+			CASE 88
+				LOCAL += 62
+			CASE 151
+				LOCAL += 14
+		ENDSELECT
+	NEXT
+	PRINTL 
+	SETCOLOR LOCAL:2
+
+	LOCAL:3 = 4
+	LOCAL:4 = GETSTYLE()
+	PRINT 체질: 
+	FOR LOCAL, 40, 151
+		IF LOCAL == 40
+			LOCAL:3--
+			SETCOLOR TALENT:ARG:LOCAL ? 0x00FF00 # 0xA0A0A0
+			PRINTBUTTON @"[{LOCAL:1, 2}] %GET_TALENTNAME(ARG, LOCAL), 12, LEFT%", LOCAL:1++
+			CONTINUE
+		ELSEIF LOCAL:3
+			PRINT 　
+		ELSE
+			PRINTL 
+			PRINT 　　　 
+			LOCAL:3 = 4
+		ENDIF
+		LOCAL:3--
+		;여자 아이/남자로 선택 할 수 없는 소질에 취소해 선을 넣어 본다
+		SELECTCASE LOCAL
+			CASE 114 TO 117, 119, 152
+				SIF MALE(ARG) == 0
+					FONTSTYLE 4
+			CASE 75, 103, 104
+				SIF VAGINA(ARG)
+					FONTSTYLE 4
+			CASE 109 TO 112
+				SIF MALE(ARG)
+					FONTSTYLE 4
+		ENDSELECT
+		SETCOLOR TALENT:ARG:LOCAL ? 0x00FF00 # 0xA0A0A0
+		PRINTFORM [{LOCAL:1++, 2}] %GET_TALENTNAME(ARG, LOCAL), 12, LEFT%
+		FONTSTYLE LOCAL:4
+		SELECTCASE LOCAL
+			CASE 62, 120, 143
+				LOCAL += 9
+			CASE 44
+				LOCAL += 11
+			CASE 57
+				LOCAL += 2
+			CASE 72, 84
+				LOCAL += 7
+			CASE 81
+				LOCAL += 1
+			CASE 94
+				LOCAL += 5
+			CASE 131
+				LOCAL += 10
+		ENDSELECT
+	NEXT
+	PRINTL 
+	SETCOLOR LOCAL:2
+
+;	PRINT 기능: 
+;	SETCOLOR TALENT:ARG:습득빠름? 0x00FF00 # 0xA0A0A0
+;	PRINTBUTTON @"[{LOCAL:1, 2}] %TALENTNAME:50, 12, LEFT% ", LOCAL:1++
+;	SETCOLOR TALENT:ARG:습득느림? 0x00FF00 # 0xA0A0A0
+;	PRINTFORML [{LOCAL:1++, 2}] %TALENTNAME:51, 12, LEFT%
+;	SETCOLOR LOCAL:2
+
+	PRINTL □ 경험 □-----------------------------------------------------------------------
+	LOCAL:1 = 100
+	PRINT 성 경험: 
+	SETCOLOR !LOCAL:10? 0x00FF00 # 0xA0A0A0
+	PRINTBUTTON @"[{LOCAL:1, 3}] 없음　　", LOCAL:1++
+	SETCOLOR LOCAL:10 == 1? 0x00FF00 # 0xA0A0A0
+	PRINTFORM [{LOCAL:1++, 3}] 조금　　
+	SETCOLOR LOCAL:10 > 1? 0x00FF00 # 0xA0A0A0
+	PRINTFORML [{LOCAL:1++, 3}] 풍부
+	SETCOLOR LOCAL:2
+
+	DRAWLINE
+	ALIGNMENT RIGHT
+	PRINT [997] - 설정 모드 변경　　
+	PRINT [998] - 리셋트　　
+	PRINTL  [999] - 설정 완료　
+	ALIGNMENT LEFT
+
+;-----------------------------------------------------------
+;입력 처리 부분
+;-----------------------------------------------------------
+	$INPUT_LOOP
+	INPUT
+	SELECTCASE RESULT
+		;이름의 변경
+		CASE 0
+			PRINTL 이름을 입력해 주세요.
+			INPUTS
+			NAME:ARG = %RESULTS%
+		CASE 1
+			PRINTL 별명을 입력해 주세요.
+			INPUTS
+			CALLNAME:ARG = %RESULTS%
+;-----------------------------------------------------------
+		;여자 아이→후타나리/반음반양/남자/아이사이즈/단소/거근/말자지/포경/절륜/동정를 OFF
+		CASE 2
+			TALENT:ARG:반음반양 = 0
+			TALENT:ARG:후타나리 = 0
+			TALENT:ARG:남자 = 0
+			TALENT:ARG:아이사이즈 = 0
+			TALENT:ARG:단소 = 0
+			TALENT:ARG:거근 = 0
+			TALENT:ARG:말자지 = 0
+			TALENT:ARG:포경 = 0
+			TALENT:ARG:절륜 = 0
+			TALENT:ARG:동정 = 0
+		;후타나리→후타나리를 ON. 반음반양/남자를 OFF
+		CASE 3
+			TALENT:ARG:후타나리 = 1
+			TALENT:ARG:반음반양 = 0
+			TALENT:ARG:남자 = 0
+		;반음반양→반음반양를 ON. 후타나리/남자/빈유/절벽/거유/폭유를 OFF
+		CASE 4
+			TALENT:ARG:반음반양 = 1
+			TALENT:ARG:후타나리 = 0
+			TALENT:ARG:남자 = 0
+			TALENT:ARG:빈유 = 0
+			TALENT:ARG:절벽 = 0
+			TALENT:ARG:거유 = 0
+			TALENT:ARG:폭유 = 0
+		;남자→남자를 ON. 후타나리/반음반양/처녀/음란구멍/V둔감/V민감/빈유/절벽/거유/폭유를 OFF
+		CASE 5
+			TALENT:ARG:남자 = 1
+			TALENT:ARG:반음반양 = 0
+			TALENT:ARG:후타나리 = 0
+			TALENT:ARG:처녀 = 0
+			TALENT:ARG:음란구멍 = 0
+			TALENT:ARG:V둔감 = 0
+			TALENT:ARG:V민감 = 0
+			TALENT:ARG:빈유 = 0
+			TALENT:ARG:절벽 = 0
+			TALENT:ARG:거유 = 0
+			TALENT:ARG:폭유 = 0
+;-----------------------------------------------------------
+		;리바→공, 수를 오프
+		CASE 6
+			TALENT:ARG:수 = 0
+			TALENT:ARG:공 = 0
+		;수→수를 반전, 공를 오프
+		CASE 7
+			TALENT:ARG:수 = !TALENT:ARG:수
+			TALENT:ARG:공 = 0
+		;공→공를 반전. 수를 오프
+		CASE 8
+			TALENT:ARG:수 = 0
+			TALENT:ARG:공 = !TALENT:ARG:공
+		;처녀→처녀를 반전
+		CASE 9
+			IF VAGINA(ARG) == 0
+				CLEARLINE 1
+				REUSELASTLINE 없지요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:처녀 = !TALENT:ARG:처녀
+		;동정→동정를 반전
+		CASE 10
+			IF PENIS(ARG) == 0
+				CLEARLINE 1
+				REUSELASTLINE 붙어 있지 않네요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:동정 = !TALENT:ARG:동정
+		;백버진→백버진를 반전
+		CASE 11
+			TALENT:ARG:백버진 = !TALENT:ARG:백버진
+;-----------------------------------------------------------
+		;겁쟁이→겁쟁이를 반전.
+		CASE 12
+			TALENT:ARG:겁쟁이 = !TALENT:ARG:겁쟁이
+		;반항적→반항적를 반전. 솔직함를 OFF
+		CASE 13
+			TALENT:ARG:반항적 = !TALENT:ARG:반항적
+			TALENT:ARG:솔직함 = 0
+		;꿋꿋함→꿋꿋함를 반전.
+		CASE 14
+			TALENT:ARG:꿋꿋함 = !TALENT:ARG:꿋꿋함
+		;솔직함→솔직함를 반전. 반항적를 OFF
+		CASE 15
+			TALENT:ARG:반항적 = 0
+			TALENT:ARG:솔직함 = !TALENT:ARG:솔직함
+		;얌전함→얌전함를 반전.
+		CASE 16
+			TALENT:ARG:얌전함 = !TALENT:ARG:얌전함
+		;프라이드높음→프라이드높음를 반전. 프라이드낮음를 OFF
+		CASE 17
+			TALENT:ARG:프라이드높음 = !TALENT:ARG:프라이드높음
+			TALENT:ARG:프라이드낮음 = 0
+		;건방짐→건방짐를 반전.
+		CASE 18
+			TALENT:ARG:건방짐 = !TALENT:ARG:건방짐
+		;프라이드낮음→프라이드낮음를 반전. 프라이드높음를 OFF
+		CASE 19
+			TALENT:ARG:프라이드높음 = 0
+			TALENT:ARG:프라이드낮음 = !TALENT:ARG:프라이드낮음
+		;츤데레→츤데레를 반전.
+		CASE 20
+			TALENT:ARG:츤데레 = !TALENT:ARG:츤데레
+		;자제적→자제적을 반전.
+		CASE 21
+			TALENT:ARG:자제심 = !TALENT:ARG:자제심
+		;무관심→무관심를 반전. 호기심를 OFF
+		CASE 22
+			TALENT:ARG:무관심 = !TALENT:ARG:무관심
+			TALENT:ARG:호기심 = 0
+		;호기심→호기심를 반전. 무관심를 OFF
+		CASE 24
+			TALENT:ARG:무관심 = 0
+			TALENT:ARG:호기심 = !TALENT:ARG:호기심
+		;감정부족→감정부족를 반전.
+		CASE 23
+			TALENT:ARG:감정부족 = !TALENT:ARG:감정부족
+		;보수적→보수적를 반전.
+		CASE 25
+			TALENT:ARG:보수적 = !TALENT:ARG:보수적
+		;낙관적→낙관적를 반전. 비관적를 OFF
+		CASE 26
+			TALENT:ARG:낙관적 = !TALENT:ARG:낙관적
+			TALENT:ARG:비관적 = 0
+		;비관적→비관적를 반전. 낙관적를 OFF
+		CASE 27
+			TALENT:ARG:낙관적 = 0
+			TALENT:ARG:비관적 = !TALENT:ARG:비관적
+		;일선을넘지않음→일선을넘지않음를 반전
+		CASE 28
+			TALENT:ARG:일선을넘지않음 = !TALENT:ARG:일선을넘지않음
+		;눈에띄고싶음→눈에띄고싶음를 반전
+		CASE 29
+			TALENT:ARG:눈에띄고싶음 = !TALENT:ARG:눈에띄고싶음
+		;정조관념→정조관념를 반전. 정조무관심를 OFF
+		CASE 30
+			TALENT:ARG:정조관념 = !TALENT:ARG:정조관념
+			TALENT:ARG:정조무관심 = 0
+		;정조무관심→정조무관심를 반전. 정조관념를 OFF
+		CASE 31
+			TALENT:ARG:정조관념 = 0
+			TALENT:ARG:정조무관심 = !TALENT:ARG:정조무관심
+		;억압→억압를 반전. 해방를 OFF
+		CASE 32
+			TALENT:ARG:억압 = !TALENT:ARG:억압
+			TALENT:ARG:해방 = 0
+		;해방→해방를 반전. 억압를 OFF
+		CASE 33
+			TALENT:ARG:억압 = 0
+			TALENT:ARG:해방 = !TALENT:ARG:해방
+		;저항→저항를 반전
+		CASE 34
+			TALENT:ARG:저항 = !TALENT:ARG:저항
+		;부끄럼쟁이→부끄럼쟁이를 반전. 수치심없음를 OFF
+		CASE 35
+			TALENT:ARG:부끄럼쟁이 = !TALENT:ARG:부끄럼쟁이
+			TALENT:ARG:수치심없음 = 0
+		;수치심없음→수치심없음를 반전. 부끄럼쟁이를 OFF
+		CASE 36
+			TALENT:ARG:부끄럼쟁이 = 0
+			TALENT:ARG:수치심없음 = !TALENT:ARG:수치심없음
+		;헌신적→헌신적를 반전.
+		CASE 37
+			TALENT:ARG:헌신적 = !TALENT:ARG:헌신적
+		;더러움무시→더러움무시를 반전.
+		CASE 38
+			TALENT:ARG:더러움무시 = !TALENT:ARG:더러움무시
+		;스킨십선호→스킨십선호를 반전. 스킨십불편를 OFF
+		CASE 39
+			TALENT:ARG:스킨십선호 = !TALENT:ARG:스킨십선호
+			TALENT:ARG:스킨십불편 = 0
+		;스킨십불편→스킨십불편를 반전. 스킨십선호를 OFF
+		CASE 40
+			TALENT:ARG:스킨십선호 = 0
+			TALENT:ARG:스킨십불편 = !TALENT:ARG:스킨십불편
+		;쾌감에솔직→쾌감에솔직를 반전. 쾌감을부정를 오프
+		CASE 41
+			TALENT:ARG:쾌감에솔직 = !TALENT:ARG:쾌감에솔직
+			TALENT:ARG:쾌감을부정 = 0
+		;쾌감을부정→쾌감을부정를 반전. 쾌감에솔직를 OFF
+		CASE 42
+			TALENT:ARG:쾌감을부정 = !TALENT:ARG:쾌감을부정
+			TALENT:ARG:쾌감에솔직 = 0
+		;남자혐오→남자혐오를 반전. 바이, 남자좋아를 OFF
+		CASE 43
+			TALENT:ARG:남자혐오 = !TALENT:ARG:남자혐오
+			TALENT:ARG:바이 = 0
+			TALENT:ARG:남자좋아 = 0
+		;소악마→소악마를 반전.
+		CASE 44
+			TALENT:ARG:소악마 = !TALENT:ARG:소악마
+		;여자혐오→여자혐오를 반전. 바이, 여자좋아를 OFF
+		CASE 45
+			TALENT:ARG:여자혐오 = !TALENT:ARG:여자혐오
+			TALENT:ARG:바이 = 0
+			TALENT:ARG:여자좋아 = 0
+		;유치→유치를 반전.
+		CASE 46
+			TALENT:ARG:유치 = !TALENT:ARG:유치
+		;여자좋아→여자좋아를 반전. 여자혐오를 OFF
+		CASE 47
+			TALENT:ARG:여자좋아 = !TALENT:ARG:여자좋아
+			TALENT:ARG:여자혐오 = 0
+		;남자좋아→남자좋아를 반전. 남자혐오를 OFF
+		CASE 48
+			TALENT:ARG:남자좋아 = !TALENT:ARG:남자좋아
+			TALENT:ARG:남자혐오 = 0
+		;아이좋아→아이좋아를 반전.
+		CASE 49
+			TALENT:ARG:아이좋아 = !TALENT:ARG:아이좋아
+;-----------------------------------------------------------
+		;고통에강함→고통에강함를 반전. 고통에강함를 오프
+		CASE 50
+			TALENT:ARG:고통에약함 = 0
+			TALENT:ARG:고통에강함 = !TALENT:ARG:고통에강함
+		;고통에약함→고통에약함를 반전. 고통에강함를 오프
+		CASE 51
+			TALENT:ARG:고통에약함 = !TALENT:ARG:고통에약함
+			TALENT:ARG:고통에강함 = 0
+		;젖기쉬움→젖기쉬움를 반전. 젖기어려움를 OFF
+		CASE 52
+			TALENT:ARG:젖기어려움 = 0
+			TALENT:ARG:젖기쉬움 = !TALENT:ARG:젖기쉬움
+		;젖기어려움→젖기어려움를 반전. 젖기쉬움를 OFF
+		CASE 53
+			TALENT:ARG:젖기어려움 = !TALENT:ARG:젖기어려움
+			TALENT:ARG:젖기쉬움 = 0
+		;요리치→요리치를 반전. 요리고수를 OFF
+		CASE 54
+			TALENT:ARG:요리고수 = 0
+			TALENT:ARG:요리치 = !TALENT:ARG:요리치
+		;독약내성→독약내성를 반전.
+		CASE 55
+			TALENT:ARG:독약내성 = !TALENT:ARG:독약내성
+		;실금버릇→실금버릇를 반전.
+		CASE 56
+			TALENT:ARG:실금버릇 = !TALENT:ARG:실금버릇
+		;자위하기쉬움→자위하기쉬움를 반전.
+		CASE 57
+			TALENT:ARG:자위하기쉬움 = !TALENT:ARG:자위하기쉬움
+		;악취둔감→악취둔감를 반전. 악취민감를 OFF
+		CASE 58
+			TALENT:ARG:악취둔감 = !TALENT:ARG:악취둔감
+			TALENT:ARG:악취민감 = 0
+		;악취민감→악취민감를 반전. 악취둔감를 OFF
+		CASE 59
+			TALENT:ARG:악취둔감 = 0
+			TALENT:ARG:악취민감 = !TALENT:ARG:악취민감
+		;중독되기쉬움→중독되기쉬움를 반전.
+		CASE 60
+			TALENT:ARG:중독되기쉬움 = !TALENT:ARG:중독되기쉬움
+		;도착적→도착적를 반전
+		CASE 61
+			TALENT:ARG:도착적 = !TALENT:ARG:도착적
+		;바이→바이를 반전, 남자혐오, 여자혐오를 오프
+		CASE 62
+			TALENT:ARG:바이 = !TALENT:ARG:바이
+			TALENT:ARG:남자혐오 = 0
+			TALENT:ARG:여자혐오 = 0
+		;새드→새드를 반전. 마조를 OFF
+		CASE 63
+			TALENT:ARG:새드 = !TALENT:ARG:새드
+			TALENT:ARG:마조 = 0
+		;마조→마조를 반전. 새드를 OFF
+		CASE 64
+			TALENT:ARG:새드 = 0
+			TALENT:ARG:마조 = !TALENT:ARG:마조
+		;매력→매력를 반전.
+		CASE 65
+			TALENT:ARG:매력 = !TALENT:ARG:매력
+		;매혹→매혹를 반전.
+		CASE 66
+			TALENT:ARG:매혹 = !TALENT:ARG:매혹
+		;수수께끼의매력→수수께끼의매력를 반전.
+		CASE 67
+			TALENT:ARG:수수께끼의매력 = !TALENT:ARG:수수께끼의매력
+		;작은체구→작은체구를 반전. 소인체형, 큰체구를 OFF
+		CASE 68
+			TALENT:ARG:큰체구 = 0
+			TALENT:ARG:소인체형 = 0
+			TALENT:ARG:작은체구 = !TALENT:ARG:작은체구
+		;C둔감→C둔감를 반전. C민감를 OFFC
+		CASE 69
+			TALENT:ARG:C민감 = !TALENT:ARG:C둔감
+			TALENT:ARG:C민감 = 0
+		;민감→C민감를 반전. C둔감를 OFF
+		CASE 70
+			TALENT:ARG:C둔감 = 0
+			TALENT:ARG:C민감 = !TALENT:ARG:C민감
+		;V둔감→남자의 경우는 입력 에러. V둔감를 반전. V민감를 OFFV
+		CASE 71
+			IF TALENT:ARG:남자
+				CLEARLINE 1
+				REUSELASTLINE 남자군요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:V둔감 = !TALENT:ARG:V둔감
+			TALENT:ARG:V민감 = 0
+		;V민감→남자의 경우는 입력 에러. V민감를 반전. V둔감를 OFF
+		CASE 72
+			IF TALENT:ARG:남자
+				CLEARLINE 1
+				REUSELASTLINE 남자군요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:V둔감 = 0
+			TALENT:ARG:V민감 = !TALENT:ARG:V민감
+		;A둔감→A둔감를 반전. A민감를 OFF
+		CASE 73
+			TALENT:ARG:A둔감 = !TALENT:ARG:A둔감
+			TALENT:ARG:A민감 = 0
+		;A민감→A민감를 반전. A둔감를 OFF
+		CASE 74
+			TALENT:ARG:A둔감 = 0
+			TALENT:ARG:A민감 = !TALENT:ARG:A민감
+		;B둔감→B둔감를 반전. B민감를 OFF
+		CASE 75
+			TALENT:ARG:B둔감 = !TALENT:ARG:B둔감
+			TALENT:ARG:B민감 = 0
+		;B민감→B민감를 반전. B둔감를 OFF
+		CASE 76
+			TALENT:ARG:B둔감 = 0
+			TALENT:ARG:B민감 = !TALENT:ARG:B민감
+		;빈유→남자의 경우는 입력 에러. 빈유를 반전. 절벽/거유/폭유를 OFF
+		CASE 77
+			IF MALE(ARG)
+				CLEARLINE 1
+				REUSELASTLINE 없지요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:빈유 = !TALENT:ARG:빈유
+			TALENT:ARG:절벽 = 0
+			TALENT:ARG:거유 = 0
+			TALENT:ARG:폭유 = 0
+		;절벽→남자의 경우는 입력 에러. 절벽를 반전. 빈유/폭유/거유를 OFF
+		CASE 78
+			IF MALE(ARG)
+				CLEARLINE 1
+				REUSELASTLINE 없지요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:절벽 = !TALENT:ARG:절벽
+			TALENT:ARG:빈유 = 0
+			TALENT:ARG:거유 = 0
+			TALENT:ARG:폭유 = 0
+		;거유→남자의 경우는 입력 에러. 거유를 반전. 빈유/절벽/폭유를 OFF
+		CASE 79
+			IF MALE(ARG)
+				CLEARLINE 1
+				REUSELASTLINE 없지요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:거유 = !TALENT:ARG:거유
+			TALENT:ARG:절벽 = 0
+			TALENT:ARG:빈유 = 0
+			TALENT:ARG:폭유 = 0
+		;폭유→남자의 경우는 입력 에러. 폭유를 반전. 빈유/절벽/거유를 OFF
+		CASE 80
+			IF MALE(ARG)
+				CLEARLINE 1
+				REUSELASTLINE 없지요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:폭유 = !TALENT:ARG:폭유
+			TALENT:ARG:절벽 = 0
+			TALENT:ARG:거유 = 0
+			TALENT:ARG:빈유 = 0
+		;큰체구→큰체구를 반전. 작은체구, 소인체형를 OFF
+		CASE 81
+			TALENT:ARG:작은체구 = 0
+			TALENT:ARG:소인체형 = 0
+			TALENT:ARG:큰체구 = !TALENT:ARG:큰체구
+		;아이사이즈→붙어 있지 않은 경우는 입력 에러. 아이사이즈를 반전. 단소/거근/말자지를 OFF
+		CASE 82
+			IF PENIS(ARG) == 0
+				CLEARLINE 1
+				REUSELASTLINE 붙어 있지 않네요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:아이사이즈 = !TALENT:ARG:아이사이즈
+			TALENT:ARG:단소 = 0
+			TALENT:ARG:거근 = 0
+			TALENT:ARG:말자지 = 0
+		;단소→붙어 있지 않은 경우는 입력 에러. 단소를 반전. 아이사이즈/거근/말자지를 OFF
+		CASE 83
+			IF PENIS(ARG) == 0
+				CLEARLINE 1
+				REUSELASTLINE 붙어 있지 않네요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:단소 = !TALENT:ARG:단소
+			TALENT:ARG:아이사이즈 = 0
+			TALENT:ARG:거근 = 0
+			TALENT:ARG:말자지 = 0
+		;거근→붙어 있지 않은 경우는 입력 에러. 거근를 반전. 단소/아이사이즈/말자지를 OFF
+		CASE 84
+			IF PENIS(ARG) == 0
+				CLEARLINE 1
+				REUSELASTLINE 붙어 있지 않네요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:거근 = !TALENT:ARG:거근
+			TALENT:ARG:단소 = 0
+			TALENT:ARG:아이사이즈 = 0
+			TALENT:ARG:말자지 = 0
+		;말자지→붙어 있지 않은 경우는 입력 에러. 말자지를 반전. 단소/거근/아이사이즈를 OFF
+		CASE 85
+			IF PENIS(ARG) == 0
+				CLEARLINE 1
+				REUSELASTLINE 붙어 있지 않네요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:말자지 = !TALENT:ARG:말자지
+			TALENT:ARG:단소 = 0
+			TALENT:ARG:거근 = 0
+			TALENT:ARG:아이사이즈 = 0
+		;음모없음→음모없음를 반전
+		CASE 86
+			TALENT:ARG:음모없음 = !TALENT:ARG:음모없음
+		;포경→붙어 있지 않은 경우는 입력 에러.
+		CASE 87
+			IF PENIS(ARG) == 0
+				CLEARLINE 1
+				REUSELASTLINE 붙어 있지 않네요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:포경 = !TALENT:ARG:포경
+		;회복빠름→회복빠름를 반전. 회복느림를 OFF
+		CASE 89
+			TALENT:ARG:회복빠름 = !TALENT:ARG:회복빠름
+			TALENT:ARG:회복느림 = 0
+		;회복느림→회복느림를 반전. 회복빠름를 OFF
+		CASE 90
+			TALENT:ARG:회복빠름 = 0
+			TALENT:ARG:회복느림 = !TALENT:ARG:회복느림
+		;소인체형→소인체형를 반전. 작은체구, 큰체구를 오프
+		CASE 91
+			TALENT:ARG:소인체형 = !TALENT:ARG:소인체형
+			TALENT:ARG:작은체구 = 0
+			TALENT:ARG:큰체구 = 0
+		;동물귀→동물귀를 반전.
+		CASE 92
+			TALENT:ARG:동물귀 = !TALENT:ARG:동물귀
+		;절륜→여자 아이의 경우는 입력 에러. 절륜를 반전.
+		CASE 93
+			IF PENIS(ARG) == 0
+				CLEARLINE 1
+				REUSELASTLINE 붙어 있지 않네요?
+				GOTO INPUT_LOOP
+			ENDIF
+			TALENT:ARG:절륜 = !TALENT:ARG:절륜
+;-----------------------------------------------------------
+		;성 경험 없음, 경험풍부를 오프
+		CASE 100
+			LOCAL:10 = 0
+		;성 경험 조금, 경험풍부를 오프
+		CASE 101
+			LOCAL:10 = 1
+		;성 경험 많은
+		CASE 102
+			LOCAL:10 = 3
+;-----------------------------------------------------------
+		CASE 997
+			JUMP MASTER_CUSTOM(ARG)
+		CASE 998
+			REPEAT 300
+				TALENT:ARG:COUNT = 0
+			REND
+			REPEAT 100
+				EXP:ARG:COUNT = 0
+			REND
+			CFLAG:ARG:5 = 0
+			TALENT:ARG:남자 = 1
+		;설정 완료
+		CASE 999
+			BREAK
+		CASEELSE
+			CLEARLINE 1
+			GOTO INPUT_LOOP
+	ENDSELECT
+WEND
+
+;-----------------------------------------------------------
+;후처리 부분
+;-----------------------------------------------------------
+;성 경험에 의한후처리
+SELECTCASE LOCAL:10
+	CASE 0
+		;성 경험 없음
+		TALENT:ARG:경험풍부 = 0
+	CASE 1
+		;성 경험 조금
+		TALENT:ARG:경험풍부 = 0
+		ABL:ARG:욕망 = 1
+		ABL:ARG:기교 = 2
+		ABL:ARG:C감각 = 2
+	CASE IS > 1
+		;성 경험 많은
+		TALENT:ARG:재생처녀 = 0
+		ABL:ARG:욕망 = 3
+		ABL:ARG:기교 = 3
+		ABL:ARG:C감각 = 3
+ENDSELECT
+;자위경험. 자위하기쉬움경우,+10
+EXP:ARG:자위경험 = TALENT:ARG:자위하기쉬움 * 10
+;봉사정신, 헌신적
+SIF TALENT:ARG:헌신적
+	ABL:ARG:봉사정신 += 3
+;새드, 새드끼
+SIF TALENT:ARG:새드
+	ABL:ARG:새드끼 += 3
+;마조, 마조끼
+SIF TALENT:ARG:더러움무시
+	ABL:ARG:마조끼 += 3
+;남자좋아, 여자좋아와레즈끼, 게이끼
+SIF MALE(ARG) && TALENT:ARG:남자좋아
+	ABL:ARG:게이끼 += 2
+SIF MALE(ARG) == 0 && TALENT:ARG:여자좋아
+	ABL:ARG:레즈끼 += 2

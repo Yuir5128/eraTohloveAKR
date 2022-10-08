@@ -1,0 +1,625 @@
+﻿;「CALL EVENT_NEXTDAY_T」 「CALL EVENTCHECK_M」를 추가
+
+@EVENTFIRST
+
+TARGET = -1
+ASSI = -1
+
+CALL CHARA_PRICE
+
+PBAND = 12
+
+;버전 업 플래그
+FLAG:150 = 14
+;조교시 텍스트 표시
+FLAG:6 = 1
+FLAG:7 = 2
+;캐릭터수의 관리
+FLAG:44 = 889
+;사정처 설정
+FLAG:99 = 8
+
+;엽기 커맨드 필터
+SAVESTR:0 = /390/391/392/
+CALL START_MODE
+
+;튜토리얼 표시 플래그
+SIF FLAG:154
+	CALL TUTORIAL
+DRAWLINE
+
+
+BEGIN SHOP
+
+@START_MODE(ARG)
+;모드
+LOCAL = 0
+;기본은 캐릭터명으로 표시한다
+LOCAL:1 = FLAG:43
+;난이도
+LOCAL:2 = 2
+SIF FLAG:4
+	LOCAL:2 = FLAG:4
+;커맨드 필터
+LOCAL:3 = 0
+SIF FLAG:41
+	LOCAL:3 = 1
+;튜토리얼
+LOCAL:4 = 0
+SIF FLAG:41
+	LOCAL:4 = 1
+;처녀동정모드
+LOCAL:5 = 0
+;-----------------------------------------------------------
+;표시부분
+;-----------------------------------------------------------
+PRINTL 　　　　　　　　　★★설정을 선택해 주세요★★
+$INPUT_LOOP_2
+WHILE 1
+	DRAWLINE
+	IF !ARG
+		PRINT 　　　　　모드:
+		SETCOLOR !LOCAL ? 0x8888FF # 0xA0A0A0
+		PRINTBUTTON @"[ 0] START　 (100일 기한에 코우슈우금백만고슈금를 버는 모드 주회 플레이유)", 0
+		PRINTL 
+		SETCOLOR LOCAL == 8? 0x8888FF # 0xA0A0A0
+		PRINTL 　　　　　　　　　[ 1] FREE MISSION　　　　　　　　　　　　　　　　
+		SETCOLOR LOCAL == 9? 0x8888FF # 0xA0A0A0
+		PRINTL 　　　　　　　　　[ 2] EXTRA　 (기한도 목표도 없음의 엔드리스 모드)
+		RESETCOLOR
+		PRINTL 
+	ENDIF
+	
+	;PRINT 　　캐릭터명 표시:
+	;SETCOLOR !LOCAL:1? 0x8888FF # 0xA0A0A0
+	;PRINTBUTTON @"[ 3] 통상　　(기본의 이름으로 표시합니다 예:라이나⇒라이나)", 3
+	;PRINTL 
+	;SETCOLOR LOCAL:1? 0x8888FF # 0xA0A0A0
+	;PRINTL 　　　　　　　　　[ 4] 본명　　(일부 캐릭터를 본명으로 표시합니다 예:라이나⇒페르나)
+	;RESETCOLOR
+	;PRINTL 
+	
+	PRINT 　　　　　난이도:
+	SETCOLOR LOCAL:2 == 1? 0x8888FF # 0xA0A0A0
+	PRINTBUTTON @"[ 5] EASY　　(미지근하게 놀아 보고 싶은 사람용)", 5
+	PRINTL 
+	SETCOLOR LOCAL:2 == 2? 0x8888FF # 0xA0A0A0
+	PRINTL 　　　　　　　　　[ 6] NORMAL (보통으로 플레이 하는 사람용)
+	SETCOLOR LOCAL:2 == 3? 0x8888FF # 0xA0A0A0
+	PRINTL 　　　　　　　　　[ 7] HARD　　(어려운 플레이에 불타는 사람용)
+	RESETCOLOR
+	PRINTL 
+	
+	PRINT 커맨드 필터:
+	SETCOLOR !LOCAL:3? 0x8888FF # 0xA0A0A0
+	PRINTBUTTON @"[ 8] 심플(처음으로 era를 플레이 하는 사람용 기본의 커맨드만)", 8
+	PRINTL 
+	SETCOLOR LOCAL:3 == 1? 0x8888FF # 0xA0A0A0
+	PRINTL 　　　　　　　　　[ 9] 매니아(era에 익숙해 온 사람용 취미의 커맨드가 충분히)
+	SETCOLOR LOCAL:3 == 2? 0x8888FF # 0xA0A0A0
+	PRINTL 　　　　　　　　　[10] 개별적으로 설정(커맨드마다 사용할까 설정할 수 있습니다)
+	RESETCOLOR
+	PRINTL 
+	
+	PRINT 　튜토리얼:
+	SETCOLOR !LOCAL:4? 0x8888FF # 0xA0A0A0
+	PRINTBUTTON @"[11] 있어　　　　　　　　　　　　　　　　　", 11
+	PRINTL 
+	SETCOLOR LOCAL:4? 0x8888FF # 0xA0A0A0
+	PRINTL 　　　　　　　　　[12] 없음　　　　　　　　　　　　　　　　　　　　　
+	RESETCOLOR
+	PRINTL 
+	
+	PRINT 　처녀동정모드:
+	SETCOLOR LOCAL:5? 0x8888FF # 0xA0A0A0
+	PRINTBUTTON @"[13] ON (저런 사람도 이런 사람도처녀·동정에)　　　", 13
+	PRINTL 
+	SETCOLOR !LOCAL:5? 0x8888FF # 0xA0A0A0
+	PRINTL 　　　　　　　　　[14] OFF 　　　　　　　　　　　　　　　　　　　　　
+	RESETCOLOR
+	PRINTL 
+	
+	PRINTL 　　　　　　　　　[15] 콘피그
+	PRINTL 　　　　　　　　　[16] 헬프
+	PRINTL 
+	PRINT 　　　　　　　　　
+	SETCOLOR 0x8888FF
+	PRINTBUTTON @" %UNICODE(0x27A0)%조교를 시작한다               ", 17
+	RESETCOLOR
+	PRINTL 
+;-----------------------------------------------------------
+;입력 처리 부분
+;-----------------------------------------------------------
+	$INPUT_LOOP
+	INPUT
+	IF ARG && RESULT <= 2
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+	ENDIF
+	SELECTCASE RESULT
+		CASE 0
+			LOCAL = 0
+		CASE 1, 2
+			LOCAL = RESULT + 7
+		CASE 3, 4
+			LOCAL:1 = !LOCAL:1
+		CASE 5, 6, 7
+			LOCAL:2 = RESULT - 4
+		CASE 8, 9, 10
+			LOCAL:3 = RESULT - 8
+		CASE 11, 12
+			LOCAL:4 = !LOCAL:4
+		CASE 13, 14
+			LOCAL:5 = !LOCAL:5
+		CASE 15
+			CALL OPTION
+			LOCAL:1 = FLAG:43
+		CASE 16
+			CALL DICTIONARY_MENU
+		CASE 17
+			BREAK
+		CASEELSE
+			CLEARLINE 1
+			GOTO INPUT_LOOP
+	ENDSELECT
+WEND
+;-----------------------------------------------------------
+;후처리 부분
+;-----------------------------------------------------------
+IF !LOCAL:3
+	SAVESTR:0 = /16/25/35/44/56/62/72/87/150/156/160/161/162/181/183/184/185/222/224/226/227/228/240/241/242/280/281/282/283/284/285/286/323/340/380/381/382/383/405/406/430/431/440/441/
+ELSEIF LOCAL:3 == 1
+	SAVESTR:0 = 
+ENDIF
+FLAG:43 = LOCAL:1
+FLAG:4 = LOCAL:2
+FLAG:154 = !LOCAL:4
+FLAG:155 = LOCAL:5
+DAY = 1
+MONEY = 30000
+SIF FLAG:5 == 9
+	MONEY += 70000
+SIF FLAG:5 == 0
+	CALL OPENING
+IF !LOCAL
+	FLAG:5 = 0
+	MASTER = -1
+	CALL START_CHARA_SELECT
+	CALL CHARA_BUY(1)
+ELSEIF LOCAL == 8
+	FLAG:5 = 8
+	CALL FREE_MISSION_START
+	SIF RESULT
+		GOTO INPUT_LOOP_2
+ELSE
+	FLAG:5 = 9
+	MASTER = -1
+	CALL START_CHARA_SELECT
+ENDIF
+
+@EVENTCOM
+#PRI
+REPEAT 30
+	TFLAG:COUNT = 0
+REND
+TFLAG:30 = 0
+TFLAG:33 = 0
+TFLAG:34 = 0
+TFLAG:43 = 0
+;입상의 도구 착탈 분기
+TFLAG:54 = 0
+TFLAG:58 = 0
+TFLAG:59 = 0
+TFLAG:68 = 0
+TFLAG:75 = 0
+TFLAG:100 = 0
+TFLAG:160 = 0
+TFLAG:161 = 0
+TFLAG:162 = 0
+TFLAG:163 = 0
+
+@EVENTCOMEND
+#PRI
+IF TALENT:기절 && (SELECTCOM == 1 || SELECTCOM == 153 || SELECTCOM == 154)
+	TALENT:기절 = 0
+	BASE:기력 = 1
+ENDIF
+IF BASE:체력 <= 0
+	PRINTFORMW ………………
+	PRINTFORMW …………
+	PRINTFORMW ……
+	PRINTFORMW (격렬한 조교에 의해,%CALLNAME%는[기절]했습니다 조교를 종료합니다)
+	EXP:기절경험 += 1
+	PRINTFORMW 기절경험+1
+	IF EXP:기절경험 == 1
+		EXP:이상경험 += 1
+		PRINTFORMW 이상경험+1
+	ENDIF
+	;체력회복 정지 플래그
+	CFLAG:6 += 2
+	SIF TALENT:불사신
+		CFLAG:6 -= 1
+	CFLAG:10 += 10
+	BASE:체력 = 1
+	BASE:기력 = 0
+	TALENT:기절 = 4
+	;순종다운
+	IF ABL:순종 > 0
+		ABL:순종 -= 1
+		PRINTFORML %CALLNAME%의순종가 1내렸다
+	ENDIF
+	BEGIN AFTERTRAIN
+ELSEIF BASE:체력 < 500
+	PRINTW (체력가 한계에 와 있습니다 조교를 종료합니다)
+	BEGIN AFTERTRAIN
+ELSEIF TFLAG:74 < 0
+	PRINTW (남은 시간이 없어졌습니다 조교를 종료합니다)
+	BEGIN AFTERTRAIN
+ENDIF
+
+
+@EVENTTURNEND
+#PRI
+;밤이벤트 호출
+IF TIME == 1
+	CALL EVENT_NIGHT_SELF
+	CALL EVENT_NIGHT_AFTER
+ENDIF
+REPEAT CHARANUM
+	;기력의 회복
+	IF TALENT:COUNT:기절
+		TALENT:COUNT:기절 -= 1
+	ELSE
+		BASE:COUNT:기력 = MAXBASE:COUNT:기력
+	ENDIF
+	
+	;뇨의·변의·구역질게이지를 초기치에
+	BASE:COUNT:뇨의 = 10
+	BASE:COUNT:변의 = 10
+	BASE:COUNT:구역질 = 10
+
+	;노역중의 캐릭터는체력회복 처리 없음
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+
+	;체력회복 정지 처리
+	IF CFLAG:COUNT:6 > 0
+		CFLAG:COUNT:6 -= 1
+		CONTINUE
+	ENDIF
+
+	;체력의 회복(오후의 조교후는 밤의 휴일이 들어가므로 회복 크다)
+	IF TIME == 0
+		A = MAXBASE:COUNT:체력 / 15
+	ELSE
+		A = MAXBASE:COUNT:체력 / 5
+	ENDIF
+
+	;회복빠름, 회복느림, 발정기, 불사신
+	IF TALENT:COUNT:회복빠름
+		TIMES A , 1.50
+	ELSEIF TALENT:COUNT:회복느림 || TALENT:COUNT:발정기
+		TIMES A , 0.75
+	ELSEIF TALENT:COUNT:불사신
+		TIMES A , 1.80
+	ENDIF
+
+	;일광욕, 월광욕, 흡혈귀
+	IF TIME == 0
+		SIF TALENT:COUNT:일광욕
+			A += 100
+	ELSE
+		SIF TALENT:COUNT:흡혈귀
+			TIMES A , 1.50
+		SIF TALENT:COUNT:월광욕
+			A += 100
+	ENDIF
+
+	;치료
+	IF ASSI >= 0
+		SIF TALENT:ASSI:치료
+			A += 150
+	ENDIF
+	SIF TALENT:MASTER:치료
+		A += 150
+	
+	;기절
+	SIF TALENT:COUNT:기절
+		TIMES A , 0.50
+
+	;휴게 플래그(휴게 플래그가 지나 있다, 혹은 조교 대상이 아니다)
+	IF FLAG:0 || TARGET != COUNT
+		A += 100
+		CFLAG:COUNT:10 -= 1
+	ENDIF
+
+	;숍에서 휴게를 선택시
+	IF FLAG:0 == 2
+		TIMES A , 2.00
+		CFLAG:COUNT:10 -= 1
+	ENDIF
+
+	BASE:COUNT:체력 += A
+	SIF BASE:COUNT:체력 > MAXBASE:COUNT:체력
+		BASE:COUNT:체력 = MAXBASE:COUNT:체력
+
+	;스트레스치가 0 미만의 경우는 0으로 한다
+	SIF CFLAG:COUNT:10 < 0
+		CFLAG:COUNT:10 = 0
+	
+	;금욕 포인트의 처리.
+	;정조대 하고 있는 캐릭터는 넉넉하게 올린다. 조교 대상 이외도 서서히 올라 간다.
+	IF TEQUIP:COUNT:속옷（아래） == 5
+		IF TALENT:COUNT:자위광 || ABL:COUNT:자위중독 >= 3 || ABL:COUNT:욕망 >= 8 || TALENT:COUNT:발정기
+			CFLAG:COUNT:602 += 15
+		ELSEIF TALENT:COUNT:자위하기쉬움 || ABL:COUNT:자위중독 || ABL:COUNT:욕망 >= 5
+			CFLAG:COUNT:602 += 10
+		ELSE
+			CFLAG:COUNT:602 += 5
+		ENDIF
+	ELSEIF TALENT:COUNT:발정기
+		CFLAG:COUNT:602 += 10
+	ELSE
+		CFLAG:COUNT:602 += 5
+	ENDIF
+REND
+CALL EVENTCHECK_ABL
+FLAG:0 = 0
+
+;오후라면 다음날, 오전이라면 오후로 한다
+IF TIME == 1
+	FLAG:81 += 1
+	FLAG:82 += 1
+
+	;일자 변경시의 이벤트 호출
+	CALL EVENT_NEXTDAY
+
+	DAY = DAY+1
+	PRINTL 
+	PRINTW 하루가 끝났다……
+	TIME = 0
+	;배드 엔드의 판정
+	SIF DAY > 100 && FLAG:5 == 0
+		CALL BADENDING_1
+	SIF MONEY < 0 && FLAG:5 == 0
+		CALL BADENDING_2
+
+	;아침이 되었을 때의 이벤트 호출
+	CALL EVENT_NEWDAY
+	CALL EVENT_NEWDAY_SELF
+ELSE
+	;전체의임신판정의 처리
+	CALL IN_VAGINA_ANAL_ALL
+	
+	PRINTL 
+	PRINTW 밤이 되었습니다
+	TIME = 1
+ENDIF
+
+BEGIN SHOP
+
+
+
+;────────────────────────────────────
+;버전 업
+;────────────────────────────────────
+@VERSION_UP
+IF FLAG:150 == 0
+	FOR LOCAL, 0, CHARANUM
+		IF (TALENT:LOCAL:3 || TALENT:LOCAL:5 || TALENT:LOCAL:6 || TALENT:LOCAL:8) && CFLAG:LOCAL:41 <= 0
+			CFLAG:LOCAL:41 = NO:MASTER
+			CFLAG:LOCAL:40 = 1
+		ENDIF
+	NEXT
+	FLAG:150 = 1
+ENDIF
+IF FLAG:150 < 2
+	FOR LOCAL, 0, CHARANUM
+		FOR LOCAL:1, 0, 100
+			CFLAG:LOCAL:(1099 + LOCAL:1) = CFLAG:LOCAL:(899 + LOCAL:1)
+			CFLAG:LOCAL:(899 + LOCAL:1) = 0
+		NEXT
+		SIF NO:LOCAL == 200
+			FLAG:33++
+		IF TALENT:LOCAL:3
+			CFLAG:LOCAL:39 = 3
+			CFLAG:LOCAL:40 = 1
+		ELSEIF TALENT:LOCAL:4
+			CFLAG:LOCAL:39 = 4
+			CFLAG:LOCAL:40 = 1
+		ELSEIF TALENT:LOCAL:5
+			CFLAG:LOCAL:39 = 5
+			CFLAG:LOCAL:40 = 1
+		ELSEIF TALENT:LOCAL:6
+			CFLAG:LOCAL:39 = 6
+			CFLAG:LOCAL:40 = 1
+		ELSEIF TALENT:LOCAL:7
+			CFLAG:LOCAL:39 = 7
+			CFLAG:LOCAL:40 = 1
+		ELSEIF TALENT:LOCAL:8
+			CFLAG:LOCAL:39 = 8
+			CFLAG:LOCAL:40 = 1
+		ENDIF
+		IF TALENT:LOCAL:165
+			CFLAG:LOCAL:39 = 165
+			CFLAG:LOCAL:40 = 1
+		ENDIF
+	NEXT
+	FLAG:150 = 2
+ENDIF
+IF FLAG:150 < 3
+	FLAG:33 = 0
+	FOR LOCAL, 0, CHARANUM
+		SIF NO:LOCAL > 150 && NO:LOCAL <= 160
+			FLAG:33++
+	NEXT
+	FLAG:150 = 3
+ENDIF
+IF FLAG:150 < 4
+	FLAG:84 = 0
+	FLAG:150 = 4
+ENDIF
+IF FLAG:150 < 5
+	FOR LOCAL, 0, CHARANUM
+		IF TALENT:LOCAL:154
+			IF CFLAG:LOCAL:114 < CHARANUM
+				CFLAG:LOCAL:114 = NO:(CFLAG:LOCAL:114)
+			ELSE
+				FOR LOCAL:1, 0, CHARANUM
+					SIF STRLENS(CSTR:(LOCAL:1):3)
+						CFLAG:LOCAL:114 = NO:(LOCAL:1)
+				NEXT
+			ENDIF
+		ENDIF
+	NEXT
+	FLAG:150 = 5
+ENDIF
+IF FLAG:150 < 6
+	FLAG:44 = 100
+	FLAG:150 = 6
+ENDIF
+IF FLAG:150 < 7
+	FOR LOCAL, 0, CHARANUM
+		;아버지, 어머니의 캐릭터 번호를 등록 번호→고유 번호에
+		SIF STRLENS(CSTR:LOCAL:2)
+			CFLAG:LOCAL:1000 = NO:(CFLAG:LOCAL:1000)
+		SIF STRLENS(CSTR:LOCAL:3)
+			CFLAG:LOCAL:1001 = NO:(CFLAG:LOCAL:1001)
+		SIF STRLENS(CSTR:LOCAL:4)
+			CFLAG:LOCAL:1002 = NO:(CFLAG:LOCAL:1002)
+		SIF STRLENS(CSTR:LOCAL:5)
+			CFLAG:LOCAL:1003 = NO:(CFLAG:LOCAL:1003)
+		SIF STRLENS(CSTR:LOCAL:6)
+			CFLAG:LOCAL:1004 = NO:(CFLAG:LOCAL:1004)
+		SIF STRLENS(CSTR:LOCAL:7)
+			CFLAG:LOCAL:1005 = NO:(CFLAG:LOCAL:1005)
+		;아이가 성장할 때까지의 비표시 플래그로아이를 검색
+		IF CFLAG:LOCAL:26
+			LOCAL:2 = 0
+			LOCAL:3 = 0
+			;어머니는 아이를 키울 수 있는 캐릭터인가
+			SIF TALENT:(NO2(CFLAG:LOCAL:1000)):붕괴 || NO:MASTER == CFLAG:LOCAL:1000 
+				LOCAL:3 = 1
+			;아이를 키우고 있는 캐릭터를 검색
+			FOR LOCAL:1, 0, CHARANUM
+				;육아중 한편, 기르고 있는 아이 플래그와아이가 동일한가 친어머니가 육아 불가
+				IF TALENT:(LOCAL:1):육아중 && (NO:LOCAL == CFLAG:(LOCAL:1):114 || LOCAL:3)
+					CFLAG:LOCAL:115 = NO:(LOCAL:1)
+					CFLAG:LOCAL:116 = CFLAG:(LOCAL:1):110
+					LOCAL:2 = 1
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+	FLAG:150 = 7
+ENDIF
+IF FLAG:150 < 8
+	SIF !CFLAG:MASTER:1
+		CFLAG:MASTER:1 = 3
+	FLAG:150 = 8
+ENDIF
+IF FLAG:150 < 9
+	CLEARBIT FLAG:2, 6
+	FLAG:150 = 9
+ENDIF
+IF FLAG:150 < 10
+	FLAG:44 = 200
+	FLAG:150 = 10
+ENDIF
+IF FLAG:150 < 11
+	FLAG:1083 = 3000
+	FLAG:150 = 11
+ENDIF
+IF FLAG:150 < 12
+	FLAG:150 = 12
+ENDIF
+IF FLAG:150 < 13
+	;CFLAG:4의 데이터의 가지는 방법의 호환 처리
+	REPEAT CHARANUM
+		SIF CFLAG:COUNT:4 == 0
+			CONTINUE
+		
+		;9자리수 이후를 보유
+		LOCAL:0 = CFLAG:COUNT:4 / POWER(10, 8)
+		;7자리수까지를 보유
+		LOCAL:1 = CFLAG:COUNT:4 % POWER(10, 6)
+		
+		;8형목을 보유 둔감 민감
+		LOCAL:2 = (CFLAG:COUNT:4 % POWER(10, 8)) / POWER(10, 7)
+		;7형목을 보유 부위
+		LOCAL:3 = (CFLAG:COUNT:4 % POWER(10, 7)) / POWER(10, 6)
+		
+		;9형목 이후를 11 자리수 이후에 비켜 놓는 7-10 자리수째는 0이 들어가 있다
+		LOCAL:4 = (LOCAL:0 * POWER(10, 10)) + LOCAL:1
+		
+		SELECTCASE LOCAL:3
+			CASE 1
+				;C 7자리수째에 격납한다
+				LOCAL:4 += LOCAL:2 * POWER(10, 6)
+			CASE 2
+				;V 8자리수째에 격납한다
+				LOCAL:4 += LOCAL:2 * POWER(10, 7)
+			CASE 3
+				;A 9자리수째에 격납한다
+				LOCAL:4 += LOCAL:2 * POWER(10, 8)
+			CASE 4
+				;B 10 자리수째에 격납한다
+				LOCAL:4 += LOCAL:2 * POWER(10, 9)
+		ENDSELECT
+		
+		CFLAG:COUNT:4 = LOCAL:4
+	REND
+	FLAG:150 = 13
+ENDIF
+IF FLAG:150 < 14
+	REPEAT CHARANUM
+		CFLAG:COUNT:4 = 0
+	REND
+	FLAG:150 = 14
+ENDIF
+
+
+@OPENING
+
+;오프닝 표시
+$INPUT_LOOP_5
+IF FLAG:5 == 0
+	PRINTL 오프닝 스토리를 표시합니까?
+	PRINTL [0] - 표시한다
+	PRINTL [1] - 표시하지 않는다
+	INPUT
+	IF RESULT == 0
+		CALL OPENING_START
+		DRAWLINE
+	ELSEIF RESULT == 1
+		DRAWLINE
+	ELSE
+		GOTO INPUT_LOOP_5
+	ENDIF
+ENDIF
+
+;종료 처리(프리 미션 클리어후에 사용)
+@GAME_END(ARG)
+DRAWLINE
+PRINTL 게임을 종료합니까?
+PRINTC [0]게임을 종료한다
+SIF ARG
+	PRINTC [1]게임을 계속한다
+PRINTC [2]타이틀에 돌아온다
+PRINTL
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	QUIT
+ELSEIF RESULT == 1 && ARG
+	FLAG:5 = 9
+	;FLAG:24 =프리 미션 번호는 그대로 보유
+ELSEIF RESULT == 2
+	BEGIN TITLE
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+

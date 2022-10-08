@@ -1,0 +1,259 @@
+﻿;====================================================================
+;DUTY_PRACTICE.ERB 내번-손 맞추어라
+;아무래도 내번 시키고 싶어서 만들었다.
+;1날 1조 밖에 내지 못하고, 내번에 낸 캐릭터는 그 날 1일 구속되지만, 스트레스 해소의손단이 됩니다.
+@DUTY_PRACTICE
+;====================================================================
+;사용하는 일시 변수의 초기화
+A = 0
+B = 0
+LOCAL:3 = 0
+LOCAL:4 = 0
+
+C = 0
+V = 0
+
+DRAWLINE
+PRINTL 【 내 차례-손 맞추어라 】
+PRINTL 
+PRINTL 노예에게 2명 1조로 페어를 짜게 해 동안차례 「손 맞추어라」를 실시하게 한다.
+PRINTL 특별히 얻는 것은 없지만, 스트레스 해소에는 가지고 와?
+PRINTL 
+PRINTL ■ 당번 내용
+PRINTL 　:[손 맞추어라]
+PRINTL 
+PRINTL ■ 선택되고 있는 추가 옵션
+PRINTL 　:＜이용 가능한 옵션은 없습니다＞
+DRAWLINE
+PRINTL 
+
+;--------------------------------------------------------
+;내번 시키는 노예를 선택
+;--------------------------------------------------------
+PRINTL 내 차례로손 맞추게 하는 노예를 2명, 선택해 주세요
+WHILE V < 10
+	C = COUNT
+	CALL SET_DUTY_PRACTICE2
+	;REPEAT CHARANUM
+	;	SIF COUNT == MASTER
+	;		CONTINUE
+	;	SIF CFLAG:COUNT:1 < 2
+	;		CONTINUE
+	;	SIF CFLAG:COUNT:12 > 0
+	;		CONTINUE
+	;	C = COUNT
+	;	CALL CHECK_CHILD_CARE
+	;	SIF RESULT == 1
+	;		CONTINUE
+	;	SIF (CFLAG:COUNT:151 & 64) && BASE:COUNT:체력 >= 1000 && CFLAG:COUNT:18 > 0
+	;		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%를 제외한다
+	;	SIF (CFLAG:COUNT:151 & 64) && BASE:COUNT:체력 >= 1000 && CFLAG:COUNT:18 == 0 && V < 2
+	;		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%를 선택
+	;REND
+	COUNT = C
+	SIF A > 0 && B > 0
+		PRINTL [800] - 현재의 2명이 확정
+	PRINTL [999] - 돌아온다
+	$INPUT_LOOP
+	INPUT
+	IF RESULT == 999
+		SIF CFLAG:A:18
+			CFLAG:A:18 = 0
+		SIF CFLAG:B:18
+			CFLAG:B:18 = 0
+		RETURN 0
+	ELSEIF RESULT == 800
+		BREAK
+	ELSEIF RESULT < 0 || RESULT >= CHARANUM
+		GOTO INPUT_LOOP
+	ELSEIF RESULT == MASTER
+		GOTO INPUT_LOOP
+	ELSEIF CFLAG:RESULT:12 > 0
+		GOTO INPUT_LOOP
+	ELSEIF ((CFLAG:RESULT:151 & 64) == 0) || BASE:RESULT:체력 < 1000
+		GOTO INPUT_LOOP
+	ELSE
+		IF CFLAG:RESULT:18 == 0 && V < 2
+			CFLAG:RESULT:18 = 1
+			IF A == 0
+				A = RESULT
+			ELSE
+				B = RESULT
+			ENDIF
+			V += 1
+		;벌써 선택되고 있는 캐릭터를 재선택 했을 경우
+		ELSE
+			IF RESULT == A
+				;벌써 2인째가 있는데 1인째를 제외했을 경우, 융통 오른다
+				IF B > 0
+					A = B
+					CFLAG:A:18 = 1
+					CFLAG:B:18 = 0
+					B = 0
+				ELSE
+					CFLAG:A:18 = 0
+					A = 0
+				ENDIF
+			ELSE
+				CFLAG:RESULT:18 = 0
+				B = 0
+			ENDIF
+			V -= 1
+			SIF V < 0
+				V = 0
+		ENDIF
+	ENDIF
+WEND
+
+SIF A == 0 && B == 0
+	RETURN 0
+
+;등록 번호가 작은 (분)편을 A로 한다
+IF A > B
+	LOCAL = A
+	A = B
+	B = LOCAL
+ENDIF
+
+;--------------------------------------------------------
+;손맞댐을 실행한다
+;--------------------------------------------------------
+;PRINTFORML %CALLNAME:A%과 %CALLNAME:B%가, 손맞댐을 개시했습니다
+
+;노역 플래그를손맞댐으로 설정
+CFLAG:A:12 = 3
+CFLAG:B:12 = 3
+
+;2회KOJO_MESSAGE_EVENT 하는 것으로 억지로입상표 가리키게 한다
+
+;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+LOCAL = TARGET
+
+TFLAG:13 = 74
+
+UCHIBAN_A = A
+UCHIBAN_B = B
+
+TARGET = A
+;이벤트입상(내번개시시);지문과 A의입상
+CALL KOJO_MESSAGE_EVENT
+
+TARGET = B
+;이벤트입상(내번개시시);B의입상
+CALL KOJO_MESSAGE_EVENT
+
+TARGET = LOCAL
+
+PRINTL 
+
+;A나 B에 보존되고 있었던 것이 타겟이었던 경우, 내번에 나가므로 지운다.
+SIF UCHIBAN_A == TARGET || UCHIBAN_B == TARGET
+	TARGET = -1
+SIF UCHIBAN_A == ASSI || UCHIBAN_B == ASSI
+	ASSI = -1
+
+;내번에 나와 있는 캐릭터가 있는 플래그(손 맞추고=1)를 세운다
+FLAG:161 |= 1
+
+
+
+
+;====================================================================
+;돌아왔을 때의 처리
+;====================================================================
+@END_DUTY_PRACTICE
+A = -1
+B = -1
+
+REPEAT CHARANUM
+	IF CFLAG:COUNT:12 == 3
+		IF A == -1
+			A = COUNT
+		ELSE
+			B = COUNT
+		ENDIF
+	ENDIF
+REND
+
+
+DRAWLINE
+PRINTFORMW %CALLNAME:A%과 %CALLNAME:B%의손 맞추고 가 종료되었습니다
+
+;2회KOJO_MESSAGE_EVENT 하는 것으로 억지로입상표 가리키게 한다
+;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+LOCAL = TARGET
+TFLAG:13 = 75
+
+UCHIBAN_A = A
+UCHIBAN_B = B
+
+TARGET = A
+;이벤트입상(내번종료시);지문과 A의입상
+CALL KOJO_MESSAGE_EVENT
+
+TARGET = B
+;이벤트입상(내번종료시);B의입상
+CALL KOJO_MESSAGE_EVENT
+TARGET = LOCAL
+
+PRINTL 
+
+
+;--------------------------------------------------------
+;습득의 구슬
+;--------------------------------------------------------
+JUEL:A:습득 += 200
+JUEL:B:습득 += 200
+PRINTFORML %CALLNAME:A%과 %CALLNAME:B%에습득의 구슬＋{200}
+
+
+
+;--------------------------------------------------------
+;체력의 감소와 스트레스 감소
+;--------------------------------------------------------
+;체력의 감소
+BASE:A:체력 -= 500
+BASE:B:체력 -= 500
+
+;스트레스 해소
+CFLAG:A:10 -= 10
+CFLAG:B:10 -= 10
+
+SIF CFLAG:A:10 < 0
+	CFLAG:A:10 = 0
+SIF CFLAG:B:10 < 0
+	CFLAG:B:10 = 0
+
+;사용한 플래그는 정리합시다
+CFLAG:A:12 = 0
+CFLAG:A:18 = 0
+CFLAG:B:12 = 0
+CFLAG:B:18 = 0
+
+;내번에 나와 있는 캐릭터가 있는 플래그(손 맞추고=1)를 떨어뜨린다
+SIF FLAG:161 & 1
+	FLAG:161 -= 1
+
+DRAWLINE
+
+;====================================================================
+;내번 시키는 노예를 선택 2
+;====================================================================
+@SET_DUTY_PRACTICE2
+REPEAT CHARANUM
+	SIF COUNT == MASTER
+		CONTINUE
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+	C = COUNT
+		CALL CHECK_CHILD_CARE
+		SIF RESULT == 1
+			CONTINUE
+	SIF (CFLAG:COUNT:151 & 64) && BASE:COUNT:체력 >= 1000 && CFLAG:COUNT:18 > 0
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%를 제외한다
+	SIF (CFLAG:COUNT:151 & 64) && BASE:COUNT:체력 >= 1000 && CFLAG:COUNT:18 == 0 && V < 2
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%를 선택
+REND
+
+
+

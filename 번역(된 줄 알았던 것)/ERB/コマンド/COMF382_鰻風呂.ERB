@@ -1,0 +1,244 @@
+﻿;-------------------------------------------------
+;뱀장어탕
+;인간세상 밖계 커맨드
+;-------------------------------------------------
+@COM382
+
+PRINTL 뱀장어탕
+STR:0 = 뱀장어탕
+
+CALL KOJO_MESSAGE_COM
+
+F = 1
+R = 1
+;V에 도구를 삽입하고 있는 경우
+SIF TALENT:남자 || TEQUIP:바이브 || TEQUIP:정조대
+	F = 0
+
+;A에 도구를 삽입하고 있는 경우
+SIF TEQUIP:애널바이브 || TEQUIP:애널비즈 || TEQUIP:확장벌룬
+	R = 0
+
+;V경험을 수반하는 커맨드의 플래그(처녀막재생 대응)
+SIF F && (TALENT:처녀 || TALENT:재생처녀)
+	TFLAG:19 |= 1
+
+;스타킹 찌릿찌릿 플래그
+IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 400
+LOSEBASE:기력 += 650
+
+SOURCE:쾌C += 100
+SOURCE:쾌B += 100
+SOURCE:통증 += 1000
+SOURCE:두려움 += 2000
+SOURCE:굴복 += 1200
+SOURCE:불결 += 800
+SOURCE:일탈 += 1500
+SOURCE:반발 += 1500
+;V에 도구를 삽입하고 있지 않는 경우
+IF F
+	SOURCE:쾌V += 350
+	SOURCE:통증 += 500
+	SOURCE:두려움 += 500
+ENDIF
+;A에 도구를 삽입하고 있지 않는 경우
+IF R
+	SOURCE:쾌A += 350
+	SOURCE:통증 += 500
+	SOURCE:두려움 += 500
+ENDIF
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;V에 도구를 삽입하고 있지 않는 경우만 본다
+IF F
+	;V에의고통는 먼저 처리해 둔다
+	;EXP:V경험를 본다(처녀의반감는 별도 처리필 보고인 것으로 생략)
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증, 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:반발, 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ENDIF
+
+	;PALAM:윤활를 본다
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증, 0.70
+		TIMES SOURCE:반발, 1.20
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증, 0.10
+	ENDIF
+ENDIF
+
+;A에 도구를 삽입하고 있지 않는 경우만 본다
+IF R
+	;A에의고통는 먼저 처리해 둔다
+	;EXP:A경험를 본다
+	IF EXP:A경험 < EXPLV:1
+		TIMES SOURCE:통증, 3.00
+		TIMES SOURCE:반발, 3.00
+	ELSEIF EXP:A경험 < EXPLV:2
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 2.00
+	ELSEIF EXP:A경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:반발, 1.50
+	ELSEIF EXP:A경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.60
+		TIMES SOURCE:반발, 1.20
+	ELSEIF EXP:A경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:A경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.20
+	ENDIF
+
+	;PALAM:윤활를 본다
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 2.00
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증, 1.00
+		TIMES SOURCE:반발, 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증, 0.60
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증, 0.30
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증, 0.20
+	ENDIF
+ENDIF
+
+;특히 하드한 커맨드에서는, 이상경험에 응해 효과를 줄인다
+IF EXP:이상경험 < EXPLV:1
+	TIMES SOURCE:두려움, 1.20
+	TIMES SOURCE:일탈, 1.20
+	TIMES SOURCE:반발, 1.20
+ELSEIF EXP:이상경험 < EXPLV:2
+	TIMES SOURCE:두려움, 0.90
+	TIMES SOURCE:일탈, 0.90
+	TIMES SOURCE:반발, 0.90
+ELSEIF EXP:이상경험 < EXPLV:3
+	TIMES SOURCE:두려움, 0.80
+	TIMES SOURCE:일탈, 0.80
+	TIMES SOURCE:반발, 0.80
+ELSEIF EXP:이상경험 < EXPLV:4
+	TIMES SOURCE:두려움, 0.70
+	TIMES SOURCE:일탈, 0.70
+	TIMES SOURCE:반발, 0.70
+ELSEIF EXP:이상경험 < EXPLV:5
+	TIMES SOURCE:두려움, 0.60
+	TIMES SOURCE:일탈, 0.60
+	TIMES SOURCE:반발, 0.60
+ELSE
+	TIMES SOURCE:두려움, 0.50
+	TIMES SOURCE:일탈, 0.50
+	TIMES SOURCE:반발, 0.50
+ENDIF
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;점액의 더러움
+IF TEQUIP:머리장식
+	STAIN:머리장식 = 32
+	STAIN:머리장식 = 128
+ENDIF
+IF TEQUIP:특수 3
+	STAIN:눈장식 = 32
+	STAIN:눈장식 = 128
+ENDIF
+
+STAIN:머리카락 = 32
+STAIN:머리카락 = 128
+STAIN:입 = 32
+
+IF TEQUIP:특수 1 == 1
+	STAIN:장갑 = 32
+	STAIN:장갑 = 128
+ELSE
+	STAIN:손 = 32
+ENDIF
+
+STAIN:가슴 = 32
+STAIN:페니스 = 32
+STAIN:바기나 = 32
+IF F
+	STAIN:바기나 = 32
+	STAIN:질내 = 32
+	;질내에 파과[破瓜]의 피의 더러움을 부가
+	SIF TALENT:처녀 == 1 || TALENT:재생처녀 == 1
+		STAIN:질내 |= 64
+ENDIF
+STAIN:애널 = 32
+SIF R
+	STAIN:장내 = 32
+STAIN:발 = 32
+IF TEQUIP:특수 2
+	STAIN:발장식 = 32
+	STAIN:발장식 = 128
+ENDIF
+
+
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;V경험
+IF F > 0
+	EXP:V경험 += 2
+	PRINTL V경험＋2
+ENDIF
+
+;A경험
+IF R > 0
+	EXP:A경험 += 2
+	PRINTL A경험＋2
+ENDIF
+
+;뱀장어탕첫경험 때, 이상경험추가
+IF EXP:뱀장어탕경험 == 0
+	EXP:이상경험 += 1
+	PRINTL 뱀장어탕첫경험으로이상경험＋1
+ENDIF
+EXP:뱀장어탕경험 += 1
+
+;의존도 벡터
+TFLAG:33 = 5
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+

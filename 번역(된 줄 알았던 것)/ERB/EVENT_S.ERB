@@ -1,0 +1,343 @@
+﻿;EVENT_S.ERB, EVENT_SUB, 추가 처리 및 서브 이벤트
+;-------------------------------------------------
+;일자가 바뀌었을 때의 이벤트
+;-------------------------------------------------
+@EVENT_NEXTDAY
+$INPUT_LOOP_2
+
+;구현소유로레즈경험or게이경험 2500 이상
+IF TARGET >= 0 
+	IF !TALENT:반음반양 && !TALENT:후타나리 && !TALENT:컨트보이 && !TALENT:쉬메일 && TALENT:구현 && (EXP:레즈경험 >= 2500 || EXP:게이경험 >= 2500)
+		DRAWLINE
+		PRINTFORML …… 아무래도[구현]의 효과가 나타날 것 같다
+		PRINTFORM %CALLNAME%를[
+		IF TALENT:남자
+			PRINT 반음반양
+		ELSE
+			PRINT 후타나리
+		ENDIF
+		PRINTL ]로 합니까?
+		PRINTL [0] - 한다
+		PRINTL [1] - 하지 않는다
+		INPUT
+		IF RESULT == 0
+			C = TARGET
+			;CALL FUTANARI
+		ELSEIF RESULT == 1
+			PRINTFORML %CALLNAME%는[구현]를 잃었다
+			TALENT:구현 = 0
+		ELSE
+			GOTO INPUT_LOOP_2
+		ENDIF
+		DRAWLINE
+		WAIT
+	ENDIF
+ENDIF
+
+;절정배뇨경험 30 이상으로실금버릇가 붙는다
+IF TARGET >= 0 && !TALENT:실금버릇
+	IF (TALENT:유아／유아퇴행 || TALENT:소인체형 || (TALENT:유치 && TALENT:작은체구)) && EXP:절정배뇨경험 >= 15
+		TFLAG:13 = 65
+		CALL KOJO_MESSAGE_EVENT
+		PRINTFORMW %CALLNAME%는[실금버릇]가 붙었다
+		TALENT:실금버릇 = 1
+	ELSEIF EXP:절정배뇨경험 >= 30
+		TFLAG:13 = 65
+		CALL KOJO_MESSAGE_EVENT
+		PRINTFORMW %CALLNAME%는[실금버릇]가 붙었다
+		TALENT:실금버릇 = 1
+	ENDIF
+ENDIF
+
+;반발각인 3가 있어, 한편[유치]일 때에
+IF TARGET >= 0 
+	IF TALENT:유치 && MARK:반발각인 >= 3
+	;욕망가 5또한순종가 5또한마조끼가 5또한이상경험가 5이상이 된다
+		SIF ABL:욕망 >= 5 && ABL:순종 >= 5 && ABL:마조끼 >= 5 && EXP:이상경험 >= 5
+			CALL EVENT_YOUJI
+	;반발각인 3가 있어, 한편[유치]가 아니고, 불사신가 없을 때에
+	ELSEIF !TALENT:불사신 && !TALENT:유치 && MARK:반발각인 >= 3
+	;욕망가 5또한순종가 5또한마조끼가 5또한이상경험가 7이상에 가세해노출 5와실금버릇가 붙는다
+		SIF ABL:욕망 >= 5 && ABL:순종 >= 5 && ABL:마조끼 >= 5 && ABL:노출벽 >= 5 && EXP:이상경험 >= 7 && TALENT:실금버릇
+			CALL EVENT_YOUJI
+	ENDIF
+ENDIF
+
+;털가 나 온다
+REPEAT CHARANUM
+	IF TALENT:COUNT:음모없음 == 2
+		BASE:COUNT:털 += 10
+		IF BASE:COUNT:털 >= 300
+			TALENT:COUNT:음모없음 = 0
+			PRINTFORML %CALLNAME:COUNT%의털가 나 왔다
+		ENDIF
+	ENDIF
+REND
+
+;발정기의 카운트
+CALL ESTRUS_PERIOD_COUNT
+
+;계절 이벤트 플래그의 처리
+REPEAT CHARANUM
+	CFLAG:COUNT:612 = 0
+	SIF FLAG:80 == 12 && FLAG:81 == 31
+		CFLAG:COUNT:613 = 0
+REND
+
+;밤이벤트 캔슬 플래그가 서있는 경우, 여기서 리셋트
+SIF FLAG:180 == 1
+	FLAG:180 = 0
+
+;노예와 도구의 유지비의 처리
+;START 모드 한정으로 EASY에서는 20일, NORMAL에서는 15일, HARD에서는 10일면제
+A = 300
+B = 25-FLAG:4*5
+REPEAT 25
+	SIF ITEM:COUNT
+		A += 50
+REND
+A += CHARANUM*200
+A -= 100
+;노역중의 노예는 제외하다
+REPEAT CHARANUM
+	SIF CFLAG:COUNT:12 > 0
+		A -= 200
+REND
+IF FLAG:5 == 0 && A && DAY > B
+	PRINTFORML 노예와 도구의 유지비, 생활비에{A}고슈금 걸렸다……
+	MONEY -= A
+ENDIF
+
+@EVENT_YOUJI
+;유아 퇴행
+TFLAG:13 = 66
+CALL KOJO_MESSAGE_EVENT
+TALENT:유치 = 0
+TALENT:일선을넘지않음 = 0
+TALENT:정조관념 = 0
+TALENT:억압 = 0
+TALENT:저항 = 0
+TALENT:유아／유아퇴행 = 1
+MARK:반발각인 = 0
+
+
+;-------------------------------------------------
+;아침이 되었을 때의 이벤트
+;-------------------------------------------------
+@EVENT_NEWDAY
+;노예 렌탈의 기일이 왔을 경우의 노예 반환 처리
+REPEAT CHARANUM
+	IF CFLAG:COUNT:12 == 1 && CFLAG:COUNT:13 == DAY
+		A = COUNT
+		CALL RETURN_SLAVE
+	ENDIF
+REND
+
+;창관아르바이트가 끝났을 경우의 종료 처리
+REPEAT CHARANUM
+	IF CFLAG:COUNT:12 == 2
+		A = COUNT
+		CALL END_PROSTITUTION
+	ENDIF
+REND
+
+;내번-손맞댐이 끝났을 경우의 종료 처리
+IF FLAG:161 & 1
+	CALL END_DUTY_PRACTICE
+ENDIF
+
+;내번-하타 당번이 끝났을 경우의 종료 처리
+IF FLAG:161 & 2
+	CALL END_DUTY_HATAKE
+ENDIF
+
+;내번-마 당번이 끝났을 경우의 종료 처리
+IF FLAG:161 & 4
+	CALL END_DUTY_UMA
+ENDIF
+
+;극수행이 끝났을 경우의 종료 처리
+IF FLAG:161 & 8 
+	REPEAT CHARANUM
+		IF CFLAG:COUNT:13 == DAY
+			CALL END_KIWAME
+			BREAK
+		ENDIF
+	REND
+	
+ENDIF
+
+;노역중은임신 발각되지 않기 때문에, 임신관련 처리를 노역 종료 처리후에 이동
+;전체의임신판정의 처리
+CALL IN_VAGINA_ANAL_ALL
+
+;전체의임신발각시의 이벤트
+CALL GET_CHILD_ALL
+
+;배란유발제와 피임결계의 효과 종료 처리
+REPEAT CHARANUM
+	IF CFLAG:COUNT:108
+		PRINTFORMW %CALLNAME:COUNT%의 피임결계의 효과가 끊어진 것 같다
+		CFLAG:COUNT:108 = 0
+	ELSEIF CFLAG:COUNT:109
+		PRINTFORMW %CALLNAME:COUNT%의배란유발제의 효과가 끊어진 것 같다
+		CFLAG:COUNT:109 = 0
+	ENDIF
+REND
+
+;출산·육아실 관련
+LOCAL = CHARANUM
+$INPUT_LOOP
+REPEAT LOCAL
+	IF TALENT:COUNT:임신 || CFLAG:COUNT:26
+
+		;출산 3일 전부터는 임월 돌입으로 조교 불가에
+		IF (CFLAG:COUNT:110 - 3) == DAY
+			DRAWLINE
+			CALL REACH_FULL_TERM
+		;출산 전날에는 육아실에의 방문을 묻는 이벤트 발생
+		ELSEIF (CFLAG:COUNT:110 - 1) == DAY && TFLAG:701!= DAY
+			;부친을 FATHER로 한다(없으면-1)
+			FATHER = GETCHARA(CFLAG:COUNT:111)
+			
+			DRAWLINE
+			PRINTFORML %CALLNAME:COUNT%는 출산이 가까워지고 있는 것 같다……
+			PRINTFORML %CALLNAME:COUNT%의 상태를 보러 갑니까?
+			PRINTL [0] - 육아실에 간다
+			SIF FATHER >= 0 && FATHER != MASTER
+				PRINTFORML [1] - 부친의 %CALLNAME:(FATHER)%에 가게 한다
+			PRINTL [2] - 육아실에 가지 않는다
+			INPUT
+			IF RESULT == 0 || (RESULT == 1 && FATHER >= 0 && FATHER != MASTER)
+				TFLAG:700 = 1
+				TFLAG:701 = DAY
+				TFLAG:702 = TIME
+				CALL CHILD_CARE_ROOM(FATHER, RESULT)
+			ELSEIF RESULT == 2
+				DRAWLINE
+			ELSE
+				GOTO INPUT_LOOP
+			ENDIF
+		;출산 예정일, 또는 출산 예정일을 지나 출산하고 있지 않으면 출산
+		ELSEIF CFLAG:COUNT:110 == DAY || (CFLAG:COUNT:110 < DAY && TALENT:COUNT:임신)
+			DRAWLINE
+			C = COUNT
+			CALL CHILD_BIRTH
+		ELSEIF CFLAG:COUNT:26
+			;부친을 FATHER로 한다
+			FATHER = GETCHARA(CFLAG:COUNT:1000)
+			
+			LOCAL:1 = -1
+			LOCAL:2 = 0
+			;아이를 키우고 있는 것은 누군가
+			FOR LOCAL, 0, CHARANUM
+				SIF CFLAG:COUNT:115 == NO:LOCAL
+					LOCAL:1 = LOCAL
+			NEXT
+			;기르고 있는 것은 친자식인가
+			SIF CFLAG:(LOCAL:1):114 == NO:COUNT
+				LOCAL:2 = 1
+			;출산후 3일에는 육아실에의 방문을 묻는 이벤트 발생
+			IF (CFLAG:COUNT:116 + 3) == DAY && TFLAG:701!= DAY
+				DRAWLINE
+				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2? 를 출산해 # 를 기르기 시작해\@로부터 3일 지났습니다
+				PRINTFORML %CALLNAME:(LOCAL:1)%의 상태를 보러 갑니까?
+				PRINTL [0] - 육아실에 간다
+				SIF FATHER >= 0 && FATHER != MASTER
+					PRINTFORML [1] - 부친의 %CALLNAME:(FATHER)%에 가게 한다
+				PRINTL [2] - 육아실에 가지 않는다
+				INPUT
+				IF RESULT == 0 || (RESULT == 1 && FATHER >= 0 && FATHER != MASTER)
+					TFLAG:700 = 1
+					TFLAG:701 = DAY
+					TFLAG:702 = TIME
+					CALL CHILD_CARE_ROOM(FATHER, RESULT)
+				ELSEIF RESULT == 2
+					DRAWLINE
+				ELSE
+					GOTO INPUT_LOOP
+				ENDIF
+			;출산후 5일에는 육아실에의 방문을 묻는 이벤트 발생
+			ELSEIF (CFLAG:COUNT:116 + 5) == DAY && TFLAG:701!= DAY
+				DRAWLINE
+				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2? 를 출산해 # 를 기르기 시작해\@로부터 5일 지났습니다
+				PRINTFORML %CALLNAME:(LOCAL:1)%의 상태를 보러 갑니까?
+				PRINTL [0] - 육아실에 간다
+				SIF FATHER >= 0 && FATHER != MASTER
+					PRINTFORML [1] - 부친의 %CALLNAME:(FATHER)%에 가게 한다
+				PRINTL [2] - 육아실에 가지 않는다
+				INPUT
+				IF RESULT == 0 || (RESULT == 1 && FATHER >= 0 && FATHER != MASTER)
+					TFLAG:700 = 1
+					TFLAG:701 = DAY
+					TFLAG:702 = TIME
+					CALL CHILD_CARE_ROOM(FATHER, RESULT)
+				ELSEIF RESULT == 2
+					DRAWLINE
+				ELSE
+					GOTO INPUT_LOOP
+				ENDIF
+			;출산후 10일에는 육아실에의 방문을 묻는 이벤트 발생
+			ELSEIF (CFLAG:COUNT:116 + 10) == DAY && TFLAG:701!= DAY
+				DRAWLINE
+				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2? 를 출산해 # 를 기르기 시작해\@로부터 10 일경했다
+				PRINTFORML %CALLNAME:(LOCAL:1)%의 상태를 보러 갑니까?
+				PRINTL [0] - 육아실에 간다
+				SIF FATHER >= 0 && FATHER != MASTER
+					PRINTFORML [1] - 부친의 %CALLNAME:(FATHER)%에 가게 한다
+				PRINTL [2] - 육아실에 가지 않는다
+				INPUT
+				IF RESULT == 0 || (RESULT == 1 && FATHER >= 0 && FATHER != MASTER)
+					TFLAG:700 = 1
+					TFLAG:701 = DAY
+					TFLAG:702 = TIME
+					CALL CHILD_CARE_ROOM(FATHER, RESULT)
+				ELSEIF RESULT == 2
+					DRAWLINE
+				ELSE
+					GOTO INPUT_LOOP
+				ENDIF
+			;출산후 15일에는 육아실에의 방문을 묻는 이벤트 발생
+			ELSEIF (CFLAG:COUNT:116 + 15) == DAY && TFLAG:701!= DAY
+				DRAWLINE
+				PRINTFORML %CALLNAME:(LOCAL:1)%가 %CALLNAME:COUNT%\@ LOCAL:2? 를 출산해 # 를 기르기 시작해\@로부터 15일 지났습니다
+				PRINTFORML %CALLNAME:(LOCAL:1)%의 상태를 보러 갑니까?
+				PRINTL [0] - 육아실에 간다
+				SIF FATHER >= 0 && FATHER != MASTER
+					PRINTFORML [1] - 부친의 %CALLNAME:(FATHER)%에 가게 한다
+				PRINTL [2] - 육아실에 가지 않는다
+				INPUT
+				IF RESULT == 0 || (RESULT == 1 && FATHER >= 0 && FATHER != MASTER)
+					TFLAG:700 = 1
+					TFLAG:701 = DAY
+					TFLAG:702 = TIME
+					CALL CHILD_CARE_ROOM(FATHER, RESULT)
+				ELSEIF RESULT == 2
+					DRAWLINE
+				ELSE
+					GOTO INPUT_LOOP
+				ENDIF
+			;출산 20일로 자립으로 조교 가능하게
+			ELSEIF (CFLAG:COUNT:116 + 20) == DAY || ((CFLAG:COUNT:116 + 20) < DAY && TALENT:(LOCAL:1):육아중)
+				C = COUNT
+				DRAWLINE
+				CALL DEPEARENT
+				LOCAL = CHARANUM
+				GOTO INPUT_LOOP
+			ENDIF
+		ENDIF
+	ENDIF
+REND
+
+;C감각 5 이상, 정액경험 100 이상
+IF TARGET >= 0
+	IF TALENT:아이사이즈
+		IF ABL:C감각 >= 5 && EXP:정액경험 >= 100
+			TFLAG:13 = 70
+			CALL KOJO_MESSAGE_EVENT
+			TALENT:아이사이즈 = 0
+			TALENT:단소 = 1
+		ENDIF
+	ENDIF
+ENDIF
+

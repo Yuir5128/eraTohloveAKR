@@ -1,0 +1,1462 @@
+﻿
+;-------------------------------------------------
+;사정게이지 체크
+;보고 괴롭기 때문에 통계 테스트. 주인과 노예의 경우
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_MT
+
+;【순종】 거의 모든 항목에 관련
+SELECTCASE SELECTCOM
+	;순종의 효과가 작은 것. 세로파이즈리, 스마타, 헤어잡, 겨드랑이잡, 엉덩이더듬기, 니플퍽
+	CASE 74, 76, 80, 81, 82, 83, 84
+		IF ABL:순종 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.90
+		ELSE
+			TIMES B , 1.00
+		ENDIF
+	;순종의 효과가 특히 높은 것. 기승위, 기승위애널, 기승위유방자위
+	CASE 106, 116, 509
+		IF ABL:순종 == 0
+			TIMES B , 0.60
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:순종 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:순종 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	;노예의순종는 관계없는 것.
+	;자위과시한다, 자위과시한다, 파이즈리한다, 파이즈리펠라한다, 발을핥는다
+	CASE 226, 227, 240, 241, 282
+		TIMES B , 1.00
+	;그 이외는 통상의 확인
+	CASEELSE
+		IF ABL:순종 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:순종 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:순종 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:순종 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+ENDSELECT
+
+;【기교】 수측이 행동하는 것이 특히 효과가 크다
+SELECTCASE SELECTCOM
+	;수의기교는 너무 관계없는 것. 주인의기교도 체크한다
+	;스마타, 헤어잡, 겨드랑이잡, 엉덩이더듬기, 니플퍽, 기승위 이외의 섹스, 역섹스기승위
+	CASE 76, 81 TO 84, 100 TO 105, 110 TO 115, 262, 265, 507, 508, 510 TO 514, 526
+		IF ABL:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:PLAYER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:PLAYER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:기교 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;주인의기교만이 관계 있는 것. 자위과시한다, 파이즈리한다, 거품비비기한다
+	CASE 226, 227, 240, 241, 318
+		IF ABL:PLAYER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:PLAYER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	;어느 쪽의기교도 관계없는 것. 매도당한다, 발을핥는다
+	CASE 281, 282
+		TIMES B , 1.00
+	;그 이외는 통상의 확인.
+	CASEELSE
+		IF ABL:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【고양이혀·혀놀림】 페라·커닐링구스계
+SELECTCASE SELECTCOM
+	;키스한다, 페라, 이라마, 파이즈리펠라, 구슬 빨아, 커닐링구스, 애널자극, 정액키스, 69
+	CASE 1, 71, 72, 75, 87, 222, 224, 412, 503
+		SIF TALENT:고양이혀
+			TIMES B , 0.50
+		SIF TALENT:혀놀림
+			TIMES B , 1.50
+ENDSELECT
+
+;【버스트】 주인이가슴를 사용하는 조교
+SELECTCASE SELECTCOM
+	;파이즈리, 세로파이즈리, 파이즈리펠라, 니플퍽, 69파이즈리
+	CASE 73, 74, 75, 84, 504
+		;폭유
+		IF TALENT:폭유
+			TIMES B , 1.30
+		;거유
+		ELSEIF TALENT:거유
+			TIMES B , 1.20
+		;빈유
+		ELSEIF TALENT:빈유
+			TIMES B , 0.80
+		;가슴없음
+		ELSEIF !BREAST(TARGET)
+			TIMES B , 0.60
+		ENDIF
+ENDSELECT
+
+;【봉사】 봉사계
+SELECTCASE SELECTCOM
+	;봉사계, 애무시킨다계, 역섹스계, 거품비비기, 수유손코키
+	CASE 70 TO 75, 80, 86, 87, 106, 116, 220 TO 25, 243 TO 245, 260 TO 265, 317, 503, 504, 509, 528
+		IF ABL:봉사정신 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:봉사정신 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:봉사정신 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:봉사정신 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:봉사정신 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【욕망】 섹스계
+SELECTCASE SELECTCOM
+	CASE 100 TO 116, 260 TO 265, 507 TO 514, 526
+		IF ABL:욕망 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:욕망 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:욕망 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:욕망 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:욕망 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【마조】 마조끼가 높다고 느끼는 쾌감이 크다
+SELECTCASE SELECTCOM
+	;풋잡, 매도당한다, 발을핥는다, 얻어맞는다, 채찍으로맞는다
+	CASE 80, 281 TO 284
+		IF ABL:PLAYER:마조끼 >= 8 || TALENT:PLAYER:마조 == 2
+			TIMES B , 5.00
+		ELSEIF ABL:PLAYER:마조끼 == 7
+			TIMES B , 3.50
+		ELSEIF ABL:PLAYER:마조끼 == 6
+			TIMES B , 2.50
+		ELSEIF ABL:PLAYER:마조끼 == 5 || TALENT:PLAYER:마조
+			TIMES B , 2.00
+		ELSEIF ABL:PLAYER:마조끼 == 4
+			TIMES B , 1.50
+		ELSEIF ABL:PLAYER:마조끼 == 3
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:마조끼 == 2
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:마조끼 == 1
+			TIMES B , 0.50
+		ELSE
+			TIMES B , 0.10
+		ENDIF
+ENDSELECT
+
+;【새드】 새드끼가 높으면 주는 쾌감이 크다
+SELECTCASE SELECTCOM
+	;이라마치오, 스팽킹섹스, 목조르기섹스
+	CASE 72, 511 TO 514
+		IF ABL:PLAYER:새드끼 >= 5 || TALENT:PLAYER:새드
+			TIMES B , 1.50
+		ELSEIF ABL:PLAYER:새드끼 == 4
+			TIMES B , 1.30
+		ELSEIF ABL:PLAYER:새드끼 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:PLAYER:새드끼 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:새드끼 == 1
+			TIMES B , 0.80
+		ELSE
+			TIMES B , 0.50
+		ENDIF
+ENDSELECT
+
+;【B감】 가슴를 사용하는 조교
+SELECTCASE SELECTCOM
+	;애무시킨다, 가슴을주무르게한다, 파이즈리한다, 가슴을비빈다, 거품비비기, 69파이즈리
+	CASE 220, 221, 240, 241, 243, 317, 318, 504
+		IF ABL:PLAYER:B감각 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:B감각 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:PLAYER:B감각 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:B감각 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:B감각 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【C감】 페니스나 클리를 사용하는 조교. 섹스의공측도 본다
+SELECTCASE SELECTCOM
+	;자위계는 오르기 힘들다
+	CASE 76, 81 TO 84, 226, 318
+		IF ABL:PLAYER:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:C감각 == 1
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:C감각 == 2
+			TIMES B , 1.20
+		ELSEIF ABL:PLAYER:C감각 == 3
+			TIMES B , 1.50
+		ELSEIF ABL:PLAYER:C감각 == 4
+			TIMES B , 1.80
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	CASE 70 TO 75, 80, 100 TO 116, 220, 222, 244, 245, 317, 503, 504, 507 TO 514, 526, 528
+		IF ABL:PLAYER:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:PLAYER:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:PLAYER:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:PLAYER:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+ENDSELECT
+
+;【V감】 V섹스계
+IF VAGINA(PLAYER) && !TALENT:PLAYER:공
+	SELECTCASE SELECTCOM
+		;손가락 넣게 하는, 자위과시한다, 역섹스
+		CASE 223, 226, 260, 261, 262
+			IF ABL:PLAYER:V감각 == 0
+				TIMES B , 0.50
+			ELSEIF ABL:PLAYER:V감각 == 1
+				TIMES B , 0.80
+			ELSEIF ABL:PLAYER:V감각 == 2
+				TIMES B , 1.00
+			ELSEIF ABL:PLAYER:V감각 == 3
+				TIMES B , 1.20
+			ELSEIF ABL:PLAYER:V감각 == 4
+				TIMES B , 1.50
+			ELSE
+				TIMES B , 2.00
+			ENDIF
+		CASEELSE
+	ENDSELECT
+ENDIF
+
+;【A감】 A섹스계
+SELECTCASE SELECTCOM
+	;애널핥기강제, 애널애무시킨다, 자위과시한다, 역섹스 A
+	CASE 224, 225, 227, 263, 264, 265
+		IF ABL:PLAYER:A감각 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:PLAYER:A감각 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:A감각 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:A감각 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:PLAYER:A감각 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	CASEELSE
+ENDSELECT
+
+;【윤활】 섹스계 전반
+SELECTCASE SELECTCOM
+	CASE 76, 100 TO 116, 507 TO 514, 526
+		IF PALAM:윤활 < PALAMLV:1
+			TIMES B , 0.60
+		ELSEIF PALAM:윤활 < PALAMLV:2
+			TIMES B , 0.70
+		ELSEIF PALAM:윤활 < PALAMLV:3
+			TIMES B , 0.80
+		ELSEIF PALAM:윤활 < PALAMLV:4
+			TIMES B , 0.90
+		ELSEIF PALAM:윤활 >= PALAMLV:4
+			TIMES B , 1.00
+		ENDIF
+	CASEELSE
+ENDSELECT
+
+;-------------------------------------------------
+;사정게이지 체크
+;보고 괴롭기 때문에 통계 테스트. 조수와 노예의 경우.
+;삽입명령, A삽입명령, 구욕명령, 조수를범하게시킨다, 조수의A를범하게시킨다
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_AT
+
+;【순종】 거의 모든 항목에 관련
+IF ABL:순종 == 0
+	TIMES B , 0.80
+ELSEIF ABL:순종 == 1
+	TIMES B , 0.90
+ELSEIF ABL:순종 == 2
+	TIMES B , 1.00
+ELSEIF ABL:순종 == 3
+	TIMES B , 1.10
+ELSEIF ABL:순종 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;【기교】 수측이 행동하는 것이 특히 효과가 크다
+SELECTCASE SELECTCOM
+	;수의기교는 너무 관계없는 것. 조수의기교도 체크한다
+	CASE 405, 406
+		IF ABL:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:ASSI:기교 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	CASE 407, 430, 431
+		IF ABL:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【고양이혀·혀놀림】 페라·커닐링구스계
+IF SELECTCOM == 405
+	SIF TALENT:고양이혀
+		TIMES B , 0.50
+	SIF TALENT:혀놀림
+		TIMES B , 1.50
+ENDIF
+
+;【봉사】 봉사계
+SELECTCASE SELECTCOM
+	CASE 407, 430, 431
+		IF ABL:봉사정신 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:봉사정신 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:봉사정신 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:봉사정신 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:봉사정신 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【욕망】 봉사, 섹스계
+SELECTCASE SELECTCOM
+	CASE 405, 406, 430, 431
+		IF ABL:욕망 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:욕망 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:욕망 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:욕망 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:욕망 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【C감】 페니스나 클리를 사용하는 조교. 섹스의공측도 본다
+SELECTCASE SELECTCOM
+	CASE 405, 406, 407
+		IF ABL:ASSI:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:ASSI:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:ASSI:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:ASSI:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+ENDSELECT
+
+;【V감】 V섹스계
+IF SELECTCOM == 430
+	IF ABL:ASSI:V감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:ASSI:V감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:ASSI:V감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:ASSI:V감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:ASSI:V감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+;【A감】 A섹스계
+IF SELECTCOM == 431
+	IF ABL:ASSI:A감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:ASSI:A감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:ASSI:A감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:ASSI:A감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:ASSI:A감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+;【윤활】 섹스계 전반
+SELECTCASE SELECTCOM
+	CASE 405, 406
+		IF PALAM:윤활 < PALAMLV:1
+			TIMES B , 0.60
+		ELSEIF PALAM:윤활 < PALAMLV:2
+			TIMES B , 0.70
+		ELSEIF PALAM:윤활 < PALAMLV:3
+			TIMES B , 0.80
+		ELSEIF PALAM:윤활 < PALAMLV:4
+			TIMES B , 0.90
+		ELSEIF PALAM:윤활 >= PALAMLV:4
+			TIMES B , 1.00
+		ENDIF
+ENDSELECT
+
+
+;-------------------------------------------------
+;사정게이지 체크
+;보고 괴롭기 때문에 통계 테스트. 주인과 조수의 경우의 「주인」
+;노예에게 범하게 하는, 노예에게 A를 범하게 하는, 노예를 범하는, 노예의 A를 범한다
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_MA1
+
+;【순종】 거의 모든 항목에 관련
+IF ABL:ASSI:순종 == 0
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:순종 == 1
+	TIMES B , 0.90
+ELSEIF ABL:ASSI:순종 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:순종 == 3
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:순종 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;【기교】 수측이 행동하는 것이 특히 효과가 크다
+SELECTCASE SELECTCOM
+	CASE 440, 441
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:PLAYER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:PLAYER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	CASEELSE
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:ASSI:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【봉사】 봉사계
+SELECTCASE SELECTCOM
+	CASE 270, 271
+		IF ABL:ASSI:봉사정신 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:ASSI:봉사정신 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:봉사정신 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:봉사정신 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:ASSI:봉사정신 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【욕망】 봉사, 섹스계
+IF ABL:ASSI:욕망 == 0
+	TIMES B , 0.50
+ELSEIF ABL:ASSI:욕망 == 1
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:욕망 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:욕망 == 3
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:욕망 == 4
+	TIMES B , 1.30
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;【C감】 페니스나 클리를 사용하는 조교. 섹스의공측도 본다
+SELECTCASE SELECTCOM
+	CASE 440, 441
+		IF ABL:PLAYER:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:PLAYER:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:PLAYER:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:PLAYER:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+ENDSELECT
+
+;【V감】 V섹스계
+IF SELECTCOM == 270
+	IF ABL:PLAYER:V감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:PLAYER:V감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:PLAYER:V감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:PLAYER:V감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:PLAYER:V감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+;【A감】 A섹스계
+IF SELECTCOM == 271
+	IF ABL:PLAYER:A감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:PLAYER:A감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:PLAYER:A감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:PLAYER:A감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:PLAYER:A감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;사정게이지 체크
+;보고 괴롭기 때문에 통계 테스트. 주인과 조수의 경우의 「조수」
+;노예에게 범하게 하는, 노예에게 A를 범하게 하는, 노예를 범하는, 노예의 A를 범한다
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_MA2
+
+;【순종】 거의 모든 항목에 관련
+IF ABL:ASSI:순종 == 0
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:순종 == 1
+	TIMES B , 0.90
+ELSEIF ABL:ASSI:순종 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:순종 == 3
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:순종 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;【기교】 수측이 행동하는 것이 특히 효과가 크다
+SELECTCASE SELECTCOM
+	CASE 440, 441
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:PLAYER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:PLAYER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	CASEELSE
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:ASSI:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【욕망】 봉사, 섹스계
+IF ABL:ASSI:욕망 == 0
+	TIMES B , 0.50
+ELSEIF ABL:ASSI:욕망 == 1
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:욕망 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:욕망 == 3
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:욕망 == 4
+	TIMES B , 1.30
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;【C감】 페니스나 클리를 사용하는 조교. 섹스의공측도 본다
+SELECTCASE SELECTCOM
+	CASE 270, 271
+		IF ABL:ASSI:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:ASSI:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:ASSI:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:ASSI:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+ENDSELECT
+
+;【V감】 V섹스계
+IF SELECTCOM == 440
+	IF ABL:ASSI:V감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:ASSI:V감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:ASSI:V감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:ASSI:V감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:ASSI:V감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+;【A감】 A섹스계
+IF SELECTCOM == 441
+	IF ABL:ASSI:A감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:ASSI:A감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:ASSI:A감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:ASSI:A감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:ASSI:A감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+
+
+;-------------------------------------------------
+;사정게이지 체크
+;보고 괴롭기 때문에 통계 테스트. 3 P계의 「주인」
+;더블펠라, 더블파이즈리, 더블스마타, 2 개 페라, 샌드위치, 이륜 꽂아, 연결
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_3PM
+;【순종】 모든 항목에 관련
+SELECTCASE SELECTCOM
+	;순종의 효과가 작은 것. 더블스마타
+	CASE 422
+		IF ABL:순종 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.90
+		ELSE
+			TIMES B , 1.00
+		ENDIF
+	;노예의순종만 본다
+	CASE 106, 116, 509
+		IF ABL:순종 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:순종 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:순종 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:순종 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;그 이외는 노예와 조수의순종를 본다
+	CASEELSE
+		IF (ABL:순종+ABL:ASSI:순종) < 3
+			TIMES B , 0.80
+		ELSEIF (ABL:순종+ABL:ASSI:순종) < 6
+			TIMES B , 0.90
+		ELSEIF (ABL:순종+ABL:ASSI:순종) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:순종+ABL:ASSI:순종) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:순종+ABL:ASSI:순종) < 20
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【기교】 수측이 행동하는 것이 특히 효과가 크다
+SELECTCASE SELECTCOM
+	;노예와 조수의기교를 보는 것. 더블펠라, 더블파이즈리, 이륜 꽂아 시킨다
+	CASE 420, 421, 522, 523
+		IF (ABL:기교+ABL:ASSI:기교) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;노예와 조수의기교는 너무 관계없는 것. 주인의기교도 체크한다
+	;더블스마타
+	CASE 422
+		IF (ABL:기교+ABL:ASSI:기교) < 3
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 6
+			TIMES B , 0.90
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 10
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:MASTER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:MASTER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:MASTER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:MASTER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:MASTER:기교 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;3사람 전원의기교를 보는 것. 샌드위치계, 연결
+	CASE 515, 519, 520, 521
+		IF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.40
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 25
+			TIMES B , 1.60
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 30
+			TIMES B , 1.80
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;노예의기교만을 확인. 2 개 페라
+	CASE 516
+		IF ABL:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	;노예를 이륜 꽂아
+	CASE 517, 518
+		IF ABL:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF (ABL:ASSI:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.50
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;조수를 이륜 꽂아
+	CASE 524, 525
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF (ABL:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.50
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+ENDSELECT
+
+;【봉사】 봉사계
+SELECTCASE SELECTCOM
+	;노예, 조수양쪽 모두의봉사정신를 본다
+	CASE 420, 421, 519, 520, 522, 523
+		IF (ABL:봉사정신+ABL:ASSI:봉사정신) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;노예, 조수양쪽 모두의봉사정신를 본다
+	CASE 422
+		IF (ABL:봉사정신+ABL:ASSI:봉사정신) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 20
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	;노예의봉사정신만을 본다
+	CASE 515, 516
+		IF ABL:봉사정신 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:봉사정신 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:봉사정신 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:봉사정신 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:봉사정신 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【욕망】 섹스계
+SELECTCASE SELECTCOM
+	;욕망가 관계없는 것.
+	CASE 516
+		TIMES B , 1.00
+	;그 이외
+	CASEELSE
+		IF (ABL:욕망+ABL:ASSI:욕망) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【C감】 페니스나 클리를 사용하는 조교. 섹스의공측도 본다
+SELECTCASE SELECTCOM
+	CASE 420, 421, 422, 516, 517, 518, 524, 525
+		IF ABL:MASTER:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:MASTER:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:MASTER:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:MASTER:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:MASTER:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+ENDSELECT
+
+;샌드위치, 연결만 별로 판정
+SELECTCASE SELECTCOM
+	CASE 515, 519, 520, 521
+		;【C감】 페니크리
+		IF TFLAG:40 == 1 || TFLAG:40 == 2 || TFLAG:49 == 8 || TFLAG:49 == 10 || TFLAG:49 == 10 || TFLAG:40 == 11 || TFLAG:40 == 12
+			IF ABL:MASTER:C감각 == 0
+				TIMES B , 1.00
+			ELSEIF ABL:MASTER:C감각 == 1
+				TIMES B , 1.50
+			ELSEIF ABL:MASTER:C감각 == 2
+				TIMES B , 2.00
+			ELSEIF ABL:MASTER:C감각 == 3
+				TIMES B , 2.50
+			ELSEIF ABL:MASTER:C감각 == 4
+				TIMES B , 3.50
+			ELSE
+				TIMES B , 5.00
+			ENDIF
+		ENDIF
+		
+		;【V감】 V섹스계
+		IF TFLAG:40 == 6 || TFLAG:41 == 6
+			IF ABL:MASTER:V감각 == 0
+				TIMES B , 0.50
+			ELSEIF ABL:MASTER:V감각 == 1
+				TIMES B , 0.80
+			ELSEIF ABL:MASTER:V감각 == 2
+				TIMES B , 1.00
+			ELSEIF ABL:MASTER:V감각 == 3
+				TIMES B , 1.20
+			ELSEIF ABL:MASTER:V감각 == 4
+				TIMES B , 1.50
+			ELSE
+				TIMES B , 2.00
+			ENDIF
+		ENDIF
+		
+		;【A감】 A섹스계
+		IF TFLAG:40 == 7 || TFLAG:41 == 7
+			IF ABL:MASTER:A감각 == 0
+				TIMES B , 0.50
+			ELSEIF ABL:MASTER:A감각 == 1
+				TIMES B , 0.80
+			ELSEIF ABL:MASTER:A감각 == 2
+				TIMES B , 1.00
+			ELSEIF ABL:MASTER:A감각 == 3
+				TIMES B , 1.20
+			ELSEIF ABL:MASTER:A감각 == 4
+				TIMES B , 1.50
+			ELSE
+				TIMES B , 2.00
+			ENDIF
+		ENDIF
+ENDSELECT
+
+;【윤활】 섹스계 전반
+SELECTCASE SELECTCOM
+	CASE 515, 517 TO 525
+		IF PALAM:윤활 < PALAMLV:1
+			TIMES B , 0.60
+		ELSEIF PALAM:윤활 < PALAMLV:2
+			TIMES B , 0.70
+		ELSEIF PALAM:윤활 < PALAMLV:3
+			TIMES B , 0.80
+		ELSEIF PALAM:윤활 < PALAMLV:4
+			TIMES B , 0.90
+		ELSEIF PALAM:윤활 >= PALAMLV:4
+			TIMES B , 1.00
+		ENDIF
+ENDSELECT
+
+
+;-------------------------------------------------
+;사정게이지 체크
+;보고 괴롭기 때문에 통계 테스트. 3 P계의 「조수」
+;더블펠라, 더블파이즈리, 더블스마타, 2 개 페라, 샌드위치, 이륜 꽂아, 연결
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_3PA
+
+;【순종】 거의 모든 항목에 관련
+SELECTCASE SELECTCOM
+	;노예의순종만 본다
+	CASE 517, 518, 519, 521, 522, 523, 524, 525
+		IF ABL:순종 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:순종 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:순종 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:순종 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+ENDSELECT
+
+;【기교】 수측이 행동하는 것이 특히 효과가 크다
+SELECTCASE SELECTCOM
+	;노예와 조수의기교를 보는 것. 더블파이즈리, 이륜 꽂아 시킨다
+	CASE 421, 522, 523
+		IF (ABL:기교+ABL:ASSI:기교) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:기교+ABL:ASSI:순종) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:순종) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:ASSI:순종) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:기교+ABL:ASSI:순종) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;노예와 조수의기교는 너무 관계없는 것. 주인의기교도 체크한다
+	;더블스마타
+	CASE 422
+		IF (ABL:기교+ABL:ASSI:기교) < 3
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 6
+			TIMES B , 0.90
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 10
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:MASTER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:MASTER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:MASTER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:MASTER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:MASTER:기교 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;3사람 전원의기교를 보는 것. 샌드위치계, 연결
+	CASE 515, 519, 520, 521
+		IF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.40
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 25
+			TIMES B , 1.60
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 30
+			TIMES B , 1.80
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;노예의기교만을 확인. 2 개 페라
+	CASE 516
+		IF ABL:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	;노예를 이륜 꽂아
+	CASE 517, 518
+		IF ABL:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF (ABL:ASSI:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.50
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;조수를 이륜 꽂아
+	CASE 524, 525
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF (ABL:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.50
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+ENDSELECT
+
+;【봉사】 봉사계
+SELECTCASE SELECTCOM
+	;노예, 조수양쪽 모두의봉사정신를 본다
+	CASE 519, 520, 524, 525
+		IF (ABL:봉사정신+ABL:ASSI:봉사정신) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;노예의봉사정신만을 본다
+	CASE 515, 516
+		IF ABL:봉사정신 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:봉사정신 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:봉사정신 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:봉사정신 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:봉사정신 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【욕망】 섹스계
+SELECTCASE SELECTCOM
+	;욕망가 관계없는 것.
+	CASE 420, 421, 516
+		TIMES B , 1.00
+	;그 이외
+	CASEELSE
+		IF (ABL:욕망+ABL:ASSI:욕망) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【B감】 가슴를 사용하는 조교
+IF SELECTCOM == 421
+	IF ABL:ASSI:B감각 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:ASSI:B감각 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:ASSI:B감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:ASSI:B감각 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:ASSI:B감각 == 4
+		TIMES B , 1.30
+	ELSE
+		TIMES B , 1.50
+	ENDIF
+ENDIF
+
+;【C감】 페니스나 클리를 사용하는 조교. 섹스의공측도 본다
+SELECTCASE SELECTCOM
+	CASE 517, 518, 522, 523
+		IF ABL:ASSI:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:ASSI:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:ASSI:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:ASSI:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+	CASE 422
+		IF ABL:ASSI:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:C감각 == 1
+			TIMES B , 1.20
+		ELSEIF ABL:ASSI:C감각 == 2
+			TIMES B , 1.50
+		ELSEIF ABL:ASSI:C감각 == 3
+			TIMES B , 1.80
+		ELSEIF ABL:ASSI:C감각 == 4
+			TIMES B , 2.10
+		ELSE
+			TIMES B , 2.50
+		ENDIF
+ENDSELECT
+
+;샌드위치, 연결만 별로 판정
+SELECTCASE SELECTCOM
+	CASE 515, 519, 520, 521
+		;【C감】 페니크리
+		IF TFLAG:41 == 1 || TFLAG:41 == 2 || TFLAG:41 == 6 || TFLAG:41 == 7 || TFLAG:49 == 13
+			IF ABL:ASSI:C감각 == 0
+				TIMES B , 1.00
+			ELSEIF ABL:ASSI:C감각 == 1
+				TIMES B , 1.50
+			ELSEIF ABL:ASSI:C감각 == 2
+				TIMES B , 2.00
+			ELSEIF ABL:ASSI:C감각 == 3
+				TIMES B , 2.50
+			ELSEIF ABL:ASSI:C감각 == 4
+				TIMES B , 3.50
+			ELSE
+				TIMES B , 5.00
+			ENDIF
+		ENDIF
+		
+		;【V감】 V섹스계
+		IF TFLAG:40 == 6 || TFLAG:41 == 6
+			IF ABL:ASSI:V감각 == 0
+				TIMES B , 0.50
+			ELSEIF ABL:ASSI:V감각 == 1
+				TIMES B , 0.80
+			ELSEIF ABL:ASSI:V감각 == 2
+				TIMES B , 1.00
+			ELSEIF ABL:ASSI:V감각 == 3
+				TIMES B , 1.20
+			ELSEIF ABL:ASSI:V감각 == 4
+				TIMES B , 1.50
+			ELSE
+				TIMES B , 2.00
+			ENDIF
+		ENDIF
+		
+		;【A감】 A섹스계
+		IF TFLAG:40 == 7 || TFLAG:41 == 7
+			IF ABL:ASSI:A감각 == 0
+				TIMES B , 0.50
+			ELSEIF ABL:ASSI:A감각 == 1
+				TIMES B , 0.80
+			ELSEIF ABL:ASSI:A감각 == 2
+				TIMES B , 1.00
+			ELSEIF ABL:ASSI:A감각 == 3
+				TIMES B , 1.20
+			ELSEIF ABL:ASSI:A감각 == 4
+				TIMES B , 1.50
+			ELSE
+				TIMES B , 2.00
+			ENDIF
+		ENDIF
+ENDSELECT
+
+;【윤활】 섹스계 전반
+SELECTCASE SELECTCOM
+	CASE 515, 517 TO 525
+		IF PALAM:윤활 < PALAMLV:1
+			TIMES B , 0.60
+		ELSEIF PALAM:윤활 < PALAMLV:2
+			TIMES B , 0.70
+		ELSEIF PALAM:윤활 < PALAMLV:3
+			TIMES B , 0.80
+		ELSEIF PALAM:윤활 < PALAMLV:4
+			TIMES B , 0.90
+		ELSEIF PALAM:윤활 >= PALAMLV:4
+			TIMES B , 1.00
+		ENDIF
+ENDSELECT
+
+
+
+

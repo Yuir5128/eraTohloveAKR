@@ -1,0 +1,131 @@
+﻿;-------------------------------------------------
+;채찍로 친다
+;SM계 커맨드
+;-------------------------------------------------
+@COM142
+
+PRINTL 채찍로 친다
+STR:0 = 채찍로 친다
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+IF TFLAG:56 == 1
+	IF TEQUIP:지하실
+		;소비체력, 기력
+		LOSEBASE:체력 += 125
+		LOSEBASE:기력 += 80
+		
+		SOURCE:통증 += 6000
+	ELSE
+		;소비체력, 기력
+		LOSEBASE:체력 += 100
+		LOSEBASE:기력 += 50
+		
+		SOURCE:통증 += 4000
+	ENDIF
+	SOURCE:쾌C += 100
+ELSEIF TFLAG:56 == 2
+	IF TEQUIP:지하실
+		;소비체력, 기력
+		LOSEBASE:체력 += 100
+		LOSEBASE:기력 += 50
+		
+		SOURCE:통증 += 3500
+	ELSE
+		;소비체력, 기력
+		LOSEBASE:체력 += 75
+		LOSEBASE:기력 += 35
+		
+		SOURCE:통증 += 1500
+	ENDIF
+	SOURCE:쾌B += 100
+ELSE
+	IF TEQUIP:지하실
+		;소비체력, 기력
+		LOSEBASE:체력 += 75
+		LOSEBASE:기력 += 35
+		
+		SOURCE:통증 += 1500
+	ELSE
+		;소비체력, 기력
+		LOSEBASE:체력 += 50
+		LOSEBASE:기력 += 20
+		
+		SOURCE:통증 += 1000
+	ENDIF
+ENDIF
+
+;착의 때, 옷에 의해통증경감
+IF TFLAG:56 == 1
+	IF BOTTOMS(TARGET) >= 4
+		TIMES SOURCE:통증, 0.70
+		TIMES SOURCE:쾌C , 0.70
+	ELSEIF TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5
+		TIMES SOURCE:통증, 0.90
+		TIMES SOURCE:쾌C , 0.90
+	ENDIF
+ELSEIF TFLAG:56 == 2
+	IF TOPS(TARGET) > 1
+		TIMES SOURCE:통증, 0.70
+		TIMES SOURCE:쾌B , 0.70
+	ELSEIF TEQUIP:속옷（위）
+		TIMES SOURCE:통증, 0.90
+		TIMES SOURCE:쾌B , 0.90
+	ENDIF
+ELSE
+	IF TEQUIP:전신상의 || TEQUIP:상의 || TEQUIP:하의
+		TIMES SOURCE:통증, 0.70
+	ELSEIF TEQUIP:속옷（위） || (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5)
+		TIMES SOURCE:통증, 0.90
+	ENDIF
+ENDIF
+
+SOURCE:두려움 += 1000
+;지하실에 있으면두려움의 소스 추가
+SIF TEQUIP:지하실
+	TIMES SOURCE:두려움, 1.50
+
+SOURCE:일탈 += 100
+SOURCE:반발 += 600
+
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;고통의 파라미터에 의한고통의 소스 증가는 먼저 처리해 둔다
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증, 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증, 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증, 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증, 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증, 3.00
+ENDIF
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;게이경험라든지 가산
+CALL COM_EXP(2)
+
+;의존도 벡터
+TFLAG:33 = 3
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+
+

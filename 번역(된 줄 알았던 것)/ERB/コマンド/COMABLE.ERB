@@ -1,0 +1,9306 @@
+﻿;===========================================================
+;커맨드 실행 판정
+;===========================================================
+;-------------------------------------------------
+;기본 사양
+;공의 구멍에 물건은 돌진할 수 없다
+;스마타는 물건 돌진해지고와 같게 취급한다
+;수·오메가는 상대의 구멍에 손가락은 돌진할 수 있지만, 자지는 돌진할 수 없다
+;이라마치오도 구멍에 자지를 돌진하는 것 같이 취급한다
+;-------------------------------------------------
+
+;===========================================================
+;애무계
+;===========================================================
+;-------------------------------------------------
+;0, 애무
+@COM_ABLE0
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(0)
+	RETURN RESULT
+;착의 플레이
+;모든 의류 위로부터 접한다. 정조대가 붙어 있는 경우만, C에 쾌감이 주어지지 않는다.
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;1, 키스한다
+@COM_ABLE1
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(1)
+	RETURN RESULT
+
+;촉수조교중, 삼각목마중은 안돼
+SIF TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;지하실에 있을 때, 기절중이 아니면 안돼
+SIF TEQUIP:지하실 && !TALENT:기절
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+
+;입가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF STAIN:입 & 2798 && !TALENT:PLAYER:더러움무시
+	;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+	SIF STAIN:입 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+		RETURN 0
+	;애널 악취민감라면 안돼(스캇경험로 완화된다)
+	SIF STAIN:입 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15
+		RETURN 0
+	;점액 악취민감라면 안돼(촉수경험로 완화된다)
+	SIF STAIN:입 & 32 && TALENT:PLAYER:악취민감 && (EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50
+		RETURN 0
+	;혈 흡혈귀가 아니고, 악취민감라면 안돼
+	SIF STAIN:입 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+		RETURN 0
+	;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+	SIF STAIN:입 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+		RETURN 0
+	;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:입 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+	;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:입 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+ENDIF
+
+;전회와 이번 조교자가 같음
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;직전이펠라한다, 파이즈리펠라한다, 식스나인의 경우
+	IF PREVCOM == 31 || PREVCOM == 241 || PREVCOM == 280 || PREVCOM == 503
+		;직전의펠라한다로사정 하고 있으면 일단 비표시가 된다
+		SIF TFLAG:10
+			RETURN 0
+	ENDIF
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;2, 아무것도안한다
+@COM_ABLE2
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(2)
+	RETURN RESULT
+RETURN 1
+
+;-------------------------------------------------
+;3, 비패개장
+@COM_ABLE3
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(3)
+	RETURN RESULT
+;착의 플레이
+;모든 의류를 스스로 비켜 놓을 수 있다. 정조대만 불가.
+SIF TEQUIP:정조대
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+
+;V완구 삽입중은 안돼
+SIF TEQUIP:바이브
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;4, 자위
+@COM_ABLE4
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(4)
+	RETURN RESULT
+;착의 플레이
+;모든 의류를 스스로 비켜 놓을 수 있다. 정조대만 불가.
+SIF TEQUIP:정조대
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;5, 가슴자위
+@COM_ABLE5
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(5)
+	RETURN RESULT
+;착의 플레이
+;모든 의류를 스스로 비켜 놓을 수 있다.
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;6, 자위
+@COM_ABLE6
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(6)
+	RETURN RESULT
+;착의 플레이
+;모든 의류를 스스로 비켜 놓을 수 있다. A에정조대는 관여하지 않는다.
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;7, 항문자위
+@COM_ABLE7
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(7)
+	RETURN RESULT
+;착의 플레이
+;모든 의류를 스스로 비켜 놓을 수 있다. 정조대만 불가.
+SIF TEQUIP:정조대
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;8, 애널개방
+@COM_ABLE8
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(8)
+	RETURN RESULT
+
+;착의 플레이
+;모든 의류를 스스로 비켜 놓을 수 있다. A에정조대는 관여하지 않는다.
+
+;A완구 삽입중은 안돼
+SIF TEQUIP:애널바이브 || TEQUIP:애널비즈 || TEQUIP:확장벌룬
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;노예의 양손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5) || TALENT:한팔결손
+	RETURN 0
+
+RETURN 1
+
+;===========================================================
+;B계
+;===========================================================
+;-------------------------------------------------
+;10, 가슴애무
+@COM_ABLE10
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(10)
+	RETURN RESULT
+;착의 플레이
+;모든상의 위로부터 접한다.
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;11, 가슴주무르기
+@COM_ABLE11
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(11)
+	RETURN RESULT
+;착의 플레이
+;모든상의 위로부터 접한다.
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예에게 유방이 없으면 안돼(절벽불가)
+SIF !BREAST(TARGET)
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;12, 유두로터
+@COM_ABLE12
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(12)
+	RETURN RESULT
+;착의 플레이
+;모든상의 위로부터 실행할 수 있다.
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:0 == 0 && NOITEM == 0
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;13, 니틀캡
+@COM_ABLE13
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(13)
+	RETURN RESULT
+;착의 플레이
+;속옷, 쓰개 모두 불가.
+SIF TEQUIP:속옷（위） || TOPS(TARGET)
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:니플캡 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:니틀캡
+	RETURN 1
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:유두클립 || TEQUIP:착유기
+	RETURN 0
+;샤워중은 안돼
+SIF TEQUIP:샤워
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+	
+;함몰유두 또한욕정일정 이하는 안돼
+SIF TALENT:함몰유두 && (PALAM:욕정 < PALAMLV:3)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;14, 유두고문
+@COM_ABLE14
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(14)
+	RETURN RESULT
+;착의 플레이
+;모든상의 위로부터 실행할 수 있다.
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;15, 유두클립
+@COM_ABLE15
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(15)
+	RETURN RESULT
+;착의 플레이
+;속옷, 쓰개 모두 불가.
+SIF TEQUIP:속옷（위） || TOPS(TARGET)
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:바디클립 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:유두클립
+	RETURN 1
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:니틀캡 || TEQUIP:착유기
+	RETURN 0
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+
+;함몰유두 또한욕정일정 이하는 안돼
+SIF TALENT:함몰유두 && (PALAM:욕정 < PALAMLV:3)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;16, 유방전극
+@COM_ABLE16
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(16)
+	RETURN RESULT
+;착의 플레이
+;속옷, 쓰개 모두 불가.
+SIF TEQUIP:속옷（위） || TOPS(TARGET)
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:전극플레이키트 == 0 && NOITEM == 0
+	RETURN 0
+;B계 도구 사용중이 아니면 안돼
+SIF !TEQUIP:착유기 && !TEQUIP:유두클립
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;체력가 800 미만에서는 장착 불가능
+SIF BASE:체력 < 800
+	RETURN 0
+
+;목욕탕플레이중/촉수조교중은 안돼
+SIF TEQUIP:목욕탕 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;17, 착유기
+@COM_ABLE17
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(17)
+	RETURN RESULT
+;착의 플레이
+;속옷, 쓰개 모두 불가.
+SIF TEQUIP:속옷（위） || TOPS(TARGET)
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:착유기 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:착유기
+	RETURN 1
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예가모유체질가 아니면 사용할 수 없다
+SIF TALENT:모유체질 == 0
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:니틀캡 || TEQUIP:유두클립
+	RETURN 0
+;샤워중은 안돼
+SIF TEQUIP:샤워
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;18, 모유마시기
+@COM_ABLE18
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(18)
+	RETURN RESULT
+;착의 플레이
+;속옷, 쓰개 모두 불가.
+SIF TEQUIP:속옷（위） || TOPS(TARGET)
+	RETURN 0
+
+;노예가모유체질가 아니면 사용할 수 없다
+SIF TALENT:모유체질 == 0
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;가슴가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF STAIN:가슴 & 2798 && !TALENT:PLAYER:더러움무시
+	;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+	SIF STAIN:가슴 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+		RETURN 0
+	;애널 악취민감라면 안돼(스캇경험로 완화된다)
+	SIF STAIN:가슴 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15
+		RETURN 0
+	;점액 악취민감라면 안돼(촉수경험로 완화된다)
+	SIF STAIN:가슴 & 32 && TALENT:PLAYER:악취민감 && (EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50
+		RETURN 0
+	; 흡혈귀가 아니고, 악취민감라면 안돼
+	SIF STAIN:가슴 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+		RETURN 0
+	;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+	SIF STAIN:가슴 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+		RETURN 0
+	;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:가슴 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+	;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:가슴 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+ENDIF
+
+RETURN 1
+
+
+
+;===========================================================
+;C계
+;===========================================================
+;-------------------------------------------------
+;20, 로터
+@COM_ABLE20
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(20)
+	RETURN RESULT
+;착의 플레이
+;모든 착의 위로부터 실행할 수 있다. 스커트는 걷는다. 정조대는 불가.
+SIF TEQUIP:정조대
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:0 == 0 && NOITEM == 0
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF TEQUIP:클리캡 || TEQUIP:전동오나홀 || TEQUIP:음핵클립
+	RETURN 0
+
+;목마를 타고 있을 때, 페니스에 사용하는 것이 아니면 안돼
+SIF TEQUIP:삼각목마 && !PENIS(TARGET)
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;21, 진동마사지기
+@COM_ABLE21
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(21)
+	RETURN RESULT
+;착의 플레이
+;모든 착의 위로부터 실행할 수 있다. 스커트는 걷는다. 정조대는 불가.
+SIF TEQUIP:정조대
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진동마사지기 == 0 && NOITEM == 0
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF TEQUIP:클리캡 || TEQUIP:전동오나홀 || TEQUIP:음핵클립
+	RETURN 0
+
+;목마를 타고 있을 때, 페니스에 사용하는 것이 아니면 안돼
+SIF TEQUIP:삼각목마 && !PENIS(TARGET)
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;22, 클리캡
+@COM_ABLE22
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(22)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예에게 클리토리스가 없으면 안돼
+SIF PENIS(TARGET)
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:클리캡 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:클리캡
+	RETURN 1
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF TEQUIP:음핵클립
+	RETURN 0
+;샤워중은 안돼
+SIF TEQUIP:샤워
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;23, 클리고문
+@COM_ABLE23
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(23)
+	RETURN RESULT
+;착의 플레이
+;모든 착의 위로부터 실행할 수 있다. 스커트는 걷는다. 정조대는 불가.
+SIF TEQUIP:정조대
+	RETURN 0
+
+;노예에게 클리토리스가 없으면 안돼
+SIF PENIS(TARGET)
+	RETURN 0
+
+;삼각목마승마중은, 새드 3 이상이나지하실에 있는 것이 아니면 안돼
+SIF TEQUIP:삼각목마 && ABL:PLAYER:새드끼 < 3 && !TALENT:PLAYER:새드 && !TEQUIP:지하실
+	RETURN 0
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;24, 음핵클립
+@COM_ABLE24
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(24)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예에게 클리토리스가 없으면 안돼
+SIF PENIS(TARGET)
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:바디클립 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:음핵클립
+	RETURN 1
+
+;C계 도구 사용중은 불가
+SIF TEQUIP:클리캡
+	RETURN 0
+
+;촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;25, 음핵전극
+@COM_ABLE25
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(25)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예에게 클리토리스가 없으면 안돼
+SIF PENIS(TARGET)
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:전극플레이키트 == 0 && NOITEM == 0
+	RETURN 0
+;C계 도구 사용중이 아니면 안돼
+SIF !TEQUIP:음핵클립
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;체력가 800 미만에서는 장착 불가능
+SIF BASE:체력 < 800
+	RETURN 0
+
+;목욕탕플레이중/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:목욕탕 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+
+
+;===========================================================
+;P계
+;===========================================================
+;-------------------------------------------------
+;30, 수음한다
+;-------------------------------------------------
+@COM_ABLE30
+;일괄관리
+SIF GLOBAL_COMABLE(30)
+	RETURN RESULT
+;착의 플레이
+;모든 착의 위로부터 실행할 수 있다. 스커트는 걷는다. 정조대는 불가.
+SIF TEQUIP:정조대
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;31, 펠라한다
+;-------------------------------------------------
+@COM_ABLE31
+;일괄관리
+SIF GLOBAL_COMABLE(31)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+
+;오나홀 사용중은 불가
+SIF TEQUIP:전동오나홀
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;페니스가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF STAIN:페니스 & 2798 && !TALENT:PLAYER:더러움무시
+	;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+	SIF STAIN:페니스 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+		RETURN 0
+	;애널 악취민감라면 안돼(스캇경험로 완화된다)
+	SIF STAIN:페니스 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15
+		RETURN 0
+	;점액 악취민감라면 안돼(촉수경험로 완화된다)
+	SIF STAIN:페니스 & 32 && TALENT:PLAYER:악취민감 && ((EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10)
+		RETURN 0
+	;혈 흡혈귀가 아니고, 악취민감라면 안돼
+	SIF STAIN:페니스 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+		RETURN 0
+	;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+	SIF STAIN:페니스 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+		RETURN 0
+	;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:페니스 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+	;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:페니스 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;32, 전동오나홀
+;-------------------------------------------------
+@COM_ABLE32
+;일괄관리
+SIF GLOBAL_COMABLE(32)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:전동오나홀 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:전동오나홀
+	RETURN 1
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;요도계 도구 사용중은 불가
+SIF TEQUIP:카테터 || TEQUIP:요도벌룬
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;33, 귀두고문
+;-------------------------------------------------
+@COM_ABLE33
+;일괄관리
+SIF GLOBAL_COMABLE(33)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+
+;윤활가 높지 않으면 안돼
+SIF PALAM:윤활 < 2000
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;페니스에 도구 사용중은 불가
+SIF TEQUIP:전동오나홀
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;34, 구슬애무
+;-------------------------------------------------
+@COM_ABLE34
+;일괄관리
+SIF GLOBAL_COMABLE(34)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예가남자/aE음반양가 아니면 안돼
+SIF TALENT:남자 == 0 && TALENT:반음반양 == 0
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;35, 구슬고문
+;-------------------------------------------------
+@COM_ABLE35
+;일괄관리
+SIF GLOBAL_COMABLE(35)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예가남자/aE음반양가 아니면 안돼
+SIF TALENT:남자 == 0 && TALENT:반음반양 == 0
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;36, 벗겨낸다
+;-------------------------------------------------
+@COM_ABLE36
+;일괄관리
+SIF GLOBAL_COMABLE(36)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예가순종 2 이상 없으면 안돼
+SIF ABL:순종 < 2
+	RETURN 0
+;너무욕정 하고 있으면 안돼
+SIF PALAM:욕정 > PALAMLV:1
+	RETURN 0
+;노예가포경페니스를 가지고 있지 않으면 안돼
+SIF !TALENT:포경 || !PENIS(TARGET)
+	RETURN 0
+
+;페니스에 도구 사용중은 불가
+SIF TEQUIP:전동오나홀 || TEQUIP:카테터 || TEQUIP:요도벌룬
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;지하실/iB수조교중/목마 탑승중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+RETURN 1
+
+
+
+;===========================================================
+;V계
+;===========================================================
+;-------------------------------------------------
+;40, 커닐링구스
+;-------------------------------------------------
+@COM_ABLE40
+;일괄관리
+SIF GLOBAL_COMABLE(40)
+	RETURN RESULT
+;착의 플레이
+;바지계는 안돼. 스커트는 걸을 수 있다. 속옷 위로부터 실행할 수 있다. 정조대는 불가.
+SIF BOTTOMS(TARGET) >= 4 || TEQUIP:정조대
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+
+;바이브사용중은 불가
+SIF TEQUIP:바이브
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;바기나가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF STAIN:바기나 & 2798 && !TALENT:PLAYER:더러움무시
+	;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+	SIF STAIN:바기나 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+		RETURN 0
+	;애널 악취민감라면 안돼(스캇경험로 완화된다)
+	SIF STAIN:바기나 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15 && EXP:PLAYER:스캇경험 < 15
+		RETURN 0
+	;점액 악취민감라면 안돼(촉수경험로 완화된다)
+	SIF STAIN:바기나 & 32 && TALENT:PLAYER:악취민감 && (EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50
+		RETURN 0
+	;혈 흡혈귀가 아니고, 악취민감라면 안돼
+	SIF STAIN:바기나 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+		RETURN 0
+	;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+	SIF STAIN:바기나 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+		RETURN 0
+	;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:바기나 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+	;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:바기나 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;41, 손가락삽입
+;-------------------------------------------------
+@COM_ABLE41
+;일괄관리
+SIF GLOBAL_COMABLE(41)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;42, 로터삽입
+;-------------------------------------------------
+@COM_ABLE42
+;일괄관리
+SIF GLOBAL_COMABLE(42)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:0 == 0 && NOITEM == 0
+	RETURN 0
+
+;확장 경험 10 미만으로, 다른 것이 들어가 있으면 안돼
+IF EXP:V확장경험 < 10
+	SIF TEQUIP:바이브
+	RETURN 0
+ENDIF
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;43, 바이브
+;-------------------------------------------------
+@COM_ABLE43
+;일괄관리
+SIF GLOBAL_COMABLE(43)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:바이브 == 0 && NOITEM == 0
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;44, 바기나전극
+;-------------------------------------------------
+@COM_ABLE44
+;일괄관리
+SIF GLOBAL_COMABLE(44)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:전극플레이키트 == 0 && NOITEM == 0
+	RETURN 0
+;V계 도구 사용중이 아니면 안돼
+SIF !TEQUIP:바이브
+	RETURN 0
+
+;촉수산란중은 안돼
+SIF TEQUIP:촉수질내산란
+	RETURN 0
+;체력가 800 미만에서는 장착 불가능
+SIF BASE:체력 < 800
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;목욕탕플레이중/촉수조교중은 안돼
+SIF TEQUIP:목욕탕 || TEQUIP:촉수
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+
+;===========================================================
+;A계
+;===========================================================
+;-------------------------------------------------
+;50, 애널자극
+;-------------------------------------------------
+@COM_ABLE50
+;일괄관리
+SIF GLOBAL_COMABLE(50)
+	RETURN RESULT
+;착의 플레이
+;바지계는 안돼. 스커트는 걸을 수 있다. 속옷 위로부터 실행할 수 있다. 정조대는 A에 관여하지 않는다.
+SIF BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;뭔가 들어 있으면 안돼
+SIF TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;애널가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF STAIN:애널 & 2798 && !TALENT:PLAYER:더러움무시
+	;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+	SIF STAIN:애널 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+		RETURN 0
+	;애널 악취민감라면 안돼(스캇경험로 완화된다)
+	SIF STAIN:애널 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15
+		RETURN 0
+	;점액 악취민감라면 안돼(촉수경험로 완화된다)
+	SIF STAIN:애널 & 32 && TALENT:PLAYER:악취민감 && (EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50
+		RETURN 0
+	;혈 흡혈귀가 아니고, 악취민감라면 안돼
+	SIF STAIN:애널 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+		RETURN 0
+	;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+	SIF STAIN:애널 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+		RETURN 0
+	;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:애널 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+	;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:애널 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;51, 애널애무
+;-------------------------------------------------
+@COM_ABLE51
+;일괄관리
+SIF GLOBAL_COMABLE(51)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 OK), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;52, 로터A삽입
+;-------------------------------------------------
+@COM_ABLE52
+;일괄관리
+SIF GLOBAL_COMABLE(52)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 OK), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:0 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;A계 도구 사용중은 불가
+SIF TEQUIP:확장벌룬
+	RETURN 0
+;확장 경험 10 미만으로, 다른 것이 들어가 있으면 안돼
+IF EXP:A확장경험 < 10
+	SIF TEQUIP:애널비즈 || TEQUIP:애널바이브
+	RETURN 0
+ENDIF
+;양쪽 모두 들어가 있으면 과연 안돼
+SIF (TEQUIP:애널비즈 || TEQUIP:애널바이브) && (TEQUIP:애널비즈 || TEQUIP:애널바이브)
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;53, 애널비즈
+;-------------------------------------------------
+@COM_ABLE53
+;일괄관리
+SIF GLOBAL_COMABLE(53)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 OK), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:애널비즈 == 0 && NOITEM == 0
+	RETURN 0
+;삼각목마승마중은 해제 할 수 없다
+SIF TEQUIP:애널비즈 && TEQUIP:삼각목마
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;A계 도구 사용중은 불가
+SIF TEQUIP:확장벌룬
+	RETURN 0
+;촉수산란중은 안돼
+SIF TEQUIP:촉수장내산란
+	RETURN 0
+
+;A경험가 적은 경우, 윤활 없으면 안돼
+SIF EXP:A경험 < 10 && PALAM:윤활 < 2000
+	RETURN 0
+;확장 경험 10 미만으로, 다른 것이 들어가 있으면 안돼
+IF EXP:A확장경험 < 10
+	SIF TEQUIP:애널바이브
+	RETURN 0
+ENDIF
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;54, 애널바이브
+;-------------------------------------------------
+@COM_ABLE54
+;일괄관리
+SIF GLOBAL_COMABLE(54)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 OK), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:애널바이브 == 0 && NOITEM == 0
+	RETURN 0
+;삼각목마승마중은 해제 할 수 없다
+SIF TEQUIP:애널바이브 && TEQUIP:삼각목마
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;A계 도구 사용중은 불가
+SIF TEQUIP:확장벌룬
+	RETURN 0
+
+;A경험가 적은 경우, 윤활 없으면 안돼
+SIF EXP:A경험 < 10 && PALAM:윤활 < 2000
+	RETURN 0
+;확장 경험 10 미만으로, 다른 것이 들어가 있으면 안돼
+IF EXP:A확장경험 < 10
+	SIF TEQUIP:애널비즈
+	RETURN 0
+ENDIF
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;55, 확장벌룬
+;-------------------------------------------------
+@COM_ABLE55
+;일괄관리
+SIF GLOBAL_COMABLE(55)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 OK), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:확장벌룬 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;A계 도구 사용중은 불가
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브
+	RETURN 0
+
+;일정한 A경험가 필요
+SIF EXP:A경험 < 50
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;56, 애널전극
+;-------------------------------------------------
+@COM_ABLE56
+;일괄관리
+SIF GLOBAL_COMABLE(56)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 OK), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:전극플레이키트 == 0 && NOITEM == 0
+	RETURN 0
+;A계 도구 사용중이 아니면 안돼
+SIF !TEQUIP:애널바이브
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;체력가 800 미만에서는 장착 불가능
+SIF BASE:체력 < 800
+	RETURN 0
+
+;A계 도구 사용중은 불가
+SIF TEQUIP:확장벌룬
+	RETURN 0
+;촉수산란중은 안돼
+SIF TEQUIP:촉수장내산란
+	RETURN 0
+
+;일정한 A경험가 필요
+SIF EXP:A경험 < 10
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+;목욕탕플레이중/촉수조교중은 안돼
+SIF TEQUIP:목욕탕 || TEQUIP:촉수
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+
+
+;===========================================================
+;U계
+;===========================================================
+;-------------------------------------------------
+;60, 카테터
+;-------------------------------------------------
+@COM_ABLE60
+;일괄관리
+SIF GLOBAL_COMABLE(60)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:카테터 == 0 && NOITEM == 0
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF TEQUIP:전동오나홀 || TEQUIP:요도벌룬 || TEQUIP:사정관리
+	RETURN 0
+
+;삼각목마탑승중
+IF TEQUIP:삼각목마
+	;삼각목마탑승중은 원래 삽입 할 수 없다
+	IF !TEQUIP:카테터
+		RETURN 0
+	;뽑을 때는, 숨지 않으면 빠진다
+	ELSEIF TEQUIP:카테터 && !PENIS(TARGET)
+		RETURN 0
+	ENDIF
+ENDIF
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+
+;조교자는기교 3 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 3
+	RETURN 0
+;ASSI의 경우, 기교 4 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:2 < 4
+	RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;61, 요도벌룬
+;-------------------------------------------------
+@COM_ABLE61
+;일괄관리
+SIF GLOBAL_COMABLE(61)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF (ITEM:카테터 == 0 || ITEM:확장벌룬 == 0) && NOITEM == 0
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF TEQUIP:전동오나홀 || TEQUIP:카테터 || TEQUIP:사정관리
+	RETURN 0
+
+;삼각목마탑승중
+IF TEQUIP:삼각목마
+	;삼각목마탑승중은 원래 삽입 할 수 없다
+	IF !TEQUIP:요도벌룬
+		RETURN 0
+	;뽑을 때는, 숨지 않으면 빠진다
+	ELSEIF TEQUIP:요도벌룬 && !PENIS(TARGET)
+		RETURN 0
+	ENDIF
+ENDIF
+
+;U확장경험 적으면 안돼
+SIF EXP:U확장경험 < 5
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 장착 불가능
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+
+;조교자는기교 3 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 3
+	RETURN 0
+;ASSI의 경우, 기교 4 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:2 < 4
+	RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;62, 전극카테터
+;-------------------------------------------------
+@COM_ABLE62
+;일괄관리
+SIF GLOBAL_COMABLE(62)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 하의, 전신상의모두 불가. 스커트류만 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF (ITEM:카테터 == 0 || ITEM:전극플레이키트 == 0) && NOITEM == 0
+	RETURN 0
+;U계 도구 사용중이 아니면 안돼
+SIF !TEQUIP:카테터
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 장착 불가능
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;목욕탕플레이중/촉수조교중은 안돼
+SIF TEQUIP:목욕탕 || TEQUIP:촉수
+	RETURN 0
+
+;조교자는기교 3 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 3
+	RETURN 0
+;ASSI의 경우, 기교 4 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:2 < 4
+	RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+
+;===========================================================
+;봉사시킨다
+;===========================================================
+;-------------------------------------------------
+;70, 수음
+;-------------------------------------------------
+@COM_ABLE70
+;일괄관리
+SIF GLOBAL_COMABLE(70)
+	RETURN RESULT
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마탑승중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;71, 펠라치오
+;-------------------------------------------------
+@COM_ABLE71
+;일괄관리
+SIF GLOBAL_COMABLE(71)
+	RETURN RESULT
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마탑승중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;72, 이라마치오
+;-------------------------------------------------
+@COM_ABLE72
+;일괄관리
+SIF GLOBAL_COMABLE(72)
+	RETURN RESULT
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가말자지로, 노예가소인체형 혹은작은체구라면 불가
+SIF TALENT:PLAYER:말자지 && (TALENT:소인체형 || TALENT:작은체구)
+	RETURN 0
+
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;순종, 욕망의 합계가 6이상 없으면 안돼
+SIF ABL:순종 + ABL:욕망 < 6
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마탑승중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;73, 파이즈리
+;-------------------------------------------------
+@COM_ABLE73
+;일괄관리
+SIF GLOBAL_COMABLE(73)
+	RETURN RESULT
+;착의 플레이
+;속옷（위） 또는상의 또는전신상의를 붙이고 있으면 안돼
+SIF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;남자/반음반양/컨트보이는 안돼
+SIF MALE(TARGET)
+	RETURN 0
+;[폭유]라면기교LV1 이상,[거유]가 아니면기교 3 이상,[빈유][절벽]라면기교 4 필요
+SIF (TALENT:폭유 && ABL:기교 < 2) || (!TALENT:폭유 && TALENT:거유 && ABL:기교 < 3) || (!TALENT:폭유 && !TALENT:거유 && ABL:기교 < 4) || (TALENT:빈유 && ABL:기교 < 5) || (TALENT:절벽 && ABL:기교 < 5)
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;74, 세로파이즈리
+;-------------------------------------------------
+@COM_ABLE74
+;일괄관리
+SIF GLOBAL_COMABLE(74)
+	RETURN RESULT
+;착의 플레이
+;속옷（위） 또는상의 또는전신상의를 붙이고 있으면 안돼
+SIF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;거유나폭유가 아니면 문답 무용으로 불가
+SIF TALENT:폭유 == 0 && TALENT:거유 == 0
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;75, 파이즈리펠라
+;-------------------------------------------------
+@COM_ABLE75
+;일괄관리
+SIF GLOBAL_COMABLE(75)
+	RETURN RESULT
+;착의 플레이
+;속옷（위） 또는상의 또는전신상의를 붙이고 있으면 안돼
+SIF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;남자/반음반양/컨트보이는 안돼
+SIF MALE(TARGET)
+	RETURN 0
+
+;절벽는 안돼
+SIF TALENT:절벽
+	RETURN 0
+;[폭유]라면기교LV2 이상,[거유]가 아니면기교 4 이상,[빈유]라면기교 5 필요
+SIF (TALENT:폭유 && ABL:기교 < 3) || (!TALENT:폭유 && TALENT:거유 && ABL:기교 < 4) || (!TALENT:폭유 && !TALENT:거유 && ABL:기교 < 5) || (TALENT:빈유 && ABL:기교 >= 5)
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;76, 스마타
+;-------------------------------------------------
+@COM_ABLE76
+;일괄관리
+SIF GLOBAL_COMABLE(76)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지 불가. 스커트는 걷는다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;C·V계 도구 사용중은 불가
+SIF TEQUIP:클리캡 || TEQUIP:음핵클립 || TEQUIP:바이브
+	RETURN 0
+;페니스가 없을 때, 요도계 도구 사용중은 불가
+SIF !PENIS(TARGET) && (TEQUIP:카테터 || TEQUIP:요도벌룬)
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중/야외플레이중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마 || TEQUIP:야외플레이
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+
+;노예의 양발를 사용할 수 없으면 안돼
+SIF TALENT:한다리결손 || BIND_CHECK_B(6)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;77, 손가락츄파
+;-------------------------------------------------
+@COM_ABLE77
+;일괄관리
+SIF GLOBAL_COMABLE(77)
+	RETURN RESULT
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;80, 풋잡
+;-------------------------------------------------
+@COM_ABLE80
+;일괄관리
+SIF GLOBAL_COMABLE(80)
+	RETURN RESULT
+;착의 플레이
+;신발를 신고 있을 때, 조교자가마조 혹은 조교 대상이새드가 아니면 안돼
+SIF TEQUIP:신발 && ABL:PLAYER:마조끼 < 3 && !TALENT:PLAYER:마조 && ABL:새드끼 < 3 && !TALENT:새드
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;81, 헤어잡
+;-------------------------------------------------
+@COM_ABLE81
+;일괄관리
+SIF GLOBAL_COMABLE(81)
+	RETURN RESULT
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;82, 겨드랑이잡
+;-------------------------------------------------
+@COM_ABLE82
+;일괄관리
+SIF GLOBAL_COMABLE(82)
+	RETURN RESULT
+;착의 플레이
+;속옷（위） 또는상의 또는전신상의를 붙이고 있으면 안돼
+SIF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;83, 엉덩이 코키
+;-------------------------------------------------
+@COM_ABLE83
+;일괄관리
+SIF GLOBAL_COMABLE(83)
+	RETURN RESULT
+;착의 플레이
+;바지계는 안돼. 스커트는 걷는다. 타이츠, 속옷은 위로부터. 정조대는 관여하지 않는다.
+SIF BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;84, 니플퍽
+;-------------------------------------------------
+@COM_ABLE84
+;일괄관리
+SIF GLOBAL_COMABLE(84)
+	RETURN RESULT
+;착의 플레이
+;속옷（위） 또는상의 또는전신상의를 붙이고 있으면 안돼
+SIF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;85, 발핥기강제
+;-------------------------------------------------
+@COM_ABLE85
+;일괄관리
+SIF GLOBAL_COMABLE(85)
+	RETURN RESULT
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+
+;촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;조교자가양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;86, 구슬비비기강제
+;-------------------------------------------------
+@COM_ABLE86
+;일괄관리
+SIF GLOBAL_COMABLE(86)
+	RETURN RESULT
+
+;조교자가남자/aE음반양가 아니면 안돼
+SIF TALENT:PLAYER:남자 == 0 && TALENT:PLAYER:반음반양 == 0
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;87, 구슬핥기강제
+;-------------------------------------------------
+@COM_ABLE87
+;일괄관리
+SIF GLOBAL_COMABLE(87)
+	RETURN RESULT
+
+;조교자가남자/aE음반양가 아니면 안돼
+SIF TALENT:PLAYER:남자 == 0 && TALENT:PLAYER:반음반양 == 0
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+RETURN 1
+
+
+;===========================================================
+;섹스계
+;===========================================================
+;-------------------------------------------------
+;100, 정상위
+;-------------------------------------------------
+@COM_ABLE100
+;일괄관리
+SIF GLOBAL_COMABLE(100)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:V경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_V
+SIF A > 1
+	RETURN 0
+
+;조교자의발를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;삼각목마승마/지하실/야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;101, 후배위
+;-------------------------------------------------
+@COM_ABLE101
+;일괄관리
+SIF GLOBAL_COMABLE(101)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:V경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_V
+SIF A > 1
+	RETURN 0
+
+;조교자의발를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;삼각목마승마/지하실/야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;102, 대면좌위
+;-------------------------------------------------
+@COM_ABLE102
+;일괄관리
+SIF GLOBAL_COMABLE(102)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < -1
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:V경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_V
+SIF A > 1
+	RETURN 0
+
+;조교자의손를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;삼각목마승마/지하실/야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;103, 배면좌위
+;-------------------------------------------------
+@COM_ABLE103
+;일괄관리
+SIF GLOBAL_COMABLE(103)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < -1
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:V경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_V
+SIF A > 1
+	RETURN 0
+
+;조교자의손를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;삼각목마승마/지하실/야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;104, 대면입위
+;-------------------------------------------------
+@COM_ABLE104
+;일괄관리
+SIF GLOBAL_COMABLE(104)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < -1
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:V경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_V
+SIF A > 1
+	RETURN 0
+
+;조교자의발를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+
+;삼각목마승마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;105, 배면입위
+;-------------------------------------------------
+@COM_ABLE105
+;일괄관리
+SIF GLOBAL_COMABLE(105)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < -1
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:V경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_V
+SIF A > 1
+	RETURN 0
+
+;조교자의발를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+
+;삼각목마승마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;106, 기승위
+;-------------------------------------------------
+@COM_ABLE106
+;일괄관리
+SIF GLOBAL_COMABLE(106)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < -1
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:V경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_V
+SIF A > 1
+	RETURN 0
+
+;노예의 몸이 부자유스럽다면 안돼
+SIF BIND_CHECK_B(0)
+	RETURN 0
+
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;삼각목마승마/지하실/야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+
+;===========================================================
+;애널섹스계
+;===========================================================
+;-------------------------------------------------
+;110, 정상위애널
+;-------------------------------------------------
+@COM_ABLE110
+;일괄관리
+SIF GLOBAL_COMABLE(110)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 제외하다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 A경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:A경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_A
+SIF A > 1
+	RETURN 0
+
+;조교자의발를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;삼각목마승마/지하실/야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;111, 후배위애널
+;-------------------------------------------------
+@COM_ABLE111
+;일괄관리
+SIF GLOBAL_COMABLE(111)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 제외하다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 A경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:A경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_A
+SIF A > 1
+	RETURN 0
+
+;조교자의발를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;삼각목마승마/지하실/야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;112, 대면좌위애널
+;-------------------------------------------------
+@COM_ABLE112
+;일괄관리
+SIF GLOBAL_COMABLE(112)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 제외하다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < -1
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 A경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:A경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_A
+SIF A > 1
+	RETURN 0
+
+;조교자의손를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;삼각목마승마/지하실/야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;113, 배면좌위애널
+;-------------------------------------------------
+@COM_ABLE113
+;일괄관리
+SIF GLOBAL_COMABLE(113)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 제외하다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < -1
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 A경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:A경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_A
+SIF A > 1
+	RETURN 0
+
+;조교자의손를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;삼각목마승마/지하실/야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;114, 대면입위애널
+;-------------------------------------------------
+@COM_ABLE114
+;일괄관리
+SIF GLOBAL_COMABLE(114)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 제외하다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < -1
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 A경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:A경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_A
+SIF A > 1
+	RETURN 0
+
+;조교자의발를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+
+
+;삼각목마승마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;115, 배면입위애널
+;-------------------------------------------------
+@COM_ABLE115
+;일괄관리
+SIF GLOBAL_COMABLE(115)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 제외하다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < -1
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 A경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:A경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_A
+SIF A > 1
+	RETURN 0
+
+;조교자의발를 사용할 수 없으면 안돼
+SIF TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+
+;삼각목마승마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;116, 기승위애널
+;-------------------------------------------------
+@COM_ABLE116
+;일괄관리
+SIF GLOBAL_COMABLE(116)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 제외하다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < -1
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 A경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:A경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_A
+SIF A > 1
+	RETURN 0
+
+;노예의 몸이 부자유스럽다면 안돼
+SIF BIND_CHECK_B(0)
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;삼각목마승마/지하실/야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;===========================================================
+;SM·하드계
+;===========================================================
+;-------------------------------------------------
+;130, 밧줄
+;-------------------------------------------------
+@COM_ABLE130
+;일괄관리
+SIF GLOBAL_COMABLE(130)
+	RETURN RESULT
+;착의 플레이 모든 착의 위로부터 긴박 가능
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:밧줄 == 0 && NOITEM == 0
+	RETURN 0
+;삼각목마승마중은 해제 할 수 없다
+SIF TEQUIP:밧줄 && TEQUIP:삼각목마
+	RETURN 0
+
+;조교자는기교 1 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 1
+	RETURN 0
+;ASSI의 경우, 기교 3 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:2 < 3
+	RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중/촉수조교중은 안돼
+SIF TEQUIP:목욕탕 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;131, 아이마스크
+;-------------------------------------------------
+@COM_ABLE131
+;일괄관리
+SIF GLOBAL_COMABLE(131)
+	RETURN RESULT
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:아이마스크 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:아이마스크
+	RETURN 1
+
+;샤워중은 안돼
+SIF TEQUIP:샤워
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;132, 볼개그
+;-------------------------------------------------
+@COM_ABLE132
+;일괄관리
+SIF GLOBAL_COMABLE(132)
+	RETURN RESULT
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:볼개그 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:볼개그
+	RETURN 1
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;133, 정조대
+;-------------------------------------------------
+@COM_ABLE133
+;일괄관리
+SIF GLOBAL_COMABLE(133)
+	RETURN RESULT
+;착의 플레이
+;바지는 안돼. 스커트는 걷는다.
+SIF BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:정조대 == 0 && NOITEM == 0
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+;V계 도구 사용중은 불가
+SIF VCHECK(TARGET)
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;134, 사정관리
+;-------------------------------------------------
+@COM_ABLE134
+;일괄관리
+SIF GLOBAL_COMABLE(134)
+	RETURN RESULT
+;착의 플레이
+;바지, 속옷(정조대는 포함하지 않는다)는 안돼. 스커트는 걷는다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:리본 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;140, 스팽킹
+;-------------------------------------------------
+@COM_ABLE140
+;일괄관리
+SIF GLOBAL_COMABLE(140)
+	RETURN RESULT
+;착의 플레이
+;바지, 속옷(정조대는 관계없다)의 위로부터라도 두드릴 수 있다.
+
+;ASSI의 경우, 순종 3 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 3 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;141, 젖스팽킹
+;-------------------------------------------------
+@COM_ABLE141
+;일괄관리
+SIF GLOBAL_COMABLE(141)
+	RETURN RESULT
+;착의 플레이
+;상의, 속옷 위로부터라도 두드릴 수 있다.
+
+;ASSI의 경우, 순종 3 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 3 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;142, 채찍
+;-------------------------------------------------
+@COM_ABLE142
+;일괄관리
+SIF GLOBAL_COMABLE(142)
+	RETURN RESULT
+;착의 플레이 모든 착의 위로부터라도 두드릴 수 있다.
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:채찍 == 0 && NOITEM == 0
+	RETURN 0
+
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;샤워중은 안돼
+SIF TEQUIP:샤워
+	RETURN 0
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;143, 바늘
+;-------------------------------------------------
+@COM_ABLE143
+;일괄관리
+SIF GLOBAL_COMABLE(143)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:바늘 == 0 && NOITEM == 0
+	RETURN 0
+
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;샤워중은 안돼
+SIF TEQUIP:샤워
+	RETURN 0
+
+;야외플레이중/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;144, 촛불
+;-------------------------------------------------
+@COM_ABLE144
+;일괄관리
+SIF GLOBAL_COMABLE(144)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:저온초 == 0 && NOITEM == 0
+	RETURN 0
+
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;야외플레이중/목욕탕플레이중/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:목욕탕 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;145, 삼각목마
+;-------------------------------------------------
+@COM_ABLE145
+;일괄관리
+SIF GLOBAL_COMABLE(145)
+	RETURN RESULT
+;착의 플레이
+;바지, 정조대는 안돼. 정조대는페니스에 붙이는 타입이라면 OK.
+SIF BOTTOMS(TARGET) >= 4 || (TEQUIP:정조대 && VAGINA(TARGET))
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:삼각목마 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:삼각목마
+	RETURN 1
+
+;조교자가한팔결손, 양팔결손, 한다리결손, 양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:한팔결손 || TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마 || TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손
+	RETURN 0
+;새드Lv3 이상 필요(소질:[새드]라면 무시할 수 있다)
+SIF ABL:PLAYER:새드끼 < 3 && !TALENT:PLAYER:새드
+	RETURN 0
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+
+;조교자는기교 1 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 1
+	RETURN 0
+;ASSI의 경우, 기교 3 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:2 < 3
+	RETURN 0
+ENDIF
+
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;도구가 삽입되고 있으면 안돼
+SIF TEQUIP:바이브
+	RETURN 0
+;노예에게페니스가 없는 경우, N계 도구 사용중은 불가
+SIF !PENIS(TARGET) && (TEQUIP:카테터 || TEQUIP:요도벌룬)
+	RETURN 0
+
+;야외플레이중/목욕탕플레이중/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:목욕탕 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;150, 가구로한다
+;-------------------------------------------------
+@COM_ABLE150
+;일괄관리
+SIF GLOBAL_COMABLE(150)
+	RETURN RESULT
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+
+;샤워중은 안돼
+SIF TEQUIP:샤워
+	RETURN 0
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+;야외플레이중/삼각목마승마중/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;151, 고문
+;-------------------------------------------------
+@COM_ABLE151
+
+;-------------------------------------------------
+;152, 매도한다
+;-------------------------------------------------
+@COM_ABLE152
+;일괄관리
+SIF GLOBAL_COMABLE(152)
+	RETURN RESULT
+;조교자의 이빨이 없으면 안돼
+SIF TALENT:PLAYER:모두발치
+	RETURN 0
+;새드Lv4 이상 필요(소질:[새드]라면 무시할 수 있다)
+SIF ABL:PLAYER:새드끼 < 4 && !TALENT:PLAYER:새드
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;153, 발로 밟는다
+;-------------------------------------------------
+@COM_ABLE153
+;일괄관리
+SIF GLOBAL_COMABLE(153)
+	RETURN RESULT
+;새드Lv4 이상 필요(소질:[새드]라면 무시할 수 있다)
+SIF ABL:PLAYER:새드끼 < 4 && !TALENT:PLAYER:새드
+	RETURN 0
+;조교자가양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;삼각목마승마중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;154, 배빵
+;-------------------------------------------------
+@COM_ABLE154
+;일괄관리
+SIF GLOBAL_COMABLE(154)
+	RETURN RESULT
+;새드Lv4 이상 필요(소질:[새드]라면 무시할 수 있다)
+SIF ABL:PLAYER:새드끼 < 4 && !TALENT:PLAYER:새드
+	RETURN 0
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;155, 목조르기
+;-------------------------------------------------
+@COM_ABLE155
+;일괄관리
+SIF GLOBAL_COMABLE(155)
+	RETURN RESULT
+;새드Lv3 이상 필요(소질:[새드]라면 무시할 수 있다)
+SIF ABL:PLAYER:새드끼 < 3 && !TALENT:PLAYER:새드
+	RETURN 0
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예가순종 2 이상 없으면 안돼
+SIF ABL:순종 < 2
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+
+;삼각목마승마중/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;156, 낙인
+;-------------------------------------------------
+@COM_ABLE156
+;일괄관리
+SIF GLOBAL_COMABLE(156)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;노예가순종 4 이상 없으면 안돼
+SIF ABL:순종 < 4
+	RETURN 0
+
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;도구 사용중은 불가(지하실에서도 사용 가능한 것)
+SIF TEQUIP:유두클립 || TEQUIP:음핵클립 || TEQUIP:바이브 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+;요도계 도구 사용중은 불가
+SIF TEQUIP:카테터 || TEQUIP:요도벌룬
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;157, 물고문
+;-------------------------------------------------
+@COM_ABLE157
+;일괄관리
+SIF GLOBAL_COMABLE(157)
+	RETURN RESULT
+
+;지하실에 없으면 안돼
+SIF !TEQUIP:지하실
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+
+;새드Lv3 이상 필요(소질:[새드]라면 무시할 수 있다)
+SIF ABL:PLAYER:새드끼 < 3 && !TALENT:PLAYER:새드
+	RETURN 0
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;158, 간지럼고문
+;-------------------------------------------------
+@COM_ABLE158
+;일괄관리
+SIF GLOBAL_COMABLE(158)
+	RETURN RESULT
+
+;지하실에 없으면 안돼
+SIF !TEQUIP:지하실
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+
+;-------------------------------------------------
+;160, 피스트퍽
+;-------------------------------------------------
+@COM_ABLE160
+;일괄관리
+SIF GLOBAL_COMABLE(160)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가처녀라면 안돼
+SIF TALENT:처녀 || TALENT:재생처녀
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL ARMSIZEJUDGE_MT
+SIF EXP:V경험 < A
+	RETURN 0
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;V에 뭔가 들어 있으면 안돼
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+;페니스가 없는 경우, 요도에 뭔가는 있으면 안돼
+SIF !PENIS(TARGET) && (TEQUIP:카테터 || TEQUIP:요도벌룬)
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;조교자는기교 3 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 3
+	RETURN 0
+;ASSI의 경우, 기교 4 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:2 < 4
+	RETURN 0
+ENDIF
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;161, 애널피스트
+;-------------------------------------------------
+@COM_ABLE161
+;일괄관리
+SIF GLOBAL_COMABLE(161)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 제외하다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예가백버진라면 안돼
+SIF TALENT:백버진
+	RETURN 0
+
+;일정한 A경험가 필요
+CALL ARMSIZEJUDGE_MT
+SIF EXP:A경험 < A
+	RETURN 0
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;A에 뭔가 들어 있으면 안돼
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;조교자는기교 3 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 3
+	RETURN 0
+;ASSI의 경우, 기교 4 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:2 < 4
+	RETURN 0
+ENDIF
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;162, 양구멍피스트
+;-------------------------------------------------
+@COM_ABLE162
+;일괄관리
+SIF GLOBAL_COMABLE(162)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가처녀, 백버진라면 안돼
+SIF TALENT:처녀 || TALENT:재생처녀 || TALENT:백버진
+	RETURN 0
+
+;일정한 V·A경험가 필요
+CALL ARMSIZEJUDGE_MT
+SIF EXP:V경험 < A || EXP:A경험 < A
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;V에 뭔가 들어 있으면 안돼
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+;A에 뭔가 들어 있으면 안돼
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+;페니스가 없는 경우, 요도에 뭔가는 있으면 안돼
+SIF !PENIS(TARGET) && (TEQUIP:카테터 || TEQUIP:요도벌룬)
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;조교자는기교 3 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 3
+	RETURN 0
+;ASSI의 경우, 기교 4 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:2 < 4
+	RETURN 0
+ENDIF
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+;조교자가한팔결손, 양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:한팔결손 || TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;163, 본체간
+;-------------------------------------------------
+@COM_ABLE163
+;일괄관리
+SIF GLOBAL_COMABLE(163)
+	RETURN RESULT
+
+;「당신」(이)가 아니면 안돼
+SIF NO:PLAYER != 0
+	RETURN 0
+
+;대상이 남사가 아니면 안돼
+SIF TOKU_KIWAME(TARGET) == 0
+	RETURN 0
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+
+;수치플레이중/신혼부부플레이중/야외플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:에이프런 || TEQUIP:야외플레이
+	RETURN 0
+;목욕탕/삼각목마에 있으면 안돼
+SIF TEQUIP:목욕탕 || TEQUIP:삼각목마
+	RETURN 0
+	
+RETURN 1
+
+;===========================================================
+;스카계
+;===========================================================
+;-------------------------------------------------
+;180, 관장
+;-------------------------------------------------
+@COM_ABLE180
+;일괄관리
+SIF GLOBAL_COMABLE(180)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 제외하다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:관장도구세트 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;A계 도구 사용중은 불가
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+
+;촉수조교중은 안돼
+SIF TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;181, 육변기
+;-------------------------------------------------
+@COM_ABLE181
+;일괄관리
+SIF GLOBAL_COMABLE(181)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대는 제외하다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+;ASSI의 경우, 순종 3 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 3 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+;조교자에게뇨의가 없으면 안돼
+SIF BASE:PLAYER:뇨의 == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;일정한 A경험가 필요
+CALL SIZEJUDGE_MT
+SIF EXP:A경험 < A
+	RETURN 0
+;벌써 2 개들어가 있으면 안돼(확장 경험도 체크)
+CALL NIRINJUDGE_A
+SIF A > 1
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;182, 방뇨
+;-------------------------------------------------
+@COM_ABLE182
+;일괄관리
+SIF GLOBAL_COMABLE(182)
+	RETURN RESULT
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+;뇨의가 없으면 안돼
+SIF BASE46(1) == 0
+	RETURN 0
+
+;사정관리, 요도벌룬중은 물리적으로 나오지 않기 때문에 안돼
+SIF TEQUIP:사정관리 || TEQUIP:요도벌룬
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;183, 배변
+;-------------------------------------------------
+@COM_ABLE183
+;일괄관리
+SIF GLOBAL_COMABLE(183)
+	RETURN RESULT
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+;변의가 없으면 안돼
+SIF BASE46(2) == 0
+	RETURN 0
+
+;확장벌룬, 촉수애널, 촉수장내산란중은 물리적으로 나오지 않기 때문에 안돼
+SIF TEQUIP:확장벌룬 || (TEQUIP:촉수 && TEQUIP:애널바이브) || TEQUIP:촉수장내산란
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;184, 음뇨시킨다
+;-------------------------------------------------
+@COM_ABLE184
+;일괄관리
+SIF GLOBAL_COMABLE(184)
+	RETURN RESULT
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드나마조라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && ABL:ASSI:새드끼 < 3 && ABL:ASSI:마조끼 < 3
+		RETURN 0
+ENDIF
+
+;촉수구욕중, 뇨의가 있어, 촉수요도삽입중은 문답 무용으로 OK
+IF TEQUIP:촉수구욕 && TEQUIP:카테터 && BASE:뇨의 > 60 && TEQUIP:지하실
+;주인으로부터 직접 마실 때
+ELSE
+	;그 자리에 오줌, 주인의뇨의양쪽 모두 없으면 안돼
+	SIF BASE:PLAYER:뇨의 == 0 && TFLAG:66 == 0
+		RETURN 0
+	;입가 구속되고 있으면 안돼
+	SIF BIND_CHECK_B(2)
+		RETURN 0
+	;삼각목마승마중/촉수조교중은 안돼
+	SIF TEQUIP:삼각목마 || TEQUIP:촉수
+		RETURN 0
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;185, 식분시킨다
+;-------------------------------------------------
+@COM_ABLE185
+;일괄관리
+SIF GLOBAL_COMABLE(185)
+	RETURN RESULT
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+
+;ASSI의 경우, 순종 4 이상 없으면 안돼(새드라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && !TALENT:ASSI:새드
+		RETURN 0
+ENDIF
+
+;촉수구욕중, 변의가 있어, 촉수애널중은 문답 무용으로 OK
+IF TEQUIP:촉수구욕 && TEQUIP:애널바이브 && BASE:변의 > 60 && TEQUIP:지하실
+ELSE
+	;그 자리에 변이 없으면 안돼
+	SIF TFLAG:57 == 0
+		RETURN 0
+	;입가 구속되고 있으면 안돼
+	SIF BIND_CHECK_B(2)
+		RETURN 0
+	;삼각목마승마중/촉수조교중은 안돼
+	SIF TEQUIP:삼각목마 || TEQUIP:촉수
+		RETURN 0
+ENDIF
+RETURN 1
+
+
+;===========================================================
+;커뮤니케이션계
+;===========================================================
+;-------------------------------------------------
+;200, 회화
+;-------------------------------------------------
+@COM_ABLE200
+;일괄관리
+SIF GLOBAL_COMABLE(200)
+	RETURN RESULT
+;입가 구속되기도 하고, 발치 하고 있으면 안돼
+SIF BIND_CHECK_A(2) || TALENT:모두발치
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;201, 선물
+;-------------------------------------------------
+@COM_ABLE201
+;일괄관리
+SIF GLOBAL_COMABLE(201)
+	RETURN RESULT
+;순종 3 이상 없으면 안돼
+SIF ABL:순종 < 3
+	RETURN 0
+;반발 3 있으면 안돼
+SIF MARK:반발각인 == 3
+	RETURN 0
+
+;몸·눈·입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(0) || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제 || TEQUIP:강정신약
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+
+;BCVA계 도구 사용중은 불가
+SIF ALLCHECK(TARGET)
+	RETURN 0
+
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;그 자리에 변이 있으면 안돼
+SIF TFLAG:57
+	RETURN 0
+
+;너무욕정 하고 있으면 안돼
+SIF PALAM:욕정 >= PALAMLV:5
+	RETURN 0
+
+;수치플레이중/야외플레이중/목욕탕플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:야외플레이 || TEQUIP:목욕탕
+	RETURN 0
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;202, 스킨십
+;-------------------------------------------------
+@COM_ABLE202
+;일괄관리
+SIF GLOBAL_COMABLE(202)
+	RETURN RESULT
+;함락이 끝난 상태가 아니면 안돼
+SIF !KANRAKU(TARGET)
+	RETURN 0
+
+;몸·눈·입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(0) || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제 || TEQUIP:강정신약
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+
+;BCVA계 도구 사용중은 불가
+SIF ALLCHECK(TARGET)
+	RETURN 0
+
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;그 자리에 변이 있으면 안돼
+SIF TFLAG:57
+	RETURN 0
+
+;너무욕정 하고 있으면 안돼
+SIF PALAM:욕정 >= PALAMLV:5
+	RETURN 0
+
+;수치플레이중/야외플레이중
+SIF TEQUIP:수치플레이 || TEQUIP:야외플레이
+	RETURN 0
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;203, 느긋하게한다
+;-------------------------------------------------
+@COM_ABLE203
+;일괄관리
+SIF GLOBAL_COMABLE(203)
+	RETURN RESULT
+;함락이 끝난 상태가 아니면 안돼
+SIF !KANRAKU(TARGET)
+	RETURN 0
+
+;몸·눈·입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(0) || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제 || TEQUIP:강정신약
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+
+;BCVA계 도구 사용중은 불가
+SIF ALLCHECK(TARGET)
+	RETURN 0
+
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;그 자리에 변이 있으면 안돼
+SIF TFLAG:57
+	RETURN 0
+
+;너무욕정 하고 있으면 안돼
+SIF PALAM:욕정 >= PALAMLV:5
+	RETURN 0
+
+;수치플레이중/야외플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:야외플레이
+	RETURN 0
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;204, 가사
+;-------------------------------------------------
+@COM_ABLE204
+;일괄관리
+SIF GLOBAL_COMABLE(204)
+	RETURN RESULT
+;함락이 끝난 상태가 아니면 안돼
+SIF !KANRAKU(TARGET)
+	RETURN 0
+
+;몸·눈·입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(0) || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+
+;수치플레이중/야외플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:야외플레이
+	RETURN 0
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;205, 노래연습
+;-------------------------------------------------
+@COM_ABLE205
+;일괄관리
+SIF GLOBAL_COMABLE(205)
+	RETURN RESULT
+;함락이 끝난 상태가 아니면 안돼
+SIF !KANRAKU(TARGET)
+	RETURN 0
+
+;몸·눈·입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(0) || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+
+;그 자리에 변이 있으면 안돼
+SIF TFLAG:57
+	RETURN 0
+
+;너무욕정 하고 있으면 안돼
+SIF PALAM:욕정 >= PALAMLV:5
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;206, 선물시킨다
+;-------------------------------------------------
+@COM_ABLE206
+;일괄관리
+SIF GLOBAL_COMABLE(206)
+	RETURN RESULT
+
+;몸·눈·입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(0) || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제 || TEQUIP:강정신약
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+
+;BCVA계 도구 사용중은 불가
+SIF ALLCHECK(TARGET)
+	RETURN 0
+
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;그 자리에 변이 있으면 안돼
+SIF TFLAG:57
+	RETURN 0
+
+;너무욕정 하고 있으면 안돼
+SIF PALAM:욕정 >= PALAMLV:5
+	RETURN 0
+
+;수치플레이중/야외플레이중/목욕탕플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:야외플레이 || TEQUIP:목욕탕
+	RETURN 0
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;207, 데이트간다
+;-------------------------------------------------
+@COM_ABLE207
+;일괄관리
+SIF GLOBAL_COMABLE(207)
+	RETURN RESULT
+;착의 플레이
+;신발 신지 않았다고 안돼
+SIF !TEQUIP:신발
+	RETURN 0
+;속옷이라고 없으면 안돼
+SIF !TEQUIP:하의
+	RETURN 0
+;윗도리나 셔츠계, 혹은전신상의 입지 않았다고 안돼
+SIF !CODE_CHECK(TARGET)
+	RETURN 0
+;웨딩 드레스, 본테이지스트는 안돼
+SIF TEQUIP:상의 == 4 || TEQUIP:상의 == 10
+	RETURN 0
+
+;함락이 끝난 상태가 아니면 안돼
+SIF !KANRAKU(TARGET)
+	RETURN 0
+
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+;조교자가양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;몸·눈·입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(0) || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제 || TEQUIP:강정신약 || ZUIKI(TARGET)
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+
+;BCVA계 도구 사용중은 불가
+SIF ALLCHECK(TARGET)
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;너무욕정 하고 있으면 안돼
+SIF PALAM:욕정 >= PALAMLV:5
+	RETURN 0
+
+;수치플레이중/야외플레이중/목욕탕플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:야외플레이 || TEQUIP:목욕탕
+	RETURN 0
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+
+;-------------------------------------------------
+;210, 몸을 맡긴다
+;-------------------------------------------------
+@COM_ABLE210
+;일괄관리
+SIF GLOBAL_COMABLE(210)
+	RETURN RESULT
+RETURN 1
+
+;-------------------------------------------------
+;211, 기분 좋게 해
+;-------------------------------------------------
+@COM_ABLE211
+;일괄관리
+SIF GLOBAL_COMABLE(211)
+	RETURN RESULT
+RETURN 1
+
+;-------------------------------------------------
+;212, 하드하게 해
+;-------------------------------------------------
+@COM_ABLE212
+;일괄관리
+SIF GLOBAL_COMABLE(212)
+	RETURN RESULT
+RETURN 1
+
+;-------------------------------------------------
+;213, 상냥하게 해
+;-------------------------------------------------
+@COM_ABLE213
+;일괄관리
+SIF GLOBAL_COMABLE(213)
+	RETURN RESULT
+RETURN 1
+
+;-------------------------------------------------
+;214, 쉬게 해
+;-------------------------------------------------
+@COM_ABLE214
+;일괄관리
+SIF GLOBAL_COMABLE(214)
+	RETURN RESULT
+RETURN 1
+
+
+;===========================================================
+;애무시킨다계
+;===========================================================
+;-------------------------------------------------
+;220, 애무시킨다
+;-------------------------------------------------
+@COM_ABLE220
+;일괄관리
+SIF GLOBAL_COMABLE(220)
+	RETURN RESULT
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;221, 가슴을주무르게한다
+;-------------------------------------------------
+@COM_ABLE221
+;일괄관리
+SIF GLOBAL_COMABLE(221)
+	RETURN RESULT
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;222, 커닐링구스강제
+;-------------------------------------------------
+@COM_ABLE222
+;일괄관리
+SIF GLOBAL_COMABLE(222)
+	RETURN RESULT
+;조교자에게바기나가 없으면 안돼
+SIF !VAGINA(PLAYER)
+	RETURN 0
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;223, 손가락삽입시킨다
+;-------------------------------------------------
+@COM_ABLE223
+;일괄관리
+SIF GLOBAL_COMABLE(223)
+	RETURN RESULT
+;조교자에게바기나가 없으면 안돼
+SIF !VAGINA(PLAYER)
+	RETURN 0
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;224, 애널핥기강제
+;-------------------------------------------------
+@COM_ABLE224
+;일괄관리
+SIF GLOBAL_COMABLE(224)
+	RETURN RESULT
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;225, 애널애무시킨다
+;-------------------------------------------------
+@COM_ABLE225
+;일괄관리
+SIF GLOBAL_COMABLE(225)
+	RETURN RESULT
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;226, 자위과시한다
+;-------------------------------------------------
+@COM_ABLE226
+;일괄관리
+SIF GLOBAL_COMABLE(226)
+	RETURN RESULT
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예의 시야가 없으면 안돼
+SIF BIND_CHECK_B(1)
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;227, 자위과시한다
+;-------------------------------------------------
+@COM_ABLE227
+;일괄관리
+SIF GLOBAL_COMABLE(227)
+	RETURN RESULT
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예의 시야가 없으면 안돼
+SIF BIND_CHECK_B(1)
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+
+;-------------------------------------------------
+;228, 벗겨보여주기
+@COM_ABLE228
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(228)
+	RETURN RESULT
+
+;조교자에게페니스가 없으면 안돼
+SIF !PENIS(PLAYER)
+	RETURN 0
+
+;조교자가수나오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+
+;공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;노예의 시야가 없으면 안돼
+SIF BIND_CHECK_B(1)
+	RETURN 0
+
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;228, 역유두고문
+
+;229, 역유두로터
+@COM_ABLE229
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(229)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;230, 역니틀캡
+@COM_ABLE230
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(230)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;231, 역유두클립
+@COM_ABLE231
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(231)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;232, 역유두전극
+@COM_ABLE232
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(232)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;233, 모유 먹인다
+@COM_ABLE233
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(233)
+	RETURN RESULT
+
+;주인이모유체질가 아니면 사용할 수 없다
+SIF TALENT:PLAYER:모유체질 == 0
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:PLAYER:니틀캡 || TEQUIP:PLAYER:유두클립 || TEQUIP:PLAYER:착유기
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;가슴가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF STAIN:PLAYER:가슴 & 2798 && !TALENT:더러움무시
+	;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+	SIF STAIN:PLAYER:가슴 & 4 && (!ABL:정액중독 || EXP:정액경험 < 30) && TALENT:악취민감
+		RETURN 0
+	;애널 악취민감라면 안돼(스캇경험로 완화된다)
+	SIF STAIN:PLAYER:가슴 & 8 && TALENT:악취민감 && EXP:스캇경험 < 15
+		RETURN 0
+	;점액 악취민감라면 안돼(촉수경험로 완화된다)
+	SIF STAIN:PLAYER:가슴 & 32 && TALENT:악취민감 && (EXP:촉수경험 < 50 || EXP:수간경험 < 30 || EXP:뱀장어탕경험 < 10 || EXP:곤충탕경험 < 10) < 50
+		RETURN 0
+	; 흡혈귀가 아니고, 악취민감라면 안돼
+	SIF STAIN:PLAYER:가슴 & 64 && !TALENT:흡혈귀 && TALENT:악취민감
+		RETURN 0
+	;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+	SIF STAIN:PLAYER:가슴 & 128 && !TALENT:악취둔감 && ((TALENT:악취민감 && EXP:스캇경험 < 30) || EXP:스캇경험 < 15)
+		RETURN 0
+	;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:PLAYER:가슴 & 512 && ((TALENT:악취민감 && EXP:스캇경험 < 50) || (!TALENT:악취둔감 && !TALENT:악취민감 && EXP:스캇경험 < 30) || (TALENT:악취둔감 && EXP:스캇경험 < 15))
+		RETURN 0
+	;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:PLAYER:가슴 & 2048 && ((TALENT:악취민감 && EXP:스캇경험 < 50) || (!TALENT:악취둔감 && !TALENT:악취민감 && EXP:스캇경험 < 30) || (TALENT:악취둔감 && EXP:스캇경험 < 15))
+		RETURN 0
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;234, 역로터
+@COM_ABLE234
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(234)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;235, 역진동마사지기
+@COM_ABLE235
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(235)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;236, 역클리캡
+@COM_ABLE236
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(236)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;237, 역클리고문
+@COM_ABLE237
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(237)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;238, 역음핵클립
+@COM_ABLE238
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(238)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;239, 역음핵전극
+@COM_ABLE239
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(239)
+	RETURN RESULT
+
+RETURN 1
+
+
+;===========================================================
+;봉사하는 계
+;===========================================================
+;-------------------------------------------------
+;240, 파이즈리한다
+;-------------------------------------------------
+@COM_ABLE240
+;일괄관리
+SIF GLOBAL_COMABLE(240)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자가남자라면 안돼
+SIF MALE(PLAYER)
+	RETURN 0
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;페니스에 도구 사용중은 불가
+SIF TEQUIP:전동오나홀
+	RETURN 0
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;241, 파이즈리펠라한다
+;-------------------------------------------------
+@COM_ABLE241
+;일괄관리
+SIF GLOBAL_COMABLE(241)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게 유방이 없으면 안돼(절벽불가)
+SIF !BREAST(PLAYER)
+	RETURN 0
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;[폭유]라면기교LV2 이상,[거유]가 아니면기교 4 이상,[빈유]라면기교 5 필요
+SIF (TALENT:PLAYER:폭유 && ABL:기교 < 3) || (!TALENT:PLAYER:폭유 && TALENT:PLAYER:거유 && ABL:기교 < 4) || (!TALENT:PLAYER:폭유 && !TALENT:PLAYER:거유 && ABL:기교 < 5) || (TALENT:PLAYER:빈유 && ABL:기교 >= 5)
+	RETURN 0
+
+;페니스가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF STAIN:페니스 & 2798 && !TALENT:PLAYER:더러움무시
+	;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+	SIF STAIN:페니스 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+		RETURN 0
+	;애널 악취민감라면 안돼(스캇경험로 완화된다)
+	SIF STAIN:페니스 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15
+		RETURN 0
+	;점액 악취민감라면 안돼(촉수경험로 완화된다)
+	SIF STAIN:페니스 & 32 && TALENT:PLAYER:악취민감 && (EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50
+		RETURN 0
+	;혈 흡혈귀가 아니고, 악취민감라면 안돼
+	SIF STAIN:페니스 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+		RETURN 0
+	;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+	SIF STAIN:페니스 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+		RETURN 0
+	;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:페니스 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+	;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:페니스 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+ENDIF
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;242, 풋잡한다
+;-------------------------------------------------
+@COM_ABLE242
+;일괄관리
+SIF GLOBAL_COMABLE(242)
+	RETURN RESULT
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;페니스에 도구 사용중은 불가
+SIF TEQUIP:전동오나홀
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+
+;조교자가양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;243, 가슴을비빈다
+;-------------------------------------------------
+@COM_ABLE243
+;일괄관리
+SIF GLOBAL_COMABLE(243)
+	RETURN RESULT
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;244, 조개비비기
+;일괄관리
+;-------------------------------------------------
+@COM_ABLE244
+;일괄관리
+SIF GLOBAL_COMABLE(244)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게바기나가 없으면 안돼
+SIF !VAGINA(PLAYER)
+	RETURN 0
+	
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;V계 도구 사용중은 불가
+SIF TEQUIP:바이브
+	RETURN 0
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중/야외플레이중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:야외플레이
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;245, 장대비비기
+;-------------------------------------------------
+@COM_ABLE245
+;일괄관리
+SIF GLOBAL_COMABLE(245)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+
+;페니스에 도구 사용중은 불가
+SIF TEQUIP:전동오나홀
+	RETURN 0
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;246, 전기안마
+;-------------------------------------------------
+@COM_ABLE246
+;일괄관리
+SIF GLOBAL_COMABLE(246)
+	RETURN RESULT
+
+;노예에게페니스가 있으면 안돼
+SIF PENIS(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+;V계 도구 사용중은 불가(로터는 가능)
+SIF TEQUIP:바이브
+	RETURN 0
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중/야외플레이는 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:야외플레이
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+
+;조교자가양팔결손, 한팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:한팔결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+RETURN 1
+
+
+;-------------------------------------------------
+;번호 감쌌기 때문에 comment out도 해 실장하는 경우는 커맨드 번호를 비켜 놓아 주세요
+;246, 역전동오나홀
+;@COM_ABLE246
+;-------------------------------------------------
+;일괄관리
+;SIF GLOBAL_COMABLE(246)
+;	RETURN RESULT
+
+;RETURN 1
+
+;-------------------------------------------------
+;247, 역귀두고문
+@COM_ABLE247
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(247)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;248, 역벗겨 받는다
+@COM_ABLE248
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(248)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;249, 역카테터
+@COM_ABLE249
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(249)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;250, 역요도벌룬
+@COM_ABLE250
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(250)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;251, 역전극카테터
+@COM_ABLE251
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(251)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;252, 역로터삽입
+@COM_ABLE252
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(252)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;253, 역바이브
+@COM_ABLE253
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(253)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;254, 역바기나전극
+@COM_ABLE254
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(254)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;255, 역로터A삽입
+@COM_ABLE255
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(255)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;256, 역애널비즈
+@COM_ABLE256
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(256)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;257, 역애널바이브
+@COM_ABLE257
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(257)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;258, 역확장벌룬
+@COM_ABLE258
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(258)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;259, 역애널전극
+@COM_ABLE259
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(259)
+	RETURN RESULT
+
+RETURN 1
+
+;===========================================================
+;주인수섹스
+;===========================================================
+;-------------------------------------------------
+;260, 정상위시킨다
+;-------------------------------------------------
+@COM_ABLE260
+;일괄관리
+SIF GLOBAL_COMABLE(260)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게바기나가 없으면 안돼
+SIF !VAGINA(PLAYER)
+	RETURN 0
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;수나오메가라면 안돼
+SIF TALENT:수 || TALENT:오메가
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;손발가 구속되고 있으면 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+
+;조교자에게 일정한 V경험가 필요
+CALL SIZEJUDGE_TM
+SIF EXP:PLAYER:V경험 < A
+	RETURN 0
+
+;야외플레이중/삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;261, 후배위시킨다
+;-------------------------------------------------
+@COM_ABLE261
+;일괄관리
+SIF GLOBAL_COMABLE(261)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게바기나가 없으면 안돼
+SIF !VAGINA(PLAYER)
+	RETURN 0
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;수나오메가라면 안돼
+SIF TALENT:수 || TALENT:오메가
+	RETURN 0
+
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+
+;조교자에게 일정한 V경험가 필요
+CALL SIZEJUDGE_TM
+SIF EXP:PLAYER:V경험 < A
+	RETURN 0
+
+;야외플레이중/삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;262, 기승위한다
+;-------------------------------------------------
+@COM_ABLE262
+;일괄관리
+SIF GLOBAL_COMABLE(262)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자에게바기나가 없으면 안돼
+SIF !VAGINA(PLAYER)
+	RETURN 0
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;노예의 사지를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(0)
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;수나오메가라면 안돼
+SIF TALENT:수 || TALENT:오메가
+	RETURN 0
+
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S > 1
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;조교자에게 일정한 V경험가 필요
+CALL SIZEJUDGE_TM
+SIF EXP:PLAYER:V경험 < A
+	RETURN 0
+
+;야외플레이중/삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;263, 정상위애널시킨다
+;-------------------------------------------------
+@COM_ABLE263
+;일괄관리
+SIF GLOBAL_COMABLE(263)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;수나오메가라면 안돼
+SIF TALENT:수 || TALENT:오메가
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;손발가 구속되고 있으면 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+
+;조교자에게 일정한 A경험가 필요
+CALL SIZEJUDGE_TM
+SIF EXP:PLAYER:A경험 < A
+	RETURN 0
+
+;야외플레이중/삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;264, 후배위애널시킨다
+;-------------------------------------------------
+@COM_ABLE264
+;일괄관리
+SIF GLOBAL_COMABLE(264)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;수나오메가라면 안돼
+SIF TALENT:수 || TALENT:오메가
+	RETURN 0
+
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+
+;조교자에게 일정한 A경험가 필요
+CALL SIZEJUDGE_TM
+SIF EXP:PLAYER:A경험 < A
+	RETURN 0
+
+;야외플레이중/삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;265, 기승위애널한다
+;-------------------------------------------------
+@COM_ABLE265
+;일괄관리
+SIF GLOBAL_COMABLE(265)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;수나오메가라면 안돼
+SIF TALENT:수 || TALENT:오메가
+	RETURN 0
+
+;노예의 사지를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(0)
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;조교자에게 일정한 A경험가 필요
+CALL SIZEJUDGE_TM
+SIF EXP:PLAYER:A경험 < A
+	RETURN 0
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S > 1
+	RETURN 0
+
+;야외플레이중/삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;267, 역피스트퍽
+@COM_ABLE267
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(267)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;268, 역애널피스트
+@COM_ABLE268
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(268)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;269, 역양구멍피스트
+@COM_ABLE269
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(269)
+	RETURN RESULT
+
+RETURN 1
+
+
+;-------------------------------------------------
+;270, 촉수에범하게시킨다
+;-------------------------------------------------
+@COM_ABLE270
+;일괄관리
+SIF GLOBAL_COMABLE(270)
+	RETURN RESULT
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;조수에페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(ASSI)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:ASSI:속옷（아래） == 5
+	RETURN 0
+;조수가수·오메가라면 안돼
+SIF TALENT:ASSI:수 || TALENT:ASSI:오메가
+	RETURN 0
+
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+;조교자에게바기나가 없으면 안돼
+SIF !VAGINA(PLAYER)
+	RETURN 0
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;조교자에게 일정한 V경험가 필요
+CALL SIZEJUDGE_AM
+SIF EXP:PLAYER:V경험 < A
+	RETURN 0
+
+;신혼부부플레이중/야외플레이중/지하실는 안돼
+SIF TEQUIP:에이프런 || TEQUIP:야외플레이 || TEQUIP:지하실
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;271, 촉수에A를범하게시킨다
+;-------------------------------------------------
+@COM_ABLE271
+;일괄관리
+SIF GLOBAL_COMABLE(271)
+	RETURN RESULT
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;조수에페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(ASSI)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:ASSI:속옷（아래） == 5
+	RETURN 0
+;조수가수·오메가라면 안돼
+SIF TALENT:ASSI:수 || TALENT:ASSI:오메가
+	RETURN 0
+
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;조교자 일정한 A경험가 필요
+CALL SIZEJUDGE_AM
+SIF EXP:PLAYER:A경험 < A
+	RETURN 0
+
+;신혼부부플레이중/야외플레이중/지하실는 안돼
+SIF TEQUIP:에이프런 || TEQUIP:야외플레이 || TEQUIP:지하실
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+
+;===========================================================
+;주인마조계
+;===========================================================
+
+;-------------------------------------------------
+;273, 역밧줄
+@COM_ABLE273
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(273)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;274, 역아이마스크
+@COM_ABLE274
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(274)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;275, 역볼개그
+@COM_ABLE275
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(275)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;276, 역정조대
+@COM_ABLE276
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(276)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;277, 역사정관리
+@COM_ABLE277
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(277)
+	RETURN RESULT
+
+RETURN 1
+
+
+;-------------------------------------------------
+;280, 이라마치오시킨다
+;-------------------------------------------------
+@COM_ABLE280
+;일괄관리
+SIF GLOBAL_COMABLE(280)
+	RETURN RESULT
+;착의 플레이 바지, 속옷(정조대 포함한다)는 안돼. 스커트는 걷는다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조교자가공라면 안돼
+SIF TALENT:PLAYER:공
+	RETURN 0
+
+;순종 3 미만의 ASSI의 경우는 안돼(마조라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 3 && ABL:ASSI:마조끼 < 3
+		RETURN 0
+ENDIF
+;노예가말자지로, 조교자가소인체형 혹은작은체구라면 불가
+IF TALENT:말자지
+	SIF TALENT:PLAYER:소인체형 || TALENT:PLAYER:작은체구
+		RETURN 0
+ENDIF
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;손발·눈·입가 구속되고 있으면 안돼
+SIF TEQUIP:밧줄 || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+
+;페니스가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF STAIN:페니스 & 2798 && !TALENT:PLAYER:더러움무시
+	;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+	SIF STAIN:페니스 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+		RETURN 0
+	;애널 악취민감라면 안돼(스캇경험로 완화된다)
+	SIF STAIN:페니스 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15
+		RETURN 0
+	;점액 악취민감라면 안돼(촉수경험로 완화된다)
+	SIF STAIN:페니스 & 32 && TALENT:PLAYER:악취민감 && (EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50
+		RETURN 0
+	;혈 흡혈귀가 아니고, 악취민감라면 안돼
+	SIF STAIN:페니스 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+		RETURN 0
+	;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+	SIF STAIN:페니스 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+		RETURN 0
+	;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:페니스 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+	;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:페니스 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+ENDIF
+
+;신혼부부플레이중/삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:에이프런 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;281, 매도당한다
+;-------------------------------------------------
+@COM_ABLE281
+;일괄관리
+SIF GLOBAL_COMABLE(281)
+	RETURN RESULT
+;순종 3 미만의 ASSI의 경우는 안돼(마조라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 3 && ABL:ASSI:마조끼 < 3
+		RETURN 0
+ENDIF
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+;발치가 끝난 상태라면 안돼
+SIF TALENT:모두발치
+	RETURN 0
+
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+;V계 도구 사용중은 불가
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+;A계 도구 사용중은 불가
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;282, 발을핥는다
+;-------------------------------------------------
+@COM_ABLE282
+;일괄관리
+SIF GLOBAL_COMABLE(282)
+	RETURN RESULT
+;착의 플레이
+;신발를 신고 있을 때, 조교자가마조 혹은 조교 대상이새드가 아니면 안돼
+SIF TEQUIP:신발 && (ABL:PLAYER:마조끼 < 3 && ABL:새드끼 < 3)
+	RETURN 0
+
+;발가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF TEQUIP:신발
+	IF STAIN:신발 & 2798 && !TALENT:PLAYER:더러움무시
+		;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+		SIF STAIN:신발 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+			RETURN 0
+		;애널 악취민감라면 안돼(스캇경험로 완화된다)
+		SIF STAIN:신발 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15
+			RETURN 0
+		;점액 악취민감라면 안돼(촉수경험로 완화된다)
+		SIF STAIN:신발 & 32 && TALENT:PLAYER:악취민감 && (EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50
+			RETURN 0
+		;혈 흡혈귀가 아니고, 악취민감라면 안돼
+		SIF STAIN:신발 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+			RETURN 0
+		;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+		SIF STAIN:신발 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+			RETURN 0
+		;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+		SIF STAIN:신발 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+			RETURN 0
+		;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+		SIF STAIN:신발 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+			RETURN 0
+	ENDIF
+ELSE
+	IF STAIN:발 & 2798 && !TALENT:PLAYER:더러움무시
+		;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+		SIF STAIN:발 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+			RETURN 0
+		;애널 악취민감라면 안돼(스캇경험로 완화된다)
+		SIF STAIN:발 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15
+			RETURN 0
+		;점액 악취민감라면 안돼(촉수경험로 완화된다)
+		SIF STAIN:발 & 32 && TALENT:PLAYER:악취민감 && (EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50
+			RETURN 0
+		;혈 흡혈귀가 아니고, 악취민감라면 안돼
+		SIF STAIN:발 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+			RETURN 0
+		;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+		SIF STAIN:발 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+			RETURN 0
+		;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+		SIF STAIN:발 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+			RETURN 0
+		;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+		SIF STAIN:발 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+			RETURN 0
+	ENDIF
+ENDIF
+
+;조교 대상이양다리결손, 달마라면 불가
+SIF TALENT:양다리결손 || TALENT:달마
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;283, 얻어맞는다
+;-------------------------------------------------
+@COM_ABLE283
+;일괄관리
+SIF GLOBAL_COMABLE(283)
+	RETURN RESULT
+;순종 3 미만의 ASSI의 경우는 안돼(마조라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 3 && ABL:ASSI:마조끼 < 3
+		RETURN 0
+ENDIF
+
+;손발·눈·입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(0) || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+;V계 도구 사용중은 불가
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+;A계 도구 사용중은 불가
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;284, 채찍으로맞는다
+;-------------------------------------------------
+@COM_ABLE284
+;일괄관리
+SIF GLOBAL_COMABLE(284)
+	RETURN RESULT
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:채찍 == 0 && NOITEM == 0
+	RETURN 0
+
+;순종 4 미만의 ASSI의 경우는 안돼(마조라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 4 && ABL:ASSI:마조끼 < 3
+		RETURN 0
+ENDIF
+
+;손발·눈·입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(0) || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+;V계 도구 사용중은 불가
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+;A계 도구 사용중은 불가
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+;샤워중은 안돼
+SIF TEQUIP:샤워
+	RETURN 0
+
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;285, 음뇨한다
+;-------------------------------------------------
+@COM_ABLE285
+;일괄관리
+SIF GLOBAL_COMABLE(285)
+	RETURN RESULT
+;착의 플레이 바지, 속옷(정조대 포함한다)는 안돼. 스커트는 걷는다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+
+;순종 3 미만의 ASSI의 경우는 안돼(마조라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 3 && ABL:ASSI:마조끼 < 3 && !ABL:ASSI:스캇중독
+		RETURN 0
+ENDIF
+
+;지하실/촉수조교중/삼각목마승마중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;벌써카테터가 들어가있는 경우는, 무리하게 내게 할 수가 있다
+IF TEQUIP:카테터 && BASE:뇨의 > 0
+;사정관리, 요도벌룬중은 물리적으로 나오지 않기 때문에 안돼
+ELSEIF TEQUIP:사정관리 || TEQUIP:요도벌룬
+	RETURN 0
+;뇨의게이지 60이상 없으면 안돼
+ELSEIF BASE:뇨의 == 0
+	RETURN 0
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;286, 식분한다
+;-------------------------------------------------
+@COM_ABLE286
+;일괄관리
+SIF GLOBAL_COMABLE(286)
+	RETURN RESULT
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+;변이 없는가애널자극로부터의 파생이 아니면 안돼
+SIF TFLAG:57 == 0 && SELECTCOM != 50
+	RETURN 0
+;조교자에게스캇중독가 없으면 안돼
+SIF ABL:PLAYER:스캇중독 == 0
+	RETURN 0
+
+;순종 5 미만의 ASSI의 경우는 안돼(마조라면 OK)
+IF ASSIPLAY
+	SIF ABL:ASSI:순종 < 5 && ABL:ASSI:마조끼 < 3
+		RETURN 0
+ENDIF
+
+;지하실는 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;287, 방뇨한다
+@COM_ABLE287
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(287)
+	RETURN RESULT
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+;뇨의가 없으면 안돼
+SIF BASE:PLAYER:뇨의 == 0
+	RETURN 0
+
+;사정관리, 요도벌룬중은 물리적으로 나오지 않기 때문에 안돼
+SIF TEQUIP:PLAYER:사정관리 || TEQUIP:PLAYER:요도벌룬
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;288, 배변 한다
+@COM_ABLE288
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(288)
+	RETURN RESULT
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+;변의가 없으면 안돼
+SIF BASE:PLAYER:변의 == 0
+	RETURN 0
+
+;확장벌룬중은 물리적으로 나오지 않기 때문에 안돼
+SIF TEQUIP:PLAYER:확장벌룬
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;289, 역관장
+@COM_ABLE289
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(289)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;290, 역육변기
+@COM_ABLE290
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(290)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;291, 역바늘
+@COM_ABLE291
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(291)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;292, 역촛불
+@COM_ABLE292
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(292)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;293, 역삼각목마
+@COM_ABLE293
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(293)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;294, 역가구가 된다
+@COM_ABLE294
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(294)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;295, 역발로 밟힌다
+@COM_ABLE295
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(295)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;296, 역배빵 된다
+@COM_ABLE296
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(296)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;297, 역잡을 수 있다
+@COM_ABLE297
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(297)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;298, 역물고문 된다
+@COM_ABLE298
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(298)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;299, 역간지러워진다
+@COM_ABLE299
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(299)
+	RETURN RESULT
+
+RETURN 1
+
+
+
+;===========================================================
+;약품계
+;===========================================================
+;-------------------------------------------------
+;300, 로션
+;-------------------------------------------------
+@COM_ABLE300
+;일괄관리
+SIF GLOBAL_COMABLE(300)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:로션 == 0 && NOITEM == 0
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;301, 미약
+;-------------------------------------------------
+@COM_ABLE301
+;일괄관리
+SIF GLOBAL_COMABLE(301)
+	RETURN RESULT
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:미약 == 0 && NOITEM == 0
+	RETURN 0
+;독약내성의 경우, 직접 주입 이외 안돼
+SIF TALENT:독약내성 && TEQUIP:촉수 == 0
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;302, 이뇨제
+;-------------------------------------------------
+@COM_ABLE302
+;일괄관리
+SIF GLOBAL_COMABLE(302)
+	RETURN RESULT
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:이뇨제 == 0 && NOITEM == 0
+	RETURN 0
+;독약내성의 경우, 직접 주입 이외 안돼
+SIF TALENT:독약내성 && TEQUIP:촉수 == 0
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;303, 강정신약
+;-------------------------------------------------
+@COM_ABLE303
+;일괄관리
+SIF GLOBAL_COMABLE(303)
+	RETURN RESULT
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:강정신약 == 0 && NOITEM == 0
+	RETURN 0
+;효과 발휘중·반동중은 안돼
+SIF TEQUIP:강정신약
+	RETURN 0
+;독약내성의 경우, 직접 주입 이외 안돼
+SIF TALENT:독약내성 && TEQUIP:촉수 == 0
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;304, 구토제
+;-------------------------------------------------
+@COM_ABLE304
+;일괄관리
+SIF GLOBAL_COMABLE(304)
+	RETURN RESULT
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:구토제 == 0 && NOITEM == 0
+	RETURN 0
+;독약내성의 경우, 직접 주입 이외 안돼
+SIF TALENT:독약내성 && TEQUIP:촉수 == 0
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;305, 가려움증약
+;-------------------------------------------------
+@COM_ABLE305
+;일괄관리
+SIF GLOBAL_COMABLE(305)
+	RETURN RESULT
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:가려움증약 == 0 && NOITEM == 0
+	RETURN 0
+;착의 플레이
+
+;독약내성의 경우, 직접 주입 이외 안돼
+SIF TALENT:독약내성 && TEQUIP:촉수 == 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;306, 꽐라플레이
+;-------------------------------------------------
+@COM_ABLE306
+;일괄관리
+SIF GLOBAL_COMABLE(306)
+	RETURN RESULT
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF (ITEM:감주 == 0 && ITEM:맥주 == 0 && ITEM:사케 == 0) && NOITEM == 0
+	RETURN 0
+
+;체력가 1000 미만에서는 불가
+SIF BASE:체력 <  1000
+	RETURN 0
+
+;야외플레이/목욕탕플레이중/삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:목욕탕 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+RETURN 1
+
+;===========================================================
+;시추에이션별
+;===========================================================
+;-------------------------------------------------
+;310, 비디오촬영
+;-------------------------------------------------
+@COM_ABLE310
+;일괄관리
+SIF GLOBAL_COMABLE(310)
+	RETURN RESULT
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF (ITEM:비디오카메라 == 0 || ITEM:비디오테이프 == 0) && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:비디오카메라
+	RETURN 1
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;311, 비디오감상
+;-------------------------------------------------
+@COM_ABLE311
+;일괄관리
+SIF GLOBAL_COMABLE(311)
+	RETURN RESULT
+;사전에 노예를 촬영한 비디오가 없으면 안돼
+SIF CFLAG:20 == 0
+	RETURN 0
+;노예의 시야가 없으면 안돼
+SIF BIND_CHECK_B(1)
+	RETURN 0
+
+;수치플레이중/야외플레이중/목욕탕플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:야외플레이 || TEQUIP:목욕탕
+	RETURN 0
+;지하실/삼각목마승마중/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:삼각목마 || TEQUIP:촉수
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;312, 사진촬영
+;-------------------------------------------------
+@COM_ABLE312
+;일괄관리
+SIF GLOBAL_COMABLE(312)
+	RETURN RESULT
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF (ITEM:카메라 == 0 || ITEM:필름 == 0) && NOITEM == 0
+	RETURN 0
+
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;313, 수치플레이
+;-------------------------------------------------
+@COM_ABLE313
+;일괄관리
+SIF GLOBAL_COMABLE(313)
+	RETURN RESULT
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:대거울 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:수치플레이
+	RETURN 1
+
+;노예가순종 1 이상 없으면 안돼
+SIF ABL:순종 < 1
+	RETURN 0
+
+;노예의 시야가 없으면 안돼
+SIF BIND_CHECK_B(1)
+	RETURN 0
+
+;야외플레이중/삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;314, 제모
+;-------------------------------------------------
+@COM_ABLE314
+;일괄관리
+SIF GLOBAL_COMABLE(314)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;음모없음라면 안돼
+SIF TALENT:음모없음
+	RETURN 0
+;조교자가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;노예가순종 2 이상 없으면 안돼
+SIF ABL:순종 < 2
+	RETURN 0
+
+;야외플레이중/삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;315, 목욕탕플레이
+;-------------------------------------------------
+@COM_ABLE315
+;일괄관리
+SIF GLOBAL_COMABLE(315)
+	RETURN RESULT
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+
+;해제는 언제라도 가능
+SIF TEQUIP:목욕탕
+	RETURN 1
+
+;대상이나 조수가동물귀로, 순종가 3 이하라면 안돼
+SIF TALENT:동물귀 && ABL:순종 < 3
+	RETURN 0
+IF ASSI > 0
+	SIF TALENT:ASSI:동물귀 && ABL:ASSI:순종 < 3
+		RETURN 0
+ENDIF
+
+;노예가순종 1 이상 없으면 안돼
+SIF ABL:순종 < 1
+	RETURN 0
+
+;수치플레이중/신혼부부플레이중/야외플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:에이프런 || TEQUIP:야외플레이
+	RETURN 0
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;316, 샤워
+;-------------------------------------------------
+@COM_ABLE316
+;일괄관리
+SIF GLOBAL_COMABLE(316)
+	RETURN RESULT
+;목욕탕플레이중한정
+SIF TEQUIP:목욕탕 == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:샤워
+	RETURN 1
+
+RETURN 1
+
+;-------------------------------------------------
+;317, 거품비비기
+;-------------------------------------------------
+@COM_ABLE317
+;일괄관리
+SIF GLOBAL_COMABLE(317)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;목욕탕플레이중한정
+SIF TEQUIP:목욕탕 == 0
+	RETURN 0
+;샤워중은 안돼
+SIF TEQUIP:샤워
+	RETURN 0
+;플레이매트가 없으면 안돼
+SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;노예의 시야가 없으면 안돼
+SIF BIND_CHECK_B(1)
+	RETURN 0
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;318, 거품비비기한다
+;-------------------------------------------------
+@COM_ABLE318
+;일괄관리
+SIF GLOBAL_COMABLE(318)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;목욕탕플레이중한정
+SIF TEQUIP:목욕탕 == 0
+	RETURN 0
+;샤워중은 안돼
+SIF TEQUIP:샤워
+	RETURN 0
+;플레이매트가 없으면 안돼
+SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;319, 신혼부부플레이
+;-------------------------------------------------
+@COM_ABLE319
+;일괄관리
+SIF GLOBAL_COMABLE(319)
+	RETURN RESULT
+;함락이 끝난 상태가 아니면 안돼
+SIF !KANRAKU(TARGET)
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:에이프런 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:에이프런
+	RETURN 1
+
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;밧줄/아이마스크/입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(0) || BIND_CHECK_A(1) || BIND_CHECK_A(2)
+	RETURN 0
+
+;야외플레이중/목욕탕플레이중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:목욕탕 || TEQUIP:수치플레이
+	RETURN 0
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;320, 야외플레이
+;-------------------------------------------------
+@COM_ABLE320
+;일괄관리
+SIF GLOBAL_COMABLE(320)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:목걸이+리드 == 0 && NOITEM == 0
+	RETURN 0
+;해제는 언제라도 가능
+SIF TEQUIP:야외플레이
+	RETURN 1
+
+;순종나마조끼가 3이상 없으면 안돼
+SIF ABL:순종 < 3 && ABL:마조끼 < 3
+	RETURN 0
+;대상인가 주인이나 조수가흡혈귀로, 시간이 낮이라면 안돼
+SIF (TALENT:흡혈귀 || TALENT:PLAYER:흡혈귀) && TIME == 0
+	RETURN 0
+IF ASSI >= 0
+	SIF TALENT:ASSI:흡혈귀 && TIME == 0
+		RETURN 0
+ENDIF
+
+;수치플레이중/신혼부부플레이중/목욕탕플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:에이프런 || TEQUIP:목욕탕
+	RETURN 0
+;삼각목마승마중/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+;조교자가양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;321, 사람을부른다
+;-------------------------------------------------
+@COM_ABLE321
+;일괄관리
+SIF GLOBAL_COMABLE(321)
+	RETURN RESULT
+;야외플레이중한정
+SIF TEQUIP:야외플레이 == 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;322, 윤간
+;-------------------------------------------------
+@COM_ABLE322
+;일괄관리
+SIF GLOBAL_COMABLE(322)
+	RETURN RESULT
+;야외플레이중한정
+SIF TEQUIP:야외플레이 == 0
+	RETURN 0
+;갤러리가 흥분하고 있지 않으면 안돼
+SIF TFLAG:151 < 5
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;323, 지하실
+;-------------------------------------------------
+@COM_ABLE323
+;일괄관리
+SIF GLOBAL_COMABLE(323)
+	RETURN RESULT
+
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+;V계 도구 사용중은 불가
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+;A계 도구 사용중은 불가
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+
+;밧줄로 구속되고 있으면 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+
+;수치플레이중/신혼부부플레이중/야외플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:에이프런 || TEQUIP:야외플레이
+	RETURN 0
+;목욕탕플레이중/삼각목마승마중/촉수조교중은 안돼
+SIF TEQUIP:목욕탕 || TEQUIP:삼각목마 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;===========================================================
+;촉수계
+;===========================================================
+;-------------------------------------------------
+;340, 촉수소환
+;-------------------------------------------------
+@COM_ABLE340
+;일괄관리
+SIF GLOBAL_COMABLE(340)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;조교자가금지된지식를 갖고 있지 않으면 안돼
+SIF TALENT:PLAYER:금지된지식 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:촉수사역술 == 0 && NOITEM == 0
+	RETURN 0
+
+;수치플레이중/신혼부부플레이중/야외플레이중은 안돼
+SIF TEQUIP:수치플레이 || TEQUIP:에이프런 || TEQUIP:야외플레이
+	RETURN 0
+;목욕탕/삼각목마에 있으면 안돼
+SIF TEQUIP:목욕탕 || TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;341, 촉수유두고문
+;-------------------------------------------------
+@COM_ABLE341
+;일괄관리
+SIF GLOBAL_COMABLE(341)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;342, 촉수클리고문
+;-------------------------------------------------
+@COM_ABLE342
+;일괄관리
+SIF GLOBAL_COMABLE(342)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+
+;노예에게 클리토리스가 없으면 안돼
+SIF PENIS(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;343, 촉수페니스고문
+;-------------------------------------------------
+@COM_ABLE343
+;일괄관리
+SIF GLOBAL_COMABLE(343)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼
+SIF !PENIS(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;344, 촉수삽입
+;-------------------------------------------------
+@COM_ABLE344
+;일괄관리
+SIF GLOBAL_COMABLE(344)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+
+;촉수산란중은 안돼
+SIF TEQUIP:촉수질내산란
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;345, 촉수애널
+;-------------------------------------------------
+@COM_ABLE345
+;일괄관리
+SIF GLOBAL_COMABLE(345)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;촉수산란중은 안돼
+SIF TEQUIP:촉수장내산란
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;350, 촉수구욕
+;-------------------------------------------------
+@COM_ABLE350
+;일괄관리
+SIF GLOBAL_COMABLE(350)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;351, 촉수구속
+;-------------------------------------------------
+@COM_ABLE351
+;일괄관리
+SIF GLOBAL_COMABLE(351)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;352, 촉수관장
+;-------------------------------------------------
+@COM_ABLE352
+;일괄관리
+SIF GLOBAL_COMABLE(352)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+
+;스카톨로지계 커맨드 표시 제한 상태라면 안돼
+SIF FLAG:84 & 4096
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;촉수산란중은 안돼
+SIF TEQUIP:촉수장내산란
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;360, 촉수착유
+;-------------------------------------------------
+@COM_ABLE360
+;일괄관리
+SIF GLOBAL_COMABLE(360)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예가모유체질가 아니면 사용할 수 없다
+SIF TALENT:모유체질 == 0
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;361, 촉수유선고문
+;-------------------------------------------------
+@COM_ABLE361
+;일괄관리
+SIF GLOBAL_COMABLE(361)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;362, 촉수G스팟고문
+;-------------------------------------------------
+@COM_ABLE362
+;일괄관리
+SIF GLOBAL_COMABLE(362)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예가남자/반음반양/컨트보이라면 안돼
+SIF MALE(TARGET)
+	RETURN 0
+;V감각 2 이상 없으면 안돼
+SIF ABL:V감각 < 2
+	RETURN 0
+
+;촉수삽입중이 아니면 안돼
+SIF TEQUIP:바이브 == 0
+	RETURN 0
+;촉수산란중은 안돼
+SIF TEQUIP:촉수질내산란
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;363, 촉수자궁고문
+;-------------------------------------------------
+@COM_ABLE363
+;일괄관리
+SIF GLOBAL_COMABLE(363)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예가남자/반음반양/컨트보이라면 안돼
+SIF MALE(TARGET)
+	RETURN 0
+;V감각 2 이상 없으면 안돼
+SIF ABL:V감각 < 2
+	RETURN 0
+;임신중은 안돼
+SIF TALENT:임신
+	RETURN 0
+
+;촉수삽입중이 아니면 안돼
+SIF TEQUIP:바이브 == 0
+	RETURN 0
+;촉수산란중은 안돼
+SIF TEQUIP:촉수질내산란
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;364, 촉수전립선자극
+;-------------------------------------------------
+@COM_ABLE364
+;일괄관리
+SIF GLOBAL_COMABLE(364)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예가남자/반음반양/컨트보이가 아니면 안돼
+SIF MALE(TARGET) == 0
+	RETURN 0
+
+;촉수애널삽입중이 아니면 안돼
+SIF TEQUIP:애널바이브 == 0
+	RETURN 0
+;A감각 2 이상 없으면 안돼
+SIF ABL:A감각 < 2
+	RETURN 0
+
+;촉수산란중은 안돼
+SIF TEQUIP:촉수장내산란
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;365, 촉수요도삽입
+;-------------------------------------------------
+@COM_ABLE365
+;일괄관리
+SIF GLOBAL_COMABLE(365)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+
+;사정관리중은 안돼
+SIF TEQUIP:사정관리
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;366, 촉수바기나확장
+;-------------------------------------------------
+@COM_ABLE366
+;일괄관리
+SIF GLOBAL_COMABLE(366)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+
+;일정한 V경험가 필요
+SIF EXP:V경험 < 150
+	RETURN 0
+;처녀라면 안돼
+SIF TALENT:처녀 || TALENT:재생처녀
+	RETURN 0
+
+;벌써촉수가 들어가 있으면 안돼
+SIF TEQUIP:촉수질내산란 || TEQUIP:바이브
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;367, 촉수애널확장
+;-------------------------------------------------
+@COM_ABLE367
+;일괄관리
+SIF GLOBAL_COMABLE(367)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;변의가 있으면 안돼
+SIF BASE:변의 >= 60
+	RETURN 0
+;벌써촉수가 들어가 있으면 안돼
+SIF TEQUIP:촉수장내산란 || TEQUIP:애널바이브
+	RETURN 0
+
+;일정한 A경험가 필요
+SIF EXP:A경험 < 150
+	RETURN 0
+;백버진라면 안돼
+SIF TALENT:백버진
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;368, 촉수양구멍확장
+;-------------------------------------------------
+@COM_ABLE368
+;일괄관리
+SIF GLOBAL_COMABLE(368)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+
+;벌써촉수가 들어가 있으면 안돼
+SIF TEQUIP:촉수질내산란 || TEQUIP:바이브
+	RETURN 0
+;벌써촉수가 들어가 있으면 안돼
+SIF TEQUIP:촉수장내산란 || TEQUIP:애널바이브
+	RETURN 0
+;변의가 있으면 안돼
+SIF BASE:변의 >= 60
+	RETURN 0
+
+;일정한 VA경험가 필요
+SIF EXP:V경험 < 150 || EXP:A경험 < 150
+	RETURN 0
+;처녀, 백버진라면 안돼
+SIF TALENT:처녀 || TALENT:재생처녀 || TALENT:백버진
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;369, 촉수산란
+;-------------------------------------------------
+@COM_ABLE369
+;일괄관리
+SIF GLOBAL_COMABLE(369)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;임신중은 안돼
+SIF TALENT:임신
+	RETURN 0
+
+;일정한 V경험가 필요
+SIF EXP:V경험 < 50
+	RETURN 0
+;처녀라면 안돼
+SIF TALENT:처녀 || TALENT:재생처녀
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;370, 촉수애널산란
+;-------------------------------------------------
+@COM_ABLE370
+;일괄관리
+SIF GLOBAL_COMABLE(370)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;변의가 있으면 안돼
+SIF BASE:변의 >= 60
+	RETURN 0
+
+;일정한 A경험가 필요
+SIF EXP:A경험 < 50
+	RETURN 0
+;백버진라면 안돼
+SIF TALENT:백버진
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;371, 촉수관통
+;-------------------------------------------------
+@COM_ABLE371
+;일괄관리
+SIF GLOBAL_COMABLE(371)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+
+;변의가 있으면 안돼
+SIF BASE:변의 >= 60
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+;백버진라면 안돼
+SIF TALENT:백버진
+	RETURN 0
+RETURN 1
+
+
+;-------------------------------------------------
+;372, 전기촉수
+;-------------------------------------------------
+@COM_ABLE372
+;일괄관리
+SIF GLOBAL_COMABLE(372)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+RETURN 1
+
+
+;-------------------------------------------------
+;373, 촉수뇌간
+;-------------------------------------------------
+@COM_ABLE373
+;일괄관리
+SIF GLOBAL_COMABLE(373)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+RETURN 1
+
+
+;-------------------------------------------------
+;374, 최면촉수
+;-------------------------------------------------
+@COM_ABLE374
+;일괄관리
+SIF GLOBAL_COMABLE(374)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+RETURN 1
+
+
+;===========================================================
+;이종간
+;===========================================================
+;-------------------------------------------------
+;380, 버터견
+;-------------------------------------------------
+@COM_ABLE380
+;일괄관리
+SIF GLOBAL_COMABLE(380)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:우리 == 0 && NOITEM == 0
+	RETURN 0
+;조교자가금지된지식를 가지고 있지 않으면 안돼
+SIF !TALENT:PLAYER:금지된지식
+	RETURN 0
+
+;함락이 끝난 상태가 아니면 안돼
+SIF !KANRAKU(TARGET)
+	RETURN 0
+
+;오나홀/음핵클립/클리캡사용중은 불가
+SIF TEQUIP:전동오나홀 || TEQUIP:음핵클립 || TEQUIP:클리캡
+	RETURN 0
+
+;야외플레이/목욕탕/삼각목마/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:목욕탕 || TEQUIP:삼각목마 || TEQUIP:촉수
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;381, 수간
+;-------------------------------------------------
+@COM_ABLE381
+;일괄관리
+SIF GLOBAL_COMABLE(381)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:우리 == 0 && NOITEM == 0
+	RETURN 0
+;조교자가금지된지식를 가지고 있지 않으면 안돼
+SIF !TALENT:PLAYER:금지된지식
+	RETURN 0
+
+;함락이 끝난 상태가 아니면 안돼
+SIF !KANRAKU(TARGET)
+	RETURN 0
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;일정한 VA경험가 필요
+SIF EXP:V경험 < 30 && EXP:A경험 < 30
+	RETURN 0
+
+;야외플레이/목욕탕/삼각목마/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:목욕탕 || TEQUIP:삼각목마 || TEQUIP:촉수
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;382, 뱀장어탕
+;-------------------------------------------------
+@COM_ABLE382
+;일괄관리
+SIF GLOBAL_COMABLE(382)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;조교자가금지된지식를 가지고 있지 않으면 안돼
+SIF !TALENT:PLAYER:금지된지식
+	RETURN 0
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+
+;함락이 끝난 상태가 아니면 안돼
+SIF !KANRAKU(TARGET)
+	RETURN 0
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;일정한 VA경험가 필요
+SIF EXP:V경험 < 50 && EXP:A경험 < 50
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;383, 곤충탕
+;-------------------------------------------------
+@COM_ABLE383
+;일괄관리
+SIF GLOBAL_COMABLE(383)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;조교자가금지된지식를 가지고 있지 않으면 안돼
+SIF !TALENT:PLAYER:금지된지식
+	RETURN 0
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+
+;함락이 끝난 상태가 아니면 안돼
+SIF !KANRAKU(TARGET)
+	RETURN 0
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+
+
+;===========================================================
+;광기계
+;===========================================================
+;-------------------------------------------------
+;390, 한쪽팔절단
+;-------------------------------------------------
+@COM_ABLE390
+;일괄관리
+SIF GLOBAL_COMABLE(390)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:수술도구세트 == 0 && NOITEM == 0
+	RETURN 0
+;조교자가광기를 가지고 있지 않으면 안돼
+SIF TALENT:PLAYER:광기 == 0
+	RETURN 0
+;떨어뜨리는 팔이 없으면 안돼
+SIF TALENT:양팔결손 || TALENT:달마
+	RETURN 0
+
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;사정관리중은 안돼
+SIF TEQUIP:사정관리
+	RETURN 0
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제 || TEQUIP:강정신약 || ZUIKI(TARGET)
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+;V계 도구 사용중은 불가
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+;A계 도구 사용중은 불가
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;391, 한쪽다리절단
+;-------------------------------------------------
+@COM_ABLE391
+;일괄관리
+SIF GLOBAL_COMABLE(391)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:수술도구세트 == 0 && NOITEM == 0
+	RETURN 0
+;조교자가광기를 가지고 있지 않으면 안돼
+SIF TALENT:PLAYER:광기 == 0
+	RETURN 0
+;떨어뜨리는 다리가 없으면 안돼
+SIF TALENT:양다리결손 || TALENT:달마
+	RETURN 0
+
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;사정관리중은 안돼
+SIF TEQUIP:사정관리
+	RETURN 0
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제 || TEQUIP:강정신약 || ZUIKI(TARGET)
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+;V계 도구 사용중은 불가
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+;A계 도구 사용중은 불가
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;392, 발치
+;-------------------------------------------------
+@COM_ABLE392
+;일괄관리
+SIF GLOBAL_COMABLE(392)
+	RETURN RESULT
+;착의 플레이
+;전라가 아니면 안돼(신발하, 특수, 정조대는 제외하다)
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의
+	RETURN 0
+
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:수술도구세트 == 0 && NOITEM == 0
+	RETURN 0
+;조교자가광기를 가지고 있지 않으면 안돼
+SIF TALENT:PLAYER:광기 == 0
+	RETURN 0
+;뽑는 이빨이 없으면 안돼
+SIF TALENT:모두발치
+	RETURN 0
+
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+
+;체력가 1000 미만/기력가 500 미만때는 안돼
+SIF BASE:체력 < 1000 || BASE:기력 < 500
+	RETURN 0
+
+;사정관리중은 안돼
+SIF TEQUIP:사정관리
+	RETURN 0
+;약 사용하고 있을 때는 안돼
+SIF TEQUIP:미약 || TEQUIP:이뇨제 || TEQUIP:구토제 || TEQUIP:강정신약 || ZUIKI(TARGET)
+	RETURN 0
+;발정기는 안돼
+SIF TALENT:발정기
+	RETURN 0
+;음주중은 안돼
+SIF TEQUIP:꽐라플레이
+	RETURN 0
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+;V계 도구 사용중은 불가
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+;A계 도구 사용중은 불가
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+;뇨의·변의가 있으면 안돼
+SIF BASE46(0)
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF BIND_CHECK_A(2)
+	RETURN 0
+
+;삼각목마승마중은 안돼
+SIF TEQUIP:삼각목마
+	RETURN 0
+RETURN 1
+
+
+
+;===========================================================
+;조수명령계
+;===========================================================
+;-------------------------------------------------
+;400, 클리토리스애무명령
+;-------------------------------------------------
+@COM_ABLE400
+;일괄관리
+SIF GLOBAL_COMABLE(400)
+	RETURN RESULT
+
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걷는다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;노예에게 클리토리스가 없으면 안돼
+SIF PENIS(TARGET)
+	RETURN 0
+
+;조수가양팔결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:달마
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;401, 페니스애무명령
+;-------------------------------------------------
+@COM_ABLE401
+;일괄관리
+SIF GLOBAL_COMABLE(401)
+	RETURN RESULT
+
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걷는다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(TARGET)
+	RETURN 0
+
+;조수가양팔결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:달마
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;402, 가슴애무명령
+;-------------------------------------------------
+@COM_ABLE402
+;일괄관리
+SIF GLOBAL_COMABLE(402)
+	RETURN RESULT
+
+;착의 플레이
+;상반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;조수가양팔결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:달마
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;403, 손가락삽입명령
+;-------------------------------------------------
+@COM_ABLE403
+;일괄관리
+SIF GLOBAL_COMABLE(403)
+	RETURN RESULT
+
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걷는다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;조수가양팔결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:달마
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;404, 애널애무명령
+;-------------------------------------------------
+@COM_ABLE404
+;일괄관리
+SIF GLOBAL_COMABLE(404)
+	RETURN RESULT
+
+;착의 플레이
+;속옷(정조대는 포함하지 않는다), 바지계는 안돼. 스커트는 걷는다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;조수가양팔결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:달마
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;405, 삽입명령
+;-------------------------------------------------
+@COM_ABLE405
+;일괄관리
+SIF GLOBAL_COMABLE(405)
+	RETURN RESULT
+
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걷는다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;노예에게바기나가 없으면 안돼
+SIF !VAGINA(TARGET)
+	RETURN 0
+
+;조수에페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(ASSI)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:ASSI:속옷（아래） == 5
+	RETURN 0
+;조수가수·오메가라면 안돼
+SIF TALENT:ASSI:수 || TALENT:ASSI:오메가
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL SIZEJUDGE_AT
+SIF EXP:V경험 < A
+	RETURN 0
+;확장 경험 10 미만으로, 다른 것이 들어가 있으면 안돼
+CALL NIRINJUDGE_V
+SIF A > 1
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;406, 애널삽입명령
+;-------------------------------------------------
+@COM_ABLE406
+;일괄관리
+SIF GLOBAL_COMABLE(406)
+	RETURN RESULT
+
+;착의 플레이
+;속옷(정조대는 포함하지 않는다), 바지계는 안돼. 스커트는 걷는다.
+SIF (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5) || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+
+;조수에페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(ASSI)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:ASSI:속옷（아래） == 5
+	RETURN 0
+;조수가수·오메가라면 안돼
+SIF TALENT:ASSI:수 || TALENT:ASSI:오메가
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL SIZEJUDGE_AT
+SIF EXP:A경험 < A
+	RETURN 0
+;확장 경험 10 미만으로, 다른 것이 들어가 있으면 안돼
+CALL NIRINJUDGE_A
+SIF A > 1
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;407, 구욕명령
+;-------------------------------------------------
+@COM_ABLE407
+;일괄관리
+SIF GLOBAL_COMABLE(407)
+	RETURN RESULT
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;조수에페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(ASSI)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:ASSI:속옷（아래） == 5
+	RETURN 0
+
+;노예의입를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(2)
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+
+RETURN 1
+
+
+;===========================================================
+;정음계
+;===========================================================
+;-------------------------------------------------
+;410, 콘돔정음(노예)
+;-------------------------------------------------
+@COM_ABLE410
+;일괄관리
+SIF GLOBAL_COMABLE(410)
+	RETURN RESULT
+;그것까지의 조교로 고무 비치지 않았다고 안돼
+;CFLAG107
+SIF CFLAG:107 == 0
+	RETURN 0
+
+;노예의입를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(2)
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;411, 콘돔정음(조수)
+;-------------------------------------------------
+@COM_ABLE411
+;일괄관리
+SIF GLOBAL_COMABLE(411)
+	RETURN RESULT
+;그것까지의 조교로 고무 비치지 않았다고 안돼
+;CFLAG107
+SIF CFLAG:107 == 0
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+
+;조수가 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;412, 정액키스
+;-------------------------------------------------
+@COM_ABLE412
+;일괄관리
+SIF GLOBAL_COMABLE(412)
+	RETURN RESULT
+;직전에펠라한다로사정 시키지 않았다고 안돼
+;CFLAG108
+;직전이펠라한다, 파이즈리펠라한다, 이라마치오시킨다, 식스나인, 콘돔장착(조수), 콘돔정음(주인)이 아니면 원래 안돼
+SIF PREVCOM != 31 && PREVCOM != 241 && PREVCOM != 280 && PREVCOM != 503 && PREVCOM != 411 && PREVCOM != 413
+	RETURN 0
+;전회와 이번 조교자가 같음
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;직전의 커맨드가 페라의 경우
+	IF PREVCOM == 31 || PREVCOM == 241 || PREVCOM == 280 || PREVCOM == 503
+		;직전의펠라한다로사정 하고 있지 않으면 안돼
+		SIF TFLAG:10 < 1
+			RETURN 0
+	ENDIF
+	;직전의 커맨드가콘돔장착(조수)로 전회의 조교자가 주인, 또는콘돔정음(주인)으로 전회의 조교자가 조수라면 안돼
+	SIF (PREVCOM == 411 && TFLAG:50 == 0) || (PREVCOM == 413 && TFLAG:50)
+		RETURN 0
+ENDIF
+
+;노예의입를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(2)
+	RETURN 0
+
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;입가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF STAIN:입 & 2798 && !TALENT:PLAYER:더러움무시
+	;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+	SIF STAIN:입 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+		RETURN 0
+	;애널 악취민감라면 안돼(스캇경험로 완화된다)
+	SIF STAIN:입 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15
+		RETURN 0
+	;점액 악취민감라면 안돼(촉수경험로 완화된다)
+	SIF STAIN:입 & 32 && TALENT:PLAYER:악취민감 && (EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50
+		RETURN 0
+	;혈 흡혈귀가 아니고, 악취민감라면 안돼
+	SIF STAIN:입 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+		RETURN 0
+	;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+	SIF STAIN:입 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+		RETURN 0
+	;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:입 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+	;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:입 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;413, 콘돔정음(주인)
+@COM_ABLE413
+;-------------------------------------------------
+;일괄관리
+SIF GLOBAL_COMABLE(413)
+	RETURN RESULT
+;그것까지의 조교로 고무 비치지 않았다고 안돼
+;CFLAG107
+SIF CFLAG:107 == 0
+	RETURN 0
+
+;입가 구속되고 있으면 안돼
+SIF TEQUIP:PLAYER:볼개그
+	RETURN 0
+
+RETURN 1
+
+
+;===========================================================
+;노예＋조수
+;===========================================================
+;-------------------------------------------------
+;420, 더블펠라
+;-------------------------------------------------
+@COM_ABLE420
+;일괄관리
+SIF GLOBAL_COMABLE(420)
+	RETURN RESULT
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+
+;조수라면 안돼
+SIF PLAYER == ASSI
+	RETURN 0
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+;노예의입를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(2)
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;421, 더블파이즈리
+;-------------------------------------------------
+@COM_ABLE421
+;일괄관리
+SIF GLOBAL_COMABLE(421)
+	RETURN RESULT
+;착의 플레이
+;상반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;조수가남자/반음반양/컨트보이는 안돼
+SIF MALE(ASSI)
+	RETURN 0
+;조수가양팔결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:달마
+	RETURN 0
+
+;조수라면 안돼
+SIF PLAYER == ASSI
+	RETURN 0
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;남자/반음반양/컨트보이는 안돼
+SIF MALE(TARGET)
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;422, 더블스마타
+;-------------------------------------------------
+@COM_ABLE422
+;일괄관리
+SIF GLOBAL_COMABLE(422)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+
+;조수라면 안돼
+SIF PLAYER == ASSI
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;노예가공라면 안돼
+SIF TALENT:공
+	RETURN 0
+;정조대가 붙어 있으면 안돼
+SIF TEQUIP:정조대
+	RETURN 0
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF TEQUIP:클리캡 || TEQUIP:음핵클립
+	RETURN 0
+;V계 도구 사용중은 불가
+SIF TEQUIP:바이브
+	RETURN 0
+;요도계 도구 사용중은 불가
+SIF TEQUIP:카테터 || TEQUIP:요도벌룬
+	RETURN 0
+
+;야외플레이/삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+
+;===========================================================
+;노예×조수
+;===========================================================
+;-------------------------------------------------
+;430, 조수를범하게시킨다
+;-------------------------------------------------
+@COM_ABLE430
+;일괄관리
+SIF GLOBAL_COMABLE(430)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;조수에바기나가 없으면 안돼
+SIF !VAGINA(ASSI)
+	RETURN 0
+;조수가공라면 안돼
+SIF TALENT:ASSI:공
+	RETURN 0
+;일정한 V경험가 필요
+CALL SIZEJUDGE_TA
+SIF EXP:ASSI:V경험 < A
+	RETURN 0
+
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(TARGET)
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;수·오메가라면 안돼
+SIF TALENT:수 || TALENT:오메가
+	RETURN 0
+
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+;노예의 시야가 없으면 안돼
+SIF BIND_CHECK_B(1)
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;431, 조수의A를범하게시킨다
+;-------------------------------------------------
+@COM_ABLE431
+;일괄관리
+SIF GLOBAL_COMABLE(431)
+	RETURN RESULT
+;착의 플레이
+;하반신노출 하고 있지 않으면 안돼
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;조수가공라면 안돼
+SIF TALENT:ASSI:공
+	RETURN 0
+;일정한 A경험가 필요
+CALL SIZEJUDGE_TA
+SIF EXP:ASSI:A경험 < A
+	RETURN 0
+
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+
+;노예에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(TARGET)
+	RETURN 0
+
+;C계 도구 사용중은 불가
+SIF CCHECK(TARGET)
+	RETURN 0
+
+;수·오메가라면 안돼
+SIF TALENT:수 || TALENT:오메가
+	RETURN 0
+
+
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+;노예의 시야가 없으면 안돼
+SIF BIND_CHECK_B(1)
+	RETURN 0
+
+;삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+
+;===========================================================
+;주인×조수
+;===========================================================
+;-------------------------------------------------
+;440, 조수를범한다
+;-------------------------------------------------
+@COM_ABLE440
+;일괄관리
+SIF GLOBAL_COMABLE(440)
+	RETURN RESULT
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;조수에바기나가 없으면 안돼
+SIF !VAGINA(ASSI)
+	RETURN 0
+;조수가공라면 안돼
+SIF TALENT:ASSI:공
+	RETURN 0
+
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;일정한 V경험가 필요
+CALL SIZEJUDGE_MA
+SIF EXP:ASSI:V경험 < A
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;441, 조수의A를범한다
+;-------------------------------------------------
+@COM_ABLE441
+;일괄관리
+SIF GLOBAL_COMABLE(441)
+	RETURN RESULT
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;조수가공라면 안돼
+SIF TALENT:ASSI:공
+	RETURN 0
+
+;주인이 아니면 안돼
+SIF ASSIPLAY
+	RETURN 0
+;조교자가수·오메가라면 안돼
+SIF TALENT:PLAYER:수 || TALENT:PLAYER:오메가
+	RETURN 0
+;조교자에게페니스가 없으면 안돼(페니반가능)
+SIF !PENIS2(PLAYER)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;일정한 A경험가 필요
+CALL SIZEJUDGE_MA
+SIF EXP:ASSI:A경험 < A
+	RETURN 0
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+
+;===========================================================
+;파생 커맨드
+;===========================================================
+;-------------------------------------------------
+;500, G스팟 자극
+;파생원 41손가락삽입→41손가락삽입
+;-------------------------------------------------
+@COM_ABLE500
+;일괄관리
+SIF GLOBAL_COMABLE(500)
+	RETURN RESULT
+;노예가남자/반음반양/컨트보이라면 안돼
+SIF MALE(TARGET)
+	RETURN 0
+;V감각 2 이상 없으면 안돼
+SIF ABL:V감각 < 2
+	RETURN 0
+
+;조교자는기교 2 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 2
+	RETURN 0
+;ASSI의 경우, 기교 3 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:기교 < 3
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;501, 전립선 자극
+;파생원 51애널애무→51애널애무
+;-------------------------------------------------
+@COM_ABLE501
+;일괄관리
+SIF GLOBAL_COMABLE(501)
+	RETURN RESULT
+;노예가남자나반음반양나컨트보이가 아니면 안돼
+SIF MALE(TARGET) == 0
+	RETURN 0
+;A감각 2 이상 없으면 안돼
+SIF ABL:A감각 < 2
+	RETURN 0
+
+;조교자는기교 2 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 2
+	RETURN 0
+;ASSI의 경우, 기교 3 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:기교 < 3
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;502, 착유
+;파생원 [모유체질]+11가슴주무르기
+;-------------------------------------------------
+@COM_ABLE502
+;일괄관리
+SIF GLOBAL_COMABLE(502)
+	RETURN RESULT
+;노예가모유체질가 아니면 사용할 수 없다
+SIF !TALENT:모유체질
+	RETURN 0
+
+;착의 플레이
+;속옷（위） 또는상의 또는전신상의를 붙이고 있으면 안돼
+SIF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:니틀캡 || TEQUIP:유두클립
+	RETURN 0
+
+;지하실/촉수조교중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;503, 식스나인
+;파생원(31펠라한다, 40커닐링구스)+(70펠라치오, 222커닐링구스강제)
+;-------------------------------------------------
+@COM_ABLE503
+;일괄관리
+SIF GLOBAL_COMABLE(503)
+	RETURN RESULT
+;착의 플레이
+;속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 4
+	RETURN 0
+
+;밧줄로 긴박중/입가 구속되고 있으면 안돼
+SIF TEQUIP:밧줄 || BIND_CHECK_A(2)
+	RETURN 0
+
+;야외플레이/삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;504, 69파이즈리
+;파생원 73파이즈리+240파이즈리한다
+;-------------------------------------------------
+@COM_ABLE504
+;일괄관리
+SIF GLOBAL_COMABLE(504)
+	RETURN RESULT
+;착의 플레이
+;상의류, 속옷(정조대 포함한다), 바지계는 안돼. 스커트는 걸을 수 있다.
+SIF TEQUIP:속옷（위） || TEQUIP:상의 || TEQUIP:속옷（아래） || BOTTOMS(TARGET) >= 3
+	RETURN 0
+
+;조교자와 노예에게 유방이 없으면 안돼(절벽불가)
+SIF !BREAST(PLAYER) || !BREAST(TARGET)
+	RETURN 0
+;조교자와 노예에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER) || !PENIS(TARGET)
+	RETURN 0
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;조교자와 노예가양팔결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마 || TALENT:양팔결손 || TALENT:달마
+	RETURN 0
+;밧줄로 긴박중은 안돼
+SIF TEQUIP:밧줄
+	RETURN 0
+
+;[폭유]라면기교LV2 이상,[거유]가 아니면기교 4 이상,[빈유]라면기교 5 필요
+SIF (TALENT:폭유 && ABL:기교 < 3) || (!TALENT:폭유 && TALENT:거유 && ABL:기교 < 4) || (!TALENT:폭유 && !TALENT:거유 && ABL:기교 < 5) || (TALENT:빈유 && ABL:기교 >= 5)
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF TEQUIP:착유기
+	RETURN 0
+;페니스에 도구 사용중은 불가
+SIF TEQUIP:전동오나홀
+	RETURN 0
+
+;야외플레이/삼각목마/지하실/촉수조교중은 안돼
+SIF TEQUIP:야외플레이 || TEQUIP:삼각목마 || TEQUIP:지하실 || TEQUIP:촉수
+	RETURN 0
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+
+;지하실에 있으면 안돼
+SIF TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;505, 이와시미즈
+;-------------------------------------------------
+@COM_ABLE505
+
+;-------------------------------------------------
+;506, 혼란 모란
+;-------------------------------------------------
+@COM_ABLE506
+
+;-------------------------------------------------
+;507, 삽입 G스포 고문
+;파생원(100정상위, 102대면좌위)+(100정상위, 102대면좌위)
+;-------------------------------------------------
+@COM_ABLE507
+;일괄관리
+SIF GLOBAL_COMABLE(507)
+	RETURN RESULT
+;노예가남자/반음반양/컨트보이라면 안돼
+SIF MALE(TARGET)
+	RETURN 0
+;V감각 2 이상 없으면 안돼
+SIF ABL:V감각 < 2
+	RETURN 0
+
+;조교자는기교 2 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 2
+	RETURN 0
+;ASSI의 경우, 기교 3 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:기교 < 3
+	RETURN 0
+ENDIF
+
+;V계 도구 사용중은 불가
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;508, 삽입 자궁입고문
+;파생원(101후배위, 113배면좌위)+(101후배위, 113배면좌위)
+;-------------------------------------------------
+@COM_ABLE508
+;일괄관리
+SIF GLOBAL_COMABLE(508)
+	RETURN RESULT
+;노예가남자/반음반양/컨트보이라면 안돼
+SIF MALE(TARGET)
+	RETURN 0
+;V감각 2 이상 없으면 안돼
+SIF ABL:V감각 < 2
+	RETURN 0
+
+;조교자는기교 2 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 2
+	RETURN 0
+;ASSI의 경우, 기교 3 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:기교 < 3
+	RETURN 0
+ENDIF
+
+;V계 도구 사용중은 불가
+SIF TEQUIP:로터삽입 || TEQUIP:바이브
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;509, 기승위유방자위
+;파생원(106기승위, 116기승위애널)→5가슴자위
+;-------------------------------------------------
+@COM_ABLE509
+;일괄관리
+SIF GLOBAL_COMABLE(509)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;510, 역에서 파는 도시락
+;파생원 102대면좌위→104대면입위, 112대면좌위애널→114대면입위애널
+;-------------------------------------------------
+@COM_ABLE510
+;일괄관리
+SIF GLOBAL_COMABLE(510)
+	RETURN RESULT
+
+;조교자가한팔결손, 양팔결손, 한다리결손, 양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:한팔결손 || TALENT:PLAYER:양팔결손 || TALENT:PLAYER:달마 || TALENT:PLAYER:한다리결손 || TALENT:PLAYER:양다리결손
+	RETURN 0
+
+;노예가양팔결손, 달마라면 불가
+SIF TALENT:양팔결손 || TALENT:달마
+	RETURN 0
+
+;체격차이가 너무 있으면 할 수 없다
+CALL BUILD
+SIF S < 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;511, 스팽킹섹스
+;파생원 140스팽킹+(101후배위, 105배면입위)
+;-------------------------------------------------
+@COM_ABLE511
+;일괄관리
+SIF GLOBAL_COMABLE(511)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;512, 스팽킹애널
+;파생원 140스팽킹+(111후배위, 115배면입위애널)
+;-------------------------------------------------
+@COM_ABLE512
+;일괄관리
+SIF GLOBAL_COMABLE(512)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;513, 목조르기섹스
+;파생원 155목조르기+(100정상위, 104대면입위)
+;-------------------------------------------------
+@COM_ABLE513
+;일괄관리
+SIF GLOBAL_COMABLE(513)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;514, 목조르기애널
+;파생원 155목조르기+(110정상위애널, 114대면입위애널)
+;-------------------------------------------------
+@COM_ABLE514
+;일괄관리
+SIF GLOBAL_COMABLE(514)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;515, 샌드위치
+;파생원　
+;-------------------------------------------------
+@COM_ABLE515
+;일괄관리
+SIF GLOBAL_COMABLE(515)
+	RETURN RESULT
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY > 0
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;주인이양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+;조수가양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:양다리결손 || TALENT:ASSI:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;516, 2 개 페라
+;파생원　
+;-------------------------------------------------
+@COM_ABLE516
+;일괄관리
+SIF GLOBAL_COMABLE(516)
+	RETURN RESULT
+
+;노예의입를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(2)
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;517, 이륜 찔러
+;파생원　
+;-------------------------------------------------
+@COM_ABLE517
+;일괄관리
+SIF GLOBAL_COMABLE(517)
+	RETURN RESULT
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY > 0
+	RETURN 0
+
+;이륜 꽂아 가능 상태가 아니면 안돼(완구와 확장 경험)
+CALL NIRINJUDGE_V
+SIF A > 1
+	RETURN 0
+;확장 경험 10 미만이라면 안돼
+SIF EXP:PLAYER:V확장경험 < 10
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+;주인이양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+;조수가양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:양다리결손 || TALENT:ASSI:달마
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;518, 이륜 찔러애널
+;파생원　
+;-------------------------------------------------
+@COM_ABLE518
+;일괄관리
+SIF GLOBAL_COMABLE(518)
+	RETURN RESULT
+
+RETURN 1
+
+;-------------------------------------------------
+;519, 연결
+;파생원　
+;-------------------------------------------------
+@COM_ABLE519
+;일괄관리
+SIF GLOBAL_COMABLE(519)
+	RETURN RESULT
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY > 0
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+;아이마스크는 안돼
+SIF  TEQUIP:아이마스크
+	RETURN 0
+
+;주인이양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+;조수가양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:양다리결손 || TALENT:ASSI:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;520, 샌드위치 시킨다
+;파생원　
+;-------------------------------------------------
+@COM_ABLE520
+;일괄관리
+SIF GLOBAL_COMABLE(520)
+	RETURN RESULT
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY > 0
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+;아이마스크는 안돼
+SIF  TEQUIP:아이마스크
+	RETURN 0
+
+;조수가양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:양다리결손 || TALENT:ASSI:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;521, 조수를 샌드위치
+;파생원　
+;-------------------------------------------------
+@COM_ABLE521
+;일괄관리
+SIF GLOBAL_COMABLE(521)
+	RETURN RESULT
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY > 0
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+;아이마스크는 안돼
+SIF  TEQUIP:아이마스크
+	RETURN 0
+
+;주인이양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;522, 이륜 꽂아 시킨다
+;파생원　
+;-------------------------------------------------
+@COM_ABLE522
+;일괄관리
+SIF GLOBAL_COMABLE(522)
+	RETURN RESULT
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY > 0
+	RETURN 0
+
+;확장 경험 10 미만이라면 안돼
+SIF EXP:PLAYER:V확장경험 < 10
+	RETURN 
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+;아이마스크는 안돼
+SIF  TEQUIP:아이마스크
+	RETURN 0
+
+;조수가양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:양다리결손 || TALENT:ASSI:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;523, 이륜 꽂아애널 시킨다
+;파생원　
+;-------------------------------------------------
+@COM_ABLE523
+;일괄관리
+SIF GLOBAL_COMABLE(523)
+	RETURN RESULT
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY > 0
+	RETURN 0
+
+;확장 경험 10 미만이라면 안돼
+SIF EXP:PLAYER:A확장경험 < 10
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+;아이마스크는 안돼
+SIF  TEQUIP:아이마스크
+	RETURN 0
+
+;조수가양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:ASSI:양팔결손 || TALENT:ASSI:양다리결손 || TALENT:ASSI:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;524, 조수를 이륜 꽂아
+;파생원　
+;-------------------------------------------------
+@COM_ABLE524
+;일괄관리
+SIF GLOBAL_COMABLE(524)
+	RETURN RESULT
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY > 0
+	RETURN 0
+
+;확장 경험 10 미만이라면 안돼
+SIF EXP:ASSI:V확장경험 < 10
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+;아이마스크는 안돼
+SIF  TEQUIP:아이마스크
+	RETURN 0
+
+;주인이양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;525, 조수를 이륜 꽂아애널
+;파생원　
+;-------------------------------------------------
+@COM_ABLE525
+;일괄관리
+SIF GLOBAL_COMABLE(525)
+	RETURN RESULT
+
+;조수가 없으면 안돼
+SIF ASSI < 0
+	RETURN 0
+;주인이 아니면 안돼
+SIF ASSIPLAY > 0
+	RETURN 0
+
+;확장 경험 10 미만이라면 안돼
+SIF EXP:ASSI:A확장경험 < 10
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+;노예의발를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(6)
+	RETURN 0
+;아이마스크는 안돼
+SIF  TEQUIP:아이마스크
+	RETURN 0
+
+;주인이양팔결손, 양다리결손, 달마라면 불가
+SIF TALENT:PLAYER:양팔결손 || TALENT:PLAYER:양다리결손 || TALENT:PLAYER:달마
+	RETURN 0
+
+;목욕탕플레이중은플레이매트가 없으면 안돼
+IF TEQUIP:목욕탕
+	SIF ITEM:플레이매트 == 0 && NOITEM == 0
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;526, 삽입 전립선 자극
+;파생원　
+;-------------------------------------------------
+@COM_ABLE526
+;일괄관리
+SIF GLOBAL_COMABLE(526)
+	RETURN RESULT
+;남자/반음반양/컨트보이가 아니라고는 안돼
+SIF !MALE(TARGET)
+	RETURN 0
+;A감각 2 이상 없으면 안돼
+SIF ABL:A감각 < 2
+	RETURN 0
+
+;조교자는기교 2 이상이 아니면 사용할 수 없다
+SIF ABL:PLAYER:기교 < 2
+	RETURN 0
+;ASSI의 경우, 기교 3 이상이 아니면 사용할 수 없다
+IF ASSIPLAY
+	SIF ABL:ASSI:기교 < 3
+	RETURN 0
+ENDIF
+
+;A계 도구 사용중은 불가
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;527, 셀프 연결 튜브
+;파생원　
+;-------------------------------------------------
+@COM_ABLE527
+;일괄관리
+SIF GLOBAL_COMABLE(527)
+	RETURN RESULT
+;촉수조교 중한정
+SIF TEQUIP:촉수 == 0
+	RETURN 0
+;아이템을 가지고 있는지, 아이템 없음 설정이 아니면 안돼
+SIF ITEM:진화의비법 == 0 && NOITEM == 0
+	RETURN 0
+
+;엽기계 커맨드 확장하고 있어, 한편지하실에 없으면 안돼
+SIF (FLAG:2 & 32) == 0 || !TEQUIP:지하실
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;528, 수유손코키
+;파생원 18모유마시기+70수음
+;-------------------------------------------------
+@COM_ABLE528
+;일괄관리
+SIF GLOBAL_COMABLE(528)
+	RETURN RESULT
+
+;착의 플레이
+;속옷, 쓰개 모두 불가.
+SIF TEQUIP:속옷（위） || TOPS(TARGET)
+	RETURN 0
+
+;노예가모유체질가 아니면 사용할 수 없다
+SIF TALENT:모유체질 == 0
+	RETURN 0
+
+;B계 도구 사용중은 불가
+SIF BCHECK(TARGET)
+	RETURN 0
+
+;노예의손를 사용할 수 없으면 안돼
+SIF BIND_CHECK_B(5)
+	RETURN 0
+
+;조교자에게페니스가 없으면 안돼(페니반 불가)
+SIF !PENIS(PLAYER)
+	RETURN 0
+
+;정조대는 안돼
+SIF TEQUIP:PLAYER:속옷（아래） == 5
+	RETURN 0
+
+;지하실/촉수조교중/삼각목마탑승중은 안돼
+SIF TEQUIP:지하실 || TEQUIP:촉수 || TEQUIP:삼각목마
+	RETURN 0
+
+;가슴가 더러워져 있는 경우, 더러워져에 따라서는 실행 할 수 없다
+IF STAIN:가슴 & 2798 && !TALENT:PLAYER:더러움무시
+	;정액 악취민감라면 안돼(정액중독or정액경험로 완화된다)
+	SIF STAIN:가슴 & 4 && (!ABL:PLAYER:정액중독 || EXP:PLAYER:정액경험 < 30) && TALENT:PLAYER:악취민감
+		RETURN 0
+	;애널 악취민감라면 안돼(스캇경험로 완화된다)
+	SIF STAIN:가슴 & 8 && TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 15
+		RETURN 0
+	;점액 악취민감라면 안돼(촉수경험로 완화된다)
+	SIF STAIN:가슴 & 32 && TALENT:PLAYER:악취민감 && (EXP:PLAYER:촉수경험 < 50 || EXP:PLAYER:수간경험 < 30 || EXP:PLAYER:뱀장어탕경험 < 10 || EXP:PLAYER:곤충탕경험 < 10) < 50
+		RETURN 0
+	; 흡혈귀가 아니고, 악취민감라면 안돼
+	SIF STAIN:가슴 & 64 && !TALENT:PLAYER:흡혈귀 && TALENT:PLAYER:악취민감
+		RETURN 0
+	;뇨기본 안돼(악취둔감는 OK. 스캇경험로 완화된다)
+	SIF STAIN:가슴 & 128 && !TALENT:PLAYER:악취둔감 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || EXP:PLAYER:스캇경험 < 15)
+		RETURN 0
+	;변 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:가슴 & 512 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+	;토사물 악취둔감도 포함해, 기본 안돼(스캇경험로 완화된다)
+	SIF STAIN:가슴 & 2048 && ((TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 50) || (!TALENT:PLAYER:악취둔감 && !TALENT:PLAYER:악취민감 && EXP:PLAYER:스캇경험 < 30) || (TALENT:PLAYER:악취둔감 && EXP:PLAYER:스캇경험 < 15))
+		RETURN 0
+ENDIF
+
+RETURN 1
+
+
+;===========================================================
+;여러가지 판정용 함수
+;===========================================================
+;-------------------------------------------
+;주인의 고추×노예의 구멍
+;-------------------------------------------
+@SIZEJUDGE_MT
+A = 0
+;고추의 사이즈 판정
+IF TALENT:PLAYER:아이사이즈 || TALENT:PLAYER:단소
+	LOCAL = 5
+ELSEIF TALENT:PLAYER:거근
+	LOCAL = 40
+ELSEIF TALENT:PLAYER:말자지
+	LOCAL = 60
+ELSE
+	LOCAL = 20
+ENDIF
+;구멍의 사이즈 판정
+IF TALENT:소인체형
+	A = LOCAL*5
+ELSEIF TALENT:작은체구
+	A = LOCAL*3
+ELSE
+	A = LOCAL
+ENDIF
+
+
+;-------------------------------------------
+;조수의 고추×노예의 구멍
+;-------------------------------------------
+@SIZEJUDGE_AT
+A = 0
+;조수의 고추의 사이즈 판정
+IF TALENT:ASSI:아이사이즈 || TALENT:ASSI:단소
+	LOCAL = 5
+ELSEIF TALENT:ASSI:거근
+	LOCAL = 40
+ELSEIF TALENT:ASSI:말자지
+	LOCAL = 60
+ELSE
+	LOCAL = 20
+ENDIF
+;구멍의 사이즈 판정
+IF TALENT:소인체형
+	A = LOCAL*5
+ELSEIF TALENT:작은체구
+	A = LOCAL*3
+ELSE
+	A = LOCAL
+ENDIF
+
+
+;-------------------------------------------
+;주인의 팔×노예의 구멍
+;-------------------------------------------
+@ARMSIZEJUDGE_MT
+A = 0
+LOCAL = 10
+;팔의 사이즈 판정
+IF TALENT:PLAYER:소인체형
+	LOCAL -= 5
+ELSEIF TALENT:PLAYER:작은체구
+	LOCAL += 1
+ELSEIF TALENT:PLAYER:큰체구
+	LOCAL += 3
+ENDIF
+;구멍의 사이즈 판정
+IF TALENT:소인체형
+	LOCAL += 2
+ELSEIF TALENT:작은체구
+	LOCAL += 1
+ELSEIF TALENT:큰체구
+	LOCAL -= 1
+ENDIF
+A = LOCAL*15
+
+
+;-------------------------------------------
+;주인의 고추×조수의 구멍
+;-------------------------------------------
+@SIZEJUDGE_MA
+A = 0
+;고추의 사이즈 판정
+IF TALENT:PLAYER:아이사이즈 || TALENT:PLAYER:단소
+	LOCAL = 5
+ELSEIF TALENT:PLAYER:거근
+	LOCAL = 40
+ELSEIF TALENT:PLAYER:말자지
+	LOCAL = 60
+ELSE
+	LOCAL = 20
+ENDIF
+;구멍의 사이즈 판정
+IF TALENT:ASSI:소인체형
+	A = LOCAL*5
+ELSEIF TALENT:ASSI:작은체구
+	A = LOCAL*3
+ELSE
+	A = LOCAL
+ENDIF
+
+
+;-------------------------------------------
+;노예의 고추×조수의 구멍
+;-------------------------------------------
+@SIZEJUDGE_TA
+A = 0
+;고추의 사이즈 판정
+IF TALENT:아이사이즈 || TALENT:단소
+	LOCAL = 5
+ELSEIF TALENT:거근
+	LOCAL = 40
+ELSEIF TALENT:말자지
+	LOCAL = 60
+ELSE
+	LOCAL = 20
+ENDIF
+;구멍의 사이즈 판정
+IF TALENT:ASSI:소인체형
+	A = LOCAL*5
+ELSEIF TALENT:ASSI:작은체구
+	A = LOCAL*3
+ELSE
+	A = LOCAL
+ENDIF
+
+;-------------------------------------------
+;노예의 고추×주인의 구멍
+;-------------------------------------------
+@SIZEJUDGE_TM
+A = 0
+;고추의 사이즈 판정
+IF TALENT:아이사이즈 || TALENT:단소
+	LOCAL = 5
+ELSEIF TALENT:거근
+	LOCAL = 40
+ELSEIF TALENT:말자지
+	LOCAL = 60
+ELSE
+	LOCAL = 20
+ENDIF
+;구멍의 사이즈 판정
+IF TALENT:PLAYER:소인체형
+	A = LOCAL*5
+ELSEIF TALENT:PLAYER:작은체구
+	A = LOCAL*3
+ELSE
+	A = LOCAL
+ENDIF
+
+
+;-------------------------------------------
+;조수의 고추×주인의 구멍
+;-------------------------------------------
+@SIZEJUDGE_AM
+A = 0
+;조수의 고추의 사이즈 판정
+IF TALENT:ASSI:아이사이즈 || TALENT:ASSI:단소
+	LOCAL = 5
+ELSEIF TALENT:ASSI:거근
+	LOCAL = 40
+ELSEIF TALENT:ASSI:말자지
+	LOCAL = 60
+ELSE
+	LOCAL = 20
+ENDIF
+;구멍의 사이즈 판정
+IF TALENT:PLAYER:소인체형
+	A = LOCAL*5
+ELSEIF TALENT:PLAYER:작은체구
+	A = LOCAL*3
+ELSE
+	A = LOCAL
+ENDIF
+
+
+;-------------------------------------------
+;이륜 꽂아 가능한가 판정(노예의 Vver)
+;-------------------------------------------
+@NIRINJUDGE_V
+A = 0
+
+SIF TEQUIP:로터삽입
+	A += 1
+SIF TEQUIP:바이브
+	A += 1
+
+;확장 경험이 10이상 없으면 문답 무용으로 불가
+IF TEQUIP:로터삽입 || TEQUIP:바이브
+	SIF EXP:V확장경험 < 10
+		A = 2
+ENDIF
+
+;-------------------------------------------
+;이륜 꽂아애널 가능한가 판정
+;-------------------------------------------
+@NIRINJUDGE_A
+A = 0
+
+SIF TEQUIP:로터A삽입
+	A += 1
+SIF TEQUIP:애널비즈
+	A += 1
+SIF TEQUIP:애널바이브
+	A += 1
+
+;확장벌룬도 불가
+SIF TEQUIP:확장벌룬
+	A = 2
+
+;확장 경험이 10이상 없으면 문답 무용으로 불가
+IF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브
+	SIF EXP:A확장경험 < 10
+		A = 2
+ENDIF
+
+

@@ -1,0 +1,135 @@
+﻿;-------------------------------------------------
+;アナル愛撫
+;Ａ系調教コマンド
+;-------------------------------------------------
+@COM51
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教がアナル愛撫、前立腺刺激だと前立腺刺激に
+	IF PREVCOM == 51 || PREVCOM == 501
+		CALL COM_ABLE501
+		SIF RESULT == 1
+			JUMP COM501
+	ENDIF
+ENDIF
+
+PRINTL アナル愛撫
+STR:0 = アナル愛撫
+CALL KOJO_MESSAGE_COM
+
+;ストッキングびりびりフラグ
+SIF TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6
+	TFLAG:55 = 1
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 10
+LOSEBASE:気力 += 50
+
+SOURCE:快Ａ += 80
+
+IF TEQUIP:拡張バルーン
+	TIMES SOURCE:快Ａ , 1.80
+	SOURCE:痛み += 200
+ELSEIF TEQUIP:アナルバイブ
+	TIMES SOURCE:快Ａ , 1.50
+	SOURCE:痛み += 200
+ELSEIF TEQUIP:アナルビーズ
+	TIMES SOURCE:快Ａ , 1.35
+	SOURCE:痛み += 200
+ELSEIF TEQUIP:ローターＡ挿入
+	TIMES SOURCE:快Ａ , 1.20
+	SOURCE:痛み += 130
+ELSE
+	IF PREVCOM == 77
+		SOURCE:痛み += 80
+	ELSE
+		SOURCE:痛み += 100
+	ENDIF
+ENDIF
+
+SOURCE:屈従 += 100
+SOURCE:逸脱 += 80
+SOURCE:反発 += 60
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 100
+
+;スキンシップ好きだと情愛のソース追加
+SIF TALENT:スキンシップ好き
+	SOURCE:情愛 += 50
+
+;Aへの苦痛は先に処理しておく
+;EXP:Ａ経験をみる
+IF EXP:Ａ経験 < EXPLV:1
+	TIMES SOURCE:痛み , 3.00
+	TIMES SOURCE:反発 , 3.00
+ELSEIF EXP:Ａ経験 < EXPLV:2
+	TIMES SOURCE:痛み , 1.20
+	TIMES SOURCE:反発 , 2.00
+ELSEIF EXP:Ａ経験 < EXPLV:3
+	TIMES SOURCE:痛み , 0.80
+	TIMES SOURCE:反発 , 1.50
+ELSEIF EXP:Ａ経験 < EXPLV:4
+	TIMES SOURCE:痛み , 0.60
+	TIMES SOURCE:反発 , 1.20
+ELSEIF EXP:Ａ経験 < EXPLV:5
+	TIMES SOURCE:痛み , 0.40
+ELSEIF EXP:Ａ経験 >= EXPLV:5
+	TIMES SOURCE:痛み , 0.20
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	TIMES SOURCE:痛み , 1.20
+	TIMES SOURCE:反発 , 2.00
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	TIMES SOURCE:痛み , 1.00
+	TIMES SOURCE:反発 , 1.50
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	TIMES SOURCE:痛み , 0.60
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	TIMES SOURCE:痛み , 0.30
+ELSEIF PALAM:潤滑 >= PALAMLV:4
+	TIMES SOURCE:痛み , 0.20
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;調教者の手⇔奴隷のＡ腸内の汚れが移動
+;道具を使用する場合は汚れは移動しない
+IF TEQUIP:拡張バルーン || TEQUIP:アナルバイブ || TEQUIP:アナルビーズ || TEQUIP:ローターＡ挿入
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+EXP:Ａ経験 += 1
+PRINTL Ａ経験＋１
+
+;ゲイ経験とか加算
+CALL COM_EXP(2)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+
+RETURN 1
+
+

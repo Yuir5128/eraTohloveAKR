@@ -1,0 +1,110 @@
+﻿;-------------------------------------------------
+;스팽킹
+;SM계 커맨드
+;-------------------------------------------------
+@COM140
+
+;-------------------------------------------------
+;특수 파생 처리
+;-------------------------------------------------
+;전회와 이번 조교자가 같음
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;전회의 조교가후배위, 배면입위, 스팽킹섹스 때, 스팽킹섹스에
+	IF PREVCOM == 101 || PREVCOM == 105 || PREVCOM == 511
+		CALL COM_ABLE511
+		SIF RESULT == 1
+			JUMP COM511
+	;전회의 조교가후배위A, 배면입위A, 스팽킹애널 때, 스팽킹애널에
+	ELSEIF PREVCOM == 111 || PREVCOM == 115 || PREVCOM == 511
+		CALL COM_ABLE512
+		SIF RESULT == 1
+			JUMP COM512
+	ENDIF
+ENDIF
+
+PRINTL 스팽킹
+STR:0 = 스팽킹
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+IF TEQUIP:지하실
+	;소비체력, 기력
+	LOSEBASE:체력 += 50
+	LOSEBASE:기력 += 20
+	
+	SOURCE:통증 += 900
+ELSE
+	;소비체력, 기력
+	LOSEBASE:체력 += 30
+	LOSEBASE:기력 += 10
+	
+	SOURCE:통증 += 450
+ENDIF
+;착의 때, 통증가 경감
+SIF BOTTOMS(TARGET) >= 4
+	TIMES SOURCE:통증, 0.70
+SIF TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5
+	TIMES SOURCE:통증, 0.90
+
+SOURCE:두려움 += 400
+;지하실에 있으면두려움의 소스 추가
+SIF TEQUIP:지하실
+	TIMES SOURCE:두려움, 2.00
+
+SOURCE:일탈 += 50
+SOURCE:반발 += 300
+
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;고통의 파라미터에 의한고통의 소스 증가는 먼저 처리해 둔다
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증, 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증, 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증, 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증, 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증, 3.00
+ENDIF
+
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;하의류를 입고 있을 때, 조교자의손의 더러운⇔노예의하의류의 더러움이 이동
+;지하실에 있을 때는 도구를 사용하므로, 더러워지지 않는다
+IF TEQUIP:지하실
+ELSEIF TEQUIP:하의 > 1 || TEQUIP:전신상의 == 8 || TEQUIP:전신상의 == 11 || TEQUIP:전신상의 == 12 || (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5)
+	CALL COM_STAIN
+ENDIF
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;게이경험라든지 가산
+CALL COM_EXP(2)
+
+;의존도 벡터
+TFLAG:33 = 3
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+
+

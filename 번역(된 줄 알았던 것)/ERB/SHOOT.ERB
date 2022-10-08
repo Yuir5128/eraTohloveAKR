@@ -1,0 +1,1012 @@
+﻿;사정관계의 처리
+
+;TFLAG:703 ~디폴트사정처 설정 일시 변수
+;1=질내사정, 2=애널사정, 3=수음관계, 4=페라·파이즈리, 5=손와입 이외(스마타 등),
+;6=조수사정, 7=커닐링구스, 9=기승위한다
+;TFLAG:704 ~ 사정개소 선택 가능한가 아닌가
+;0=불가, 1=가능
+
+;---------------------------------------------------------
+;eraheta용 변경
+;---------------------------------------------------------
+;사정관련 처리가 여러가지 이상했기 때문에 다양하게손를 더했다(너무 바꾸어 변경점이 올려지지 않다…)
+
+;기본적으로 커맨드내의사정처리는 조교자측입니다
+;노예용은 TRACHECK로 행해지고 있습니다만, 질 쏘아 맞히고·장 쏘아 맞히고 만은 여기서 제어하고 있으므로 주의
+;PLAYER 이외가사정 하는 것 같은 커맨드의 경우도 주의가 필요(3 P를 참고로 해 주세요)
+
+;---------------------------------------------------------
+;사정 할까의 체크
+;커맨드 파일내에서 체크한사정게이지를 반영. 사정 하고 있으면 E를 돌려준다.
+;---------------------------------------------------------
+@SAMEN_CHECK(ARG, ARG:1)
+;범용적인 함수인 것으로, 장래적으로는 모든 조교 커맨드의사정체크를 여기서 하는 일도 가능
+S = BASE:ARG:사정
+EJAC = MAXBASE:ARG:사정
+
+SIF TALENT:ARG:조루
+	TIMES S , 1.50
+SIF TALENT:ARG:지루
+	TIMES S , 0.70
+;동정상실시의사정게이지 보너스
+SIF TALENT:ARG:동정 && TFLAG:160 == 2
+	S += 5000
+;사정한계가 와 있는 경우는, 사정게이지는 강제적으로 0으로 한다
+IF CFLAG:ARG:11 == 0
+	S = 0
+	BASE:ARG:사정 = 0
+ENDIF
+
+IF S > EJAC * 2
+	;조교자 이외의사정플래그
+	TFLAG:6 = 2
+	E = 2
+ELSEIF S > EJAC
+	;조교자 이외의사정플래그
+	TFLAG:6 = 2
+	E = 1
+ELSE
+	E = 0
+ENDIF
+SIF ARG:1
+	TFLAG:6 = 0
+
+
+;한층 더 커맨드 파일내에서, E가 있으면사정시의 처리를 실시한다.
+;이 커맨드에서는 어디에사정 하는 것이 보통인가(섹스라면 질, 페라라면입 등)를 판정
+;옵션으로사정처를 「때 마다 선택한다」로 설정해 있는 경우, 선택할 수가 있는지 아닌지를 판정
+;사정시의 처리
+;IF E >= 1
+;	;사정처 타입의 설정
+;	TFLAG:703 = 4
+;	;사정처 선택의 가능·불가
+;	TFLAG:704 = 1
+;	;범용적인 처리는 이 함수로 실시한다
+;	;(사정게이지의 재계산이나사정경험의 상승과 공통 부분의 표시)
+;	CALL SAMEN_SHOOT
+;ENDIF
+
+
+;---------------------------------------------------------
+;사정장소 선택
+;---------------------------------------------------------
+@SAMEN_SHOOT
+;뿌리고 선택
+;[0] 머리카락 손코키 구분
+;[1] 얼굴	손코키 구분
+;[2] 가슴	페라·파이즈리구분
+;[3] 배페라·파이즈리구분
+;[4] 겨드랑이 페라·파이즈리 2 구분
+;[5] 넙적다리 섹스 2구분
+;[6] 균열 섹스 2구분
+;[7] 발 페라·파이즈리구분
+;[8] 고무 쏘아 맞히고·나카타씨
+
+;각 커맨드중에서사정의 판정에 사용되는 변수 E를 사용한다.
+;이것까지의사정의 처리를 여기에 갖게해 각 커맨드내에서 사용하지 않도록 한다.
+;따라서 여기서 E를 초기화해, 각 COMF에 처리를 돌려준다(E == 0이라면 각 커맨드내에서사정의 처리는 행해지지 않는다)
+
+;사정 한 인물의 설정
+IF TFLAG:6
+	P = ASSIPLAY ? MASTER # ASSI
+ELSE
+	P = PLAYER
+ENDIF
+
+;사정 하는 대상의 설정
+IF (SELECTCOM == 270 || SELECTCOM == 271) && TFLAG:703!= 6
+	T = MASTER
+ELSEIF ((SELECTCOM == 440 || SELECTCOM == 441) && TFLAG:703!= 6) || (SELECTCOM == 270 || SELECTCOM == 271)
+	T = ASSI
+ELSE
+	T = TARGET
+ENDIF
+
+;우선 뿌리고 장소 판별 플래그를 초기화(조교자 이외의사정 때는 플래그를 보존)
+SIF TFLAG:6
+	F = CFLAG:T:106
+CFLAG:T:106 = 0
+
+;추가 부분, 사정개소 선택 기능을 OFF로 했을 때에콘돔를 포함한 통상의사정처리를 실시한다
+;또, 상황적으로사정개소의 선택을 실시할 수 없을 커맨드의 경우도 여기서 통상 처리에 날린다
+
+$INPUT_LOOP
+;아이는사정 할 수 없다.
+IF TALENT:P:아이사이즈
+	CALL KARA_SHOOT_CHECK
+	RETURN 0
+;옵션으로 「그대로사정」가 선택되고 있다, 혹은 커맨드내의사정개소 선택이 불가의 경우
+ELSEIF FLAG:99 == 8 || TFLAG:704 == 0
+	;콘돔장비중은, 그대로콘돔사정에.
+	IF TEQUIP:P:콘돔 == 1
+		CFLAG:T:106 = 9
+	;통상사정
+	ELSE
+		;커맨드 파일내에서 설정되어 있는, 기본적인 개소를 확인하는 처리에 날린다.
+		CALL COMMAND_CHECK
+		RETURN 0
+	ENDIF
+;옵션으로 「때 마다 선택」을 설정해 있어, 사정개소 선택 가능한 경우
+ELSEIF FLAG:99 == 9 && P == PLAYER
+	PRINTFORMW %CALLNAME:P%의페니스는 한계까지 팽창해, 이제(벌써)사정직전이다……
+	PRINTFORMW 　
+	PRINTFORMW %CALLNAME:T%의 어디에사정 합니까?
+	PRINTL [0] 「머리카락」
+	PRINTL [1] 「얼굴」
+	PRINTL [2] 「가슴」
+	PRINTL [3] 「배」
+	PRINTL [4] 「겨드랑이」
+	PRINTL [5] 「허벅지」
+	PRINTL [6] 「균열」
+	PRINTL [7] 「엉덩이」
+	PRINTL [8] 「발」
+	IF TEQUIP:P:콘돔
+		PRINTL [9] 「콘돔에사정 한다」
+	ELSE
+		PRINTL [9] 「그대로사정 한다」
+	ENDIF
+	INPUT
+	IF RESULT == 0
+		CFLAG:T:106 = 1
+	ELSEIF RESULT == 1
+		CFLAG:T:106 = 2
+	ELSEIF RESULT == 2
+		CFLAG:T:106 = 3
+	ELSEIF RESULT == 3
+		CFLAG:T:106 = 4
+	ELSEIF RESULT == 4
+		CFLAG:T:106 = 5
+	ELSEIF RESULT == 5
+		CFLAG:T:106 = 6
+	ELSEIF RESULT == 6
+		CFLAG:T:106 = 7
+	ELSEIF RESULT == 7
+		CFLAG:T:106 = 8
+	ELSEIF RESULT == 8
+		CFLAG:T:106 = 10
+	ELSEIF RESULT == 9
+		;콘돔첨부의 경우
+		IF TEQUIP:P:콘돔 == 1
+			CFLAG:T:106 = 9
+		ELSE
+			;커맨드 파일내에서 설정되어 있는, 기본적인 개소를 확인하는 처리에 날린다.
+			CALL COMMAND_CHECK
+			RETURN 0
+		ENDIF
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+;옵션으로 「기본적인 개소 선택」이 되고 있으면, 각각의 처리에 날린다.
+ELSE
+	IF FLAG:99 == 0
+		CFLAG:T:106 = 1
+	ELSEIF FLAG:99 == 1
+		CFLAG:T:106 = 2
+	ELSEIF FLAG:99 == 2
+		CFLAG:T:106 = 3
+	ELSEIF FLAG:99 == 3
+		CFLAG:T:106 = 4
+	ELSEIF FLAG:99 == 4
+		CFLAG:T:106 = 5
+	ELSEIF FLAG:99 == 5
+		CFLAG:T:106 = 6
+	ELSEIF FLAG:99 == 6
+		CFLAG:T:106 = 7
+	ELSEIF FLAG:99 == 7
+		CFLAG:T:106 = 8
+	ENDIF
+ENDIF
+
+;위의 처리를 빠져 왔을 경우, 설정된 개소에사정 하는 처리에 날린다.
+CALL CHECK_CFLAG106
+
+
+
+;---------------------------------------------------------
+;사정처리 함수 그 1 커맨드마다 설정된, 기본사정개소에사정 하는 경우.
+;---------------------------------------------------------
+@COMMAND_CHECK
+;그대로사정시의 처리의 분기
+;커맨드에 의한 처리 타겟의 확인과 분기
+IF TFLAG:703 == 1
+	;질내사정
+	CALL SAMEN_SHOOT_OLD_SEX
+	CALL IN_VAGINA_CHECK
+ELSEIF TFLAG:703 == 2
+	;애널사정
+	CALL SAMEN_SHOOT_OLD_SEX2
+	CALL IN_VAGINA_CHECK
+ELSEIF TFLAG:703 == 3
+	;수음
+	CALL SAMEN_SHOOT_OLD_FINGER
+ELSEIF TFLAG:703 == 4
+	;페라·파이즈리
+	CALL SAMEN_SHOOT_OLD_ORAL
+ELSEIF TFLAG:703 == 5
+	;손와입 이외(스마타 등)
+	CALL SAMEN_SHOOT_OLD_SUMATA
+ELSEIF TFLAG:703 == 6
+	;조수사정
+	CALL SAMEN_SHOOT_OLD_ASSISTANT
+ELSEIF TFLAG:703 == 7
+	;커닐링구스강제
+	CALL SAMEN_SHOOT_OLD_PUSSY
+ELSEIF TFLAG:703 == 9
+	;기승위한다
+	CALL SAMEN_SHOOT_OLD_RAPED
+ENDIF
+
+
+;---------------------------------------------------------
+;사정처리 함수 그 2
+;실제로사정를 실시하기 (위해)때문에, 더러움도 여기서 판정.
+;---------------------------------------------------------
+;CFLAG:106 =뿌리고 장소 판별 플래그
+@CHECK_CFLAG106
+;머리카락
+IF CFLAG:T:106 == 1
+	IF TEQUIP:T:머리장식 >= 5
+		STAIN:T:머리장식 |= 4
+	ELSE
+		STAIN:T:머리카락 |= 4
+	ENDIF
+;안
+ELSEIF CFLAG:T:106 == 2
+	SIF TEQUIP:T:특수 3
+		STAIN:T:눈장식 |= 4
+;가슴, 배, 겨드랑이
+ELSEIF CFLAG:T:106 == 3 || CFLAG:T:106 == 4 || CFLAG:T:106 == 5
+	;가슴의 경우, 착의는 베개 없다. 앞이 벌어짐의 옷에는 붙지 않는다.
+	IF CFLAG:T:106 == 3
+		IF TOPS(T)
+			STAIN:T:전신상의 |= 4
+		ELSEIF TEQUIP:T:상의
+			STAIN:T:상의 |= 4
+		ELSEIF TEQUIP:T:속옷（위）
+			STAIN:T:속옷（위） |= 4
+		ELSE
+			STAIN:T:가슴 |= 4
+		ENDIF
+	;겨드랑이의 경우, 전신상의, 상의는 베개 없다. 속옷에 정액 더러움은 부착하지 않는다.
+	ELSEIF CFLAG:T:106 == 5 
+		IF TEQUIP:T:전신상의
+			STAIN:T:전신상의 |= 4
+		ELSEIF TEQUIP:T:상의
+			STAIN:T:상의 |= 4
+		ENDIF
+	ENDIF
+;허벅지, 균열, 엉덩이
+ELSEIF CFLAG:T:106 == 6 || CFLAG:T:106 == 7 || CFLAG:T:106 == 8
+	;착의의 경우(스커트계는 걸으므로 먼저 배제해 둔다)
+	IF BOTTOMS(T) >= 4 || TEQUIP:T:속옷（아래）
+		;허벅지의 경우, 하프 팬츠계, 숏팬츠계, 속옷이라면 맨살갗에사정 할 수 있다.
+		IF CFLAG:T:106 == 6 && (BOTTOMS(T) == 4 || TEQUIP:T:속옷（아래）)
+		;스커트 이외의 착의는, 착의에 더러움이 붙는다
+		ELSEIF TEQUIP:T:하의
+			STAIN:T:하의 |= 4
+		;속옷에 관해서
+		ELSEIF TEQUIP:T:속옷（아래）
+			;엉덩이의 경우, 정조대는 관여하지 않는다
+			IF CFLAG:T:106 == 8 && TEQUIP:T:정조대
+			;그 이외는 모두 속옷에 더러움이 붙는다
+			ELSE
+				STAIN:T:속옷（아래） |= 4
+			ENDIF
+		ENDIF
+	ENDIF
+;발
+ELSEIF CFLAG:T:106 == 10
+	IF TEQUIP:T:신발
+		STAIN:T:신발 |= 4
+	ELSEIF TEQUIP:T:특수 2
+		STAIN:T:발장식 |= 4
+	ELSE
+		STAIN:T:발 |= 4
+	ENDIF
+ENDIF
+
+IF CFLAG:T:106 == 0
+	CALL COMMAND_CHECK
+ELSEIF CFLAG:T:106 <= 2
+	CALL SAMEN_SHOOT_OLD_FINGER
+ELSEIF CFLAG:T:106 <= 5
+	CALL SAMEN_SHOOT_OLD_ORAL
+ELSEIF CFLAG:T:106 <= 8
+	CALL SAMEN_SHOOT_OLD_SEX3
+ELSEIF CFLAG:T:106 == 9
+	CALL IN_VAGINA_CHECK
+ELSEIF CFLAG:T:106 == 10
+	CALL SAMEN_SHOOT_OLD_ORAL
+ENDIF
+
+;조교자 이외의사정 때는사정개소를 TFLAG:43에 기록해 플래그를 되돌린다
+IF TFLAG:6
+	TFLAG:43 = CFLAG:T:106
+	CFLAG:T:106 = F
+ENDIF
+
+
+;---------------------------------------------------------
+@KARA_SHOOT_CHECK
+;---------------------------------------------------------
+;조교자 이외의사정는 별플래그
+IF TFLAG:6
+	TFLAG:43 = 21
+;커맨드에 의한 처리 타겟의 확인과 분기
+ELSEIF TFLAG:703 == 1
+	;질내사정
+	TFLAG:164 = 1
+ELSEIF TFLAG:703 == 2
+	;애널사정
+	TFLAG:164 = 2
+ELSEIF TFLAG:703 == 3
+	;수음
+	TFLAG:164 = 3
+ELSEIF TFLAG:703 == 4
+	;페라·파이즈리
+	TFLAG:164 = 4
+ELSEIF TFLAG:703 == 5
+	;손와입 이외(스마타 등)
+	TFLAG:164 = 5
+ELSEIF TFLAG:703 == 6
+	;조수사정
+	TFLAG:164 = 6
+ELSEIF TFLAG:703 == 7
+	;커닐링구스강제
+	TFLAG:164 = 7
+ELSEIF TFLAG:703 == 9
+	;기승위한다
+	TFLAG:164 = 8
+ENDIF
+;아이의 경우사정 할 수 없다
+CALL SAMEN_SHOOT_KARA
+
+
+
+;---------------------------------------------------------
+;플레이나 및 조수의 각 커맨드에서의 나카타씨 체크
+;---------------------------------------------------------
+@IN_VAGINA_CHECK
+;각 커맨드에의 영향을 작게 하는 것이 목적(함수를 부른다, 혹은 생략 하는 것만으로 좋다)
+;TFLAG:2(나카타씨)로 TEQUIP:콘돔(콘돔)를 조건으로 질 쏘아 맞히고·장 쏘아 맞히고를 늘리는 처리를 가진다
+
+;커맨드마다의 분기
+;우선콘돔로 분기
+IF TEQUIP:P:콘돔 == 1
+	IF !TFLAG:6
+		CFLAG:T:106 = 9
+	ELSE
+		TFLAG:43 = 9
+	ENDIF
+	IF NO:P == 0
+		PRINT 주인
+	ELSE
+		PRINTFORM %CALLNAME:P%
+	ENDIF
+	PRINTL 　콘돔사정
+	CALL SAMEN_SHOOT_CONDOM
+;콘돔를 하고 있지 않는가 개V계라면 질내사정
+ELSEIF TFLAG:703 == 1 || TFLAG:703 == 6
+	SIF P == MASTER
+		A = 102
+	SIF P == ASSI
+		A = 103
+	;섹스로사정, 조수가사정, 조수를범한다로사정
+	IF TFLAG:2 == 2 || TFLAG:6 == 2 || TFLAG:7 == 2
+		IF NO:P == 0
+			PRINT 주인
+		ELSE
+			PRINTFORM %CALLNAME:P%
+		ENDIF
+		PRINTL 　질내대량사정
+		TFLAG:38 = 2
+		IF CFLAG:T:108
+			PRINTL <피임결계>
+		ELSE
+			PRINTFORML %CALLNAME:T%의질내사정경험+2
+			EXP:T:질내사정경험 += 2
+			CFLAG:T:A += 2
+			;나카타씨시의공포판정등
+			SIF T == TARGET
+				CALL SAMEN_SHOOT_SOURCE
+		ENDIF
+	;섹스로사정, 조수가사정, 조수를범한다로사정
+	ELSEIF TFLAG:2 == 1 || TFLAG:6 == 1 || TFLAG:7 == 1
+		IF NO:P == 0
+			PRINT 주인
+		ELSE
+			PRINTFORM %CALLNAME:P%
+		ENDIF
+		PRINTL 　질내사정
+		TFLAG:38 = 1
+		IF CFLAG:T:108
+			PRINTL <피임결계>
+		ELSE
+			PRINTFORML %CALLNAME:T%의질내사정경험+1
+			EXP:T:질내사정경험 += 1
+			CFLAG:T:A += 1
+			;나카타씨시의공포판정등
+			SIF T == TARGET
+				CALL SAMEN_SHOOT_SOURCE
+		ENDIF
+	ENDIF
+;콘돔 하고 있지 않는가 개A계라면 장 쏘아 맞히고
+ELSEIF TFLAG:703 == 2 || TFLAG:703 == 6
+	SIF P == MASTER
+		A = 702
+	SIF P == ASSI
+		A = 703
+	;섹스로사정, 조수가사정. 조수의A를범한다로사정
+	IF TFLAG:2 == 2 || TFLAG:6 == 2 || TFLAG:7 == 2
+		IF NO:P == 0
+			PRINT 주인
+		ELSE
+			PRINTFORM %CALLNAME:P%
+		ENDIF
+		PRINTL 장내대량사정
+		TFLAG:138 = 2
+		IF CFLAG:T:108
+			PRINTL 〈피임결계〉
+		ELSE
+			PRINTFORML %CALLNAME:T%의장내사정경험＋2
+			EXP:T:장내사정경험 += 2
+			CFLAG:T:A += 2
+			;나카타씨시의공포판정등
+			SIF T == TARGET
+				CALL SAMEN_SHOOT_SOURCE
+		ENDIF
+	
+	;섹스로사정, 조수가사정. 조수의A를범한다로사정
+	ELSEIF TFLAG:2 == 1 || TFLAG:6 == 1 || TFLAG:7 == 1
+		IF NO:P == 0
+			PRINT 주인
+		ELSE
+			PRINTFORM %CALLNAME:P%
+		ENDIF
+		PRINTL 장내사정
+		TFLAG:138 = 1
+		IF CFLAG:T:108
+			PRINTL 〈피임결계〉
+		ELSE
+			PRINTFORML %CALLNAME:T%의장내사정경험＋1
+			EXP:T:장내사정경험 += 1
+			CFLAG:T:A += 1
+			;나카타씨시의공포판정등
+			SIF T == TARGET
+				CALL SAMEN_SHOOT_SOURCE
+		ENDIF
+	ENDIF
+ENDIF
+
+@IN_VAGINA_CHECK_T
+;노예의 각 커맨드에서의 나카타씨 체크
+;각 커맨드에의 영향을 작게 하는 것이 목적(함수를 부른다, 혹은 생략 하는 것만으로 좋다)
+
+;노예공계 커맨드(조수를범하게시킨다, 역섹스계)의 경우
+IF (SELECTCOM == 430 || SELECTCOM == 431) || SEXPLAY(TARGET) >= 3
+	;사정 한 인물의 설정
+	P = TARGET
+
+	;사정 하는 대상의 설정
+	IF (SELECTCOM == 430 || SELECTCOM == 431)
+		T = ASSI
+	ELSE
+		T = PLAYER
+	ENDIF
+
+	;V계 플래그
+	V = 0
+	SIF ((SELECTCOM == 430 || SELECTCOM == 431) && TFLAG:705 == 0) || SEXPLAY(TARGET) == 3
+		V = 1
+	
+	;우선콘돔로 분기
+	IF TEQUIP:P:콘돔 == 1
+		PRINTFORML %CALLNAME:P% 콘돔사정
+		CALL SAMEN_SHOOT_CONDOM
+	;콘돔를 하고 있지 않는가 개V계라면 질내사정
+	ELSEIF V
+		IF E == 2
+			PRINTFORML %CALLNAME:P% 질내대량사정
+			IF CFLAG:T:108
+				PRINTL <피임결계>
+			ELSE
+				PRINTFORML %CALLNAME:T%의질내사정경험+2
+				EXP:T:질내사정경험 += 2
+				CFLAG:T:104 += 2
+			ENDIF
+		ELSEIF E == 1
+			PRINTFORML %CALLNAME:P% 질내사정
+			IF CFLAG:T:108
+				PRINTL <피임결계>
+			ELSE
+				PRINTFORML %CALLNAME:T%의질내사정경험+1
+				EXP:T:질내사정경험 += 1
+				CFLAG:T:104 += 1
+			ENDIF
+		ENDIF
+	;콘돔를 하고 있지 않는가 개A계라면 장질내사정
+	ELSEIF V == 0
+		IF E == 2
+			PRINTFORML %CALLNAME:P% 장내대량사정
+			IF CFLAG:T:108
+				PRINTL <피임결계>
+			ELSE
+				PRINTFORML %CALLNAME:T%의장내사정경험+2
+				EXP:T:장내사정경험 += 2
+				CFLAG:T:704 += 2
+			ENDIF
+		ELSEIF E == 1
+			PRINTFORML %CALLNAME:P% 장내사정
+			IF CFLAG:T:108
+				PRINTL <피임결계>
+			ELSE
+				PRINTFORML %CALLNAME:T%의장내사정경험+1
+				EXP:T:장내사정경험 += 1
+				CFLAG:T:704 += 1
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+
+;---------------------------------------------------------
+;각사정타입마다의 처리 함수
+;---------------------------------------------------------
+;지금후는 COMF내에서는 처리하지 않고, 필요에 따라서 여기로부터 호출한다.
+;더러운 이동등의 처리는 각 COMF내에서 해 주므로 이동의 필요 없음
+
+@SAMEN_SHOOT_CONDOM
+;고무사정의 처리
+;거의 다른사정와 함께이지만, TFLAG를 세우지 않고(질 쏘아 맞히고·장 쏘아 맞히고 저지), 정액경험도 늘리지 않는다
+;콘돔관련의 플래그도 가능한 한 여기서 취급한다.
+
+CALL SAMEN_SHOOT_CALC
+
+;콘돔가 벗겨진다
+TEQUIP:P:콘돔 = 0
+
+SIF P == MASTER
+	S = 4
+SIF P == ASSI
+	S = 2
+SIF P == TARGET
+	S = 1
+;콘돔에 정액 모인다(누구의 정액이나 비트로 격납)
+CFLAG:107 |= S
+
+;콘돔자동 장착 처리
+IF FLAG:98 & S && ITEM:45 <= 0
+	PRINT <콘돔가 없어졌으므로, 자동 장착을 해제합니다>
+	FLAG:98 = 0
+ELSEIF FLAG:98 & S
+		ITEM:45 -= 1
+		TEQUIP:P:콘돔 = 1
+ENDIF
+
+;반감가 다소 감소
+SOURCE:반발 -= 500
+
+
+@SAMEN_SHOOT_OLD_SEX
+;이것까지 COMF내에서 사용되고 있던 섹스사정의 처리
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET
+	RETURN 0
+
+;대량사정
+IF E == 2
+	EXP:정액경험 += 1
+	PRINTL 정액경험＋1
+
+	;섹스로사정플래그
+	IF !TFLAG:6
+		TFLAG:2 = 2
+	ELSE
+		TFLAG:43 = 18
+	ENDIF
+;통상의사정
+ELSEIF E == 1
+	;섹스로사정플래그
+	IF !TFLAG:6
+		TFLAG:2 = 1
+	ELSE
+		TFLAG:43 = 18
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_SEX2
+;이것까지 COMF내에서 사용되고 있던 섹스사정의 처리를 개조.
+;애널섹스계 커맨드에 사용한다.
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;대량사정
+IF E == 2
+	EXP:정액경험 += 2
+	PRINTL 정액경험＋2
+	;섹스로사정플래그
+	IF !TFLAG:6
+		TFLAG:2 = 2
+	ELSE
+		TFLAG:43 = 17
+	ENDIF
+ELSEIF E == 1
+	IF SELECTCOM == 116
+		EXP:정액경험 += 1
+		PRINTL 정액경험＋1
+	ENDIF
+	;섹스로사정플래그
+	IF !TFLAG:6
+		TFLAG:2 = 1
+	ELSE
+		TFLAG:43 = 17
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_SEX3
+;이것까지 COMF내에서 사용되고 있던 섹스사정의 처리를 개조.
+;허벅지, 균열, 엉덩이에 사용한다.
+;정액경험는 증가하지만 섹스사정의 플래그는 세우지 않다(세우면 나카타씨입상이 나오거나질내사정경험·장내사정경험가 증가해 버린다)
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;대량사정
+IF E == 2
+	IF SELECTCOM == 116
+		EXP:정액경험 += 2
+		PRINTL 정액경험＋2
+	ELSE
+		EXP:정액경험 += 1
+		PRINTL 정액경험＋1
+	ENDIF
+ELSEIF E == 1
+	IF SELECTCOM == 116
+		EXP:정액경험 += 1
+		PRINTL 정액경험＋1
+	ENDIF
+ENDIF
+
+;착의라면 더러운 추가
+IF E > 0
+	IF TEQUIP:하의
+		STAIN:하의 |= 4
+	ELSEIF TEQUIP:속옷（아래）
+		STAIN:속옷（아래） |= 4
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_FINGER
+;이것까지 COMF내에서 사용되고 있던손코키사정의 처리
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;대량사정
+IF E == 2
+	EXP:정액경험 += 3
+	PRINTL 정액경험＋3
+	;손로사정 시킨 플래그
+	TFLAG:1 = 2
+;통상의사정
+ELSEIF E == 1
+	EXP:정액경험 += 1
+	PRINTL 정액경험＋1
+	;손로사정 시킨 플래그
+	TFLAG:1 = 1
+ENDIF
+
+;착의라면 더러운 추가
+IF E > 0
+	IF TEQUIP:특수 1 == 1
+		STAIN:장갑 |= 4
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_ORAL
+;이것까지 COMF내에서 사용되고 있던 페라·파이즈리사정의 처리
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;대량사정
+IF E == 2
+	EXP:정액경험 += 9
+	PRINTL 정액경험＋9
+	IF SELECTCOM == 317 || SELECTCOM == 74
+		;가슴로사정 시킨 플래그
+		TFLAG:34 = 2
+	ELSE
+		;입로사정 시킨 플래그
+		IF !TFLAG:6
+			TFLAG:0 = 2
+		ELSE
+			TFLAG:43 = 13
+		ENDIF
+	ENDIF
+;통상의사정
+ELSEIF E == 1
+	EXP:정액경험 += 3
+	PRINTL 정액경험＋3
+	IF SELECTCOM == 317 || SELECTCOM == 74
+		;가슴로사정 시킨 플래그
+		TFLAG:34 = 1
+	ELSE
+		;입로사정 시킨 플래그
+		IF !TFLAG:6
+			TFLAG:0 = 1
+		ELSE
+			TFLAG:43 = 13
+		ENDIF
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_SUMATA
+;이것까지 COMF내에서 사용되고 있던손와입 이외(스마타 등)사정의 처리
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;대량사정
+IF E == 2
+	EXP:정액경험 += 2
+	PRINTL 정액경험＋2
+	IF SELECTCOM == 80
+		;발로사정 시킨 플래그
+		TFLAG:16 = 2
+	ELSE
+		;손와입 이외(스마타 등)로사정 시킨 플래그
+		TFLAG:9 = 2
+	ENDIF
+;통상의사정
+ELSEIF E == 1
+	EXP:정액경험 += 1
+	PRINTL 정액경험＋1
+	IF SELECTCOM == 80
+		;발로사정 시킨 플래그
+		TFLAG:16 = 1
+	ELSEIF SELECTCOM == 73 || SELECTCOM == 74 || SELECTCOM == 421 || SELECTCOM == 504
+		;가슴로사정
+		TFLAG:34 = 1
+	ELSE
+		;손와입 이외(스마타 등)로사정 시킨 플래그
+		TFLAG:9 = 1
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_ASSISTANT
+;이것까지 COMF내에서 사용되고 있던 조수의사정의 처리
+
+CALL SAMEN_SHOOT_CALC
+
+IF E
+	;촉수에범하게시킨다커맨드 때 주인에게정액경험
+	IF SELECTCOM == 270 || SELECTCOM == 271
+		EXP:MASTER:정액경험 += 1
+		PRINTFORML %CALLNAME:MASTER%에정액경험＋1
+		TFLAG:43 = 12
+	ELSE
+		EXP:정액경험 += 1
+		PRINTL 정액경험＋1
+		;조수를범한다
+		IF SELECTCOM == 440 || SELECTCOM == 441
+			TFLAG:43 = 12
+		;조수를범하게시킨다
+		ELSEIF SELECTCOM == 430 || SELECTCOM == 431
+			TFLAG:43 = 20
+		ENDIF
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_PUSSY
+;이것까지 COMF내에서 사용되고 있던커닐링구스강제시의사정의 처리
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;대량사정
+IF E == 2
+	EXP:정액경험 += 4
+	PRINTL 정액경험＋4
+	;커닐링구스로사정 시킨 플래그
+	TFLAG:5 = 2
+;통상의사정
+ELSEIF E == 1
+	EXP:정액경험 += 1
+	PRINTL 정액경험＋1
+	;커닐링구스로사정 시킨 플래그
+	TFLAG:5 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_RAPED
+;이것까지 COMF내에서 사용되고 있던기승위한다로사정때의 처리
+
+CALL SAMEN_SHOOT_CALC
+
+IF E == 2
+	EXP:T:정액경험 += 1
+	PRINTL 정액경험＋1
+	;기승위한다로사정 시킨 플래그
+	TFLAG:12 = 2
+;통상의사정
+ELSEIF E == 1
+	;기승위한다로사정 시킨 플래그
+	TFLAG:12 = 1
+ENDIF
+
+@SAMEN_SHOOT_CALC
+;사정시의 공통 처리
+;정액 더러움의 설정
+STAIN:P:페니스 |= 4
+
+;대량사정
+IF E == 2
+	IF NO:P == 0
+		PRINT 주인
+	ELSE
+		PRINTFORM %CALLNAME:P%
+	ENDIF
+	PRINTL 　대량사정
+
+	EXP:P:사정경험 += 2
+	BASE:P:사정 -= EJAC*2
+	SIF BASE:P:사정 >= EJAC
+		BASE:P:사정 = EJAC-1
+;통상의사정
+ELSEIF E == 1
+	IF NO:P == 0
+		PRINT 주인
+	ELSE
+		PRINTFORM %CALLNAME:P%
+	ENDIF
+	PRINTL 　사정
+
+	EXP:P:사정경험 += 1
+	BASE:P:사정 -= EJAC
+	SIF BASE:P:사정 >= EJAC
+		BASE:P:사정 = EJAC-1
+ENDIF
+
+;사정시에중독충족의 소스를 추가
+;통상사정시
+SIF E == 1
+	A = 200
+;대량사정시
+SIF E == 2
+	A = 500
+
+IF E > 0
+	;정액중독를 본다
+	IF ABL:정액중독 == 1
+		TIMES A , 0.00
+	ELSEIF ABL:정액중독 == 2
+		TIMES A , 0.30
+	ELSEIF ABL:정액중독 == 3
+		TIMES A , 0.60
+	ELSEIF ABL:정액중독 == 4
+		TIMES A , 0.90
+	ELSEIF ABL:정액중독 == 5
+		TIMES A , 1.20
+	ELSEIF ABL:정액중독 == 6
+		TIMES A , 1.50
+	ELSEIF ABL:정액중독 == 7
+		TIMES A , 1.80
+	ELSEIF ABL:정액중독 == 8
+		TIMES A , 2.30
+	ELSEIF ABL:정액중독 == 9
+		TIMES A , 3.00
+	ELSEIF ABL:정액중독 == 10
+		TIMES A , 5.00
+	ENDIF
+ENDIF
+
+;고무 쏘아 맞히고 플래그가 있으면중독충족 하지 않는다
+SIF CFLAG:T:106!= 9
+	SOURCE:중독충족 += A
+
+;사정후는 재장전의 시간을 마련한다
+;통상사정시
+SIF E == 1
+	CFLAG:P:9 = 3
+;대량사정시
+SIF E == 2
+	CFLAG:P:9 = 5
+CFLAG:P:11 -= 1
+
+
+;-------------------------------------------------
+;하늘사정
+;-------------------------------------------------
+@SAMEN_SHOOT_KARA
+
+;강공사정
+IF E == 2
+	IF NO:P == 0
+		PRINT 주인
+	ELSE
+		PRINTFORM %CALLNAME:P%
+	ENDIF
+	PRINTL 　강공사정
+
+	BASE:P:사정 -= EJAC*2
+	SIF BASE:P:사정 >= EJAC
+		BASE:P:사정 = EJAC-1
+;하늘사정
+ELSEIF E == 1
+	IF NO:P == 0
+		PRINT 주인
+	ELSE
+		PRINTFORM %CALLNAME:P%
+	ENDIF
+	PRINTL 　하늘사정
+
+	BASE:P:사정 -= EJAC
+	SIF BASE:P:사정 >= EJAC
+		BASE:P:사정 = EJAC-1
+ENDIF
+
+
+
+;-------------------------------------------------
+;소스의 계산
+;-------------------------------------------------
+@SAMEN_SHOOT_SOURCE
+;성전환 하고 있는 경우에 대비해 원의 성별을 본다
+;남성이라면 1 여성이라면 0
+LOCAL = MALE2(TARGET)
+
+;원이 여자의 경우
+IF LOCAL == 0
+	;미함락의 경우반발, 공포
+	IF !KANRAKU(TARGET)
+		SOURCE:반발 += 1000
+		;임신 하고 있지 않는가 개 임신할 가능성이 있는(장) 질내사정
+		SIF TALENT:임신 == 0 && ((TFLAG:38 && MALE(TARGET) == 0) || (TFLAG:138 && TALENT:오메가))
+			SOURCE:두려움 += 1000
+	;연모루트는성취감의 소스가 증가한다
+	ELSEIF KANRAKU(TARGET) == 1
+		SOURCE:성취감 += 1500
+	;연모 이외의 함락은순종
+	ELSE
+		SOURCE:순종 += 500
+	ENDIF
+;원이남자의 경우
+ELSE
+	;미함락의 경우반발, 공포
+	IF !KANRAKU(TARGET)
+		SOURCE:반발 += 2000
+		;임신 하고 있지 않는가 개 임신할 가능성이 있는(장) 질내사정
+		SIF TALENT:임신 == 0 && ((TFLAG:38 && MALE(TARGET) == 0) || (TFLAG:138 && TALENT:오메가))
+			SOURCE:두려움 += 2000
+	;연모루트는순종, 공포
+	ELSEIF KANRAKU(TARGET) == 1
+		SOURCE:순종 += 1000
+		;임신 하고 있지 않는가 개 임신할 가능성이 있는(장) 질내사정
+		SIF TALENT:임신 == 0 && ((TFLAG:38 && MALE(TARGET) == 0) || (TFLAG:138 && TALENT:오메가))
+			SOURCE:두려움 += 500
+	;연모 이외의 함락은순종＋굴복＋공포
+	ELSE
+		SOURCE:순종 += 300
+		;임신 하고 있지 않는가 개 임신할 가능성이 있는(장) 질내사정
+		IF TALENT:임신 == 0 && ((TFLAG:38 && MALE(TARGET) == 0) || (TFLAG:138 && TALENT:오메가))
+			SOURCE:두려움 += 1000
+			SOURCE:굴복 += 300
+		ENDIF
+	ENDIF
+ENDIF
+

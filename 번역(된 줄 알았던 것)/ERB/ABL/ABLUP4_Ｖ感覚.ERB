@@ -1,0 +1,116 @@
+﻿;V감각의 가부
+@ISABLUP4
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:V감각 >= 10
+	RETURN 0
+ELSEIF ABL:V감각 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	RETURN 0
+ELSEIF TALENT:공 || VAGINA(TARGET)  == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP4
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+;V감각
+@ABLUP4
+DRAWLINE
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:V감각 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:V감각 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP4
+
+PRINTFORM [0] - %PALAMNAME:1%의 구슬×{A}……
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:V감각 += 1
+
+IF RESULT == 0
+	JUEL:쾌V -= A
+ENDIF
+
+PRINTFORMW %ABLNAME:4%의 레벨이{ABL:V감각}가 되었습니다
+
+
+;V감각LvUP의 판정
+@DECIDE_ABLUP4
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:V감각 == 0
+	A = 1
+ELSEIF ABL:V감각 == 1
+	A = 20
+ELSEIF ABL:V감각 == 2
+	A = 400
+ELSEIF ABL:V감각 == 3
+	A = 5000
+ELSEIF ABL:V감각 == 4
+	A = 15000
+ELSEIF ABL:V감각 == 5
+	A = 30000
+ELSEIF ABL:V감각 == 6
+	A = 40000
+ELSEIF ABL:V감각 == 7
+	A = 50000
+ELSEIF ABL:V감각 == 8
+	A = 60000
+ELSEIF ABL:V감각 == 9
+	A = 70000
+ENDIF
+
+;음란
+SIF TALENT:음란
+	TIMES A , 0.80
+;창부
+SIF TALENT:창부
+	TIMES A , 0.50
+
+;0(이)가 되었을 경우는 1으로 한다
+SIF A == 0
+	A = 1
+
+;쾌V의 구슬로 올린다
+SIF JUEL:쾌V < A
+	I |= 1
+
+IF I == 0
+	Z = 1
+ENDIF
+
+RETURN 1
+

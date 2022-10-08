@@ -1,0 +1,225 @@
+﻿;====================================================================
+;DUTY_HATAKE.ERB 내번-하타 당번
+;1날 1조 밖에 낼 수 없다
+;내번에 낸 캐릭터는 그 날 1일 구속된다
+;====================================================================
+@DUTY_HATAKE
+;각각 하타 당번 담당의 남사의 등록 번호를 보유 초기치-1
+#DIM DYNAMIC HATAKE_A = -1
+#DIM DYNAMIC HATAKE_B = -1
+
+
+DRAWLINE
+PRINTL 【 내 번-하타 당번 】
+PRINTL 
+PRINTL 노예에게 2명 1조로 페어를 짜게 해 동안차례 「하타 당번」을 실시하게 한다.
+PRINTL 체력의 최대치가 상승한다
+PRINTL 
+PRINTL ■ 당번 내용
+PRINTL 　:[하타 당번]
+PRINTL 
+PRINTL ■ 선택되고 있는 추가 옵션
+PRINTL 　:＜이용 가능한 옵션은 없습니다＞
+DRAWLINE
+PRINTL 
+
+;--------------------------------------------------------
+;내번 시키는 노예를 선택
+;--------------------------------------------------------
+PRINTL
+PRINTL 하타 당번을 시키는 남사를 2명, 선택해 주세요
+PRINTL
+$INPUT_LOOP_START
+;양쪽 모두 선택이 끝난 상태
+IF HATAKE_A > 0 && HATAKE_B > 0
+	PRINTFORML [{HATAKE_A}]%CALLNAME:HATAKE_A%를 제외한다
+	PRINTFORML [{HATAKE_B}]%CALLNAME:HATAKE_B%를 제외한다
+	PRINTL
+ELSE
+	REPEAT CHARANUM
+		;하타 당번 할 수 있는 플래그가 서 있지 않은 남사는 표시하지 않는다
+		SIF (CFLAG:COUNT:151 & 128) == 0
+			CONTINUE
+		
+		PRINTFORM [{COUNT}]%CALLNAME:COUNT%
+		IF HATAKE_A == COUNT || HATAKE_B == COUNT
+			PRINTL 를 제외한다
+		ELSE
+			PRINTL 를 선택
+		ENDIF
+	REND
+ENDIF
+
+;양쪽 모두 선택이 끝난 상태
+SIF HATAKE_A > 0 && HATAKE_B > 0
+	PRINTL [900] - 현재의 2명이 확정
+PRINTL [999] - 돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 900
+
+ELSEIF RESULT == 999
+	RETURN 0
+ELSEIF (CFLAG:RESULT:151 & 128) == 0
+	GOTO INPUT_LOOP
+ELSE
+	;선택 끝난 캐릭터를 클릭 했을 경우
+	IF RESULT == HATAKE_A
+		HATAKE_A = -1
+		;앞당기기 처리(HATAKE_B에 0이 들어가도 대입한다)
+		HATAKE_A = HATAKE_B
+	;선택 끝난 캐릭터를 클릭 했을 경우
+	ELSEIF RESULT == HATAKE_B
+		HATAKE_B = -1
+	ELSE
+		;비어있는 (분)편에게 대입한다
+		IF HATAKE_A == -1
+			HATAKE_A = RESULT
+		ELSEIF HATAKE_B == -1
+			HATAKE_B = RESULT
+		ENDIF
+		
+		;등록 번호가 작은 (분)편을 A로 한다
+		IF HATAKE_A > HATAKE_B
+			LOCAL = HATAKE_A
+			HATAKE_A = HATAKE_B
+			HATAKE_B = LOCAL
+		ENDIF
+	ENDIF
+	GOTO INPUT_LOOP_START
+ENDIF
+
+;--------------------------------------------------------
+;하타 당번을 실행한다
+;--------------------------------------------------------
+;PRINTFORML %CALLNAME:HATAKE_A%과 %CALLNAME:HATAKE_B%가, 하타 당번을 개시했습니다
+
+;노역 플래그를 하타 당번으로 설정
+CFLAG:HATAKE_A:12 = 4
+CFLAG:HATAKE_B:12 = 4
+
+;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+LOCAL = TARGET
+TFLAG:13 = 82
+
+UCHIBAN_A = HATAKE_A
+UCHIBAN_B = HATAKE_B
+
+;현재가 기수일눈이라면 UCHIBAN_A의 (분)편을 부른다
+IF DAY % 2 == 1
+	TARGET = HATAKE_A
+	;이벤트입상(내번개시시);지문과 A의입상
+	CALL KOJO_MESSAGE_EVENT
+;현재가 짝수 일째라면 UCHIBAN_B의 (분)편을 부른다
+ELSE
+	TARGET = HATAKE_B
+	;이벤트입상(내번개시시);지문과 B의입상
+	CALL KOJO_MESSAGE_EVENT
+ENDIF
+
+TARGET = LOCAL
+
+PRINTL 
+
+;하타 당번 담당남사가 조교 대상이나 조수의 경우는, 조교 대상이나 조수로부터 제외한다
+SIF UCHIBAN_A == TARGET || UCHIBAN_B == TARGET
+	TARGET = -1
+SIF UCHIBAN_A == ASSI || UCHIBAN_B == ASSI
+	ASSI = -1
+
+;내번개시가 끝난 플래그(하타 당번=2)를 세운다
+FLAG:161 |= 2
+
+
+
+;====================================================================
+;종료시의 처리
+;====================================================================
+@END_DUTY_HATAKE
+#DIM DYNAMIC HATAKE_A = -1
+#DIM DYNAMIC HATAKE_B = -1
+
+REPEAT CHARANUM
+	IF CFLAG:COUNT:12 == 4
+		IF HATAKE_A == -1
+			HATAKE_A = COUNT
+		ELSE
+			HATAKE_B = COUNT
+		ENDIF
+	ENDIF
+REND
+
+DRAWLINE
+
+;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+LOCAL = TARGET
+TFLAG:13 = 83
+
+UCHIBAN_A = HATAKE_A
+UCHIBAN_B = HATAKE_B
+
+
+;필연적으로, 내번개시시에 불리지 않았던 (분)편의 지문과입상이 불립니다
+
+;현재가 기수일눈이라면 UCHIBAN_A의 (분)편을 부른다
+IF DAY % 2 == 1
+	TARGET = HATAKE_A
+	;이벤트입상(내번종료시);지문과 A의입상
+	CALL KOJO_MESSAGE_EVENT
+;현재가 짝수 일째라면 UCHIBAN_B의 (분)편을 부른다
+ELSE
+	TARGET = HATAKE_B
+	;이벤트입상(내번종료시);지문과 B의입상
+	CALL KOJO_MESSAGE_EVENT
+ENDIF
+
+TARGET = LOCAL
+
+PRINTL 
+
+
+;--------------------------------------------------------
+;주취득
+;--------------------------------------------------------
+JUEL:HATAKE_A:습득 += 200
+JUEL:HATAKE_A:부정 += 50
+JUEL:HATAKE_B:습득 += 200
+JUEL:HATAKE_B:부정 += 50
+PRINTFORML %CALLNAME:HATAKE_A%과 %CALLNAME:HATAKE_B%에습득의 구슬＋{200}
+PRINTFORML %CALLNAME:HATAKE_A%과 %CALLNAME:HATAKE_B%에부정의 구슬＋{50}
+
+;--------------------------------------------------------
+;체력의 최대치 업
+;확정입니다 (웃음)
+;--------------------------------------------------------
+;오르는 값은 20-30의 랜덤
+LOCAL = RAND:10 + 20
+MAXBASE:HATAKE_A:체력 += LOCAL
+PRINTFORML %CALLNAME:HATAKE_A%의체력의 최대치＋{LOCAL}
+
+LOCAL = RAND:10 + 20
+MAXBASE:HATAKE_B:체력 += LOCAL
+PRINTFORML %CALLNAME:HATAKE_B%의체력의 최대치＋{LOCAL}
+
+
+;--------------------------------------------------------
+;체력의 감소
+;--------------------------------------------------------
+;체력의 감소
+BASE:HATAKE_A:체력 -= 500
+BASE:HATAKE_B:체력 -= 500
+
+;플래그의 리셋트
+CFLAG:HATAKE_A:12 = 0
+CFLAG:HATAKE_B:12 = 0
+
+;내번개시가 끝난 플래그(하타 당번=2)를 떨어뜨린다
+SIF FLAG:161 & 2
+	FLAG:161 -= 2
+
+DRAWLINE
+
+
+
+
+

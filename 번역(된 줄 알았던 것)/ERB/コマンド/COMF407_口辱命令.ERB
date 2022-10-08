@@ -1,0 +1,196 @@
+﻿;-------------------------------------------------
+;구욕명령
+;조수명령계 커맨드
+;-------------------------------------------------
+@COM407
+
+;-------------------------------------------------
+;특수 파생 처리
+;-------------------------------------------------
+;전회와 이번 조교자가 같음
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;전회 커맨드가 페라나 2 개 페라= 「2 개 페라」
+	IF PREVCOM == 71 || PREVCOM == 516
+		CALL COM_ABLE516
+		IF RESULT == 1
+			TFLAG:40 = 0
+			TFLAG:41 = 0
+			TFLAG:49 = 20
+			JUMP COM516
+		ENDIF
+	;전회 커맨드가조수를범한다 때= 「조수를 샌드위치」
+	ELSEIF PREVCOM == 440 || PREVCOM == 441
+		CALL COM_ABLE521
+		IF RESULT == 1
+			IF PREVCOM == 440
+				TFLAG:40 = 11
+			ELSE
+				TFLAG:40 = 12
+			ENDIF
+			TFLAG:41 = 0
+			TFLAG:49 = 13
+			JUMP COM521
+		ENDIF
+	;전회 커맨드가 노예를 범할 때= 「샌드위치」
+	ELSEIF PREVCOM == 101 || PREVCOM == 103 || PREVCOM == 111 || PREVCOM == 113
+		CALL COM_ABLE515
+		IF RESULT == 1
+			IF PREVCOM == 101 || PREVCOM == 103
+				TFLAG:40 = 1
+			ELSE
+				TFLAG:40 = 1
+			ENDIF
+			TFLAG:41 = 0
+			TFLAG:49 = 13
+			JUMP COM515
+		ENDIF
+	;전회 커맨드가 샌드위치인가, 조수를 샌드위치 때
+	ELSEIF PREVCOM == 515 || PREVCOM == 521
+		;주인이 노예를 범하고 있을 때는 「샌드위치」
+		IF TFLAG:40 == 1 || TFLAG:40 == 2
+			CALL COM_ABLE515
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:49 = 13
+				JUMP COM515
+			ENDIF
+		;주인이 조수를 범하고 있을 때는 「조수를 샌드위치」
+		ELSEIF TFLAG:40 == 11 || TFLAG:40 == 12
+			CALL COM_ABLE521
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:49 = 13
+				JUMP COM521
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;아무것도 읽지 않고 여기에 왔을 때는 플래그 해제
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 구욕명령
+STR:0 = 구욕명령
+
+;-------------------------------------------------
+;실행 판정 처리
+;-------------------------------------------------
+;모든 명령에 공통의 요소를 고려
+;(순종가 높다고 명령에 따르기 쉬운 등)
+CALL COM_ORDER
+
+;실행 판정 조작
+CALL KOJO_DENIAL_PLUS
+
+;합계를 표시(24이상으로 실행)
+PRINT  = 
+PRINTV A
+
+V = 24
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행치
+PRINTV V
+
+;실행 불가입상/실행 판정 조작
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;실행 할 수 없다
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;실행자가 노예인 플래그
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;사정게이지 체크(조수)
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_AT
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:ASSI:9 > 0
+	B /= 20
+
+SIF PENIS(ASSI)
+	BASE:ASSI:사정 += B
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 50
+
+SOURCE:성행동 += 300
+SOURCE:성취감 += 50
+SOURCE:굴복 += 100
+SOURCE:불결 += 60
+SOURCE:일탈 += 60
+SOURCE:반발 += 60
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 60
+
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;노예의입⇔조수의페니스의 더러움이 이동
+STAIN:입 |= STAIN:ASSI:페니스
+STAIN:ASSI:페니스 = 2
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;펠라경험
+PRINTFORML %EXPNAME:22%＋1
+EXP:펠라경험 += 1
+
+;노예가고양이혀소유의 경우는, 노예에게가학쾌락경험를 추가
+IF TALENT:TARGET:고양이혀
+	EXP:가학쾌락경험 += 1
+	PRINTFORML %EXPNAME:32%＋1
+ENDIF
+
+;봉사 쾌락 플래그
+TFLAG:100 = 1
+
+;조수에쾌C·습득·순종·부정의 구슬
+JUEL:ASSI:쾌C += 50
+JUEL:ASSI:순종 += 50
+JUEL:ASSI:부정 += 50
+PRINTFORML %CALLNAME:ASSI%에 %PALAMNAME:0%의 구슬＋50
+PRINTFORML %CALLNAME:ASSI%에 %PALAMNAME:5%의 구슬＋50
+PRINTFORMW %CALLNAME:ASSI%에 %PALAMNAME:100%의 구슬＋50
+
+;게이경험라든지 가산
+CALL COM_EXP(3)
+
+;의존도 벡터
+TFLAG:33 = 1
+
+
+RETURN 1
+
+

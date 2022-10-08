@@ -1,0 +1,179 @@
+﻿;-------------------------------------------------
+;촉수바기나확장
+;촉수계 커맨드
+;-------------------------------------------------
+@COM366
+
+PRINTL 촉수바기나확장
+STR:0 = 촉수바기나확장
+
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;소스의 계산
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 200
+LOSEBASE:기력 += 300
+
+IF EXP:촉수경험 < EXPLV:1
+	TIMES LOSEBASE:체력, 1.10
+	TIMES LOSEBASE:기력, 2.00
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES LOSEBASE:체력, 0.90
+	TIMES LOSEBASE:기력, 1.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES LOSEBASE:체력, 0.80
+	TIMES LOSEBASE:기력, 1.50
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES LOSEBASE:체력, 0.70
+	TIMES LOSEBASE:기력, 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES LOSEBASE:체력, 0.60
+	TIMES LOSEBASE:기력, 1.00
+ELSE
+	TIMES LOSEBASE:체력, 0.50
+	TIMES LOSEBASE:기력, 0.50
+ENDIF
+
+;ABL:V감각를 본다
+IF ABL:V감각 == 0
+	SOURCE:쾌V += 10
+ELSEIF ABL:V감각 == 1
+	SOURCE:쾌V += 30
+ELSEIF ABL:V감각 == 2
+	SOURCE:쾌V += 500
+ELSEIF ABL:V감각 == 3
+	SOURCE:쾌V += 1000
+ELSEIF ABL:V감각 == 4
+	SOURCE:쾌V += 1700
+ELSE
+	SOURCE:쾌V += 2200
+ENDIF
+
+;EXP:V경험를 본다
+IF EXP:V경험 < EXPLV:1
+	TIMES SOURCE:쾌V , 0.20
+ELSEIF EXP:V경험 < EXPLV:2
+	TIMES SOURCE:쾌V , 0.60
+ELSEIF EXP:V경험 < EXPLV:3
+	TIMES SOURCE:쾌V , 1.00
+ELSEIF EXP:V경험 < EXPLV:4
+	TIMES SOURCE:쾌V , 1.20
+ELSEIF EXP:V경험 < EXPLV:5
+	TIMES SOURCE:쾌V , 1.40
+ELSE
+	TIMES SOURCE:쾌V , 1.60
+ENDIF
+
+;PALAM:윤활를 본다
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:쾌V , 0.40
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:쾌V , 0.80
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:쾌V , 1.00
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:쾌V , 1.40
+ELSE
+	TIMES SOURCE:쾌V , 1.80
+ENDIF
+
+SOURCE:통증 += 1200
+SOURCE:노출 += 1000
+SOURCE:굴복 += 1000
+SOURCE:일탈 += 4200
+SOURCE:두려움 += 1000
+
+
+
+;EXP:V경험를 본다
+IF EXP:V경험 < EXPLV:1
+	SOURCE:통증 += 20000
+	SOURCE:액체 += 2000
+ELSEIF EXP:V경험 < EXPLV:2
+	SOURCE:통증 += 300
+ELSEIF EXP:V경험 < EXPLV:3
+	SOURCE:통증 += 50
+ELSEIF EXP:V경험 < EXPLV:4
+	SOURCE:통증 += 10
+ELSEIF EXP:V경험 < EXPLV:5
+	SOURCE:통증 += 0
+ELSE
+	SOURCE:통증 += 0
+ENDIF
+
+;촉수경험를 본다
+IF EXP:촉수경험 < EXPLV:1
+	SOURCE:통증 += 1000
+ELSEIF EXP:촉수경험 < EXPLV:2
+	SOURCE:통증 += 800
+ELSEIF EXP:촉수경험 < EXPLV:3
+	SOURCE:통증 += 500
+ELSEIF EXP:촉수경험 < EXPLV:4
+	SOURCE:통증 += 100
+ELSEIF EXP:촉수경험 < EXPLV:5
+	SOURCE:통증 += 50
+ENDIF
+
+;촉수경험
+IF EXP:촉수경험 < EXPLV:1
+	SOURCE:중독충족 += 1500
+	TIMES SOURCE:두려움, 0.50
+ELSEIF EXP:촉수경험 < EXPLV:2
+	SOURCE:중독충족 += 1700
+	TIMES SOURCE:두려움, 0.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	SOURCE:중독충족 += 2000
+ELSEIF EXP:촉수경험 < EXPLV:4
+	SOURCE:중독충족 += 2500
+	TIMES A , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	SOURCE:중독충족 += 3300
+	TIMES SOURCE:두려움, 1.50
+ELSE
+	SOURCE:중독충족 += 4200
+	TIMES SOURCE:두려움, 1.80
+ENDIF
+
+;소인 체형
+SIF TALENT:소인체형
+	TIMES SOURCE:통증, 2.00
+
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;더러운 처리
+STAIN:바기나 |= 32
+STAIN:질내 |= 32
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+IF EXP:V확장경험 == 0
+	EXP:이상경험 += 1
+	PRINTL V확장 첫경험으로이상경험＋1
+ENDIF
+EXP:V경험 += 25
+PRINTL V경험＋25
+EXP:V확장경험 += 1
+PRINTL V확장경험＋1
+
+T = 1
+
+;촉수장착중은 의존도 벡터 강제 변경
+;의존도 벡터
+TFLAG:33 = 5
+
+;의존도 보정치(복종로 1, 예속로 2 강제 변경인 것으로, 이것까지의 수치를 리셋트)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 = 4
+ENDIF
+
+RETURN 1
+
+

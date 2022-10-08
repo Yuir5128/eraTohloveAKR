@@ -1,0 +1,79 @@
+﻿;-------------------------------------------------
+;선물
+;커뮤니케이션계 커맨드
+;-------------------------------------------------
+@COM201
+
+PRINTL 선물
+STR:0 = 선물
+
+CALL KOJO_MESSAGE_COM
+
+;주지 않았던 경우는 돌아온다
+SIF TFLAG:17 == 99
+	RETURN 0
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+
+;소비체력, 기력
+LOSEBASE:체력 += 0
+LOSEBASE:기력 += 10
+
+IF TALENT:친애 || TALENT:창부 || TALENT:예속
+	SOURCE:순종 += 2000
+	SOURCE:애정 += 200
+ELSEIF TALENT:연모 || TALENT:음란 || TALENT:복종
+	SOURCE:순종 += 1000
+	SOURCE:애정 += 100
+ELSE
+	SOURCE:순종 += 500
+	SOURCE:두려움 += 50
+ENDIF
+
+SOURCE:일탈 += 200
+
+IF TFLAG:17 == 1
+	TIMES SOURCE:순종, 0.80
+ELSEIF TFLAG:17 == 2
+	TIMES SOURCE:순종, 1.00
+ELSEIF TFLAG:17 == 3
+	TIMES SOURCE:순종, 1.20
+ELSEIF TFLAG:17 == 4
+	TIMES SOURCE:순종, 1.40
+ELSEIF TFLAG:17 == 5
+	TIMES SOURCE:순종, 1.60
+ELSEIF TFLAG:17 == 6
+	TIMES SOURCE:순종, 1.80
+ELSEIF TFLAG:17 == 7
+	TIMES SOURCE:순종, 2.00
+ELSEIF TFLAG:17 == 50
+	TIMES SOURCE:순종, 3.00
+ENDIF
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;애정경험
+IF (TALENT:연모 == 1 || TALENT:친애 == 1) && ASSIPLAY == 0 && TFLAG:17 > 0 && TFLAG:17 < 99
+	A = TFLAG:17
+	PRINTS EXPNAME:23
+	PRINTVL +A
+	EXP:애정경험 += A
+ENDIF
+
+;의존도 벡터
+TFLAG:33 = 4
+
+;의존도 보정치
+SIF (TALENT:연모 == 1 || TALENT:친애 == 1) && ASSIPLAY == 0 && TFLAG:17 < 99
+	TFLAG:30 += TFLAG:17
+
+
+RETURN 1
+
+
+
+

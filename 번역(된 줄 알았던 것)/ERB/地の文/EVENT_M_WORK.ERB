@@ -1,0 +1,913 @@
+﻿
+
+;노역 확장
+;지문이 뭔가 짧고 이래서야 시시하다!라고 생각해 주었다. 반성은 하고 있지 않다.
+
+
+
+;=================================================
+;정식포장마차시의 이벤트입상
+@EVENT_MESSAGE_15
+;=================================================
+
+IF P >= 100
+	IF F == 1
+		PRINTFORMW %CALLNAME%과의 정식포장마차로 낸 요리는,많은 손님으로부터 호평을 얻을 수 있었다
+	ELSE
+		PRINTFORMW %CALLNAME%과의 정식포장마차로 낸 요리는,평소보다 매출이 좋지 않았던 것 같다…
+	ENDIF
+ELSEIF P >= 50
+	PRINTFORM %CALLNAME%과의 정식포장마차로 낸%LUNCH_NAME_DETAIL(TARGET)%
+	IF F == 1
+		PRINTFORMW 는,꽤 호평이었던 것 같다
+	ELSE
+		PRINTFORMW 는,별로 평가가 되지 않았던 것 같다…
+	ENDIF
+ELSE
+	PRINTFORM %CALLNAME%과의 정식포장마차로 낸%LUNCH_NAME_DETAIL(TARGET)%
+	IF F == 1
+		PRINTFORMW 는,그런대로의 평가를 얻을 수 있었다
+	ELSE
+		PRINTFORMW 는,그다지 호평은 아니었던 것 같다…
+	ENDIF
+ENDIF
+
+;랜덤으로 에로이 밴트 넣어 본다
+IF RAND:50 == 0
+	DRAWLINE
+	PRINTFORML 
+	PRINTFORMW 「…………!」
+	PRINTFORMW 포장마차의 정리를 하고 있으면,뒤로부터%CALLNAME%의 목소리가 들렸다.
+	PRINTFORMW 보면,무려%CALLNAME%가 몇사람의 술주정꾼에게 둘러싸여,그 몸을 만지작거려지고 있다…
+	PRINTFORML 
+	PRINTL [0] 나가 돕는다
+	PRINTL [1] 당분간 모습을 본다
+	$INPUT_LOOP_STALL1
+	INPUT
+	;나가 돕는다
+	IF RESULT == 0
+		PRINTFORMW %CALLNAME:MASTER%가 나가 그 녀석들을 쫓아버리면,
+		IF TALENT:음란 || TALENT:창부
+			PRINTFORMW %CALLNAME%는 조금 유감스러운 얼굴을 해 정리하러 돌아와 버렸다…
+		ELSE
+			PRINTFORMW %CALLNAME%는 안심한 것처럼 %CALLNAME:MASTER%에 몸을 맡겨 왔다…
+		ENDIF
+	;당분간 모습을 본다
+	ELSEIF RESULT == 1
+		;간파해
+		IF RAND:3 == 0
+			PRINTFORMW 이윽고 흥분한 남자가,자신의 육봉을 꺼내,%CALLNAME%의 눈앞에서 잡아당기기 시작한다.
+			PRINTFORML 
+			IF ABL:욕망 >= 5
+				PRINTFORMW 그 광경에,%CALLNAME%는 무심코 목을 울려 버리고 있다.
+				PRINTFORMW 하지만 남자들은 그 이상%CALLNAME%에는손를 내지 않고,승손에 그욕망만을 토해내 간다.
+				PRINTFORMW 이윽고 남자들이 만발 해 떠난후에는,
+				PRINTFORMW 오탁 투성이가 되어,주저앉는%CALLNAME%만이 남아 있었다…
+				JUEL:6 += 500
+			ELSE
+				PRINTFORMW 어안이 벙벙히 하는%CALLNAME%의 앞에서,남자들은 혼자 또 혼자와욕망를 토해내 간다.
+				PRINTFORMW 이윽고 남자들이 만발 해 떠난후에는,
+				PRINTFORMW 오탁 투성이가 되어,주저앉는%CALLNAME%만이 남아 있었다…
+				JUEL:11 += 200
+				JUEL:13 += 400
+			ENDIF
+			;의존도-10
+			EXP:정액경험 += 5
+			JUEL:7 += 600
+		;페라
+		ELSEIF RAND:2 == 0
+			IF (TALENT:음란 || TALENT:창부) || ABL:욕망 >= 5
+				PRINTFORMW 당분간 모습을 지켜보고 있으면,%CALLNAME%는 마지못해 말한 모습으로,
+				PRINTFORMW 눈앞에 내밀어진 남자의 육봉을 빨기 시작했다.
+				PRINTFORMW 이지만 그 눈동자는 완전하게 녹아,봉사에 쾌감을 느끼고 있는 것을 안다…
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORMW 남자들이 만발 해 떠난후로,%CALLNAME:MASTER%는 나가%CALLNAME%를 위로했다.
+				PRINTFORMW 어딘가 공허한 표정을 한%CALLNAME%의 몸은 오탁 투성이가 되어,손에는 지폐를 잡아지고 있다.
+				PRINTFORMW …… 그러한 가게는 아니지만…
+			ELSEIF ABL:욕망 >= 3
+				PRINTFORMW %CALLNAME%는저항 하고 있지만,대단한 남자에게 몇사람에 걸려 억눌려져서는 이길 수 없다
+				PRINTFORMW 이윽고 체념했는지,눈앞에 내밀어진 남자의 육봉을 빨기 시작했다.
+				PRINTFORMW %CALLNAME%는 눈에 눈물을 머금으면서,빨리 이 상황을 끝내려고 필사적으로 봉사를 계속하고 있다…
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORMW 남자들이 만발 해 떠난후로,%CALLNAME:MASTER%는 나가%CALLNAME%를 돕고 일으켰다.
+				PRINTFORMW 공허한 표정으로 주저앉는%CALLNAME%의 몸은 오탁 투성이가 되어,손에는 지폐를 잡아지고 있다.
+				PRINTFORMW …… 그러한 가게는 아니지만…
+				JUEL:11 += 400
+				JUEL:13 += 600
+			ELSE
+				PRINTFORMW %CALLNAME%는저항 하고 있지만,대단한 남자에게 몇사람에 걸려 억눌려져서는 이길 수 없다.
+				PRINTFORMW 이윽고 눈앞에 남자의 육봉이 내밀어져 무리하게입를 막혀 버린다.
+				PRINTFORML 
+				PRINTFORMW 남자들은 싫어하는%CALLNAME%의입를 사용해,번갈아 당신의욕망를 토해내 갔다.
+				PRINTFORMW %CALLNAME%는 눈에 눈물을 머금으면서,빨리 이 상황을 끝내려고 필사적으로 봉사를 계속하고 있다…
+				PRINTFORML 
+				PRINTFORML 
+				PRINTFORMW 남자들이 만발 해 떠난후로,%CALLNAME:MASTER%는 나가%CALLNAME%를 돕고 일으켰다.
+				PRINTFORMW 공허한 표정으로 방심하고 있는%CALLNAME%는 오탁 투성이가 되어,손에는 지폐를 잡아지고 있다.
+				PRINTFORMW …… 그러한 가게는 아니지만…
+				JUEL:11 += 800
+				JUEL:13 += 1200
+			ENDIF
+			PRINTFORML 
+			PRINTFORML 5000고슈금를손에 넣었습니다
+			MONEY += 5000
+			;의존도-10
+			CFLAG:2 -= 10
+			EXP:정액경험 += 10
+			JUEL:6 += 100
+			JUEL:7 += 1000
+			JUEL:8 += 2200
+			IF !EXP:윤간경험
+				PRINTFORML 윤간첫경험으로이상경험＋1
+				EXP:이상경험 += 1
+			ENDIF
+			;윤간경험
+			EXP:윤간경험 += 1
+		;윤간
+		ELSE
+			PRINTFORMW %CALLNAME%는저항 하고 있지만,대단한 남자에게 몇사람에 걸려 억눌려져서는 이길 수 없다.
+			PRINTFORMW 손로입를 막혀,지면에 밀어 넘어뜨려져 버린다.
+			PRINTFORMW 더욱은,키후에 다른 남자가 돌아 들어가,%CALLNAME%는 당장 범해질 것 같다…
+			PRINTFORML 
+			PRINTL [0] 나가 돕는다
+			PRINTL [1] 방관을 관철한다
+			PRINTL [2] 윤간에 참가한다
+			$INPUT_LOOP_STALL2
+			INPUT
+			;나가 돕는다
+			IF RESULT == 0
+				PRINTFORMW %CALLNAME:MASTER%는 당황해 나가,모인 남자들을 쫓아버렸다.
+				PRINTFORML 
+				PRINTFORMW 이지만,쭉 보고 있었던 것에%CALLNAME%는 깨닫고 있던 것 같다.
+				PRINTFORMW 움찔 어깨를 진동시킨 %CALLNAME:MASTER%를,%CALLNAME%의 시선이 쏘아 맞혔다…
+				;의존도-10
+				CFLAG:2 -= 10
+				JUEL:11 += 800
+				JUEL:13 += 1200
+			;방관을 관철한다
+			ELSEIF RESULT == 1
+				IF EXP:윤간경험 >= 20
+					;발견된다
+					IF RAND:2 == 0
+						PRINTFORMW …… 그 때,이쪽을 본%CALLNAME%과 %CALLNAME:MASTER%가 시선이 마주쳤다.
+						PRINTFORMW 「…… 읏」
+						PRINTFORMW 매달리도록(듯이) 늘려진%CALLNAME%의손를 무시해,%CALLNAME:MASTER%는 빙글 등을 돌렸다…
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORMW 잠시 후 %CALLNAME:MASTER%가 돌아오면,남자들은 벌써 만발 해 돌아갔는지,
+						PRINTFORMW 거기에는 공허한 표정으로 방심하고 있는%CALLNAME%만이 남겨지고 있었다.
+						PRINTFORMW %CALLNAME%의 몸은,남자들의 오탁 투성이가 되어,근처에는 지폐나 동전이 흩어져 있다…
+						;의존도-50
+						CFLAG:2 -= 50
+					;발견되지 않는다
+					ELSE
+						PRINTFORMW %CALLNAME%의저항의 소리가 그쳐,대신에 팡팡 허리를 쳐박는 소리가 들려 온다.
+						PRINTFORM 무리하게 범해지는고통
+						SIF ABL:마조끼 >= 3 || ABL:V감각 >= 3 || ABL:A감각 >= 3
+							PRINTFORM 와 저항할 수 없는 쾌감
+						PRINTFORMW 에 허덕이면서,
+						PRINTFORMW %CALLNAME%가 남자들에게 좋아해 승손 범해지는 것을,제대로 관찰했다…
+						PRINTFORML 
+						PRINTFORML 
+						PRINTFORMW 이윽고 만발 한 남자들이 떠난후에는,공허한 표정으로 방심하고 있는%CALLNAME%만이 남겨졌다.
+						PRINTFORMW 그 몸은 남자들의 오탁 투성이가 되어,근처에는 지폐나 동전이 흩어져 있다…
+						;의존도-30
+						CFLAG:2 -= 30
+					ENDIF
+				ELSE
+					PRINTFORMW 모습의 안보이는 %CALLNAME:MASTER%를 필사적으로 부르는 소리를 들으면서,
+					PRINTFORMW %CALLNAME%가 남자들에게 좋아해 승손 범해지는 것을,제대로 관찰했다…
+					PRINTFORML 
+					PRINTFORML 
+					PRINTFORMW 이윽고 만발 한 남자들이 떠난후에는,공허한 표정으로 방심하고 있는%CALLNAME%만이 남겨졌다.
+					PRINTFORMW 그 몸은 남자들의 오탁 투성이가 되어,근처에는 지폐나 동전이 흩어져 있다…
+					;의존도-30
+					CFLAG:2 -= 30
+				ENDIF
+				PRINTFORML 
+				IF TALENT:처녀 && TEQUIP:속옷（아래） != 5
+					TALENT:처녀 = 0
+					PRINTFORML 처녀상실
+					PRINTFORML 이상한 행위에서의처녀상실로 %EXPNAME:50%+1
+					EXP:이상경험 += 1
+				ENDIF
+				IF TALENT:백버진
+					TALENT:백버진 = 0
+					PRINTFORML 백버진상실
+					PRINTFORML 이상한 행위에서의백버진상실로 %EXPNAME:50%+1
+					EXP:이상경험 += 1
+				ENDIF
+				IF !EXP:윤간경험
+					PRINTFORML 윤간첫경험으로이상경험＋1
+					EXP:이상경험 += 1
+				ENDIF
+				;윤간경험
+				EXP:윤간경험 += 1
+				;3만
+				MONEY += 30000
+				SIF VAGINA(TARGET) && TEQUIP:속옷（아래） != 5
+					EXP:V경험 += 5
+				EXP:A경험 += 5
+				EXP:절정경험 += 3
+				EXP:정액경험 += 16
+				EXP:고통쾌락경험 += 12
+				SIF VAGINA(TARGET) && TEQUIP:속옷（아래） != 5
+					JUEL:1 += 500
+				JUEL:2 += 500
+				JUEL:6 += 1000
+				JUEL:7 += 4000
+				JUEL:10 += 1200
+				JUEL:11 += 2000
+				JUEL:14 += 3000
+			;윤간에 참가한다
+			ELSEIF RESULT == 2
+				PRINTFORMW 나타난 %CALLNAME:MASTER%의 모습을 봐,%CALLNAME%가 도움을 요구해 온다.
+				PRINTFORMW 이지만 거기에는 무시해,%CALLNAME:MASTER%는 남자들에게 적당한 금액을 제시했다…
+				PRINTFORML 
+				PRINTFORMW 놀라 다시저항를 시작한%CALLNAME%를,남자들과 함께 되어 다 범했다…
+				PRINTFORML 
+				IF TALENT:처녀 && TEQUIP:속옷（아래） != 5
+					TALENT:처녀 = 0
+					PRINTFORML 처녀상실
+					PRINTFORML 이상한 행위에서의처녀상실로 %EXPNAME:50%+1
+					EXP:이상경험 += 1
+				ENDIF
+				IF TALENT:백버진
+					TALENT:백버진 = 0
+					PRINTFORML 백버진상실
+					PRINTFORML 이상한 행위에서의백버진상실로 %EXPNAME:50%+1
+					EXP:이상경험 += 1
+				ENDIF
+				IF !EXP:윤간경험
+					PRINTFORML 윤간첫경험으로이상경험＋1
+					EXP:이상경험 += 1
+				ENDIF
+				;윤간경험
+				EXP:윤간경험 += 1
+				;5만
+				MONEY += 50000
+				SIF VAGINA(TARGET) && TEQUIP:속옷（아래） != 5
+					EXP:V경험 += 10
+				EXP:A경험 += 10
+				EXP:절정경험 += 8
+				EXP:정액경험 += 24
+				EXP:고통쾌락경험 += 22
+				SIF VAGINA(TARGET) && TEQUIP:속옷（아래） != 5
+					JUEL:1 += 1000
+				JUEL:2 += 1000
+				JUEL:6 += 2000
+				JUEL:7 += 4000
+				JUEL:10 += 800
+				JUEL:11 += 1500
+			ELSE
+				GOTO INPUT_LOOP_STALL2
+			ENDIF
+		ENDIF
+	ELSE
+		GOTO INPUT_LOOP_STALL1
+	ENDIF
+ENDIF
+
+
+;=================================================
+;콘서트 실행시의 이벤트입상
+@EVENT_MESSAGE_20
+;=================================================
+;실패시
+IF F == 0
+	PRINTFORMW %CALLNAME:A%는 긴장의 탓인지,몇번이나 미스를 반복하고 있다
+	PRINTFORMW 그 때문인지,이번 라이브의 평판은 그다지 좋지 않았던 것 같다…
+;성공시
+ELSE
+	;유닛 결성하고 있는 경우
+	IF A:1 || A:2 || A:3 || A:4
+		PRINTFORM %STR:80%
+		IF ABL:A:가창기능 >= 4
+			PRINTFORM 가 피로[披露] 한 소중히 간직함의 레퍼터리
+					CALL SONG_NAME_TOHO
+			PRINTFORM 는
+		ELSE
+			PRINTFORM 의 라이브는
+		ENDIF
+		IF ABL:A:가창기능 >= 5
+			PRINTFORMW 대성공이다!
+			PRINTFORM %STR:80%
+			PRINTFORMW 의 훌륭한 라이브에,회장에 모인 관객은 열광적인 환성을 올리고 있다
+			P = RAND:2
+			IF P == 0
+				PRINTFORMW %CALLNAME:A%는 흥분한 유닛 동료에게 껴안아지면서,성취감 흘러넘치는 미소를 띄우고 있었다…
+			ELSE
+				PRINTFORMW %CALLNAME:A%들은 서로 까불며 떠들면서,관객과 %CALLNAME:MASTER%에 크게손를 털어 응했다…
+			ENDIF
+		ELSEIF ABL:A:가창기능 >= 3
+			PRINTFORMW 아무래도 성공한 것 같다
+			P = RAND:2
+			IF P == 0
+				PRINTFORMW %CALLNAME:(A:1)%가 갑자기 들어가져 온 애드립을,%CALLNAME:A%는 어떻게든 잘 처리해 돌려주었다
+				PRINTFORMW 눈짓으로 서로 신호해,%CALLNAME:A%들은 라이브를 많이 북돋웠다…
+				PRINTFORMW 라이브 종료후,%CALLNAME:A%는 긴장이 풀려 힘이 빠져 버린 동료를 지지하면서,모두 관객들의 박손를 일신에 받았다…
+			ELSE
+				PRINTFORMW %CALLNAME:A%는 긴장한 나머지,도중에 가사를 잊어 버린 것 같다
+				PRINTFORMW 거기에 깨달아,%CALLNAME:(A:1)%가 계속을 이어 노래하기 시작한다
+				PRINTFORMW %CALLNAME:(A:1)%의 서포트와 눈짓을수라고,약간은 %CALLNAME:A%도 목소리를 맞추고 다시 모두 노래하기 시작했다…
+				PRINTFORMW 라이브가 끝나,서로 지지해 무대를 내려 올 때에
+				PRINTFORMW %CALLNAME:A%들은 노래해 끝낸후도 기분이 고양한 모습으로,기쁨 맞고 있었다…
+			ENDIF
+		ELSE
+			PRINTFORMW 실패하지 않고 끝난 것 같다
+			P = RAND:2
+			IF P == 0
+				PRINTFORMW %CALLNAME:A%의 가창 미스를 %CALLNAME:(A:1)%가 잘 보충해 준 것 같다
+				PRINTFORMW %CALLNAME:A%는 긴장하고 있었는지,%CALLNAME:(A:1)%에 의지하면서 무대를 내려 왔을 때에는 안심한 표정을 띄우고 있었다…
+			ELSE
+				PRINTFORMW %CALLNAME:A%는 긴장한 나머지,도중에 가사를 잊어 버린 것 같다
+				PRINTFORMW 거기에 깨달아,%CALLNAME:(A:1)%가 계속을 이어 노래하기 시작한다
+				PRINTFORMW %CALLNAME:(A:1)%의 서포트와 눈짓을수라고,약간은 %CALLNAME:A%도 목소리를 맞추고 다시 모두 노래하기 시작했다…
+				PRINTFORMW 라이브가 끝나,서로 지지해 무대를 내려 올 때에
+				PRINTFORMW %CALLNAME:A%는 %CALLNAME:(A:1)%의 귓전으로 살그머니 감사를 속삭였다…
+			ENDIF
+		ENDIF
+	ELSE
+		PRINTFORM %CALLNAME:A%
+		IF ABL:A:가창기능 >= 4
+			PRINTFORM 가 피로[披露] 한 소중히 간직함의 레퍼터리
+			CALL SONG_NAME_TOHO
+			PRINTFORM 는
+		ELSE
+			PRINTFORM 의 라이브는
+		ENDIF
+		IF ABL:A:가창기능 >= 5
+			PRINTFORMW 대성공이다
+			PRINTFORMW %CALLNAME:A%의매력적인 가성에,회장에 모인 관객은 열광적인 환성을 올리고 있다
+			PRINTFORMW 다 노래하면 %CALLNAME:A%는성취감 흘러넘치는 미소를 관객,그리고 %CALLNAME:MASTER%로 보냈다…
+		ELSEIF ABL:A:가창기능 >= 3
+			PRINTFORMW 아무래도 성공한 것 같다
+			PRINTFORMW %CALLNAME:A%는 노래해 끝낸후도 기분이 고양하고 있는지,조금 전부터 쭉 콧노래를 노래하고 있었다…
+		ELSE
+			PRINTFORMW 실패하지 않고 끝난 것 같다
+			PRINTFORMW %CALLNAME:A%는 긴장하고 있었는지,무대를 내린다고 안심한 표정을 띄우고 있었다…
+		ENDIF
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;창관봉공시의 이벤트입상
+@EVENT_MESSAGE_69
+;=================================================
+;
+;
+IF B == 0
+	PRINTFORMW 이지만,%CALLNAME%는 이번,1명이나 손님을 받는 것이 할 수 없었던 것 같다
+ELSEIF B <= 3
+	PRINTFORMW %CALLNAME%는 이번,너무 많은 손님을 받을 수 없었던 것 같다
+ELSEIF B >= 7
+	PRINTFORMW %CALLNAME%는 이번,무려{B}인의 손님을 상대로 한 것 같다
+ELSE
+	PRINTFORMW %CALLNAME%는 이번,합계로{B}인의 손님을 상대로 한 것 같다
+ENDIF
+IF BASE:체력 < 500
+	PRINTFORM 기진맥진이 되면서도,
+ELSEIF BASE:체력 >= 1500
+	PRINTFORM 피로를 느끼게 하지 않는 미소로,
+ELSE
+	PRINTFORM 조금 지친 모습으로,
+ENDIF
+IF B <= 3
+	PRINTFORMW 미안한 것 같이 숙이고 있다…
+ELSEIF B >= 7
+	PRINTFORMW 칭찬하면 좋겠다고 졸라 왔다…
+ELSE
+	PRINTFORMW 창관에서의 일을 이야기를 시작했다…
+ENDIF
+
+;
+;실전 있어 /nA = {M:0}
+;실전 없음 /nA = {M:1}
+;복수 플레이/nA = {M:2}
+;소프트 SM/nA = {M:3}
+;하도SM/nA = {M:4}
+;
+;실전 있어 /iV = {M:10}
+;실전 없음 /iV = {M:11}
+;복수 플레이/iV = {M:12}
+;소프트 SM/iV = {M:13}
+;하도SM/iV = {M:14}
+;
+;수치플레이/nA = {M:20}
+;피스트 /nA = {M:21}
+;스카톨로지 /nA = {M:22}
+
+
+;=================================================
+;구경거리 오두막 실행시의 이벤트입상
+@EVENT_MESSAGE_21
+;=================================================
+PRINTFORM %CALLNAME%를 비밀 클럽의
+;스트립 쇼
+IF B == 1
+	PRINTFORMW 스트립 쇼에 서게 했다
+	PRINTFORMW %CALLNAME%는 요염한 미소를 띄워,한 장,한 장과 옷을 벗어 간다
+	PRINTFORMW 그 선정적인 모습에,관객들은 군침을 삼켜,뜨거운 시선을 따르고 있다
+	IF ABL:노출벽 >= 4 || ABL:자위중독 >= 2
+		PRINTFORMW 이윽고%CALLNAME%는 인내 할 수 없게 되었는지,
+		PRINTFORMW 중인 환시 중(안)에서 상스럽고자위를 시작해 버렸다…
+	ENDIF
+;난교 라이브
+ELSEIF B == 2
+	PRINTFORMW 난교 라이브에 서게 했다
+	PRINTFORMW %CALLNAME%는 요염한 미소를 띄워,마치 권하는 것 같은 행동으로 춤추고 있다…
+	PRINTFORML 
+	PRINTFORMW %CALLNAME%의매력와 가성에 매료되었는가
+	PRINTFORMW 흥분한 청중들이 일제히%CALLNAME%의 아래에 몰려닥쳤다…
+	SIF LOCAL:1
+		PRINTFORMW %CALLNAME%는 모인 청중에게 여러번 범해졌다…
+;SM쇼
+ELSEIF B == 3
+	PRINTFORMW SM쇼에 서게 했다
+	IF LOCAL:2
+		PRINTFORMW 채찍나촛불라고 하는 도구를 가지고 나타난%CALLNAME%는,
+		PRINTFORMW 그것을마조역의 인간에게 털어,S노예로서 관객들의 눈을 많이 즐겁게 했다…
+	ELSE
+		PRINTFORMW 마조역의%CALLNAME%는,S역의 인간이 터는채찍나촛불에 달콤한 비명을 올려,
+		PRINTFORMW 그것을 보는 관객들의 눈을 많이 즐겁게 했다…
+	ENDIF
+;고문 쇼
+ELSEIF B == 4
+	PRINTFORMW 고문 쇼에 서게 했다
+	IF LOCAL:2
+		PRINTFORMW S역으로서 나타난%CALLNAME%는,기학적인 미소를 없애는 일 없이
+		PRINTFORMW 마조역의 인간을 고문을 가해서는 비명을 올리게 해 관객들의 눈을 많이 즐겁게 했다…
+	ELSE
+		PRINTFORM %CALLNAME%는,많은 고문
+		IF ABL:마조끼 >= 5
+			PRINTFORMW 에도 느껴 버려,달콤한 비명을 올리고 있었다…
+		ELSE
+			PRINTFORMW 에 진심으로 눈물을 흘려,울부짖고 있었다…
+		ENDIF
+	ENDIF
+;수간쇼
+ELSEIF B == 5
+	PRINTFORMW 수간쇼에 서게 했다
+	SIF EXP:수간경험 >= 50
+		PRINTFORM 달콤하다
+	PRINTFORM 비명을 올리면서 짐승에게 모여지는%CALLNAME%의 모습을,
+	PRINTFORM 관객들은 마른침을 마셔 지켜보고 있다…
+ENDIF
+
+
+
+;=================================================
+;노역 - 공중 변소 플레이시
+@EVENT_MESSAGE_22
+;=================================================
+
+IF B == 1
+	PRINTFORML 뒤골목에 도착하면%CALLNAME%를 적당한 그늘에서
+ELSEIF B == 2
+	PRINTFORML 공중 변소에 도착하면%CALLNAME%를 적당한 독실의 변기 위에서
+ELSEIF B == 3
+	PRINTFORML 비밀 클럽에 도착하면%CALLNAME%를 클럽의 화장실에서
+ENDIF
+PRINTFORML 가랑이를 크게 넓히도록(듯이)해 앉게 해 거기서 대기하도록(듯이) 명령했다
+PRINTFORML …
+PRINTFORM 아무래도%CALLNAME%의육변기는
+IF B == 1
+	PRINTFORM 호기심인 인간들
+ELSEIF B == 2
+	PRINTFORM 부랑자들
+ELSEIF B == 3
+	PRINTFORM 호사가들
+ENDIF
+PRINTFORML 에 호평이었던 것 같다…
+
+
+
+
+
+
+
+;=================================================
+;렌탈시의 이벤트입상
+@EVENT_MESSAGE_17
+;플레이 내용은 지금후 늘릴 예정. 갖고 싶은 것 있으면 자꾸자꾸 추가해!
+;분기의 시키는 방법이 분명하게 무리하게 지나 위험하다. 누군가 수정해 주세요…
+;=================================================
+
+;원의 녀석 남겨 둔다
+;B는 렌탈의 기간 일수
+;IF B == 1
+;	PRINTFORMW %CALLNAME%는 피로를 느끼게 하지 않는 미소를 띄우고 있다
+;	PRINTFORM 아무래도,
+;ELSEIF B == 3
+;	PRINTFORMW %CALLNAME%는 부드러운 미소를 띄우고 있다
+;	PRINTFORM 아무래도,
+;ELSEIF B == 5
+;	PRINTFORMW %CALLNAME%는 웃어 보였지만,얼굴에는 피로가 떠올라 있다
+;	PRINTFORM 이지만,
+;ELSEIF B == 10
+;	PRINTFORMW %CALLNAME%는 다 피폐해진 표정을 하고 있다
+;	PRINTFORM 이지만,
+;ENDIF
+;PRINTFORMW %CALLNAME:MASTER%의 도움이 될 수 있었던 일에 기쁨을 느끼고 있는 것 같다…
+
+
+;수간(노예수만)
+IF CFLAG:152 & 1
+	PRINTFORMW 이번 상대는,꽤 특수한 플레이를 좋아하는 인간이었던 것 같다
+	PRINTFORMW 손님 자신은손를 내지 않고,%CALLNAME%는 짐승들의 상대를 하게 한 것 같다
+	IF EXP:수간경험 >= 100 && !TALENT:연모 && !TALENT:친애
+		PRINTFORMW 이번 상대를 해 준 짐승들이 얼마나 사랑스러워서,자신에게 상냥하게 해 주었는지를 말하면서,
+		PRINTFORMW %CALLNAME%는 도취한 것처럼 웃고 있다…
+	ELSEIF EXP:수간경험 >= 50 && !TALENT:연모 && !TALENT:친애
+		PRINTFORMW %CALLNAME%도,최근에는 수상대의 행위에 익숙한 것 같다.
+		PRINTFORMW 분명하게 이쪽의 몸을 신경써 주는 상냥함도 가지고 있다,라고
+		PRINTFORMW 녹초가된 얼굴로 기쁜듯이 힘이 빠지고 있다…
+	ELSEIF EXP:수간경험 >= 30 && (ABL:A감각 >= 3 || ABL:V감각 >= 3) && (TALENT:연모 || TALENT:친애)
+		PRINTFORMW %CALLNAME%는 단념하고 자른 얼굴로 담담하게 이번 보고를 실시하고 있다.
+		PRINTFORMW 기분 좋았는지 %CALLNAME:MASTER%가 (들)물으면,허약한 미소가 되돌아 왔다…
+	ELSE
+		PRINTFORMW %CALLNAME%의 몸에는,날뛰었을 때에 붙여진 상처가 딱하게 남아 있다.
+		PRINTFORMW 짐승들의 토하는 비릿한 숨이나,날카로운 손톱이나 송곳니의공포가 달라붙어 떨어지지 않는 것인지,
+		PRINTFORMW 저택에 돌아오고 나서도,%CALLNAME%는 쭉 자신의 몸을 껴안아 떨고 있었다…
+	ENDIF
+;스카톨로지(노예수만)
+ELSEIF CFLAG:152 & 2
+	PRINTFORMW 이번 상대는,꽤 특수한 플레이를 좋아하는 인간이었던 것 같다
+	IF EXP:이상경험 >= 20 || ABL:마조끼 >= 8
+		PRINTFORMW %CALLNAME%는 완전히 초췌한 모습이지만,
+		PRINTFORMW 매우 만발 그런 표정으로,%CALLNAME:MASTER%에 이번 보고를 실시했다…
+	ELSEIF EXP:이상경험 >= 12 || ABL:마조끼 >= 5
+		PRINTFORMW %CALLNAME%는 완전히 초췌한 모습이지만,
+		PRINTFORMW 어딘가 공허한 눈동자의 안쪽에는,확실히 정욕의 색을 간파할 수 있었다…
+	ELSEIF EXP:이상경험 >= 8 || ABL:마조끼 >= 3
+		PRINTFORMW %CALLNAME%는 완전히 초췌한 모습으로,
+		PRINTFORMW %CALLNAME:MASTER%의 질문에,공허한 표정으로 담담하게 대답을 하고 있다…
+	ELSE
+		PRINTFORMW %CALLNAME%는 완전히 초췌한 모습으로,
+		PRINTFORMW %CALLNAME:MASTER%가 보고를 요구해도,당분간 어떤 반응도 돌아오지 않았다…
+	ENDIF
+;하도SM(공)
+ELSEIF CFLAG:152 & 4
+	PRINTFORMW 이번 상대는,상당한 M기질을 가지고 있던 것 같다
+	IF ABL:새드끼 >= 8 || TALENT:새드 == 2
+		PRINTFORMW 그곳에서는%CALLNAME%도,마음껏 자신의 좋아하는 고문을 실시할 수가 있던 것 같고,
+		PRINTFORMW 녹초가된 얼굴을 하면서도,그 표정은 어딘가 상쾌로 하고 있다…
+	ELSEIF ABL:새드끼 >= 5 || TALENT:새드
+		PRINTFORMW %CALLNAME%의 고문에는 상대도 매우 기뻐했던 것 같고,
+		PRINTFORMW 녹초가된 얼굴을 하면서도,%CALLNAME%는 만발 그렇게 웃고 있다…
+	ELSEIF ABL:새드끼 >= 3
+		PRINTFORMW %CALLNAME%의 달콤한 고문에서는,손님을 만발 시킬 수 없었던 것 같다
+		PRINTFORMW 녹초가된 얼굴로,%CALLNAME%는 어쩐지 미안한 것 같이 하고 있다…
+	ELSE
+		PRINTFORMW 그런 상대에 어째서 좋은가 모르고,곤란해 버렸다,라고
+		PRINTFORMW %CALLNAME%는 진한 피로의 배이는 쓴웃음을 띄워 보였다…
+	ENDIF
+;하도SM(수)
+ELSEIF CFLAG:152 & 8
+	PRINTFORMW 이번 상대는,꽤 하드한 SM를 좋아하는 인간이었던 것 같다
+	IF ABL:마조끼 >= 8 || TALENT:마조 == 2
+		PRINTFORMW 심하게 혼내줄 수 있던 것 같고,%CALLNAME%는 다 피폐해진 얼굴을 하고 있지만,
+		PRINTFORMW 그것이 기뻤다,와 만발 그렇게 웃고 있다…
+	ELSEIF ABL:마조끼 >= 5 || TALENT:마조
+		PRINTFORMW 심하게 혼내줄 수 있던 것 같고,%CALLNAME%는 다 피폐해진 얼굴을 하고 있지만,
+		PRINTFORMW 그 눈동자의 안쪽에는,확실히 정욕의 색을 간파할 수 있었다…
+	ELSEIF ABL:마조끼 >= 3
+		PRINTFORMW 이제 싫다고 울어도 상관하지 않고 혼내줄 수 있던 것 같고,
+		PRINTFORMW %CALLNAME%는 다 피폐해진 얼굴로,%CALLNAME:MASTER%에 달라붙어 왔다…
+	ELSE
+		PRINTFORMW 이제 싫다고 울어도 상관하지 않고 혼내줄 수 있던 것 같고,
+		PRINTFORMW %CALLNAME%는 어딘가 공허한 표정으로,담담하게 이번 보고를 실시하고 있다…
+	ENDIF
+;소프트 SM(공)
+ELSEIF CFLAG:152 & 16
+	PRINTFORMW 이번 상대는,조금 M기분이 있는 인간이었던 것 같다
+	IF ABL:새드끼 >= 5 || TALENT:새드
+		PRINTFORMW 이지만,%CALLNAME%의 꾸짖어에 따라 올 수 있는 것으로는 도저히 없었던 것 같고,
+		PRINTFORMW %CALLNAME%는 물건발리나 있고,라고 불평하고 있다…
+	ELSEIF ABL:새드끼 >= 3
+		PRINTFORMW %CALLNAME%의 고문에 손님도 기뻐해 준 것 같고,
+		PRINTFORMW 지친 얼굴을 하면서도,%CALLNAME%도 만발 그렇게 웃고 있다…
+	ELSE
+		PRINTFORMW 그런 상대에 어째서 좋은가 모르고,곤란해 버렸다,라고
+		PRINTFORMW %CALLNAME%는 진한 피로의 배이는 쓴웃음을 띄워 보였다…
+	ENDIF
+;소프트 SM(수)
+ELSEIF CFLAG:152 & 32
+	PRINTFORMW 이번 상대는,SM에 흥미가 있는 인간이었던 것 같다
+	PRINTFORM 이지만 결코 하드한 것은 아니었던 것 같고,
+	IF ABL:마조끼 >= 5 || TALENT:마조
+		PRINTFORMW %CALLNAME%는 물건발리나실 불평하고 있다…
+	ELSEIF ABL:마조끼 >= 3
+		PRINTFORMW 안심했다고%CALLNAME%는 웃고 있다
+		PRINTFORMW 이지만,그 얼굴은 어딘가 유감스러운 듯하다…
+	ELSE
+		PRINTFORMW %CALLNAME%는,안심했다고 웃고 있다…
+	ENDIF
+;복수 플레이(공)
+ELSEIF CFLAG:152 & 64
+	PRINTFORMW 이번 상대는,복수에서의 플레이를 좋아하는 인간이었던 것 같다
+	PRINTFORMW %CALLNAME%도 난교 파티와 같은 것에 데리고 가져
+	PRINTFORMW 귀중한공노예로서 많은 구멍을 범한 것 같다
+	IF ABL:새드끼 >= 5
+		PRINTFORMW 특히%CALLNAME%가 실시하는 플레이는 M노예들에게인기였던 것 같아,
+		PRINTFORMW %CALLNAME%도 완전히 흥분한 모습으로,이번 보고를 실시하고 있다…
+	ELSEIF ABL:새드끼 >= 3
+		PRINTFORMW %CALLNAME%는 이번 일을 %CALLNAME:MASTER%에 보고하면서,
+		PRINTFORMW 어딘가 흥분한 표정을 띄우고 있다…
+	ELSE
+		PRINTFORMW 거의 무리하게 걸쳐져 정령을 좁혀진 것 같아,
+		PRINTFORMW %CALLNAME%벗기는 충분하고와 다 피폐해진 표정을 하고 있다…
+	ENDIF
+;복수 플레이(수)
+ELSEIF CFLAG:152 & 128
+	PRINTFORMW 이번 상대는,복수에서의 플레이를 좋아하는 인간이었던 것 같다
+	PRINTFORMW 난교 파티와 같은 것에 데리고 가져 많은 인간에게 범해진 것 같다
+	IF ABL:노출벽 >= 5 || (ABL:마조끼 >= 8 || TALENT:마조 == 2)
+		PRINTFORMW 번갈아 위의입도 아래의입도 범해져,그 쾌감은
+		PRINTFORMW 버릇이 될 것 같다,라고%CALLNAME%는 만발 그렇게 웃고 있다…
+	ELSEIF ABL:노출벽 >= 4 || (ABL:마조끼 >= 6 || TALENT:마조)
+		PRINTFORMW 번갈아 위의입도 아래의입도 범해져,언제까지 계속된다고도 모르는 상태가
+		PRINTFORMW 무서웠지만 기분 좋았다,라고%CALLNAME%는 얼굴을 새빨갛게 해 미소짓고 있다…
+	ELSEIF ABL:노출벽 >= 3 || ABL:마조끼 >= 4
+		PRINTFORMW 번갈아 위의입도 아래의입도 범해져,언제까지 계속된다고도 모르는 상태가
+		PRINTFORMW 굉장히 무서웠다,라고%CALLNAME%는 말하지만,그 표정은 그렇지만도 않은 것 같다…
+	ELSE
+		PRINTFORMW 번갈아 위의입도 아래의입도 범해져,언제까지 계속된다고도 모르는 그 상태는
+		PRINTFORMW 굉장히 무서웠다,라고%CALLNAME%는 어깨를 진동시켜 숙이고 있다…
+	ENDIF
+;페티시즘. 삽입 없음
+ELSEIF CFLAG:152 & 256
+	PRINTFORMW 이번 상대는,조금 특수한 플레이를 좋아하는 인간이었던 것 같다
+	PRINTFORMW 범해질 것도 없고,도구와 같이 다루어졌다고 하는%CALLNAME%는
+	IF B == 10
+		PRINTFORMW 돌아오든지,빨리 범하면 좋겠다고 %CALLNAME:MASTER%에 간원 해 왔다…
+	ELSEIF B == 5
+		PRINTFORMW 보고를 하고 있는 동안도 쭉,빨리 범하면 좋겠다고 눈으로 호소하고 있었다…
+	ELSEIF B == 3
+		PRINTFORMW 보고를 하고 있는 동안 중,쑤시는 몸을 머뭇머뭇진동시키고 있었다…
+	ELSE
+		PRINTFORMW 녹초가된 표정으로 담담하게 이번 보고를 실시하고 있다…
+	ENDIF
+;수치계
+ELSEIF CFLAG:152 & 512
+	PRINTFORMW 이번 상대는,조금 특수한 플레이를 좋아하는 인간이었던 것 같다
+	IF ABL:노출벽 >= 5 || (ABL:마조끼 >= 8 || TALENT:마조 == 2)
+		PRINTFORMW %CALLNAME%는 완전히 흥분한 모습으로,
+		PRINTFORMW 이번하게 한 부끄러운 것에 붙어,자세하게 보고해 왔다…
+	ELSEIF ABL:노출벽 >= 4 && (ABL:마조끼 >= 6 || TALENT:마조)
+		PRINTFORMW 상당히 부끄러운 일을 하게 했는지,
+		PRINTFORMW %CALLNAME%는 얼굴을 새빨갛게 해,흥분 기색으로 이번 보고를 시작했다…
+	ELSEIF ABL:노출벽 >= 3 && ABL:마조끼 >= 4
+		PRINTFORMW %CALLNAME:MASTER%에 보고를 하면서,
+		PRINTFORMW %CALLNAME%는 이번 조교를 생각해 내,얼굴을 새빨갛게 하고 있다…
+	ELSE
+		PRINTFORMW 상당히 부끄러운 일을 하게 했는지,%CALLNAME%는 얼굴을 새빨갛게 해 숙이고 있다.
+		PRINTFORMW %CALLNAME:MASTER%가 강하게 재촉하면,띄엄띄엄 이번 보고를 시작했다…
+	ENDIF
+;쾌락 고문
+ELSEIF CFLAG:152 & 1024
+	PRINTFORMW 이번 상대는,새드끼가 있는 인간이었던 것 같다
+	PRINTFORMW %CALLNAME%는 강력한미약를 맞아 쾌락 고문으로 오로지 가게 된 것 같다.
+	IF PENIS(TARGET)
+		PRINTFORMW 아무것도 나오지 않게 되어도 상관하지 않고,절정의 물결이 주어졌다고 하는%CALLNAME%는,
+	ELSE
+		PRINTFORMW 기절직전까지 절정의 물결이 주어졌다고 하는%CALLNAME%는,
+	ENDIF
+	IF B == 10 || B == 5
+		PRINTFORMW 축초췌해 버린 모습으로,미약의 다 빠지지 않는 몸을 경련시키고 있다…
+	ELSEIF B == 3
+		PRINTFORMW 기분 좋았는가 하는 %CALLNAME:MASTER%의 물음에,
+		PRINTFORMW 「아아…」 「,우우」라고 말로 할 수 없는 소리를 돌려주고 있다…
+	ELSEIF B == 1
+		PRINTFORMW 기분 좋았는가 하는 %CALLNAME:MASTER%의 물음에,공허한 표정으로 작게 수긍했다…
+	ENDIF
+;초조하게 해 쾌락 고문
+ELSEIF CFLAG:152 & 4096
+	PRINTFORMW 이번 상대는,조금새드끼가 있는 인간이었던 것 같다
+	PRINTFORMW 심하게 초조하게 해 고문을수라고 하는%CALLNAME%는,
+	PRINTFORMW 돌아오든지,빨리 범하면 좋겠다고 간원 해 왔다…
+;아무것도 없었다(러브러브 포함한다)
+ELSE
+	PRINTFORMW 이번 렌탈에서는,특별히 바뀐 일은 없었던 것 같다.
+	IF B == 1
+		PRINTFORMW %CALLNAME%는 피로를 느끼게 하지 않는 미소로,오늘까지의 보고를 시작했다…
+	ELSEIF B == 3
+		PRINTFORMW %CALLNAME%는 부드러운 미소로,오늘까지의 보고를 시작했다…
+	ELSEIF B == 5
+		PRINTFORMW %CALLNAME%는 웃어 보였지만,얼굴에는 피로가 떠올라 있다…
+	ELSEIF B == 10
+		PRINTFORMW %CALLNAME%는 다 피폐해진 표정을 하고 있다…
+	ENDIF
+ENDIF
+
+;=================================================
+;손맞댐 개시시의 이벤트입상
+@EVENT_MESSAGE_74
+;=================================================
+;미독
+IF UCHIBAN_READ == 0
+	PRINTFORML %CALLNAME:UCHIBAN_A%과 %CALLNAME:UCHIBAN_B%는손맞댐을 개시한 것 같다
+	PRINTL 
+	UCHIBAN_READ = 1
+;기독이라면 표시하지 않는다
+ELSE
+	UCHIBAN_READ = 0
+ENDIF
+
+;=================================================
+;손맞댐 종료시의 이벤트입상
+@EVENT_MESSAGE_75
+;=================================================
+;미독
+IF UCHIBAN_READ == 0
+	PRINTFORML %CALLNAME:UCHIBAN_A%과 %CALLNAME:UCHIBAN_B%는손맞댐을 종료한 것 같다
+	PRINTL 
+	UCHIBAN_READ = 1
+;기독이라면 표시하지 않는다
+ELSE
+	UCHIBAN_READ = 0
+ENDIF
+
+;=================================================
+;하타 당번 개시시의 이벤트입상
+;현재가 기수일눈이라면,UCHIBAN_A에 들어가 있는 (분)편이 TARGET가 됩니다
+@EVENT_MESSAGE_82
+;=================================================
+PRINTFORML %CALLNAME:UCHIBAN_A%과 %CALLNAME:UCHIBAN_B%는 하타 당번을 개시한 것 같다
+PRINTL 
+IF ABL:순종 < 3
+	IF TALENT:동물귀
+		PRINTFORML %CALLNAME%는 나무 그늘 스으스으 숨소리를 내고 있다…
+	ENDIF
+ELSEIF TALENT:동물귀
+	PRINTFORML %CALLNAME%는,밭에 있는 벌레를 잡고 있다…
+ELSEIF TALENT:습득느림
+	PRINTFORML %CALLNAME%가 밭에 비료를 털어 놓고 있다…
+ELSEIF TALENT:조제지식
+	PRINTFORML %CALLNAME%가 비료의 조제를 하고 있다…
+ELSEIF (TALENT:호기심 || TALENT:유치 || TALENT:유아／유아퇴행)
+	PRINTFORML %CALLNAME%는 밭의 흙을 만지작거려 놀고 있다…
+ELSE
+	SELECTCASE RAND:2
+		CASE 1
+			PRINTFORML %CALLNAME%는 종을 뿌리고 있다…
+		CASEELSE
+			PRINTFORML %CALLNAME%는 흙을 경작하고 있다…
+	ENDSELECT
+ENDIF
+
+PRINTW 
+
+;=================================================
+;하타 당번 종료시의 이벤트입상
+;현재가 기수일눈이라면,UCHIBAN_A에 들어가 있는 (분)편이 TARGET가 됩니다
+;※필연적으로 하타 당번 개시시에 불리지 않았던 (분)편이 된다(날을 넘어 표시되기 (위해)때문에)
+@EVENT_MESSAGE_83
+;=================================================
+IF ABL:순종 < 3
+	IF TALENT:건방짐 || TALENT:반항적 || TALENT:프라이드높음
+		PRINTFORML 나무 그늘에서 빈둥거리고 있는%CALLNAME%를 찾아냈으므로,당번은 끝났는지와 말을 걸면,
+		PRINTFORML %CALLNAME%는 눈을 유영하게 해 애매하게 대답했다…
+	ENDIF
+ELSEIF TALENT:요리고수 || TALENT:요리치
+	IF TALENT:헌신적 || ABL:봉사정신 >= 3
+		PRINTFORML %CALLNAME%가 수확한 야채를손에,무엇을 먹고 싶은가 (들)물어 왔다…
+	ELSE
+		PRINTFORML %CALLNAME%는 수확한 야채를손에,어떻게 요리할까 염려하고 있다…
+	ENDIF
+ELSEIF (TALENT:연모 || TALENT:친애)
+	PRINTFORML %CALLNAME:MASTER%를 찾아내면,%CALLNAME%는 수확한 야채를손에 웃는 얼굴로 이쪽으로 다가왔다…
+ELSEIF (TALENT:호기심 || TALENT:유치 || TALENT:유아／유아퇴행)
+	PRINTFORML %CALLNAME%가 수확한지 얼마 안된 야채를 몰래 군것질하고 있었다…
+ELSE
+	SELECTCASE RAND:2
+		CASE 1
+			PRINTFORML %CALLNAME%는 야채를 수확하고 있다…
+		CASEELSE
+			PRINTFORML %CALLNAME%는 밭에 물을 뿌리고 있다…
+	ENDSELECT
+ENDIF
+
+PRINTL 
+PRINTFORML %CALLNAME:UCHIBAN_A%과 %CALLNAME:UCHIBAN_B%는 하타 당번을 종료한 것 같다
+PRINTW 
+
+
+;=================================================
+;말당번 개시시의 이벤트입상
+;현재가 기수일눈이라면,UCHIBAN_A에 들어가 있는 (분)편이 TARGET가 됩니다
+@EVENT_MESSAGE_84
+;=================================================
+PRINTFORML %CALLNAME:UCHIBAN_A%과 %CALLNAME:UCHIBAN_B%는 말당번을 개시한 것 같다
+PRINTL 
+IF ABL:순종 < 3
+	IF TALENT:악취민감
+		PRINTFORML %CALLNAME%는 자욱하는 마분의 악취에 얼굴을 찡그려,마구간을 멀리서 포위로 하고 있다…
+	ELSEIF TALENT:동물귀
+		PRINTFORML %CALLNAME%는 짚 위에서 스으스으 숨소리를 내고 있다…
+	ENDIF
+ELSEIF TALENT:위압
+	PRINTFORML %CALLNAME%는 말에 두려워해져 쓸쓸히 하고 있다…
+ELSEIF TALENT:음란 || TALENT:창부 || ABL:욕망 > 3
+	IF TALENT:정조관념 || TALENT:부끄럼쟁이 || TALENT:보수적
+		PRINTFORML %CALLNAME%는,새빨간 얼굴로 말의 뭐에 못박음이 되어 있다…
+	ELSEIF EXP:수간경험 && (TALENT:섹스광 || ABL:섹스중독)
+		PRINTFORML %CALLNAME%는 말의 무엇을 보면,허겁지겁 속옷을 벗으려고 하고 있다
+		PRINTFORML 일단,당번은 성실하게 실시하도록(듯이) 주의했습니다…
+	ELSEIF TALENT:자위광 || ABL:자위중독 >= 3
+		PRINTFORML %CALLNAME%는,말의 무엇을 응시하면서,손를 안 되는 느낌에 움직이고 있다
+		PRINTFORML 일단,당번은 성실하게 실시하도록(듯이) 주의했습니다…
+	ELSE
+		PRINTFORML %CALLNAME%는,말의 무엇을 가만히 응시하고 있다…
+	ENDIF
+ELSEIF TALENT:스킨십선호 || TALENT:호기심
+	PRINTFORML %CALLNAME%가 멀리 타고 감에 가려고 하고 있다
+	PRINTFORML 당황해 %CALLNAME:MASTER%가 말리러 들어갔습니다…
+ELSEIF TALENT:더러움무시 || TALENT:악취둔감 || TALENT:악취민감 || ABL:스캇중독 >= 3
+	IF TALENT:악취민감
+		PRINTFORML %CALLNAME%는 자욱하는 마분의 악취에 얼굴을 찡그리고 있다
+	ELSEIF (TALENT:악취둔감 || TALENT:더러움무시 || ABL:스캇중독 >= 3) && (TALENT:무관심 || TALENT:감정부족)
+		PRINTFORML %CALLNAME%는 마분의 악취를 기분에도 두지 않고,말을 돌보고 있다
+	ELSEIF (TALENT:악취둔감 || TALENT:더러움무시 || ABL:스캇중독 >= 3) &&(TALENT:호기심 || TALENT:유치 || TALENT:유아／유아퇴행)
+		PRINTFORML %CALLNAME:MASTER%를 찾아내면,%CALLNAME%는 마분이 들어온 물통편손에 이쪽에 다가온다…
+		PRINTFORML 싫은 예감이 했으므로,쏜살같이 도망쳤습니다
+	ELSEIF TALENT:더러움무시 || ABL:스캇중독 >= 3
+		PRINTFORML %CALLNAME%는 근처의 마분을 주워 모으고 있다
+		PRINTFORML …… 소손로
+	ENDIF
+ELSE
+	SELECTCASE RAND:3
+		CASE 2
+			PRINTFORML %CALLNAME%는 목초를 옮기고 있다…
+		CASE 1
+			PRINTFORML %CALLNAME%는 짚을 청소하고 있다…
+		CASEELSE
+			PRINTFORML %CALLNAME%는 마구간을 청소하고 있다…
+	ENDSELECT
+ENDIF
+
+PRINTW 
+
+;=================================================
+;말당번 종료시의 이벤트입상
+;현재가 기수일눈이라면,UCHIBAN_A에 들어가 있는 (분)편이 TARGET가 됩니다
+;※필연적으로 말당번 개시시에 불리지 않았던 (분)편이 된다(날을 넘어 표시되기 (위해)때문에)
+@EVENT_MESSAGE_85
+;=================================================
+IF ABL:순종 < 3
+	IF TALENT:건방짐 || TALENT:반항적 || TALENT:프라이드높음
+		PRINTFORML 나무 그늘에서 빈둥거리고 있는%CALLNAME%를 찾아냈으므로,당번은 끝났는지와 말을 걸면,
+		PRINTFORML %CALLNAME%는 눈을 유영하게 해 애매하게 대답했다…
+	ENDIF
+ELSEIF TALENT:음란 || TALENT:창부 || ABL:욕망 > 3
+	IF EXP:수간경험
+		PRINTFORML %CALLNAME%는 요염한 미소를 띄워,다음은수간플레이는 어떨까라고 (들)물어 왔다…
+	ELSE
+		PRINTFORML %CALLNAME%는,말의 무엇을 응시해 그 크기를 꾀하고 있다…
+	ENDIF
+ELSEIF TALENT:실의
+	PRINTFORML %CALLNAME%의 표정이 밝아지고 있다
+	PRINTFORML 마를 돌보는 것으로 조금기력를 되찾은 것 같다…
+ELSEIF TALENT:동물귀 || TALENT:여우
+	PRINTFORML %CALLNAME%가 말과 뭔가 말하고 있다(같게 보인다)
+	PRINTFORML 말을 알까……?
+ELSEIF TALENT:헌신적 || ABL:봉사정신 >= 3
+	PRINTFORML %CALLNAME%는 열심인손 돌출해 말을 브러싱 하고 있다
+ELSEIF TALENT:수치심없음 || ABL:노출벽 >= 3
+	PRINTFORML 깨달으면%CALLNAME%는 전라로 말을 돌보고 있었다
+	PRINTFORML 사정을 (들)물으면,옷이 말의 타액 투성이가 되었기 때문이라고 한…
+ELSEIF TALENT:악취민감
+	PRINTFORML 옷을 말의 타액 투성이로 된%CALLNAME%는,불쾌를 드러내고 있다…
+ELSE
+	SELECTCASE RAND:2
+		CASE 1
+			PRINTFORML %CALLNAME%는 말을 씻고 있다…
+		CASEELSE
+			PRINTFORML %CALLNAME%는 말을 가볍게 운동시키고 있다
+	ENDSELECT
+ENDIF
+
+PRINTL 
+PRINTFORML %CALLNAME:UCHIBAN_A%과 %CALLNAME:UCHIBAN_B%는 말당번을 종료한 것 같다
+PRINTW 
+
+;=================================================
+;수행 출발시의 이벤트입상
+@EVENT_MESSAGE_86
+;=================================================
+PRINTFORML %CALLNAME:TARGET%는 수행에 출발한 것 같다
+PRINTL 
+
+
+;=================================================
+;수행 귀환시의 이벤트입상
+@EVENT_MESSAGE_87
+;=================================================
+PRINTFORML %CALLNAME:TARGET%는 수행으로부터 귀환한 것 같다
+PRINTL 
+
+

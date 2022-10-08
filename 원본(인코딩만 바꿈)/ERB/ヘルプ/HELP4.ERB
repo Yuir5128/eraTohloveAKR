@@ -1,0 +1,61 @@
+﻿;--------------------------------------------------
+;このファイル内ではキャラクターについての記述があります。
+;--------------------------------------------------
+;=============================================================================
+;用語辞典――キャラクター
+;=============================================================================
+;--------------------------------------------------
+;キャラクター解説メインページ
+;--------------------------------------------------
+@DICTIONARY_CHARA_MAIN
+P = 0
+FLAG:45 = 0
+$CHARA_HELP
+DRAWLINE
+
+PRINTFORML 説明を知りたいキャラクターの番号を入力してください。＜page.{P+1}/＞
+DRAWLINE
+
+LOCAL = 0
+FOR LOCAL, 1, FLAG:44, 1
+	;CSVが存在しないキャラは除外
+	SIF !EXISTCSV(LOCAL, 0)
+		CONTINUE
+	;子供は除外
+	SIF GROUPMATCH(CSVNAME(LOCAL, 0), "子供1", "子供2", "子供3", "子供4", "子供5", "子供6", "子供7", "子供8", "子供9", "子供10")
+		CONTINUE
+	
+	PRINTFORMLC [{LOCAL}] %CSVNAME(LOCAL,0),20,LEFT%
+		CALL CHECK_NEWLINE
+	
+NEXT
+PRINTL 
+DRAWLINE
+;PRINTFORMLC \@(P <= 0) ? %" " * 18% # [1001]前のページ\@
+PRINTLC [1000]戻る
+;PRINTFORMLC \@(P >= P:1) ? %" " * 18% # [1009]後ろのページ\@
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+;ELSEIF RESULT == 1001 && P > 0
+;	P -= 1
+;	GOTO CHARA_HELP
+;ELSEIF RESULT == 1009 && P < P:1
+;	P += 1
+;	GOTO CHARA_HELP
+ELSEIF RESULT < 0 || RESULT > FLAG:44 || !EXISTCSV(RESULT, 0)
+	GOTO CHARA_HELP
+ELSE
+	IF FLAG:43
+		LOCALS = %NAME_NATION(RESULT)%
+	ELSE
+		CSVNAME RESULT, 0
+		LOCALS = %RESULTS%
+	ENDIF
+	CALL CHARA_MANUAL(RESULT, 1)
+	PRINTW
+ENDIF
+GOTO CHARA_HELP
+

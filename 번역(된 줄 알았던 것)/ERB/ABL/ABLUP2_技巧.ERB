@@ -1,0 +1,116 @@
+﻿;기교의 가부
+@ISABLUP2
+;연모, 친애, 복종, 예속는 MAXLV10
+IF ABL:기교 >= 10
+	RETURN 0
+ELSEIF ABL:기교 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP2
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;기교
+@ABLUP2
+DRAWLINE
+;연모, 친애, 복종, 예속는 MAXLV10
+IF ABL:기교 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:기교 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP2
+
+PRINTFORM [0] - %PALAMNAME:8%의 구슬×{A}……
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:기교 += 1
+
+IF RESULT == 0
+	JUEL:습득 -= A
+ENDIF
+
+PRINTFORMW %ABLNAME:2%의 레벨이{ABL:기교}가 되었습니다
+
+;기교LVUP 판정
+@DECIDE_ABLUP2
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:기교 == 0
+	A = 1
+ELSEIF ABL:기교 == 1
+	A = 20
+ELSEIF ABL:기교 == 2
+	A = 200
+ELSEIF ABL:기교 == 3
+	A = 3000
+ELSEIF ABL:기교 == 4
+	A = 20000
+ELSEIF ABL:기교 == 5
+	A = 25000
+ELSEIF ABL:기교 == 6
+	A = 34000
+ELSEIF ABL:기교 == 7
+	A = 45000
+ELSEIF ABL:기교 == 8
+	A = 55000
+ELSEIF ABL:기교 == 9
+	A = 70000
+ENDIF
+
+;프라이드높음
+IF TALENT:프라이드높음
+	TIMES A , 1.50
+ENDIF
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+ENDIF
+
+;0(이)가 되었을 경우는 1으로 한다
+SIF A == 0
+	A = 1
+
+;습득의 구슬로 올린다
+SIF JUEL:습득 < A
+	I |= 1
+
+IF I == 0
+	Z = 1
+ENDIF
+RETURN 1
+
+

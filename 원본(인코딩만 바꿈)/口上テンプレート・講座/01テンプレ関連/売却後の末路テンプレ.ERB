@@ -1,0 +1,64 @@
+﻿;売却後エピソードテンプレ　for eratohoA
+;例によってX1をキャラ番号に置換
+;分岐条件とかは自由にいじるといいよ
+
+;このテンプレの修正・加筆・改変・二次配布・その他はご自由にどうぞ。
+
+;-------------------------------------------------
+;売却後エピソード関係
+;-------------------------------------------------
+@SET_SLAVE_AFTERWARDS_KX1
+;エピソード番号決定
+;関数内で変更禁止変数	A,T(WORK.ERBで使用)
+;売却するとキャラデータが削除されるので、どのキャラを売ってどのエピソードになるかを削除される前にFLAGに記録しておく
+;Zに入力したエピソード番号が記録される
+;能力とかで分岐
+;恋慕系+反発刻印Lv3未満
+IF (TALENT:恋慕 || TALENT:親愛) && MARK:反発刻印 < 3
+	Z = 1
+;淫乱系
+ELSEIF TALENT:淫乱 || TALENT:娼婦
+	Z = 2
+;服従系
+ELSEIF TALENT:服従 || TALENT:隷属
+	Z = 3
+;反発刻印Lv3
+ELSEIF MARK:反発刻印 == 3
+	Z = 4
+;それ以外
+;エピソードなし
+ELSE
+	Z = 0
+ENDIF
+@SHOW_SLAVE_AFTERWARDS_KX1
+;エピソード表示
+;関数内で変更禁止変数	Y(エンディング番号に使用),W(@SHOW_AFTERWARDSで一時変数として使用)
+;エピソード番号0の場合、この関数は呼ばれないはず
+DRAWLINE
+PRINTFORMW 　○○のその後
+DRAWLINE
+;Zにエピソード番号が入っているのでそれで分岐
+;Yにエンディング番号が入る。詳しくは内容.txtで。
+;これを利用することにより「あなたがまだ元の屋敷にいるかどうか」といった分岐が作れるかも
+;例：あなたが屋敷にいると思われるエンディング：ノーマルエンド・ハーレムエンド・単体エンド系
+IF Z == 1
+	IF Y == 1 || Y == 5 || (Y >= 2000 && Y <= 4999)
+		PRINTFORMW 恋慕系売却エピソード　（%CALLNAME:MASTER%がまだ元の屋敷にいる）
+	ELSE
+		PRINTFORMW 恋慕系売却エピソード　（%CALLNAME:MASTER%は行方不明）
+	ENDIF
+ELSEIF Z == 2
+	PRINTFORMW 淫乱系エピソード
+ELSEIF Z == 3
+	PRINTFORMW 服従系エピソード
+ELSEIF Z == 4
+	PRINTFORMW 反発３エピソード
+ELSE
+	PRINTFORML [例外]エピソード番号{Z}が指定されました
+	PRINTFORML ・売却後に口上ファイルの改変・入れ替えなどを行った
+	PRINTFORML ・エピソード番号の対応がおかしい
+	PRINTFORML ・パッチ製作者が⑨
+	PRINTFORMW などの原因が考えられます。
+ENDIF
+DRAWLINE
+RETURN 0

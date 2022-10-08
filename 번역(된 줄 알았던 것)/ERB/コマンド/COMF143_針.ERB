@@ -1,0 +1,92 @@
+﻿;-------------------------------------------------
+;바늘를 찌른다
+;SM계 커맨드
+;-------------------------------------------------
+@COM143
+
+PRINTL 바늘를 찌른다
+STR:0 = 바늘를 찌른다
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;조
+IF TFLAG:56 == 3 && TEQUIP:지하실
+	;소비체력, 기력
+	LOSEBASE:체력 += 350
+	LOSEBASE:기력 += 500
+	
+	SOURCE:통증 += 6000
+;성기
+ELSEIF TFLAG:56 == 1
+	;소비체력, 기력
+	LOSEBASE:체력 += 200
+	LOSEBASE:기력 += 350
+	
+	SOURCE:통증 += 6000
+	SOURCE:쾌C += 100
+;유두
+ELSEIF TFLAG:56 == 2
+	;소비체력, 기력
+	LOSEBASE:체력 += 100
+	LOSEBASE:기력 += 100
+	
+	SOURCE:통증 += 2500
+	SOURCE:쾌B += 100
+ELSE
+	;소비체력, 기력
+	LOSEBASE:체력 += 50
+	LOSEBASE:기력 += 50
+	
+	SOURCE:통증 += 1500
+ENDIF
+
+SOURCE:두려움 += 2000
+;지하실에 있으면두려움의 소스 추가
+SIF TEQUIP:지하실
+	TIMES SOURCE:두려움, 1.50
+
+SOURCE:일탈 += 500
+SOURCE:반발 += 1200
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;고통의 파라미터에 의한고통의 소스 증가는 먼저 처리해 둔다
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증, 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증, 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증, 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증, 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증, 3.00
+ENDIF
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;게이경험라든지 가산
+CALL COM_EXP(2)
+
+;의존도 벡터
+TFLAG:33 = 5
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+
+

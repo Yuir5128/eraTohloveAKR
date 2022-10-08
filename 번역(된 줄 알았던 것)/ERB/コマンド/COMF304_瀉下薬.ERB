@@ -1,0 +1,79 @@
+﻿;-------------------------------------------------
+;구토제
+;약품계 커맨드
+;-------------------------------------------------
+@COM304
+
+IF TEQUIP:촉수
+	PRINTL 촉수구토제
+	STR:0 = 촉수구토제
+ELSE
+	PRINTL 구토제
+	STR:0 = 구토제
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+
+;사용한 아이템 줄인다
+SIF TEQUIP:촉수 == 0
+	ITEM:48 -= 1
+
+TEQUIP:구토제 = 1
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+;조교자가조제지식를 가지고 있으면 소비를 억제 당한다
+IF TALENT:PLAYER:조제지식
+	LOSEBASE:체력 += 0
+	LOSEBASE:기력 += 50
+ELSE
+	LOSEBASE:체력 += 10
+	LOSEBASE:기력 += 100
+ENDIF
+
+SOURCE:통증 += 200
+SOURCE:일탈 += 500
+SOURCE:반발 += 200
+
+IF BASE:변의 >= 60
+	BASE:변의 += 30
+ELSE
+	BASE:변의 += 60
+ENDIF
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;스캇중독
+IF ABL:스캇중독 == 0
+	TIMES SOURCE:일탈, 2.00
+	TIMES SOURCE:반발, 2.00
+ELSEIF ABL:스캇중독 == 1
+	SOURCE:성취감 += 30
+	TIMES SOURCE:일탈, 1.00
+	TIMES SOURCE:반발, 1.00
+ELSEIF ABL:스캇중독 == 2
+	SOURCE:성취감 += 50
+	TIMES SOURCE:일탈, 0.70
+	TIMES SOURCE:반발, 0.70
+ELSEIF ABL:스캇중독 == 3
+	SOURCE:성취감 += 100
+	TIMES SOURCE:일탈, 0.50
+	TIMES SOURCE:반발, 0.50
+ELSEIF ABL:스캇중독 == 4
+	SOURCE:성취감 += 300
+	TIMES SOURCE:일탈, 0.30
+	TIMES SOURCE:반발, 0.30
+ELSEIF ABL:스캇중독 == 5
+	SOURCE:성취감 += 1000
+	TIMES SOURCE:일탈, 0.10
+	TIMES SOURCE:반발, 0.10
+ENDIF
+
+
+RETURN 1
+

@@ -1,0 +1,79 @@
+﻿;-------------------------------------------------
+;瀉下薬
+;薬品系コマンド
+;-------------------------------------------------
+@COM304
+
+IF TEQUIP:触手
+	PRINTL 触手瀉下薬
+	STR:0 = 触手瀉下薬
+ELSE
+	PRINTL 瀉下薬
+	STR:0 = 瀉下薬
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+
+;使ったアイテム減らす
+SIF TEQUIP:触手 == 0
+	ITEM:48 -= 1
+
+TEQUIP:瀉下薬 = 1
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+;調教者が調合知識を持っていれば消費を抑えられる
+IF TALENT:PLAYER:調合知識
+	LOSEBASE:体力 += 0
+	LOSEBASE:気力 += 50
+ELSE
+	LOSEBASE:体力 += 10
+	LOSEBASE:気力 += 100
+ENDIF
+
+SOURCE:痛み += 200
+SOURCE:逸脱 += 500
+SOURCE:反発 += 200
+
+IF BASE:便意 >= 60
+	BASE:便意 += 30
+ELSE
+	BASE:便意 += 60
+ENDIF
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;スカ中毒
+IF ABL:スカ中毒 == 0
+	TIMES SOURCE:逸脱 , 2.00
+	TIMES SOURCE:反発 , 2.00
+ELSEIF ABL:スカ中毒 == 1
+	SOURCE:達成感 += 30
+	TIMES SOURCE:逸脱 , 1.00
+	TIMES SOURCE:反発 , 1.00
+ELSEIF ABL:スカ中毒 == 2
+	SOURCE:達成感 += 50
+	TIMES SOURCE:逸脱 , 0.70
+	TIMES SOURCE:反発 , 0.70
+ELSEIF ABL:スカ中毒 == 3
+	SOURCE:達成感 += 100
+	TIMES SOURCE:逸脱 , 0.50
+	TIMES SOURCE:反発 , 0.50
+ELSEIF ABL:スカ中毒 == 4
+	SOURCE:達成感 += 300
+	TIMES SOURCE:逸脱 , 0.30
+	TIMES SOURCE:反発 , 0.30
+ELSEIF ABL:スカ中毒 == 5
+	SOURCE:達成感 += 1000
+	TIMES SOURCE:逸脱 , 0.10
+	TIMES SOURCE:反発 , 0.10
+ENDIF
+
+
+RETURN 1
+

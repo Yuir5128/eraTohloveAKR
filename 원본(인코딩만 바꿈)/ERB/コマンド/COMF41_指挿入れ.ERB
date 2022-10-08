@@ -1,0 +1,137 @@
+﻿;-------------------------------------------------
+;指挿入れ
+;Ｖ系調教コマンド
+;-------------------------------------------------
+@COM41
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教が指挿入れ、Ｇスポット刺激だとＧスポット刺激に
+	IF PREVCOM == 41 || PREVCOM == 500
+		CALL COM_ABLE500
+		SIF RESULT == 1
+			JUMP COM500
+	ENDIF
+ENDIF
+
+PRINTL 指挿入れ
+STR:0 = 指挿入れ
+CALL KOJO_MESSAGE_COM
+
+;ストッキングびりびりフラグ
+IF TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6
+	TFLAG:55 = 1
+ENDIF
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 10
+LOSEBASE:気力 += 50
+
+SOURCE:快Ｖ += 80
+IF PREVCOM == 77
+	SOURCE:痛み += 5
+ELSE
+	SOURCE:痛み += 10
+ENDIF
+SOURCE:露出 += 10
+SOURCE:逸脱 += 20
+SOURCE:反発 += 20
+
+IF TEQUIP:ローター挿入 || TEQUIP:バイブ
+	SIF TEQUIP:バイブ
+		TIMES SOURCE:快Ｖ , 1.50
+	SIF TEQUIP:ローター挿入
+		TIMES SOURCE:快Ｖ , 1.20
+
+	SIF TEQUIP:バイブ
+		SOURCE:痛み += 50
+	SIF TEQUIP:ローター挿入
+		SOURCE:痛み += 20
+ENDIF
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+IF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 20
+	;処女
+	SIF TALENT:処女
+		SOURCE:鬱屈 += 10
+ENDIF
+
+;スキンシップ好きだと情愛のソース追加
+SIF TALENT:スキンシップ好き && !TEQUIP:ローター挿入 && !TEQUIP:バイブ
+	SOURCE:情愛 += 50
+
+;Vへの苦痛は先に処理しておく
+;EXP:Ｖ経験をみる（処女の反感は別途処理済みなので省略）
+IF EXP:Ｖ経験 < EXPLV:1
+	TIMES SOURCE:痛み , 2.50
+ELSEIF EXP:Ｖ経験 < EXPLV:2
+	TIMES SOURCE:痛み , 0.80
+	TIMES SOURCE:反発 , 1.20
+ELSEIF EXP:Ｖ経験 < EXPLV:3
+	TIMES SOURCE:痛み , 0.40
+ELSEIF EXP:Ｖ経験 < EXPLV:4
+	TIMES SOURCE:痛み , 0.10
+ELSEIF EXP:Ｖ経験 < EXPLV:5
+	TIMES SOURCE:痛み , 0.00
+ELSEIF EXP:Ｖ経験 >= EXPLV:5
+	TIMES SOURCE:痛み , 0.00
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	TIMES SOURCE:痛み , 1.20
+	TIMES SOURCE:反発 , 1.50
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	TIMES SOURCE:痛み , 0.70
+	TIMES SOURCE:反発 , 1.20
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	TIMES SOURCE:痛み , 0.40
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	TIMES SOURCE:痛み , 0.10
+ELSEIF PALAM:潤滑 >= PALAMLV:4
+	TIMES SOURCE:痛み , 0.10
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;調教者の手⇔奴隷のＶ膣内の汚れが移動
+;道具を使用する場合は汚れは移動しない
+IF TEQUIP:ローター挿入 || TEQUIP:バイブ
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;Ｖ経験
+EXP:Ｖ経験 += 1
+PRINTL Ｖ経験＋１
+
+;ゲイ経験とか加算
+CALL COM_EXP(1)
+
+;依存度ベクトル
+IF TALENT:処女
+	TFLAG:33 = 3
+ELSE
+	TFLAG:33 = 1
+ENDIF
+
+
+RETURN 1
+
+

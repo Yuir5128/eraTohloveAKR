@@ -1,0 +1,264 @@
+﻿;마조끼의 가부
+@ISABLUP9
+;연모,친애,복종,예속는 MAXLV10
+IF ABL:마조끼 >= 10
+	RETURN 0
+ELSEIF ABL:마조끼 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP9
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;마조끼
+@ABLUP9
+DRAWLINE
+;연모,친애,복종,예속는 MAXLV10
+IF ABL:마조끼 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:마조끼 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP9
+
+;LV3로부터 4에 올릴 때는이상경험필요(소질:[해방]라면 무시할 수 있다)
+IF ABL:마조끼 == 3 && TALENT:해방 == 0
+	PRINTFORML %EXPNAME:50%있어,한편
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[해방]라면 무시할 수 있다)
+ELSEIF ABL:마조끼 == 4 && TALENT:해방 == 0
+	PRINTFORML %EXPNAME:50%3이상,한편
+;LV8로부터 9에 올릴 때는이상경험 5 이상 필요(소질:[해방]라면 무시할 수 있다)
+ELSEIF ABL:마조끼 == 4 && TALENT:해방 == 0
+	PRINTFORML %EXPNAME:50%5이상,한편
+ENDIF
+
+IF B > 0
+	PRINTFORM [0] - %PALAMNAME:10%의 구슬×{A},%PALAMNAME:6%의 구슬×{B}
+	SIF C > 0
+		PRINTFORM ,%EXPNAME:30%{C}이상
+	PRINT ……
+
+	IF I == 0
+		PRINT OK
+	ELSE
+		SIF I & 1
+			PRINT 주불발 
+		SIF I & 2
+			PRINT 경험불발 
+		SIF I & 4
+			PRINT 능력불발 
+	ENDIF
+	PRINTL 
+ELSE
+	I = 256
+ENDIF
+
+IF D > 0
+	PRINTFORM [1] - %PALAMNAME:10%의 구슬×{D},%PALAMNAME:7%의 구슬×{E}
+	IF C > 0
+		PRINTFORM ,%EXPNAME:30%{C}이상
+	ENDIF
+	PRINTFORM ,%EXPNAME:2%1이상……
+	
+	IF J == 0
+		PRINT OK
+	ELSE
+		SIF J & 1
+			PRINT 주불발 
+		SIF J & 2
+			PRINT 경험불발 
+		SIF J & 4
+			PRINT 능력불발 
+	ENDIF
+	PRINTL 
+ELSE
+	J = 256
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 1) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF J == 256 && RESULT == 1
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:마조끼 += 1
+
+IF RESULT == 0
+	JUEL:고통 -= A
+	JUEL:욕정 -= B
+ELSEIF RESULT == 1
+	JUEL:고통 -= D
+	JUEL:굴복 -= E
+ENDIF
+
+PRINTFORMW %ABLNAME:9%의 레벨이{ABL:마조끼}가 되었습니다
+
+;마조끼LVUP 판정
+@DECIDE_ABLUP9
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+J = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:마조끼 == 0
+	A = 100
+	B = 100
+	C = 0
+	D = 100
+	E = 100
+ELSEIF ABL:마조끼 == 1
+	A = 500
+	B = 500
+	C = 0
+	D = 500
+	E = 300
+ELSEIF ABL:마조끼 == 2
+	A = 1200
+	B = 1000
+	C = 0
+	D = 1500
+	E = 1000
+ELSEIF ABL:마조끼 == 3
+	A = 0
+	B = 0
+	C = 10
+	D = 3000
+	E = 6000
+ELSEIF ABL:마조끼 == 4
+	A = 0
+	B = 0
+	C = 50
+	D = 5000
+	E = 12000
+ELSEIF ABL:마조끼 == 5
+	A = 0
+	B = 0
+	C = 100
+	D = 8000
+	E = 15000
+ELSEIF ABL:마조끼 == 6
+	A = 0
+	B = 0
+	C = 150
+	D = 12000
+	E = 20000
+ELSEIF ABL:마조끼 == 7
+	A = 0
+	B = 0
+	C = 200
+	D = 15000
+	E = 25000
+ELSEIF ABL:마조끼 == 8
+	A = 0
+	B = 0
+	C = 250
+	D = 25000
+	E = 35000
+ELSEIF ABL:마조끼 == 9
+	A = 0
+	B = 0
+	C = 350
+	D = 30000
+	E = 40000
+ENDIF
+
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A ,2.00
+	TIMES B ,2.00
+	TIMES C ,2.00
+	TIMES D ,2.00
+	TIMES E ,2.00
+ENDIF
+;마조
+IF TALENT:마조
+	TIMES A ,0.50
+	TIMES B ,0.50
+	TIMES C ,0.50
+	TIMES D ,0.50
+	TIMES E ,0.50
+ENDIF
+
+
+;LV3로부터 4에 올릴 때는이상경험필요(소질:[해방]라면 무시할 수 있다)
+IF ABL:마조끼 == 3 && TALENT:해방 == 0
+	IF EXP:이상경험 == 0
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[해방]라면 무시할 수 있다)
+ELSEIF ABL:마조끼 == 4 && TALENT:해방 == 0
+	IF EXP:이상경험 < 3
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV8로부터 9에 올릴 때는이상경험 5 이상 필요(소질:[해방]라면 무시할 수 있다)
+ELSEIF ABL:마조끼 == 8 && TALENT:해방 == 0
+	IF EXP:이상경험 < 5
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+ENDIF
+
+IF B > 0
+	;고통의 구슬로 올린다
+	SIF JUEL:고통 < A
+		I |= 1
+	;욕정의 구슬로 올린다
+	SIF JUEL:욕정 < B
+		I |= 1
+
+	IF I == 0
+		Z = 1
+	ENDIF
+ELSE
+	I = 256
+ENDIF
+
+IF D > 0
+	;고통의 구슬로 올린다
+	SIF JUEL:고통 < D
+		J |= 1
+	;굴복의 구슬로 올린다
+	SIF JUEL:굴복 < E
+		J |= 1
+	;이 경우고통쾌락경험가 필요한 일이 있어
+	SIF EXP:고통쾌락경험 < C
+		J |= 2
+	;이 경우절정경험가 1이상 필요
+	SIF EXP:절정경험 < 1
+		J |= 2
+	
+	IF J == 0
+		Z = 1
+	ENDIF
+ELSE
+	J = 256
+ENDIF
+RETURN 1
+

@@ -1,0 +1,239 @@
+﻿;-------------------------------------------------
+;펠라치오
+;봉사계 커맨드
+;-------------------------------------------------
+@COM71
+
+;-------------------------------------------------
+;특수 파생 처리
+;-------------------------------------------------
+;전회와 이번 조교자가 같음
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;조수입욕중, 전회 커맨드가 조수입욕이나 2 개 페라= 「2 개 페라」
+	IF PREVCOM == 407 || PREVCOM == 516
+		CALL COM_ABLE516
+		IF RESULT == 1
+			TFLAG:40 = 0
+			TFLAG:41 = 0
+			TFLAG:49 = 20
+			JUMP COM516
+		ENDIF
+	;조수삽입중, 전회 커맨드가 조수삽입 때= 「샌드위치」
+	ELSEIF PREVCOM == 405 || PREVCOM == 406
+		CALL COM_ABLE515
+		IF RESULT == 1
+			TFLAG:40 = 0
+			IF PREVCOM == 405
+				TFLAG:41 = 1
+			ELSE
+				TFLAG:41 = 2
+			ENDIF
+			TFLAG:49 = 8
+			JUMP COM515
+		ENDIF
+	;전회 커맨드가촉수에범하게시킨다 때, 「샌드위치 시킨다」
+	ELSEIF PREVCOM == 270 || PREVCOM == 271
+		CALL COM_ABLE520
+		IF RESULT == 1
+			TFLAG:40 = 0
+			IF PREVCOM == 270
+				TFLAG:41 = 6
+			ELSE
+				TFLAG:41 = 7
+			ENDIF
+			TFLAG:49 = 8
+			JUMP COM520
+		ENDIF
+	;전회 커맨드가 샌드위치 때
+	ELSEIF PREVCOM == 515
+		;조수가 노예에게 삽입하고 있으면 다시 「샌드위치」에
+		IF TFLAG:41 == 1 || TFLAG:41 == 2
+			CALL COM_ABLE515
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:49 = 8
+				JUMP COM515
+			ENDIF
+		;조수가 주인에게 삽입하고 있으면 「샌드위치 시킨다」에
+		ELSEIF TFLAG:41 == 6 || TFLAG:41 == 7
+			CALL COM_ABLE520
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:49 = 8
+				JUMP COM520
+			ENDIF
+		ENDIF
+	;전회의 조교가펠라한다, 커닐링구스, 식스나인 때, 식스나인에
+	ELSEIF PREVCOM == 31 || PREVCOM == 40 || PREVCOM == 503
+		CALL COM_ABLE503
+		SIF RESULT == 1
+			JUMP COM503
+	ENDIF
+ENDIF
+
+;아무것도 읽지 않고 여기에 왔을 때는 플래그 해제
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 펠라치오
+STR:0 = 펠라치오
+
+
+;-------------------------------------------------
+;실행 판정 처리
+;-------------------------------------------------
+;모든 명령에 공통의 요소를 고려
+;(순종가 높다고 명령에 따르기 쉬운 등)
+CALL COM_ORDER
+
+;실행 판정 조작
+CALL KOJO_DENIAL_PLUS
+
+;합계를 표시(24이상으로 실행)
+PRINT  = 
+PRINTV A
+
+V = 24
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행치
+PRINTV V
+
+;실행 불가입상/실행 판정 조작
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;실행 할 수 없다
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;실행자가 노예인 플래그
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;사정게이지 체크
+;-------------------------------------------------
+B = 950
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 50
+
+SOURCE:애정 += 100
+
+;스킨십선호라면애정의 소스 추가
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+SOURCE:성행동 += 300
+SOURCE:성취감 += 150
+SOURCE:굴복 += 700
+SOURCE:일탈 += 200
+SOURCE:반발 += 200
+
+;위 쪽으로 계산한 더러운 데이터
+SOURCE:불결 += Y*10 + 60
+
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 400
+
+;조교자가말자지의 경우
+IF TALENT:PLAYER:말자지
+	;공포와굴복의 소스를 추가
+	SOURCE:두려움 += 200
+	SOURCE:굴복 += 200
+ENDIF
+
+
+;-------------------------------------------------
+;사정체크
+;-------------------------------------------------
+CALL SAMEN_CHECK(PLAYER, 1)
+
+;사정시의 처리
+IF E >= 1
+	;사정처 타입의 설정
+	TFLAG:703 = 4
+	;사정처 선택의 가능·불가
+	TFLAG:704 = 1
+	;범용적인 처리는 이 함수로 실시한다
+	;(사정게이지의 재계산이나사정경험의 상승과 공통 부분의 표시)
+	CALL SAMEN_SHOOT
+ENDIF
+
+SIF E >= 1
+	TFLAG:8 = 1
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+CALL COM_STAIN
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;펠라경험
+PRINTL 펠라경험＋1
+EXP:펠라경험 += 1
+
+;게이경험라든지 가산
+CALL COM_EXP(7)
+
+;애정경험
+IF (TALENT:연모 == 1 || TALENT:친애 == 1) && ASSIPLAY == 0
+	EXP:애정경험 += 1
+	PRINTL 애정경험+1
+ENDIF
+
+;노예가고양이혀소유의 경우는, 노예에게가학쾌락경험를 추가
+IF TALENT:TARGET:고양이혀
+	EXP:가학쾌락경험 += 1
+	PRINTL 기학 경험＋1
+ENDIF
+
+;의존도 벡터
+TFLAG:33 = 1
+
+;의존도 보정치(주인 또한연모, 음란, 복종로 1. 친애, 창부, 예속로 2)
+IF (TALENT:연모 || TALENT:음란 || TALENT:복종) && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF (TALENT:친애 || TALENT:창부 || TALENT:예속) && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+;봉사 쾌락 플래그
+TFLAG:100 = 1
+
+RETURN 1
+
+
+

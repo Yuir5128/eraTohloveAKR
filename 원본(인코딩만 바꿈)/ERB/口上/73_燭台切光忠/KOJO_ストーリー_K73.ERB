@@ -1,0 +1,1026 @@
+﻿;=================================================
+;燭台切口上
+;改変流用・加筆修正はお好きにどうぞ。
+;=================================================
+;
+;eratohoA及びeratohoA系列専用口上テンプレート
+;1と01をキャラ番号に置換し、Y1を助手のキャラ番号に置換してください
+;ただし、キャラ番号が一桁のキャラの場合、1,Y1は1、01は01のように変えてください
+;そしてコマンド内の適当な条件の下のPRINTFORMWの後ろに半角スペースを置いてセリフを追加してください
+;口上を追加しないコマンドは無記入でも構いませんが、CFLAG:XXXの頭に『;』をつけてコメントアウトすると尚良いでしょう
+;エキストラ構文など、コメントアウトされている構文を使う際には、『;』を外してコメントアウトを解除する必要があります
+;最後にread meにも目を通しておくことをお勧めします
+;
+;-------------------------------------------------
+;==================================================
+;口上ファイルの存在判定（XXをキャラ番号に置換　※1は01と表記）
+;==================================================
+@EVENTSHOP
+;#PRI
+;FLAG:173 = 1
+;SIF FLAG:7 == 0
+;FLAG:7 = 2
+
+
+
+;==================================================
+;EVENTTRAIN関係（Xをキャラ番号に置換）
+;調教開始時のセリフ CFLAG 201～219を使用
+;==================================================
+@EVENTTRAIN
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF NO:TARGET != 73
+	RETURN 0
+@KOJO_EVENTTRAIN_K73
+
+;==================================================
+;エキストラモード構文　FIRSTTIME(1)
+;はいを選択した時に初調教時に口上設定用の素質に変更できます
+;下記に処女化する場合の構文をサンプルとして載せておきます
+;==================================================
+;IF FIRSTTIME(1)
+;	PRINTL 処女モードに移行しますか？
+;	PRINTL [0] はい
+;	PRINTL [1] いいえ
+;	$INPUT_LOOP_EXTRA
+;	INPUT
+;	IF RESULT == 0
+;		PRINTFORMW ―処女モードに素質、能力を変更します―
+;		TALENT:TARGET:0 = 1
+;		ABL:TARGET:4 = 0
+;		EXP:TARGET:0 = 0
+;	ELSEIF RESULT == 1
+;		PRINTFORMW ―通常モードで調教を開始します―
+;	ELSE
+;		GOTO INPUT_LOOP_EXTRA
+;	ENDIF
+
+;ENDIF
+
+;--------------------------------------------------
+;特定助手、主人時に特殊助手口上を呼び出す(Y1を特定助手、Zを主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL EVENTTRAIN_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL EVENTTRAIN_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;--------------------------------------------------
+;簡易助手口上の発動時に初調教時口上をスキップ（Y1を助手のキャラ番号にする）
+;複数人いる際には、SIF NO:ASSI == Y1 || NO:ASSI == Z1と追加していく
+;--------------------------------------------------
+;IF CFLAG:201 == 0 && ASSI >= 0
+;	SIF NO:ASSI == Y1
+;		CFLAG:201 = 1
+;ENDIF
+
+
+
+;==================================================
+;調教開始時（一回のみ） CFLAG201
+;FIRSTTIME２～１５と、CFLAG:201を併用。
+;FIRSTTIMEを使うことで、１度しか表示されなくなる。
+;CFLAG:201はどこまで調教が進んだか、っていうのを記録するため。
+;==================================================
+DRAWLINE
+;--------------------------------------------------
+;初調教時　FIRSTTIME(2)
+;--------------------------------------------------
+IF FIRSTTIME(2)
+	IF NO:MASTER == 0 
+		;貞ちゃん
+;		IF NO:ASSI == 69
+		;助手なし、他刀剣男士
+;		ELSEIF
+			PRINTFORMW 「はじめまして、君が審神者だね」
+			PRINTFORMW 「僕は、燭台切光忠。伊達政宗公が使ってた刀なんだ」
+			PRINTFORMW 「これから宜しく……って、ちょっと、どこに連れて行く気だい？」
+			PRINTFORMW 「………僕を…調教する？　………面白くない冗談だね」
+			PRINTFORMW 胡乱な目でこちらを見る%CALLNAME%に、あなたは手を伸ばした…
+;		ENDIF
+	ELSE
+	;刀剣男士
+		PRINTFORMW 「もしかして、出迎えに来てくれたのかな？　ありがとう」
+			IF NO:MASTER == 116
+;				PRINTFORMW 『光忠…』
+				PRINTFORM 「ふふ。久し振りだね、
+							CALL PNAME_73_116
+				PRINTFORML 。
+				PRINTFORMW 　同じ主の元で戦う仲間として、これから宜しく頼むよ」
+			;貞ちゃん
+			ELSEIF NO:MASTER == 69
+;				PRINTFORMW 『みっちゃん…』
+				PRINTFORML 「ふふ。久しぶりだね、貞ちゃん。元気にしてたかい？
+				PRINTFORMW 　また会えて嬉しいな。これからよろしく頼むよ」
+			ELSE
+				PRINTFORMW 「僕は、燭台切光忠。同じ主の元で戦う仲間として、これから宜しく頼むよ」
+			ENDIF
+		PRINTFORMW そう言って差し出された%CALLNAME%の手を掴み、目的の部屋へと引っ張っていく
+		PRINTFORMW 「ちょ、ちょっと、どこに行くんだい？　僕、主に挨拶に行かないと……」
+		PRINTFORMW %CALLNAME:PLAYER%が『主命』だと告げると、不穏を感じ取ったのか、%CALLNAME%の身体が強張った
+
+	ENDIF
+	CFLAG:201 = 1
+	RETURN 0
+
+;--------------------------------------------------
+;崩壊　FIRSTTIME(3)
+;--------------------------------------------------
+;持て余したため一度コメントアウト
+ELSEIF TALENT:崩壊 && FIRSTTIME(3)
+	CFLAG:201 = 5
+;	PRINTFORMW 部屋にやってきた%CALLNAME:PLAYER%をぼんやりと見つめる%CALLNAME%に、どこか異変を感じた
+;	SIF NO:MASTER == 118
+;		PRINTFORMW 『…燭台切？』
+;	SIF NO:MASTER == 49
+;		PRINTFORMW 『…燭台切の旦那？』
+;	PRINTFORML 何度か%CALLNAME%の名を呼ぶが、%CALLNAME%は不思議そうな顔を向けるばかりだ
+;	PRINTFORM 「…『%CALLNAME%』とは何方の事ですか？　それに…これは人の身体？　兄上たちは？ …僕はどうなったのですか
+;	SIF NO:MASTER == 118
+;		PRINTFORM 、国重さま
+;	SIF NO:MASTER == 49
+;		PRINTFORM 、薬研さま
+;	PRINTFORMW ？」
+;	PRINTFORML %CALLNAME:PLAYER%は試しに%CALLNAME%に触れるが、%CALLNAME%はその手の意味を理解していないようだ
+;	PRINTFORMW （これは、まさか…）
+;	PRINTFORMW %CALLNAME%は【崩壊】と共に、号を貰う前に退行してしまったようだ…
+	RETURN 0
+
+;--------------------------------------------------
+;反発刻印刻印Lv3　FIRSTTIME(4)
+;--------------------------------------------------
+ELSEIF MARK:反発刻印 == 3 && FIRSTTIME(4)
+	CFLAG:201 = 2
+	PRINTFORML 「…君は僕を怒らせようとしてるのかな」
+	PRINTFORMW %CALLNAME%は憤りを隠さず睨みつけてきた
+	RETURN 0
+
+;--------------------------------------------------
+;屈服刻印Lv2　FIRSTTIME(5)
+;--------------------------------------------------
+ELSEIF MARK:屈服刻印 == 2 && FIRSTTIME(5)
+	CFLAG:201 = 3
+	
+	PRINTFORML 「はあ……君の考えていることが分からないよ…」
+	PRINTFORMW %CALLNAME%は疲れたように溜め息を吐いた
+	RETURN 0
+
+;--------------------------------------------------
+;屈服刻印Lv3＋陥落素質なし　FIRSTTIME(6)
+;--------------------------------------------------
+ELSEIF MARK:屈服刻印 == 3 && !KANRAKU(TARGET) && FIRSTTIME(6)
+	CFLAG:201 = 4
+
+	;貞ちゃん
+	IF NO:MASTER == 69
+		PRINTFORML 「貞ちゃん。君は僕をどうしたいのかな…」
+		PRINTFORMW %CALLNAME%は戸惑いを隠さずに、こちらを見つめている
+		PRINTL [0] 恋慕させたい
+		PRINTL [1] 淫乱にしたい
+		PRINTL [2] 服従させたい
+		$INPUT_LOOP_3kuppuku69
+		INPUT
+		IF RESULT == 0
+			PRINTFORMW 『俺、みっちゃんと仲良ししたいな』
+			PRINTFORMW 「…それ、素直な意味で言ってないよね？」
+			PRINTFORMW 『なになに、俺にやらしーことされるのでも想像した？』
+			PRINTFORMW 「それは……君がいつも僕にいやらしいことばかりするからね」
+			PRINTFORML %CALLNAME:PLAYER%が『みっちゃんのえっちー』と揶揄うと、
+			PRINTFORMW %CALLNAME%は羞恥からか、誤魔化すように眉を顰めた
+			PRINTFORML 
+			PRINTFORML 
+			PRINTFORMW 
+		ELSEIF RESULT == 1
+			PRINTFORMW 『俺、みっちゃんとエッチなこと沢山したいな』
+			PRINTFORMW 「え、えっちなことって……」
+			PRINTFORMW %CALLNAME%は呆れたように、しかし艶っぽい溜息を吐いた
+			PRINTFORML 
+			PRINTFORML 
+			PRINTFORMW 
+		ELSEIF RESULT == 2
+			PRINTFORMW 『俺、みっちゃんを俺の物にしたいな』
+			PRINTFORMW 「君の”物”か……僕たち、刀の付喪神なのに、変な感じがするね」
+			PRINTFORML 『そうかなあ。　元が付喪神だからって、今は人の身体なんだから
+			PRINTFORMW 　人間みたいな欲が生まれたっておかしくないと思うけど？』
+			PRINTFORML 「…僕にはわからないかな」
+			PRINTFORMW %CALLNAME%は疲れたように溜め息を吐いた
+			PRINTFORML 
+			PRINTFORML 
+			PRINTFORMW 
+		ELSE
+			GOTO INPUT_LOOP_3kuppuku69
+		ENDIF
+
+	ELSE
+		PRINTFORML 「…やあ、\@ TIME == 0 ? 今日 # 今夜 \@は僕に何をするつもりなんだい？」
+		PRINTFORMW %CALLNAME%は気怠げに%CALLNAME:PLAYER%を出迎えた
+	ENDIF
+	RETURN 0
+
+;--------------------------------------------------
+;下位陥落　FIRSTTIME(7)
+;--------------------------------------------------
+ELSEIF (TALENT:恋慕 || TALENT:淫乱 || TALENT:服従) && FIRSTTIME(7)
+	;恋慕
+	IF TALENT:恋慕
+		PRINTFORMW 「…君のこと、待ってたんだ」
+;		IF NO:MASTER == 0
+;			PRINTFORMW 
+		;貞ちゃん
+		IF NO:MASTER == 69
+			PRINTFORMW 『…みっちゃん？』
+			PRINTFORMW 「貞ちゃんは……僕の事をどう思ってるんだい？」
+			PRINTL [0] 好き
+			PRINTL [1] 黙る
+			$INPUT_LOOP_renbo69
+			INPUT
+			;好き
+			IF RESULT == 0
+				PRINTFORMW 『みっちゃんのことは好きだぜ。当たり前だろ？』
+				PRINTFORMW 「僕の事好きだって言うのなら、どうしてこんな……いや、今更愚問かな」
+				PRINTFORMW 「君の事を思うなら、最初に止めさせておくべきだったんだ…」
+				PRINTFORMW %CALLNAME%は項垂れ、悲痛な声で言った
+			;好きじゃない
+			ELSEIF RESULT == 1
+				PRINTFORMW 「だんまりはひどいな。……何か言ってくれないか」
+				PRINTFORMW 「それとも……僕の事を気遣って答えられない？」
+				PRINTFORMW 『…みっちゃん』
+				PRINTFORMW 「……困らせてしまったね。ごめん、今のは忘れてくれ」
+				PRINTFORMW %CALLNAME%は笑みを浮かべたが、その声音はどこか硬かった
+			ELSE
+				GOTO INPUT_LOOP_renbo69
+			ENDIF
+
+		;大倶利伽羅。
+		ELSEIF NO:MASTER == 116
+			PRINTFORMW 『光忠……』
+			PRINTFORM 「ねえ、
+						CALL PNAME_73_116
+			PRINTFORMW 。君は僕のことをどう思ってるんだい？」
+			PRINTL [0] 『嫌いじゃない』
+			PRINTL [1] 『鬱陶しい』
+			$INPUT_LOOP_renbo116
+			INPUT
+			;嫌いじゃない
+			IF RESULT == 0
+				PRINTFORMW 「……そうか。ありがとう。僕も、君のこと、嫌いじゃないよ」
+				PRINTFORMW %CALLNAME%は少し嬉しそうに笑った
+				exp:愛情経験 += 1
+			;鬱陶しい
+			ELSEIF RESULT == 1
+				PRINTFORMW 「……そうか。なら、こんなことしない方が君の為じゃあないのかい？ こんなことをする理由は何だ？」
+				PRINTFORMW 『………………』
+				PRINTFORM 「………黙りかい。
+							CALL PNAME_73_116
+				PRINTFORML ……君は、いったい何を考えているんだろうね…」
+				PRINTFORMW %CALLNAME%は困惑した様子だった
+			ELSE
+				GOTO INPUT_LOOP_renbo116
+			ENDIF
+		;長谷部
+		ELSEIF NO:MASTER == 118
+			PRINTFORMW 『何を企んでいる？』
+			PRINTFORML 「何も企んでなんかいないよ。ただ君に会いたかったんだ」
+			PRINTFORMW %CALLNAME:PLAYER%が『どうだかな』と返すと、%CALLNAME%は寂しげに笑った
+		;薬研
+		ELSEIF NO:MASTER == 49
+			PRINTFORMW 『そりゃまた、どうしてだ？ 俺っちは旦那に嫌われてると思ってたんだがな』
+			PRINTFORML 「ふふ、君はそう思うのかい？」
+			PRINTFORMW %CALLNAME%はくすくすと不敵に笑った
+		;鶴丸
+		ELSEIF NO:MASTER == 130
+			PRINTFORMW 『何か企んでいるのかい？』
+			PRINTFORM 「君じゃないんだから……深い意味はないよ。ただ、この部屋は何もなくて退屈だから、
+						CALL PNAME_73_130
+			PRINTFORML のような刺激が欲しかっただけさ」
+			PRINTFORMW そう言って%CALLNAME%は誤魔化すように笑った
+		ELSE
+			PRINTFORMW いつもより熱っぽい視線を向ける%CALLNAME%に、%CALLNAME:PLAYER%は訝しむ
+			PRINTFORML 「……ううん、深い意味はないよ。ここには君以外の刺激が無いものだから」
+			PRINTFORMW その様子を見抜いたのか、%CALLNAME%はそう言って誤魔化すように笑った
+		ENDIF
+	;淫乱
+	ELSEIF TALENT:淫乱
+		IF NO:MASTER == 0
+			PRINTFORMW 「刀の付喪神である僕をこんな身体にして……わるいひとだね」
+			PRINTFORMW %CALLNAME%は金色の眼を期待に濡らし、%CALLNAME:PLAYER%を出迎えた
+		ELSE
+			PRINTFORMW 「\@ TIME == 0 ? 今日 # 今夜 \@は僕にどんな気持ちのいいことを教えてくれるのかな？」
+			PRINTFORMW %CALLNAME%は金色の眼を期待に濡らし、%CALLNAME:PLAYER%を出迎えた
+		ENDIF
+	;服従
+	ELSE
+		PRINTFORMW 「\@ TIME == 0 ? 今日 # 今夜 \@は何を求められるんだろうって、少し楽しみなんだ」
+		SIF NO:MASTER == 0
+			PRINTFORMW 「やっぱり僕は付喪神だから、人に使われることに喜びを感じるのかもね。…長谷部くん程じゃあないけれど」
+		PRINTFORMW %CALLNAME%は金色の眼を期待に濡らし、%CALLNAME:PLAYER%を出迎えた
+	ENDIF
+	CFLAG:201 = 6
+	RETURN 0
+ENDIF
+
+;--------------------------------------------------
+;上位陥落　FIRSTTIME(8)
+;--------------------------------------------------
+IF (TALENT:親愛 || TALENT:娼婦 || TALENT:隷属) && FIRSTTIME(8)
+	;親愛
+	IF TALENT:親愛
+		PRINTFORMW 「君が待ち遠しかったよ」
+		;審神者。とりあえず枠だけ置いとく
+;		IF NO:MASTER == 0
+;			PRINTFORMW 
+
+		;貞ちゃん。
+		IF NO:MASTER == 69
+			PRINTFORMW そう言って%CALLNAME%は%CALLNAME:PLAYER%\@ TALENT:小柄体型 ? にそっと抱きついた # を優しく抱き寄せた \@
+			PRINTL [0] 抱き返す
+			PRINTL [1] 振り解く
+			$INPUT_LOOP_sinai69
+			INPUT
+			;抱き返す
+			IF RESULT == 0
+				PRINTFORML %CALLNAME:PLAYER%が%CALLNAME%の背に手を伸ばし抱き締めると、
+				PRINTFORMW %CALLNAME%は嬉しそうに腕の力を強めた
+				PRINTFORML 『どうしたんだよ、みっちゃん。今日は随分と甘えたじゃないか』
+				PRINTFORMW 「…甘えさせてくれないのかい？」
+				PRINTFORML 『はは。なんだよ、みっちゃん。いつもの恰好付けが形無しじゃん』
+				PRINTFORMW 「ん…貞ちゃんの前くらい、恰好悪い日があったっていいかなって…」
+				PRINTFORMW %CALLNAME%は甘えるように顔をすり寄せてきた
+				PRINTFORMW 
+				exp:愛情経験 += 1
+			;振り解く
+			ELSEIF RESULT == 1
+				PRINTFORML 「……つれないね。少しくらい触れさせてくれたっていいじゃないか」
+				PRINTFORMW %CALLNAME%はやれやれと肩を竦めた
+				PRINTFORMW 
+			ELSE
+				GOTO INPUT_LOOP_sinai69
+			ENDIF
+
+		;大倶利伽羅。分岐作ったし、もうちょっと加筆したい
+		ELSEIF NO:MASTER == 116
+			PRINTFORMW そう言って%CALLNAME%は%CALLNAME:PLAYER%\@ TALENT:小柄体型 ? にそっと抱きついた # を優しく抱き寄せた \@
+			PRINTL [0] 抱き返す
+			PRINTL [1] 振り解く
+			$INPUT_LOOP_sinai116
+			INPUT
+			;抱き返す
+			IF RESULT == 0
+				PRINTFORML %CALLNAME:PLAYER%が%CALLNAME%の背に手を伸ばし抱き締めると、
+				PRINTFORMW %CALLNAME%の\@ TALENT:小柄体型 ? 小さな身体 # 身体 \@が少し強張るのがわかった
+				PRINTFORML 『どうした。あんたから抱き付いてきたんだろう』
+				PRINTFORMW 「ええと……抱き返してくれるとは予想してなかったから…少し、驚いた」
+				PRINTFORML 『離れた方が良かったか』
+				PRINTFORMW 「ううん！ その…こっちの方が嬉しいから。もう少しだけ、このままで居させて欲しい」
+				PRINTFORMW %CALLNAME%は甘えるように顔をすり寄せてきた
+				PRINTFORMW 
+				exp:愛情経験 += 1
+			;振り解く
+			ELSEIF RESULT == 1
+				PRINTFORML 「……つれないね。少しくらい触れさせてくれたっていいじゃないか」
+				PRINTFORMW %CALLNAME%はやれやれと肩を竦めた
+				PRINTFORMW 
+			ELSE
+				GOTO INPUT_LOOP_sinai116
+			ENDIF
+
+		;長谷部
+		ELSEIF NO:MASTER == 118
+			PRINTFORMW 微笑みながらそう言って出迎えた%CALLNAME%に、%CALLNAME:PLAYER%は訝しげな目を向けた
+			PRINTFORMW 『またか…何を企んでいる。叱られたくなければ素直に言え』
+			PRINTFORMW 「…長谷部君って、僕の事なんだと思ってるんだろうね…」
+			PRINTFORMW %CALLNAME%は溜め息を吐いてから、きゅっと唇を引き締めて%CALLNAME:PLAYER%を真剣な目つきで見詰める
+			PRINTFORML そうして、ふっと表情を緩めたかと思うと、%CALLNAME:PLAYER%\@ TALENT:小柄体型 ? に抱きつい # を抱き寄せ \@て
+			PRINTFORMW 珍しく囁くようなか細い声で、まるで縋るように言った
+			PRINTFORML 「……君を好いてしまったから…といったら。君は信じる？」
+			PRINTFORMW 
+			PRINTFORMW 『………くだらんな』
+			PRINTFORML 「君ねぇ…もう少し、僕のことを優しく扱ってくれてもいいと思うんだけどな」
+			PRINTFORMW %CALLNAME%は深く溜め息を吐いて、拗ねたようにフイとそっぽを向いた
+			PRINTFORMW 
+
+		;薬研
+;		ELSEIF NO:MASTER == 49
+;			PRINTFORMW 『そうかい、その言葉が本音なら嬉しいがな』
+;			PRINTFORML 「…信じてくれないのかい？　……僕は、こんなにも君のことを…」
+;			PRINTFORMW %CALLNAME%はそう言いかけたが、顔を伏せて口を噤んでしまう
+;			PRINTFORML 『俺のことを…なんだ？』
+;			PRINTFORMW %CALLNAME:PLAYER%は%CALLNAME%の顎に手をかけ、優しく顔を上げさせた
+;			PRINTFORML 「……意地の悪い顔してるよ、君」
+;			PRINTFORMW せめてもの抵抗か、目を逸らし続ける%CALLNAME%の唇を奪う
+;			PRINTFORMW 「んんっ…ふ、…はふ…」
+;			PRINTFORMW 
+
+
+		;鶴丸
+;		ELSEIF NO:MASTER == 130
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+
+		ELSE
+			PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%に熱っぽい視線を向けている
+			PRINTFORMW 「今日は何をするんだい？　僕としては、君に触りたい気分なんだけど…なんてね」
+			PRINTFORML 
+			PRINTFORML 悪戯っぽく微笑む%CALLNAME%がいつもより可愛く見えた…かもしれない
+			PRINTFORMW 
+		ENDIF
+	;娼婦
+	ELSEIF TALENT:娼婦
+		PRINTFORMW 「僕、刀の付喪神なのに……君のせいで、いやらしいことしか考えられなくなっちゃったよ」
+		PRINTFORMW 「ふふ……当然、責任取ってくれるよね？%UNICODE(0x2661)%」
+		PRINTFORMW 舌なめずりをして%CALLNAME%は%CALLNAME:PLAYER%にしな垂れかかった
+		PRINTFORMW 
+
+	;隷属
+	ELSEIF TALENT:隷属
+		PRINTFORMW 「\@ TIME == 0 ? 今日 # 今夜 \@はどんな奉仕がお望みなのかな？」
+		SIF NO:MASTER == 0
+			PRINTFORMW 「え？　ふふ、そうかも。君に使われるのが幸せなんだ…これじゃあ、長谷部くんのこと言えないね」
+		PRINTFORMW %CALLNAME%は金色の隻眼を期待に濡らし、%CALLNAME:PLAYER%を出迎えた
+		PRINTFORMW 
+
+	ENDIF
+	CFLAG:201 = 7
+	RETURN 0
+ENDIF
+
+
+;==================================================
+;簡易助手口上（Y1を助手のキャラ番号に置換、Xをキャラ番号に変更する) CFLAG203
+;掛け合いをするキャラを増やす場合は、構文をコピー＆ペーストをして、CFLAGの数を204、205と増やす
+;==================================================
+;助手の有無をチェック（いない場合は二回目以降へ飛ぶ）
+IF ASSI < 0 
+	CALL EVENTTRAIN_SECOND_K73
+
+;-------------------
+;○○が助手
+;-------------------
+;ELSEIF NO:ASSI == Y1 && TALENT:ASSI:崩壊 == 0
+;	;初めて
+;	IF CFLAG:203 == 0
+;		CFLAG:203 = 1
+;	;二回目以降
+;	ELSEIF CFLAG:203 < 2 || FLAG:7 == 2
+;		CFLAG:203 = 2
+;	ENDIF
+
+;大倶利伽羅が助手
+ELSEIF NO:ASSI == 116 && TALENT:ASSI:崩壊 == 0
+	IF KANRAKU(TARGET)
+		;陥落済みの場合。とりあえず飛ばしとく
+		CALL EVENTTRAIN_SECOND_K73
+	ELSE
+	;燭台切が未陥落
+		;初めて
+		IF CFLAG:203 == 0
+			PRINTFORM 「……君、
+						CALL PNAME_73_116
+			PRINTFORML …？」
+			PRINTFORMW %CALLNAME:PLAYER%の後ろで控える様に立つ旧知の顔を見て、%CALLNAME%は狼狽える
+			PRINTFORMW 「どうして君がこんなことに手を貸すんだ」
+			PRINTFORML 『…慣れ合うつもりはないが、これが今の俺の仕事なものでね』
+			PRINTFORMW 突き放すように言った%CALLNAME:ASSI%に、%CALLNAME%は気丈に睨んだ
+			CFLAG:203 = 1
+		;二回目以降
+		ELSEIF CFLAG:203 < 2 || FLAG:7 == 2
+			PRINTFORMW 「……そろそろ止める気にはならないかい？」
+			PRINTFORMW 『…くどいぞ光忠』
+			PRINTFORML 「大倶利伽羅…」
+			PRINTFORMW 突き放すように言った%CALLNAME:ASSI%に%CALLNAME%は一瞬悲しそうに顔を顰めるが、すぐに気丈に睨みつけた
+			CFLAG:203 = 2
+		ENDIF
+	ENDIF
+
+;口上のある助手が居ない場合は、通常の二回目以降の口上へ飛ぶ
+ELSE
+	CALL EVENTTRAIN_SECOND_K73
+ENDIF
+
+
+
+;==================================================
+;調教開始時（2回目以降、Xをキャラ番号に変更する）
+;==================================================
+@EVENTTRAIN_SECOND_K73
+
+;前回に調教した日を検索（Rに入ってるのはキャラ番号）
+R = 73
+CALL GET_MEMBER_TARGET
+
+;-------------------------------------
+;１週間以上調教してない
+;-------------------------------------
+IF D:2 == -1 && KANRAKU(TARGET)
+	PRINTFORML 「ほったらかしにされるのは気分が良くないね」
+	PRINTFORMW %CALLNAME%は拗ねているようだ
+
+;--------------------------------------------------
+;反発刻印３
+;--------------------------------------------------
+ELSEIF MARK:反発刻印 == 3
+	PRINTFORML 「ふざけるのも大概にしなよ」
+	PRINTFORMW %CALLNAME%は金色の瞳に、静かな怒りを湛えている
+
+
+;--------------------------------------------------
+;陥落済み
+;--------------------------------------------------
+ELSEIF KANRAKU(TARGET)
+	;上位陥落済み
+	IF TALENT:親愛 || TALENT:娼婦 || TALENT:隷属
+		PRINTFORML 部屋に入ると、%CALLNAME%が出迎えた
+		PRINTFORMW 「待ち遠しかったよ。たくさん構って欲しいな」
+		SIF TALENT:親愛 || TALENT:隷属
+			PRINTFORMW %CALLNAME%は熱っぽい眼差しで%CALLNAME:PLAYER%を見つめている
+		SIF TALENT:娼婦
+			PRINTFORMW %CALLNAME%は妖艶な笑みで舌なめずりをしている
+	;下位陥落済み
+	ELSE
+		PRINTFORML 部屋に入ると、%CALLNAME%が出迎えた
+		PRINTFORMW 「\@ TIME == 0 ? 今日 # 今夜 \@は何するんだい？」
+	ENDIF
+
+;--------------------------------------------------
+;未陥落
+;--------------------------------------------------
+;屈服刻印Lv3
+ELSEIF MARK:屈服刻印 == 3
+		PRINTFORML 部屋に入ると、%CALLNAME%が気怠げにこちらを向いた
+		PRINTFORMW 「君か…\@ TIME == 0 ? 今日 # 今夜 \@は何するんだい？」
+;通常時
+ELSE
+		PRINTFORML 部屋に入ると、%CALLNAME%が胡乱げにこちらを向いた
+		PRINTFORMW 「君か…\@ TIME == 0 ? 今日 # 今夜 \@はをするつもりなのかな」
+ENDIF
+RETURN 0
+
+
+
+;==================================================
+;EVENTEND関係（Xをキャラ番号に置換）
+;調教終了時のセリフ
+;==================================================
+@EVENTEND
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF NO:TARGET != 73
+	RETURN 0
+@KOJO_EVENTEND_K73
+
+;--------------------------------------------------
+;特定助手、主人時に特殊助手口上を呼び出す(Y1を特定助手、Xを主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL EVENTEND_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	SIF NO:ASSI == Y1
+;	CALL EVENTEND_PY1_KZ
+;	RETURN 0
+;ENDIF
+
+;==================================================
+;調教終了時のセリフ
+;↓は何もせず帰った時用の変数
+P = PALAM:6 + UP:6
+;==================================================
+DRAWLINE
+
+;気絶している
+IF TALENT:気絶
+	PRINTFORMW 気絶した%CALLNAME%をベッドに寝かせ、そっと部屋を後にした……
+;--------------------------------------------------
+;特殊状況で調教を終了した
+;[0]野外視姦中に終了			CFLAG:606
+;[1]触手産卵したまま終了		CFLAG:607
+;[2]浣腸したまま終了			CFLAG:608
+;[3]縄＋気持ちいい道具つきで終了
+;[7]何もしないで帰った（欲情Lv1以下）
+;--------------------------------------------------
+;[4]触手出したまま終了			CFLAG:609
+;[5]お風呂で終了（そのままゆっくり入浴）
+;[6]エプロン付きで終了（いちょいちょタイム突入）
+;--------------------------------------------------
+;野外視姦中に終了（輪姦突入）　CFLAG:606
+;--------------------------------------------------
+ELSEIF TEQUIP:野外プレイ > 0 && TFLAG:500 > 0 && TFLAG:151 >= 4
+	PRINTFORMW 観衆のボルテージは最高潮に達しているようだ…
+	;体力あれば輪姦選択可能
+	IF BASE:0 >= 500
+		PRINTFORMW 興奮している野次馬達に、%CALLNAME%を好きにさせますか？
+		PRINTFORMW 
+		IF CFLAG:606 < 5
+			PRINTL [0] 面白そうなのでくれてやる
+		ELSE
+			PRINTL [0] 今日もよろしく
+		ENDIF
+		PRINTL [1] 追い払って帰る
+		$INPUT_LOOP_LINCOLN
+		INPUT
+		;面白そうなのでくれてやる
+		IF RESULT == 0
+			PRINTFORMW %CALLNAME%を野次馬達の前に押し出して、
+			PRINTFORMW その身体が隅まで凌辱され尽くすのを、たっぷりと堪能した…
+			CFLAG:606 += 1
+		;追い払って帰る
+		ELSEIF RESULT == 1
+			PRINTFORMW 興奮する野次馬達を追い払い、%CALLNAME%を連れて家に帰った…
+		ELSE
+			GOTO INPUT_LOOP_LINCOLN
+		ENDIF
+	;体力ないときは帰宅
+	ELSE
+		PRINTFORML だが、疲れ切った%CALLNAME%に無理はさせられない
+		PRINTFORMW 興奮する野次馬達を追い払い、%CALLNAME%を連れて家に帰った…
+	ENDIF
+
+;--------------------------------------------------
+;触手の卵を孕んだまま終了（出産）　CFLAG:607
+;--------------------------------------------------
+ELSEIF TEQUIP:触手膣内産卵 || TEQUIP:触手腸内産卵
+	IF TEQUIP:触手膣内産卵 && TEQUIP:触手腸内産卵
+		;メッセージ部分。書き換えOK
+		CALL TRAIN_MESSAGE_DOUBLE_EGGPLAY_OUT
+		;処理を呼ぶ。消しちゃダメなとこ
+		CALL DOUBLE_EGGPLAY_OUT
+	ELSEIF TEQUIP:触手膣内産卵
+		;メッセージ部分。書き換えOK
+		CALL TRAIN_MESSAGE_EGGPLAY_OUT
+		;処理を呼ぶ。消しちゃダメなとこ
+		CALL EGGPLAY_OUT
+	ELSEIF TEQUIP:触手腸内産卵
+		;メッセージ部分。書き換えOK
+		CALL TRAIN_MESSAGE_KANTYO_EGGPLAY_OUT
+		;処理を呼ぶ。消しちゃダメなとこ
+		CALL KANTYO_EGGPLAY_OUT
+	ENDIF
+
+;--------------------------------------------------
+;排泄させずに終了（排泄）：触手浣腸もこっち　CFLAG:608
+;--------------------------------------------------
+;ELSEIF BASE:6 >= 60 && TEQUIP:拡張バルーン
+;	;体力がある？　ならもうちょっと続くんじゃよ。
+;	IF BASE:0 >= 500
+;		IF TEQUIP:触手
+;			PRINTFORML %CALLNAME:TARGET%の後孔では、未だ排泄を堰き止めようと触手が蠢いている…
+;			PRINTL [0] 触手を還す
+;			PRINTL [1] 還さずに放置する
+;		ELSE
+;			PRINTFORML %CALLNAME:TARGET%の後孔には、未だ排泄を堰き止めるバイブが差し込まれている…
+;			PRINTL [0] 抜いてやる
+;			PRINTL [1] 抜かずに放置する
+;		ENDIF
+;		$INPUT_LOOP_SCATOLOGY
+;		INPUT
+;		;抜いてやるｏｒ触手を還す
+;		IF RESULT == 0
+;			;処理を呼ぶ。消しちゃダメなとこ
+;			CALL AFTERTRAIN_KANTYO
+;		;抜かずに放置するｏｒ還さずに放置する
+;		ELSEIF RESULT == 1
+;			;縄ついてるとやばい
+;			IF TEQUIP:縄 && TEQUIP:触手 == 0
+;				BASE:0 -= 1000
+;			;触手がいる　禁断の知識持ちは考えないことにした。この状態で冷静に魔法使えたらすごい
+;			ELSEIF TEQUIP:触手
+;				EXP:触手経験 += 5
+;				BASE:0 -= 1000
+;			;自由の身
+;			ELSE
+;			ENDIF
+;			EXP:スカ経験 += 3
+;		ELSE
+;			GOTO INPUT_LOOP_SCATOLOGY
+;		ENDIF
+;	;体力ないなら無理はさせない
+;	ELSE
+;	ENDIF
+	
+;--------------------------------------------------
+;縄＋気持ちいい道具のまま終了（放置プレイ）：触手プレイ中もこっち
+;--------------------------------------------------
+;ELSEIF TEQUIP:縄 && ALLCHECK(TARGET)
+;	;体力があると選択肢
+;	IF BASE:0 >= 500
+;		IF TEQUIP:触手
+;			PRINTFORMW %CALLNAME%の体には未だ触手が巻き付いたまま、その性感を刺激し続けている…
+;			PRINTL [0] 触手を還す
+;			PRINTL [1] 還さずに放置する
+;		ELSE
+;			PRINTFORMW %CALLNAME%の体は拘束されたまま、取りついた玩具がその性感を刺激し続けている…
+;			PRINTL [0] 縄を解いてやる
+;			PRINTL [1] そのまま放置する
+;		ENDIF
+;		$INPUT_LOOP_IGNORE
+;		INPUT
+;		;縄を解いてやる
+;		IF RESULT == 0
+;		;そのまま放置する
+;		ELSEIF RESULT == 1
+;		ELSE
+;			GOTO INPUT_LOOP_IGNORE
+;		ENDIF
+;	;体力ないなら無理はさせない
+;	ELSE
+;		IF TEQUIP:触手
+;			PRINTFORMW 触手を送還して自由にしてやってから、部屋を後にした…
+;		ELSE
+;			PRINTFORMW それらを外して自由にしてやってから、部屋を後にした…
+;		ENDIF
+;	ENDIF
+	
+;--------------------------------------------------
+;触手を送還せず終了（触手レイプ突入）　CFLAG:609
+;--------------------------------------------------
+;ELSEIF TEQUIP:触手
+;	;触手NTR　対象が自分で呼んだ触手である
+;	IF TEQUIP:触手 == 2 && TALENT:TARGET:禁断の知識
+;	;体力あれば触手姦選択可能
+;	ELSEIF BASE:0 >= 500
+;		PRINTFORMW 部屋の中では、グロテスクな触手が還されることなく蠢いている…
+;		PRINTFORMW 触手を元の世界に還しますか？
+;		PRINTL [0] 還す
+;		PRINTL [1] 還さない
+;		$INPUT_LOOP_SYOKUSYU
+;		INPUT
+;		;還す
+;		IF RESULT == 0
+;		;還さない
+;		ELSEIF RESULT == 1
+;		ELSE
+;			GOTO INPUT_LOOP_SYOKUSYU
+;		ENDIF
+;	;体力なければ触手は還す
+;	ELSE
+;	ENDIF
+
+;--------------------------------------------------
+;入浴したまま終了（そのままゆっくりお風呂を楽しむ）
+;--------------------------------------------------
+;ELSEIF TEQUIP:お風呂場 > 0
+;	SIF CFLAG:10 >= 30
+;		CFLAG:10 -= 5
+
+;--------------------------------------------------
+;エプロン付で終了（いちょいちょタイム突入）
+;親愛目指してると毎回出るのでランダムにするか…
+;--------------------------------------------------
+ELSEIF TEQUIP:エプロン > 0
+	PRINTFORML 「……ねえ、もうちょっと一緒に居ようよ」
+	PRINTFORMW %CALLNAME%は甘えた声で%CALLNAME:PLAYER%にしな垂れかかる
+	PRINTL [0] もう少し一緒に過ごす
+	PRINTL [1] 部屋を出る
+	$INPUT_LOOP_apronend
+	INPUT
+	;いちゃいちゃ
+	IF RESULT == 0
+		;欲望Lv2以上でえっち
+		IF (P > PALAMLV:2) && KANRAKU(TARGET)
+			PRINTFORMW %CALLNAME:PLAYER%は欲望のままに%CALLNAME%を抱き寄せ、そのまま噛み付く様に口付ける
+			PRINTFORMW 「あっ……ん、ちゅ…ふぁ…」
+				;大倶利伽羅
+				IF NO:MASTER == 116
+					IF !RAND:3
+						PRINTFORMW 『…あんた、いやらしい顔をしてるぞ』
+						PRINTFORMW 「ん…だって、君にそういう身体にされてしまったからね……責任とって慰めてよ」
+						PRINTFORML 淫靡に笑う%CALLNAME%に煽られたことを誤魔化すように%CALLNAME:PLAYER%は舌打ちし、
+						PRINTFORMW その\@ TALENT:小柄体型 ? 小さな身体 # 身体 \@を押し倒す
+				;長谷部
+				ELSEIF NO:MASTER == 118
+						PRINTFORMW 『…腑抜けた顔をしてるぞ』
+						PRINTFORMW 「ん？　ふふ…でも、君もまだ足りないだろう？…えっちな顔してる%UNICODE(0x2661)%」
+						PRINTFORML クスクスとからかい交じりに笑う%CALLNAME%に苛立ちを感じ
+						PRINTFORMW %CALLNAME:PLAYER%は冷めやらぬ熱に身を任せて、その\@ TALENT:小柄体型 ? 小さな身体 # 身体 \@を押し倒す
+				;薬研
+				ELSEIF NO:MASTER == 49
+						PRINTFORML 『…いやらしい顔してるぜ、旦那』
+						PRINTFORMW 「ん、ふふ…そうしたのは、君でしょう…？」
+						PRINTFORML 『ははっ、言うねえ。なら…責任取らねえとな』
+				;鶴丸
+				ELSEIF NO:MASTER == 130
+						PRINTFORML 『そんな顔をして…どうされても文句は言えないぞ』
+						PRINTFORMW 「ん…さっきまで、もっとすごいこと…してたのに？」
+						PRINTFORML くすくすと淫靡に笑う%CALLNAME%に昂った%CALLNAME:PLAYER%は、
+						PRINTFORMW 目の前の\@ TALENT:小柄体型 ? 小さな身体 # 身体 \@を優しく倒す
+						PRINTFORMW 『そうかい。なら、何をしても泣いてくれるなよ？』
+				ELSE
+					PRINTFORMW %CALLNAME:PLAYER%は冷めやらぬ熱に身を任せて、%CALLNAME%の\@ TALENT:小柄体型 ? 小さな身体 # 身体 \@を押し倒す
+				ENDIF
+			PRINTFORMW 火照る身体を重ね合い、二人は甘いひと時を過ごした
+			exp:性交経験 += 1
+			exp:愛情経験 += 1
+			ELSE
+			ENDIF
+		ELSE
+			PRINTFORMW 寄り添った二人は甘いひと時を過ごした
+			exp:愛情経験 += 1
+		ENDIF
+	;帰る
+	ELSEIF RESULT == 1
+		PRINTFORML 「そうか……引き止めるのも恰好悪いしね。それじゃあ、またね」
+		PRINTFORMW 部屋を後にする%CALLNAME:PLAYER%を%CALLNAME%は寂しそうに見送った
+	ELSE
+		GOTO INPUT_LOOP_apronend
+	ENDIF
+;--------------------------------------------------
+;何もしないで帰りました（陥落済で欲情Lv1以下）
+;--------------------------------------------------
+ELSEIF (P < PALAMLV:2) && KANRAKU(TARGET)
+	PRINTFORMW 「次はもっと相手して欲しいな」
+;ENDIF
+
+;--------------------------------------------------
+;特殊な条件下でない時の調教終了台詞
+;--------------------------------------------------
+;反発刻印Lv3
+;IF MARK:反発刻印 >= 3
+;陥落済み
+;	ELSEIF TALENT:親愛 || TALENT:娼婦 || TALENT:隷属 || TALENT:恋慕 || TALENT:淫乱 || TALENT:服従
+;未陥落
+;	ELSE
+ENDIF
+RETURN 0
+
+
+;==================================================
+;@@SET_SLAVE_AFTERWARDS関係(X、Y1をキャラ番号に置換する)
+;==================================================
+@SET_SLAVE_AFTERWARDS_K73
+PRINTFORMW 
+
+
+;==================================================
+;@KOJO_MESSAGE_ENDING関係(X、Y1をキャラ番号に置換する)
+;==================================================
+;--------------------------------------------------
+;特定助手、主人時に特殊助手口上を呼び出す(Y1を特定助手、1を主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL EVENTTURNEND_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	SIF NO:ASSI == Y1
+;	CALL EVENTTURNEND_PY1_KZ
+;	RETURN 0
+;ENDIF
+;-------------------------------------------------
+;条件設定
+;-------------------------------------------------
+@EVENTTURNEND
+#LATER
+SIF TARGET < 0
+	RETURN 0
+SIF NO:TARGET != 73
+	RETURN 0
+;特殊ハーレムエンド用条件判定構文サンプル
+;XX内に条件とするキャラのキャラ番号を入れると、好きな組み合わせのハーレムエンドを設定できる
+;ハーレムエンドの条件を満たしたとき、ここの特殊ハーレムエンドの条件も満たしている場合、ハーレムエンドから派生する
+;A = 0
+;B = 0
+;REPEAT CHARANUM
+;	IF NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX
+;		SIF TALENT:COUNT:6 || TALENT:COUNT:7 || TALENT:COUNT:8
+;			A += 1
+;		SIF TALENT:COUNT:3 || TALENT:COUNT:4 || TALENT:COUNT:5 || TALENT:COUNT:6 || TALENT:COUNT:7 || TALENT:COUNT:8
+;			B += 1
+;	ENDIF
+;REND
+;SIF A && A+B >= XXX
+;	CFLAG:21 = 2
+;単体エンド用分岐フラグ、単体エンドのある上位陥落素質のみコメントアウトを解除する
+;SIF TALENT:親愛
+;	CFLAG:21 = 1
+;SIF TALENT:娼婦
+;	CFLAG:21 = 1
+;SIF TALENT:隷属
+;	CFLAG:21 = 1
+
+;==================================================
+;エンド本文
+;==================================================
+@KOJO_MESSAGE_ENDING_K73
+;親愛・娼婦・隷属エンド共通部分
+IF (TALENT:親愛 || TALENT:娼婦 || TALENT:隷属) && CFLAG:21 == 1
+	PRINTFORMW 
+	PRINTFORMW ------------キャラエンド条件達成---------------
+	PRINTFORMW 
+	PRINTFORMW 
+	PRINTFORMW 
+	PRINTFORMW 
+	;--------------------------------------
+	;親愛√
+	;--------------------------------------
+	IF TALENT:親愛 && CFLAG:21 == 1
+;		IF NO:MASTER == 0
+;			PRINTFORM %CALLNAME:PLAYER%が屋敷に帰ると、
+;		ELSE
+;			PRINTFORM %CALLNAME:PLAYER%が主の付き添いを終えて屋敷に帰ると、
+;		ENDIF
+;		PRINTFORMW エプロンを着けた%CALLNAME%が出迎えた
+;		PRINTFORM 「おかえり、
+;		SIF NO:MASTER == 0
+;			PRINTFORM 主
+;		SIF NO:MASTER == 116
+;			CALL PNAME_73_116
+;		SIF NO:MASTER == 130
+;			CALL PNAME_73_130
+;		SIF NO:MASTER == 7 || NO:MASTER == 55 || NO:MASTER == 107 || NO:MASTER == 112 || NO:MASTER == 134 || NO:MASTER == 136
+;			PRINTFORM %CALLNAME:PLAYER%さん
+;		SIF NO:MASTER == 5 || NO:MASTER == 9 || NO:MASTER == 11 || NO:MASTER == 23 || NO:MASTER == 47 || NO:MASTER == 59 || NO:MASTER == 65 || NO:MASTER == 122 || NO:MASTER == 138 || NO:MASTER == 132
+;			PRINTFORM %CALLNAME:PLAYER%君
+;		SIF NO:MASTER == 3
+;			PRINTFORM 三日月さん
+;		SIF NO:MASTER == 17
+;			PRINTFORM 数珠丸さん
+;		SIF NO:MASTER == 19
+;			PRINTFORM 青江君
+;		SIF NO:MASTER == 25
+;			PRINTFORM 一期君
+;		SIF NO:MASTER == 27
+;			PRINTFORM 鯰尾君
+;		SIF NO:MASTER == 29
+;			PRINTFORM 骨喰君
+;		SIF NO:MASTER == 31
+;			PRINTFORM 平野君
+;		SIF NO:MASTER == 33
+;			PRINTFORM 厚君
+;		SIF NO:MASTER == 37
+;			PRINTFORM 信濃君
+;		SIF NO:MASTER == 39
+;			PRINTFORM 前田君
+;		SIF NO:MASTER == 41
+;			PRINTFORM 秋田君
+;		SIF NO:MASTER == 43
+;			PRINTFORM 博多君
+;		SIF NO:MASTER == 45
+;			PRINTFORM 乱君
+;		SIF NO:MASTER == 49
+;			PRINTFORM 薬研君
+;		SIF NO:MASTER == 57
+;			PRINTFORM 明石君
+;		SIF NO:MASTER == 61
+;			PRINTFORM 愛染君
+;		SIF NO:MASTER == 67
+;			PRINTFORM 物吉君
+;		SIF NO:MASTER == 79
+;			PRINTFORM 江雪君
+;		SIF NO:MASTER == 81
+;			PRINTFORM 宗三君
+;		SIF NO:MASTER == 83
+;			PRINTFORM 小夜ちゃん
+;		SIF NO:MASTER == 85
+;			PRINTFORM 加州君
+;		SIF NO:MASTER == 87
+;			PRINTFORM 大和守君
+;		SIF NO:MASTER == 89
+;			PRINTFORM 歌仙君
+;		SIF NO:MASTER == 91
+;			PRINTFORM 和泉守君
+;		SIF NO:MASTER == 93
+;			PRINTFORM 陸奥守君
+;		SIF NO:MASTER == 95
+;			PRINTFORM 山姥切君
+;		SIF NO:MASTER == 97
+;			PRINTFORM 山伏君
+;		SIF NO:MASTER == 99
+;			PRINTFORM 堀川君
+;		SIF NO:MASTER == 101
+;			PRINTFORM 蜂須賀君
+;		SIF NO:MASTER == 103
+;			PRINTFORM 浦島君
+;		SIF NO:MASTER == 105
+;			PRINTFORM 長曽祢君
+;		SIF NO:MASTER == 118
+;			PRINTFORM 長谷部君
+;		SIF NO:MASTER == 120
+;			PRINTFORM 不動君
+;		SIF NO:MASTER == 128
+;			PRINTFORM 同田貫君
+;		PRINTFORMW 。\@ TIME == 0 ? 昼餉 # 夕餉 \@を用意しておいたから一緒に食べよう。今日のは自信作なんだ」
+;		PRINTFORMW 
+;		PRINTFORMW 
+;		PRINTFORMW 
+	;--------------------------------------
+	;娼婦√
+	;--------------------------------------
+	ELSEIF TALENT:娼婦 && CFLAG:21 == 1
+	;--------------------------------------
+	;隷属√
+	;--------------------------------------
+	ELSEIF TALENT:隷属 && CFLAG:21 == 1
+	ENDIF
+ENDIF
+RETURN 0
+
+

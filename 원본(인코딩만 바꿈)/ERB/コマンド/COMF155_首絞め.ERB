@@ -1,0 +1,149 @@
+﻿;-------------------------------------------------
+;首絞め
+;ＳＭ-ハード系コマンド
+;-------------------------------------------------
+@COM155
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教が正常位、対面立位、首絞めセックスのとき、首絞めセックスに
+	IF PREVCOM == 100 || PREVCOM == 104 || PREVCOM == 513
+		CALL COM_ABLE513
+		SIF RESULT == 1
+			JUMP COM513
+	;前回の調教が正常位Ａ、対面立位Ａ、首絞めアナルのとき、首絞めアナルに
+	ELSEIF PREVCOM == 110 || PREVCOM == 114 || PREVCOM == 514
+		CALL COM_ABLE514
+		SIF RESULT == 1
+			JUMP COM514
+	ENDIF
+ENDIF
+
+PRINTL 首絞め
+STR:0 = 首絞め
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 125
+LOSEBASE:気力 += 100
+
+;痛み、恐れ、逸脱、反感
+SOURCE:痛み += 1000
+SOURCE:恐れ += 2500
+SOURCE:逸脱 += 600
+SOURCE:反発 += 800
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;苦痛のパラメータによる苦痛のソース増加は先に処理しておく
+IF PALAM:苦痛 < PALAMLV:1
+	TIMES SOURCE:痛み , 1.00
+ELSEIF PALAM:苦痛 < PALAMLV:2
+	TIMES SOURCE:痛み , 1.50
+ELSEIF PALAM:苦痛 < PALAMLV:3
+	TIMES SOURCE:痛み , 2.00
+ELSEIF PALAM:苦痛 < PALAMLV:4
+	TIMES SOURCE:痛み , 2.50
+ELSEIF PALAM:苦痛 >= PALAMLV:4
+	TIMES SOURCE:痛み , 3.00
+ENDIF
+
+;マゾっ気を見る
+IF ABL:マゾっ気 == 0
+	TIMES SOURCE:屈従 , 0.80
+	SOURCE:中毒充足 += 0
+	SOURCE:欲情 += 0
+ELSEIF ABL:マゾっ気 == 1
+	TIMES SOURCE:屈従 , 1.00
+	SOURCE:中毒充足 += 20
+	SOURCE:欲情 += 30
+ELSEIF ABL:マゾっ気 == 2
+	TIMES SOURCE:屈従 , 1.20
+	SOURCE:中毒充足 += 40
+	SOURCE:欲情 += 70
+ELSEIF ABL:マゾっ気 == 3
+	TIMES SOURCE:屈従 , 1.40
+	SOURCE:中毒充足 += 70
+	SOURCE:欲情 += 120
+ELSEIF ABL:マゾっ気 == 4
+	TIMES SOURCE:屈従 , 1.50
+	SOURCE:中毒充足 += 110
+	SOURCE:欲情 += 180
+ELSEIF ABL:マゾっ気 == 5
+	TIMES SOURCE:屈従 , 1.70
+	SOURCE:中毒充足 += 150
+	SOURCE:欲情 += 250
+ELSEIF ABL:マゾっ気 == 6
+	TIMES SOURCE:屈従 , 1.90
+	SOURCE:中毒充足 += 200
+	SOURCE:欲情 += 300
+ELSEIF ABL:マゾっ気 == 7
+	TIMES SOURCE:屈従 , 2.10
+	SOURCE:中毒充足 += 250
+	SOURCE:欲情 += 350
+ELSEIF ABL:マゾっ気 == 8
+	TIMES SOURCE:屈従 , 2.30
+	SOURCE:中毒充足 += 300
+	SOURCE:欲情 += 400
+ELSEIF ABL:マゾっ気 == 9
+	TIMES SOURCE:屈従 , 2.50
+	SOURCE:中毒充足 += 350
+	SOURCE:欲情 += 450
+ELSEIF ABL:マゾっ気 >= 10
+	TIMES SOURCE:屈従 , 3.00
+	SOURCE:中毒充足 += 500
+	SOURCE:欲情 += 500
+ENDIF
+
+;マゾを見る
+IF TALENT:マゾ
+	TIMES SOURCE:欲情 , 1.50
+	TIMES SOURCE:反発 , 0.80
+ENDIF
+
+;体格差により恐怖のソース追加
+CALL BUILD
+IF S == 3
+	TIMES SOURCE:恐れ , 2.00
+ELSEIF S == 2
+	TIMES SOURCE:恐れ , 1.50
+ELSEIF S == 1
+	TIMES SOURCE:恐れ , 1.20
+ELSEIF S == 0
+	TIMES SOURCE:恐れ , 1.00
+ELSEIF S == -3
+	TIMES SOURCE:恐れ , 0.75
+ELSE
+	TIMES SOURCE:恐れ , 0.90
+ENDIF
+
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;ゲイ経験とか加算
+CALL COM_EXP(2)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+;依存度補正値(主人かつ恋慕、淫乱、服従で1。親愛、娼婦、隷属で2）
+IF (TALENT:恋慕 || TALENT:淫乱 || TALENT:服従) && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF (TALENT:親愛 || TALENT:娼婦 || TALENT:隷属) && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+

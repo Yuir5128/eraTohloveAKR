@@ -1,0 +1,833 @@
+﻿;=================================================
+;야겐 토시로입상
+;개변 유용·가필 수정은 좋아하게 아무쪼록.
+;=================================================
+;
+;eratohoA 및 eratohoA 계열 전용입상 템플릿
+;1(와)과 01을 캐릭터 번호에 치환해,Y1를 조수의 캐릭터 번호에 치환해 주세요
+;다만,캐릭터 번호가 1자리수의 캐릭터의 경우,1,Y1는 1,01은 01과 같이 바꾸어 주세요
+;그리고 커맨드내의 적당한 조건아래의 PRINTFORMW의후에 반각 스페이스를 두어 대사를 추가해 주세요
+;입상을 추가하지 않는 커맨드는 무기입에서도 상관하지 않습니다만,CFLAG:XXX의 머리에 『;』를 붙여 comment out 하면 더욱 좋을 것입니다
+;엑스트라 구문 따위,comment out 되고 있는 구문을 사용하는 때는,『;』를 제외해 comment out를 해제할 필요가 있습니다
+;최후에 read me에도 대충 훑어봐 두는 것을 추천합니다
+;
+;-------------------------------------------------
+;==================================================
+;입상 파일의 존재 판정(XX를 캐릭터 번호에 치환 ※1은 01으로 표기)
+;==================================================
+@EVENTSHOP
+;#PRI
+;FLAG:149 = 1
+;SIF FLAG:7 == 0
+;FLAG:7 = 2
+
+
+
+;==================================================
+;EVENTTRAIN 관계(X를 캐릭터 번호에 치환)
+;조교 개시시의 대사 CFLAG 201~219를 사용
+;==================================================
+@EVENTTRAIN
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF NO:TARGET != 49
+	RETURN 0
+@KOJO_EVENTTRAIN_K49
+
+;==================================================
+;엑스트라 모드 구문 FIRSTTIME(1)
+;네를 선택했을 때에 첫조교시에입상 설정용의 소질로 변경할 수 있습니다
+;아래와 같이에처녀화하는 경우의 구문을 샘플로서 실어 둡니다
+;==================================================
+;IF FIRSTTIME(1)
+;	PRINTL 처녀모드로 이행합니까?
+;	PRINTL [0] 네
+;	PRINTL [1] 아니오
+;	$INPUT_LOOP_EXTRA
+;	INPUT
+;	IF RESULT == 0
+;		PRINTFORMW -처녀모드에 소질,능력을 변경합니다―
+;		TALENT:TARGET:0 = 1
+;		ABL:TARGET:4 = 0
+;		EXP:TARGET:0 = 0
+;	ELSEIF RESULT == 1
+;		PRINTFORMW -통상 모드로 조교를 개시합니다―
+;	ELSE
+;		GOTO INPUT_LOOP_EXTRA
+;	ENDIF
+
+;ENDIF
+
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL EVENTTRAIN_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL EVENTTRAIN_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;--------------------------------------------------
+;간이조수입상의 발동시에 첫조교시입상을 스킵(Y1를 조수의 캐릭터 번호로 한다)
+;복수인 있는 때는,SIF NO:ASSI == Y1 || NO:ASSI == Z1와 추가해 나간다
+;--------------------------------------------------
+;IF CFLAG:201 == 0 && ASSI >= 0
+;	SIF NO:ASSI == Y1
+;		CFLAG:201 = 1
+;ENDIF
+
+
+
+;==================================================
+;조교 개시시(1회만) CFLAG201
+;FIRSTTIME2~15와 CFLAG:201을 병용.
+;FIRSTTIME를 사용하는 것으로,1번 밖에 표시되지 않게 된다.
+;CFLAG:201은 어디까지 조교가 진행되었는지,라고 하는 것을 기록하기 위해(때문에).
+;==================================================
+DRAWLINE
+;--------------------------------------------------
+;첫조교시 FIRSTTIME(2)
+;--------------------------------------------------
+IF FIRSTTIME(2)
+	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		;제약 기구씨는 자신만으로 들어간다면,다른 도검에 피해가 나오지 않으면 좋은가,라고 하는 느낌
+		;그리고 색기와 귀염성은 너무 충분합니다. 형님 카이나 진한 있고
+		PRINTFORMW 현현한 츠쿠모가미는 단도인것 같고 가는손발와 몸집이 작은 체구를 가지고 있었다.
+		PRINTFORMW 깨끗이 한 흑머리카락가 가장자리를 장식하는 약간 덮은 얼굴은,여성 모습의 인형과 같이 우아해,너무 흰 살색에 어렴풋이 물든 입술이 빛난다.
+		PRINTFORMW 마치 인형과 같은 면이,후,라고 올려지고 다홍색 갈색의 눈동자와 시선이 맞는다.
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORMW 
+		PRINTFORMW －－－－아,이 녀석,겉모습과 달라요.
+		PRINTFORMW 
+		PRINTFORMW 「나는%CALLNAME%다. 아무쪼록 부탁해……? 응? 뭐라고,싸우기 위해서(때문에) 불렀지 않다는?」
+		PRINTFORMW 「우선,자세하게 들려주어 받을까」
+		PRINTFORML 
+		PRINTFORMW 
+		PRINTFORMW 
+		PRINTFORMW 「아─,뭐,대개 알았다」
+		PRINTFORMW 빌리고와 책상다리를 한 한쪽 무릎에 팔꿈치를 붙어,악처를 지탱하면서 이쪽의 이야기를 듣고 있던%CALLNAME%는 어깨를 움츠렸다.
+		PRINTFORMW 「스스로 내리는 곳은 선택할 수 있는 해,원래 시중드는 주를 선택할 수 없는 것은 이 몸이 하가네만의 때와 변함없구나. 이건 와 버린 이상은 어쩔 수 없다는 것이다」
+		PRINTFORMW 뜻밖의 일에%CALLNAME%는,약간 기막힌 얼굴이었지만 상황을수 넣은 것 같았다.
+		PRINTFORMW 「기천,만으로 분령이 내리고 있다. 나한번 휘두름 정도라면 이런 것이라도 상관없는 거야. 나도 단도이니까 침실의 일도 다소는 알고」
+		PRINTFORMW 「라고는 해도 나전장 태생으로 말야. 아도 모르고 색기도 귀염성도 없지만,그 정도는 너가 어떻게든 노력해 주어라」
+		PRINTFORMW %CALLNAME%는 책상다리의 상태로는 있지만 자세를 바로잡으면,빙그레,겉모습에는 어울리지 않지만 묘하게 분위기에는 들어맞는,매우 남성다운 미소를 띄웠다.
+		PRINTFORMW 「그러면,재차 아무쪼록 부탁하겠어. 대장」
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 「뭐 말하고 있는 것이다,너. 제정신인가?」
+		PRINTFORMW 「…… 뭐,어째서 있을까? 손 유연하게」
+	ENDIF
+	CFLAG:201 = 1
+	RETURN 0
+
+;--------------------------------------------------
+;반발각인각인 Lv3 FIRSTTIME(3)
+;--------------------------------------------------
+ELSEIF MARK:반발각인 == 3 && FIRSTTIME(3)
+	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:201 = 5
+	RETURN 0
+
+;--------------------------------------------------
+;굴복각인Lv1 FIRSTTIME(4)
+;--------------------------------------------------
+ELSEIF MARK:굴복각인 == 1 && FIRSTTIME(4)
+	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:201 = 2
+	RETURN 0
+
+;--------------------------------------------------
+;굴복각인Lv2 FIRSTTIME(5)
+;--------------------------------------------------
+ELSEIF MARK:굴복각인 == 2 && FIRSTTIME(5)
+	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:201 = 3
+	RETURN 0
+
+;--------------------------------------------------
+;굴복각인Lv3＋함락 소질 없음 FIRSTTIME(6)
+;--------------------------------------------------
+ELSEIF MARK:굴복각인 == 3 && !KANRAKU(TARGET) && FIRSTTIME(6)
+	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		;자르는 것 만으로는통증는 모를테니까…… 뭐고통 3 붙일 생각 없지만 말야!
+		IF MARK:0 == 3
+			PRINTFORMW 「…… 읏!무르구나,고기가 있는 몸은. 원 사버릴 가,몰랐어요」
+		ELSEIF MARK:1 == 3
+			PRINTFORMW 「아휴,전망이 달콤했는지. 고기의 몸은,정말로 마음대로 되지 않는 것이다」
+			PRINTFORMW 「기분이 좋은 일 되면 머릿속까지 묶인다. …… 어느 쪽인가가 없으면 아도 와 락이었을 것이다」
+		ELSE
+			PRINTFORMW %CALLNAME%는 식과 크게 한숨 돌리면 %CALLNAME:PLAYER%를 올려보고입각을 주었다.
+			PRINTFORMW 「완전히,대장에게는 근성에 패배다. 최대한 교제해 준다」
+		ENDIF
+	ELSE
+		PRINTFORMW 「아아,아아,나의 근성에 패배다. 최대한 교제해 준다」
+	ENDIF
+	CFLAG:201 = 4
+	RETURN 0
+
+;--------------------------------------------------
+;하위 함락 FIRSTTIME(7)
+;--------------------------------------------------
+ELSEIF (TALENT:연모 || TALENT:음란 || TALENT:복종) && FIRSTTIME(7)
+	;연모
+	IF TALENT:연모
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW %CALLNAME:PLAYER%가%CALLNAME%의 방에 방문하면,그는 평소와 다르게 성실한 얼굴로 이야기가 있으므로 약간 시간을 주지 않는지,라고 말해 왔다.
+			PRINTFORMW 조금이라면 상관없으면 %CALLNAME:PLAYER%가 응하면,%CALLNAME%는 몇 걸음 내려 정좌를 한다. 조금 무릎을 나누어 주먹을 그 위에 둬,꽉 등골을 편 모양은 변함없는 미남자다.
+			PRINTFORMW 「그런데,대장. 내가 여기에 현현해 잠등구 지난다. 처음은,심하다고 생각한 것이지만 지금은 익숙해진…… 아니,」
+			PRINTFORMW 문득,%CALLNAME%는 말을 막히게 하면 눈을 숙였다.
+			PRINTFORMW 「아아,두결정한 생각이었던 것이지만. 과연 첫 출진은 무서운 것이다」
+			PRINTFORMW 「응? 대장이 나를 전장에 내지 않는다고 말하는 것은 알고 있어. (이)지만 말야,나에 있으면 싸움과 변함없다」
+			PRINTFORMW %CALLNAME%는 덮은 얼굴을 들어 천천히 1 호흡 두어 고하기 시작했다.
+			PRINTFORML 
+			PRINTFORMW 
+			PRINTFORMW 「부디 대장,나를 너의 호신용 칼로 해 주어라. 사용해 줘,마음대로 해 줘. 뭐든지 하고,무엇을 되어도 상관없다」
+			PRINTFORMW 「이 세상에 기만분 영혼이 내리고 있어도,나는,너의 앞에 있는 한번 휘두름은 너만의 제약 기구통요시미츠다」
+			PRINTFORMW 「이 나의 전부는,그렇다,칼날도 신체도 마음도 신격도 영혼도,전부 전부 너의 것이다」
+			PRINTFORMW 「하하,뭐 말하고 있다 라는 얼굴이다,대장? 우리 일이면서 정이 끓었는지 묶였는지,뭔가 어딘가 망가져 버린 것인지 모르지만. 대장,나는 너를―――」
+			PRINTFORMW 
+			PRINTFORML 사랑하고 있다,라고 다홍색 갈색의 눈동자에 열을 품게 해%CALLNAME%는 %CALLNAME:PLAYER%를 감입 말했다.
+			PRINTFORML 너를 보는 눈이 어느입 말하는입가 있어,접해지는손가 있어 쫓을 수 있는발가 있어
+			PRINTFORMW 너의 소리를 듣는 귀가 있어,그리고,너를 위로받는 신체가 있는 것이,기쁜 것이다,라고.
+			PRINTFORMW 
+			PRINTFORMW 「그리고,부디 부디 너의 최후때에는 나를 함께 데려가 주고」
+			PRINTFORMW 「쭉 함께 있게 해 주어라. 내가 바라는 것은 그것뿐이다」
+			PRINTFORMW 
+			PRINTFORML 
+			PRINTFORMW 깊숙히 고개를 숙인%CALLNAME%의 둥근 머리 부분에 시선을 둬,%CALLNAME:PLAYER%는 뺨을 느슨하게했다.
+			PRINTFORMW 대답은 정해져 있었지만,그런데,그에게 있어 이 싸움은 승리인 것일까 패배인 것일까.
+			;내기에 이겼는지 반했지만 패배인가
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;음란
+	ELSEIF TALENT:음란
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;복종
+	ELSEIF TALENT:복종
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+	CFLAG:201 = 6
+	RETURN 0
+
+;--------------------------------------------------
+;상위 함락 FIRSTTIME(8)
+;--------------------------------------------------
+ELSEIF (TALENT:친애 || TALENT:창부 || TALENT:예속) && FIRSTTIME(8)
+	;친애
+	IF TALENT:친애
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「…… 대장」
+			PRINTFORMW %CALLNAME%는 감극 기다린 모습으로 %CALLNAME:PLAYER%를 껴안았다.
+			PRINTFORMW 「아아,드디어 나는 대장이 없으면 안되게 되어 버렸다」
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;창부
+	ELSEIF TALENT:창부
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;예속
+	ELSEIF TALENT:예속
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+	CFLAG:201 = 7
+	RETURN 0
+ENDIF
+
+
+
+;==================================================
+;간이조수입상(Y1를 조수의 캐릭터 번호에 치환,X를 캐릭터 번호로 변경한다) CFLAG203
+;교섭을 하는 캐릭터를 늘리는 경우는,구문을 카피＆페이스트를 해,CFLAG의 수를 204,205로 늘린다
+;==================================================
+;조수의 유무를 체크(없는 경우는 2회째 이후에 난다)
+IF ASSI < 0 
+	CALL EVENTTRAIN_SECOND_K49
+
+;-------------------
+;00이 조수
+;-------------------
+;ELSEIF NO:ASSI == Y1 && TALENT:ASSI:붕괴 == 0
+;	;처음
+;	IF CFLAG:203 == 0
+;		CFLAG:203 = 1
+;	;2회째 이후
+;	ELSEIF CFLAG:203 < 2 || FLAG:7 == 2
+;		CFLAG:203 = 2
+;	ENDIF
+
+;입상이 있는 조수가 없는 경우는,통상의 2회째 이후의입상에 난다
+ELSE
+	CALL EVENTTRAIN_SECOND_K49
+ENDIF
+
+
+
+;==================================================
+;조교 개시시(2회째 이후,X를 캐릭터 번호로 변경한다)
+;==================================================
+@EVENTTRAIN_SECOND_K49
+
+;전회에 조교한 날을 검색(R에 들어가 있는 것은 캐릭터 번호)
+R = 49
+CALL GET_MEMBER_TARGET
+
+;-------------------------------------
+;1주간 이상 조교하고 있지 않다
+;-------------------------------------
+IF D:2 == -1 && KANRAKU(TARGET)
+	PRINTFORMW 「내팽개쳤다좋은 근성이다?」
+
+;-------------------------------------
+;수고했어요. 체력 1000 이하.
+;-------------------------------------
+ELSEIF BASE:0 < 1000
+	IF TALENT:친애 || TALENT:창부 || TALENT:예속
+		PRINTFORMW 「모처럼 와 주었다는데 미안하군」
+	ELSEIF TALENT:연모 || TALENT:음란 || TALENT:복종
+		PRINTFORMW 「나쁘다,조금 오늘은 무리이다」
+	ELSE
+		PRINTFORMW 
+	ENDIF
+
+;--------------------------------------------------
+;반발각인 3
+;--------------------------------------------------
+ELSEIF MARK:반발각인 == 3
+	PRINTFORMW 무언인 채 침대 위에서 한쪽 무릎 세우고 앉기에 앉는%CALLNAME%의 자수정의 눈이 그윽한 빛을 하고 있다.
+	PRINTFORMW 발하는 압력이 방의 온도를 약간 내리고 있는 것 같다……
+;--------------------------------------------------
+;함락이 끝난 상태
+;--------------------------------------------------
+ELSEIF KANRAKU(TARGET)
+	;상위 함락이 끝난 상태
+	IF TALENT:친애 || TALENT:창부 || TALENT:예속
+		IF TALENT:친애
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			IF RAND:3 == 0
+				PRINTFORMW %CALLNAME:PLAYER%가의 방의 문을 열려고 하면,그것보다 빨리 안쪽으로부터 문이 열려 %CALLNAME:PLAYER%는 팔을 잡아지고 안에 이끌어 난처되어져 버렸다.
+				PRINTFORML %CALLNAME:PLAYER%의 키후로 소리를 내 문이 닫히는 것과 동시에,이끌어 난처할 수 있어 약간 앞으로 구부림이 된 %CALLNAME:PLAYER%의 목에 가는 팔이 감겼다.
+				PRINTFORMW 얇은 작은 입술이 %CALLNAME:PLAYER%의 거기에 꽉 누를 수 있자마자 떨어진다.
+				PRINTFORMW 지근거리에%CALLNAME%의 다홍색 갈색의 눈동자가 반짝여 이쪽을 올려보고 있었다.
+				PRINTFORMW 「헤헤헤,잡았다구. 도미 실마리%UNICODE(0x2661)%」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「무엇이다,대장. 대단히 늦지 않은가」
+				PRINTFORMW %CALLNAME%는 불만인 것처럼 입술을 뾰족하게 하면서도,소매치기,라고 머리를 %CALLNAME:PLAYER%의가슴에 문지르고 응석부려 온다.
+				PRINTFORMW 달래는 것처럼머리카락를 어루만져 주면 기분 좋은 것 같이 웃음을 띄웠지만,곧바로 일부러답고 장독면을 만들면 %CALLNAME:PLAYER%를 올려보았다.
+				PRINTFORMW 「여기와들일일천추[一日千秋]는 커녕 일각을 기다릴 수 없는 것이다. 오늘은 나치노기분이 풀릴 때까지 교제해 받을거니까!」
+					IF TALENT:처녀 == 0 || TALENT:백버진 == 0
+						PRINTFORMW  %CALLNAME%는 %CALLNAME:PLAYER%의 사타구니를 어루만지면서 요염한 미소를 띄운다.
+						PRINTFORMW 「대장도 그 기분일 것이다?」
+					ENDIF
+			ELSE
+				PRINTFORMW 「헤헤,안 되는구나,대장의 얼굴 보면 어떻게도 간들거려 버린다」
+				PRINTFORMW %CALLNAME%는 은은하게 연분홍색에 물든 당신이 뺨을 반들반들 어루만졌다
+			ENDIF
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	;하위 함락이 끝난 상태
+	ELSEIF TALENT:연모 || TALENT:음란 || TALENT:복종
+		IF TALENT:연모
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF TEQUIP:7 == 1
+					PRINTFORMW 「대장,언덕 옷깃에 응♪」
+					PRINTFORMW 
+					PRINTFORML 
+					PRINTFORML 
+					PRINTFORML 
+					PRINTFORMW 「…… 은,」
+				ELSE
+					IF RAND:3 == 0
+						PRINTFORMW 「여어,대장. 오늘은 어떻게 해?」
+						PRINTFORMW %CALLNAME%는 만면의 미소로 %CALLNAME:PLAYER%를 마중했다.
+					ELSEIF RAND:2 == 0
+						PRINTFORMW 「만나고 싶었어요,도미 실마리%UNICODE(0x2661)%」
+						PRINTFORMW 방에 들어간 순간,기다림에 지친이라는 듯이%CALLNAME%는 %CALLNAME:PLAYER%에 껴안아 왔다
+					ELSE
+						PRINTFORMW 「헤헤,안 되는구나,대장의 얼굴 보면 어떻게도 간들거려 버린다」
+						PRINTFORMW %CALLNAME%는 은은하게 연분홍색에 물든 당신이 뺨을 반들반들 어루만졌다
+					ENDIF
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;그 외
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+
+;--------------------------------------------------
+;미함락
+;--------------------------------------------------
+ELSE
+	;굴복각인Lv3
+	IF MARK:굴복각인 == 3
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			IF RAND:2 == 0
+				PRINTFORMW 「…… 어쩔 수 없는 사람이다」
+			ELSE
+				PRINTFORMW 「빠르지 않은가,대장」
+				PRINTFORMW 「뭐,여기도 준비는 끝나 있어. 언제라도 와라」
+			ENDIF
+		ELSE
+			PRINTFORMW 「아휴,어쩔 수 없구나」
+		ENDIF
+	;굴복각인Lv2
+	ELSEIF MARK:굴복각인 == 2
+		PRINTFORMW 「조금 기다리고 있어 줘,좀 더로 끝맺음이 좋다」
+		PRINTFORMW %CALLNAME%는 책에 눈을 떨어뜨린 채로,방을 방문한 %CALLNAME:PLAYER%에 응했다.
+		PRINTFORMW 「하면\@ RAND:2 == 0? 포상 # 처벌 되어\@줄테니까」
+	;굴복각인Lv1
+	ELSEIF MARK:굴복각인 == 1
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「오늘도인가. 나그렇게 넣는 만큼 보람?」
+		ELSE
+			PRINTFORMW 「질리지 않는구나,너도」
+		ENDIF
+	;통상시
+	ELSE
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「빠르지 않은가,대장」
+		ELSE
+			PRINTFORMW 「뭐,빨리 처음으로 끝내자구」
+		ENDIF
+	ENDIF
+ENDIF
+RETURN 0
+
+
+
+;==================================================
+;EVENTEND 관계(X를 캐릭터 번호에 치환)
+;조교 종료시의 대사
+;==================================================
+@EVENTEND
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF NO:TARGET != 49
+	RETURN 0
+@KOJO_EVENTEND_K49
+
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,X를 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL EVENTEND_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	SIF NO:ASSI == Y1
+;	CALL EVENTEND_PY1_KZ
+;	RETURN 0
+;ENDIF
+
+;==================================================
+;조교 종료시의 대사
+;↓는 아무것도 하지 않고 돌아갔을 때 용무의 변수
+P = PALAM:6 + UP:6
+;==================================================
+DRAWLINE
+
+;기절 하고 있다
+IF TALENT:기절
+	PRINTFORMW 기절 한%CALLNAME%를 침대에 재워,살그머니 방을후로 했다……
+;--------------------------------------------------
+;특수 상황으로 조교를 종료했다
+;[0]야외 시간[視姦]중에 종료			CFLAG:606
+;[1]촉수산란 한 채로 종료		CFLAG:607
+;[2]관장 한 채로 종료			CFLAG:608
+;[3]밧줄＋기분이 좋은 도구 돌출하고 종료
+;[4]촉수 낸 채로 종료			CFLAG:609
+;[5]욕실로 종료(그대로 천천히 입욕)
+;[6]에이프런첨부로 종료(타임 돌입)
+;[7]아무것도안한다로 돌아갔다(욕정Lv1 이하)
+;--------------------------------------------------
+;--------------------------------------------------
+;야외 시간[視姦]중에 종료(윤간돌입) CFLAG:606
+;--------------------------------------------------
+ELSEIF TEQUIP:야외플레이 > 0 && TFLAG:500 > 0 && TFLAG:151 >= 4
+	PRINTFORMW 관중의 볼티지는 최고조에 이르고 있는 것 같다…
+	;체력 있으면윤간선택 가능
+	IF BASE:0 >= 500
+		PRINTFORMW 흥분하고 있는 구경꾼들에게,%CALLNAME%를 좋아하게 시킵니까?
+		PRINTFORMW 
+		IF CFLAG:606 < 5
+			PRINTL [0] 재미있을 것 같은 것으로 준다
+		ELSE
+			PRINTL [0] 오늘이나 잘 부탁드립니다
+		ENDIF
+		PRINTL [1] 쫓아버려 돌아간다
+		$INPUT_LOOP_LINCOLN
+		INPUT
+		;재미있을 것 같은 것으로 준다
+		IF RESULT == 0
+			PRINTFORMW %CALLNAME%를 구경꾼들의 앞에 밀어 내,
+			PRINTFORMW 그 신체가 구석까지 능욕 다 되는 것을,충분히 만끽했다…
+			CFLAG:606 += 1
+		;쫓아버려 돌아간다
+		ELSEIF RESULT == 1
+			PRINTFORMW 흥분하는 구경꾼들을 쫓아버려,%CALLNAME%를 따라 집에 돌아갔다…
+		ELSE
+			GOTO INPUT_LOOP_LINCOLN
+		ENDIF
+	;체력 없을 때는 귀가
+	ELSE
+		PRINTFORML 이지만,녹초가된%CALLNAME%에 무리는 시킬 수 없다
+		PRINTFORMW 흥분하는 구경꾼들을 쫓아버려,%CALLNAME%를 따라 집에 돌아갔다…
+	ENDIF
+
+;--------------------------------------------------
+;촉수의 알을 임신한 채로 종료(출산) CFLAG:607
+;--------------------------------------------------
+ELSEIF TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란
+	IF TEQUIP:촉수질내산란 && TEQUIP:촉수장내산란
+		;메세지 부분. 개서 OK
+		CALL TRAIN_MESSAGE_DOUBLE_EGGPLAY_OUT
+		;처리를 부른다. 지워서는 안된 곳
+		CALL DOUBLE_EGGPLAY_OUT
+	ELSEIF TEQUIP:촉수질내산란
+		;메세지 부분. 개서 OK
+		CALL TRAIN_MESSAGE_EGGPLAY_OUT
+		;처리를 부른다. 지워서는 안된 곳
+		CALL EGGPLAY_OUT
+	ELSEIF TEQUIP:촉수장내산란
+		;메세지 부분. 개서 OK
+		CALL TRAIN_MESSAGE_KANTYO_EGGPLAY_OUT
+		;처리를 부른다. 지워서는 안된 곳
+		CALL KANTYO_EGGPLAY_OUT
+	ENDIF
+
+;--------------------------------------------------
+;배설시키지 않고 종료(배설):촉수관장도 여기 CFLAG:608
+;--------------------------------------------------
+;ELSEIF BASE:6 >= 60 && TEQUIP:확장벌룬
+;	;체력가 있어? 라면 좀 더 계속되는거야.
+;	IF BASE:0 >= 500
+;		IF TEQUIP:촉수
+;			PRINTFORML %CALLNAME:TARGET%의후 구멍에서는,아직도 배설을 막으려고촉수가 꿈틀거리고 있다…
+;			PRINTL [0] 촉수를 돌려보낸다
+;			PRINTL [1] 돌려보내지 않고 방치한다
+;		ELSE
+;			PRINTFORML %CALLNAME:TARGET%의후 구멍에는,아직도 배설을 막는바이브가 삽입되고 있다…
+;			PRINTL [0] 뽑아 준다
+;			PRINTL [1] 뽑지 않고 방치한다
+;		ENDIF
+;		$INPUT_LOOP_SCATOLOGY
+;		INPUT
+;		;뽑아 주는 or촉수를 돌려보낸다
+;		IF RESULT == 0
+;			;처리를 부른다. 지워서는 안된 곳
+;			CALL AFTERTRAIN_KANTYO
+;		;뽑지 않고 방치하는 or 돌려보내지 않고 방치한다
+;		ELSEIF RESULT == 1
+;			;밧줄 붙어 있으면 위험하다
+;			IF TEQUIP:밧줄 && TEQUIP:촉수 == 0
+;				BASE:0 -= 1000
+;			;촉수가 있다 금지된지식소유는 생각하지 않기로 했다. 이 상태로 냉정하게 마법 사용할 수 있으면 굉장하다
+;			ELSEIF TEQUIP:촉수
+;				EXP:촉수경험 += 5
+;				BASE:0 -= 1000
+;			;자유의 몸
+;			ELSE
+;			ENDIF
+;			EXP:스캇경험 += 3
+;		ELSE
+;			GOTO INPUT_LOOP_SCATOLOGY
+;		ENDIF
+;	;체력 없으면 무리는 시키지 않다
+;	ELSE
+;	ENDIF
+	
+;--------------------------------------------------
+;밧줄＋기분이 좋은 도구인 채 종료(방치 플레이):촉수플레이중도 여기
+;--------------------------------------------------
+;ELSEIF TEQUIP:밧줄 && ALLCHECK(TARGET)
+;	;체력가 있으면 선택지
+;	IF BASE:0 >= 500
+;		IF TEQUIP:촉수
+;			PRINTFORMW %CALLNAME%의 몸에는 아직도촉수가 감긴 채로,그 성감을 계속 자극하고 있다…
+;			PRINTL [0] 촉수를 돌려보낸다
+;			PRINTL [1] 돌려보내지 않고 방치한다
+;		ELSE
+;			PRINTFORMW %CALLNAME%의 몸은 구속된 채로,매달린 완구가 그 성감을 계속 자극하고 있다…
+;			PRINTL [0] 밧줄를 풀어 준다
+;			PRINTL [1] 그대로 방치한다
+;		ENDIF
+;		$INPUT_LOOP_IGNORE
+;		INPUT
+;		;밧줄를 풀어 준다
+;		IF RESULT == 0
+;		;그대로 방치한다
+;		ELSEIF RESULT == 1
+;		ELSE
+;			GOTO INPUT_LOOP_IGNORE
+;		ENDIF
+;	;체력 없으면 무리는 시키지 않다
+;	ELSE
+;		IF TEQUIP:촉수
+;			PRINTFORMW 촉수를 송환해 자유롭게 해 주고 나서,방을후로 했다…
+;		ELSE
+;			PRINTFORMW 그것들을 제외해 자유롭게 해 주고 나서,방을후로 했다…
+;		ENDIF
+;	ENDIF
+	
+;--------------------------------------------------
+;촉수를 송환하지 않고 종료(촉수강간 돌입) CFLAG:609
+;--------------------------------------------------
+;ELSEIF TEQUIP:촉수
+;	;촉수NTR 대상이 스스로 부른촉수이다
+;	IF TEQUIP:촉수 == 2 && TALENT:TARGET:금지된지식
+;	;체력 있으면촉수간선택 가능
+;	ELSEIF BASE:0 >= 500
+;		PRINTFORMW 방 안에서는,그로테스크한촉수가 돌려보내지는 일 없이 꿈틀거리고 있다…
+;		PRINTFORMW 촉수를 원의 세계에 돌려보냅니까?
+;		PRINTL [0] 돌려보낸다
+;		PRINTL [1] 돌려보내지 않는다
+;		$INPUT_LOOP_SYOKUSYU
+;		INPUT
+;		;돌려보낸다
+;		IF RESULT == 0
+;		;돌려보내지 않는다
+;		ELSEIF RESULT == 1
+;		ELSE
+;			GOTO INPUT_LOOP_SYOKUSYU
+;		ENDIF
+;	;체력 없으면촉수는 돌려보낸다
+;	ELSE
+;	ENDIF
+
+;--------------------------------------------------
+;입욕한 채로 종료(그대로 천천히 욕실을 즐긴다)
+;--------------------------------------------------
+;ELSEIF TEQUIP:목욕탕 > 0
+;	SIF CFLAG:10 >= 30
+;		CFLAG:10 -= 5
+
+;--------------------------------------------------
+;에이프런부로 종료(타임 돌입)
+;--------------------------------------------------
+;ELSEIF TEQUIP:에이프런 > 0
+	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		PRINTFORMW 「응? 벗기지 않는다는 일은,대장,이것기분에 말했는지?」
+		PRINTFORMW %CALLNAME%는에이프런의 옷자락을 만지작거리면서 목을 기울였다.
+		PRINTFORMW 「오오,그렇다. 그러면 전에 들은,은일까 응이라는생각하므로 마중나가고 하면,대장 기쁜가?」
+	ELSE
+		PRINTFORMW %CALLNAME%는에이프런의 옷자락을 만지작거리면서 목을 기울였다.
+	ENDIF
+;--------------------------------------------------
+;아무것도안한다로 돌아갔습니다(함락제로욕정Lv1 이하)
+;--------------------------------------------------
+ELSEIF (P < PALAMLV:2) && KANRAKU(TARGET)
+	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		IF RAND:2 == 0
+			PRINTFORMW 「아무것도 해 가내는 개미인가. …… 아아,젠장,대장이발리나구라고 이상해지기 전에 또 와 주어라」
+		ELSE
+			PRINTFORMW 「대장의 얼굴 볼 수 있어 기뻐. 다음은 충분히 귀여워해 주어라. 기다리고 있다」
+		ENDIF
+	ELSE
+		PRINTFORMW 「뭐하러 온 것이다,바보. …… 기다리고 있어 주기 때문에 또 곧 와라」
+	ENDIF
+
+;-------------------------------------
+;수고했어요. 체력 1000 이하. 함락이 끝난 한정
+;-------------------------------------
+ELSEIF BASE:0 < 1000 && KANRAKU(TARGET)
+	IF TALENT:연모
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「응,그렇게 항상 신경쓰고 이루지 않지는. 이런 것 조금 쉬면……」
+			PRINTFORMW 그렇게 말하면서,%CALLNAME%는 졸린 듯해 머리가 이미 어찔어찔흔들리고 있다.
+		ELSE
+			PRINTFORMW 식과 한숨 돌려%CALLNAME%는 눈을 감았다.
+		ENDIF
+	ELSEIF TALENT:친애
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「나쁜,대장. 조금 쉬게 해 받지마. 너가 만발 해 주면 좋지만……」
+			PRINTFORMW 식과 한숨 돌려%CALLNAME%는 눈을 감았다.
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ELSEIF TALENT:음란 || TALENT:창부
+		PRINTFORMW 
+	ELSEIF TALENT:복종
+		PRINTFORMW 
+	ELSEIF TALENT:예속
+		PRINTFORMW 
+	ENDIF
+
+;--------------------------------------------------
+;특수한 조건하가 아닐 때의 조교 종료 대사
+;--------------------------------------------------
+;반발각인Lv3
+ELSEIF MARK:반발각인 >= 3
+	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		PRINTFORMW 「…… 잊지 말아요,대장」
+		PRINTFORMW 「나는 제약 기구통요시미츠. 나를 관통했기 때문인 이름이다」
+	ELSE
+		PRINTFORMW 「…… 겨우 틈을 보이지 않는 것이다. 언제에 소매치기 가게 해 받겠어」
+	ENDIF
+;함락이 끝난 상태
+ELSEIF TALENT:친애 || TALENT:창부 || TALENT:예속 || TALENT:연모 || TALENT:음란 || TALENT:복종
+	IF TALENT:친애
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「돌려보내고 싶지 않은…… 매달면 대장,곤란하구나」
+			PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%의손를 취해 그 손가락끝에입 지었다.
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ELSEIF TALENT:창부 || TALENT:예속
+		PRINTFORMW 
+	ELSEIF TALENT:연모
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「벌써 끝인가,대장」
+			PRINTFORMW %CALLNAME:PLAYER%가 살짝 주의를 주어,%CALLNAME%는입를 날카롭게 되어지고 있다……
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ELSE
+		PRINTFORMW 
+	ENDIF
+;미함락
+ELSE
+	;굴복각인Lv3
+	IF MARK:굴복각인 == 3
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「…… 응,끝인가. 대장,돌아갈까? 그렇지 않으면 좀 더 있을까?」
+			PRINTFORMW %CALLNAME%는 흐트러진 침구에서 나른한 듯이 몸을 일으키면 %CALLNAME:PLAYER%를 올려봐 고개를 갸웃했다
+		ELSE
+			PRINTFORMW 「그런데,다음은 언제 오지?」
+			PRINTFORMW 흐트러진 호흡과 착의를 정돈하는%CALLNAME%의 표정에는,아직 얼마간인가의 여유가 있는 것처럼 생각된다
+		ENDIF
+	;굴복각인Lv1 이하
+	ELSE
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「……… 얼굴 씻어 온다」
+		ELSE
+			PRINTFORMW 「……… 얼굴 씻어 온다」
+		ENDIF
+	ENDIF
+ENDIF
+RETURN 0
+
+
+;==================================================
+;@@SET_SLAVE_AFTERWARDS 관계(X,Y1를 캐릭터 번호에 치환한다)
+;==================================================
+@SET_SLAVE_AFTERWARDS_K49
+PRINTFORMW 
+
+
+;==================================================
+;@KOJO_MESSAGE_ENDING 관계(X,Y1를 캐릭터 번호에 치환한다)
+;==================================================
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,1을 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL EVENTTURNEND_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	SIF NO:ASSI == Y1
+;	CALL EVENTTURNEND_PY1_KZ
+;	RETURN 0
+;ENDIF
+;-------------------------------------------------
+;조건 설정
+;-------------------------------------------------
+@EVENTTURNEND
+#LATER
+SIF TARGET < 0
+	RETURN 0
+SIF NO:TARGET != 49
+	RETURN 0
+;특수 하렘 엔드용 조건 판정 구문 샘플
+;XX내에 조건으로 하는 캐릭터의 캐릭터 번호를 넣으면,좋아하는 편성의 하렘 엔드를 설정할 수 있다
+;하렘 엔드의 조건을 채웠을 때,여기의 특수 하렘 엔드의 조건도 채우고 있는 경우,하렘 엔드로부터 파생한다
+;A = 0
+;B = 0
+;REPEAT CHARANUM
+;	IF NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX
+;		SIF TALENT:COUNT:6 || TALENT:COUNT:7 || TALENT:COUNT:8
+;			A += 1
+;		SIF TALENT:COUNT:3 || TALENT:COUNT:4 || TALENT:COUNT:5 || TALENT:COUNT:6 || TALENT:COUNT:7 || TALENT:COUNT:8
+;			B += 1
+;	ENDIF
+;REND
+;SIF A && A+B >= XXX
+;	CFLAG:21 = 2
+;단체[單体] 엔드용 분기 플래그,단체[單体] 엔드가 있는 상위 함락 소질만 comment out를 해제한다
+;SIF TALENT:친애
+;	CFLAG:21 = 1
+;SIF TALENT:창부
+;	CFLAG:21 = 1
+;SIF TALENT:예속
+;	CFLAG:21 = 1
+
+;==================================================
+;엔드 본문
+;==================================================
+@KOJO_MESSAGE_ENDING_K49
+;친애·창부·예속엔드 공통 부분
+IF (TALENT:친애 || TALENT:창부 || TALENT:예속) && CFLAG:21 == 1
+	PRINTFORMW 
+	PRINTFORMW ------------캐릭터 엔드 조건 달성---------------
+	PRINTFORMW 
+	PRINTFORMW 
+	PRINTFORMW 
+	PRINTFORMW 
+	;--------------------------------------
+	;친애√
+	;--------------------------------------
+	IF TALENT:친애 && CFLAG:21 == 1
+	;--------------------------------------
+	;창부√
+	;--------------------------------------
+	ELSEIF TALENT:창부 && CFLAG:21 == 1
+	;--------------------------------------
+	;예속√
+	;--------------------------------------
+	ELSEIF TALENT:예속 && CFLAG:21 == 1
+	ENDIF
+ENDIF
+RETURN 0
+
+

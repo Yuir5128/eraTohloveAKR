@@ -1,0 +1,677 @@
+﻿;EVENT_A.ERB, EVENT_ABILITY, 능력이나 소질의 변화 이벤트
+@EVENTCHECK_ABL
+SIF TARGET >= 0
+	CALL EVENTCHECK_T
+SIF MASTER >= 0
+	CALL EVENTCHECK_M
+SIF ASSI >= 0
+	CALL EVENTCHECK_A
+
+;조교자 변경 확장용·연모대상 기록 플래그 판정
+;만약 기록되고 있는 사모·공포 대상이 현재의 마스터가 아닌 경우, 일시적으로 해제(일자 변경 이베비해를 위해서(때문에)
+CALL MASTER_CHANGE_OFF
+
+
+;---------------------------------------------------------
+;함락 소질
+;---------------------------------------------------------
+;함락 소질의 다중 취득을 봉인
+@EVENTCHECK_T
+IF !TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속 && !TALENT:붕괴 && !TALENT:실의
+	;피조교경험의 합계로부터 마스터 조교의 경험을 당겨 조수조교경험를 산출
+	A = 0
+	REPEAT FLAG:44
+		B = COUNT + 1099
+		A += CFLAG:B
+	REND
+	LOCAL = NO:MASTER + 1099
+	A -= CFLAG:LOCAL
+
+	;연모:순종, 봉사정신 3 이상+굴복각인Lv3+반발각인Lv0+봉사쾌락경험 200 이상+의존도 1000이상+이상경험 2 미만+현재의 마스터로부터의 피조교경험 1000 이상
+	IF ABL:순종 >= 3 && ABL:봉사정신 >= 3 && MARK:굴복각인 == 3 && MARK:반발각인 == 0 && EXP:봉사쾌락경험 >= 200 && CFLAG:2 >= 1000 && EXP:이상경험 < 2 && CFLAG:(NO:MASTER + 1099) >= 1000
+		TFLAG:13 = 46
+		CALL KOJO_MESSAGE_EVENT
+		SIF TARGET < 0
+			RETURN 0
+		PRINTFORMW %NAME:TARGET%는【연모】를 얻었다
+		PRINTL 　
+		TALENT:연모 = 1
+		FLAG:30 += 1
+		;조교자 변경 확장용·연모대상 기록 플래그
+		CFLAG:41 =  NO:MASTER
+		CFLAG:40 = 1
+		CFLAG:39 = 3
+
+		CALL RELATION_CHECK(LOCAL)
+	ENDIF
+
+	;음란:욕망 3 이상+CVAB 감각 합계 10이상+쾌락각인Lv3+굴복각인Lv3+반발각인Lv0+절정경험 50 이상+이상경험 3 이상 or이상경험 1 이상+조수조교경험 1000 이상 or조수조교경험 2000 이상
+	IF ABL:욕망 >= 3 && ABL:C감각+ABL:V감각+ABL:A감각+ABL:B감각 >= 10 && MARK:쾌락각인 == 3 && MARK:굴복각인 == 3 && MARK:반발각인 == 0 && EXP:절정경험 >= 50 && !TALENT:연모
+		IF EXP:이상경험 >= 3 || (EXP:이상경험 >= 1 && A >= 1000) || A >= 2000
+			TFLAG:13 = 47
+			CALL KOJO_MESSAGE_EVENT
+			SIF TARGET < 0
+				RETURN 0
+			PRINTFORMW %NAME:TARGET%는【음란】를 얻었다
+			PRINTL 　
+			TALENT:음란 = 1
+			FLAG:31 += 1
+			CFLAG:39 = 4
+			CALL RELATION_CHECK(LOCAL)
+		ENDIF
+	ENDIF
+
+	;복종:순종, 마조끼 3 이상+CAVB 감각 10 미만+굴복각인Lv3+반발각인Lv0+고통쾌락경험+속박경험 200 이상+의존도-1000 이하+이상경험 2 이상
+	I = CFLAG:2 * -1
+	IF ABL:순종 >= 3 && ABL:마조끼 >= 3 && ABL:C감각+ABL:V감각+ABL:A감각+ABL:B감각 < 10 && MARK:굴복각인 == 3 && MARK:반발각인 == 0 && EXP:고통쾌락경험+EXP:속박경험 >= 200 && I >= 1000 && EXP:이상경험 >= 2
+		TFLAG:13 = 48
+		CALL KOJO_MESSAGE_EVENT
+		SIF TARGET < 0
+			RETURN 0
+		PRINTFORMW %NAME:TARGET%는【복종】를 얻었다
+		PRINTL 　
+		TALENT:복종 = 1
+		FLAG:32 += 1
+		;조교자 변경 확장용·공포 대상 기록 플래그
+		CFLAG:41 =  NO:MASTER
+		CFLAG:40 = 1
+		CFLAG:39 = 5
+
+		CALL RELATION_CHECK(LOCAL)
+	ENDIF
+
+ENDIF
+
+
+IF !TALENT:친애 && !TALENT:창부 && !TALENT:예속 && !TALENT:붕괴
+	;피조교경험의 합계로부터 마스터 조교의 경험을 당겨 조수조교경험를 산출
+	A = 0
+	REPEAT FLAG:44
+		B = COUNT + 1099
+		A += CFLAG:B
+	REND
+	M = NO:MASTER + 1099
+	A -= CFLAG:M
+
+	;친애:순종, 봉사정신 5 이상+반발각인Lv0+애정경험 200 이상+봉사쾌락경험 400 이상+의존도 3000이상+이상경험 5 미만+현재의 마스터로부터의 피조교경험 1500 이상
+	IF ABL:순종 >= 5 && ABL:봉사정신 >= 5 && MARK:반발각인 == 0 && EXP:애정경험 >= 200 && EXP:봉사쾌락경험 >= 400 && CFLAG:2 >= 3000 && EXP:이상경험 < 5 && CFLAG:(NO:MASTER + 1099) >= 1500
+		TFLAG:13 = 49
+		CALL KOJO_MESSAGE_EVENT
+		SIF TARGET < 0
+			RETURN 0
+		PRINTFORMW %NAME:TARGET%는【친애】를 얻었다
+		TALENT:연모 = 0
+		TALENT:음란 = 0
+		TALENT:복종 = 0
+		TALENT:친애 = 1
+		CFLAG:39 = 6
+		;조교자 변경용의
+		IF CFLAG:MASTER:39 == 6 && CFLAG:MASTER:41 == NO:TARGET && TALENT:MASTER:상사상애 == 0 && TALENT:상사상애 == 0
+			PRINTL 
+			TFLAG:13 = 53
+			CALL KOJO_MESSAGE_EVENT
+			SIF TARGET < 0
+				RETURN 0
+			PRINTFORMW %NAME:MASTER%과 %NAME:TARGET%는【상사상애】가 되었다
+			TALENT:MASTER:상사상애 = 1
+			TALENT:상사상애 = 1
+			CFLAG:39 = 165
+			CFLAG:MASTER:39 = 165
+		ENDIF
+		PRINTL 　
+	ENDIF
+	;창부:욕망 5 이상+CVAB 감각 합계 20이상+반발각인Lv0+절정경험 200 이상+이상경험 6 이상 or이상경험 4 이상+조수조교경험 2000 이상 or이상경험 3 이상+조수조교경험 3000 이상
+	IF ABL:욕망 >= 5 && ABL:C감각+ABL:V감각+ABL:A감각+ABL:B감각 >= 20 && MARK:반발각인 == 0 && EXP:절정경험 >= 200
+		IF EXP:이상경험 >= 6 || (EXP:이상경험 >= 4 && A >= 2000) || (EXP:이상경험 >= 3 && A >= 3000)
+			TFLAG:13 = 50
+			CALL KOJO_MESSAGE_EVENT
+			SIF TARGET < 0
+				RETURN 0
+			PRINTFORMW %NAME:TARGET%는【창부】를 얻었다
+			PRINTL 　
+			TALENT:연모 = 0
+			TALENT:음란 = 0
+			TALENT:복종 = 0
+			TALENT:창부 = 1
+			CFLAG:39 = 7
+		ENDIF
+	ENDIF
+
+	;예속:순종, 마조끼 5 이상+CAVB 감각 15 미만+반발각인Lv0+고통쾌락경험+속박경험 500 이상+의존도-3000 이하+이상경험 5 이상
+	I = CFLAG:2 * -1
+	IF ABL:순종 >= 5 && ABL:마조끼 >= 5 && ABL:C감각+ABL:V감각+ABL:A감각+ABL:B감각 < 15 && MARK:반발각인 == 0 && EXP:고통쾌락경험+EXP:속박경험 >= 500 && I >= 3000 && EXP:이상경험 >= 5
+		TFLAG:13 = 51
+		CALL KOJO_MESSAGE_EVENT
+		SIF TARGET < 0
+			RETURN 0
+		PRINTFORMW %NAME:TARGET%는【예속】를 얻었다
+		PRINTL 　
+		TALENT:연모 = 0
+		TALENT:음란 = 0
+		TALENT:복종 = 0
+		TALENT:예속 = 1
+		CFLAG:39 = 8
+	ENDIF
+
+ENDIF
+
+;---------------------------------------------------------
+;그 외 노예의 소질 및 능력
+;---------------------------------------------------------
+LOCAL:1 = 1000 + NO:TARGET
+;특수성감 소질, 전주회로 획득 경험이 없으면 1개 밖에 취득은 할 수 없다(중복 했을 경우는 위로부터 우선)
+;섹스중독 4 이상, 성교경험 250 이상, 절정경험 200 이상
+IF ABL:섹스중독 >= 4 && EXP:성교경험 >= 250 && EXP:절정경험 >= 200 && ((!TALENT:자위광 && !TALENT:음란구멍 && !TALENT:항문광 && !TALENT:음란가슴 && !TALENT:섹스광) || (FLAG:(LOCAL:1) & 1 && !TALENT:섹스광))
+	TFLAG:13 = 55
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【섹스광】를 얻었다
+	PRINTL 　
+	TALENT:섹스광 = 1
+	FLAG:(LOCAL:1) |= 1
+ENDIF
+;자위광:C감각 5 이상, 조교자위경험+자위경험 300 이상, 절정경험 200 이상
+IF ABL:C감각 >= 5 && EXP:조교자위경험+EXP:자위경험 >= 300 && EXP:절정경험 >= 200 && ((!TALENT:자위광 && !TALENT:음란구멍 && !TALENT:항문광 && !TALENT:음란가슴 && !TALENT:섹스광) || (FLAG:(LOCAL:1) & 16 && !TALENT:자위광))
+	TFLAG:13 = 56
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【자위광】를 얻었다
+	PRINTL 　
+	TALENT:자위광 = 1
+	FLAG:(LOCAL:1) |= 16
+ENDIF
+
+;음란구멍:V감각 5 이상, V경험 400 이상, 절정경험 200 이상
+IF ABL:V감각 >= 5 && EXP:V경험 >= 400 && EXP:절정경험 >= 200 && ((!TALENT:자위광 && !TALENT:음란구멍 && !TALENT:항문광 && !TALENT:음란가슴 && !TALENT:섹스광) || (FLAG:(LOCAL:1) & 8 && !TALENT:음란구멍))
+	TFLAG:13 = 57
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【음란구멍】를 얻었다
+	PRINTL 　
+	TALENT:음란구멍 = 1
+	FLAG:(LOCAL:1) |= 8
+ENDIF
+
+;항문광:A감각 5 이상, A경험 400 이상, 절정경험 200 이상
+IF ABL:A감각 >= 5 && EXP:A경험 >= 400 && EXP:절정경험 >= 200 && ((!TALENT:자위광 && !TALENT:음란구멍 && !TALENT:항문광 && !TALENT:음란가슴 && !TALENT:섹스광) || (FLAG:(LOCAL:1) & 4 && !TALENT:항문광))
+	TFLAG:13 = 58
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【항문광】를 얻었다
+	PRINTL 　
+	TALENT:항문광 = 1
+	FLAG:(LOCAL:1) |= 4
+ENDIF
+
+;음란가슴:B감각 5 이상, 분유경험+B사정경험 150 이상, 절정경험 200 이상
+IF ABL:B감각 >= 5 && (EXP:분유경험+EXP:B사정경험) >= 150 && EXP:절정경험 >= 200 && ((!TALENT:자위광 && !TALENT:음란구멍 && !TALENT:항문광 && !TALENT:음란가슴 && !TALENT:섹스광) || (FLAG:(LOCAL:1) & 2 && !TALENT:음란가슴))
+	TFLAG:13 = 59
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【음란가슴】를 얻었다
+	PRINTL 　
+	TALENT:음란가슴 = 1
+	FLAG:(LOCAL:1) |= 2
+ENDIF
+
+;즉각함락:음계 소질 무료 초대권
+IF !TALENT:즉각함락 && TALENT:자위광 && TALENT:음란구멍 && TALENT:항문광 && TALENT:음란가슴 && TALENT:섹스광
+	TFLAG:13 = 60
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【즉각함락】를 얻었다
+	PRINTL 　
+	TALENT:즉각함락 = 1
+	FLAG:(LOCAL:1) |= 32
+ENDIF
+
+;특수성버릇 소질
+;새드:새드끼Lv5 이상, 가학쾌락경험 300 이상
+IF ABL:새드끼 >= 5 && EXP:가학쾌락경험 >= 300 && TALENT:새드 == 0
+	TFLAG:13 = 61
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【새드】를 얻었다
+	PRINTL 　
+	TALENT:새드 = 1
+;도S:새드끼Lv8 이상, 가학쾌락경험 1000 이상
+ELSEIF ABL:새드끼 >= 8 && EXP:가학쾌락경험 >= 1000 && TALENT:새드 == 1
+	TFLAG:13 = 63
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【도S】를 얻었다
+	PRINTL 　
+	TALENT:새드 = 2
+ENDIF
+
+;마조:마조끼Lv5 이상, 고통쾌락경험 300 이상
+IF ABL:마조끼 >= 5 && EXP:고통쾌락경험 >= 300 && TALENT:마조 == 0
+	TFLAG:13 = 62
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【마조】를 얻었다
+	PRINTL 　
+	TALENT:마조 = 1
+;드 M:마조끼Lv8 이상, 고통쾌락경험 1000 이상
+ELSEIF ABL:마조끼 >= 8 && EXP:고통쾌락경험 >= 1000 && TALENT:마조 == 1
+	TFLAG:13 = 64
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【드 M】를 얻었다
+	PRINTL 　
+	TALENT:마조 = 2
+ENDIF
+
+;혀놀림:펠라경험 200 이상, 정음절정경험 50 이상 혹은정액중독Lv4 이상
+IF EXP:펠라경험 >= 200 && (EXP:정음절정경험 >= 50 || ABL:정액중독 >= 4) && TALENT:혀놀림 == 0
+	TFLAG:13 = 80
+	CALL KOJO_MESSAGE_EVENT
+	PRINTFORMW %NAME:TARGET%는【혀놀림】를 얻었다
+	PRINTL 　
+	TALENT:혀놀림 = 1
+ENDIF
+
+;---------------------------------------------------------
+;주인의 소질 및 능력
+;---------------------------------------------------------
+@EVENTCHECK_M
+;주인의기교:조교경험가 20, 100, 250, 400, 600마다 상승, Lv5까지
+;소질:습득빠름, 골드핑거, 수수께끼의매력, 금지된지식중 한쪽이 있을 때 Lv10까지
+;조교경험가, 1000, 1500, 2000, 3000, 5000마다 상승
+IF TALENT:MASTER:습득빠름 || TALENT:MASTER:골드핑거 || TALENT:MASTER:수수께끼의매력 || TALENT:MASTER:금지된지식
+	IF EXP:MASTER:조교경험 >= 5000 && ABL:MASTER:기교 <= 9
+		ABL:MASTER:기교 = 10
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:2%가{ABL:MASTER:기교}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:조교경험 >= 3000 && ABL:MASTER:기교 <= 8
+		ABL:MASTER:기교 = 9
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:2%가{ABL:MASTER:기교}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:조교경험 >= 2000 && ABL:MASTER:기교 <= 7
+		ABL:MASTER:기교 = 8
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:2%가{ABL:MASTER:기교}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:조교경험 >= 1500 && ABL:MASTER:기교 <= 6
+		ABL:MASTER:기교 = 7
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:2%가{ABL:MASTER:기교}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:조교경험 >= 1000 && ABL:MASTER:기교 <= 5
+		ABL:MASTER:기교 = 6
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:2%가{ABL:MASTER:기교}에 올랐다
+		PRINTL 　
+	ENDIF
+ENDIF
+IF EXP:MASTER:조교경험 >= 600 && ABL:MASTER:기교 <= 4
+	ABL:MASTER:기교 = 5
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:2%가{ABL:MASTER:기교}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:조교경험 >= 400 && ABL:MASTER:기교 <= 3
+	ABL:MASTER:기교 = 4
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:2%가{ABL:MASTER:기교}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:조교경험 >= 250 && ABL:MASTER:기교 <= 2
+	ABL:MASTER:기교 = 3
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:2%가{ABL:MASTER:기교}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:조교경험 >= 100 && ABL:MASTER:기교 <= 1
+	ABL:MASTER:기교 = 2
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:2%가{ABL:MASTER:기교}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:조교경험 >= 20 && ABL:MASTER:기교 <= 0
+	ABL:MASTER:기교 = 1
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:2%가{ABL:MASTER:기교}에 올랐다
+	PRINTL 　
+ENDIF
+
+;주인의새드끼:가학쾌락경험가 10, 20, 50, 100, 200마다 상승, Lv5까지
+;【새드】(이)가 있을 때, Lv10까지, 가학쾌락경험 300, 500, 700, 1000, 2000으로 상승
+IF TALENT:MASTER:새드
+	IF EXP:MASTER:가학쾌락경험 >= 2000 && ABL:MASTER:새드끼 <= 9
+		ABL:MASTER:새드끼 = 10
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:10%가{ABL:MASTER:새드끼}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:가학쾌락경험 >= 1000 && ABL:MASTER:새드끼 <= 8
+		ABL:MASTER:새드끼 = 9
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:10%가{ABL:MASTER:새드끼}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:가학쾌락경험 >= 700 && ABL:MASTER:새드끼 <= 7
+		ABL:MASTER:새드끼 = 8
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:10%가{ABL:MASTER:새드끼}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:가학쾌락경험 >= 500 && ABL:MASTER:새드끼 <= 6
+		ABL:MASTER:새드끼 = 7
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:10%가{ABL:MASTER:새드끼}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:가학쾌락경험 >= 300 && ABL:MASTER:새드끼 <= 5
+		ABL:MASTER:새드끼 = 6
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:10%가{ABL:MASTER:새드끼}에 올랐다
+		PRINTL 　
+	ENDIF
+ENDIF
+IF EXP:MASTER:가학쾌락경험 >= 200 && ABL:MASTER:새드끼 <= 4
+	ABL:MASTER:새드끼 = 5
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:10%가{ABL:MASTER:새드끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:가학쾌락경험 >= 100 && ABL:MASTER:새드끼 <= 3
+	ABL:MASTER:새드끼 = 4
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:10%가{ABL:MASTER:새드끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:가학쾌락경험 >= 50 && ABL:MASTER:새드끼 <= 2
+	ABL:MASTER:새드끼 = 3
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:10%가{ABL:MASTER:새드끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:가학쾌락경험 >= 20 && ABL:MASTER:새드끼 <= 1
+	ABL:MASTER:새드끼 = 2
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:10%가{ABL:MASTER:새드끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:가학쾌락경험 >= 10 && ABL:MASTER:새드끼 <= 0
+	ABL:MASTER:새드끼 = 1
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:10%가{ABL:MASTER:새드끼}에 올랐다
+	PRINTL 　
+ENDIF
+
+;주인의마조끼:고통쾌락경험가 10, 20, 50, 100, 200마다 상승, Lv5까지
+;【마조】(이)가 있을 때, Lv10까지, 고통쾌락경험 300, 500, 700, 1000, 2000으로 상승
+IF TALENT:MASTER:마조
+	IF EXP:MASTER:고통쾌락경험 >= 2000 && ABL:MASTER:마조끼 <= 9
+		ABL:MASTER:마조끼 = 10
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:9%가{ABL:MASTER:마조끼}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:고통쾌락경험 >= 1000 && ABL:MASTER:마조끼 <= 8
+		ABL:MASTER:마조끼 = 9
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:9%가{ABL:MASTER:마조끼}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:고통쾌락경험 >= 700 && ABL:MASTER:마조끼 <= 7
+		ABL:MASTER:마조끼 = 8
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:9%가{ABL:MASTER:마조끼}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:고통쾌락경험 >= 500 && ABL:MASTER:마조끼 <= 6
+		ABL:MASTER:마조끼 = 7
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:9%가{ABL:MASTER:마조끼}에 올랐다
+		PRINTL 　
+	ELSEIF EXP:MASTER:고통쾌락경험 >= 300 && ABL:MASTER:마조끼 <= 5
+		ABL:MASTER:마조끼 = 6
+		PRINTFORMW %NAME:MASTER%의 %ABLNAME:9%가{ABL:MASTER:마조끼}에 올랐다
+		PRINTL 　
+	ENDIF
+ENDIF
+IF EXP:MASTER:고통쾌락경험 >= 200 && ABL:MASTER:마조끼 <= 4
+	ABL:MASTER:마조끼 = 5
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:9%가{ABL:MASTER:마조끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:고통쾌락경험 >= 100 && ABL:MASTER:마조끼 <= 3
+	ABL:MASTER:마조끼 = 4
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:9%가{ABL:MASTER:마조끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:고통쾌락경험 >= 50 && ABL:MASTER:마조끼 <= 2
+	ABL:MASTER:마조끼 = 3
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:9%가{ABL:MASTER:마조끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:고통쾌락경험 >= 20 && ABL:MASTER:마조끼 <= 1
+	ABL:MASTER:마조끼 = 2
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:9%가{ABL:MASTER:마조끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:고통쾌락경험 >= 10 && ABL:MASTER:마조끼 <= 0
+	ABL:MASTER:마조끼 = 1
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:9%가{ABL:MASTER:마조끼}에 올랐다
+	PRINTL 　
+ENDIF
+
+;주인의촬영기능:촬영경험가 10, 30, 60, 100, 150마다 상승, Lv5까지
+IF EXP:MASTER:촬영경험 >= 150 && ABL:MASTER:촬영기능 <= 4
+	ABL:MASTER:촬영기능 = 5
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:13%가{ABL:MASTER:촬영기능}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:촬영경험 >= 100 && ABL:MASTER:촬영기능 <= 3
+	ABL:MASTER:촬영기능 = 4
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:13%가{ABL:MASTER:촬영기능}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:촬영경험 >= 60 && ABL:MASTER:촬영기능 <= 2
+	ABL:MASTER:촬영기능 = 3
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:13%가{ABL:MASTER:촬영기능}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:촬영경험 >= 30 && ABL:MASTER:촬영기능 <= 1
+	ABL:MASTER:촬영기능 = 2
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:13%가{ABL:MASTER:촬영기능}에 올랐다
+	PRINTL 　
+ELSEIF EXP:MASTER:촬영경험 >= 10 && ABL:MASTER:촬영기능 <= 0
+	ABL:MASTER:촬영기능 = 1
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:13%가{ABL:MASTER:촬영기능}에 올랐다
+	PRINTL 　
+ENDIF
+
+;주인의절륜:조교자의사정경험가 200이상으로 취득
+IF EXP:MASTER:사정경험 >= 200 && TALENT:MASTER:절륜 == 0 && TALENT:MASTER:남자 == 1
+	PRINTFORMW %NAME:MASTER%는【절륜】를 몸에 익혔다
+	TALENT:MASTER:절륜 = 1
+ENDIF
+
+;주인의수수께끼의매력:연모·복종로 한 노예의 수가 5명 이상
+B = 0
+REPEAT CHARANUM
+	A = COUNT
+	SIF CFLAG:A:40 && CFLAG:A:41 == NO:MASTER
+		B += 1
+REND
+IF B >= 5 && TALENT:MASTER:수수께끼의매력 == 0
+	PRINTFORMW %NAME:MASTER%는【수수께끼의매력】를 몸에 익혔다
+	TALENT:MASTER:수수께끼의매력 = 1
+ENDIF
+
+;골드핑거:기교 5 이상, 함락 루트 각 한사람 이상 있는 것
+;B = 0
+;C = 0
+;D = 0
+;더욱 조교자 변경이 온의 경우에 제한
+;REPEAT CHARANUM
+;	A = COUNT
+;	SIF (TALENT:A:연모 || TALENT:A:친애) && CFLAG:A:40 && CFLAG:A:41 == NO:MASTER
+;		B += 1
+;	SIF (TALENT:A:복종 || TALENT:A:예속) && CFLAG:A:40 && CFLAG:A:41 == NO:MASTER
+;		C += 1
+;	SIF TALENT:A:음란 || TALENT:A:창부
+;		D += 1
+;REND
+;IF ABL:MASTER:기교 >= 5 && B && C && D && TALENT:MASTER:골드핑거 == 0
+;	PRINTFORMW %NAME:MASTER%는【골드핑거】를 몸에 익혔다
+;	TALENT:MASTER:골드핑거 = 1
+;ENDIF
+
+;주인의새드:새드끼가 Lv5 이상, 가학쾌락경험 300 이상으로새드
+IF ABL:MASTER:새드끼 >= 5 && EXP:MASTER:가학쾌락경험 >= 300 && !TALENT:MASTER:새드
+	PRINTFORMW %NAME:MASTER%는【새드】를 몸에 익혔다
+	TALENT:MASTER:새드 = 1
+;주인의 도S:새드끼Lv8 이상, 가학쾌락경험 1000 이상, 기교Lv8 이상, 도M가 아니다
+ELSEIF ABL:MASTER:새드끼 >= 8 && EXP:MASTER:가학쾌락경험 >= 1000 && ABL:MASTER:기교 >= 4 && TALENT:MASTER:새드 == 1
+	PRINTFORMW %NAME:MASTER%는【도S】를 몸에 익혔다
+	TALENT:MASTER:새드 = 2
+ENDIF
+
+;주인의마조:마조끼가 Lv5 이상, 고통쾌락경험 300 이상으로새드
+IF ABL:MASTER:마조끼 >= 5 && EXP:MASTER:고통쾌락경험 >= 300 && !TALENT:MASTER:마조
+	PRINTFORMW %NAME:MASTER%는【마조】를 몸에 익혔다
+	TALENT:MASTER:마조 = 1
+;주인의 드 M:마조끼Lv8 이상, 고통쾌락경험 1000 이상, 도S가 아니다
+ELSEIF ABL:MASTER:마조끼 >= 8 && EXP:MASTER:고통쾌락경험 >= 1000 && TALENT:MASTER:마조 == 1
+	PRINTFORMW %NAME:MASTER%는【도M】를 몸에 익혔다
+	TALENT:MASTER:마조 = 2
+ENDIF
+
+SIF TARGET > 0 && CFLAG:MASTER:1 == 3
+	CALL YEARN_FOR
+
+;주인의스캇중독:스캇경험 10 이상
+IF EXP:MASTER:스캇경험 >= 10 && ABL:MASTER:스캇중독 == 0
+	ABL:MASTER:스캇중독 = 1
+	PRINTFORMW %NAME:MASTER%의 %ABLNAME:22%가{ABL:MASTER:스캇중독}에 올랐다
+ENDIF
+;---------------------------------------------------------
+;조수의 소질 및 능력
+;---------------------------------------------------------
+@EVENTCHECK_A
+;조수의기교:조교경험가 20, 100, 250, 400, 600마다 상승, Lv5까지
+IF EXP:ASSI:조교경험 >= 600 && ABL:ASSI:기교 <= 4
+	ABL:ASSI:기교 = 5
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:2%가{ABL:ASSI:기교}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:조교경험 >= 400 && ABL:ASSI:기교 <= 3
+	ABL:ASSI:기교 = 4
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:2%가{ABL:ASSI:기교}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:조교경험 >= 250 && ABL:ASSI:기교 <= 2
+	ABL:ASSI:기교 = 3
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:2%가{ABL:ASSI:기교}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:조교경험 >= 100 && ABL:ASSI:기교 <= 1
+	ABL:ASSI:기교 = 2
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:2%가{ABL:ASSI:기교}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:조교경험 >= 20 && ABL:ASSI:기교 <= 0
+	ABL:ASSI:기교 = 1
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:2%가{ABL:ASSI:기교}에 올랐다
+	PRINTL 　
+ENDIF
+
+;조수의새드끼:가학쾌락경험가 10, 20, 50, 100, 200마다 상승, Lv5까지
+IF EXP:ASSI:가학쾌락경험 >= 200 && ABL:ASSI:새드끼 <= 4
+	ABL:ASSI:새드끼 = 5
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:10%가{ABL:ASSI:새드끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:가학쾌락경험 >= 100 && ABL:ASSI:새드끼 <= 3
+	ABL:ASSI:새드끼 = 4
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:10%가{ABL:ASSI:새드끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:가학쾌락경험 >= 50 && ABL:ASSI:새드끼 <= 2
+	ABL:ASSI:새드끼 = 3
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:10%가{ABL:ASSI:새드끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:가학쾌락경험 >= 20 && ABL:ASSI:새드끼 <= 1
+	ABL:ASSI:새드끼 = 2
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:10%가{ABL:ASSI:새드끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:가학쾌락경험 >= 10 && ABL:ASSI:새드끼 <= 0
+	ABL:ASSI:새드끼 = 1
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:10%가{ABL:ASSI:새드끼}에 올랐다
+	PRINTL 　
+ENDIF
+
+;조수의마조끼:고통쾌락경험가 10, 20, 50, 100, 200마다 상승, Lv5까지
+IF EXP:ASSI:고통쾌락경험 >= 200 && ABL:ASSI:마조끼 <= 4
+	ABL:ASSI:마조끼 = 5
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:9%가{ABL:ASSI:마조끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:고통쾌락경험 >= 100 && ABL:ASSI:마조끼 <= 3
+	ABL:ASSI:마조끼 = 4
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:9%가{ABL:ASSI:마조끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:고통쾌락경험 >= 50 && ABL:ASSI:마조끼 <= 2
+	ABL:ASSI:마조끼 = 3
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:9%가{ABL:ASSI:마조끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:고통쾌락경험 >= 20 && ABL:ASSI:마조끼 <= 1
+	ABL:ASSI:마조끼 = 2
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:9%가{ABL:ASSI:마조끼}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:고통쾌락경험 >= 10 && ABL:ASSI:마조끼 <= 0
+	ABL:ASSI:마조끼 = 1
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:9%가{ABL:ASSI:마조끼}에 올랐다
+	PRINTL 　
+ENDIF
+
+;조수의촬영기능:촬영경험가 10, 30, 60, 100, 150마다 상승, Lv5까지
+IF EXP:ASSI:촬영경험 >= 150 && ABL:ASSI:촬영기능 <= 4
+	ABL:ASSI:촬영기능 = 5
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:13%가{ABL:ASSI:촬영기능}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:촬영경험 >= 100 && ABL:ASSI:촬영기능 <= 3
+	ABL:ASSI:촬영기능 = 4
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:13%가{ABL:ASSI:촬영기능}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:촬영경험 >= 60 && ABL:ASSI:촬영기능 <= 2
+	ABL:ASSI:촬영기능 = 3
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:13%가{ABL:ASSI:촬영기능}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:촬영경험 >= 30 && ABL:ASSI:촬영기능 <= 1
+	ABL:ASSI:촬영기능 = 2
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:13%가{ABL:ASSI:촬영기능}에 올랐다
+	PRINTL 　
+ELSEIF EXP:ASSI:촬영경험 >= 10 && ABL:ASSI:촬영기능 <= 0
+	ABL:ASSI:촬영기능 = 1
+	PRINTFORMW %NAME:ASSI%의 %ABLNAME:13%가{ABL:ASSI:촬영기능}에 올랐다
+	PRINTL 　
+ENDIF
+
+;조수의새드:새드끼가 Lv4 이상, 가학쾌락경험 300 이상으로새드
+IF ABL:ASSI:새드끼 >= 4 && EXP:ASSI:가학쾌락경험 >= 300 && TALENT:ASSI:새드 == 0
+	PRINTFORMW %CALLNAME:ASSI%의 모습이 이상하다
+	PRINTFORML %CALLNAME:ASSI%는 사람을 아프게 하는 기쁨에 눈을 뜬 것 같다
+	PRINTFORMW %NAME:ASSI%는【새드】를 몸에 익혔다
+	TALENT:ASSI:새드 = 1
+;조수의 도S:새드끼Lv8 이상, 가학쾌락경험 1000 이상, 기교Lv8 이상, 도M가 아니다
+ELSEIF ABL:ASSI:새드끼 >= 8 && EXP:ASSI:가학쾌락경험 >= 1000 && ABL:ASSI:기교 >= 4 && TALENT:ASSI:새드 == 1 && TALENT:ASSI:마조 < 2
+	PRINTFORMW %CALLNAME:ASSI%의 이쪽을 보는 눈이 이상하다
+	PRINTFORML %CALLNAME:ASSI%는 사람을 아프게 해, 학대하는 것에 완전히 열중한 것 같다
+	PRINTFORMW %NAME:ASSI%는【도S】를 얻었다
+	PRINTL 　
+	TALENT:ASSI:새드 = 2
+ENDIF
+
+;조수의마조:마조끼가 Lv4 이상, 고통쾌락경험 300 이상으로마조
+IF ABL:ASSI:마조끼 >= 4 && EXP:ASSI:고통쾌락경험 >= 300 && TALENT:ASSI:마조 == 0
+	PRINTFORMW %CALLNAME:ASSI%의 모습이 이상하다
+	PRINTFORML %CALLNAME:ASSI%는 몸을 아프게 할 수 있는 기쁨에 눈을 뜬 것 같다
+	PRINTFORMW %NAME:ASSI%는【마조】를 몸에 익혔다
+	PRINTL 　
+	TALENT:ASSI:마조 = 1
+;조수의 드 M:마조끼Lv8 이상, 고통쾌락경험 1000 이상, 도S가 아니다
+ELSEIF ABL:ASSI:마조끼 >= 8 && EXP:ASSI:고통쾌락경험 >= 1000 && TALENT:ASSI:마조 == 1 && TALENT:ASSI:새드 < 2
+	PRINTFORMW %CALLNAME:ASSI%의 이쪽을 보는 눈이 이상하다
+	PRINTFORML %CALLNAME:ASSI%는 시달려고통를 맛보는 것에 완전히 열중한 것 같다
+	PRINTFORMW %NAME:ASSI%는【드 M】를 얻었다
+	PRINTL 　
+	TALENT:ASSI:마조 = 2
+ENDIF
+
+
+
+;조수 마다의레즈경험 혹은게이경험판정 함수
+;CFLAG에 격납된 수치로부터 가장레즈경험 혹은게이경험를 많이 얻은 조수에 의한레즈경험 혹은게이경험를 C에 격납한다
+@DECIDE_RELATION
+C = 0
+REPEAT FLAG:44
+	A = 1099+COUNT
+	IF CFLAG:A > C
+		C = CFLAG:A
+		X = COUNT
+	ENDIF
+REND
+
+;궁합 변동 체크
+;음란로 주인 이상으로 관련이 많은 조수가 있는 경우는 그 조수와 그 이외는 주인과의 궁합이 좋아지도록(듯이)해 보았다
+;마이너스가 많을 수록 큰 일인 것으로 포상적으로 수치가 반전한다(조수의 경우만, 상대의 궁합도 변동하는 tohoA의 사양을 계승)
+@RELATION_CHECK(ARG)
+CALL DECIDE_RELATION
+IF NO:MASTER != X && C > CFLAG:ARG && RELATION:X < 100 && TALENT:음란
+	Y = RELATION:X
+	Z = 200 - Y
+	SIF Z == 200
+		Z = 120
+	RELATION:X = Z
+	REPEAT CHARANUM
+		SIF NO:COUNT == X
+			W = COUNT
+	REND
+	T = NO:TARGET
+	SIF RELATION:W:T < Z
+		RELATION:W:T = Z
+	IF ASSI >= 0
+		IF ASSI == W
+			PRINTFORMW %CALLNAME%는 %CALLNAME:W%에 요염한 시선을 보내고 있었다
+		ELSE
+			PRINTFORMW %CALLNAME%는 %CALLNAME:W%의 이름을 안타까운 듯이 중얼거리고 있었다
+		ENDIF
+	ELSE
+		PRINTFORMW %CALLNAME%는 %CALLNAME:W%의 이름을 안타까운 듯이 중얼거리고 있었다
+	ENDIF
+	PRINTFORMW %CALLNAME%과 %CALLNAME:W%의 궁합이{RELATION:X}%가 되었습니다
+ELSE
+	X = NO:MASTER
+	SIF RELATION:X == 0 || RELATION:X > 100
+		RETURN 0
+	Y = RELATION:X
+	Z = 200 - Y
+	RELATION:X = Z
+	PRINTFORMW %CALLNAME%의 %CALLNAME:MASTER%에 대한 궁합이{RELATION:X}%가 되었습니다
+ENDIF
+
+

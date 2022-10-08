@@ -1,0 +1,355 @@
+﻿;자위중독의 가부
+@ISABLUP15
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:자위중독 >= 10
+	RETURN 0
+ELSEIF ABL:자위중독 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	RETURN 0
+ELSEIF EXP:자위경험 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP15
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;자위중독
+@ABLUP15
+DRAWLINE
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:자위중독 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:자위중독 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP15
+
+;LV2로부터 3에 올릴 때는이상경험필요(소질:[중독되기쉬움][자위광]라면 무시할 수 있다)
+IF ABL:자위중독 == 2 && TALENT:중독되기쉬움 == 0 && TALENT:자위광 == 0
+	PRINTFORML %EXPNAME:50%있어, 한편
+;LV3로부터 4에 올릴 때는이상경험 2 이상 필요(소질:[중독되기쉬움][자위광]라면 무시할 수 있다)
+ELSEIF ABL:자위중독 == 3 && TALENT:중독되기쉬움 == 0 && TALENT:자위광 == 0
+	PRINTFORML %EXPNAME:50%2이상, 한편
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[중독되기쉬움][자위광]라면 무시할 수 있다)
+ELSEIF ABL:자위중독 == 4 && TALENT:중독되기쉬움 == 0 && TALENT:자위광 == 0
+	PRINTFORML %EXPNAME:50%3이상, 한편
+;LV8로부터 9에 올릴 때는이상경험 7 이상 필요(소질:[중독되기쉬움][자위광]라면 무시할 수 있다)
+ELSEIF ABL:자위중독 == 8 && TALENT:중독되기쉬움 == 0 && TALENT:자위광 == 0
+	PRINTFORML %EXPNAME:50%7이상, 한편
+ENDIF
+
+;노출벽가 필요
+PRINTFORM %ABLNAME:8%{ABL:자위중독+1}이상, 한편
+
+;C감각가 필요
+PRINTFORM %ABLNAME:3%{ABL:자위중독+1}이상, 한편
+
+PRINTFORM [0] - %PALAMNAME:6%의 구슬×{A}, %PALAMNAME:0%의 구슬×{B}, %PALAMNAME:9%의 구슬×{C}, %EXPNAME:10%{D}이상……
+
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+	SIF I & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+PRINTFORM [1] - %PALAMNAME:6%의 구슬×{A}, %PALAMNAME:0%의 구슬×{B}, %PALAMNAME:9%의 구슬×{C}, %EXPNAME:11%{E}이상……
+
+IF J == 0
+	PRINT OK
+ELSE
+	SIF J & 1
+		PRINT 주불발 
+	SIF J & 2
+		PRINT 경험불발 
+	SIF J & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+;노출벽가 필요
+PRINTFORM %ABLNAME:8%{ABL:자위중독+1}이상, 한편
+
+;A감각가 필요
+PRINTFORM %ABLNAME:5%{ABL:자위중독+1}이상, 한편
+
+PRINTFORM [2] - %PALAMNAME:6%의 구슬×{A}, %PALAMNAME:2%의 구슬×{B}, %PALAMNAME:9%의 구슬×{C}, %EXPNAME:10%{D}이상……
+
+IF K == 0
+	PRINT OK
+ELSE
+	SIF K & 1
+		PRINT 주불발 
+	SIF K & 2
+		PRINT 경험불발 
+	SIF K & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+PRINTFORM [3] - %PALAMNAME:6%의 구슬×{A}, %PALAMNAME:2%의 구슬×{B}, %PALAMNAME:9%의 구슬×{C}, %EXPNAME:11%{E}이상……
+
+IF L == 0
+	PRINT OK
+ELSE
+	SIF L & 1
+		PRINT 주불발 
+	SIF L & 2
+		PRINT 경험불발 
+	SIF L & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 3) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF K != 0 && RESULT == 2
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF L != 0 && RESULT == 3
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:자위중독 += 1
+
+IF RESULT == 0 || RESULT == 1
+	JUEL:욕정 -= A
+	JUEL:쾌C -= B
+	JUEL:수치 -= C
+ELSEIF RESULT == 2 || RESULT == 3
+	JUEL:욕정 -= A
+	JUEL:쾌A -= B
+	JUEL:수치 -= C
+ENDIF
+
+PRINTFORMW %ABLNAME:15%의 레벨이{ABL:자위중독}가 되었습니다
+
+
+;자위중독LVUP 판정
+@DECIDE_ABLUP15
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+J = 0
+K = 0
+L = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:자위중독 == 0
+	A = 3000
+	B = 10000
+	C = 1000
+	D = 100
+	E = 20
+ELSEIF ABL:자위중독 == 1
+	A = 6000
+	B = 25000
+	C = 3000
+	D = 250
+	E = 40
+ELSEIF ABL:자위중독 == 2
+	A = 12000
+	B = 50000
+	C = 6000
+	D = 500
+	E = 60
+ELSEIF ABL:자위중독 == 3
+	A = 20000
+	B = 100000
+	C = 15000
+	D = 1000
+	E = 100
+ELSEIF ABL:자위중독 == 4
+	A = 40000
+	B = 300000
+	C = 40000
+	D = 2000
+	E = 160
+ELSEIF ABL:자위중독 == 5
+	A = 45000
+	B = 350000
+	C = 45000
+	D = 2500
+	E = 200
+ELSEIF ABL:자위중독 == 6
+	A = 50000
+	B = 400000
+	C = 50000
+	D = 3000
+	E = 250
+ELSEIF ABL:자위중독 == 7
+	A = 55000
+	B = 450000
+	C = 55000
+	D = 3000
+	E = 300
+ELSEIF ABL:자위중독 == 8
+	A = 60000
+	B = 500000
+	C = 60000
+	D = 3500
+	E = 350
+ELSEIF ABL:자위중독 == 9
+	A = 70000
+	B = 600000
+	C = 70000
+	D = 5000
+	E = 500
+ENDIF
+
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+	TIMES B , 2.00
+	TIMES C , 2.00
+	TIMES D , 2.00
+	TIMES E , 2.00
+ENDIF
+;중독되기쉬움
+IF TALENT:중독되기쉬움
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+ENDIF
+;스킨십선호
+IF TALENT:스킨십선호
+	TIMES A , 1.50
+	TIMES B , 1.50
+	TIMES C , 1.50
+ENDIF
+
+;LV2로부터 3에 올릴 때는이상경험필요(소질:[중독되기쉬움][자위광]라면 무시할 수 있다)
+IF ABL:자위중독 == 2 && TALENT:중독되기쉬움 == 0 && TALENT:자위광 == 0
+	IF EXP:이상경험 == 0
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+		K |= 2
+		L |= 2
+	ENDIF
+;LV3로부터 4에 올릴 때는이상경험 2 이상 필요(소질:[중독되기쉬움][자위광]라면 무시할 수 있다)
+ELSEIF ABL:자위중독 == 3 && TALENT:중독되기쉬움 == 0 && TALENT:자위광 == 0
+	IF EXP:이상경험 < 2
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+		K |= 2
+		L |= 2
+	ENDIF
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[중독되기쉬움][자위광]라면 무시할 수 있다)
+ELSEIF ABL:자위중독 == 4 && TALENT:중독되기쉬움 == 0 && TALENT:자위광 == 0
+	IF EXP:이상경험 < 3
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+		K |= 2
+		L |= 2
+	ENDIF
+;LV8로부터 9에 올릴 때는이상경험 7 이상 필요(소질:[중독되기쉬움][자위광]라면 무시할 수 있다)
+ELSEIF ABL:자위중독 == 8 && TALENT:중독되기쉬움 == 0 && TALENT:자위광 == 0
+	IF EXP:이상경험 < 7
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+		K |= 2
+		L |= 2
+	ENDIF
+ENDIF
+
+;노출벽가 필요
+IF ABL:노출벽 < ABL:자위중독 + 1
+	I |= 4
+	J |= 4
+	K |= 4
+	L |= 4
+ENDIF
+
+;C감각가 필요
+IF ABL:C감각 < ABL:자위중독 + 1
+	I |= 4
+	J |= 4
+ENDIF
+;A감각이 필요
+IF ABL:A감각 < ABL:자위중독 + 1
+	K |= 4
+	L |= 4
+ENDIF
+;욕정의 구슬로 올린다
+IF JUEL:욕정 < A
+	I |= 1
+	J |= 1
+	K |= 1
+	L |= 1
+ENDIF
+;쾌C의 구슬로 올린다
+IF JUEL:쾌C < B
+	I |= 1
+	J |= 1
+ENDIF
+;쾌A의 구슬로 올린다
+IF JUEL:쾌A < B
+	K |= 1
+	L |= 1	
+ENDIF
+;수치의 구슬로 올린다
+IF JUEL:수치 < C
+	I |= 1
+	J |= 1
+	K |= 1
+	L |= 1
+ENDIF
+;자위경험가 필요
+IF EXP:자위경험 < D
+	I |= 2
+	K |= 2
+ENDIF
+;조교자위경험가 필요
+IF EXP:조교자위경험 < E
+	J |= 2
+	L |= 2
+ENDIF
+IF I == 0
+	Z = 1
+ENDIF
+
+IF J == 0
+	Z = 1
+ENDIF
+
+IF K == 0 
+	Z = 1
+
+ENDIF
+IF L == 0
+	Z = 1
+ENDIF
+
+RETURN 1
+

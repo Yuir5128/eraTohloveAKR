@@ -1,0 +1,98 @@
+﻿※旧テンプレートを新版口上機能で使用するために
+
+●１．「口上ファイルの存在判定」の下に以下の部分を追加
+
+;*************************************************
+;口上存在判定ついでに口上セレクタ
+;*************************************************
+@SELECTER_KX1(ARG:0, ARG:1)
+;NOが1のキャラとの掛け合い専用、たとえばKOJO_NO1_EVENT_K○_0などが呼ばれる
+;SIF NO:MASTER == 1
+;	RESULTS = _NO1
+
+;恋慕陥落時専用、たとえばKOJO_LOVE_EVENT_K○_0などが呼ばれる
+;SIF TALENT:ARG:恋慕 || TALENT:ARG:親愛
+;	RESULTS = _LOVE
+
+;助手を調教者にしているとき専用、たとえばKOJO_APLAYER_K○_0などが呼ばれる
+;	RESULTS = _APLAYER
+
+;予めCFLAGに適当な値を割り振ればセレクタとしてもつかえる
+;IF !CFLAG:(ARG):1000
+;	PRINTL どの口上を用いますか？
+;	PRINTL [1] - 口上1
+;	PRINTL [2] - 口上2
+;	$INPUT_LOOP
+;	INPUT
+;	IF RESULT = 1 || RESULT == 2
+;		CFLAG:(ARG):1000 = RESULT
+;	ELSE
+;		GOTO INPUT_LOOP
+;	ENDIF
+;ENDIF
+;RESULTS:1 = _{CFLAG:(ARG):1000}
+;この場合は選択に応じて@KOJO_1_EVENT_K○_0,@KOJO_2_EVENT_K○_0が呼ばれる
+;RESULTSに何も代入しなければ@KOJO_EVENT_K○_0が呼ばれる
+
+;コマンド口上は新テンプレートを使用する
+;SIF ARG:1 == 1
+;	RETURN 1
+
+;パラメータ変化口上は新テンプレートを使用する
+;SIF ARG:1 == 2
+;	RETURN 1
+
+;調教開始時口上は新テンプレートを使用する
+;SIF ARG:1 == 3
+;	RETURN 1
+
+;調教終了時口上は新テンプレートを使用する
+;SIF ARG:1 == 4
+;	RETURN 1
+
+;イベント口上は新テンプレートを使用する
+;SIF ARG:1 == 5
+;	RETURN 1
+
+;エンディング口上は新テンプレートを使用する
+;SIF ARG == 6
+;	RETURN 1
+
+;旧テンプレートを使用する
+RETURN 2
+
+;新テンプレートを使用する
+;RETURN 1
+
+
+
+●２．@EVENTTRAIN以下の部分を次のように書き換え
+
+;--------------------------------------------------
+;EVENTTRAIN関係（X1をキャラ番号に置換）
+;調教開始時のセリフ CFLAG 201～219を使用
+;--------------------------------------------------
+@EVENTTRAIN
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF NO:TARGET != X1
+	RETURN 0
+
+@KOJO_EVENTTRAIN_KX1
+
+
+
+●３．@EVENTEND以下の部分を次のように書き換え
+
+;-------------------------------------------------
+;EVENTEND関係（X1をキャラ番号に置換）
+;調教終了時のセリフ
+;-------------------------------------------------
+@EVENTEND
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF NO:TARGET != X1
+	RETURN 0
+@KOJO_EVENTEND_KX1
+
+

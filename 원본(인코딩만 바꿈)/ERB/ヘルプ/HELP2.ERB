@@ -1,0 +1,1423 @@
+﻿;--------------------------------------------------------------------------------------------
+;このファイル内ではアイテム・ネタばれＱ＆Ａ・
+;ゲームモード・エンディング条件・拡張機能の記述があります。
+;--------------------------------------------------------------------------------------------
+;=============================================================================
+;用語辞典――アイテム
+;=============================================================================
+;--------------------------------------------------
+;アイテム解説メインページ
+;--------------------------------------------------
+@DICTIONARY_ITEM_MAIN
+P = 0
+FLAG:45 = 0
+$PRINT_LIST
+DRAWLINE
+PRINTFORML 「アイテム」に関する大まかな説明です。(※現段階ではまだ未完成です)
+PRINTFORML ＜page.{P+1}/2＞
+DRAWLINE
+;各ページを表示
+FOR LOCAL:1, 0, 50
+	LOCAL = LOCAL:1 + P*50
+	Q:LOCAL = 0
+	STRLENS ITEMNAME:LOCAL
+	IF RESULT > 0
+		PRINTFORMLC [{LOCAL, 2}] %ITEMNAME:LOCAL%
+		CALL CHECK_NEWLINE
+		Q:LOCAL = 1
+	ENDIF
+NEXT
+PRINTL 
+DRAWLINE
+PRINTFORMLC \@(P <= 0) ? %" " * 16% # [1001]前のページ\@
+PRINTLC [1000]戻る
+PRINTFORMLC \@(P >= 1) ? %" " * 16% # [1009]次のページ\@
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+	GOTO PRINT_LIST
+ELSEIF RESULT == 1009 && P < 2
+	P += 1
+	GOTO PRINT_LIST
+ELSE
+	SIF Q:RESULT == 0
+		GOTO INPUT_LOOP
+	PRINTFORML 【%ITEMNAME:RESULT%】
+	TRYCALLFORM DICTIONARY_ITEM_{RESULT}
+	PRINTW 
+	GOTO PRINT_LIST
+ENDIF
+
+;--------------------------------------------------
+;アイテム解説
+;--------------------------------------------------
+;ローター
+@DICTIONARY_ITEM_0
+PRINTL 初心者にも安心な、かわいい卵型をしたローターのお買い得セット。
+PRINTL 秘部に当てて、挿入して、振動することで快感を与える性具。
+PRINTL 防水加工もバッチリなので、水に濡れても大丈夫。
+PRINTL 小さいので、奴隷の処女膜を破ってしまう心配もない。
+PRINTL ローターを使用するコマンドに必須。
+
+;Ｅマッサージャ
+@DICTIONARY_ITEM_1
+PRINTL 電動マッサージ器とも呼ばれるマッサージ器具……を、性具に改良したもの。
+PRINTL ローターよりも強い刺激を与えるが、大きいので挿入はできない。
+PRINTL コマンド「Ｅマッサージャ」には必須。
+
+;クリキャップ
+@DICTIONARY_ITEM_2
+PRINTL クリトリスに吸いつかせ、快感を与える性具。装着型。
+PRINTL 吸引式のため、痛みはほとんど与えない。
+PRINTL コマンド「クリキャップ」に必須。
+
+;電動オナホール
+@DICTIONARY_ITEM_3
+PRINTL シリコン製の筒をペニスに被せ、快感を与える性具。装着型。
+PRINTL 電動式なので、なにもしなくても気持ちいい。
+PRINTL コマンド「電動オナホール」に必須。
+
+;バイブ
+@DICTIONARY_ITEM_4
+PRINTL ヴァギナに挿入できる、一般的なバイブ。装着型。
+PRINTL そこそこのサイズがあるため、奴隷の[処女]を破ってしまう。
+PRINTL コマンド「バイブ」に必須。
+
+;アナルバイブ
+@DICTIONARY_ITEM_5
+PRINTL アナルに挿入できる、アナル用のバイブ。装着型。
+PRINTL 男のバージンは概念なので、玩具で破る心配はないですよ。
+PRINTL コマンド「アナルバイブ」に必須。
+
+;アナルビーズ
+@DICTIONARY_ITEM_6
+PRINTL アナルに挿入できる、複数の玉を繋げた形をした性具。装着型。
+PRINTL 入れるときより、抜くときの方が気持ちいいらしい。
+PRINTL コマンド「アナルビーズ」に必須。
+
+;ボディクリップ
+@DICTIONARY_ITEM_7
+PRINTL 様々な個所に使用可能なクリップセット。装着型。
+PRINTL バネは弱めだが、挟まれればもちろん痛い。
+PRINTL コマンド「乳首クリップ」「陰核クリップ」に必須。
+
+;拡張バルーン
+@DICTIONARY_ITEM_8
+PRINTL 風船と空気を送り込む器具のセット。装着型。
+PRINTL 基本的にはアナル用だが、とある器具とセットで尿道にも使用可能。
+PRINTL コマンド「拡張バルーン」に必須。
+
+;浣腸器具一式
+@DICTIONARY_ITEM_9
+PRINTL 奴隷に浣腸を行うための、医療用の浣腸器具一式。
+PRINTL 浣腸された奴隷は「便意」を催す。
+PRINTL コマンド「浣腸」に必須。
+
+
+;ニプルキャップ
+@DICTIONARY_ITEM_10
+PRINTL 乳首に吸いつかせ、快感を与える性具。装着型。
+PRINTL 吸引式のため、痛みはほとんど与えない。
+PRINTL コマンド「ニプルキャップ」に必須。
+
+;搾乳機
+@DICTIONARY_ITEM_11
+PRINTL 搾乳するために乳房に装着する器具。装着型。
+PRINTL 奴隷が[母乳体質]でないと使えない。
+PRINTL コマンド「搾乳機」に必須。
+
+;ペニスバンド
+@DICTIONARY_ITEM_12
+PRINTL ペニスのない人間が腰につけて使う疑似ペニス。
+PRINTL 相手に挿入するセックス系コマンドが使用可能になるが、当然、射精機能はない。
+
+;鞭
+@DICTIONARY_ITEM_13
+PRINTL 奴隷を打ち据えるための鞭。
+PRINTL バラ鞭や一本鞭、長いものから短いものまで、その種類は豊富。
+PRINTL バラ鞭って実はあんまり痛くないの知ってた？
+PRINTL コマンド「鞭」「鞭で打ってもらう」に必須。
+
+;針
+@DICTIONARY_ITEM_14
+PRINTL 鋭く尖った普通の針。セットでたくさん入ってるお買い得品。
+PRINTL 人体に使用する場合、消毒は忘れずに。
+PRINTL コマンド「針」に必須。
+
+;アイマスク
+@DICTIONARY_ITEM_15
+PRINTL 視界を覆い隠すアイマスク。装着型。
+PRINTL コマンド「アイマスク」に必須。
+
+;縄
+@DICTIONARY_ITEM_16
+PRINTL 奴隷を縛り、その動きを封じるための縄。装着型。
+PRINTL 長さも強度も十分、奴隷に傷をつけることもない優れ物。
+PRINTL コマンド「縄」に必須。
+
+;ボールギャグ
+@DICTIONARY_ITEM_17
+PRINTL 奴隷の口を封じる拘束具。装着型。
+PRINTL 噛ませるボール部分には穴が開いており、呼吸を阻害しない。
+PRINTL コマンド「ボールギャグ」に必須。
+
+;ビデオカメラ
+@DICTIONARY_ITEM_18
+PRINTL 奴隷をビデオ撮影するためのビデオカメラ。
+PRINTL 記録するためのビデオテープがないと使えない他、
+PRINTL テープの残量がなくなった場合には、自動で撮影が終了される。
+PRINTL 撮ったビデオは手元に残すことも、売却することもできる。
+PRINTL コマンド「ビデオ撮影」に必須。
+
+;カメラ
+@DICTIONARY_ITEM_19
+PRINTL 写真撮影するためのカメラ。フィルムがないと使えない。
+PRINTL 撮った写真は売却し、お金に換えることができる。
+PRINTL コマンド「写真撮影」に必須。
+
+;プレイマット
+@DICTIONARY_ITEM_20
+PRINTL お風呂場でプレイの幅が広がる、大きなプレイマット。
+PRINTL お風呂場は滑りやすいので、これがないとほとんどのプレイは実行不可。
+
+;大鏡
+@DICTIONARY_ITEM_21
+PRINTL 奴隷の姿を映す、大きな鏡。羞恥プレイが可能になる。
+PRINTL 曇り防止加工付きなので、お風呂場でも使える。
+PRINTL コマンド「羞恥プレイ」に必須。
+
+;首輪＋リード
+@DICTIONARY_ITEM_22
+PRINTL 奴隷を繋ぎ、外に連れ出すためのお散歩セット。
+PRINTL コマンド「野外プレイ」に必須。
+
+;電極プレイキット
+@DICTIONARY_ITEM_23
+PRINTL 様々な個所に使用できる、電極と電源のセット。
+PRINTL 電気プレイはなかなか上級者向けと思います。
+PRINTL 電極を使ったコマンド各種に必須。
+
+;リボン
+@DICTIONARY_ITEM_24
+PRINTL 射精止めが可能になる。きつく巻いても安心。装着型。
+PRINTL 貞操帯のアタッチメントとしても使える。
+PRINTL コマンド「射精止め」に必須。
+
+;カテーテル
+@DICTIONARY_ITEM_25
+PRINTL 尿道開発用のカテーテルと洗浄液のセット。装着型。
+PRINTL 筒状になっているため、これを挿されても奴隷は放尿が可能。
+PRINTL 電極やバルーンと組み合わせることで、プレイの幅が広がる。
+PRINTL コマンド「カテーテル」に必須。
+
+;三角木馬
+@DICTIONARY_ITEM_26
+PRINTL 奴隷を乗せて使う、調教用の三角木馬。装着型。
+PRINTL 怪我などしないように、背は若干幅をつけた構造になっているが、
+PRINTL 全体重が秘部にかかるその苦痛は相当のもの。
+PRINTL コマンド「三角木馬」に必須。
+
+;貞操帯
+@DICTIONARY_ITEM_30
+PRINTL 奴隷の貞操を守る、施錠可能な特殊な下着。装着型。
+PRINTL Ｃ、Ｖを塞ぎ、奴隷の自慰を防止することができるが、主人も触れない。
+PRINTL 常時装着しても平気なように、尿道付近とお尻部分は開いているため、
+PRINTL 放尿させたり、Ａ調教を行うことは可能。
+PRINTL 「リボン」を併用することで射精止めの効果も期待できる。
+PRINTL コマンド「貞操帯」に必須。
+
+;ねこみみ
+@DICTIONARY_ITEM_31
+PRINTL その名の通りの猫の耳。装着型。
+PRINTL 猫の種類はご想像にお任せ。
+PRINTL 動物耳を装着中、アナルバイブが動物の尻尾を模した形に変化する。
+
+;いぬみみ
+@DICTIONARY_ITEM_32
+PRINTL その名の通りの犬の耳。装着型。
+PRINTL 犬の種類はご想像にお任せ。
+PRINTL 動物耳を装着中、アナルバイブが動物の尻尾を模した形に変化する。
+
+;うさみみ
+@DICTIONARY_ITEM_33
+PRINTL その名の通りのウサギの耳。装着型。
+PRINTL ウサギの種類はご想像にお任せ。
+PRINTL 動物耳を装着中、アナルバイブが動物の尻尾を模した形に変化する。
+
+;ヘッドセット
+@DICTIONARY_ITEM_34
+PRINTL マイク付きのヘッドセット。装着型。
+
+;ストッキング
+@DICTIONARY_ITEM_36
+PRINTL 何の変哲もないストッキング。びりびりして楽しむ。使い捨て。
+
+;タイツ
+@DICTIONARY_ITEM_37
+PRINTL 何の変哲もないタイツ。びりびりして楽しむ。使い捨て。
+
+;エプロン
+@DICTIONARY_ITEM_38
+PRINTL 何の変哲もないエプロン。装着型。
+PRINTL 「ご飯にする？ お風呂にする？ それとも……」っていうのができる。
+PRINTL コマンド「新妻プレイ」に必須。
+
+;ウェディングセット
+@DICTIONARY_ITEM_39
+PRINTL 結婚式に着る衣装とヴェールのセット。
+PRINTL ウェディングドレスはかわいい方が着るもの、と古今東西相場が決まっている。
+
+;ローション
+@DICTIONARY_ITEM_40
+PRINTL 奴隷の潤滑を上げるための潤滑剤。使い捨て。
+PRINTL 人体に優しい成分でできているため、口に入れても大丈夫。
+PRINTL コマンド「ローション」に必須。
+
+;媚薬
+@DICTIONARY_ITEM_41
+PRINTL 性的な興奮を促すお薬。依存性はないので安心。使い捨て。
+PRINTL コマンド「媚薬」に必須。
+
+;利尿剤
+@DICTIONARY_ITEM_42
+PRINTL 尿意を促すお薬。使い捨て。
+PRINTL コマンド「利尿剤」に必須。
+
+;ビデオテープ
+@DICTIONARY_ITEM_43
+PRINTL ビデオカメラの使用に必要なビデオテープ。使い捨て。
+PRINTL コマンド「ビデオ撮影」に必須。
+
+;フィルム
+@DICTIONARY_ITEM_44
+PRINTL 写真撮影には必須のフィルム。使い捨て。
+PRINTL コマンド「写真撮影」に必須。
+
+;コンドーム
+@DICTIONARY_ITEM_45
+PRINTL 定番の避妊具。避妊には十分だが、使い捨て。
+PRINTL 中にためた精液を、奴隷や助手に飲ませることもできる。
+
+;低温蝋燭
+@DICTIONARY_ITEM_46
+PRINTL 蝋燭プレイに必要。素肌を傷つけない優れもの。高い値段の割に使い捨て。
+PRINTL 蝋燭プレイは日本人考案で、昔はバーナーが一般的だったんですって。
+PRINTL コマンド「蝋燭」に必須。
+
+;強精神薬
+@DICTIONARY_ITEM_47
+PRINTL とある特殊な効果を持った謎の白い粉。使い捨て。
+PRINTL 依存性？　そんなものないない。ないったら！
+PRINTL コマンド「強精神薬」に必須。
+
+;瀉下薬
+@DICTIONARY_ITEM_48
+PRINTL 便意を促すお薬。要するに下剤である。使い捨て。
+PRINTL コマンド「瀉下薬」に必須。
+
+;掻痒剤
+@DICTIONARY_ITEM_49
+PRINTL 塗った部分がとっても痒くなるお薬。使い捨て。
+PRINTL 奴隷の性感に塗ることで、痒みを感じるようになる。
+PRINTL コマンド「掻痒剤」に必須。
+
+;汚れ無視
+@DICTIONARY_ITEM_50
+PRINTL TALENT【汚れ無視】を付与する事ができる。
+
+;調合知識
+@DICTIONARY_ITEM_51
+PRINTL TALENT【調合知識】を付与する事ができる。
+
+;禁断の知識
+@DICTIONARY_ITEM_52
+PRINTL TALENT【禁断の知識】を付与する事ができる。
+
+;千里眼
+@DICTIONARY_ITEM_53
+PRINTL TALENT【千里眼】を付与する事ができる。
+
+;絶倫
+@DICTIONARY_ITEM_54
+PRINTL TALENT【絶倫】を付与する事ができる。
+
+;受け
+@DICTIONARY_ITEM_55
+PRINTL 対象を【受け】にする。
+
+;攻め
+@DICTIONARY_ITEM_56
+PRINTL 対象を【攻め】にする。
+
+;触手使役術
+@DICTIONARY_ITEM_57
+PRINTL 触手を使役できるようになるための謎の力。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+PRINTL あらゆる触手系調教に必須である。
+
+;進化の秘法
+@DICTIONARY_ITEM_58
+PRINTL 触手を進化させるよ！
+PRINTL より紳士的かつハイレベルな触手調教を行えるようになる。
+PRINTL すでに触手を扱えるようになっていなければ、買うことができない。
+
+;オメガ
+@DICTIONARY_ITEM_59
+PRINTL 対象を【オメガ】にする。
+
+;河童の妙薬
+@DICTIONARY_ITEM_60
+PRINTL 体力を回復する。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+PRINTL [薬毒耐性]持ちには効きが鈍いので注意。
+
+;薬の材料（双）
+@DICTIONARY_ITEM_61
+PRINTL ふたなりにする。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;薬の材料（消）
+@DICTIONARY_ITEM_62
+PRINTL ふたなりを消去する。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;青い丸薬
+@DICTIONARY_ITEM_63
+PRINTL 母乳体質になる。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;赤い丸薬
+@DICTIONARY_ITEM_64
+PRINTL 体が若返る丸薬。処女膜が再生する。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;豊胸剤
+@DICTIONARY_ITEM_65
+PRINTL 胸の大きさを1段階上げる。爆乳使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;縮胸剤
+@DICTIONARY_ITEM_66
+PRINTL 胸の大きさを1段階下げる。絶壁使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;抑プロラクチン剤
+@DICTIONARY_ITEM_67
+PRINTL 母乳が出なくなる。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;３環系抗鬱薬
+@DICTIONARY_ITEM_68
+PRINTL お漏らし癖が直る。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;半性転換の薬
+@DICTIONARY_ITEM_69
+PRINTL 投与した対象の下半身の性別を逆転させる。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;性転換の薬
+@DICTIONARY_ITEM_70
+PRINTL 投与した対象の性別を逆転させる。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;天使の奇跡
+@DICTIONARY_ITEM_71
+PRINTL 体の大きさを1段階下げる。小人体型には使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;悪魔の呪い
+@DICTIONARY_ITEM_72
+PRINTL 体の大きさを1段階上げる。大柄体系には使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;豊根剤
+@DICTIONARY_ITEM_73
+PRINTL ペニスの大きさを一段階上げる。馬並み使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;縮根剤
+@DICTIONARY_ITEM_74
+PRINTL ペニスの大きさを1段階下げる。子供サイズ使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;包根剤
+@DICTIONARY_ITEM_75
+PRINTL 対象のペニスを【包茎】にする。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;記憶消去薬
+@DICTIONARY_ITEM_80
+PRINTL 処女、ふたなり、母乳体質、経験、感覚の変化を残した状態で、
+PRINTL 残りのパラメータを全て初期化する。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;巻き戻しの薬
+@DICTIONARY_ITEM_81
+PRINTL 記憶はそのまま、身体だけを調教前に戻す薬。
+PRINTL 陥落素質、変化した素質、刻印、フラグなどを残した状態で、
+PRINTL 残りのパラメータを全て初期化する。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;排卵誘発剤
+@DICTIONARY_ITEM_82
+PRINTL 排卵を誘発する薬剤。使い捨て。
+PRINTL 敢えて孕ませる場合に使う。
+
+;高性能避妊具
+@DICTIONARY_ITEM_83
+PRINTL 妊娠を阻害する為の避妊具。使い捨て。
+PRINTL 子宮内に結界を張る高性能避妊具で、快感も損なわないが、一日しか持たない。
+
+;黄色い丸薬
+@DICTIONARY_ITEM_84
+PRINTL 妊娠中に使うと産卵し、妊娠を失う。
+PRINTL 妊娠キャンセルが可能だが、ハイリスク。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;緊急避妊薬
+@DICTIONARY_ITEM_85
+PRINTL モーニングアフターピルのこと。
+PRINTL 中出ししたいけど妊娠は嫌だというワガママさん向け。
+PRINTL 確実な効果ができるかと言われるとちょっと不安。
+
+;甘酒
+@DICTIONARY_ITEM_86
+PRINTL 甘酒。度数が低いため、下戸でも安心して飲める。
+PRINTL コマンド「酩酊プレイ」に必須。
+
+;ビール
+@DICTIONARY_ITEM_87
+PRINTL 麦を発酵させたお酒。
+PRINTL コマンド「酩酊プレイ」に必須。
+
+;日本酒
+@DICTIONARY_ITEM_88
+PRINTL お酒。度数が強いため、酔いが回りやすい。
+PRINTL コマンド「酩酊プレイ」に必須。
+
+;手術道具一式
+@DICTIONARY_ITEM_90
+PRINTL 手術を行うために必要な道具セット。
+PRINTL 切除手術や抜歯手術に必要。狂気を感じる。
+
+;檻
+@DICTIONARY_ITEM_91
+PRINTL 獣を捕まえてくることができる。獣の種類はご想像にお任せ。
+PRINTL コマンド「獣姦」に必須。
+
+;屋台
+@DICTIONARY_ITEM_92
+PRINTL 労役「定食屋台」を行うための屋台を作る。
+PRINTL サポートをつけるためには、屋台の増築が必要。
+
+;屋台の増築
+@DICTIONARY_ITEM_93
+PRINTL 労役「定食屋台」を行うための屋台を増築する。
+PRINTL 広くなるので、サポートをつけることができるようになる。
+
+;プラカード
+@DICTIONARY_ITEM_94
+PRINTL 労役「公衆便所」をさせるために必要なプラカード。
+PRINTL 値段などを書き、奴隷に持たせて使う。
+
+;お守り
+@DICTIONARY_ITEM_96
+PRINTL 奴隷に装備させる事のできるお守り。
+PRINTL 装備していると１度だけ【破壊】を防止してくれる。
+
+;お守り・極
+@DICTIONARY_ITEM_97
+PRINTL 「お守り」の、さらに効果を高めたもの。
+PRINTL 装備していると１度だけ【破壊】を防止し、ストレスも回復してくれる。
+
+
+;=============================================================================
+;ネタばれＱ＆Ａ
+;=============================================================================
+;システム関係のネタばれを入れる
+;とりあえず作成といった程度。具体的に何を載せるかは未定
+@DICTIONARY_NETABARE_QA
+;現在のページを示す
+P = 0
+;最大ページ数を示す
+LOCAL = 1
+;LOCAL = 8
+$NETABARE_QA_HELP
+DRAWLINE
+PRINTL 以下eraToLoveA02私家版のシステム等に関するＱ＆Ａです。
+PRINTFORML 内容を知りたい項目の番号を入力してください。 ＜page.{P+1}/{LOCAL+1}＞
+PRINTL ※いずれの項目も重度のネタばれを含みます。見る場合はそのつもりで。
+PRINTL 　当然ながら未完成です。
+DRAWLINE
+IF P == 0
+	PRINTL [ 0] Ｑ.奴隷を「売却」する
+	PRINTL [ 1] Ｑ.奴隷を「助手」として働かせる
+	PRINTL [ 2] Ｑ.奴隷を「陥落」させる
+	PRINTL [ 3] Ｑ.奴隷に「部位開発系素質」を取得させる
+	PRINTL [ 4] Ｑ.「特殊性癖素質」を取得する
+	PRINTL [ 5] Ｑ.「舌使い」を取得する
+	PRINTL [ 6] Ｑ.「謎の魅力」を取得する
+	PRINTL [ 7] Ｑ.「絶倫」を取得する
+	PRINTL [ 8] Ｑ.「妊娠」「出産」について
+	PRINTL [ 9] Ｑ.「異常経験」を取得するタイミング
+ELSEIF P == 1
+	PRINTL [10] Ｑ.主人から奴隷に「執着」を向ける
+	PRINTL [11] Ｑ.「周回プレイ」について
+	PRINTL [12] Ｑ.「共犯者」について
+	PRINTL [13] Ｑ.「特別なプレゼント」について
+	PRINTL [14] Ｑ.「刀剣雷舞」の「部隊結成」について
+;	PRINTL [15] Ｑ.（未定義）
+;	PRINTL [16] Ｑ.（未定義）
+;	PRINTL [17] Ｑ.（未定義）
+;	PRINTL [18] Ｑ.（未定義）
+;	PRINTL [19] Ｑ.（未定義）
+ENDIF
+DRAWLINE
+PRINTFORMLC \@(P <= 0) ? %" " * 18% # [1001]前のページ\@
+PRINTLC [1000]戻る
+PRINTFORMLC \@(P >= LOCAL) ? %" " * 18% # [1009]後ろのページ\@
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+	GOTO NETABARE_QA_HELP
+ELSEIF RESULT == 1009 && P < LOCAL
+	P += 1
+	GOTO NETABARE_QA_HELP
+ELSEIF RESULT >= 0 && RESULT <= (LOCAL+1) * 10
+	TRYCALLFORM DICTIONARY_NETABARE_Q{RESULT}
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+GOTO NETABARE_QA_HELP
+
+;売却可能な条件
+@DICTIONARY_NETABARE_Q0
+PRINTL 【奴隷を「売却」する】
+PRINTL 以下の条件を全て満たしていると売却することが可能になります
+PRINTL ※素質[烙印]や[相愛]が付いたキャラは、原則として売却出来ない
+PRINTL 
+PRINTL ・従順と欲望のLv合計が6以上である
+PRINTL ※ただし、服従・隷属陥落以外の素質[反抗的]を持つキャラ
+PRINTL [気丈]のを持つキャラは従順がLv4以上、
+PRINTL 　素質[抑圧]、[抵抗]、[自制心]のいずれかを持つキャラは欲望がLv4以上が必要
+PRINTL 
+PRINTL ・次の1～6のいずれかを満たす
+PRINTL 　1：技巧がLv3以上である
+PRINTL 　2：奉仕精神がLv3以上である
+PRINTL 　3：マゾっ気がLv3以上である
+PRINTL 　4：従順がLv5である
+PRINTL 　5：欲望がLv5である
+PRINTW 　6：Ｃ感覚、Ｖ感覚、Ａ感覚、Ｂ感覚の合計が13以上
+
+;助手可能な条件
+@DICTIONARY_NETABARE_Q1
+PRINTL 【奴隷を「助手」として働かせる】
+PRINTL 以下の条件を全て満たしていると調教の助手（主人の代わりに調教できる）をさせることが可能になります
+PRINTL 
+PRINTL ・従順と欲望のLv合計が6以上である
+PRINTL ※ただし、服従・隷属陥落以外の素質[反抗的]を持つキャラ
+PRINTL [気丈]のを持つキャラは従順がLv4以上、
+PRINTL 　素質[抑圧]、[抵抗]、[自制心]のいずれかを持つキャラは欲望がLv4以上が必要
+PRINTL 
+PRINTL ・次の1～6のいずれかを満たす
+PRINTL 　1：技巧がLv3以上である
+PRINTL 　2：奉仕精神がLv3以上である
+PRINTL 　3：マゾっ気がLv3以上である
+PRINTL 　4：従順がLv5である
+PRINTL 　5：欲望がLv5である
+PRINTL 　6：Ｃ感覚、Ｖ感覚、Ａ感覚、Ｂ感覚の合計が13以上
+PRINTL 
+PRINTL ・次の1～2のいずれかを満たす
+PRINTL 　1：従順・欲望・技巧・Ｃ感覚・レズっ気・ホモっ気のレベルの合計が12以上である
+PRINTW 　2：従順がLv5かつ、欲望がLv4以上である
+
+;陥落条件
+@DICTIONARY_NETABARE_Q2
+PRINTL 【奴隷を「陥落」させる】
+PRINTL 一定の条件を満たすと、奴隷は主人に対して「陥落」します。
+PRINTL 陥落には「下位陥落」と「上位陥落」の２種類があり、条件を満たす毎に、
+PRINTL 「未陥落」→「下位陥落」→「上位陥落」と、順番に取得していく事になります。
+PRINTL 
+PRINTL 取得条件を確認したい陥落素質を選択して下さい
+PRINTL [ 0] 恋慕（下位陥落）
+PRINTL [ 1] 淫乱（下位陥落）
+PRINTL [ 2] 服従（下位陥落）
+PRINTL [ 3] 親愛（上位陥落）
+PRINTL [ 4] 娼婦（上位陥落）
+PRINTL [ 5] 隷属（上位陥落）
+PRINTL [ 6] 相愛（特殊）
+PRINTL 
+PRINTL [99] 戻る
+$INPUT_LOOP
+INPUT
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT == 0
+	CLEARLINE 1
+	PRINTFORML 【恋慕陥落の条件】
+	PRINTFORML 
+	PRINTFORML 1：「　　　　従順」Lv3以上
+	PRINTFORML 2：「　　奉仕精神」Lv3以上
+	PRINTFORML 3：「奉仕快楽経験」200以上
+	PRINTFORML 4：「　　異常経験」2未満
+	PRINTFORML 5：「　　屈服刻印」Lv3
+	PRINTFORML 6：「　　反発刻印」Lv0
+	PRINTFORML 7：「　　　依存度」1000以上
+	PRINTFORML 8：「現在の主人からの被調教経験」1000以上
+ELSEIF RESULT == 1
+	CLEARLINE 1
+	PRINTFORML 【淫乱陥落の条件】
+	PRINTFORML 
+	PRINTFORML 前提条件として、未陥落の奴隷が以下の条件を満たしている
+	PRINTFORML 1：「　　　　欲望」Lv3以上
+	PRINTFORML 2：「 C/V/A/B感覚」Lv合計が10以上
+	PRINTFORML 3：「　　絶頂経験」50以上
+	PRINTFORML 4：「　　快楽刻印」Lv3
+	PRINTFORML 5：「　　屈服刻印」Lv3
+	PRINTFORML 6：「　　反発刻印」Lv0
+	PRINTFORML 
+	PRINTFORML かつ、以下の条件のどれかを満たす必要がある。
+	PRINTFORML 1：「　　異常経験」3以上
+	PRINTFORML 2：「　　異常経験」1以上＋「助手調教経験」1000以上
+	PRINTFORMW 3：「助手調教経験」2000以上
+ELSEIF RESULT == 2
+	CLEARLINE 1
+	PRINTFORML 【服従陥落の条件】
+	PRINTFORML 
+	PRINTFORML 1：「　　　　従順」Lv3以上
+	PRINTFORML 2：「 C/V/A/B感覚」Lv合計が10未満
+	PRINTFORML 3：「　　マゾっ気」Lv3以上
+	PRINTFORML 4：「苦痛快楽経験」＋「緊縛経験」合計が200以上
+	PRINTFORML 5：「　　異常経験」2以上
+	PRINTFORML 6：「　　屈服刻印」Lv3
+	PRINTFORML 7：「　　反発刻印」Lv0
+	PRINTFORMW 8：「　　　依存度」マイナス1000以下
+ELSEIF RESULT == 3
+	CLEARLINE 1
+	PRINTFORML 【親愛陥落の条件】
+	PRINTFORML 
+	PRINTFORML 1：「　　　　従順」Lv5以上
+	PRINTFORML 2：「　　奉仕精神」Lv5以上
+	PRINTFORML 3：「　　愛情経験」200以上
+	PRINTFORML 4：「奉仕快楽経験」400以上
+	PRINTFORML 5：「　　異常経験」5未満
+	PRINTFORML 6：「　　反発刻印」Lv0
+	PRINTFORML 7：「　　　依存度」3000以上
+	PRINTFORML 8：「現在の主人からの被調教経験」1500以上
+ELSEIF RESULT == 4
+	CLEARLINE 1
+	PRINTFORML 【娼婦陥落の条件】
+	PRINTFORML 
+	PRINTFORML 前提条件として、未陥落の奴隷が以下の条件を満たしており、
+	PRINTFORML 1：「　　　　欲望」Lv5以上
+	PRINTFORML 2：「 C/V/A/B感覚」Lv合計が20以上
+	PRINTFORML 3：「　　絶頂経験」200以上
+	PRINTFORML 4：「　　反発刻印」Lv0
+	PRINTFORML 
+	PRINTFORML かつ、以下の条件のどれかを満たす必要がある。
+	PRINTFORML 1：「　　異常経験」6以上
+	PRINTFORML 2：「　　異常経験」4以上＋「助手調教経験」2000以上
+	PRINTFORMW 3：「　　異常経験」3以上＋「助手調教経験」3000以上
+ELSEIF RESULT == 5
+	CLEARLINE 1
+	PRINTFORML 【隷属陥落の条件】
+	PRINTFORML 
+	PRINTFORML 1：「　　　　従順」Lv5以上
+	PRINTFORML 2：「 C/V/A/B感覚」Lv合計が15未満
+	PRINTFORML 3：「　　マゾっ気」Lv5以上
+	PRINTFORML 4：「苦痛快楽経験」＋「緊縛経験」500以上
+	PRINTFORML 5：「　　異常経験」5以上
+	PRINTFORML 6：「　　反発刻印」Lv0
+	PRINTFORMW 7：「　　　依存度」マイナス3000以下
+ELSEIF RESULT == 6
+	CLEARLINE 1
+	PRINTFORML 【相愛取得の条件】
+	PRINTFORML 
+	PRINTFORML 相互に「親愛陥落」したキャラクターがいる場合、素質が変化します。
+	PRINTFORML 
+	PRINTFORML 最初に選択した主人を調教することはできませんが、
+	PRINTFORML 自分に対して「親愛陥落」したキャラクターに「執着」を向けることで、
+	PRINTFORMW 主人も「相愛」素質を入手することが可能です。
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+PRINTL 
+RESTART
+
+;淫乱系(部位開発系)素質取得条件
+@DICTIONARY_NETABARE_Q3
+PRINTL 【奴隷に「部位開発系素質」を取得させる】
+PRINTL 奴隷の能力が一定値に達すると、以下の素質のいずれかを取得します。
+PRINTL 同時に複数の条件を満たした場合は数字の若いものから優先されるため、
+PRINTL 一度のプレイで、重複して取得させることは不可能です。
+PRINTL ただし、周回プレイで前周までに取得した素質は、重複取得が可能になります。
+PRINTL 
+PRINTL 取得条件を確認したい陥落素質を選択して下さい
+PRINTL [ 0] セックス狂
+PRINTL [ 1] 自慰狂い
+PRINTL [ 2] 淫壺
+PRINTL [ 3] 尻穴狂い
+PRINTL [ 4] 淫乳
+PRINTL [10] 即落ち
+PRINTL 
+PRINTL [99] 戻る
+$INPUT_LOOP
+INPUT
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT == 0
+	CLEARLINE 1
+	PRINTFORML 【セックス狂】
+	PRINTFORML 
+	PRINTFORML ：「セックス中毒」Lv4以上
+	PRINTFORML ：「　　性交経験」250以上
+	PRINTFORMW ：「　　絶頂経験」200以上
+ELSEIF RESULT == 1
+	CLEARLINE 1
+	PRINTFORML 【自慰狂い】
+	PRINTFORML 
+	PRINTFORML ：「　　　Ｃ感覚」Lv5以上
+	PRINTFORML ：「調教自慰経験」＋「自慰経験」合計が300以上
+	PRINTFORMW ：「　　絶頂経験」200以上
+ELSEIF RESULT == 2
+	CLEARLINE 1
+	PRINTFORML 【淫壺】
+	PRINTFORML 
+	PRINTFORML ：「　Ｖ感覚」Lv5以上
+	PRINTFORML ：「　Ｖ経験」400以上
+	PRINTFORMW ：「絶頂経験」200以上
+ELSEIF RESULT == 3
+	CLEARLINE 1
+	PRINTFORML 【尻穴狂い】
+	PRINTFORML 
+	PRINTFORML ：「　Ａ感覚」Lv5以上
+	PRINTFORML ：「　Ａ経験」400以上
+	PRINTFORMW ：「絶頂経験」200以上
+ELSEIF RESULT == 4
+	CLEARLINE 1
+	PRINTFORML 【淫乳】
+	PRINTFORML 
+	PRINTFORML ：「　Ｂ感覚」Lv5以上
+	PRINTFORML ：「噴乳経験」+「Ｂ射精経験」150以上
+	PRINTFORMW ：「絶頂経験」200以上
+ELSEIF RESULT == 10
+	CLEARLINE 1
+	PRINTFORML 【即落ち】
+	PRINTFORML 
+	PRINTFORML 「セックス狂」「自慰狂い」「淫壺」「尻穴狂い」「淫乳」
+	PRINTFORMW 　以上の全ての素質を取得する。
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+PRINTL 
+RESTART
+
+
+;特殊性癖素質取得条件
+@DICTIONARY_NETABARE_Q4
+PRINTL 【「特殊性癖素質」を取得する】
+PRINTL どのキャラクターも、一定の条件を満たすと、「サド」や「マゾ」、
+PRINTL またはそれぞれの上位素質である「ドＳ」や「ドＭ」の素質を取得します。
+PRINTL 条件さえ満たせば、重複取得が可能な素質です。
+PRINTL 
+PRINTL [サド]
+PRINTL ：「　　サドっ気」Lv5以上
+PRINTL ：「嗜虐快楽経験」300以上
+PRINTL [ドＳ]
+PRINTL ：「　　サドっ気」Lv8以上
+PRINTL ：「嗜虐快楽経験」800以上
+PRINTL 
+PRINTL [マゾ]
+PRINTL ：「　　マゾっ気」Lv5以上
+PRINTL ：「苦痛快楽経験」300以上
+PRINTL [ドＭ]
+PRINTL ：「　　マゾっ気」Lv8以上
+PRINTW ：「苦痛快楽経験」800以上
+
+;[舌使い]取得条件
+@DICTIONARY_NETABARE_Q5
+PRINTL 【「舌使い」を取得する】
+PRINTL 以下の両方の条件を満たすと、「舌使い」を取得します。
+PRINTL 1：フェラ経験200以上
+PRINTW 2：精飲絶頂経験50以上、または精液中毒Lv4以上
+
+;[謎の魅力]取得条件
+@DICTIONARY_NETABARE_Q6
+PRINTL 【「謎の魅力」を取得する】
+PRINTL 
+PRINTL この素質は、主人しか取得することができません。
+PRINTL 「恋慕系」もしくは「服従系」陥落者の累計が5人以上になると、調教終了時に取得します。
+PRINTW 「淫乱系」の陥落者数は数に入らないので注意して下さい。
+
+;[絶倫]取得条件
+@DICTIONARY_NETABARE_Q7
+PRINTL 【「絶倫」を取得する】
+PRINTL 
+PRINTL この素質は主人しか取得することができません。
+PRINTW オトコを持つ主人の「射精経験」が200以上になると、調教終了時に取得します。
+
+;妊娠・出産
+@DICTIONARY_NETABARE_Q8
+PRINTL 【「妊娠」「出産」について】
+PRINTL 
+PRINTL 「女性」「ふたなり」は、膣射によりランダムで妊娠することがあります。
+PRINTL またオメガを持つ「オトコ」「半陰半陽」「カントボーイ」は腸射によりランダムで妊娠することがあります。
+PRINTL ※「半陰半陽」「カントボーイ」はヴァギナがあっても妊娠することはありません。
+PRINTL 
+PRINTL 妊娠すると、５０日程度の期間を経て出産、さらに２０日の育児期間後、
+PRINTL 子供を「独立」させるか、奴隷として「調教」するか選択することができます。
+PRINTL 子供キャラは誰の子供かにかかわらず、１０人までしか持てません。
+PRINTL 
+PRINTL 実際の妊娠から妊娠発覚までは若干のタイムラグがあり、
+PRINTW その期間に「ある薬」を使うことで、処女懐胎させることができます。
+
+;異常経験取得条件
+@DICTIONARY_NETABARE_Q9
+$DECTIONARY_NETABARE_IJOU
+PRINTL 【異常経験取得条件】
+PRINTL [ 0] 異常な調教の初体験時、調教対象に＋１
+PRINTL [ 1] 拡張系初経験時に＋１
+PRINTL [ 2] 異常な処女・童貞・バックバージン喪失時、喪失した対象に＋１
+PRINTL [ 3] その他＋１
+PRINTL 
+PRINTL [99] 戻る
+$INPUT_LOOP_IJOU
+INPUT
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTL 【異常な調教の初体験時、調教対象に＋１】
+	PRINTL 
+	PRINTL ・公開オナニーをさせる　※淫乱陥落時を除く
+	PRINTL ・Ｕ拡張経験を伴う調教
+	PRINTL ・Ｍ拡張経験を伴う調教
+	PRINTL ・スカ経験を伴う調教
+	PRINTL ・浣腸
+	PRINTL ・食糞
+	PRINTL ・電極経験を伴う調教
+	PRINTL ・輪姦
+	PRINTL ・獣姦
+	PRINTL ・鰻風呂
+	PRINTL ・蟲風呂
+	PRINTL ・烙印
+	PRINTL ・触手召喚
+	PRINTL ・触手貫通
+	PRINTL ・触手脳姦
+	PRINTL ・催眠触手
+	PRINTW ・産卵
+ELSEIF RESULT == 1
+	PRINTL 【拡張系初経験時に＋１】
+	PRINTL 
+	PRINTL ・フィスト系・二輪挿し系・触手拡張系コマンド実行時（入れられる側）
+	PRINTL ・セックス系コマンドで入れる側が【馬並み】、かつ入れられる側が【小人体型】のとき（入れられる側）
+	PRINTL ・騎乗位する・騎乗位アナルするコマンドで入れる側が【馬並み】、かつ入れられる側が【小人体型】のとき（奴隷）
+	PRINTW ・助手を犯させる・助手のＡを犯させるコマンドで入れる側が【馬並み】、かつ入れられる側が【小人体型】のとき（奴隷）
+ELSEIF RESULT == 2
+	PRINTL 【異常な処女・童貞・バックバージン喪失時、喪失した対象に＋１】
+	PRINTL 
+	PRINTL ・バイブで処女喪失
+	PRINTL ・騎乗位で処女喪失
+	PRINTL ・オトコ以外に騎乗位で処女喪失
+	PRINTL ・助手がいるときに、騎乗位で処女喪失
+	PRINTL ・騎乗位するで処女喪失（調教者）
+	PRINTL ・騎乗位アナルでバックバージン喪失
+	PRINTL ・オトコ以外に騎乗位アナルでバックバージン喪失
+	PRINTL ・助手がいるときに、騎乗位アナルでバックバージン喪失
+	PRINTL ・騎乗位アナルするでバックバージン喪失（調教者）
+	PRINTL ・肉便器でバックバージン喪失
+	PRINTL ・肉便器で童貞喪失（調教者）
+	PRINTL ・オトコに騎乗位アナルするをされて童貞喪失
+	PRINTL ・輪姦・鰻風呂・獣姦・触手・首を絞められながら処女・バックバージン喪失
+	PRINTL ・３Ｐ系コマンドで処女・童貞・バックバージン喪失
+	PRINTL ・ビデオ撮影中に処女・童貞・バックバージン喪失
+	PRINTL ・目・口・身体が拘束された状態で処女・童貞・バックバージン喪失
+	PRINTL ・娼館、奴隷ショー、公衆便所プレイ、奴隷のレンタルで処女・童貞・バックバージン喪失
+	PRINTL ・自分自身が相手で処女・童貞・バックバージン喪失　※特と極など
+	PRINTL ・奴隷→主人の相性が100以上かつ、助手に犯させるコマンドで主人が処女喪失したとき（奴隷）
+	PRINTL ・奴隷→主人の相性が100以上かつ、助手にＡを犯させるコマンドで主人が処女喪失したとき（奴隷）
+	PRINTL ・奴隷→助手の相性が100以上かつ、助手を犯すコマンドで助手が処女喪失したとき（奴隷）
+	PRINTL ・奴隷→助手の相性が100以上かつ、助手のＡを犯すコマンドで助手が処女喪失したとき（奴隷）
+	PRINTL ・奴隷→助手の相性が100以上かつ、助手を犯させるコマンドで助手が処女喪失したとき（奴隷）
+	PRINTL ・助手→奴隷の相性が100以上かつ、助手を犯させるコマンドで助手が処女喪失したとき（助手）
+	PRINTL ・奴隷→助手の相性が100以上かつ、助手のＡを犯させるコマンドで助手が処女喪失したとき（奴隷）
+	PRINTW ・助手→奴隷の相性が100以上かつ、助手のＡを犯させるコマンドで助手が処女喪失したとき（助手）
+ELSEIF RESULT == 3
+	PRINTL 【その他＋１】
+	PRINTL 
+	PRINTL ・初めて気絶したとき
+	PRINTL ・オトコでないとき初射精
+	PRINTL ・母性も妊娠も無いとき初噴乳
+	PRINTL ・精飲絶頂が可能になったとき
+	PRINTL ・苦痛刻印３取得
+	PRINTL ・苦痛刻印３取得時に、調教者が【サド】を持っている
+	PRINTL 　もしくは苦痛刻印３取得時に、針コマンド実行で調教者が【針さばき】を持っているとき
+	PRINTL ・出産経験がない場合に黄色い丸薬使用時　※＋２
+	PRINTW ・片腕切断、片足切断、抜歯を実行したとき
+ELSE
+	GOTO INPUT_LOOP_IJOU
+ENDIF
+GOTO DECTIONARY_NETABARE_IJOU
+
+;主人から奴隷に「執着」を向ける
+@DICTIONARY_NETABARE_10
+PRINTL 【前提条件】
+PRINTL 主人の「調教経験」が1000以上
+PRINTL 
+PRINTL 【執着心の芽生え】
+PRINTL 主人の「調教経験」の内、対象の奴隷に対する「調教経験」が7割以上になると、
+PRINTL 主人が奴隷の事を気にかけ始める瞬間があります。
+PRINTL そのときに自分の気持ちを認めると、奴隷に対する「執着」が芽生えます。
+PRINTL 
+PRINTL さらに「執着」を向けた奴隷が主人に対し「親愛陥落」していれば、
+PRINTL その奴隷と主人は、「相愛」の関係となります。
+PRINTL 
+PRINTL 【執着心の喪失】
+PRINTL 絶対的な「陥落」とは違い、「執着」はあくまで一時的なものです。
+PRINTL 他の奴隷にばかりかまけていると、執着は徐々に薄れていくことになります。
+PRINTL 
+PRINTL 主人の「調教経験」の内、対象の奴隷に対する「調教経験」が5割以下になると、
+PRINTL 主人は奴隷への「執着」を失うことになります。
+PRINTL 
+PRINTL しかし、「執着」を持った期間中、その奴隷に「プロミスリング」を渡し、
+PRINTW 受け取ってもらうことができたなら、その気持ちは永遠のものとなるでしょう。
+
+
+;周回プレイについて
+@DICTIONARY_NETABARE_Q11
+PRINTL 【「周回プレイ」について】
+PRINTL "START"モードでゲームを始め、期限内に目標を達成してクリアすると、
+PRINTL そのままゲームを継続するか、終了するかを選ぶことができます。
+PRINTL ゲームを継続する事で、「強くてニューゲーム（周回プレイ）」が選択可能になります。
+PRINTL 
+PRINTL ゲームをクリアすることで得た「BP(ボーナスポイント)」を使えば、
+PRINTL 様々な特典を得た状態で、新しい調教生活を始めることができます。
+PRINTL また、周回プレイ開始時には、主人と難易度を選び直せます。
+PRINTL 
+PRINTL 周回プレイで得られるボーナスは、以下の通りです。
+PRINTL 
+PRINTL 1：「主人(あなた)」の素質選択で選択できる素質が増える（BP消費無し）
+PRINTL 2：「部位開発系素質」の重複取得が可能になる（BP消費無し）
+PRINTL 3：主人の「技巧」を３上昇させる（BP１）
+PRINTL 4：「共犯者」を呼ぶことができる（１人につきBP１）
+PRINTL 5：「禁断の知識」を身につけることができる（BP１）
+PRINTL 6：「調合知識」を身につけることができる（BP１）
+PRINTL 7：「サド」を身につけることができる（BP１）
+PRINTL 8：「マゾ」を身につけることができる（BP１）
+PRINTL 9：「謎の魅力」を身につけることができる（BP１）
+PRINTL 
+PRINTW ボーナスポイントは周回ごとに累積するため、何度もプレイして効率化を図りましょう。
+
+
+;「共犯者」について
+@DICTIONARY_NETABARE_Q12
+PRINTL 【「共犯者」について】
+PRINTL 「共犯者」とは、主人(あなた)と志を同じくするものであり、いわば、第二の主人です。
+PRINTL 最初から助手として奴隷を調教する事ができるため、
+PRINTL 初期にはなかなか上げづらい「助手調教経験」等を上げるのに役立ってくれるでしょう。
+PRINTL 
+PRINTL しかしゲーム内ではあくまで助手扱いであり、主人(あなた)に比べると制限が多いです。
+PRINTW また、「共犯者」を奴隷として調教したり、労役を行わせることはできません。
+
+;特別なプレゼント出現条件
+@DICTIONARY_NETABARE_Q13
+PRINTL 【「特別なプレゼント」について】
+PRINTL 以下の条件を満たすと、[201]プレゼントコマンドを選択した際、
+PRINTL プレゼントメニューに[特別なプレゼント]が出現し、渡すことができるようになります。
+PRINTL 
+PRINTL このプレゼントは「プロミスリング」とも呼ばれ、
+PRINTL 主人と、これを贈った奴隷との関係を約束するものです。
+PRINTL 失いたくない相手がいるのなら、勇気を持って渡してみる事をおすすめします。
+PRINTL 
+PRINTL （特別なプレゼントの出現条件）
+PRINTL ・主人が対象の奴隷に対し「執着」を抱いている、
+PRINTL 　もしくは、主人が対象の奴隷に対し「親愛陥落」済みである
+PRINTL 
+PRINTL ※同じ主人から、複数の奴隷に「プロミスリング」を贈ることはできません。
+PRINTW ※一度渡して、受け取ってもらった指輪を返してもらうことはできません。
+
+;「刀剣雷舞」の「部隊結成」について
+@DICTIONARY_NETABARE_Q14
+PRINTL 【「刀剣雷舞」の「部隊結成」について】
+$DICTIONARY_Q12_LIST
+DRAWLINE
+PRINTFORML 労役コマンド「刀剣雷舞」では、一定の条件を満たすと、
+PRINTFORML 奴隷が他の奴隷と「部隊」を組んでライブを行う場合があります。
+PRINTFORML 現状、「部隊」を組むことによるメリットは特にありませんが、
+PRINTFORMW 口上が用意されていれば、「部隊」限定のイベントが発生するかも……
+
+
+
+
+;=============================================================================
+;用語辞典――ゲームモード
+;=============================================================================
+;--------------------------------------------------
+;ゲームモード解説メインページ
+;--------------------------------------------------
+@DICTIONARY_GAMEMODE_MAIN
+$PRINT_LIST
+DRAWLINE
+PRINTFORML eraToLoveA02私家版に用意されたゲームモードに関する大まかな説明です。
+PRINTFORML ゲームモードを変更するにはゲームそのものをやり直すしかありません。
+DRAWLINE
+PRINTL [ 0] STARTモード
+PRINTL [ 1] FREE MISSIONモード（※現在未実装）
+PRINTL [ 2] EXTRAモード
+DRAWLINE
+PRINTLC [1000]戻る
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT > 8
+	GOTO INPUT_LOOP
+ENDIF
+Q = RESULT
+TRYCALLFORM DICTIONARY_GAMEMODE_{Q}
+GOTO PRINT_LIST
+
+;--------------------------------------------------
+;ゲームモード解説
+;--------------------------------------------------
+;startモード
+@DICTIONARY_GAMEMODE_0
+PRINTL “STARTモード”
+PRINTL eraToLoveA02私家版の主力モードで一番基本的なゲームモードです。
+PRINTL 主人の「あなた」、または選択した戦勇。キャラクターが
+PRINTL 期限内に設定された目標を達成すべく頑張るものです。
+PRINTL 「あなた」の素質を選択し、女主人やマゾ主人を作ることも可能です。
+PRINTL 期限内に目標を達成したあとも継続することができ、
+PRINTL その後、「強くてニューゲーム」を選択すると、クリアした回数や
+PRINTW 見たエンドに応じたボーナスを得て周回プレイをすることが出来ます。
+
+;FREEモード
+@DICTIONARY_GAMEMODE_1
+PRINTL “FREE MISSIONモード”
+PRINTL 通称ミッションモードです。
+PRINTW 期限内に設定された特殊な目標を達成すべく頑張るものです。
+
+;EXTRAモード
+@DICTIONARY_GAMEMODE_2
+PRINTL “EXTRAモード”
+PRINTL 主人、共犯者を自由に選ぶことができる期限のないゲームモードです。
+PRINTL ゲーム開始時に奴隷を１人もらうことができます。
+PRINTL eraToLoveA02私家版のもう一つの主力モードであり、このモードだけの特殊要素も存在します。
+PRINTL 基本的にバッドエンド以外のエンディングは存在しませんが、
+PRINTW 口上によっては、それに近いものが用意されている場合もあります。
+
+
+
+
+;=============================================================================
+;用語辞典――エンディング条件
+;=============================================================================
+;--------------------------------------------------
+;エンディング条件解説メインページ
+;--------------------------------------------------
+@DICTIONARY_ENDING_MAIN
+P = 0
+$PRINT_LIST
+DRAWLINE
+PRINTFORML ストーリーを進めている内、一定の条件を満たすとエンディングが発生します。
+PRINTFORML 通常は、設定金額の「納金」を行うことでエンディングとなり、
+PRINTFORML 複数のエンディング条件を同時に満たした場合は、そのいずれかを選択できますが、
+PRINTFORML 逆に条件を満たせずバッドエンドとなる場合は、有無を言わさずゲームが終了します。
+PRINTFORML 
+PRINTFORML また、“EXTRAモード”や、“STARTモード”クリア後の継続プレイでは、
+PRINTFORML バッドエンド以外のエンディングは発生しません。
+PRINTFORML ただし、口上側でエンディングが用意されている場合、
+PRINTFORML 条件さえ満たせば、どのモードであってもエンディングが発生します。
+PRINTFORML 
+PRINTFORML 内容を知りたい項目の番号を入力してください。
+PRINTFORML ※以下はネタバレ要素が多いため、閲覧にはご注意ください。
+;PRINTFORML 内容を知りたい項目の番号を入力してください。 ＜page.{P+1}/2＞
+DRAWLINE
+IF P == 0
+	PRINTL [ 1] ノーマルエンド
+	PRINTL [ 2] 上位陥落エンド
+	PRINTL [ 3] ハーレムエンド
+;	PRINTL [ 4] （枠確保）
+;	PRINTL [ 5] （枠確保）
+;	PRINTL [ 6] （枠確保）
+;	PRINTL [ 7] （枠確保）
+;	PRINTL [ 8] （枠確保）
+;	PRINTL [ 9] （枠確保）
+;ELSE
+ENDIF
+DRAWLINE
+;PRINTFORMLC \@(P <= 0) ? %" " * 18% # [1001]前のページ\@
+PRINTLC [1000]戻る
+;PRINTFORMLC \@(P >= 1) ? %" " * 18% # [1009]後ろのページ\@
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+	GOTO PRINT_LIST
+ELSEIF RESULT == 1009 && P < 1
+	P += 1
+	GOTO PRINT_LIST
+ELSEIF RESULT < 1 || RESULT > 68
+	GOTO INPUT_LOOP
+ENDIF
+Q = RESULT
+TRYCALLFORM DICTIONARY_ENDING_{Q}
+GOTO PRINT_LIST
+
+
+;--------------------------------------------------
+;エンディング条件解説解説
+;--------------------------------------------------
+;ノーマルエンド
+@DICTIONARY_ENDING_1
+PRINTL 〔ノーマルエンド〕
+PRINTL 恋慕、淫乱、服従のいずれかに陥落した奴隷がいる場合、
+PRINTL 最も基本的なエンディングを見ることができます。
+PRINTL 
+PRINTL 「上位陥落エンド」の条件を満たしている場合でも、
+PRINTL 納金額を「直接納める」ことで、「ノーマルエンド」を見ることができます。
+PRINTL 
+PRINTL （ノーマルエンド達成条件）
+PRINTW 1：期間内に、目標額以上の金額を所持し、納金額を「直接納める」。
+
+;上位陥落エンド
+@DICTIONARY_ENDING_2
+PRINTL 〔上位陥落エンド〕
+PRINTL 親愛、娼婦、隷属のいずれかに陥落した奴隷がいる場合、
+PRINTL それぞれに対応したアイテムを購入することで、
+PRINTL 「ノーマルエンド」よりもキャラに寄ったエンディングを見ることができます。
+PRINTL 
+PRINTL 陥落済みの奴隷が複数いる場合は、現在調教中の奴隷が選択されるため、
+PRINTL 特定の奴隷のエンディングが見たいなら、先に「調教対象」を変更しておきましょう。
+PRINTL 
+PRINTL 口上側で個別の「上位陥落エンド」が設定されている場合は、
+PRINTL エンディングの内容が変化します。
+PRINTL 
+PRINTL （上位陥落エンド達成条件）
+PRINTL 1：期間内に、目標額以上の金額を所持している。
+PRINTL 2：奴隷が「親愛」「娼婦」「隷属」のいずれかに陥落している。
+PRINTL 3：1～2を満たした上で「納金」を選択し、対応したアイテムを購入する。
+PRINTL ※それぞれの対応アイテム
+PRINTW 　「親愛」＝指輪、「娼婦」＝バイブ、「隷属」＝首輪
+
+;ハーレムエンド
+@DICTIONARY_ENDING_3
+PRINTL 〔ハーレムエンド〕
+PRINTL たくさんの奴隷を陥落させ、ハーレムを作った場合に出現するエンディングです。
+PRINTL 
+PRINTL 口上側で「特殊ハーレムエンド」が設定されており、
+PRINTL そちらの条件を満たしている場合、「特殊ハーレムエンド」が優先されます。
+PRINTL 
+PRINTL （ハーレムエンド達成条件）
+PRINTL 1：期間内に、目標額以上の金額を所持している。
+PRINTL 2：陥落済みの奴隷が、５人以上存在する。
+PRINTL 3：陥落済みの奴隷の内、１人以上が上位陥落である。
+PRINTW 4：1～3を満たした上で「納金」を選択し、「館の権利書を買う」。
+
+
+;=============================================================================
+;コンフィグ説明
+;=============================================================================
+;--------------------------------------------------
+;コンフィグ解説メインページ
+;--------------------------------------------------
+@DICTIONARY_EXPANSION
+$PRINT_LIST
+DRAWLINE
+PRINTFORML [600]コンフィグで設定できる各種機能の解説です。
+PRINTFORML 内容を知りたい項目の番号を入力してください。
+DRAWLINE
+PRINTL [ 0] テキスト表示
+PRINTL [ 1] 射精箇所設定
+PRINTL [ 2] 着衣初期設定
+PRINTL [ 3] ステータス表示設定
+PRINTL [ 4] キャラ口上
+PRINTL [ 5] 汎用喘ぎ使用設定
+PRINTL [ 6] 拡張- 猟奇なコマンド
+PRINTL [ 7] 拡張- デート時露出プレイ
+PRINTL [ 8] 拡張- 労役オプション
+PRINTL [ 9] 拡張- オトコ母乳取得可否
+PRINTL [20] 個体差設定
+PRINTL [30] 消耗品自動補充設定
+PRINTL [70]セーブデータ名変更
+PRINTL [80] コマンドフィルタ設定
+PRINTL [90] PALAM獲得アニメーション設定
+PRINTL 
+PRINTL [100]戻る
+DRAWLINE
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSE
+	TRYCALLFORM DICTIONARY_EXPANSION_{RESULT}
+	GOTO PRINT_LIST
+ENDIF
+
+@DICTIONARY_EXPANSION_0
+PRINTL 〔テキスト表示〕
+PRINTL 
+PRINTL ・口上テキスト（常に表示）＋情景テキスト
+PRINTL 　キャラクターの口上が用意されている場合、その口上と、
+PRINTL 　基本的なキャラクターの行動などを描く地の文を、両方表示します。
+PRINTL 　口上側で地の文の表示がカットされている場合、地の文は表示されません。
+PRINTL 　
+PRINTL ・情景テキストのみ
+PRINTL 　キャラクターの口上の有る無しに関わらず、口上は表示されず、
+PRINTL 　基本的なキャラクターの行動などを描く地の文のみが表示されます。
+PRINTL 　口上側で設定されている個別イベントなども発生しなくなります。
+PRINTL 　
+PRINTL ・テキストを表示しない
+PRINTW 　キャラクターの口上、地の文の両方が表示されません。
+
+@DICTIONARY_EXPANSION_1
+PRINTL 〔射精箇所設定〕
+PRINTL 　主人が射精するとき、奴隷のどこを狙うかが選択できます。
+PRINTL 　基本的には見たままなので、詳細な説明を省きます。
+PRINTL 　
+PRINTL ・そのまま射精
+PRINTL 　調教時に行っていたコマンドによって、射精箇所が異なります。
+PRINTL 　たとえばSEX系調教中なら膣内へ、フェラチオなら口、といった具合です。
+PRINTL 　特にぶっかけへのこだわりがない場合、これを選んでおくとよいでしょう。
+PRINTL 　
+PRINTL ・その都度選択
+PRINTL 　射精しそうになる度、奴隷のどこを狙うかが選択可能になります。
+PRINTW 　しかし、実行中のコマンドによっては、狙いをつけられない場合もあります。
+
+@DICTIONARY_EXPANSION_2
+PRINTL 〔着衣初期設定〕
+PRINTL 　調教開始時の、奴隷の着衣状態を設定することができます。
+PRINTL 　いちいち服を脱がせるのが面倒な人は設定しておくとよいでしょう。
+PRINTL 　
+PRINTL 　設定を「前回終了時」にして、「貞操帯」を履かせたまま調教を終了すると、
+PRINTW 　主人の見ていないところで、奴隷が勝手に自慰をするのを防ぐことができます。
+
+@DICTIONARY_EXPANSION_3
+PRINTL 〔ステータス表示設定〕
+PRINTL 　メインメニュー画面にて、カレンダーに則したスケジュールや、
+PRINTW 　現在の奴隷の状態を表すステータスを、表示するかどうかを選択できます。
+
+
+@DICTIONARY_EXPANSION_4
+PRINTL 〔キャラ口上〕
+PRINTL 　キャラクター口上を「カラー」「デフォルト色」のどちらで表示するかを選択できます。
+PRINTW 　口上側で色が設定されていない場合、設定に関わらずデフォルト色で表示されます。
+
+@DICTIONARY_EXPANSION_5
+PRINTL 〔汎用喘ぎ使用設定〕
+PRINTL 　専用口上の無いキャラを調教する際、汎用口上を表示するかどうかを選択できます。
+PRINTW 　簡単な喘ぎ声や否定文など、ある程度しゃべるようになります。
+
+@DICTIONARY_EXPANSION_6
+PRINTL 〔猟奇コマンド拡張〕
+PRINTL 　ＯＮにすると、地下室への扉が開かれます。
+PRINTL 　地下室は拷問のための部屋であり、地下室にいると一部コマンドで
+PRINTL 　調教の内容がハードになる他、奴隷に烙印を押したりと、特殊な行為が可能になります。
+PRINTL 　逆に、快楽のみを与えるようなコマンドは実行できなくなります。
+PRINTW 　「手術道具一式」と「ある素質」があれば、人体改造にも手を出せるかも…？
+
+@DICTIONARY_EXPANSION_7
+PRINTL 〔デート時露出プレイ拡張〕
+PRINTL 　ＯＮにして一定の条件を満たすと、デート時に露出プレイが行えるようになります。
+PRINTW 　健全なデートのみを楽しみたい人は、ＯＦＦにしておくとよいでしょう。
+
+@DICTIONARY_EXPANSION_8
+PRINTL 〔労役オプション〕
+PRINTL 　労役コマンドには、それぞれ独立したオプションプレイが存在し、
+PRINTL 　ＯＮにすることで、関連するプレイを行わせることができるようになります。
+PRINTL 　ゲーム開始時点では全てＯＦＦになっていますので、お好みに設定してください。
+PRINTL 　たとえば[処女]や[バックバージン]を労役で散らせたくない、という場合には、
+PRINTL 　貫通オプションをＯＦＦにしておくとよいでしょう。
+PRINTL 　
+PRINTW 　「定食屋台」「野外ライブ」の「昼の部」には、オプションが適用されません。
+
+@DICTIONARY_EXPANSION_9
+PRINTL 〔オトコ母乳取得可否〕
+PRINTL 　ＯＮにすることで、[オトコ][半陰半陽][カントボーイ]を持つキャラでも
+PRINTW 　母乳体質を取得するようになります。
+
+@DICTIONARY_EXPANSION_20
+PRINTL 〔個体差設定〕
+PRINTL 　ＯＮにすることで、キャラを購入した場合に
+PRINTL 　ＣＳＶでついている素質とは別に、素質が追加されることがあります。
+PRINTL 　追加される素質は項目ごとにＯＮとＯＦＦが選べるので、
+PRINTL 　適宜選択してください。
+PRINTW 　また、元のＣＳＶと相反する素質をつけることも可能です。
+
+@DICTIONARY_EXPANSION_30
+PRINTL 〔消耗品自動補充設定〕
+PRINTL 　複数所持可能なアイテムの所持基準数を設定することができます。
+PRINTL 　所持基準数に満たないアイテムは自動で購入されます。
+PRINTL 　所持甲州金が足りない場合は、可能な限り購入されます。
+PRINTL 　対象となるアイテムは、ローション・ビデオテープ・フィルム・コンドームです。
+PRINTW 　デフォルトの所持基準数は、全て0個です。
+
+@DICTIONARY_EXPANSION_70
+PRINTL 〔セーブデータ名変更〕
+PRINTL 　セーブデータ名を任意のものに変更できます。
+
+@DICTIONARY_EXPANSION_80
+PRINTL 〔コマンドフィルタ設定〕
+PRINTL 　調教時、表示されるコマンドにフィルタをかけることができます。
+PRINTL 　表示コマンドが多すぎて見辛いときや、
+PRINTW 　間違っても選択したくないコマンドがある場合に使用してください。
+
+@DICTIONARY_EXPANSION_90
+PRINTL 〔PALAM獲得アニメーション設定〕
+PRINTL 　奴隷のパラメータ変化時、変化した値がアニメーションで表示されるようになります。
+PRINTW 　動作が重くなる場合にはＯＦＦを設定してください。
+
+;=============================================================================
+;コンフィグ説明
+;=============================================================================
+;--------------------------------------------------
+;コンフィグ解説メインページ
+;--------------------------------------------------
+@DICTIONARY_CHARA_EXPANSION
+$PRINT_LIST
+DRAWLINE
+PRINTFORML [610]キャラコンフィグで設定できる各種機能の解説です。
+PRINTFORML 内容を知りたい項目の番号を入力してください。
+DRAWLINE
+PRINTL [ 0] あだ名設定
+PRINTL [ 1] 衣装の独自設定
+PRINTL [ 2] 汎用喘ぎ設定
+PRINTL 
+PRINTL [100]戻る
+DRAWLINE
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSE
+	TRYCALLFORM DICTIONARY_CHARA_EXPANSION_{RESULT}
+	GOTO PRINT_LIST
+ENDIF
+
+@DICTIONARY_CHARA_EXPANSION_0
+PRINTL 〔あだ名設定〕
+PRINTL 　キャラクターのあだ名を変更することができます。
+PRINTW 　変更した場合は地の文や各種項目で表示される名前が変更されます。
+
+@DICTIONARY_CHARA_EXPANSION_1
+PRINTL 〔衣装の独自設定〕
+PRINTL 　キャラクターの衣装設定を変更することができます。
+PRINTL 　衣装設定を「独自衣装」に設定することで反映されます。
+PRINTW 　仕様上、全裸には設定できません。
+
+@DICTIONARY_CHARA_EXPANSION_2
+PRINTL 〔汎用喘ぎ設定〕
+PRINTL 　キャラクターの汎用口上の口調などを変更することができます。
+PRINTW 　この項目は、調教画面にも表示されています。
+

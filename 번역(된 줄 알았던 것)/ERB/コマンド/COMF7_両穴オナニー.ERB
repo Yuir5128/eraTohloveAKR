@@ -1,0 +1,376 @@
+﻿;-------------------------------------------------
+;항문자위
+;자위계 커맨드
+;-------------------------------------------------
+@COM7
+
+;바이브, 비디오촬영때에 내용 변화
+;비디오촬영중이라면공개자위
+;야외플레이중이라면 야외 자위
+;바이브장비로바이브자위
+LOCALS = 
+
+SIF TEQUIP:비디오카메라
+	LOCALS =공개
+SIF TEQUIP:야외플레이
+	LOCALS =야외
+
+IF TEQUIP:바이브 && TEQUIP:애널바이브
+	LOCALS = %LOCALS%두 구멍바이브
+ELSEIF (TEQUIP:바이브 || TEQUIP:로터삽입) && (TEQUIP:애널바이브 || TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:확장벌룬)
+	LOCALS = %LOCALS% 양구멍 완구
+ENDIF
+
+IF TEQUIP:바이브 || TEQUIP:로터삽입 || TEQUIP:애널바이브 || TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:확장벌룬
+	LOCALS = %LOCALS%자위
+ELSE
+	LOCALS = %LOCALS%항문자위
+ENDIF
+
+STR:0 = %LOCALS%
+PRINTFORML %STR:0%
+
+TFLAG:56 = 1
+
+;-------------------------------------------------
+;실행할 수 있을까의 판정
+;-------------------------------------------------
+;모든 명령에 공통의 요소를 고려
+;(순종가 높다고 명령에 따르기 쉬운 등)
+CALL COM_ORDER
+
+;실행 판정 조작
+CALL KOJO_DENIAL_PLUS
+
+;합계를 표시(33이상으로 실행)
+PRINT  = 
+PRINTV A
+
+;난이도 상승
+;공개로+10, 바이브로+5
+V = 42
+SIF TEQUIP:비디오카메라
+	V += 10
+SIF TEQUIP:야외플레이
+	V += 10
+
+SIF TEQUIP:확장벌룬
+	V += 10
+SIF TEQUIP:애널바이브
+	V += 5
+SIF TEQUIP:애널비즈
+	V += 5
+SIF TEQUIP:로터A삽입
+	V += 3
+SIF TEQUIP:바이브
+	V += 5
+SIF TEQUIP:로터삽입
+	V += 3
+
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행치
+PRINTV V
+
+;실행 불가입상/실행 판정 조작
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;실행 할 수 없다
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;실행자가 노예인 플래그
+TFLAG:28 = 1
+
+;스타킹 찌릿찌릿 플래그
+IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 30
+LOSEBASE:기력 += 100
+
+SOURCE:쾌V += 80
+SOURCE:쾌A += 80
+SOURCE:통증 += 150
+
+IF TEQUIP:바이브 || TEQUIP:로터삽입
+	TIMES SOURCE:쾌C , 0.70
+
+	SIF TEQUIP:바이브
+		TIMES SOURCE:쾌V , 1.50
+	SIF TEQUIP:로터삽입
+		TIMES SOURCE:쾌V , 1.20
+
+	SIF TEQUIP:바이브
+		SOURCE:통증 += 50
+	SIF TEQUIP:로터삽입
+		SOURCE:통증 += 20
+
+	;V에의고통는 먼저 처리해 둔다
+	;EXP:V경험를 본다(처녀의반감는 별도 처리필 보고인 것으로 생략)
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증, 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:반발, 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ENDIF
+
+	SOURCE:굴복 += 100
+	SOURCE:반발 += 100
+ENDIF
+IF TEQUIP:애널바이브 || TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:확장벌룬
+	TIMES SOURCE:쾌A , 1.50
+
+	SIF TEQUIP:확장벌룬
+		SOURCE:통증 += 200
+	SIF TEQUIP:애널바이브
+		SOURCE:통증 += 200
+	SIF TEQUIP:애널비즈
+		SOURCE:통증 += 200
+	SIF TEQUIP:로터A삽입
+		SOURCE:통증 += 130
+
+	SOURCE:굴복 += 150
+	SOURCE:반발 += 150
+ENDIF
+
+;A에의고통는 먼저 처리해 둔다
+;EXP:A경험를 본다
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:통증, 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:통증, 1.20
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:통증, 0.80
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:통증, 0.60
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:통증, 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:통증, 0.20
+ENDIF
+
+;PALAM:윤활를 본다
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증, 1.20
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증, 1.00
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증, 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증, 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증, 0.20
+ENDIF
+
+SOURCE:성행동 += 200
+SOURCE:두려움 += 300
+SOURCE:중독충족 += 300
+SOURCE:노출 += 500
+SOURCE:굴복 += 700
+SOURCE:일탈 += 450
+SOURCE:반발 += 300
+
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;비디오
+IF TEQUIP:비디오카메라
+	SOURCE:노출 += 50
+	SOURCE:액체 += 50
+	SOURCE:욕정 += 50
+	SOURCE:반발 += 80
+ENDIF
+;야외플레이
+IF TEQUIP:야외플레이
+	SOURCE:노출 += 100
+	SOURCE:굴복 += 100
+	SOURCE:반발 +=80
+ENDIF
+
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 400
+
+IF TEQUIP:비디오카메라 || TEQUIP:야외플레이
+	SELECTCASE ABL:노출벽
+		CASE 0
+			TIMES SOURCE:반발, 2.00
+		CASE 1
+			SOURCE:욕정 += 10
+			TIMES SOURCE:반발, 1.20
+		CASE 2
+			SOURCE:욕정 += 20
+			TIMES SOURCE:반발, 1.00
+		CASE 3
+			SOURCE:욕정 += 50
+			TIMES SOURCE:반발, 0.70
+		CASE 4
+			SOURCE:욕정 += 75
+			TIMES SOURCE:반발, 0.50
+		CASE 5
+			SOURCE:욕정 += 80
+			TIMES SOURCE:반발, 0.30
+		CASE 6
+			SOURCE:욕정 += 100
+			TIMES SOURCE:반발, 0.10
+		CASE 7
+			SOURCE:욕정 += 120
+			TIMES SOURCE:반발, 0.10
+		CASE 8
+			SOURCE:욕정 += 150
+			TIMES SOURCE:반발, 0.10
+		CASE 9
+			SOURCE:욕정 += 180
+			TIMES SOURCE:반발, 0.10
+		CASEELSE
+			SOURCE:욕정 += 200
+			TIMES SOURCE:반발, 0.10
+	ENDSELECT
+ENDIF
+
+;EXP:A경험를 본다
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:반발, 1.50
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:반발, 1.20
+ENDIF
+
+;중독에 의한중독충족의 소스는 먼저 처리해 둔다
+;자위중독를 본다
+IF ABL:자위중독 == 1
+	TIMES SOURCE:쾌C , 1.00
+	TIMES SOURCE:쾌V , 1.00
+	TIMES SOURCE:쾌A , 1.00
+	TIMES SOURCE:중독충족, 0.00
+ELSEIF ABL:자위중독 == 2
+	TIMES SOURCE:쾌C , 1.10
+	TIMES SOURCE:쾌V , 1.10
+	TIMES SOURCE:쾌A , 1.10
+	TIMES SOURCE:중독충족, 0.30
+ELSEIF ABL:자위중독 == 3
+	TIMES SOURCE:쾌C , 1.20
+	TIMES SOURCE:쾌V , 1.20
+	TIMES SOURCE:쾌A , 1.20
+	TIMES SOURCE:중독충족, 0.60
+ELSEIF ABL:자위중독 == 4
+	TIMES SOURCE:쾌C , 1.30
+	TIMES SOURCE:쾌V , 1.30
+	TIMES SOURCE:쾌A , 1.30
+	TIMES SOURCE:중독충족, 0.90
+ELSEIF ABL:자위중독 == 5
+	TIMES SOURCE:쾌C , 1.50
+	TIMES SOURCE:쾌V , 1.50
+	TIMES SOURCE:쾌A , 1.50
+	TIMES SOURCE:중독충족, 1.20
+ELSEIF ABL:자위중독 == 6
+	TIMES SOURCE:쾌C , 1.70
+	TIMES SOURCE:쾌V , 1.70
+	TIMES SOURCE:쾌A , 1.70
+	TIMES SOURCE:중독충족, 1.50
+ELSEIF ABL:자위중독 == 7
+	TIMES SOURCE:쾌C , 2.00
+	TIMES SOURCE:쾌V , 2.00
+	TIMES SOURCE:쾌A , 2.00
+	TIMES SOURCE:중독충족, 1.80
+ELSEIF ABL:자위중독 == 8
+	TIMES SOURCE:쾌C , 2.30
+	TIMES SOURCE:쾌V , 2.30
+	TIMES SOURCE:쾌A , 2.30
+	TIMES SOURCE:중독충족, 2.30
+ELSEIF ABL:자위중독 == 9
+	TIMES SOURCE:쾌C , 2.50
+	TIMES SOURCE:쾌V , 2.50
+	TIMES SOURCE:쾌A , 2.50
+	TIMES SOURCE:중독충족, 3.00
+ELSEIF ABL:자위중독 >= 10
+	TIMES SOURCE:쾌C , 3.50
+	TIMES SOURCE:쾌V , 3.50
+	TIMES SOURCE:쾌A , 3.50
+	TIMES SOURCE:중독충족, 5.00
+ENDIF
+
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;노예의손(장갑)⇔노예의 V질내의 더러움이 이동
+;도구를 사용하고 있을 때는 더러움은 이동하지 않는다
+;바이브, 로터, 오나홀을 사용하고 있을 때는 더러움은 어디에도 이동하지 않는다
+IF (TEQUIP:바이브 || TEQUIP:로터삽입) && (TEQUIP:애널바이브 || TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:확장벌룬)
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+IF TFLAG:56 == 1
+	EXP:V경험 += 1
+	PRINTL V경험＋1
+ENDIF
+
+EXP:A경험 += 1
+PRINTL A경험＋1
+
+;비디오촬영시는 경험에 플러스
+IF TEQUIP:비디오카메라
+	EXP:자위경험 += 2
+	PRINTL 자위경험＋2
+	EXP:조교자위경험 += 2
+	PRINTL 조교자위경험＋2
+	
+	IF !EXP:공개자위 && !TALENT:음란 && !TALENT:창부
+		EXP:이상경험 += 1
+		PRINTL 공개자위첫경험으로이상경험＋1
+	ENDIF
+	EXP:공개자위 += 1
+	PRINTL 공개자위경험＋1
+ELSE
+	EXP:자위경험 += 1
+	PRINTL 자위경험＋1
+	EXP:조교자위경험 += 1
+	PRINTL 조교자위경험＋1
+ENDIF
+
+;게이경험라든지 가산
+CALL COM_EXP(1)
+
+;의존도 벡터
+TFLAG:33 = 3
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+

@@ -1,0 +1,496 @@
+﻿;-------------------------------------------------
+;윤간
+;시추에이션별 커맨드
+;-------------------------------------------------
+@COM322
+#LOCALSIZE 17
+
+PRINTL 윤간
+STR:0 = 윤간
+
+CALL KOJO_MESSAGE_COM
+
+;플레이 내용을 판정
+CALL OUTDOOR_PLAY_CHECK
+
+;V경험을 수반하는 커맨드의 플래그(처녀막재생 대응)
+SIF E && (TALENT:처녀 || TALENT:재생처녀)
+	TFLAG:19 |= 1
+
+;조교 대상이백버진였던 경우의 상실 플래그
+SIF F && TALENT:백버진
+	TFLAG:161 |= 1
+
+;조교 대상이동정였던 경우의 상실 플래그
+SIF G && TALENT:동정
+	TFLAG:160 |= 1
+
+;붙고 있었던 완구는(물건에 따라서는 랜덤으로) 제외한다
+SIF TEQUIP:니틀캡 && !RAND:5
+	TEQUIP:니틀캡 = 0
+SIF TEQUIP:유두클립 && !RAND:5
+	TEQUIP:유두클립 = 0
+SIF TEQUIP:착유기 && !RAND:5
+	TEQUIP:착유기 = 0
+SIF TEQUIP:클리캡 && !RAND:5
+	TEQUIP:클리캡 = 0
+SIF TEQUIP:음핵클립 && !RAND:5
+	TEQUIP:음핵클립 = 0
+SIF TEQUIP:전동오나홀 && (G || !RAND:5)
+	TEQUIP:전동오나홀 = 0
+SIF TEQUIP:카테터 && (G || !RAND:5)
+	TEQUIP:카테터 = 0
+SIF TEQUIP:요도벌룬 && (G || !RAND:5)
+	TEQUIP:요도벌룬 = 0
+SIF TEQUIP:로터삽입
+	TEQUIP:로터삽입 = 0
+SIF TEQUIP:바이브
+	TEQUIP:바이브 = 0
+SIF TEQUIP:로터A삽입
+	TEQUIP:로터A삽입 = 0
+SIF TEQUIP:애널비즈
+	TEQUIP:애널비즈 = 0
+SIF TEQUIP:애널바이브
+	TEQUIP:애널바이브 = 0
+SIF TEQUIP:확장벌룬
+	TEQUIP:확장벌룬 = 0
+
+;스타킹 찌릿찌릿 플래그
+SIF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TFLAG:55 = 1
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 500
+LOSEBASE:기력 += 500
+
+;V
+IF E
+	SOURCE:쾌V += 300 * E
+	SOURCE:통증 += 500
+ENDIF
+;A
+IF F
+	SOURCE:쾌A += 300 * F
+	SOURCE:통증 += 700
+ENDIF
+;역섹스
+IF G
+	SOURCE:쾌C += 300 * G
+ELSEIF C
+	SOURCE:쾌C += 300 * C
+ELSEIF V
+	SOURCE:쾌C += 300 * V
+ENDIF
+
+;쾌B, 굴복, 액체, 욕정, 성행동, 노출, 통증, 두려움, 일탈, 반감의 소스
+SOURCE:쾌B += 300
+
+SOURCE:성행동 += 30 * (E+F+G)
+SOURCE:두려움 += 2000 / (EXP:윤간경험+1)
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 울굴소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 1000
+
+;V
+IF E
+	;처녀, 재생처녀였던 경우
+	IF TALENT:처녀 || TALENT:재생처녀
+		TIMES SOURCE:쾌V , 2.00
+		SOURCE:통증 += 2000
+	ENDIF
+
+	;V에의고통는 먼저 처리해 둔다
+	;EXP:V경험를 본다(처녀의반감는 별도 처리필 보고인 것으로 생략)
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증, 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:쾌V , 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ENDIF
+
+	;PALAM:윤활를 본다
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:쾌V , 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증, 0.70
+		TIMES SOURCE:쾌V , 1.20
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증, 0.10
+	ENDIF
+ENDIF
+
+;A
+IF F
+	;백버진였던 경우
+	IF TALENT:백버진
+		TIMES SOURCE:쾌A , 2.00
+		SOURCE:통증 += 2000
+	ENDIF
+
+	;A에의고통는 먼저 처리해 둔다
+	;EXP:A경험를 본다
+	IF EXP:A경험 < EXPLV:1
+		TIMES SOURCE:통증, 3.00
+		TIMES SOURCE:쾌A , 3.00
+	ELSEIF EXP:A경험 < EXPLV:2
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:쾌A , 2.00
+	ELSEIF EXP:A경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:쾌A , 1.50
+	ELSEIF EXP:A경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.60
+		TIMES SOURCE:쾌A , 1.20
+	ELSEIF EXP:A경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:A경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.20
+	ENDIF
+
+	;PALAM:윤활를 본다
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:쾌V , 2.00
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증, 1.00
+		TIMES SOURCE:쾌V , 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증, 0.60
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증, 0.30
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증, 0.20
+	ENDIF
+ENDIF
+
+;역강간
+IF G
+	;동정였던 경우
+	IF TALENT:동정
+		;사정게이지에 보너스
+		BASE:사정 += 8000
+		TIMES SOURCE:쾌C , 1.20
+	ENDIF
+ENDIF
+
+;특히 하드한 커맨드에서는, 이상경험에 응해 효과를 줄인다
+IF EXP:이상경험 < EXPLV:1
+	TIMES SOURCE:두려움, 1.20
+ELSEIF EXP:이상경험 < EXPLV:2
+	TIMES SOURCE:두려움, 0.90
+ELSEIF EXP:이상경험 < EXPLV:3
+	TIMES SOURCE:두려움, 0.80
+ELSEIF EXP:이상경험 < EXPLV:4
+	TIMES SOURCE:두려움, 0.70
+ELSEIF EXP:이상경험 < EXPLV:5
+	TIMES SOURCE:두려움, 0.60
+ELSE
+	TIMES SOURCE:두려움, 0.50
+ENDIF
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+IF !EXP:윤간경험
+	EXP:이상경험 += 1
+	PRINTL 윤간첫경험으로이상경험＋1
+ENDIF
+EXP:윤간경험 += 1
+
+;수간의 경우
+IF TFLAG:500 == 1
+	IF EXP:수간경험 == 0
+		EXP:이상경험 += 1
+		PRINTL 수간첫경험으로이상경험＋1
+	ENDIF
+	EXP:수간경험 += 1
+ENDIF
+
+;페라
+IF C
+	;펠라경험
+	EXP:펠라경험 += C
+	PRINTFORML 펠라경험+{C}
+	;정액경험
+	EXP:정액경험 += C
+	PRINTFORML 정액경험+{C}
+ENDIF
+
+;V
+IF E
+	;V경험가산
+	EXP:V경험 += E
+	PRINTFORML V경험+{E}
+	D = E/2
+	SIF D < 1
+		D = 1
+	;질내사정경험가산
+	EXP:질내사정경험 += D
+	PRINTFORML 질내사정경험+{D}
+	;창관 따위의 손님과 노예 사이의 나카타씨 카운트용
+	CFLAG:105 += D
+ENDIF
+
+;A
+IF F
+	;A경험
+	EXP:A경험 += F
+	PRINTFORML A경험+{F}
+	H = F/2
+	SIF H < 1
+		H = 1
+	;장내사정경험가산
+	EXP:장내사정경험 += H
+	PRINTFORML 장내사정경험+{F}
+	;창관 따위의 손님과 노예 사이의 나카타씨 카운트용
+	CFLAG:705 += F
+ENDIF
+
+;성교경험
+EXP:성교경험 += E+F+G
+PRINTFORML 성교경험+{E+F+G}
+
+;변의나뇨의가 있으면 배출
+SIF BASE:변의 >= 60
+	CALL DEFECATION_CHECK2
+SIF BASE:뇨의 >= 60
+	CALL DEFECATION_CHECK3
+
+;수익을 자금에 가산
+MONEY += TFLAG:71
+
+;상황과 갤러리를 리셋트
+TFLAG:151 = 0
+TFLAG:500 = 0
+
+;의존도 벡터
+TFLAG:33 = 5
+
+;-------------------------------------------------
+;더러움의 처리
+;경험을 봐 더러움을 추가하므로 여기에 가져온다
+;-------------------------------------------------
+
+CALL COM_STAIN
+
+;노예의 전신(의류)에 더러움을 추가
+;V
+IF E
+	STAIN:바기나 |= 2
+	STAIN:질내 |= 2
+	STAIN:바기나 |= 4
+	STAIN:질내 |= 4
+	
+	;수간의 경우, 점액도 추가
+	IF TFLAG:500 == 1
+		STAIN:바기나 |= 32
+		STAIN:질내 |= 32
+	ENDIF
+	
+	;가려움증약 사용하고 있는 경우는 효과가 끊어진다
+	SIF STAIN:바기나 & 1024
+		STAIN:바기나 -= 1024
+	SIF STAIN:질내 & 1024
+		STAIN:질내 -= 1024
+ENDIF
+
+;A
+IF F
+	STAIN:애널 |= 2
+	STAIN:장내 |= 2
+	STAIN:애널 |= 4
+	STAIN:장내 |= 4
+	;수간의 경우, 점액도 추가
+	IF TFLAG:500 == 1
+		STAIN:애널 |= 32
+		STAIN:장내 |= 32
+	ENDIF
+	
+	;가려움증약 사용하고 있는 경우는 효과가 끊어진다
+	SIF STAIN:애널 & 1024
+		STAIN:애널 -= 1024
+	SIF STAIN:장내 & 1024
+		STAIN:장내 -= 1024
+ENDIF
+
+;페라
+IF C
+	STAIN:머리카락 |= 4
+	SIF TEQUIP:머리장식
+		STAIN:머리장식 |= 4
+	SIF TEQUIP:특수 3
+		STAIN:눈장식 |= 4
+	
+	IF TEQUIP:특수 1 == 1
+		STAIN:장갑 |= 2
+		STAIN:장갑 |= 4
+	ELSE
+		STAIN:손 |= 2
+		STAIN:손 |= 4
+	ENDIF
+	
+	STAIN:입 |= 2
+	STAIN:입 |= 4
+	
+	STAIN:가슴 |= 4
+	
+	SIF TEQUIP:특수 2
+		STAIN:발장식 |= 4
+	STAIN:발 |= 4
+	
+	;수간의 경우, 점액도 추가
+	IF TFLAG:500 == 1
+		STAIN:입 |= 32
+		STAIN:가슴 |= 32
+	ENDIF
+ENDIF
+
+;커닐링구스
+IF V
+	STAIN:손 |= 1
+	STAIN:입 |= 1
+ENDIF
+
+;역강간
+IF G
+	IF TFLAG:500 & 8
+		STAIN:손 |= 1
+		STAIN:페니스 |= 1
+	ELSEIF TFLAG:500 & 16
+		STAIN:손 |= 8
+		STAIN:페니스 |= 8
+	ENDIF
+	
+	;가려움증약 사용하고 있는 경우는 효과가 끊어진다
+	SIF STAIN:페니스 & 1024
+		STAIN:페니스 -= 1024
+ENDIF
+
+;가려움증약 사용하고 있는 경우는 효과가 끊어진다
+SIF STAIN:가슴 & 1024
+	STAIN:가슴 -= 1024
+
+RETURN 1
+
+
+
+;-------------------------------------------------
+;플레이 내용 체크
+;-------------------------------------------------
+@OUTDOOR_PLAY_CHECK
+
+;성교계 E:V F:A G:역강간 D:질 쏘아 맞히고 수 H:장 쏘아 맞히고 수
+E = 0
+F = 0
+G = 0
+D = 0
+H = 0
+
+;성적 봉사 C:페라계 V:커닐링구스계
+C = 0
+V = 0
+
+;노예가공는 아니고, 갤러리에[짐승][아이][남][여장 남자]어떤 것인가가 있다
+;IF !TALENT:공 && (TFLAG:500 & 1 || TFLAG:500 & 2 || TFLAG:500 & 4 || TFLAG:500 & 16)
+IF !TALENT:공 && (TFLAG:500 == 1 || TFLAG:500 == 2 || TFLAG:500 & 4 || TFLAG:500 & 16)
+	;V와 A의 플레이차이
+	;남자, 정조대는 A만
+	IF TALENT:남자 || TEQUIP:정조대
+		E = 0
+		F = (ABL:A감각+ABL:욕망+1)/3
+		SIF F < 1
+			F = 1
+	ELSE
+		E = (ABL:V감각+ABL:욕망+1)/3
+		F = (ABL:A감각+ABL:욕망+1)/3
+		SIF E < 1
+			E = 1
+		SIF F < 1
+			F = 1
+	ENDIF
+	
+ENDIF
+
+;노예가수에서도오메가는 아니고, 정조대가 없고, 페니스가 있어,[여자]나[여장 남자]가 있다
+IF !TALENT:수 && !TALENT:오메가 && TEQUIP:속옷（아래） != 5 && PENIS(TARGET) && (TFLAG:500 & 8 || TFLAG:500 & 16)
+	G = (ABL:C감각+ABL:욕망+1)/3
+	
+	SIF G < 1
+		G = 1
+ENDIF
+
+;갤러리에[짐승][아이][남][여장 남자]어떤 것인가가 있다
+SIF (TFLAG:500 & 1 || TFLAG:500 & 2 || TFLAG:500 & 4 || TFLAG:500 & 16)
+	C = (ABL:봉사정신+ABL:기교+ABL:정액중독)/3
+
+;갤러리에[여자]가 있다
+SIF TFLAG:500 & 8
+	V = (ABL:봉사정신+ABL:기교+ABL:순종)/3
+
+;범하는 장소를 기록
+TFLAG:705 = 0
+SIF E
+	TFLAG:705 |= 2
+SIF F
+	TFLAG:705 |= 1
+SIF G
+	TFLAG:705 |= 4
+SIF C
+	TFLAG:705 |= 8
+
+
+;먼저 수익을 산출해 TFLAG:71에 넣어 둔다(지문으로 표시하기 위해(때문에))
+TFLAG:71 = 0
+
+;행위 회수에 의해 금액 가산
+SIF E
+	TFLAG:71 += E*1000
+SIF F
+	TFLAG:71 += F*1000
+SIF G
+	TFLAG:71 += G*1000
+SIF C
+	TFLAG:71 += C*500
+SIF V
+	TFLAG:71 += V*500
+
+;처녀/bA생처녀를 찢고 있으면 보정 
+SIF E && (TALENT:처녀 || TALENT:재생처녀)
+	TFLAG:71 += 10000
+;백버진를 빼앗고 있으면 보정
+SIF F && TALENT:백버진
+	TFLAG:71 += 10000
+;동정를 빼앗고 있으면 보정
+SIF G && TALENT:동정
+	TFLAG:71 += 5000
+
+;개는 돈을 주지 않는다
+IF TFLAG:500 == 1
+	TFLAG:71 = 0
+;아이는 금액이 꽤 줄어든다
+ELSEIF TFLAG:500 == 2
+	TFLAG:71 /= 3
+ENDIF
+
+

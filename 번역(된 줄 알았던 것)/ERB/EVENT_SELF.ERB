@@ -1,0 +1,2109 @@
+﻿;SELF.ERB, 노예로부터의 봉사 따위의 이벤트
+;-------------------------------------------------
+;아침에 일어나는 이벤트
+;-------------------------------------------------
+@EVENT_NEWDAY_SELF
+;조교 대상이 없는 경우는 종료
+SIF TARGET < 0
+	RETURN 0
+;전체 판정, 함락 소질이 없는 경우 혹은반발각인가 있을 때는 함수 종료
+SIF (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0) || MARK:반발각인
+	RETURN 0
+;기절 하고 있으면 함수 종료
+SIF TALENT:기절
+	RETURN 0
+
+;아침 이벤트 캔슬 플래그가 서있는 경우는 종료
+SIF CFLAG:42
+	RETURN 0
+
+VARSET LOCAL
+LOCAL:1 = 10
+;이벤트 결정
+FOR LOCAL, 1, 10
+	CALLFORM SELF_MORNING_ABLE{LOCAL}
+	IF RESULT
+		LOCAL:(LOCAL:1) = LOCAL
+		LOCAL:1 += 1
+	ENDIF
+NEXT
+LOCAL:1 -= 10
+SIF LOCAL:1 == 0
+	RETURN 0
+LOCAL:2 = LOCAL:(RAND:(LOCAL:1) + 10)
+IF LOCAL:2 == 7 || LOCAL:2 == 8
+	CALLFORM MORNING_EVENT_{LOCAL:2}
+ELSE
+	CALLFORM SELF_MORNING_{LOCAL:2}
+ENDIF
+
+;-------------------------------------------------
+;아침 페라
+;-------------------------------------------------
+@SELF_MORNING_ABLE1
+SIF !PENIS(MASTER)
+	RETURN 0
+SIF !ABL:정액중독
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;아침파이즈리
+;-----------------------------------------------
+@SELF_MORNING_ABLE2
+SIF !PENIS(MASTER)
+	RETURN 0
+SIF !BREAST(TARGET)
+	RETURN 0
+SIF ABL:봉사정신 < 5
+	RETURN 0
+SIF !ABL:정액중독
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;아침기승위
+;-----------------------------------------------
+@SELF_MORNING_ABLE3
+SIF !PENIS(MASTER)
+	RETURN 0
+SIF TALENT:MASTER:동정
+	RETURN 0
+SIF (VAGINA(TARGET) && (TALENT:처녀 || TALENT:재생처녀) && TALENT:백버진) || (!VAGINA(TARGET) && TALENT:백버진)
+	RETURN 0
+SIF ABL:봉사정신 < 7 && !TALENT:음란 && !TALENT:창부
+	RETURN 0
+SIF ((VAGINA(TARGET) && !TALENT:처녀 && !TALENT:재생처녀 && ABL:V감각 < 3) || ((!VAGINA(TARGET) || (VAGINA(TARGET) && (TALENT:처녀 || TALENT:재생처녀))) && ABL:A감각 < 3))
+	RETURN 0
+SIF TALENT:MASTER:수 || TALENT:MASTER:오메가 || TALENT:공
+	RETURN 0
+SIF !ABL:섹스중독
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;아침 요리
+;-----------------------------------------------
+@SELF_MORNING_ABLE4
+SIF !TALENT:연모 && !TALENT:친애
+	RETURN 0
+SIF (!ABL:요리기능 && RAND:2) || (ABL:요리기능 < 3 && !RAND:3)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;아침발호된 훈련
+;-----------------------------------------------
+@SELF_MORNING_ABLE5
+SIF !PENIS(MASTER)
+	RETURN 0
+SIF ABL:봉사정신 < 5
+	RETURN 0
+SIF !TALENT:새드 && !ABL:새드끼 < 5
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;모닝 키스
+;-----------------------------------------------
+@SELF_MORNING_ABLE6
+SIF !TALENT:연모 && !TALENT:친애
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;아침 목욕
+;-----------------------------------------------
+@SELF_MORNING_ABLE7
+SIF ABL:봉사정신 < 8
+	RETURN 0
+SIF ABL:순종 < 5
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;3P
+;-----------------------------------------------
+@SELF_MORNING_ABLE8
+SIF ASSI < 0
+	RETURN 0
+SIF TEQUIP:속옷（아래） == 5 || TEQUIP:ASSI:속옷（아래） == 5
+	RETURN 0
+SIF !ABL:섹스중독 && !ABL:ASSI:섹스중독 && ABL:욕망 < 5 && ABL:ASSI:욕망 < 5
+	RETURN 0
+SIF (MALE(TARGET) && MALE(ASSI) && MALE(MASTER) && ABL:게이끼 && ABL:ASSI:게이끼 && ABL:MASTER:게이끼) || (!MALE(TARGET) && !MALE(ASSI) && !MALE(MASTER) && ABL:레즈끼 && ABL:ASSI:레즈끼 && ABL:MASTER:레즈끼)
+	RETURN 1
+
+;-------------------------------------------------
+;음뇨
+;-----------------------------------------------
+@SELF_MORNING_ABLE9
+SIF !PENIS(MASTER)
+	RETURN 0
+SIF EXP:음뇨경험 < 30
+	RETURN 0
+SIF ABL:마조끼 < 3
+	RETURN 0
+SIF ABL:스캇중독 < 2
+	RETURN 0
+RETURN 1
+
+
+;-----------------------------------------------
+;아침 페라
+;-----------------------------------------------
+@SELF_MORNING_1
+DRAWLINE
+A = 0
+TFLAG:13 = 1
+CALL KOJO_MESSAGE_EVENT
+
+;정액중독
+IF ABL:정액중독 == 0
+	A = 1
+ELSEIF ABL:정액중독 == 1
+	A = 2
+ELSEIF ABL:정액중독 == 2
+	A = 3
+ELSEIF ABL:정액중독 == 3
+	A = 4
+ELSEIF ABL:정액중독 == 4
+	A = 5
+ELSEIF ABL:정액중독 >= 5
+	A = 6
+ENDIF
+
+;악취둔감 더러움무시
+SIF TALENT:악취둔감 || TALENT:더러움무시
+	A += 1
+;악취민감
+SIF TALENT:악취민감
+	A -= 1
+;헌신적
+SIF TALENT:헌신적
+	A += 1
+;발정기
+SIF TALENT:발정기
+	A += 1
+;Pavlov 카운터
+CALL SEIIN_CHECK
+;정액절정경험
+SIF EXP:정음절정경험 > P
+	A += 3
+
+SIF A == 0
+	A = 1
+
+EXP:펠라경험 += A
+;아이사이즈가 아니다
+SIF TALENT:MASTER:아이사이즈 == 0
+	EXP:정액경험 += A/2
+JUEL:순종 += A*100
+JUEL:굴복 += A*30
+JUEL:습득 += A*40
+PRINTFORML %EXPNAME:22%＋{A}
+;아이사이즈가 아니다
+SIF TALENT:MASTER:아이사이즈 == 0
+	PRINTFORML %EXPNAME:20%＋{A/2}
+;정액절정경험
+IF EXP:정음절정경험 > P
+	PRINTFORML %EXPNAME:24%＋1
+	EXP:정음절정경험 += 1
+ENDIF
+PRINTFORML %PALAMNAME:5%의 구슬＋{A*100}
+PRINTFORML %PALAMNAME:7%의 구슬＋{A*30}
+PRINTFORMW %PALAMNAME:8%의 구슬＋{A*40}
+DRAWLINE
+
+RETURN 0
+
+
+;-----------------------------------------------
+;아침파이즈리
+;-----------------------------------------------
+@SELF_MORNING_2
+DRAWLINE
+A = 0
+TFLAG:13 = 2
+CALL KOJO_MESSAGE_EVENT
+
+;정액중독
+IF ABL:정액중독 == 0
+	A = 1
+ELSEIF ABL:정액중독 == 1
+	A = 2
+ELSEIF ABL:정액중독 == 2
+	A = 3
+ELSEIF ABL:정액중독 == 3
+	A = 4
+ELSEIF ABL:정액중독 == 4
+	A = 5
+ELSEIF ABL:정액중독 >= 5
+	A = 6
+ENDIF
+
+;악취둔감 더러움무시
+SIF TALENT:악취둔감 || TALENT:더러움무시
+	A += 1
+;악취민감
+SIF TALENT:악취민감
+	A -= 1
+;헌신적
+SIF TALENT:헌신적
+	A += 1
+;Pavlov 카운터
+CALL SEIIN_CHECK
+;정액절정경험
+SIF EXP:정음절정경험 > P
+	A += 1
+
+SIF A == 0
+	A = 1
+
+EXP:펠라경험 += A
+;아이사이즈가 아니다
+SIF TALENT:MASTER:아이사이즈 == 0
+	EXP:정액경험 += A/2
+JUEL:쾌B += A*20
+JUEL:순종 += A*100
+JUEL:굴복 += A*30
+JUEL:습득 += A*40
+PRINTFORML %EXPNAME:22%＋{A}
+;아이사이즈가 아니다
+SIF TALENT:MASTER:아이사이즈 == 0
+	PRINTFORML %EXPNAME:20%＋{A/2}
+;정액절정경험
+IF EXP:정음절정경험 > P
+	PRINTFORML %EXPNAME:24%＋1
+	EXP:정음절정경험 += 1
+ENDIF
+PRINTFORML %PALAMNAME:3%의 구슬＋{A*20}
+PRINTFORML %PALAMNAME:5%의 구슬＋{A*100}
+PRINTFORML %PALAMNAME:7%의 구슬＋{A*30}
+PRINTFORMW %PALAMNAME:8%의 구슬＋{A*40}
+DRAWLINE
+
+RETURN 0
+
+
+;-----------------------------------------------
+;아침기승위
+;-----------------------------------------------
+@SELF_MORNING_3
+DRAWLINE
+A = 0
+TFLAG:13 = 3
+
+CALL KOJO_MESSAGE_EVENT
+
+;원이 남자, 혹은 V보다 A가 높으면 A우선
+IF MALE2(TARGET) || ABL:V감각 < ABL:A감각
+	;다만, A를 사용할 수 없는 경우는 V의 사용 가부를 본다
+	IF ABL:A감각 < 3 || TALENT:백버진
+		;V를 사용할 수 있으면 V를 사용하려고 한다
+		IF VAGINA(TARGET) && !TALENT:처녀 && !TALENT:재생처녀 && ABL:V감각 >= 3
+			;그 위에서 V도정조대로 메워지고 있으면정조대입상을 불러낸다
+			IF TEQUIP:속옷（아래） == 5
+				TFLAG:67 = 0
+			;메워지지 않으면 V를 사용한다
+			ELSE
+				TFLAG:67 = 1
+			ENDIF
+		ENDIF
+	;A를 사용할 수 있으면정조대 관계없이 A를 사용한다
+	ELSE
+		TFLAG:67 = 2
+	ENDIF
+;원이 여자라면 V우선
+ELSE
+	;정조대가 있는 경우, A의 사용 가부를 본다
+	IF TEQUIP:속옷（아래） == 5
+		;A도 사용할 수 없으면, 정조대입상을 불러낸다
+		IF ABL:A감각 < 3 || TALENT:백버진
+			TFLAG:67 = 0
+		;A를 사용할 수 있으면 A를 사용한다
+		ELSE
+			TFLAG:67 = 2
+		ENDIF
+	;원래 V를 사용할 수 없는 경우는 A의 사용 가부를 본다
+	ELSEIF TALENT:처녀 || TALENT:재생처녀 || ABL:V감각 < 3
+		;A를 사용할 수 있으면 A를 사용한다
+		SIF ABL:A감각 >= 3 && !TALENT:백버진
+			TFLAG:67 = 2
+	;V를 사용할 수 있으므로 V를 사용한다
+	ELSE
+		TFLAG:67 = 1
+	ENDIF
+ENDIF
+
+;정조대의 경우, 이 이후의 부분은 읽지 않는다
+SIF TFLAG:67 == 0
+	RETURN 0
+
+;정액중독
+IF ABL:정액중독 == 0
+	A = 1
+ELSEIF ABL:정액중독 == 1
+	A = 1
+ELSEIF ABL:정액중독 == 2
+	A = 2
+ELSEIF ABL:정액중독 == 3
+	A = 2
+ELSEIF ABL:정액중독 == 4
+	A = 3
+ELSEIF ABL:정액중독 >= 5
+	A = 3
+ENDIF
+
+;섹스중독
+IF ABL:섹스중독 == 0
+	A += 1
+ELSEIF ABL:섹스중독 == 1
+	A += 2
+ELSEIF ABL:섹스중독 == 2
+	A += 3
+ELSEIF ABL:섹스중독 == 3
+	A += 4
+ELSEIF ABL:섹스중독 == 4
+	A += 5
+ELSEIF ABL:섹스중독 >= 5
+	A += 6
+ENDIF
+
+;음란구멍
+SIF TALENT:음란구멍
+	A += 2
+;항문광
+SIF TALENT:항문광
+	A += 2
+;섹스광
+SIF TALENT:섹스광
+	A += 3
+;헌신적
+SIF TALENT:헌신적
+	A += 1
+;발정기
+SIF TALENT:발정기
+	A += 1
+
+SIF A == 0
+	A = 1
+
+;A사용의 경우
+IF TFLAG:67 == 2
+	EXP:A경험 += A
+	EXP:성교경험 += A
+	;아이사이즈가 아니다
+	SIF TALENT:MASTER:아이사이즈 == 0
+		EXP:정액경험 += A/2
+	IF CFLAG:108 == 0
+		EXP:장내사정경험 += A/2
+		CFLAG:702 += A/2
+	ENDIF
+	JUEL:쾌A += A*100
+	JUEL:순종 += A*100
+	JUEL:굴복 += A*30
+	JUEL:습득 += A*40
+	PRINTFORML %EXPNAME:1%＋{A}
+	PRINTFORML %EXPNAME:4%＋{A}
+	;아이사이즈가 아니다
+	SIF TALENT:MASTER:아이사이즈 == 0
+		PRINTFORML %EXPNAME:20%＋{A/2}
+	SIF CFLAG:702 > 0 && CFLAG:108 == 0
+		PRINTFORML %EXPNAME:14%+{A/2}
+	PRINTFORML %PALAMNAME:2%의 구슬＋{A*20}
+	PRINTFORML %PALAMNAME:5%의 구슬＋{A*100}
+	PRINTFORML %PALAMNAME:7%의 구슬＋{A*30}
+	PRINTFORMW %PALAMNAME:8%의 구슬＋{A*40}
+	DRAWLINE
+ELSEIF TFLAG:67 == 1
+	EXP:V경험 += A
+	EXP:성교경험 += A
+	;아이사이즈가 아니다
+	SIF TALENT:MASTER:아이사이즈 == 0
+		EXP:정액경험 += A/2
+	IF CFLAG:108 == 0
+		EXP:질내사정경험 += A/2
+		CFLAG:102 += A/2
+	ENDIF
+	JUEL:쾌V += A*100
+	JUEL:순종 += A*100
+	JUEL:굴복 += A*30
+	JUEL:습득 += A*40
+	PRINTFORML %EXPNAME:0%＋{A}
+	PRINTFORML %EXPNAME:4%＋{A}
+	;아이사이즈가 아니다
+	SIF TALENT:MASTER:아이사이즈 == 0
+		PRINTFORML %EXPNAME:20%＋{A/2}
+	SIF CFLAG:102 > 0 && CFLAG:108 == 0
+		PRINTFORML %EXPNAME:5%＋{A/2}
+	PRINTFORML %PALAMNAME:1%의 구슬＋{A*20}
+	PRINTFORML %PALAMNAME:5%의 구슬＋{A*100}
+	PRINTFORML %PALAMNAME:7%의 구슬＋{A*30}
+	PRINTFORMW %PALAMNAME:8%의 구슬＋{A*40}
+	DRAWLINE
+ENDIF
+
+EXP:MASTER:성교경험 += A
+EXP:MASTER:삽입경험 += A
+
+
+RETURN 0
+
+;-----------------------------------------------
+;아침 요리
+;-----------------------------------------------
+@SELF_MORNING_4
+DRAWLINE
+A = 0
+TFLAG:13 = 23
+CALL KOJO_MESSAGE_EVENT
+
+;요리기능
+IF ABL:요리기능 == 0
+	A = 1
+ELSEIF ABL:요리기능 == 1
+	A = 2
+ELSEIF ABL:요리기능 == 2
+	A = 3
+ELSEIF ABL:요리기능 == 3
+	A = 4
+ELSEIF ABL:요리기능 == 4
+	A = 5
+ELSEIF ABL:요리기능 >= 5
+	A = 6
+ENDIF
+
+;헌신적
+SIF TALENT:헌신적
+	A += 1
+
+SIF A == 0
+	A = 1
+
+EXP:애정경험 += A
+EXP:가사경험 += A
+JUEL:순종 += A*100
+JUEL:습득 += A*100
+
+PRINTFORML %EXPNAME:23%＋{A}
+PRINTFORML %EXPNAME:61%＋{A}
+PRINTFORML %PALAMNAME:5%의 구슬＋{A*100}
+PRINTFORML %PALAMNAME:8%의 구슬＋{A*100}
+
+	PRINTFORMW 
+
+DRAWLINE
+
+RETURN 0
+
+;-----------------------------------------------
+;아침풋잡
+;-----------------------------------------------
+@SELF_MORNING_5
+DRAWLINE
+A = 0
+
+;새드끼로 가산 Lv3로 1
+;원래 코코에 오는 시점에서 3있으므로 최저 1
+A += (ABL:새드끼 - 2)
+;도착적
+SIF TALENT:도착적
+	A += 1
+;새드
+SIF TALENT:새드
+	A += 2
+;소악마
+SIF TALENT:소악마
+	A += 1
+;주인이【마조】
+SIF  TALENT:MASTER:마조 == 1
+	A += 5
+;연모
+SIF TALENT:연모 || TALENT:친애
+	A += 1
+;음란
+SIF TALENT:음란
+	A += 2
+;창부
+SIF TALENT:창부
+	A += 4
+;반발는 3있으면 안돼
+SIF MARK:반발각인 >= 3
+	RETURN 0
+;조건을 채우지 않았다
+SIF A < 1
+	RETURN 0
+
+DRAWLINE
+
+
+;입상의 호출
+TFLAG:13 = 30
+CALL KOJO_MESSAGE_EVENT
+
+;남자의 경우
+IF MALE(TARGET)
+	EXP:가학쾌락경험 += A
+	PRINTFORML %CALLNAME%의 %EXPNAME:32%＋{A}
+	;주인도 남자라면, 게이경험가산
+	IF MALE(TARGET) && MALE(MASTER)
+		EXP:게이경험 += A
+		PRINTFORML %EXPNAME:41%＋{A}
+	ENDIF
+	;주인이아이사이즈가 아닐 때, 조교 대상으로정액경험, 주인에게사정경험추가
+	;주인에게고통쾌락경험추가
+	;습득, 욕정의 주획득
+	;아이사이즈가 아니다
+	IF TALENT:MASTER:아이사이즈 == 0
+		EXP:정액경험 += A/2
+		EXP:MASTER:사정경험 += A/2
+		;금욕 포인트 줄인다
+		CFLAG:MASTER:602 = 0
+		PRINTFORML %CALLNAME%의 %EXPNAME:20%＋{A/2}
+		PRINTFORML %CALLNAME:MASTER%의 %EXPNAME:3%＋{A/2}
+	ENDIF
+	EXP:MASTER:고통쾌락경험 += A/4
+	JUEL:욕정 += A*20
+	JUEL:습득 += A*70
+	PRINTFORML %CALLNAME:MASTER%의 %EXPNAME:30%＋{A/4}
+	PRINTFORML %PALAMNAME:6%의 구슬＋{A*20}
+	PRINTFORML %PALAMNAME:8%의 구슬＋{A*70}
+	DRAWLINE
+ELSE
+	EXP:가학쾌락경험 += A
+	PRINTFORML %CALLNAME%의 %EXPNAME:32%＋{A}
+	;주인도 여자라면, 레즈경험가산
+	IF  MALE(TARGET) == 0 && MALE(MASTER) == 0
+		EXP:레즈경험 += A
+		PRINTFORML %EXPNAME:40%＋{A}
+	ENDIF
+	;주인에게고통쾌락경험추가
+	;습득, 욕정의 주획득
+	EXP:MASTER:고통쾌락경험 += A/4
+	JUEL:욕정 += A*20
+	JUEL:습득 += A*70
+	PRINTFORML %CALLNAME:MASTER%의 %EXPNAME:30%＋{A/4}
+	PRINTFORML %PALAMNAME:6%의 구슬＋{A*20}
+	PRINTFORML %PALAMNAME:8%의 구슬＋{A*70}
+	DRAWLINE
+ENDIF
+RETURN 0
+
+
+;-----------------------------------------------
+;모닝 키스
+;-----------------------------------------------
+@SELF_MORNING_6
+DRAWLINE
+A = 0
+
+;순종＋봉사정신
+IF ABL:순종 + ABL:봉사정신 < 7
+	A = 1
+ELSEIF ABL:순종 + ABL:봉사정신 < 9
+	A = 2
+ELSE
+	A = 4
+ENDIF
+
+;헌신적
+SIF TALENT:헌신적
+	A += 1
+;친애
+SIF TALENT:친애
+	A += 2
+;상사상애
+SIF TALENT:상사상애
+	A += 4
+;반발각인가 있으면 안돼
+SIF MARK:반발각인 > 0
+	RETURN 0
+;조건을 채우지 않았다
+SIF A < 1
+	RETURN 0
+
+DRAWLINE
+
+;입상 호출
+TFLAG:13 = 31
+CALL KOJO_MESSAGE_EVENT
+
+;애정경험, 습득의 구슬, 순종의 주가산. 조교 대상과 주인이 남자끼리 or녀끼리라면 동성애자 or레즈경험도.
+EXP:애정경험 += A
+PRINTFORML %EXPNAME:23%＋{A}
+
+IF MALE(TARGET) && MALE(MASTER)
+	EXP:게이경험 += A
+	PRINTFORML %EXPNAME:41%＋{A}
+ELSEIF MALE(TARGET) == 0 && MALE(MASTER) == 0
+	EXP:레즈경험 += A
+	PRINTFORML %EXPNAME:40%＋{A}
+ENDIF
+
+JUEL:순종 += A*100
+JUEL:습득 += A*100
+PRINTFORML %PALAMNAME:5%의 구슬＋{A*100}
+PRINTFORML %PALAMNAME:8%의 구슬＋{A*100}
+RETURN 0
+
+
+;-----------------------------------------------
+;아침 목욕
+;-----------------------------------------------
+@MORNING_EVENT_7
+DRAWLINE
+A = 0
+;순종＋봉사정신
+IF ABL:순종 + ABL:봉사정신 < 7
+	A = 1
+ELSEIF ABL:순종 + ABL:봉사정신 < 9
+	A = 2
+ELSE
+	A = 4
+ENDIF
+
+;헌신적
+SIF TALENT:헌신적
+	A += 1
+;복종
+SIF TALENT:복종
+	A += 1
+;예속
+SIF TALENT:예속
+	A += 2
+;반발각인가 있으면 안돼
+SIF MARK:반발각인 > 0
+	RETURN 0
+;조건을 채우지 않았다
+SIF A < 1
+	RETURN 0
+
+;입상 호출
+TFLAG:13 = 32
+CALL KOJO_MESSAGE_EVENT
+
+;애정경험, 습득의 구슬, 순종의 주가산. 조교 대상과 주인이 남자끼리 or녀끼리라면 동성애자 or레즈경험도.
+EXP:애정경험 += A
+PRINTFORML %EXPNAME:23%＋{A}
+
+IF MALE(TARGET) && MALE(MASTER)
+	EXP:게이경험 += A
+	PRINTFORML %EXPNAME:41%＋{A}
+ELSEIF MALE(TARGET) == 0 && MALE(MASTER) == 0
+	EXP:레즈경험 += A
+	PRINTFORML %EXPNAME:40%＋{A}
+ENDIF
+
+JUEL:순종 += A*100
+JUEL:습득 += A*100
+PRINTFORML %PALAMNAME:5%의 구슬＋{A*100}
+PRINTFORML %PALAMNAME:8%의 구슬＋{A*100}
+RETURN 0
+
+
+;-----------------------------------------------
+;아침의 3P
+;-----------------------------------------------
+@MORNING_EVENT_8
+DRAWLINE
+A = 0
+;노예와 조수의욕망와 동성애자 or레즈중독를 가산해 평균화
+IF MALE(TARGET) && MALE(ASSI)
+	A += (ABL:욕망+ABL:게이중독+ABL:ASSI:욕망+ABL:ASSI:게이중독)/4
+ELSEIF MALE(TARGET) == 0 && MALE(ASSI) == 0
+	A += (ABL:욕망+ABL:레즈중독+ABL:ASSI:욕망+ABL:ASSI:레즈중독)/4
+ENDIF
+;음란
+SIF TALENT:음란
+	A += 2
+SIF TALENT:ASSI:음란
+	A += 2
+;창부
+SIF TALENT:창부
+	A += 4
+SIF TALENT:ASSI:창부
+	A += 4
+;헌신적
+SIF TALENT:헌신적
+	A += 1
+SIF TALENT:ASSI:헌신적
+	A += 1
+;친애
+SIF TALENT:친애
+	A += 1
+SIF TALENT:ASSI:친애
+	A += 1
+;상사상애
+SIF TALENT:상사상애
+	A += 1
+SIF TALENT:ASSI:상사상애
+	A += 1
+;발정기
+SIF TALENT:발정기
+	A += 1
+SIF TALENT:ASSI:발정기
+	A += 1
+;조수가고무적
+SIF TALENT:ASSI:고무적
+	A += 1
+;반발각인 있어
+SIF MARK:반발각인
+	A -= MARK:반발각인
+SIF MARK:ASSI:반발각인
+	A -= MARK:ASSI:반발각인
+;반발는 3있으면 안돼
+SIF MARK:반발각인 >= 3
+	RETURN 0
+SIF MARK:ASSI:반발각인 >= 3
+	RETURN 0
+;조건을 채우지 않았다
+SIF A < 1
+	RETURN 0
+;A = 1의 경우는 처리의 형편상 서비스한다
+SIF A == 1
+	A = 2
+
+DRAWLINE
+
+;입상의 호출
+TFLAG:13 = 33
+CALL KOJO_MESSAGE_EVENT
+
+WAIT
+
+;습득, 순종, 욕정의 구슬 게이경험(레즈경험)
+JUEL:순종 += A*110
+JUEL:욕정 += A*150
+JUEL:습득 += A*80
+JUEL:ASSI:순종 += A*110
+JUEL:ASSI:욕정 += A*150
+JUEL:ASSI:습득 += A*80
+JUEL:MASTER:순종 += A*110
+JUEL:MASTER:욕정 += A*150
+JUEL:MASTER:습득 += A*80
+;순종의 구슬
+PRINTFORML 3명의 %PALAMNAME:5%의 구슬＋{A*110}
+;욕정의 구슬
+PRINTFORML 3명의 %PALAMNAME:6%의 구슬＋{A*150}
+;습득의 구슬
+PRINTFORML 3명의 %PALAMNAME:8%의 구슬＋{A*80}
+
+;남자 3 P의 경우
+IF MALE(TARGET)
+	EXP:게이경험 += A	
+	EXP:ASSI:게이경험 += A
+	EXP:MASTER:게이경험 += A
+	;게이경험
+	PRINTFORML 3명의 %EXPNAME:41%＋{A}
+;여자 3 P의 경우
+ELSEIF MALE(TARGET) == 0
+	EXP:레즈경험 += A
+	EXP:ASSI:레즈경험 += A
+	EXP:MASTER:레즈경험 += A
+	;레즈경험
+	PRINTFORML 3명의 %EXPNAME:40%＋{A}
+ENDIF
+
+PRINTL 
+;사정경험 정액경험
+;주인이사정
+IF ABLE_SHOOT(MASTER) == 1
+	PRINTFORML %CALLNAME:MASTER%에 %EXPNAME:3%＋{A}
+	;금욕 포인트를 줄인다
+	CFLAG:MASTER:602 = 0
+	;메인이사정
+	IF ABLE_SHOOT(TARGET) == 1
+		PRINTFORML %CALLNAME%에 %EXPNAME:3%＋{A}
+		;금욕 포인트를 줄인다
+		CFLAG:602 = 0
+		;서브가사정
+		IF ABLE_SHOOT(ASSI) == 1
+			PRINTFORML %CALLNAME:ASSI%에 %EXPNAME:3%＋{A}
+			;금욕 포인트를 줄인다
+			CFLAG:ASSI:602 = 0
+		ENDIF
+		;주인 이외의 누군가가사정 하고 있지 않으면 주인에게정액경험가 붙지 않는다
+		PRINTFORML %CALLNAME:MASTER%에 %EXPNAME:20%＋{A*2}
+		EXP:MASTER:정액경험 += A*2
+	ENDIF
+	PRINTFORML %CALLNAME%에 %EXPNAME:20%＋{A*2}
+	PRINTFORML %CALLNAME:ASSI%에 %EXPNAME:20%＋{A*2}
+	EXP:정액경험 += A*2
+	EXP:ASSI:정액경험 += A*2
+;메인이사정
+ELSEIF ABLE_SHOOT(MASTER) == 1
+	PRINTFORML %CALLNAME%에 %EXPNAME:3%＋{A}
+	;금욕 포인트를 줄인다
+	CFLAG:602 = 0
+	;서브가사정
+	IF ABLE_SHOOT(ASSI) == 1
+		PRINTFORML %CALLNAME:ASSI%에 %EXPNAME:3%＋{A}
+		;금욕 포인트를 줄인다
+		CFLAG:ASSI:602 = 0
+		;메인 이외의 누군가가사정 하고 있지 않으면 메인에정액경험가 붙지 않는다
+		PRINTFORML %CALLNAME%에 %EXPNAME:20%＋{A*2}
+		EXP:MASTER:정액경험 += A*2
+	ENDIF
+	PRINTFORML %CALLNAME:MASTER%에 %EXPNAME:20%＋{A*2}
+	PRINTFORML %CALLNAME:ASSI%에 %EXPNAME:20%＋{A*2}
+	EXP:MASTER:정액경험 += A*2
+	EXP:ASSI:정액경험 += A*2
+;서브가사정
+ELSEIF ABLE_SHOOT(ASSI) == 1
+	PRINTFORML %CALLNAME:ASSI%에 %EXPNAME:3%＋{A}
+	;금욕 포인트를 줄인다
+	CFLAG:ASSI:602 = 0
+	PRINTFORML %CALLNAME%에 %EXPNAME:20%＋{A*2}
+	PRINTFORML %CALLNAME:MASTER%에 %EXPNAME:20%＋{A*2}
+	EXP:정액경험 += A*2
+	EXP:MASTER:정액경험 += A*2
+ENDIF
+
+DRAWLINE
+WAIT
+RETURN 0
+
+;-----------------------------------------------
+;조음뇨
+;-----------------------------------------------
+@SELF_MORNING_9
+DRAWLINE
+A = 0
+TFLAG:13 = 34
+CALL KOJO_MESSAGE_EVENT
+
+;스캇경험
+IF EXP:음뇨경험 <= 35
+	A = 0
+ELSEIF EXP:음뇨경험 <= 42
+	A = 1
+ELSEIF EXP:음뇨경험 <= 50
+	A = 2
+ELSE
+	A = 3
+ENDIF
+
+;마조끼＋봉사정신
+IF ABL:마조끼 + ABL:봉사정신 < 7
+	A += 0
+ELSEIF ABL:마조끼 + ABL:봉사정신 < 10
+	A += 1
+ELSE
+	A += 2
+ENDIF
+
+;악취둔감 더러움무시
+SIF TALENT:악취둔감 || TALENT:더러움무시
+	A += 1
+;악취민감
+SIF TALENT:악취민감
+	A -= 1
+;헌신적
+SIF TALENT:헌신적
+	A += 1
+
+SIF A == 0
+	A = 1
+
+EXP:펠라경험 += A
+;아이사이즈가 아니다
+SIF TALENT:MASTER:아이사이즈 == 0
+	EXP:정액경험 += A/2
+EXP:스캇경험 += A
+EXP:음뇨경험 += A
+JUEL:순종 += A*100
+JUEL:굴복 += A*30
+JUEL:습득 += A*40
+PRINTFORML %EXPNAME:22%＋{A}
+;아이사이즈가 아니다
+SIF TALENT:MASTER:아이사이즈 == 0
+	PRINTFORML %EXPNAME:20%＋{A/2}
+PRINTFORML %EXPNAME:33%＋{A}
+PRINTFORML %PALAMNAME:5%의 구슬＋{A*100}
+PRINTFORML %PALAMNAME:7%의 구슬＋{A*30}
+PRINTFORMW %PALAMNAME:8%의 구슬＋{A*40}
+DRAWLINE
+
+WAIT
+RETURN 0
+
+
+;-------------------------------------------------
+;조교후에 일어나는 이벤트
+;-------------------------------------------------
+@SELF_CHECK
+;조교후의 연장전. 주인수에 분기 있어
+;강정신약의 반동이 일어날 때는 무효
+;레즈비언 플레이는 조수와 노예의 러브러브인 것으로 남성판은 백합 플레이적인 이미지. 현재 동성 전용
+;조교후섹스는 주인이 불끈불끈 해 노예 덮치는 경우.
+
+;virgin 판정(일단백버진, 동정도 승손에 잃지 않도록 해 보았다)
+V = 0
+SIF TALENT:처녀 || TALENT:처녀 || TALENT:백버진 || TALENT:MASTER:동정
+	V = 1
+;주인 virgin 판정
+M = 0
+SIF TALENT:MASTER:처녀 || TALENT:MASTER:재생처녀 || TALENT:MASTER:백버진 || TALENT:동정
+	M = 1
+;주인의 정력 판정
+P = 0
+SIF CFLAG:MASTER:11 && PENIS(MASTER)
+	P = 1
+;노예의 정력 판정
+S = 0
+SIF CFLAG:TARGET:11 && PENIS(TARGET)
+	S = 1
+;이벤트 캔슬 플래그가 서있는 경우는 종료
+SIF CFLAG:42
+	RETURN 0
+;강정신약의 반동이 없는＆체력 500 이상＆기력 1 이상＆총절정 10 이하＆욕정PALAMLV4 이상
+IF (TFLAG:44 + TFLAG:45 + TFLAG:46 + TFLAG:47) == 0 && BASE:체력 >= 500 && BASE:기력 > 0 && PALAM:욕정 >= PALAMLV:4 && (EX:0 + EX:1 + EX:2 + EX:3 + EX:4 + EX:5 + EX:13 + EX:40) <= 10
+	IF (TALENT:연모 || TALENT:친애 || TALENT:음란 || TALENT:복종 || TALENT:창부 || TALENT:예속 || ABL:자위중독 > 2) && !RAND:3
+		CALL AFTER_S_CHECK
+		RETURN 0
+	ELSEIF RAND:8 <= ABL:욕망
+		RETURN 0
+	ENDIF
+	;갈대가 있는, 노예와 조수의 사이가 좋은, 음란함락
+	IF ASSI >= 0 && (TALENT:음란 || TALENT:창부) && RELATION:A > 100
+			;레즈비언 플레이
+			CALL SELF_CHECK1
+			RETURN 0
+	;갈대가 없다
+	ELSEIF ABL:섹스중독 && ((TALENT:음란 || TALENT:창부) || ((TALENT:연모 || TALENT:복종 || TALENT:친애 || TALENT:예속) && ABL:욕망 >= 5))
+		;노예가공 또는 주인이수나오메가
+		IF TALENT:공 || TALENT:MASTER:수 || TALENT:MASTER:오메가
+			;주인 virgin 판정, 노예의 정력 판정
+			IF M == 0 && S
+				;조교후섹스수
+				CALL SELF_CHECK7
+				RETURN 0
+			ENDIF
+		ELSEIF TALENT:수 || TALENT:오메가 || TALENT:MASTER:공
+			IF V == 0 && P
+				;조교후섹스
+				CALL SELF_CHECK2
+				RETURN 0
+			ENDIF
+		ELSE
+			IF RAND:5 == 0 && M == 0 && S
+				;조교후섹스수
+				CALL SELF_CHECK7
+				RETURN 0
+			ELSEIF V == 0 && P
+				;조교후섹스
+				CALL SELF_CHECK2
+				RETURN 0
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+;강정신약의 반동
+IF (TFLAG:44 + TFLAG:45 + TFLAG:46 + TFLAG:47) > 0
+	CALL SELF_CHECK3
+ENDIF
+
+
+;레즈비언 플레이
+@SELF_CHECK1
+;이벤트입상 호출
+DRAWLINE
+TFLAG:13 = 4
+CALL KOJO_MESSAGE_EVENT
+
+;정조대로 가드
+SIF TEQUIP:속옷（아래） == 5
+	RETURN 0
+
+N = 1
+;게이중독
+IF MALE(TARGET)
+	IF ABL:게이중독 == 1
+		N += 1
+	ELSEIF ABL:게이중독 == 2
+		N += 2
+	ELSEIF ABL:게이중독 == 3
+		N += 3
+	ELSEIF ABL:게이중독 == 4
+		N += 5
+	ELSEIF ABL:게이중독 >= 5
+		N += 7
+	ENDIF
+	IF ABL:ASSI:게이중독 == 1
+		N += 1
+	ELSEIF ABL:ASSI:게이중독 == 2
+		N += 2
+	ELSEIF ABL:ASSI:게이중독 == 3
+		N += 5
+	ELSEIF ABL:ASSI:게이중독 == 4
+		N += 8
+	ELSEIF ABL:ASSI:게이중독 >= 5
+		N += 13
+	ENDIF
+;레즈중독
+ELSEIF MALE(TARGET) == 0
+	IF ABL:레즈중독 == 1
+		N += 1
+	ELSEIF ABL:레즈중독 == 2
+		N += 2
+	ELSEIF ABL:레즈중독 == 3
+		N += 3
+	ELSEIF ABL:레즈중독 == 4
+		N += 5
+	ELSEIF ABL:레즈중독 >= 5
+		N += 7
+	ENDIF
+	IF ABL:ASSI:레즈중독 == 1
+		N += 1
+	ELSEIF ABL:ASSI:레즈중독 == 2
+		N += 2
+	ELSEIF ABL:ASSI:레즈중독 == 3
+		N += 5
+	ELSEIF ABL:ASSI:레즈중독 == 4
+		N += 8
+	ELSEIF ABL:ASSI:레즈중독 >= 5
+		N += 13
+	ENDIF
+ENDIF
+;바이
+SIF TALENT:바이
+	N += 3
+;궁합 처리
+A = NO:ASSI
+N *= RELATION:A
+N /= 100
+
+IF MALE(TARGET)
+	PRINTFORML %EXPNAME:41%＋{N*20}
+	EXP:게이경험 += N*20
+ELSEIF MALE(TARGET) == 0
+	PRINTFORML %EXPNAME:40%＋{N*20}
+	EXP:레즈경험 += N*20
+ENDIF
+
+IF N*100*ABL:순종/500 > 0
+	PRINTFORML %EXPNAME:2%＋{N*100*ABL:순종/500}
+	EXP:절정경험 += N*100*ABL:순종/500
+ENDIF
+
+IF PENIS(TARGET) && PENIS(ASSI)
+	;아이사이즈가 아니다
+	SIF TALENT:아이사이즈 == 0
+		PRINTFORML %EXPNAME:3%＋{N}
+	;아이사이즈가 아니다
+	SIF TALENT:ASSI:아이사이즈 == 0
+		PRINTFORML %EXPNAME:20%＋{N}
+	PRINTFORML %EXPNAME:21%＋{N}
+	PRINTFORML %EXPNAME:22%＋{N}
+	PRINTFORML %PALAMNAME:7%의 구슬＋{N*100}
+	PRINTFORML %PALAMNAME:9%의 구슬＋{N*100}
+	;아이사이즈가 아니다
+	IF TALENT:아이사이즈 == 0
+		EXP:사정경험 += N
+		;금욕 포인트 줄인다
+		CFLAG:602 = 0
+		EXP:ASSI:정액경험 += N
+	ENDIF
+	;아이사이즈가 아니다
+	IF TALENT:ASSI:아이사이즈 == 0
+		EXP:정액경험 += N
+		EXP:ASSI:사정경험 += N
+		;금욕 포인트 줄인다
+		CFLAG:ASSI:602 = 0
+	ENDIF
+	EXP:봉사쾌락경험 += N
+	EXP:펠라경험 += N
+	JUEL:굴복 += N*100
+	JUEL:수치 += N*100
+	EXP:ASSI:봉사쾌락경험 += N
+	EXP:ASSI:펠라경험 += N
+	JUEL:ASSI:굴복 += N*100
+	JUEL:ASSI:수치 += N*100
+ELSEIF PENIS(ASSI)
+	;아이사이즈가 아니다
+	IF TALENT:ASSI:아이사이즈 == 0
+		PRINTFORML %EXPNAME:20%＋{N}
+	ENDIF
+	PRINTFORML %PALAMNAME:7%의 구슬＋{N*100*(ABL:기교+ABL:봉사정신)}
+	PRINTFORML %PALAMNAME:8%의 구슬＋{N*100*(ABL:기교+ABL:봉사정신)}
+	;아이사이즈가 아니다
+	IF TALENT:ASSI:아이사이즈 == 0
+		EXP:정액경험 += N
+		EXP:ASSI:사정경험 += N
+		;금욕 포인트 줄인다
+		CFLAG:ASSI:602 = 0
+	ENDIF
+	JUEL:굴복 += N*100*(ABL:기교+ABL:봉사정신)
+	JUEL:습득 += N*100*(ABL:기교+ABL:봉사정신)
+	JUEL:ASSI:굴복 += N*100*(ABL:기교+ABL:봉사정신)
+	JUEL:ASSI:습득 += N*100*(ABL:기교+ABL:봉사정신)
+ELSEIF PENIS(TARGET)
+	;아이사이즈가 아니다
+	SIF TALENT:아이사이즈 == 0
+		PRINTFORML %EXPNAME:3%＋{N}
+	PRINTFORML %PALAMNAME:9%의 구슬＋{N*100}
+	;아이사이즈가 아니다
+	IF TALENT:아이사이즈 == 0
+		EXP:사정경험 += N
+		EXP:ASSI:정액경험 += N
+		;금욕 포인트 줄인다
+		CFLAG:602 = 0
+	ENDIF
+	JUEL:수치 += N*100
+	JUEL:ASSI:수치 += N*100
+ELSE
+	PRINTFORML %PALAMNAME:7%의 구슬＋{N*50*(ABL:기교+ABL:봉사정신)}
+	PRINTFORML %PALAMNAME:8%의 구슬＋{N*50*(ABL:기교+ABL:봉사정신)}
+	JUEL:굴복 += N*50*(ABL:기교+ABL:봉사정신)
+	JUEL:습득 += N*50*(ABL:기교+ABL:봉사정신)
+	JUEL:ASSI:굴복 += N*50*(ABL:기교+ABL:봉사정신)
+	JUEL:ASSI:습득 += N*50*(ABL:기교+ABL:봉사정신)
+ENDIF
+
+IF TALENT:ASSI:새드
+	PRINTFORML %EXPNAME:30%＋{N}
+	PRINTFORML %CALLNAME:ASSI%의 %EXPNAME:32%＋{N}
+	IF N*100*ABL:노출벽 > 0
+		PRINTFORML %PALAMNAME:10%의 구슬＋{N*100*ABL:마조끼}
+		JUEL:고통 += N*100*ABL:마조끼
+	ENDIF
+		EXP:고통쾌락경험 += N
+		EXP:ASSI:가학쾌락경험 += N
+ENDIF
+
+PRINTFORML %PALAMNAME:0%의 구슬＋{N*100*ABL:순종}
+PRINTFORMW %PALAMNAME:6%의 구슬＋{N*200}
+JUEL:쾌C += N*100*ABL:순종
+JUEL:욕정 += N*200
+
+
+;조교후섹스
+@SELF_CHECK2
+;이벤트입상 호출
+DRAWLINE
+TFLAG:13 = 5
+CALL KOJO_MESSAGE_EVENT
+
+;정조대로 가드
+SIF TEQUIP:속옷（아래） == 5
+	RETURN 0
+
+S = 1
+
+;V가 없는, 혹은 V보다 A가 높은 경우 A감각을 본다
+IF VAGINA(TARGET) == 0 || (ABL:V감각 < ABL:A감각)
+	IF ABL:A감각 == 1
+		S += 1
+	ELSEIF ABL:A감각 == 2
+		S += 2
+	ELSEIF ABL:A감각 == 3
+		S += 3
+	ELSEIF ABL:A감각 == 4
+		S += 4
+	ELSEIF ABL:A감각 >= 5
+		S += 5
+	ENDIF
+ELSE
+;V감각
+	IF ABL:V감각 == 1
+		S += 1
+	ELSEIF ABL:V감각 == 2
+		S += 2
+	ELSEIF ABL:V감각 == 3
+		S += 3
+	ELSEIF ABL:V감각 == 4
+		S += 4
+	ELSEIF ABL:V감각 >= 5
+		S += 5
+	ENDIF
+ENDIF
+
+;욕망와봉사정신에 의한 보너스
+IF ABL:욕망 >= 5 && ABL:봉사정신 >= 5 && PALAM:욕정 >= PALAMLV:5
+	S += 3
+ELSEIF ABL:욕망 >= 4 && ABL:봉사정신 >= 4 && PALAM:욕정 >= PALAMLV:4
+	S += 2
+ELSEIF ABL:욕망 >= 3 && ABL:봉사정신 >= 3 && PALAM:욕정 >= PALAMLV:3
+	S += 1
+ENDIF
+
+;음란구멍
+SIF TALENT:음란구멍
+	S += 3
+;항문광
+SIF TALENT:항문광
+	S += 3
+;섹스광
+SIF TALENT:섹스광
+	S += 4
+;발정기
+SIF TALENT:발정기
+	S += 2
+
+;주인의사정제한
+SIF S > CFLAG:MASTER:11
+	S = CFLAG:MASTER:11
+
+EXP:성교경험 += S
+EXP:MASTER:삽입경험 += S
+IF CFLAG:108 == 0
+	IF VAGINA(TARGET) == 0 || (ABL:V감각 < ABL:A감각)
+		EXP:장내사정경험 += S/2
+		CFLAG:702 += S/2
+	ELSE
+		EXP:질내사정경험 += S/2
+		CFLAG:102 += S/2
+	ENDIF
+ENDIF
+;아이사이즈가 아니다
+SIF TALENT:MASTER:아이사이즈 == 0
+	EXP:정액경험 += S/2
+JUEL:순종 += S*200
+JUEL:욕정 += S*400
+CFLAG:MASTER:11 -= S
+
+PRINTFORML %EXPNAME:4%＋{S}
+IF VAGINA(TARGET) == 0 || (ABL:V감각 < ABL:A감각)
+	PRINTFORML %EXPNAME:1%＋{S}
+	EXP:A경험 += S
+ELSE
+	PRINTFORML %EXPNAME:0%＋{S}
+	EXP:V경험 += S
+ENDIF
+SIF CFLAG:702 > 0 && CFLAG:108 == 0
+	PRINTFORML %EXPNAME:14%＋{S/2}
+SIF CFLAG:102 > 0 && CFLAG:108 == 0
+	PRINTFORML %EXPNAME:5%＋{S/2}
+;아이사이즈가 아니다
+SIF TALENT:MASTER:아이사이즈 == 0
+	PRINTFORML %EXPNAME:20%＋{S/2}
+
+IF VAGINA(TARGET) == 0 || (ABL:V감각 < ABL:A감각)
+	PRINTFORML %PALAMNAME:2%의 구슬＋{S*400}
+	JUEL:쾌A += S*400
+ELSE
+	PRINTFORML %PALAMNAME:1%의 구슬＋{S*400}
+	JUEL:쾌V += S*400
+ENDIF
+
+PRINTFORML %PALAMNAME:5%의 구슬＋{S*200}
+PRINTFORMW %PALAMNAME:6%의 구슬＋{S*400}
+
+
+
+@SELF_CHECK3
+;이벤트입상 호출
+DRAWLINE
+TFLAG:13 = 6
+CALL KOJO_MESSAGE_EVENT
+
+;강정신약에 의한 절정 체크
+D = 0
+IF (TFLAG:44 + TFLAG:45 + TFLAG:46 + TFLAG:47) > 0
+	;강정신약의 효과가 남은 채로 조교를 종료했을 경우의 처리
+	;통상시의 효과를 재현 할 수 있을 것 같지 않기 때문에 동시 다중 절정 했다고 하는 처리로 변경
+	;D는 다중 절정의 종류를 나타낸다(1의 경우는○절정, 2의 경우는○＋△절정, 4의 경우는 사중 절정이 되고 있다)
+	SIF TFLAG:44
+		D += 1
+	SIF TFLAG:45
+		D += 1
+	SIF TFLAG:46
+		D += 1
+	SIF TFLAG:47
+		D += 1
+
+	C = D * TFLAG:44
+	V = D * TFLAG:45
+	A = D * TFLAG:46
+	B = D * TFLAG:47
+
+	PRINTFORML %EXPNAME:2%＋{TFLAG:44 + TFLAG:45 + TFLAG:46 + TFLAG:47}
+	SIF C > 0
+		PRINTFORML %PALAMNAME:0%의 구슬＋{C*1000}
+	SIF V > 0
+		PRINTFORML %PALAMNAME:1%의 구슬＋{V*1000}
+	SIF A > 0
+		PRINTFORML %PALAMNAME:2%의 구슬＋{A*1000}
+	SIF B > 0
+		PRINTFORML %PALAMNAME:3%의 구슬＋{B*1000}
+	PRINTW 
+	EXP:절정경험 += TFLAG:44 + TFLAG:45 + TFLAG:46 + TFLAG:47
+	JUEL:쾌C += C*1000
+	JUEL:쾌V += V*1000
+	JUEL:쾌A += A*1000
+	JUEL:쾌B += B*1000
+
+	;리셋트
+	TFLAG:44 = 0
+	TFLAG:45 = 0
+	TFLAG:46 = 0
+	TFLAG:47 = 0
+	TEQUIP:강정신약 = 0
+
+	;부작용으로체력가 500 미만에
+	SIF BASE:체력 >= 500
+		BASE:체력 = 499
+ENDIF
+
+
+;조교후섹스 주인수
+@SELF_CHECK7
+;이벤트입상 호출
+DRAWLINE
+TFLAG:13 = 5
+CALL KOJO_MESSAGE_EVENT
+
+;정조대로 가드
+SIF TEQUIP:속옷（아래） == 5
+	RETURN 0
+
+S = 1
+
+;C감각
+IF ABL:C감각 == 1
+	S += 1
+ELSEIF ABL:C감각 == 2
+	S += 2
+ELSEIF ABL:C감각 == 3
+	S += 3
+ELSEIF ABL:C감각 == 4
+	S += 4
+ELSEIF ABL:C감각 >= 5
+	S += 5
+ENDIF
+
+;섹스광
+SIF TALENT:섹스광
+	S += 4
+
+;노예의사정제한
+SIF S > CFLAG:TARGET:11
+	S = CFLAG:TARGET:11
+;성교경험·사정경험
+PRINTFORML %EXPNAME:4%＋{S}
+;아이사이즈가 아니다
+SIF TALENT:아이사이즈 == 0
+	PRINTFORML %EXPNAME:3%＋{S/2}
+PRINTFORML %PALAMNAME:0%의 구슬＋{S*400}
+PRINTFORML %PALAMNAME:5%의 구슬＋{S*400}
+PRINTFORMW %PALAMNAME:6%의 구슬＋{S*400}
+EXP:성교경험 += S
+EXP:삽입경험 += S
+;아이사이즈가 아니다
+IF TALENT:아이사이즈 == 0
+	EXP:사정경험 += S/2
+	;금욕 포인트 줄인다
+	CFLAG:602 = 0
+ENDIF
+JUEL:쾌C += S*400
+JUEL:순종 += S*400
+JUEL:욕정 += S*400
+CFLAG:TARGET:11 -= S
+;주인에게성교경험
+PRINTFORML %CALLNAME:MASTER%에 %EXPNAME:4%＋{S}
+EXP:MASTER:성교경험 += S
+;주인에게 V가 있어 A능력보다 V능력이 높고, 노예가아이사이즈가 아닐 때질내사정경험
+IF TALENT:아이사이즈 == 0 && VAGINA(MASTER) && (ABL:V감각 >= ABL:A감각)
+	PRINTFORML %CALLNAME:MASTER%에 %EXPNAME:5%＋{S/2}
+	EXP:MASTER:질내사정경험 += S/2
+	CFLAG:MASTER:104 += S/2
+;노예가아이사이즈가 아닐 때장내사정경험
+ELSEIF TALENT:아이사이즈 == 0
+	PRINTFORML %CALLNAME:MASTER%에 %EXPNAME:14%＋{S/2}
+	EXP:MASTER:장내사정경험 += S/2
+	CFLAG:MASTER:704 += S/2
+ENDIF
+PRINTW 
+
+
+@AFTER_S_CHECK
+;자위체크  ---------------------------------09/10/09
+;입상 플래그
+TFLAG:13 = 8
+CALL KOJO_MESSAGE_EVENT
+;정조대로 가드
+IF TEQUIP:속옷（아래） == 5
+	RETURN 0
+ELSE
+
+	;주변화량을 기록
+	TFLAG:500 = JUEL:쾌C
+	TFLAG:501 = JUEL:쾌V
+	TFLAG:502 = JUEL:쾌A
+	TFLAG:503 = JUEL:쾌B
+	TFLAG:504 = JUEL:윤활
+	TFLAG:505 = JUEL:순종
+	TFLAG:506 = JUEL:욕정
+	TFLAG:507 = JUEL:굴복
+	TFLAG:508 = JUEL:습득
+	TFLAG:509 = JUEL:수치
+	TFLAG:510 = JUEL:고통
+	TFLAG:511 = JUEL:공포
+	TFLAG:512 = JUEL:반감
+	TFLAG:513 = JUEL:불쾌
+	TFLAG:514 = JUEL:억울
+	TFLAG:515 = JUEL:부정
+
+	;경험 변화량도 기록
+	TFLAG:520 = EXP:V경험
+	TFLAG:521 = EXP:A경험
+	TFLAG:522 = EXP:사정경험
+	TFLAG:523 = EXP:자위경험
+	TFLAG:524 = EXP:조교자위경험
+	TFLAG:525 = EXP:정액경험
+	TFLAG:526 = EXP:분유경험
+
+	A = 0
+	;자위중독에 의한 보정
+	IF ABL:자위중독 == 1
+		A = 1
+	ELSEIF ABL:자위중독 == 2
+		A = 2
+	ELSEIF ABL:자위중독 == 3
+		A = 4
+	ELSEIF ABL:자위중독 == 4
+		A = 6
+	ELSEIF ABL:자위중독 == 5
+		A = 9
+	ELSEIF ABL:자위중독 > 5
+		A = ABL:자위중독 * 2 - 1
+	ENDIF
+	;욕망L4 & C감각 L4이상 & 욕정가 일정치를 넘었을 경우
+	IF ABL:욕망 == 4 && ABL:C감각 >= 4 && PALAM:욕정 >= PALAMLV:4
+		A += 1
+	;욕망L5 & C감각 L4이상 & 욕정가 일정치를 넘었을 경우
+	ELSEIF ABL:욕망 >= 5 && ABL:C감각 >= 4 && PALAM:욕정 >= PALAMLV:4
+		A += 2
+	ENDIF
+	;자위하기쉬움
+	IF TALENT:자위하기쉬움
+		A *= 2
+		;욕망L3 & C감각 L3이상 & 욕정가 일정치를 넘었을 경우
+		SIF ABL:욕망 == 3 && ABL:C감각 >= 3 && PALAM:욕정 >= PALAMLV:3
+			A += 1
+	ENDIF
+	
+	;발정기 & C감각 L3이상 & 욕정가 일정치를 넘었을 경우
+	SIF TALENT:발정기 && ABL:C감각 >= 3 && PALAM:욕정 >= PALAMLV:3
+		A += 2
+
+	;소질 「쾌감을부정」가 있으면자위회수가 감소
+	SIF TALENT:쾌감을부정
+		A -= 2
+		
+	;자위회수가 0이상의 처리
+	IF A > 0
+	;조교후자위입상의 분기 플래그로서 이용해 주세요
+	;할 수 있으면 전용 함수나 플래그 추가 추천
+	Z = 0
+		;쾌감에솔직, 쾌감을부정, 음란화
+		SIF TALENT:쾌감에솔직 && A
+			A += 1
+		SIF TALENT:항문광 && A
+			A += 1
+		SIF TALENT:음란구멍 && A
+			A += 1
+			
+		;미약
+		SIF TEQUIP:미약
+			A += 1
+
+		;조수가고무적
+		IF ASSI >= 0
+			SIF TALENT:ASSI:고무적
+			A += 1
+		ENDIF
+		
+		;계산만을 실시해, 결과를 표시하지 않는다
+		EXP:자위경험 += A
+		JUEL:쾌C += A*500
+		;전에 찔러 넣었다
+		IF TEQUIP:바이브
+			JUEL:쾌V += A*400
+			EXP:V경험 += A*2
+		ENDIF
+		;후에 찔러 넣었다
+		IF TEQUIP:애널바이브
+			JUEL:쾌A += A*400
+			EXP:A경험 += A*2
+		ENDIF
+			
+		JUEL:윤활 += A*100
+		JUEL:순종 += A*250
+		JUEL:억울 += A*300
+		;페니스가 있는, 아이사이즈가 아니면사정경험도 상승
+		IF PENIS(TARGET) && TALENT:아이사이즈 == 0
+			EXP:사정경험  += A / 2
+			;금욕 포인트 줄인다
+			CFLAG:602 = 0
+		ENDIF
+		;모유체질라면분유경험도 상승
+		SIF TALENT:모유체질
+			EXP:분유경험 += A / 2
+
+		;먼저 들키고 판정
+
+		;자위회수가 그대로 발견 확률
+		C = A
+
+		;노출벽+마조+자위중독+기교
+		C += (ABL:노출벽 + ABL:마조끼 + ABL:자위중독 + ABL:기교) / 2
+
+		;조수가고무적라면 인내가 효과가 없게 되어 발견되기 쉽다
+		IF ASSI >= 0
+			IF TALENT:ASSI:고무적
+				C += 5
+				
+				;그 상태로미약를 번창해지고 있으면 한층 더 발견되기 쉬워진다
+				SIF TEQUIP:미약
+					C += 5
+			ENDIF
+		ENDIF
+
+		;A민감 혹은항문광로, 애널바이브가 박힌 채라면 발견되기 쉬워진다
+		IF TEQUIP:애널바이브 && (TALENT:A민감 || TALENT:항문광)
+			C += 5
+			
+			;전부라고 한층 더 소리가 커져, 주위에도 깨달을 수 없게 된다
+			SIF TEQUIP:애널바이브 && TALENT:A민감 && TALENT:항문광
+				C += 5
+		ENDIF
+		
+		;V민감 혹은음란구멍로, 바이브가 박힌 채라면 발견되기 쉬워진다
+		IF TEQUIP:바이브 && (TALENT:V민감 || TALENT:음란구멍)
+			C += 5
+			
+			;전부라고 한층 더 소리가 커져, 주위에도 깨달을 수 없게 된다
+			SIF TEQUIP:바이브 && TALENT:V민감 && TALENT:음란구멍
+				C += 5
+		ENDIF
+		
+		;양쪽 모두 찔리고 있어, AV어느 쪽인지가 민감, 혹은항문광나음란구멍라면 한층 더 깨달을 수 없습니다
+		SIF TEQUIP:바이브 && TEQUIP:애널바이브 && (TALENT:V민감 || TALENT:A민감 || TALENT:항문광 || TALENT:음란구멍)
+			C += 5
+		
+		;겁쟁이라고 발각되는 것을 무서워해 소리나 소리도 작아진다
+		SIF TALENT:겁쟁이
+			C -= 10
+		
+		
+		;쾌감에솔직, 수치심없음, 해방라면솔직함에 소리를 높이므로 발견되기 쉽다
+		SIF TALENT:해방 || TALENT:수치심없음 || TALENT:쾌감에솔직
+			C += 5
+
+		;미약를 사용하는·발정기라면 발견되기 쉬워진다
+		SIF TEQUIP:미약 || TALENT:발정기
+			C += 15
+
+		;자제심, 억압, 저항, 쾌감을부정라고 소리를 억제하려고 하므로 발견 되기 어렵다
+		;다만 조수가고무적소유라면 그다지저항 할 수 없다
+		IF TALENT:자제심 || TALENT:억압 || TALENT:저항 || TALENT:쾌감을부정
+			C /= 2
+			IF ASSI == 0 
+				SIF TALENT:ASSI:고무적 
+					C += 5
+			ENDIF
+		ENDIF
+			
+		;부끄럼쟁이라고 소리가 작기 때문에 발견 되기 어렵다
+		;다만 조수가고무적소유라면(어디까지나) 약간기분이 느슨해진다.
+		IF TALENT:부끄럼쟁이
+			C /= 2
+			IF ASSI >= 0 
+				SIF TALENT:ASSI:고무적 
+					C += 3
+			ENDIF
+		ENDIF
+
+		;반발각인의 5배(최대 15)가 마이너스 보정
+		C -= MARK:반발각인 * 5
+
+		DRAWLINE
+
+		;발각되었다
+		IF RAND:100 < C
+			PRINTFORMW …
+			PRINTFORML %CALLNAME%의 방으로부터
+			;호감도가 높면(혹은연모루트)
+			SIF TALENT:연모 || TALENT:친애 || CFLAG:2 > 1000
+				PRINTFORM 안타깝고 %CALLNAME:MASTER%를 부른다
+			PRINTFORML 허덕이는 소리가 들린다…
+			PRINTFORML 발음을 죽여 방에 들어가면, 거기에는
+			;바이브와애널바이브(조교 종료시에 장비 하고 있는 경우)
+			IF TEQUIP:바이브 && TEQUIP:애널바이브
+				PRINT 2개의바이브를 양구멍에 뭄
+			ELSEIF TEQUIP:바이브
+				PRINT 바기나에극태의바이브를 뭄
+			ELSEIF TEQUIP:애널바이브
+				;항문광
+				IF TALENT:항문광
+					PRINTL 야무지지 못하게입를 반쯤 열려 있는 상태에 시키면서
+					PRINT 애널바이브를 뭄
+				ELSE
+					PRINT 애널바이브를 뭄
+				ENDIF
+			ENDIF
+			;후타나리(굳이 TALENT:남자, TALENT:쉬메일는 넣지 않는 저스티스, 답다)
+			SIF TALENT:반음반양 || TALENT:후타나리
+				PRINT 노장[怒張] 한페니스를 잡아당기고
+			PRINTFORML 한사람 쾌락에 빠지는%CALLNAME%의 모습이 있었다.
+			PRINTFORML 
+			PRINTFORML … 도취해 버린 눈동자가 %CALLNAME:MASTER%를 붙잡는다.
+			
+			;약점을 잡는다
+			IF TALENT:약점잡힘 == 0
+				Z = 1
+				;CALL KOJO_MESSAGE_EVENT
+				
+				PRINTFORML 소리가 되지 않는 비명을 올리는%CALLNAME%를 슬쩍 봐,
+				PRINTFORML %CALLNAME:MASTER%는 방을후로 했다.
+				PRINTFORML 
+				PRINTFORML %CALLNAME%의【약점잡힘】를 잡는 일에 성공했다.
+				TALENT:약점잡힘 = 1
+				
+				;반발각인가 2이상이라면 1개 내린다
+				IF MARK:반발각인 > 1
+					PRINTFORML 반발각인가 Lv{MARK:반발각인-1}이 되었다
+					MARK:반발각인 -= 1
+				ENDIF
+				
+			ELSE
+				;호감계 함락제(질투는 번호가 이식원의 바리안트로연모계 소질이었다만인 것으로 삭제) 
+				IF TALENT:연모 || TALENT:음란 || TALENT:복종 || TALENT:친애 || TALENT:창부 || TALENT:예속
+					;자위보다 정액을 좋아하면 구애에 가기 쉽다
+					IF ABL:정액중독 - ABL:자위중독 + 6 > RAND:12
+
+					;자위 발견되어후분기 랜덤 계획
+					;후랜덤 0-9 + A의 LV + A 민첩한들 3 + A광이라면+3다만 A경험이 50 미만·공라면 문답 무용으로 0
+					;전　 　랜덤 0-9 + V의 LV + V 민첩한들 3 + 음란구멍라면+3다만처녀·공라면 문답 무용으로 0
+					;정자 갖고 싶어하는 랜덤 0-9 + (정액중독 + 봉사) / 2
+					;그 이외 랜덤 0-9 + C의 LV + 자위중독 + C 민첩한들 3
+						
+						X = RAND:10 + ABL:A감각
+						SIF TALENT:A민감
+							X += 3
+						SIF TALENT:항문광
+							X += 3
+						SIF EXP:A경험 < 50
+							X = 0
+						SIF TALENT:공
+							X = 0
+
+						W = RAND:10 + ABL:V감각
+						SIF TALENT:V민감
+							W += 3
+						SIF TALENT:음란구멍
+							W += 3
+						SIF TALENT:처녀
+							W = 0
+						SIF TALENT:공
+							W = 0
+							
+						V = RAND:10 + ABL:정액중독 + (ABL:B감각 / 2)
+						U = RAND:10 + ABL:C감각 + (ABL:자위중독 / 2)
+						SIF TALENT:C민감
+							U += 3
+							
+						;PRINT A:
+						;PRINTV X
+						;PRINTL 　
+						
+						;PRINT V:
+						;PRINTV W
+						;PRINTL 　
+						
+						;PRINT 액:
+						;PRINTV V
+						;PRINTL 　
+						
+						;PRINT C:
+						;PRINTV U
+						;PRINTL 　
+						
+						IF TEQUIP:애널바이브 && TEQUIP:바이브
+							;두 구멍이었다
+							
+							Z = 3
+							;CALL KOJO_MESSAGE_EVENT
+
+							PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%를 요구해, 둔부를 내밀어,
+							PRINTFORML 다 야무지지 못하게 연 전후의 구멍을 스스로의 손가락으로 열려 있다
+							
+							EXP:V경험 += A/3
+							EXP:A경험 += 5*A/3
+							JUEL:쾌V += 400*A/2
+							JUEL:쾌A += 400*A/2
+							JUEL:윤활 += 300*A/2
+							JUEL:순종 += 400*A/2
+							JUEL:욕정 += 400*A/2
+							JUEL:습득 += 200*A/2
+							JUEL:억울 += 150*A/2
+							
+						
+						ELSEIF TEQUIP:애널바이브 || (X > 0 && (X >= W && X >= V && X >= U))
+							;자위 하고 있었던가 엉덩이 구멍의 승리
+							
+							Z = 2
+							;CALL KOJO_MESSAGE_EVENT
+							
+							PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%를 요구해, 둔부를 내밀어,
+							PRINTFORML 기대로 실룩거리는 항문을 스스로의 손가락으로 크게 열려 있다
+							
+							EXP:A경험 += 5*A/2
+							JUEL:쾌A += 400*A/2
+							JUEL:윤활 += 300*A/2
+							JUEL:순종 += 400*A/2
+							JUEL:욕정 += 300*A/2
+							JUEL:습득 += 200*A/2
+							JUEL:억울 += 150*A/2
+							
+						
+						ELSEIF TEQUIP:바이브 || (W > 0 && (W >= X && W >= V && W >= U))
+							;바이브였는지 V의 승리
+							
+							Z = 4
+							;CALL KOJO_MESSAGE_EVENT
+
+							PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%를 요구해, 천하게도 가랑이를 크게 벌어져,
+							PRINTFORML 애액 투성이의 질입를 스스로의 손가락으로 열려 있다
+							
+							EXP:V경험 += A/2
+							JUEL:쾌V += 400*A/2
+							JUEL:윤활 += 300*A/2
+							JUEL:순종 += 400*A/2
+							JUEL:욕정 += 300*A/2
+							JUEL:습득 += 200*A/2
+							JUEL:억울 += 150*A/2
+							
+						ELSEIF ABL:정액중독 > 3 && (V >= X && V >= W && V >= U)
+							;그 이외로정액중독 4 이상에서 정령의 승리(여기는 굳이 조건 힘듭니다. 『해 주었으면 한다』(뜻)이유이기 때문에)
+							
+							Z = 5
+							;CALL KOJO_MESSAGE_EVENT
+							
+							PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%의 정액을 요구해, 바짝 다가왔다
+							
+							;아이사이즈가 아니다
+							SIF TALENT:MASTER:아이사이즈 == 0
+								EXP:정액경험 += 6*A/2
+							JUEL:쾌C += 500*A/2
+							JUEL:윤활 += 400*A/2
+							JUEL:순종 += 400*A/2
+							JUEL:욕정 += 300*A/2
+							JUEL:습득 += 200*A/2
+							JUEL:억울 += 400*A/3
+							
+						ELSE
+							;그 이외, 범용
+							Z = 6
+							;CALL KOJO_MESSAGE_EVENT
+							
+							PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%를 요구해,
+							PRINTFORML 당신의 비밀스런 장소를 만지작거리면서 기대고 걸려 왔다
+							
+							JUEL:쾌C += 500*A/2
+							JUEL:윤활 += 300*A/2
+							JUEL:순종 += 250*A/2
+							JUEL:욕정 += 200*A/2
+							JUEL:습득 += 200*A/2
+							JUEL:억울 += 400*A/2
+							
+						ENDIF
+						
+						;페니스가 있는, 아이사이즈가 아니면사정경험도 상승
+						IF PENIS(TARGET) && TALENT:아이사이즈 == 0
+							EXP:사정경험  += A / 4
+							;금욕 포인트 줄인다
+							CFLAG:602 = 0
+						ENDIF
+						;모유체질라면분유경험도 상승
+						SIF TALENT:모유체질
+							EXP:분유경험 += A / 4
+						
+						PRINTL 　
+						PRINTFORML %CALLNAME:MASTER%는 거기에 응해 주기로 했다.
+						
+					ELSE
+						;자위가 좋아해
+						;(욕망 + 노출 + 마조가 11이상이나 해방나 수치심없음) 한편은 지뢰를 갖고 있지 않다
+						IF ((ABL:욕망 + ABL:봉사정신 + ABL:자위중독 > 10) || TALENT:해방 || TALENT:수치심없음) && TALENT:부끄럼쟁이 == 0
+						
+							Z = 7
+							;CALL KOJO_MESSAGE_EVENT
+						
+							PRINTFORML %CALLNAME%는 가랑이를 크게 벌어져, %CALLNAME:MASTER%에 봐 주세요라고 중얼거리면,
+							PRINTFORML 보다 큰 소리로 한사람 허덕이기 시작했다.
+							JUEL:욕정 += A*250/2
+							JUEL:습득 += A*300/2
+						ELSE
+						
+							Z = 8
+							;CALL KOJO_MESSAGE_EVENT
+						
+							PRINTFORML %CALLNAME%는 주뼛주뼛발를 열면, 수치로 얼굴을 새빨갛게 물들이면서도
+							PRINTFORML %CALLNAME:MASTER%로부터는 얼굴을 피하지 않고, 작은 계속 소리를 질렀다.
+							JUEL:욕정 += A*400/2
+							JUEL:습득 += A*600/2
+						ENDIF
+
+						EXP:자위경험 += A/2
+						EXP:조교자위경험 += A/2
+						JUEL:쾌C += 500*A/2
+						;전에 찔러 넣었다
+						IF TEQUIP:바이브
+							JUEL:쾌V += 400*A/2
+							EXP:V경험 +=  A
+						ENDIF
+						;후에 찔러 넣었다
+						IF TEQUIP:애널바이브
+							JUEL:쾌A += 400*A/2
+							EXP:A경험 += A 
+						ENDIF
+							
+						JUEL:윤활 += A*300/2
+						JUEL:순종 += A*250/2
+						JUEL:억울 += A*300/2
+						;페니스가 있는, 아이사이즈가 아니면사정경험도 상승
+						IF PENIS(TARGET) && TALENT:아이사이즈 == 0
+							EXP:사정경험  += A / 4
+							;금욕 포인트 줄인다
+							CFLAG:602 = 0
+						ENDIF
+						;모유체질라면분유경험도 상승
+						SIF TALENT:모유체질
+							EXP:분유경험 += A / 4
+					ENDIF
+				ELSE
+				
+					;굴복가 3이나반감가 1 이하
+					IF MARK:굴복각인 == 3 || MARK:반발각인 < 2
+						;자위보다 정액을 좋아하면 구애하러 가기 쉽다(뭐 안지 않지만)
+						IF ABL:정액중독 - ABL:자위중독 + 6 > RAND:12
+							Z = 9
+							;CALL KOJO_MESSAGE_EVENT
+						
+							PRINTFORML %CALLNAME%는 %CALLNAME:MASTER%를 요구해, 저보다, 달라붙어 왔다.
+							PRINTFORML %CALLNAME:MASTER%는 그손를 뿌리쳐, 방을 나간다.
+							PRINTFORML 　
+							PRINTFORML 열어젖혀진 채로의%CALLNAME%로부터, 다시 미성이 새기 시작했다.
+
+							EXP:자위경험 += A/2
+							JUEL:쾌C += 500*A/2
+							;전에 찔러 넣었다
+							IF TEQUIP:바이브
+								JUEL:쾌V += 400*A/2
+								EXP:V경험 += A
+							ENDIF
+							;후에 찔러 넣었다
+							IF TEQUIP:애널바이브
+								JUEL:쾌A += 400*A/2
+								EXP:A경험 += A
+							ENDIF
+								
+							JUEL:윤활 += A*300/2
+							JUEL:순종 += A*250/2
+							JUEL:욕정 += A*600/2
+							JUEL:습득 += A*400/2
+							JUEL:억울 += A*300/2
+							;페니스가 있는, 아이사이즈가 아니면사정경험도 상승
+							IF PENIS(TARGET) && TALENT:아이사이즈 == 0
+								EXP:사정경험  += A/4
+								;금욕 포인트 줄인다
+								CFLAG:602 = 0
+							ENDIF
+							;모유체질라면분유경험도 상승
+							SIF TALENT:모유체질
+								EXP:분유경험 += A/4
+						
+						ELSE
+						
+							;자위가 좋아해
+							
+							;(욕망 + 노출 + 마조가 11이상이나 해방나 수치심없음) 한편은 지뢰를 갖고 있지 않다
+							IF (ABL:욕망 + ABL:노출벽 + ABL:마조끼 > 10 || TALENT:수치심없음 || TALENT:쾌감에솔직) && TALENT:부끄럼쟁이 == 0
+							
+								Z = 10
+								;CALL KOJO_MESSAGE_EVENT
+							
+								PRINTFORML %CALLNAME%는 가랑이를 크게 벌어져, %CALLNAME:MASTER%에 봐 주세요간원 하면,
+								PRINTFORML 보다 큰 소리로 한사람 허덕이기 시작했다.
+								PRINTFORML 　
+								PRINTFORML 모처럼인 것으로 기분이 풀릴 때까지 시키기로 했다.
+								EXP:자위경험 += A/2
+								EXP:조교자위경험 += A/2
+								JUEL:욕정 += A*500/2
+								JUEL:습득 += A*300/2
+							ELSE
+							
+								Z = 11
+								;CALL KOJO_MESSAGE_EVENT
+								
+								PRINTFORML 그대로 계속하도록(듯이) 명하면,
+								PRINTFORML %CALLNAME%는 주뼛주뼛발를 열면, 수치로 얼굴을 새빨갛게 물들여,
+								PRINTFORML 눈물고인 눈이 되면서도, 손가락을 움직여, 작은 계속 소리를 질렀다.
+								EXP:자위경험 += A/2
+								EXP:조교자위경험 += A/2
+								JUEL:욕정 += A*600/2
+								JUEL:습득 += A*600/2
+							ENDIF
+							
+							JUEL:쾌C += 500*A/2
+							;전에 찔러 넣었다
+							IF TEQUIP:바이브
+								JUEL:쾌V += 400*A/2
+								EXP:V경험 += A*2/2
+							ENDIF
+							;후에 찔러 넣었다
+							IF TEQUIP:애널바이브
+								JUEL:쾌A += 400*A/2
+								EXP:A경험 += A
+							ENDIF
+								
+							JUEL:윤활 += A*300/2
+							JUEL:순종 += A*250/2
+							JUEL:억울 += A*300/2
+							;페니스가 있는, 아이사이즈가 아니면사정경험도 상승
+							IF PENIS(TARGET) && TALENT:아이사이즈 == 0
+								EXP:사정경험  += A / 4
+								;금욕 포인트 줄인다
+								CFLAG:602 = 0
+							ENDIF
+							;모유체질라면분유경험도 상승
+							SIF TALENT:모유체질
+								EXP:분유경험 += A / 4
+						ENDIF
+					ELSE
+						
+						Z = 14
+						;CALL KOJO_MESSAGE_EVENT
+					
+						PRINTFORML %CALLNAME%는 비명을 올리면, 이불에 기어들어 버렸지만,
+						PRINTFORML 그대로 계속하도록(듯이) 명하면,
+						PRINTFORML 수치와 회한에 얼굴을 비뚤어지게 하면서도, 손가락을 움직여, 계속 소리를 질렀다.
+						JUEL:욕정 += A*300/3
+						JUEL:습득 += A*300/3
+						EXP:자위경험 += A/3
+						EXP:조교자위경험 += A/3
+						JUEL:쾌C += 500*A/3
+						;전에 찔러 넣었다
+						IF TEQUIP:바이브
+							JUEL:쾌V += 400*A/3
+							EXP:V경험 += A
+						ENDIF
+						;후에 찔러 넣었다
+						IF TEQUIP:애널바이브
+							JUEL:쾌A += 400*A/3
+							EXP:A경험 += A
+						ENDIF
+							
+						JUEL:윤활 += A*300/3
+						JUEL:순종 += A*250/3
+						JUEL:억울 += A*300/3
+						;페니스가 있는, 아이사이즈가 아니면사정경험도 상승
+						IF PENIS(TARGET) && TALENT:아이사이즈 == 0
+							EXP:사정경험  += A / 6
+							;금욕 포인트 줄인다
+							CFLAG:602 = 0
+						ENDIF
+						;모유체질라면분유경험도 상승
+						SIF TALENT:모유체질
+							EXP:분유경험 += A / 6
+
+					ENDIF
+				
+				ENDIF
+				
+				PRINTW 　
+			
+			ENDIF
+			
+		ELSE
+		;발각되지 않았다
+		
+			;자위의 보고 순종+노출+마조-반발각인*2
+			B = ABL:순종 + ABL:노출벽 + ABL:마조끼 - ( MARK:반발각인 * 2)
+			;솔직함나유치라고 말하기 쉽다
+			SIF TALENT:솔직함 || TALENT:유치
+				B += 2
+				
+			PRINTL 　
+			;보고치가 10이상으로반발각인 2 미만이나약점잡힘가 있으면 보고한다
+			IF B >= 10 && (MARK:반발각인 < 2 || TALENT:약점잡힘)
+				Z = 0
+				;CALL KOJO_MESSAGE_EVENT
+				PRINTFORML 자위를 하면 보고하도록(듯이) 명령해 둔 곳,
+				PRINTV A
+				PRINTFORML 회자위를 한 것을%CALLNAME%는 보고해 왔다.
+				JUEL:욕정 += A*200
+			ELSE
+				PRINTFORM %CALLNAME:MASTER%가 방을 나간후,%CALLNAME%는
+				PRINTV A
+				PRINTFORML 회자위를 한 것 같다.
+			ENDIF
+		
+		ENDIF
+		
+		
+		PRINTW 
+		CALL PALAMCHANGE
+		
+		PRINTW 
+		RETURN 0
+	ENDIF
+ENDIF
+
+@PALAMCHANGE
+
+	SIF TFLAG:520 < EXP:V경험
+		PRINTFORML %EXPNAME:0%＋{EXP:V경험 - TFLAG:520}
+	SIF TFLAG:521 < EXP:A경험
+		PRINTFORML %EXPNAME:1%＋{EXP:A경험 - TFLAG:521}
+	IF TFLAG:522 < EXP:사정경험
+		PRINTFORML %EXPNAME:3%＋{EXP:사정경험 - TFLAG:522}
+		;금욕 포인트 줄인다
+		CFLAG:602 = 0
+	ENDIF
+	SIF TFLAG:523 < EXP:자위경험
+		PRINTFORML %EXPNAME:10%＋{EXP:자위경험 - TFLAG:523}
+	SIF TFLAG:524 < EXP:조교자위경험
+		PRINTFORML %EXPNAME:11%＋{EXP:조교자위경험 - TFLAG:524}
+	SIF TFLAG:525 < EXP:정액경험
+		PRINTFORML %EXPNAME:20%＋{EXP:정액경험 - TFLAG:525}
+	SIF TFLAG:526 < EXP:분유경험
+		PRINTFORML %EXPNAME:54%＋{EXP:분유경험 - TFLAG:526}
+
+	SIF TFLAG:500 < JUEL:쾌C
+		PRINTFORML %PALAMNAME:0%의 구슬＋{JUEL:쾌C - TFLAG:500}
+	SIF TFLAG:501 < JUEL:쾌V
+		PRINTFORML %PALAMNAME:1%의 구슬＋{JUEL:쾌V - TFLAG:501}
+	SIF TFLAG:502 < JUEL:쾌A
+		PRINTFORML %PALAMNAME:2%의 구슬＋{JUEL:쾌A - TFLAG:502}
+	SIF TFLAG:503 < JUEL:쾌B
+		PRINTFORML %PALAMNAME:3%의 구슬＋{JUEL:쾌B - TFLAG:503}
+	SIF TFLAG:504 < JUEL:윤활
+		PRINTFORML %PALAMNAME:4%의 구슬＋{JUEL:윤활 - TFLAG:504}
+	SIF TFLAG:505 < JUEL:순종
+		PRINTFORML %PALAMNAME:5%의 구슬＋{JUEL:순종 - TFLAG:505}
+	SIF TFLAG:506 < JUEL:욕정
+		PRINTFORML %PALAMNAME:6%의 구슬＋{JUEL:욕정 - TFLAG:506}
+	SIF TFLAG:507 < JUEL:굴복
+		PRINTFORML %PALAMNAME:7%의 구슬＋{JUEL:굴복 - TFLAG:507}
+	SIF TFLAG:508 < JUEL:습득
+		PRINTFORML %PALAMNAME:8%의 구슬＋{JUEL:습득 - TFLAG:508}
+	SIF TFLAG:509 < JUEL:수치
+		PRINTFORML %PALAMNAME:9%의 구슬＋{JUEL:수치 - TFLAG:509}
+	SIF TFLAG:510 < JUEL:고통
+		PRINTFORML %PALAMNAME:10%의 구슬＋{JUEL:고통 - TFLAG:510}
+	SIF TFLAG:511 < JUEL:공포
+		PRINTFORML %PALAMNAME:11%의 구슬＋{JUEL:공포 - TFLAG:511}
+	SIF TFLAG:512 < JUEL:반감
+		PRINTFORML %PALAMNAME:12%의 구슬＋{JUEL:반감 - TFLAG:512}
+	SIF TFLAG:513 < JUEL:불쾌
+		PRINTFORML %PALAMNAME:13%의 구슬＋{JUEL:불쾌 - TFLAG:513}
+	SIF TFLAG:514 < JUEL:억울
+		PRINTFORML %PALAMNAME:14%의 구슬＋{JUEL:억울 - TFLAG:514 }
+	SIF TFLAG:515 < JUEL:부정
+		PRINTFORML %PALAMNAME:100%의 구슬＋{JUEL:부정 - TFLAG:515}
+
+

@@ -1,0 +1,45 @@
+﻿;오메가관련의 이벤트(발정기 남체임신)
+;---------------------------------------------------------
+;사용 플래그
+;---------------------------------------------------------
+;CFLAG
+;700→발정기카운트
+		;1-15를 반복해 0은 되지 않는다
+		;카운트가 9이상 때 랜덤으로발정기에 들어간다
+		;카운트가 12이상 때 랜덤으로발정기가 끝난다
+		;카운트가 15이상 때 확정으로발정기가 끝난다
+
+;발정기와 통상기(?)의 일수를 카운트 한다
+;1날이 끝났다… 때에 카운트를 진행시킨다
+;ARG 캐릭터 등록 번호
+@ESTRUS_PERIOD_COUNT
+;현재의 조교 대상을 퇴피
+LOCAL = TARGET
+REPEAT CHARANUM
+	;오메가를 가지고 있지 않으면 종료
+	SIF TALENT:COUNT:오메가 == 0
+		CONTINUE
+
+	CFLAG:COUNT:700 += 1
+	
+	;발정기종료
+	IF (CFLAG:COUNT:700 >= 12 && TALENT:COUNT:발정기 && RAND:2 == 0) || (CFLAG:COUNT:700 >= 15 && TALENT:COUNT:발정기)
+		TALENT:COUNT:발정기 = 0
+		CFLAG:COUNT:700 = 1
+		TARGET = COUNT
+		TFLAG:13 = 79
+		CALL KOJO_MESSAGE_EVENT
+	ENDIF
+	
+	;발정기개시
+	IF (CFLAG:COUNT:700 >= 9 && TALENT:COUNT:발정기 == 0) && RAND:2 == 0
+		TALENT:COUNT:발정기 = 1
+		TARGET = COUNT
+		TFLAG:13 = 79
+		CALL KOJO_MESSAGE_EVENT
+	ENDIF
+	
+REND
+
+TARGET = LOCAL
+

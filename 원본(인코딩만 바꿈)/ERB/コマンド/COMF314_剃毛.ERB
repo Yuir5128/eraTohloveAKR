@@ -1,0 +1,147 @@
+﻿;-------------------------------------------------
+;剃毛
+;シチュエーション別コマンド
+;-------------------------------------------------
+@COM314
+
+PRINTL 剃毛
+STR:0 = 剃毛
+CALL KOJO_MESSAGE_COM
+
+;ストッキング脱がせる
+IF TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6
+	TEQUIP:特殊２ = 0
+	TEQUIP:特殊２ = 0
+ENDIF
+
+IF TALENT:パイパン == 0
+	PRINTL 
+	PRINTFORMW %CALLNAME%は[%TALENTNAME:118%]になった
+	TALENT:パイパン = 2
+ENDIF
+
+;毛が生えている場合はツルツルになる
+BASE:毛 = 0
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 5
+LOSEBASE:気力 += 100
+
+;恐れ、露出、屈従、逸脱、反発
+SOURCE:恐れ += 200
+SOURCE:露出 += 2000
+SOURCE:屈従 += 500
+SOURCE:逸脱 += 800
+SOURCE:反発 += 300
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 500
+;露出癖を見る
+IF ABL:露出癖 == 0
+	SOURCE:中毒充足 += 0
+	SOURCE:欲情 += 0
+ELSEIF ABL:露出癖 == 1
+	SOURCE:中毒充足 += 20
+	SOURCE:欲情 += 30
+ELSEIF ABL:露出癖 == 2
+	SOURCE:中毒充足 += 40
+	SOURCE:欲情 += 70
+ELSEIF ABL:露出癖 == 3
+	SOURCE:中毒充足 += 70
+	SOURCE:欲情 += 120
+ELSEIF ABL:露出癖 == 4
+	SOURCE:中毒充足 += 110
+	SOURCE:欲情 += 180
+ELSEIF ABL:露出癖 == 5
+	SOURCE:中毒充足 += 150
+	SOURCE:欲情 += 250
+ELSEIF ABL:露出癖 == 6
+	SOURCE:中毒充足 += 200
+	SOURCE:欲情 += 300
+ELSEIF ABL:露出癖 == 7
+	SOURCE:中毒充足 += 250
+	SOURCE:欲情 += 350
+ELSEIF ABL:露出癖 == 8
+	SOURCE:中毒充足 += 300
+	SOURCE:欲情 += 400
+ELSEIF ABL:露出癖 == 9
+	SOURCE:中毒充足 += 350
+	SOURCE:欲情 += 450
+ELSEIF ABL:露出癖 >= 10
+	SOURCE:中毒充足 += 500
+	SOURCE:欲情 += 500
+ENDIF
+;マゾっ気を見る
+IF ABL:マゾっ気 == 0
+	TIMES SOURCE:屈従 , 0.80
+	SOURCE:中毒充足 += 0
+	SOURCE:欲情 += 0
+ELSEIF ABL:マゾっ気 == 1
+	TIMES SOURCE:屈従 , 1.00
+	SOURCE:中毒充足 += 20
+	SOURCE:欲情 += 30
+ELSEIF ABL:マゾっ気 == 2
+	TIMES SOURCE:屈従 , 1.20
+	SOURCE:中毒充足 += 40
+	SOURCE:欲情 += 70
+ELSEIF ABL:マゾっ気 == 3
+	TIMES SOURCE:屈従 , 1.40
+	SOURCE:中毒充足 += 70
+	SOURCE:欲情 += 120
+ELSEIF ABL:マゾっ気 == 4
+	TIMES SOURCE:屈従 , 1.50
+	SOURCE:中毒充足 += 110
+	SOURCE:欲情 += 180
+ELSEIF ABL:マゾっ気 == 5
+	TIMES SOURCE:屈従 , 1.70
+	SOURCE:中毒充足 += 150
+	SOURCE:欲情 += 250
+ELSEIF ABL:マゾっ気 == 6
+	TIMES SOURCE:屈従 , 1.90
+	SOURCE:中毒充足 += 200
+	SOURCE:欲情 += 300
+ELSEIF ABL:マゾっ気 == 7
+	TIMES SOURCE:屈従 , 2.10
+	SOURCE:中毒充足 += 250
+	SOURCE:欲情 += 350
+ELSEIF ABL:マゾっ気 == 8
+	TIMES SOURCE:屈従 , 2.30
+	SOURCE:中毒充足 += 300
+	SOURCE:欲情 += 400
+ELSEIF ABL:マゾっ気 == 9
+	TIMES SOURCE:屈従 , 2.50
+	SOURCE:中毒充足 += 350
+	SOURCE:欲情 += 450
+ELSEIF ABL:マゾっ気 >= 10
+	TIMES SOURCE:屈従 , 3.00
+	SOURCE:中毒充足 += 500
+	SOURCE:欲情 += 500
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;ゲイ経験とか加算
+CALL COM_EXP(4)
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+;依存度補正値(服従で2、隷属で4）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 += 4
+ENDIF
+
+RETURN 1
+

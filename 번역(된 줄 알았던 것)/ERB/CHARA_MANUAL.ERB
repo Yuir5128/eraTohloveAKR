@@ -1,0 +1,827 @@
+﻿;캐릭터 구입시에 해설을 넣는다
+;ARG:0=구입 예정 캐릭터 고유 번호 ARG:1=
+@CHARA_MANUAL(ARG:0, ARG:1)
+PRINT 노예 번호 00
+SIF ARG < 10
+	PRINT 0
+PRINTV ARG 
+PRINTL 
+IF ARG == 0
+	PRINTFORML 【당신】
+	PRINTL 
+	PRINTFORML 당신.
+	PRINTFORML 이름으로부터 성별, 소질까지 커스터마이즈 할 수가 있다.
+	PRINTFORML 
+ELSE
+	IF ARG == 3
+		PRINTFORML 【미카즈키 무네치카】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 평안 시대의 도공, 산죠우 무네치카작의 칼.
+		PRINTFORML 천하 5검의 1개로, 그 중에서도 가장 아름다우면 평 된다.
+		PRINTFORML 도검남사로서의 모습도, 평안 귀족과 같이 우아함.
+		PRINTFORML 기가 크다고 하면 소문은 좋지만, 구극의 마이 페이스.
+		PRINTFORML 또 솔직한 인품 고로 자주(잘) 웃는다.
+		PRINTFORML 모두에 대해서 그릇이 크기 때문에, 조금 빠져 있도록(듯이)도 생각된다.
+		PRINTFORML 
+		PRINTFORML 주선을 되는 것을 좋아한다고 하는 만큼,
+		PRINTFORML 접할 수 있는 것에도 특히저항는 없는 것 같다.
+		PRINTFORML 이지만 그 반면, 기억에 관계해서는 미묘하다.
+	ELSEIF ARG == 5
+		PRINTFORML 【코기츠네마루】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 평안 시대의 도공, 산죠우 무네치카작의 칼.
+		PRINTFORML 곡식의 신 묘진의 원조에 의해 만들었다고 전해지는 칼.
+		PRINTFORML 명은 소여우이지만, 전혀 작지 않다.
+		PRINTFORML 작지는 않지만, 주로 상관해 받을 수 있는 것은 좋아.
+		PRINTFORML 
+		PRINTFORML 전도검남사중에서도, 특히 드문 천연의[동물귀]소유.
+		PRINTFORML 기본적으로솔직함로 접할 수 있는 것에도저항는 없지만,
+		PRINTFORML 짐승의 본능인지, 약간 공격적인 일면이 있는 것 같다.
+	ELSEIF ARG == 7
+		PRINTFORML 【이시키리마루】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 이시키리검전신사에 전해지는 보도인 대칼.
+		PRINTFORML 4자 넘치는 칼로, 신사 유래에 의하면 산죠우 무네치카작이라고 한다.
+		PRINTFORML 이시키리검전신사는 종기 치유의 신님으로서 유명해,
+		PRINTFORML 이시키리마루에도 그러한 효능이 있는 것 같다.
+		PRINTFORML 
+		PRINTFORML 몸집이 큰 체격으로체력가 높지만, 그 만큼 회복에 시간이 걸린다.
+		PRINTFORML 신사 생활이 길었다고 하는 만큼,
+		PRINTFORML 스스로를 규율할 방법에 뛰어난, 온화한 성격을 하고 있다.
+	ELSEIF ARG == 9
+		PRINTFORML 【이와토오시】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 무사시보 강자가 사용하고 있던 것으로 유명한 나기나타.
+		PRINTFORML 거대함에 두어 외를 누른다.
+		PRINTFORML 성격은 호방뇌락. 하지만 태생은 자주(잘), 풍취에는 물건이 있다.
+		PRINTFORML 작고 재빠른 것이 좋아해, 이마노츠루기를 귀여워하고 있다.
+		PRINTFORML 
+		PRINTFORML 보는 사람에게위압감을 준다, 매우 몸집이 큰 체격.
+		PRINTFORML 성장 속도는 늦고, 습득의 부분에 그 영향이 나타나고 있다.
+	ELSEIF ARG == 11
+		PRINTFORML 【이마노츠루기】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 평안 시대의 도공, 산죠우 무네치카작의 단도.
+		PRINTFORML 미나모토노 요시쓰네의 호신용 단도이며, 의경이 할복 한 칼이라고 말해지고 있다.
+		PRINTFORML 건강해 자주(잘) 뛰는, 건방짐인 안마의 코아마구.
+		PRINTFORML 장난꾸러기기분이 있는 표정이라고 날거나 뛰거나 자주(잘) 돌아다니는 그는,
+		PRINTFORML 함께 있는 것만으로, 주위의 공기를 밝게 한다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+	ELSEIF ARG == 13
+		PRINTFORML 【오오덴타 미츠요】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 천하 5검의 하나로, 미이케전태광세작의 칼.
+		PRINTFORML 동시대의 도검과는 작풍이 격절 하고 있어,
+		PRINTFORML 그 이질 다과등이나 머리맡에 두면 병도 낫는다고 여겨진 령도.
+		PRINTFORML 작은 새 따위의 동물이두려움라고 접근할 수 없을 만큼의 강한 영력을 가진다.
+		PRINTFORML 평상시는 엄중하게 창고에 치워지고 있던 정진정명[正眞正銘]의 순익 아들.
+	ELSEIF ARG == 15
+		PRINTFORML 【소하야노츠루기】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 무명이지만, 미이케전태광세작과 전해지는 칼.
+		PRINTFORML 사카우에 타무라 마로의 패도였다 「소하야의 검」(사카우에보검) 의 사본.
+		PRINTFORML 도쿠가와 이에야스가 소지해, 죽음후령도로서 함께 매장해졌다고 말해지고 있다.
+		PRINTFORML 강한 영력을 가지기 위해서(때문에) 길게 끝나지고 있던 것을 조금 원한을 품는다.
+	ELSEIF ARG == 17
+		PRINTFORML 【쥬즈마루 츠네츠구】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 천하 5검의 하나로, 아오에 츠네지작과의 설이 있는 칼.
+		PRINTFORML 가마쿠라 시대의 승려, 니치렌이 호신용으로서 소지하고 있었다고 전해져,
+		PRINTFORML (무늬)격에 염주가 감겨지고 있었던 것이 이름의 유래와도 되고 있다.
+		PRINTFORML 
+		PRINTFORML 그 유래로부터인가 불법에 따른 말투가 많다.
+		PRINTFORML 빌도록(듯이) 덮을 수 있었던 시선으로부터, 그 마음의 기미를 읽어 푸는 것은 어렵다.
+	ELSEIF ARG == 19
+		PRINTFORML 【닛카리 아오에】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 빗츄 아오에파의 도공·아오에정차의 작으로 여겨지는 오오와키 차이.
+		PRINTFORML 원래는 대칼이었기 때문인가, 다른 호신용 단도에 비해
+		PRINTFORML 외관, 성격 모두 어른스러워지고 있다.
+		PRINTFORML 명의 유래는, 에 빌리고와 웃는 여자의 유령을 새기고 이튿날 아침 보면,
+		PRINTFORML 실은 석탑을 두동강이로 하고 있었다고 하는 전설에 의한다.
+		PRINTFORML 
+		PRINTFORML 어쩐지 모든 의미로 위험한 대사가 많은 도검남사.
+		PRINTFORML 그러한 취미의 소유자인 것일까…?
+	ELSEIF ARG == 21
+		PRINTFORML 【오니마루 쿠니츠나】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 천하 5검의 하나로, 아와타입국강작의 칼. 귀신을 찾아, 주인을 찾아 방황하고 있던 영검.
+		PRINTFORML 꿈 속에서 신탁을 하거나 저절로 움직여 것을 자르거나와 영묘한 이야기를 가진다.
+		PRINTFORML 목적 이외에 관련되는 것을 싫어하지만, 감정이입도 하기 쉽다.
+	ELSEIF ARG == 23
+		PRINTFORML 【나키키츠네】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대의 도공, 아와타입쿠니요시작중칼.
+		PRINTFORML 아와타입파이지만, 토시로등과는 작자가 다르다.
+		PRINTFORML 수행의여우를 데리고 있어 좋아해 이외의 감정 표현의 대부분을여우가 실시한다.
+		PRINTFORML 그것을 봐 주위가 놀라는 것을 은밀하게 기뻐하고 있다.
+		PRINTFORML 
+		PRINTFORML 자신의 감정을 눌러 참고 있는 것은 아니고, 단지 그저
+		PRINTFORML 교제가 근심손인 만일 수 있는답다. 그렇지만 알기 힘들다.
+		PRINTFORML 수행의여우는 정말로 자주(잘) 말하지만, 본인은 기본적으로얌전함.
+	ELSEIF ARG == 25
+		PRINTFORML 【이치고히토후리】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 단도의 명손로 불리는 아와타입요시미츠작의, 유일한 칼.
+		PRINTFORML 원래는 현재보다 컸던 것을, 주요해 있던 도요토미 히데요시가,
+		PRINTFORML 스스로의 체격에 맞추어 마 올려 지금의 사이즈가 되었다.
+		PRINTFORML 한 번 타고 있기 (위해)때문에, 그 무렵의 기억이 없다.
+		PRINTFORML 
+		PRINTFORML 토시로등을 시작으로 하는 많은 남동생들의 좋은오빠.
+		PRINTFORML 돌보기를 좋아해, 인당의 좋은 성격은 매우인기가 있다.
+	ELSEIF ARG == 27
+		PRINTFORML 【나마즈오 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 호신용 단도.
+		PRINTFORML 원래는 소나기나타였지만, 호신용 단도로 마 올려졌다.
+		PRINTFORML 주와 함께 구워져 버린 것으로 일부 기억을 잃고 있지만,
+		PRINTFORML 과거는 되돌아 보지 않는다, 라고 곧은 성격을 하고 있다.
+		PRINTFORML 의사가 강하고, 주가 이번에야말로 구워지지 않게, 가끔 충고하는 일도.
+		PRINTFORML 
+		PRINTFORML 토시로 형제의 혼자서, 특히호네바미 토시로를 걱정하고 있다.
+	ELSEIF ARG == 29
+		PRINTFORML 【호네바미 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 호신용 단도.
+		PRINTFORML 원래는 나기나타였지만, 호신용 단도로 마 올려졌다.
+		PRINTFORML 한 번 자신의 몸을 불로 태우는 것이 되어, 대부분의 기억을 잃었다.
+		PRINTFORML 말수도 적지만, 근친이 되어 보살펴 준다
+		PRINTFORML 나마즈오 토시로의 일은 매우 신뢰하고 있다.
+		PRINTFORML 
+		PRINTFORML 토시로 형제의 혼자.
+	ELSEIF ARG == 31
+		PRINTFORML 【히라노 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 단도.
+		PRINTFORML 단도의 명물의 필두로 여겨진다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+		PRINTFORML 실천보다 경호나 수행원으로서의 경험이 긴 탓인지,
+		PRINTFORML 충성심에 두껍고, 헌신적인 성격.
+		PRINTFORML 같은 츠카사 시로 형제의, 마에다 토시로와 잘 닮은 용모를 하고 있다.
+	ELSEIF ARG == 33
+		PRINTFORML 【아츠시 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 단도.
+		PRINTFORML 칼날이 곧바로, 한편 두꺼운 것이 특징으로, 갑옷 안내로 불린다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+		PRINTFORML 다른 토시로 형제에 비하면, 약간 오빠 집합과 같지만,
+		PRINTFORML 성격은솔직함로호기심도 강하면 아직도아이인것 같기도 한다.
+	ELSEIF ARG == 35
+		PRINTFORML 【고토 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 단도.
+		PRINTFORML 후 후지 쇼우자부로우광차가 소지하고 있던 것으로부터 이름 붙여졌다고 여겨져
+		PRINTFORML 후에 오와리 토쿠가와가에 전해진다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+		PRINTFORML 토시로 형제중에서 신장은 큰 부류에 들어가지만, 좀 더 커지고 싶은 나이무렵.
+	ELSEIF ARG == 37
+		PRINTFORML 【시나노 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 단도.
+		PRINTFORML 토시로 형제의 혼자. 나가이 시나노 마모루 나오마사 소지로 있었던 것이 이름의 유래.
+		PRINTFORML 후에, 쇼나이번사카이가에 전래.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+		PRINTFORML 주의품에 들어가고 싶은, 보증수표의 귀동.
+		PRINTFORML 그러나, 무사하게 복귀는 했지만 한 번 도난에 있어 있거나 한다.
+	ELSEIF ARG == 39
+		PRINTFORML 【마에다 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 단도.
+		PRINTFORML 마에다가에 전래한 것으로부터, 이 이름으로 불린다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+		PRINTFORML 같은 츠카사 시로 형제의, 히라노 토시로와 잘 닮은 용모를 하고 있다.
+	ELSEIF ARG == 41
+		PRINTFORML 【아키타 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 단도.
+		PRINTFORML 오랫동안 호신용 단도로서 있었기 때문에, 밖의 세계가 드문 것 같다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+		PRINTFORML 토시로 형제의 혼자.
+	ELSEIF ARG == 43
+		PRINTFORML 【하카타 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 단도.
+		PRINTFORML 하카타에서 나왔기 때문에, 하카타 토시로의 이명이 도착했다고 여겨진다.
+		PRINTFORML 치쿠젠 후쿠오카 성주 쿠로다 타카유키로부터 오가사와라 다다자네에게 주어
+		PRINTFORML 이후 오가사와라가에 전래했다.
+		PRINTFORML 하카타의 호상으로부터수 이은 상인영혼을 가진다.
+		PRINTFORML 
+		PRINTFORML 토시로 형제의 혼자.
+	ELSEIF ARG == 45
+		PRINTFORML 【미다레 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 단도.
+		PRINTFORML 혼란칼날이니까미다레 토시로… 지만, 대사가 묘하게 에로하다.
+		PRINTFORML 입조도 겉모습도 마치 여자 아이. 그렇지만 훌륭한 남자 아가씨.
+		PRINTFORML 소악마적인매력로 주를 희롱한다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+		PRINTFORML 토시로 형제의 혼자.
+	ELSEIF ARG == 47
+		PRINTFORML 【고코타이】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 단도.
+		PRINTFORML 우에스기 켄신이 상경했을 때에 오오기마치 천황에서 귀인으로부터 물건을 받음했다.
+		PRINTFORML 발리 요시미츠의 견명사로서 명에 향한 공무원이,
+		PRINTFORML 5마리의 범에 습격당했을 때, 이 단도로 쫓아버렸다고 하는 까닭이 있다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+		PRINTFORML 토시로 형제의 혼자서, 겁쟁이인 성격.
+	ELSEIF ARG == 49
+		PRINTFORML 【야겐 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 단도.
+		PRINTFORML 오다 노부나가인 애도였지만, 혼노지의 변에서 소실했다고 여겨진다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+		PRINTFORML 토시로 형제의 혼자이지만, 전장 태생 고인가 원래의 것인가,
+		PRINTFORML 다른 형제들에 비하면 매우 어른스러워진, 의협심 넘치는 성격.
+	ELSEIF ARG == 51
+		PRINTFORML 【호쵸 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 아와타입요시미츠작의 단도. 토시로 형제의 혼자.
+		PRINTFORML 무가에 있어 요시미츠의 단도는 최상급의 선물.
+		PRINTFORML 그것이 도쿠가와 이에야스의 바탕으로 한때이기도 한 것이 되면 더욱 의미는 늘어난다.
+		PRINTFORML 그리고, 그의 기호가 누구 양도의 것인가는 말할 필요도 없다.
+	ELSEIF ARG == 53
+		PRINTFORML 【오오카네히라】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 고비젠파의 도공 파오 평작의 칼.
+		PRINTFORML 모두 도검의 요코즈나라고 말해지면서, 천하 5검이기도 한 도우지키리 야스츠나를 라이벌시 한다.
+		PRINTFORML 역사적인 일화나 전설에 약간 부족하고, 이케다 아키라정에 찾아내졌다고 하는 일설은 그의 지주.
+		PRINTFORML 동향의우구이스마루에 관찰되고 있다.
+	ELSEIF ARG == 55
+		PRINTFORML 【우구이스마루】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 고비젠파의 도공의 칼.
+		PRINTFORML 고비젠파는 고래부터 보물로서 다루어지는 것이 많아,
+		PRINTFORML 이우구이스마루도 마찬가지이다.
+		PRINTFORML 
+		PRINTFORML 한가로이 차를 마시는 것을 좋아하는, 마이 페이스인 양반.
+		PRINTFORML 타인의 말을 신경쓰지 않는, 이라고 하는 것이 신조인 것 같다.
+		PRINTFORML 동향으로, 한편 형제와 같은 것이기도 한오오카네히라의 관찰이 취미.
+	ELSEIF ARG == 57
+		PRINTFORML 【아카시 쿠니유키】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 래파의 실질적인 개조[開祖], 내국[来國] 교사쿠의 칼.
+		PRINTFORML 일단아이젠 쿠니토시와호타루마루의 보호자이지만, 호타루마루편애가 곤란한 인물.
+		PRINTFORML 의지가 없는 것이 매도라고 하는 말도 말해입조도 어딘가 수상하고,
+		PRINTFORML 그의 본심=진실이 어디에 있는지는 잡을 수 없다.
+	ELSEIF ARG == 59
+		PRINTFORML 【호타루마루】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 내국[来國]슌의 작, 작은 몸에 큰 대칼!
+		PRINTFORML 칼날 이가 빠짐에 반디가 모이는 꿈을 꾼후,
+		PRINTFORML 그것이 실제로 낫고 있었다고 하는 전설이 이름의 유래.
+		PRINTFORML 자유분방한 그의 행동은, 강함의 표현.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형이지만, 체력는 더할 나위 없고,
+		PRINTFORML 그 대신에 회복 속도가 늦다.
+		PRINTFORML 야간은, 반디의 힘을 빌려 회복 속도가 올라간다.
+	ELSEIF ARG == 61
+		PRINTFORML 【아이젠 쿠니토시】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 래파의 2대, 통칭 두 글자 쿠니토시가 친 단도.
+		PRINTFORML 아이젠 명왕의 문신이 있는 것으로부터 이 이름이 지어졌다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형으로, 체력는 낮지만 회복은 빠르다.
+		PRINTFORML 같은 래파의호타루마루와는 형제와 같이 사이가 좋다.
+	ELSEIF ARG == 63
+		PRINTFORML 【센고 무라마사】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 초대 무라마사(센고 무라마사)의 작으로, 무서울 만큼의 예리함을 가지는 실전 방향의 타도.
+		PRINTFORML 미스테리어스인 행동거지는,
+		PRINTFORML 길고 요도로서 시선을 향해져 온 그의 이야기로부터 올까 보냐.
+		PRINTFORML 같은 무라마사의 일파인톤보키리의 걱정의 종이기도 하다.
+	ELSEIF ARG == 65
+		PRINTFORML 【톤보키리】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 천하 3명창으로 불린 창의 하나.
+		PRINTFORML 전국시대의 무장, 혼다 다다카쓰가 애용한 일로 알려진다.
+		PRINTFORML 전장에서 창을 세우고 있던 곳에 잠자리가 날아 와,
+		PRINTFORML 칼날에 접한 순간 2개에 끊어진, 라는 것으로부터 그 이름이 지어졌다.
+		PRINTFORML 
+		PRINTFORML 몸집이 큰 성격이지만 마음씨는 상냥하고, 헌신적인 면도 가지고 있다.
+	ELSEIF ARG == 67
+		PRINTFORML 【모노요시 사다무네】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 소슈 사다무네작의 호신용 단도.
+		PRINTFORML 도쿠가와 이에야스인 애도로, 이것을 띠어 출진하면 반드시 승리를 얻은 것으로부터
+		PRINTFORML 「물길」이라고 이름 붙여졌다고 전해진다.
+		PRINTFORML 
+		PRINTFORML 를 좋아하는 (일)것은 손 타. 싸움 익숙한 행운의 왕자.
+	ELSEIF ARG == 69
+		PRINTFORML 【타이코가네 사다무네】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 길게 다테가에 있던, 소슈 사다무네작의 단도.
+		PRINTFORML 쇼쿠다이키리 미츠타다와는 「밋쨩」 「다」라고 서로 부르는 사이에서,
+		PRINTFORML 쇼쿠다이키리 미츠타다와 같이, 파손를 좋아해 멋부리기를 존경하는 다테자.
+	ELSEIF ARG == 71
+		PRINTFORML 【킷코 사다무네】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 소슈 사다무네의 작으로, 무명의 타도.
+		PRINTFORML 줄기에 귀갑 국화문의 문신이 있는 것으로부터 이 이름이 지어졌다고 여겨진다.
+		PRINTFORML 기품 향기나는 사다무네의 풍격. 백국과 같은 미청년.
+		PRINTFORML 그리고극만, 주인님 지상 주의.
+	ELSEIF ARG == 73
+		PRINTFORML 【쇼쿠다이키리 미츠타다】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 오사후네파의 도공의 칼.
+		PRINTFORML 원래는 오다 노부나가가 애용해, 그후다테 마사무네의손에 건넜다.
+		PRINTFORML 이름의 유래는, 사람을 베었을 때에 곁의 촛대까지 함께 끊어졌기 때문에.
+		PRINTFORML 
+		PRINTFORML 언제라도 근사하게 있는 것을 유의하고 있지만,
+		PRINTFORML 보살핌이 좋으니까인 것인가, 모두의 어머니 취급을수일이 많다.
+	ELSEIF ARG == 75
+		PRINTFORML 【다이한냐 나가미츠】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 비젠 오사후네파의 도공, 나가미츠작의 칼.
+		PRINTFORML 명의 유래는, 무로마치 시대의 값전 6백관과 대반야경 6백권을 걸친 것.
+		PRINTFORML 미술품을 좋아해, 아름다운 것을 사랑으로입설 기모노로 한다는 것은
+		PRINTFORML 지극 정직한 일이라고 말한다.
+		PRINTFORML 가, 평상시는 검소 검약이 모토.
+	ELSEIF ARG == 77
+		PRINTFORML 【코류 카게미츠】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 비젠 오사후네파의 도공, 경광작의 칼.
+		PRINTFORML 명은, 통중에 구리카라용이 부조 되고 있는 것으로부터 붙었다고 여겨진다.
+		PRINTFORML 그 외에도 「난코경광」이나 「엿보기룡경광」등 이명도 많다.
+		PRINTFORML 진정한 주인을 찾아 끝없이 여행하는 변덕장이.
+	ELSEIF ARG == 79
+		PRINTFORML 【코우세츠 사몬지】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 도공 산몬지의 작에 의한 칼.
+		PRINTFORML 원의 주인의 영향이나 화를 존중해 싸움을 싫어한다.
+		PRINTFORML 
+		PRINTFORML 산몬지 3 형제는 모두 과거에 불행한 꼴을 당하고 있어
+		PRINTFORML 각각 다른 벡터로 굴절하고 있다.
+		PRINTFORML 기본적으로는얌전함성격이지만 조금 감정이 부족한 부분도 있어,
+		PRINTFORML 떨어뜨리는 것은 결코 편한 상대는 아닐 것이다.
+	ELSEIF ARG == 81
+		PRINTFORML 【소우자 사몬지】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 천하를 호령하는 사람의손를 떠돌아 다닌, 경국의 칼.
+		PRINTFORML 원래는 타케다가에 있던 것이 오다 노부나가의손에 건너, 각인을 넣을 수 있다.
+		PRINTFORML 그 내력 고인가, 매우 네가티브가 성격.
+		PRINTFORML 전에도 거의 나오는 것이 없었기 (위해)때문에, 통증에의 면역은 낮다.
+		PRINTFORML 
+		PRINTFORML 산몬지 3 형제의 혼자.
+	ELSEIF ARG == 83
+		PRINTFORML 【사요 사몬지】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 산몬지파의 단도.
+		PRINTFORML 불행 3 형제, 삼남의사요 사몬지는 「복수」에 생을 찾아냈다.
+		PRINTFORML 옷차림은 그다지 좋지 않지만,
+		PRINTFORML 이것은 일찍이 산적의 것이었기 때문이다.
+		PRINTFORML 인을 의심해 걸리는 성격 고로, 주의일도 신용하고 있지 않다.
+		PRINTFORML 
+		PRINTFORML 매우 몸집이 작은 체형이지만, 다른 단도에 비하면체력가 높다.
+	ELSEIF ARG == 85
+		PRINTFORML 【카슈 키요미츠】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 신선조, 오키타 소우지가 사용하고 있었다고 여겨지는 타도.
+		PRINTFORML 궁핍한 환경에서 태어난 탓인지, 더러워지는 것을 싫어해,
+		PRINTFORML 예쁘게 하고 있으면 주로 귀여워해 받을 수 있다고 생각하고 있다.
+		PRINTFORML 야마토노카미 야스사다란, 정반대로 보여 서로 닮은 사람끼리의 싸움 동료.
+		PRINTFORML 
+		PRINTFORML 현재 실장 끝난 칼 중(안)에서도[멘헤라]소유로,
+		PRINTFORML 의존도의 변동치가, 그 밖에 비교해 크다.
+	ELSEIF ARG == 87
+		PRINTFORML 【야마토노카미 야스사다】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 신선조, 오키타 소우지가 사용하고 있었다고 여겨지는 타도.
+		PRINTFORML 카슈 키요미츠와 같이, 취급이 어렵고, 사용손를 선택한다.
+		PRINTFORML 그 때문에 값은 쌌다고도 말해지고 있다.
+		PRINTFORML 일견 점잖은 듯이 보이지만 전투가 되면 표변.
+		PRINTFORML 꽤 공격적인 성격을 안에 숨기고 있는 것 같다.
+		PRINTFORML 
+		PRINTFORML 전의 주인을 잊을 수 없는 것인지, 처음은 주인에게도 그다지 따르지 않는다.
+		PRINTFORML 이지만, 한 번 따르면 그 성격은 일변할지도…?
+	ELSEIF ARG == 89
+		PRINTFORML 【카센 카네사다】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 소유자였던 호소카와 타다시 가마가, 36명의 가신을손 토벌해로 한 것으로부터,
+		PRINTFORML 고금에 뛰어난 36명의 가인을 기념하여, 카센 카네사다로 불리는 타도.
+		PRINTFORML 문화인인 그는, 무엇에 대해서도 풍류인 것이나 고상한 것을 좋아한다.
+		PRINTFORML 다만 어디까지나 「자칭」이며, 그 몸매는 확실히 하고 있어,
+		PRINTFORML 의외로 육체파의 인물인 것을 엿볼 수 있다.
+		PRINTFORML 문득 웃으면, 녹는 것 같은 얼굴을 하는 것 같다.
+	ELSEIF ARG == 91
+		PRINTFORML 【이즈미노카미 카네사다】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 무로마치 시대, 동국 제일의 명공 카네사다의 작이며,
+		PRINTFORML 신선조 부장, 막노동자나이 3이 애용했다고 말해지는 칼.
+		PRINTFORML 미와 실력의 양립을 테마로서 살아 있다.
+		PRINTFORML 성미가 급한 것은 원래의 소유자의 탓. 실은 울보라든지 뭐라든가…?
+		PRINTFORML 너무손처의 요령 있는 (분)편은 아닌 것 같다.
+	ELSEIF ARG == 93
+		PRINTFORML 【무츠노카미 요시유키】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 사카모토 류마가 패도 하고 있었다고 여겨지는 타도.
+		PRINTFORML 시골 냄새가 남은 다 빠지지 않지만, 새로운 것 좋아.
+		PRINTFORML 자신의 야심과 주에의 충성심, 어느 쪽에 대해서도 곧바로.
+		PRINTFORML 호쾌하고, 강직한 성격. 검은 시대착오라고 말해, 총도 휴대하고 있다.
+		PRINTFORML 장비는 완벽하지만, 본래는 싸움을 좋아하지 않는 상냥한 마음의 소유자.
+	ELSEIF ARG == 95
+		PRINTFORML 【야만바기리 쿠니히로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 영검 「야마우바절」을 본떠 만들어졌다고 여겨지는 타도.
+		PRINTFORML 오리지날이 아닌 것이 컴플렉스.
+		PRINTFORML 예쁘다라고 해지는 것이 싫어, 일부러 초라한 모습을 하고 있다.
+		PRINTFORML 다양하게 악화시켜 버리고 있지만,
+		PRINTFORML 자신이 가짜는 아니고, 쿠니히로 제일의 걸작인 것에는 자랑을 가지고 있다.
+	ELSEIF ARG == 97
+		PRINTFORML 【야마부시 쿠니히로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 호리카와 쿠니히로가 수도자 수행을 하고 있었을 무렵에 쳤다고 여겨지는 칼.
+		PRINTFORML 항상 수행을 하고 있기 (위해)때문인가, 그 육체는 과연 한 마디.
+		PRINTFORML 수행승려 고인가, 그 겉모습과는 정반대로보수적로, 자제심에도 뛰어나고 있다.
+	ELSEIF ARG == 99
+		PRINTFORML 【호리카와 쿠니히로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 安土桃山시대에 활약한 도공,
+		PRINTFORML 호리카와 쿠니히로작(그렇다고 하는 설이 있다)의 호신용 단도.
+		PRINTFORML 신선조 부장, 막노동자나이 3이 애용하고 있었다고 말해진다.
+		PRINTFORML 가사나 남의 일에 신경씀이 너무 좋아. 이즈미노카미 카네사다의 일을 카네상라고 불러,
+		PRINTFORML 파트너이며 조수. …… 그렇다고 하는 것보다, 밀어닥치고 부인과 같은 존재에.
+		PRINTFORML 예의 바르게 보살핌도 좋지만, 가슴에는 뜨거운 투지를 숨기고 있다.
+	ELSEIF ARG == 101
+		PRINTFORML 【하치스카 코테츠】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 에도시대에 활약한 도공, 코테츠작의 진도인 타도.
+		PRINTFORML 늠름함과 아름다움을 겸비한, 코테츠 3 형제의 차남.
+		PRINTFORML 남동생의우라시마 코테츠는 귀여워하고 있지만, 위조품인 오빠를 업신여긴다.
+		PRINTFORML 그러나 본심에서는, 오빠의 실력이나 투박함에 끌리고 있는 일면도 있는 것 같다.
+	ELSEIF ARG == 103
+		PRINTFORML 【우라시마 코테츠】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 에도시대에 활약한 도공, 코테츠작의 호신용 단도.
+		PRINTFORML 톳토리 지방 영주 이케다가에 전래한 호신용 단도로, 우라시마 타로의 상이 조각해지고 있다.
+		PRINTFORML 코테츠 3 형제의 막내.
+		PRINTFORML 성격 천진난만하게라고, 누구라고도 친구가 될 수 있다.
+		PRINTFORML 그야말로 거북이겠지만 용의 왕이겠지만 뭐든지 와라.
+	ELSEIF ARG == 105
+		PRINTFORML 【나가소네 코테츠】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 에도시대에 활약한 도공, 코테츠의 위조품이라고 말해지고 있는 타도.
+		PRINTFORML 신선조 국장·곤도 이사미를 원주로 하는, 코테츠 3 형제의 장남.
+		PRINTFORML 체격을 타고나 느긋한 성격.
+		PRINTFORML 이지만, 자신의 칼로서의 본연의 자세에 대해서는 어려운 일면도.
+	ELSEIF ARG == 107
+		PRINTFORML 【히게키리】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 겐지의 귀중한 보물.
+		PRINTFORML 시험참로 죄인의 목을 베었을 때에, 수염까지 끊어졌던 것이 이름의 유래로 여겨진다.
+		PRINTFORML 그후, 몇번이나 개명된다.
+		PRINTFORML 히게키리와히자마루는 일구(1조)로, 다다노 미쓰나카가 하치만대 보살로부터 받은 겐지 선조 대대의 검인 것으로,
+		PRINTFORML 잠시 나뉘고 있었지만 결국 한곳에 모여 뢰조의 바탕으로 찾아 뵌 것은 실로 경사스러운 것이다.
+		PRINTFORML 
+		PRINTFORML 긴 세월을 거쳐 대체로의 일은 어떻든지 좋아졌다고 너글너글하게 말한다.
+		PRINTFORML 가, 어떻든지 좋아져서는 안 되는 것까지 잊어 버리고 있는 것 같은…….
+	ELSEIF ARG == 112
+		PRINTFORML 【히자마루】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 겐지의 귀중한 보물. 시험참로 죄인을 베었을 때에, 양 무릎까지 단칼로 거절했던 것이 이름의 유래로 여겨진다.
+		PRINTFORML 
+		PRINTFORML 때때로 오빠인히게키리에 잊을 수 있어 절망하지만, 곧바로 회복한다.
+		PRINTFORML 긴 세월, 실의를 반복하면 과연 복귀도 빠른 것 같다.
+	ELSEIF ARG == 116
+		PRINTFORML 【오오쿠리카라】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 다테 가전 이래의 칼로, 상주 히로미츠작.
+		PRINTFORML 도신에 구리카라용이 조각해지고 있는 것이 명의 유래.
+		PRINTFORML 서로 익숙해지는 것을 싫어하는 독불 장군으로, 기본누구에 대해서도반항적로, 무관심.
+		PRINTFORML 이지만, 한 때의 주인 원으로 함께 보낸쇼쿠다이키리 미츠타다나,
+		PRINTFORML 츠루마루 쿠니나가에 대해서는, 머리가 오르지 않는 것도 있는 것 같다.
+	ELSEIF ARG == 118
+		PRINTFORML 【헤시키리 하세베】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 오다 노부나가에 관련되는 타도.
+		PRINTFORML 무례를 일한 무가에서 다도를 맡아보던 사람이 선반아래에 숨은 곳, 격노한 노부나가가,
+		PRINTFORML 그 선반마다 무가에서 다도를 맡아보던 사람을 「눌러 베었다」일로부터 그 이름이 지어졌다고 한다.
+		PRINTFORML 여기저기에서 한 때의 주인인 노부나가의 이름을 보내고 있어
+		PRINTFORML 그입상으로부터는, 그를 미워하고 있도록(듯이)도 생각되지만…….
+		PRINTFORML 
+		PRINTFORML 주인에 대해서는 기본적으로 매우 충실해, 거역하는 일은 없다.
+		PRINTFORML 이지만, 어디선가 일선을 긋고 있는 것 같은 마디도 보고수.
+	ELSEIF ARG == 120
+		PRINTFORML 【후도 유키미츠】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 카마쿠라의 도공, 토자부로 유키미츠의 작. 오다 노부나가인 애도. 모리 란마루가 귀인으로부터 물건을 받음, 후에 혼노지의 변으로 타고 살이 되었다고 여겨진다.
+		PRINTFORML 노부나가는 취하면 무릎을 두드려 「후도 유키미츠, 붙는 것도머리카락, 사람에게는 고로 왼쪽 어좌 문안 드림」이라고 노래했다고 한다.
+		PRINTFORML 명은 부동명왕과 긍갈라동자, 제다가동자가 부조 되고 있던 일에 유래하고 있다.
+		PRINTFORML 
+		PRINTFORML 몸집이 작은 체형으로체력는 낮지만 회복은 빠르다.
+	ELSEIF ARG == 122
+		PRINTFORML 【시시오】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 평안 시대 말기의 야마토 칼공작의 칼.
+		PRINTFORML 노령이라도 사용할 수 있도록(듯이)와 가늘고 가볍게 만들어 있다.
+		PRINTFORML 그러면서 존은 노장군의 자랑을 해치지 않게, 훌륭하게 만들어져
+		PRINTFORML 용감하게도 마음 상냥한, 할아버지자가 되었다.
+		PRINTFORML 칼로 해서는 어린 용모와 성격으로,
+		PRINTFORML 무엇이라도 흥미를 가지고 돌아다닌다, 매우 밝은 성격.
+	ELSEIF ARG == 124
+		PRINTFORML 【코가라스마루】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 고래, 귀중한 보물로서 유명한 칼.
+		PRINTFORML 일설에서는 일본의 도검이 일본도로 불리는 형태가 되는 성립 과정에 있는 한번 휘두름.
+		PRINTFORML 까닭에, 까마귀의 동자를 생각하게 하는 모습으로 여기되지만,
+		PRINTFORML 다른 도검들은 말하자면 우리 아이이며, 스스로는 그 아버지로서 행동한다.
+	ELSEIF ARG == 128
+		PRINTFORML 【도다누키 마사쿠니】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 천황 관람 카부토와리의 일화로 일약 유명하게 된 타도.
+		PRINTFORML 외관에는 일절 신경을 쓰지 않고, 파워 중시로, 실천 일변도.
+		PRINTFORML 퉁명스럽지만 인정이 두터운, 실은 매우 남자다운 성격.
+		PRINTFORML 이지만 대신에 성적인 일에는 꽤 서먹하고,
+		PRINTFORML 보수적인 모아 두어 난이도는 높다.
+	ELSEIF ARG == 130
+		PRINTFORML 【츠루마루 쿠니나가】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 평안 시대의 도공·고조 쿠니나가작의 칼.
+		PRINTFORML 많은 주인의손를 전전과 떠돌아 다녀 온 경력을 가진다.
+		PRINTFORML 홀연히 한 성격으로, 지루함이 싫은 것인가, 사람을 놀라게 하는 것이 취미.
+	ELSEIF ARG == 132
+		PRINTFORML 【타로타치】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 매우 크고, 취급할 수 있는 인간은 없다고 까지 말해진 대칼.
+		PRINTFORML 도검남사로서도 특히 몸집이 큰 체격으로, 그위압감은 상당한 것.
+		PRINTFORML 남동생의지로타치와는 달라, 온화한 성격.
+	ELSEIF ARG == 134
+		PRINTFORML 【지로타치】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 오빠의타로타치의 주인인 마가라직륭의 아이, 마가라 타카시기가 이용했다고 여겨지는 칼.
+		PRINTFORML 오빠에 비하면 작지만, 그런데도 거체인 것은 변함없다.
+		PRINTFORML 상당한 폭주가로, 언제나 술을손에 가지고 있다.
+		PRINTFORML 「여역 남우이지만 오네에는 아니다」답다.
+	ELSEIF ARG == 136
+		PRINTFORML 【니혼고】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 천하 3명창의 하나로, 「일본 제일의 창」이라고 칭할 수 있다.
+		PRINTFORML 쿠로다번의 중신 모리태효우에가, 후쿠시마 마사노리와의 이해내기로 차지했다고 하는 전승으로부터,
+		PRINTFORML 별명 「이해 잡기의 창」이라고도 불린다.
+		PRINTFORML 창이면서 정 3위(질산 보고)의 위소유.
+	ELSEIF ARG == 138
+		PRINTFORML 【오테기네】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 천하 3창으로 불린 명창의 하나.
+		PRINTFORML 찌르는 일에 특화하고 있기 (위해)때문에,
+		PRINTFORML 다른 창보다 지원해 주는 호신용 단도와 사이가 좋다.
+		PRINTFORML 전법이기 때문에 모기장이나 수수한 인상을수가…… 좋은 녀석!
+		PRINTFORML 온화해 장난꾸러기기분이 있는 성격.
+	ELSEIF ARG == 140
+		PRINTFORML 【토모에가타 나기나타】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 품이 넓게 칼끝의 휘어진 상태가 큰, 전례용과도 되는 나기나타.
+		PRINTFORML 신격은 보다 높고 사람으로서의 의식은 얇다.
+		PRINTFORML 주로 대해 과보호 기미의 곳이 있어,
+		PRINTFORML 심신자가 빛나도록(듯이) 옆에 앞두거나 시중을 들거나 한다.
+	ELSEIF ARG == 142
+		PRINTFORML 【모리 토시로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 아와타입요시미츠작의 단도. 토시로 형제의 혼자.
+		PRINTFORML 털리가에 있었던 것이 이름의 유래.
+		PRINTFORML 몸집이 작은 일을 이용한 변칙적인 싸우는 방법을 자랑으로 여긴다.
+		PRINTFORML 이야기를 듣는 것으로, (자신의 신장은 접어두어) 작은 아이를 좋아해.
+	ELSEIF ARG == 144
+		PRINTFORML 【코테키리 고우】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 코시나카국의 도공, 고우 요시히로작의 호신용 단도.
+		PRINTFORML 이나바가와 호소카와가를 왕래했다.
+		PRINTFORML 보좌역의 기질은 강하고, 주로 대해 빈틈 없게 행동한다.
+		PRINTFORML 옷 매무새가 자신있어, 주위의 것을 몸치장해 준다.
+	ELSEIF ARG == 146
+		PRINTFORML 【켄신 카게미츠】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 비젠 오사후네파의 도공, 경광작의 단도.
+		PRINTFORML 명은, 우에스기 켄신이 가까이에 둔 것으로부터 붙었다고 여겨진다.
+		PRINTFORML 표에는 「치치부 다이보사츠」의 문자, 뒤에는 다이이토쿠묘 왕을 나타내는 범자가 조각해지고 있다.
+		PRINTFORML 인내를 할 수 있는, 강한 와.
+	ELSEIF ARG == 148
+		PRINTFORML 【아즈키 나가미츠】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 우에스기 켄신 애도였다고 전해지는 칼.
+		PRINTFORML 명의 유래는 제설 있지만, 칼끝에 해당된 빨간콩의 알이 2개로 갈라져 있었기 때문에, 라고 그는 말한다.
+		PRINTFORML 보육사 아무쪼록 보살핌 좋게, 한편 들이마셔─개직공인 것이지만,
+		PRINTFORML 마음에 드는 것의 응이 어울리지 않는다.
+	ELSEIF ARG == 150
+		PRINTFORML 【휴가 마사무네】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 일본도의 대명사라고도 말하는 「마사무네」의 단도.
+		PRINTFORML 마사무네는 옛부터 격의 비싼 도검으로서 선물로 되는 것이 많았다.
+		PRINTFORML 그의 「아까웠다」는 체념의 말은 아니다. 반드시 다음이 있다고 하는 허용이라고 감사이다.
+		PRINTFORML 기슈에 있던 적도 있어, 우메보시 만들기가 이익.
+	ELSEIF ARG == 152
+		PRINTFORML 【시즈카가타 나기나타】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 호리호리한 몸매로 휘어진 상태가 작고, 실전용으로 여겨지는 나기나타.
+		PRINTFORML 전장에서의 무기의 변천으로부터인가, 창에 대해서 대항심이 강하다.
+		PRINTFORML 주로 대해 자신에게 접근하지 않게 재촉하는 것은,
+		PRINTFORML 당신의 힘으로 심신자를 부수어 버리지 않도록 신경을 쓰고 있기 (위해)때문에.
+	ELSEIF ARG == 154
+		PRINTFORML 【난센 이치몬지】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 후쿠오카 1문자파작, 대마상 무명의 타도.
+		PRINTFORML 접한 고양이를 두동강이에 벨 수 있었다고 하는 일화와
+		PRINTFORML 고사 『남천 잠묘』를 걸어 이 이름이 지어졌다고 여겨진다.
+		PRINTFORML 본래이면, 자신은 좀 더 키가 크게 우는 아이도 입다무는 무서워해야 할 도검남사일 것
+		PRINTFORML …… 모두는 고양이의 저주의 탓. 라고 주장한다.
+	ELSEIF ARG == 156
+		PRINTFORML 【치요가네마루】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 류큐 왕국의 왕가에게 전래한 보검의 하나.
+		PRINTFORML 도신은 일본제라고 생각되지만,
+		PRINTFORML 편손치는 것의 (무늬)격 따위 일본도의 형식과는 다른 독특한 구조를 볼 수가 있다.
+		PRINTFORML 대어서는 돌려주는 물결과 같이 말해입에 귀를 기울이면, 우치나 타임에 권해진다.
+	ELSEIF ARG == 158
+		PRINTFORML 【야만바기리 쵸우기】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 비젠 오사후네장의작의 타도. 장의는 오사후네파의 주류와는 별계통의 도공이 된다.
+		PRINTFORML 사본이다고 말해지고 있는야만바기리 쿠니히로와 함께 백중의 성과.
+		PRINTFORML 아름답지만 고만.
+		PRINTFORML 보다 정확하게 말하면 자신에게 자신이 있어, 그 밖에 겁먹는 일이 없다.
+	ELSEIF ARG == 160
+		PRINTFORML 【부젠 고우】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 코시나카국의 도공, 고우 요시히로작의 타도.
+		PRINTFORML 고우 요시히로의 도검은 재명작이 현존 하지 않고,
+		PRINTFORML 또 「시골과 도깨비는 보았던 적이 없다」라고 칭해지는 만큼 보는 것이 할 수 없었다.
+		PRINTFORML 그는 바람을 잘라 달린다. 빠름의, 그 앞을 목표로 해…… 
+	ELSEIF ARG == 162
+		PRINTFORML 【네네키리마루】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 짐승을 포함한 산의 정점으로 군림하는, 고위 신격의 대칼.
+		PRINTFORML 요괴 「이들」을 베었다고 하는 이야기도
+		PRINTFORML 산의 치수에 관한 사람들의 기원으로부터 온 것이라고 생각된다.
+		PRINTFORML 대체로의 일은 온천에 들어가면 어떻게든 된다.
+	ELSEIF ARG == 164
+		PRINTFORML 【하쿠산 요시미츠】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 가마쿠라 시대에 활약한 도공, 아와타입요시미츠작의 검().
+		PRINTFORML 도쿠가와 이에미쓰의 양녀대공주가 마에다광고에 시집갔을 때에 지참되어 그 죽음후봉납되었다.
+		PRINTFORML 검은 보다 신의 계보가 되어, 하쿠산 요시미츠는 치유의 힘을 가진다.
+		PRINTFORML 수행의 흰여우를 데리고 있다. 오이를 좋아해.
+	ELSEIF ARG == 166
+		PRINTFORML 【난카이 타로 쵸우손】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 다케치한페이타가 사용하고 있었다고 여겨지는 타도.
+		PRINTFORML 학자 같은 도검남사이며, 지식으로 심신자를 돕는다.
+		PRINTFORML 그 한편으로 사람 베어에 적당한 칼이기도 해, 차례차례로 적을 벤다.
+		PRINTFORML 실은알콜쓰레기.
+	ELSEIF ARG == 168
+		PRINTFORML 【히젠 타다히로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 오카다이장이 사용하고 있었다고 여겨지는 호신용 단도.
+		PRINTFORML 난폭해 적을 베는 것 이외 흥미가 없는 것 처럼 보이지만,
+		PRINTFORML 적을 베는 것 이외로 당신의 존재 가치를 발견하지 못하고 있다, 라고 하는 것이 진상.
+		PRINTFORML 째 하지는 먹는 전문.
+	ELSEIF ARG == 170
+		PRINTFORML 【챠탄나키리】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 류큐 왕국의 왕가에게 전래한 보검의 하나.
+		PRINTFORML 류큐제의 존은, 나전이나 돈이 사용된 호화로운 것.
+		PRINTFORML 짧게 쇠퇴 한 도신으로부터는, 소중히 사용되고손 넣고 되어 왔을 때를 느낀다.
+		PRINTFORML 꽃과 같이 명랑하게, 생활에 다가붙는 칼.
+	ELSEIF ARG == 172
+		PRINTFORML 【쿠와나 고우】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 코시나카국의 도공, 고우 요시히로작의 타도.
+		PRINTFORML 이세 쿠와나번 2대 지방 영주, 혼다 다다마사가 소지했다.
+		PRINTFORML 농업은 삼라 만상 모두와 마주볼 수 있는 학문.
+		PRINTFORML 연구열심인 부분이 때에 이론이 많은 인상을 주고 있지만, 본인은 전혀 자각이 없다.
+	ELSEIF ARG == 174
+		PRINTFORML 【스이신시 마사히데】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 에도를 거점으로 한 명검공 「에도 세번째 작품」의 혼자, 스이신시 마사히데작의 타도.
+		PRINTFORML 신들칼의 선조로서 적당하게 있을것이라고 이상을 내걸고 노력을 아끼지 않는다.
+		PRINTFORML 그러나 아직 경험이 풍부하지 못하고, 틈을 지치면 소가 나와 버린다.
+	ELSEIF ARG == 176
+		PRINTFORML 【미나모토 키요마로】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 에도를 거점으로 한 명검공 「에도 세번째 작품」의 혼자, 미나모토 키요마로작의 타도.
+		PRINTFORML 언행은 온화한 인상을 주지만, 도공 자신의 소양을 계승해인가 전투력은 높다.
+		PRINTFORML 친구인 수심자를 응원하고 있다.
+	ELSEIF ARG == 178
+		PRINTFORML 【마츠이 고우】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 코시나카국의 도공, 고우 요시히로작의 타도.
+		PRINTFORML 일국일성령의 예외가 된 8대 성주, 마츠이흥장이 소지했다.
+		PRINTFORML 전도 실무도 자신있는 만능 좌파, 우수한 무장으로 있던 원주의 영향으로부터인가.
+		PRINTFORML 그리고, 피에의 집착도 그의 칼로서의 이야기로부터 올까 보냐……
+	ELSEIF ARG == 180
+		PRINTFORML 【산쵸모】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 후쿠오카 1문자파의 작으로 되어 있는 칼.
+		PRINTFORML 지휘 능력에 뛰어나, 1문자 일가를 장으로서 인솔한다.
+		PRINTFORML 여러가지로 형용되는 화려한 일본칼의 날 부분의 모양의 정신은, 불길과 같은 각인과 진홍의 눈동자에 나타난다.
+		PRINTFORML 우에스기가에 소중히 되어 수백년 공개되지 않고 비밀의 베일에 휩싸여지고 있었다.
+	ELSEIF ARG == 182
+		PRINTFORML 【코킨덴쥬노타치】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 평안 시대 말기부터 가마쿠라 시대 전기의 도공, 풍후쿠니유키 히로시의 칼.
+		PRINTFORML 지금은 끈적 물기를 띠어 큰뱀(큰 뱀)의 마다 해.
+		PRINTFORML 호소카와 유사이로부터 카라스마광광에 고금 전수가 이루어졌을 때, 모두 건네받았던 것이 이름의 유래.
+		PRINTFORML 문화를 사랑해, 사랑 받는…… 이 나라의 꽃.
+	ELSEIF ARG == 184
+		PRINTFORML 【지조 유키히라】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 평안 시대 말기부터 가마쿠라 시대 전기의 도공, 풍후쿠니유키 히로시의 타도.
+		PRINTFORML 지장보살 신앙이 번성했던 무렵에, 지조 유키히라는 복수 라인 존재했다고 생각된다.
+		PRINTFORML 또, 이 시대의 도검은 큰뱀(큰 뱀)이다.
+		PRINTFORML 지장과 큰뱀, 대극의 모습이 주어져 더 모든 것을 구하려고 그는 발버둥 친다.
+	ELSEIF ARG == 186
+		PRINTFORML 【치가네마루】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 류큐 왕국의 왕가에게 전래한 보검의 하나.
+		PRINTFORML 산성 태생의 류큐 태생.
+		PRINTFORML 존은 본토제이지만, 날밑과 칼날밑 양면 손잡이는치요가네마루와 동종의 것으로 류큐에서 붙여졌다고 생각된다.
+		PRINTFORML 새와 같이 춤추는, 바다밧줄무술 「손(테이)」의 사용손.
+	ELSEIF ARG == 188
+		PRINTFORML 【닛코 이치몬지】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 후쿠오카 1문자파의 작으로 되어 있는 칼.
+		PRINTFORML 1문자 일가의 장, 산쵸모의 왼팔. 주어진 생명은 완수 한다.
+		PRINTFORML 일광 곤겐의 보도로 있었던 것이 이름의 유래.
+		PRINTFORML 호죠가, 쿠로다가 따위를 전해져 「지」와 「무」를 갖춘 풍채에 역대의 그것이 나타난다.
+	ELSEIF ARG == 190
+		PRINTFORML 【타이코 사몬지】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 치쿠젠의 도공, 산몬지의 단도.
+		PRINTFORML 그리고, 그도 또 당신의 본연의 자세를 묻는 산몬지 일진. 슬퍼하는 본연의 자세도, 즐기는 본연의 자세도.
+		PRINTFORML 도요토미에 관련되는 이름을 하사할 수 있으면, 거기에 응하려고 힘쓴다.
+	ELSEIF ARG == 192
+		PRINTFORML 【사미다레 고우】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 코시나카국의 도공, 고우 요시히로작의 타도.
+		PRINTFORML 경치를 명에 머문 명검은 화려한 내력을 더듬지만,
+		PRINTFORML 그 말에는 같은 시대를 살아 이름을 읊어 준 하이쿠 짓는 사람에게로의 생각이 나타난다.
+		PRINTFORML 열구름이나 개의 내기 오줌() 마을 늦가을 비
+	ELSEIF ARG == 194
+		PRINTFORML 【오오치도리 쥬몬지야리】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 10문자창의 하나로, 창신으로부터 양측으로 나온 낫이 치도리형을 한 창.
+		PRINTFORML 일본 제일의 군사와 칭해진 사나다 사에몬좌신번의 애창을 자칭해, 붉은 상처를 예로서 내건다.
+	ELSEIF ARG == 196
+		PRINTFORML 【한진】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 줄기에 금상감으로 「한진 사나다 사에몬대지」라고 있는 사나다 사에몬좌신번의 호신용 단도.
+		PRINTFORML 신번의 죽음후, 기슈 코우노야마로부터 매도에 나온다. 우다 구니지의 작으로, 「한진」란 이명.
+		PRINTFORML 오오치도리 쥬몬지야리와 함께, 사나다의 것으로 해 전장에 선다.
+	ELSEIF ARG == 198
+		PRINTFORML 【이치몬지 노리무네】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 후쿠오카 1문자파의 작으로 되어 있는 칼.
+		PRINTFORML 칙종은 후쿠오카 1문자파의 시조이며, 후카라스바원번대장장이의 한사람으로서 유명하다.
+		PRINTFORML 1문자 일가의 머리를산쵸모에 양보한후는 제멋대인 은거 라이프를 보낸다.
+		PRINTFORML 삐뚤어진 존재를, 그것 까닭에 귀여워한다.
+	ELSEIF ARG == 200
+		PRINTFORML 【무라쿠모 고우】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 코시나카국의 도공, 고우 요시히로작의 타도.
+		PRINTFORML 경치를 명에 머문 명검은 화려한 내력을 더듬지만,
+		PRINTFORML 한 때의 주인은 악역으로 되는 것이 많기도 하고, 자신은 싸구려로 팔리는 일도 있거나…….
+		PRINTFORML 싸움에 진 개의 복통 달래는 장마(오월 짜라)
+	ELSEIF ARG == 202
+		PRINTFORML 【히메츠루 이치몬지】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 후쿠오카 1문자파의 작으로 되어 있는 칼. 우에스기 경승 비장의 칼.
+		PRINTFORML 연사의 꿈에 틀이라고 자칭하는 아가씨가 나타나, 마올리지 않게 탄원 했다――라고 하는 전설이 남는다.
+		PRINTFORML 1문자 일가의 저것이나 이것이나로부터는 (뜻)이유 있어 거리를 두고 싶은, 꿈 고하고의 새.
+	ELSEIF ARG == 204
+		PRINTFORML 【후쿠시마 미츠타다】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 비젠 오사후네파의 사실상의 선조라고 말해지고 있는 도공, 미쓰타다의 작.
+		PRINTFORML 명은, 원 주요한 후쿠시마 마사노리가 유래.
+		PRINTFORML 이지만 술의 실패는 모방하고 싶지 않다. 풀꽃을 어레인지 해 장식하거나 누군가에게 주는 것이 좋아.
+		PRINTFORML 쇼쿠다이키리 미츠타다에는, 오빠로 불리고 싶다.
+	ELSEIF ARG == 206
+		PRINTFORML 【칠성검】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 칠성검란, 도신에 북두칠성이 새겨진 검을 가리킨다.
+		PRINTFORML 북 하늘에 빛나는 북두칠성은 즉 죽음을 맡는 신, 북두성군.
+		PRINTFORML 재액을 쫓아, 모든 적을 죽인다고 한다.
+		PRINTFORML 그 1입는 쇼토쿠 태자 패용의 전승을 가져, 질서안녕을 별에 바란다.
+	ELSEIF ARG == 210
+		PRINTFORML 【이나바 고우】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 코시나카국의 도공, 고우 요시히로작의 타도.
+		PRINTFORML 명은, 오다 노부나가에 기마 무사로서 시중든 이나바중통이 소지했던 것에 연관된다.
+		PRINTFORML 후에 도쿠가와 이에야스, 유우키 히데야스로 건너지만, 주가 천하에 닿는 순간에 마침 있는 일은 없었다.
+		PRINTFORML 그리고 당신이손를 늘린다.
+	ELSE
+		PRINTFORML 【%CSVNAME(ARG, 0)%】 난이도:%CHARA_DIFFICULTY(ARG)% 매각치:%CHARA_SELLING_PRICE(ARG)%
+		PRINTL
+		PRINTL
+	ENDIF
+ENDIF
+PRINTFORML 
+
+

@@ -1,0 +1,179 @@
+﻿;-------------------------------------------------
+;触手ヴァギナ拡張
+;触手系コマンド
+;-------------------------------------------------
+@COM366
+
+PRINTL 触手ヴァギナ拡張
+STR:0 = 触手ヴァギナ拡張
+
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 200
+LOSEBASE:気力 += 300
+
+IF EXP:触手経験 < EXPLV:1
+	TIMES LOSEBASE:体力 , 1.10
+	TIMES LOSEBASE:気力 , 2.00
+ELSEIF EXP:触手経験 < EXPLV:2
+	TIMES LOSEBASE:体力 , 0.90
+	TIMES LOSEBASE:気力 , 1.80
+ELSEIF EXP:触手経験 < EXPLV:3
+	TIMES LOSEBASE:体力 , 0.80
+	TIMES LOSEBASE:気力 , 1.50
+ELSEIF EXP:触手経験 < EXPLV:4
+	TIMES LOSEBASE:体力 , 0.70
+	TIMES LOSEBASE:気力 , 1.20
+ELSEIF EXP:触手経験 < EXPLV:5
+	TIMES LOSEBASE:体力 , 0.60
+	TIMES LOSEBASE:気力 , 1.00
+ELSE
+	TIMES LOSEBASE:体力 , 0.50
+	TIMES LOSEBASE:気力 , 0.50
+ENDIF
+
+;ABL:Ｖ感覚をみる
+IF ABL:Ｖ感覚 == 0
+	SOURCE:快Ｖ += 10
+ELSEIF ABL:Ｖ感覚 == 1
+	SOURCE:快Ｖ += 30
+ELSEIF ABL:Ｖ感覚 == 2
+	SOURCE:快Ｖ += 500
+ELSEIF ABL:Ｖ感覚 == 3
+	SOURCE:快Ｖ += 1000
+ELSEIF ABL:Ｖ感覚 == 4
+	SOURCE:快Ｖ += 1700
+ELSE
+	SOURCE:快Ｖ += 2200
+ENDIF
+
+;EXP:Ｖ経験をみる
+IF EXP:Ｖ経験 < EXPLV:1
+	TIMES SOURCE:快Ｖ , 0.20
+ELSEIF EXP:Ｖ経験 < EXPLV:2
+	TIMES SOURCE:快Ｖ , 0.60
+ELSEIF EXP:Ｖ経験 < EXPLV:3
+	TIMES SOURCE:快Ｖ , 1.00
+ELSEIF EXP:Ｖ経験 < EXPLV:4
+	TIMES SOURCE:快Ｖ , 1.20
+ELSEIF EXP:Ｖ経験 < EXPLV:5
+	TIMES SOURCE:快Ｖ , 1.40
+ELSE
+	TIMES SOURCE:快Ｖ , 1.60
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	TIMES SOURCE:快Ｖ , 0.40
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	TIMES SOURCE:快Ｖ , 0.80
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	TIMES SOURCE:快Ｖ , 1.00
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	TIMES SOURCE:快Ｖ , 1.40
+ELSE
+	TIMES SOURCE:快Ｖ , 1.80
+ENDIF
+
+SOURCE:痛み += 1200
+SOURCE:露出 += 1000
+SOURCE:屈従 += 1000
+SOURCE:逸脱 += 4200
+SOURCE:恐れ += 1000
+
+
+
+;EXP:Ｖ経験をみる
+IF EXP:Ｖ経験 < EXPLV:1
+	SOURCE:痛み += 20000
+	SOURCE:液体 += 2000
+ELSEIF EXP:Ｖ経験 < EXPLV:2
+	SOURCE:痛み += 300
+ELSEIF EXP:Ｖ経験 < EXPLV:3
+	SOURCE:痛み += 50
+ELSEIF EXP:Ｖ経験 < EXPLV:4
+	SOURCE:痛み += 10
+ELSEIF EXP:Ｖ経験 < EXPLV:5
+	SOURCE:痛み += 0
+ELSE
+	SOURCE:痛み += 0
+ENDIF
+
+;触手経験を見る
+IF EXP:触手経験 < EXPLV:1
+	SOURCE:痛み += 1000
+ELSEIF EXP:触手経験 < EXPLV:2
+	SOURCE:痛み += 800
+ELSEIF EXP:触手経験 < EXPLV:3
+	SOURCE:痛み += 500
+ELSEIF EXP:触手経験 < EXPLV:4
+	SOURCE:痛み += 100
+ELSEIF EXP:触手経験 < EXPLV:5
+	SOURCE:痛み += 50
+ENDIF
+
+;触手経験
+IF EXP:触手経験 < EXPLV:1
+	SOURCE:中毒充足 += 1500
+	TIMES SOURCE:恐れ , 0.50
+ELSEIF EXP:触手経験 < EXPLV:2
+	SOURCE:中毒充足 += 1700
+	TIMES SOURCE:恐れ , 0.80
+ELSEIF EXP:触手経験 < EXPLV:3
+	SOURCE:中毒充足 += 2000
+ELSEIF EXP:触手経験 < EXPLV:4
+	SOURCE:中毒充足 += 2500
+	TIMES A , 1.20
+ELSEIF EXP:触手経験 < EXPLV:5
+	SOURCE:中毒充足 += 3300
+	TIMES SOURCE:恐れ , 1.50
+ELSE
+	SOURCE:中毒充足 += 4200
+	TIMES SOURCE:恐れ , 1.80
+ENDIF
+
+;小人体形
+SIF TALENT:小人体型
+	TIMES SOURCE:痛み , 2.00
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;汚れ処理
+STAIN:ヴァギナ |= 32
+STAIN:膣内 |= 32
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF EXP:Ｖ拡張経験 == 0
+	EXP:異常経験 += 1
+	PRINTL Ｖ拡張初経験で異常経験＋1
+ENDIF
+EXP:Ｖ経験 += 25
+PRINTL Ｖ経験＋25
+EXP:Ｖ拡張経験 += 1
+PRINTL Ｖ拡張経験＋1
+
+T = 1
+
+;触手装着中は依存度ベクトル強制変更
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(服従で1、隷属で2　強制変更なので、これまでの数値をリセット）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 = 4
+ENDIF
+
+RETURN 1
+
+

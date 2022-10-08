@@ -1,0 +1,238 @@
+﻿;게이끼의 가부
+@ISABLUP20
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:게이끼 >= 10
+	RETURN 0
+ELSEIF ABL:게이끼 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	RETURN 0
+ELSEIF MALE(TARGET)  == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP20
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;게이끼
+@ABLUP20
+DRAWLINE
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:게이끼 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:게이끼 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP20
+
+;LV3로부터 4에 올릴 때는이상경험필요(소질:[바이]라면 무시할 수 있다)
+IF ABL:게이끼 == 3 && TALENT:바이 == 0
+	PRINTFORML %EXPNAME:50%있어, 한편
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[바이]라면 무시할 수 있다)
+ELSEIF ABL:게이끼 == 4 && TALENT:바이 == 0
+	PRINTFORML %EXPNAME:50%3이상, 한편
+;LV8로부터 9에 올릴 때는이상경험 5 이상 필요(소질:[바이]라면 무시할 수 있다)
+ELSEIF ABL:게이끼 == 8 && TALENT:바이 == 0
+	PRINTFORML %EXPNAME:50%5이상, 한편
+ENDIF
+
+PRINTFORM [0] - %PALAMNAME:6%의 구슬×{A}
+IF C > 0
+	PRINTFORM , %PALAMNAME:7%의 구슬×{C}
+ENDIF
+PRINTFORM , %EXPNAME:41%{B}이상……
+
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+	SIF I & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+IF D > 0
+	PRINTFORM [1] - %PALAMNAME:0%의 구슬×{D}, %EXPNAME:41%{B}이상……
+	
+	IF J == 0
+		PRINT OK
+	ELSE
+		SIF J & 1
+			PRINT 주불발 
+		SIF J & 2
+			PRINT 경험불발 
+		SIF J & 4
+			PRINT 능력불발 
+	ENDIF
+	PRINTL 
+ELSE
+	J = 256
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 1) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF J == 256 && RESULT == 1
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:게이끼 += 1
+
+IF RESULT == 0
+	JUEL:욕정 -= A
+	JUEL:굴복 -= C
+ELSEIF RESULT == 1
+	JUEL:쾌C -= D
+ENDIF
+
+PRINTFORMW %ABLNAME:20%의 레벨이{ABL:게이끼}가 되었습니다
+
+
+;게이끼의 LVUP 판정
+@DECIDE_ABLUP20
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+J = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:게이끼 == 0
+	A = 200
+	B = 50
+	C = 0
+	D = 1000
+ELSEIF ABL:게이끼 == 1
+	A = 1000
+	B = 200
+	C = 0
+	D = 5000
+ELSEIF ABL:게이끼 == 2
+	A = 3000
+	B = 500
+	C = 1000
+	D = 10000
+ELSEIF ABL:게이끼 == 3
+	A = 8000
+	B = 1000
+	C = 2000
+	D = 15000
+ELSEIF ABL:게이끼 == 4
+	A = 20000
+	B = 2000
+	C = 5000
+	D = 0
+ELSEIF ABL:게이끼 == 5
+	A = 25000
+	B = 2300
+	C = 6000
+	D = 0
+ELSEIF ABL:게이끼 == 6
+	A = 30000
+	B = 2600
+	C = 8000
+	D = 0
+ELSEIF ABL:게이끼 == 7
+	A = 35000
+	B = 3000
+	C = 10000
+	D = 0
+ELSEIF ABL:게이끼 == 8
+	A = 40000
+	B = 3500
+	C = 15000
+	D = 0
+ELSEIF ABL:게이끼 == 9
+	A = 50000
+	B = 4000
+	C = 20000
+	D = 0
+ENDIF
+
+;음란
+SIF TALENT:음란
+	TIMES A , 0.80
+;창부
+SIF TALENT:창부
+	TIMES A , 0.50
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+	TIMES B , 2.00
+	TIMES C , 2.00
+	TIMES D , 2.00
+ENDIF
+
+;LV3로부터 4에 올릴 때는이상경험필요(소질:[바이]라면 무시할 수 있다)
+IF ABL:게이끼 == 3 && TALENT:바이 == 0
+	IF EXP:이상경험 == 0
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[바이]라면 무시할 수 있다)
+ELSEIF ABL:게이끼 == 4 && TALENT:바이 == 0
+	IF EXP:이상경험 < 3
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV8로부터 9에 올릴 때는이상경험 5 이상 필요(소질:[바이]라면 무시할 수 있다)
+ELSEIF ABL:게이끼 == 8 && TALENT:바이 == 0
+	IF EXP:이상경험 < 5
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+ENDIF
+
+;욕정의 구슬로 올린다
+SIF JUEL:욕정 < A
+	I |= 1
+;굴복의 구슬로 올린다
+SIF JUEL:굴복 < C
+	I |= 1
+;게이경험가 필요
+SIF EXP:게이경험 < B
+	I |= 2
+
+IF I == 0
+	Z = 1
+ENDIF
+
+IF D > 0
+	;쾌C의 구슬로 올린다
+	SIF JUEL:쾌C < D
+		J |= 1
+	;게이경험가 필요
+	SIF EXP:게이경험 < B
+		J |= 2
+	
+	IF J == 0
+		Z = 1
+	ENDIF
+ELSE
+	J = 256
+ENDIF
+RETURN 1
+

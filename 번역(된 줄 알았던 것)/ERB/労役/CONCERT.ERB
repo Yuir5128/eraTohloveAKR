@@ -1,0 +1,2143 @@
+﻿;====================================================================
+;CONSERT.ERB 콘서트⇒야외 라이브로 명칭을 변경
+@CONCERT
+;====================================================================
+;사용하는 일시 변수의 초기화
+A = 0
+A:1 = 0
+A:2 = 0
+A:3 = 0
+A:4 = 0
+A:5 = 0
+C = 0
+D = 0
+G = 0
+S = 0
+V = 0
+X = 0
+W = 0
+Z = 0
+
+
+DRAWLINE
+IF TIME == 0
+	PRINTL 【 도검뢰무(낮의 부)】
+	PRINTL 보통 의상으로 보통으로 노래하는, 보통 라이브.
+	PRINTL 악손나 싸인, 말을 걸고 등의 팬 서비스도 보통으로 가고 있다.
+	PRINTL 
+	PRINTL ■ 기본 서비스
+	PRINTL 　:[수다] [기념 촬영]
+	PRINTL 
+	PRINTL ■ 선택되고 있는 추가 옵션
+	PRINTL 　:＜이용 가능한 옵션은 없습니다＞
+ELSE
+	PRINTL 【 도검뢰무(밤의 부)】
+	PRINTL 조금 엣치한 의상으로 노래하는, 밤의 라이브.
+	PRINTL 라이브후에는 조금 엣치한 팬 서비스도 준비하고 있습니다.
+	PRINTL 다만, 멤버에게로의 보디 터치는 엄금입니다.
+	PRINTL 
+	PRINTL ■ 기본 서비스
+	PRINTL 　:[수다] [기념 촬영]
+	PRINTL 　:[팬티 엿보기] [젖 보이고] [부카케]
+	PRINTL 
+	PRINTL ■ 선택되고 있는 추가 옵션
+	PRINTL 　:＜이용 가능한 옵션은 없습니다＞
+ENDIF
+PRINTL 
+DRAWLINE
+
+;--------------------------------------------------------
+;라이브로 노래하는 노예를 선택
+;--------------------------------------------------------
+PRINTFORML 도검뢰무로 노래하게 하는 노예를 선택해 주세요(최대 6명)
+WHILE G < 10
+	PRINTFORM 현재의 편성:
+	PRINTFORM (대장)
+	IF A > 0
+		PRINTFORM %CALLNAME:A%
+	ELSE
+		PRINTFORM 미선택
+	ENDIF
+	PRINTFORM /(부)
+	IF A:1 > 0
+		PRINTFORM %CALLNAME:(A:1)%
+	ELSE
+		PRINTFORM 미선택
+	ENDIF
+	SIF A:2 > 0
+		PRINTFORM /%CALLNAME:(A:2)%
+	SIF A:3 > 0
+		PRINTFORM /%CALLNAME:(A:3)%
+	SIF A:4 > 0
+		PRINTFORM /%CALLNAME:(A:4)%
+	SIF A:5 > 0
+		PRINTFORM /%CALLNAME:(A:5)%
+	PRINTFORML 
+	PRINTFORML 
+	C = COUNT
+	CALL SET_LIVE_SUP
+	;REPEAT CHARANUM
+	;	SIF COUNT == MASTER
+	;		CONTINUE
+	;	SIF CFLAG:COUNT:1 < 2
+	;		CONTINUE
+	;	SIF CFLAG:COUNT:12 > 0
+	;		CONTINUE
+	;	C = COUNT
+	;	CALL CHECK_CHILD_CARE
+	;	SIF RESULT == 1
+	;		CONTINUE
+	;	SIF (CFLAG:COUNT:151 & 2) && BASE:COUNT:체력 >= 800 && CFLAG:COUNT:18 > 0
+	;		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%를 제외한다
+	;	SIF (CFLAG:COUNT:151 & 2) && BASE:COUNT:체력 >= 800 && CFLAG:COUNT:18 == 0 && G < 6
+	;		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%를 선택
+	;REND
+	COUNT = C
+	SIF A > 0 || A:1 > 0 || A:2 > 0 || A:3 > 0 || A:4 > 0 || A:5 > 0
+		PRINTFORML [500] - 멤버를 리셋트
+	SIF A > 0
+		PRINTL [800] - 멤버를 확정한다
+	PRINTL [999] - 돌아온다
+	$INPUT_LOOP
+	INPUT
+	IF RESULT == 999
+		IF A > 0
+			CFLAG:A:18 = 0
+			A = 0
+		ENDIF
+		IF A:1 > 0
+			CFLAG:(A:1):18 = 0
+			A:1 = 0
+		ENDIF
+		IF A:2 > 0
+			CFLAG:(A:2):18 = 0
+			A:2 = 0
+		ENDIF
+		IF A:3 > 0
+			CFLAG:(A:3):18 = 0
+			A:3 = 0
+		ENDIF
+		IF A:4 > 0
+			CFLAG:(A:4):18 = 0
+			A:4 = 0
+		ENDIF
+		IF A:5 > 0
+			CFLAG:(A:5):18 = 0
+			A:5 = 0
+		ENDIF
+		RETURN 0
+	ELSEIF RESULT == 800
+		BREAK
+	ELSEIF RESULT == 500
+		IF A > 0
+			CFLAG:A:18 = 0
+			A = 0
+		ENDIF
+		IF A:1 > 0
+			CFLAG:(A:1):18 = 0
+			A:1 = 0
+		ENDIF
+		IF A:2 > 0
+			CFLAG:(A:2):18 = 0
+			A:2 = 0
+		ENDIF
+		IF A:3 > 0
+			CFLAG:(A:3):18 = 0
+			A:3 = 0
+		ENDIF
+		IF A:4 > 0
+			CFLAG:(A:4):18 = 0
+			A:4 = 0
+		ENDIF
+		IF A:5 > 0
+			CFLAG:(A:5):18 = 0
+			A:5 = 0
+		ENDIF
+		G = 0
+	ELSEIF RESULT < 0 || RESULT >= CHARANUM
+		GOTO INPUT_LOOP
+	ELSEIF RESULT == MASTER
+		GOTO INPUT_LOOP
+	ELSEIF CFLAG:RESULT:1 < 2
+		GOTO INPUT_LOOP
+	ELSEIF CFLAG:RESULT:12 > 0
+		GOTO INPUT_LOOP
+	ELSEIF ((CFLAG:RESULT:151 & 2) == 0) || BASE:RESULT:체력 < 800
+		GOTO INPUT_LOOP
+	ELSE
+		;미선택의 캐릭터를 추가했을 경우
+		IF CFLAG:RESULT:18 == 0 && G < 6
+			LOCAL = RESULT
+			CFLAG:LOCAL:18 = 1
+			PRINTFORML %CALLNAME:LOCAL%를 어디에 자리잡습니까?
+			PRINTFORML [ 0] - 대장
+			PRINTFORML [ 1] - 부대장
+			PRINTFORML [ 2] - 그 외
+			$INPUT_LOOP1
+			INPUT
+			IF RESULT == 0
+				IF A > 0
+					CFLAG:A:18 = 0
+					A = 0
+				ENDIF
+				A = LOCAL
+				G += 1
+			ELSEIF RESULT == 1
+				IF A:1 > 0
+					CFLAG:(A:1):18 = 0
+					A:1 = 0
+				ENDIF
+				A:1 = LOCAL
+				G += 1
+			ELSEIF RESULT == 2
+				IF A:2 == 0
+					A:2 = LOCAL
+				ELSEIF A:3 == 0
+					A:3 = LOCAL
+				ELSEIF A:4 == 0
+					A:4 = LOCAL
+				ELSEIF A:5 == 0
+					A:5 = LOCAL
+				ENDIF
+				G += 1
+			ELSE
+				GOTO INPUT_LOOP1
+			ENDIF
+		;벌써 선택되고 있는 캐릭터를 재선택 했을 경우
+		ELSE
+			IF RESULT == A
+				CFLAG:A:18 = 0
+				A = 0
+			ELSEIF RESULT == A:1
+				CFLAG:(A:1):18 = 0
+				A:1 = 0
+			ELSEIF RESULT == A:2
+				CFLAG:(A:2):18 = 0
+				A:2 = 0
+			ELSEIF RESULT == A:3
+				CFLAG:(A:3):18 = 0
+				A:3 = 0
+			ELSEIF RESULT == A:4
+				CFLAG:(A:4):18 = 0
+				A:4 = 0
+			ELSE
+				CFLAG:(A:5):18 = 0
+				A:5 = 0
+			ENDIF
+			G -= 1
+			SIF G < 0
+				G = 0
+		ENDIF
+	ENDIF
+WEND
+LOCAL = 0
+
+SIF A == 0 && A:1 == 0 && A:2 == 0 && A:3 == 0 && A:4 == 0 && A:5 == 0
+	RETURN 0
+
+;이 시점에서, 보좌 요원은 있는데 부대장이 없는, 이라고 하는 경우, 보좌 요원의 1명을 부대장에게 앞당긴다.
+IF (A:2 || A:3 || A:4 || A:5) && A:1 == 0
+	IF A:2 > 0
+		A:1 = A:2
+		CFLAG:(A:1):18 = 1
+		CFLAG:(A:2):18 = 0
+		A:2 = 0
+	ELSEIF A:3 > 0
+		A:1 = A:3
+		CFLAG:(A:1):18 = 1
+		CFLAG:(A:3):18 = 0
+		A:3 = 0
+	ELSEIF A:4 > 0
+		A:1 = A:4
+		CFLAG:(A:1):18 = 1
+		CFLAG:(A:4):18 = 0
+		A:4 = 0
+	ELSE
+		A:1 = A:5
+		CFLAG:(A:1):18 = 1
+		CFLAG:(A:5):18 = 0
+		A:5 = 0
+	ENDIF
+ENDIF
+
+IF G > 1
+	CALL SET_UNIT
+	IF W > 0
+		PRINTFORML 
+		PRINTFORMW 「%STR:80%」로 부대를 결성했습니다!
+	ELSEIF A:1 || A:2 || A:3 || A:4 || A:5
+		PRINTFORML 
+		PRINTFORMW %CALLNAME:A%를 부대장으로 한 부대를 편성했습니다
+	ENDIF
+ENDIF
+PRINTFORML 
+
+;--------------------------------------------------------
+;보수액에 직결하는 것을 계산
+;--------------------------------------------------------
+;노예의가창기능와가창경험의 레벨에 의해 가격의 기초치가 상승
+IF ABL:A:가창기능 == 0
+	S += 0
+ELSE
+	S += ABL:A:가창기능*800
+ENDIF
+SIF S
+	PRINTFORML %ABLNAME:14%{ABL:A:가창기능}LV +{S}
+
+;유닛 구성원의가창기능에 의한 보정
+IF A:1
+	Z:0 = 0
+	Z:1 = 0
+	Z:3 = 0
+	IF A:1
+		Z:0 += ABL:(A:1):가창기능
+		Z:1 += 1
+	ENDIF
+	IF A:2
+		Z:0 += ABL:(A:2):가창기능
+		Z:1 += 1
+	ENDIF
+	IF A:3
+		Z:0 += ABL:(A:3):가창기능
+		Z:1 += 1
+	ENDIF
+	IF A:4
+		Z:0 += ABL:(A:4):가창기능
+		Z:1 += 1
+	ENDIF
+	IF A:5
+		Z:0 += ABL:(A:5):가창기능
+		Z:1 += 1
+	ENDIF
+	SIF Z:0
+		Z:2 = Z:0/Z:1
+	IF Z:2 == 0
+		Z:3 += 0
+	ELSEIF Z:2 == 1
+		Z:3 += 600
+	ELSEIF Z:2 == 2
+		Z:3 += 1000
+	ELSEIF Z:2 == 3
+		Z:3 += 1500
+	ELSEIF Z:2 == 4
+		Z:3 += 2100
+	ELSEIF Z:2 == 5
+		Z:3 += 2800
+	ELSEIF Z:2 == 6
+		Z:3 += 3600
+	ELSEIF Z:2 == 7
+		Z:3 += 4500
+	ELSEIF Z:2 == 8
+		Z:3 += 5500
+	ELSEIF Z:2 == 9
+		Z:3 += 6600
+	ELSE
+		Z:3 += 7800
+	ENDIF
+	SIF Z:3
+		PRINTFORML 대원의 %ABLNAME:14%{Z:2}LV +{Z:3}
+	S += Z:3
+ENDIF
+
+;가창경험에 의한 보정
+IF EXP:A:가창경험 < EXPLV:1
+	D += 10
+ELSEIF EXP:A:가창경험 < EXPLV:2
+	D += 200
+ELSEIF EXP:A:가창경험 < EXPLV:3
+	D += 800
+ELSEIF EXP:A:가창경험 < EXPLV:4
+	D += 1800
+ELSEIF EXP:A:가창경험 < EXPLV:5
+	D += 3000
+ELSE
+	D += 5000
+ENDIF
+	PRINTFORML %EXPNAME:64%{EXP:A:가창경험} +{D}
+S += D
+
+
+;--------------------------------------------------------
+;노예의 능력, 소질에 의한 배율 계산
+;--------------------------------------------------------
+V = 100
+;ABL:A:순종를 본다
+IF ABL:A:순종 == 0
+	C = 0
+ELSEIF ABL:A:순종 == 1
+	C = 10
+ELSEIF ABL:A:순종 == 2
+	C = 20
+ELSEIF ABL:A:순종 == 3
+	C = 30
+ELSEIF ABL:A:순종 == 4
+	C = 40
+ELSEIF ABL:A:순종 == 5
+	C = 50
+ELSEIF ABL:A:순종 == 6
+	C = 60
+ELSEIF ABL:A:순종 == 7
+	C = 70
+ELSEIF ABL:A:순종 == 8
+	C = 80
+ELSEIF ABL:A:순종 == 9
+	C = 90
+ELSE
+	C = 100
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:0%{ABL:A:순종}LV +{C}%
+V += C
+
+;ABL:욕망를 본다
+IF ABL:A:욕망 == 0
+	C = 0
+ELSEIF ABL:A:욕망 == 1
+	C = 5
+ELSEIF ABL:A:욕망 == 2
+	C = 10
+ELSEIF ABL:A:욕망 == 3
+	C = 15
+ELSEIF ABL:A:욕망 == 4
+	C = 20
+ELSEIF ABL:A:욕망 == 5
+	C = 25
+ELSEIF ABL:A:욕망 == 6
+	C = 30
+ELSEIF ABL:A:욕망 == 7
+	C = 35
+ELSEIF ABL:A:욕망 == 8
+	C = 40
+ELSEIF ABL:A:욕망 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:1%{ABL:A:욕망}LV +{C}%
+V += C
+
+;ABL:기교를 본다
+IF ABL:A:기교 == 0
+	C = 0
+ELSEIF ABL:A:기교 == 1
+	C = 5
+ELSEIF ABL:A:기교 == 2
+	C = 10
+ELSEIF ABL:A:기교 == 3
+	C = 15
+ELSEIF ABL:A:기교 == 4
+	C = 20
+ELSEIF ABL:A:기교 == 5
+	C = 25
+ELSEIF ABL:A:기교 == 6
+	C = 30
+ELSEIF ABL:A:기교 == 7
+	C = 35
+ELSEIF ABL:A:기교 == 8
+	C = 40
+ELSEIF ABL:A:기교 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:2%{ABL:A:기교}LV +{C}%
+V += C
+
+;ABL:봉사정신를 본다
+IF ABL:A:봉사정신 == 0
+	C = 0
+ELSEIF ABL:A:봉사정신 == 1
+	C = 5
+ELSEIF ABL:A:봉사정신 == 2
+	C = 10
+ELSEIF ABL:A:봉사정신 == 3
+	C = 15
+ELSEIF ABL:A:봉사정신 == 4
+	C = 20
+ELSEIF ABL:A:봉사정신 == 5
+	C = 25
+ELSEIF ABL:A:봉사정신 == 6
+	C = 30
+ELSEIF ABL:A:봉사정신 == 7
+	C = 35
+ELSEIF ABL:A:봉사정신 == 8
+	C = 40
+ELSEIF ABL:A:봉사정신 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+IF C > 0
+	PRINTFORML %ABLNAME:7%{ABL:A:봉사정신}LV +{C}%
+ENDIF
+V += C
+
+
+;ABL:노출벽를 본다
+IF TIME != 0
+	IF ABL:A:노출벽 == 0
+		C = 0
+	ELSEIF ABL:A:노출벽 == 1
+		C = 10
+	ELSEIF ABL:A:노출벽 == 2
+		C = 20
+	ELSEIF ABL:A:노출벽 == 3
+		C = 30
+	ELSEIF ABL:A:노출벽 == 4
+		C = 40
+	ELSEIF ABL:A:노출벽 == 5
+		C = 50
+	ELSEIF ABL:A:노출벽 == 6
+		C = 60
+	ELSEIF ABL:A:노출벽 == 7
+		C = 70
+	ELSEIF ABL:A:노출벽 == 8
+		C = 80
+	ELSEIF ABL:A:노출벽 == 9
+		C = 90
+	ELSE
+		C = 100
+	ENDIF
+	SIF C > 0
+		PRINTFORML %ABLNAME:8%{ABL:A:노출벽}LV +{C}%
+	V += C
+ENDIF
+
+;--------------------------------------------------------
+;노예의 소질을 계산
+;--------------------------------------------------------
+;함락 소질
+;연모
+IF TALENT:A:연모
+	C = 100
+	V += 100
+	PRINTFORML %TALENTNAME:3% ＋{C}%
+ENDIF
+;음란
+IF TALENT:A:음란
+	C = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:4% －{C}%
+ENDIF
+;복종
+IF TALENT:A:복종
+	C = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:5% －{C}%
+ENDIF
+;친애
+IF TALENT:A:친애
+	C = 200
+	V += 200
+	PRINTFORML %TALENTNAME:6% ＋{C}%
+ENDIF
+;창부
+IF TALENT:A:창부
+	C = 60
+	V -= 60
+	PRINTFORML %TALENTNAME:7% －{C}%
+ENDIF
+;예속
+IF TALENT:A:예속
+	C = 100
+	V -= 100
+	PRINTFORML %TALENTNAME:8% －{C}%
+ENDIF
+
+
+
+;그 외 소질
+;겁쟁이
+IF TALENT:A:겁쟁이
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:10% ＋{C}%
+ENDIF
+;반항적
+IF TALENT:A:반항적
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:11% －{C}%
+ENDIF
+;꿋꿋함
+IF TALENT:A:꿋꿋함
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:12% ＋{C}%
+ENDIF
+;솔직함
+IF TALENT:A:솔직함
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:13% ＋{C}%
+ENDIF
+;얌전함
+IF TALENT:A:얌전함
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:14% ＋{C}%
+ENDIF
+;프라이드높음
+IF TALENT:A:프라이드높음
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:15% －{C}%
+ENDIF
+;건방짐
+IF TALENT:A:건방짐
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:16% －{C}%
+ENDIF
+;프라이드낮음
+IF TALENT:A:프라이드낮음
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:17% ＋{C}%
+ENDIF
+;츤데레
+IF TALENT:A:츤데레
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:18% ＋{C}%
+ENDIF
+;자제심
+IF TALENT:A:자제심
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:20% ＋{C}%
+ENDIF
+;무관심
+IF TALENT:A:무관심
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:21% －{C}%
+ENDIF
+;감정부족
+IF TALENT:A:감정부족
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:22% －{C}%
+ENDIF
+;일선을넘지않음
+IF TALENT:A:일선을넘지않음
+	C = 15
+	V += 15
+	PRINTFORML %TALENTNAME:27% ＋{C}%
+ENDIF
+;눈에띄고싶음
+IF TALENT:A:눈에띄고싶음
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:28% ＋{C}%
+ENDIF
+;정조관념
+IF TALENT:A:정조관념
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:30% ＋{C}%
+ENDIF
+;정조무관심
+IF TALENT:A:정조무관심
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:31% －{C}%
+ENDIF
+;습득빠름
+IF TALENT:A:습득빠름
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:50% ＋{C}%
+ENDIF
+;습득느림
+IF TALENT:A:습득느림
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:51% －{C}%
+ENDIF
+;헌신적
+IF TALENT:A:헌신적
+	C = 15
+	V += 15
+	PRINTFORML %TALENTNAME:63% ＋{C}%
+ENDIF
+;남자혐오
+IF TALENT:A:남자혐오
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:82% －{C}%
+ENDIF
+;맹신
+IF TALENT:A:맹신
+	C = 15
+	V += 15
+	PRINTFORML %TALENTNAME:86% ＋{C}%
+ENDIF
+;소악마
+IF TALENT:A:소악마
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:87% ＋{C}%
+ENDIF
+;여자혐오
+IF TALENT:A:여자혐오
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:88% －{C}%
+ENDIF
+;요호
+IF TALENT:A:요호
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:91% ＋{C}%
+ENDIF
+;매력
+IF TALENT:A:매력
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:92% ＋{C}%
+ENDIF
+;수수께끼의매력
+IF TALENT:A:수수께끼의매력
+	C = 50
+	V += 50
+	PRINTFORML %TALENTNAME:94% ＋{C}%
+ENDIF
+;빈유
+IF TALENT:A:빈유
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:109% －{C}%
+ENDIF
+;절벽
+IF TALENT:A:절벽
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:110% －{C}%
+ENDIF
+;거유
+IF TALENT:A:거유
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:111% ＋{C}%
+ENDIF
+;폭유
+IF TALENT:A:폭유
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:112% ＋{C}%
+ENDIF
+;흡혈귀
+IF TALENT:A:흡혈귀
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:132% －{C}%
+ENDIF
+;동물귀
+IF TALENT:A:동물귀
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:143% ＋{C}%
+ENDIF
+;인기
+IF TALENT:A:인기
+	C = 25
+	V += 25
+	PRINTFORML %TALENTNAME:145% ＋{C}%
+ENDIF
+;임신
+IF TALENT:A:임신
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:153% ＋{C}%
+ENDIF
+;모성
+IF TALENT:A:모성
+	C = 60
+	V += 60
+	PRINTFORML %TALENTNAME:155% ＋{C}%
+ENDIF
+;극
+IF TALENT:A:극
+	C = 50
+	V += 50
+	PRINTFORML %TALENTNAME:180% ＋{C}%
+ENDIF
+
+;보정치가 0 이하의 경우는 1으로 한다
+SIF V <= 0
+	V = 1
+
+PRINTFORML 최종 배율 {V}%
+
+;보정치의 적용
+S *= V
+S /= 100
+
+
+;붕괴, 광기는 이윤을 꽤 낮게 한다(순종에 의해,80%까지 회복)
+IF TALENT:A:붕괴 || TALENT:A:광기
+PRINTL 
+	IF TALENT:A:붕괴
+		S *= ABL:A:순종
+		TIMES S , 0.08
+		Z = ABL:A:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:9% ×{Z}%
+	ELSEIF TALENT:A:광기
+		S *= ABL:A:순종
+		TIMES S , 0.08
+		Z = ABL:A:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:141% ×{Z}%
+	ENDIF
+PRINTL 
+ENDIF
+
+;난이도 처리
+;EASY
+IF FLAG:4 == 1
+	PRINTFORML 난이도:EASY ×120%
+	TIMES S , 1.20
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES S , 1.00
+;HARD
+ELSEIF FLAG:4 == 3
+	PRINTFORML 난이도:HARD ×80%
+	TIMES S , 0.80
+ENDIF
+
+
+;--------------------------------------------------------
+;라이브를 실행할까?
+;--------------------------------------------------------
+IF S > 0
+	PRINTFORMW 이윤은{S}고슈금정도를 전망할 수 있습니다
+ELSE
+	PRINTFORMW 이윤을 전망할 수 없기 때문에, 도검뢰무를 중지합니다
+	RETURN 0
+ENDIF
+
+PRINTFORML 도검뢰무를 실행합니까?
+PRINTL [0] -   실행한다
+PRINTL [100] - 그만둔다
+$INPUT_LOOP_3
+INPUT
+IF RESULT == 0
+	IF W > 0
+		PRINTFORML %STR:80%의 라이브를 열었다
+	ELSEIF A:1 || A:2 || A:3 || A:4 || A:5
+		PRINTFORML %CALLNAME:A%들의 라이브를 열었다
+	ELSE
+		PRINTFORML %CALLNAME:A%의 라이브를 열었다
+	ENDIF
+	
+	;이 타이밍에 성공 여부 판정
+	CALL CHECK_LIVE_FAV
+	
+	;이벤트입상 호출
+	TFLAG:13 = 20
+	CALL KOJO_MESSAGE_EVENT
+ELSEIF RESULT == 100
+	IF A > 0
+		CFLAG:A:18 = 0
+		A = 0
+	ENDIF
+	IF A:1 > 0
+		CFLAG:(A:1):18 = 0
+		A:1 = 0
+	ENDIF
+	IF A:2 > 0
+		CFLAG:(A:2):18 = 0
+		A:2 = 0
+	ENDIF
+	IF A:3 > 0
+		CFLAG:(A:3):18 = 0
+		A:3 = 0
+	ENDIF
+	IF A:4 > 0
+		CFLAG:(A:4):18 = 0
+		A:4 = 0
+	ENDIF
+	IF A:5 > 0
+		CFLAG:(A:5):18 = 0
+		A:5 = 0
+	ENDIF
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP_3
+ENDIF
+
+
+
+;====================================================================
+;라이브후의 경험이라든지 판정
+;====================================================================
+PRINTFORML 
+PRINTFORM 【%CALLNAME:A%
+SIF G > 1
+	PRINT 들
+PRINTL 의 경험과 구슬】
+
+;--------------------------------------------------------
+;라이브경험, 가창경험, 습득의 구슬
+Q = 0
+R = 0
+;--------------------------------------------------------
+Q = ABL:A:가창기능*8
+R += Q*30
+
+EXP:A:라이브경험 += 1
+SIF A:1
+	EXP:(A:1):라이브경험 += 1
+SIF A:2
+	EXP:(A:2):라이브경험 += 1
+SIF A:3
+	EXP:(A:3):라이브경험 += 1
+SIF A:4
+	EXP:(A:4):라이브경험 += 1
+SIF A:5
+	EXP:(A:5):라이브경험 += 1
+
+EXP:A:가창경험 += Q
+SIF A:1
+	EXP:(A:1):가창경험 += Q
+SIF A:2
+	EXP:(A:2):가창경험 += Q
+SIF A:3
+	EXP:(A:3):가창경험 += Q
+SIF A:4
+	EXP:(A:4):가창경험 += Q
+SIF A:5
+	EXP:(A:5):가창경험 += Q
+
+SIF G > 1
+	PRINT 전원의
+PRINTFORML 라이브경험＋1
+SIF G > 1
+	PRINT 전원의
+PRINTFORML 가창경험＋{Q}
+
+;--------------------------------------------------------
+;인기도의 계산
+B:0 = 0
+B:1 = 0
+B:2 = 0
+B:3 = 0
+B:4 = 0
+B:5 = 0
+;--------------------------------------------------------
+B:0 = (EXP:A:라이브경험+ABL:A:가창기능)/3
+SIF A:1
+	B:1 = (EXP:(A:1):라이브경험+ABL:(A:1):가창기능)/3
+SIF A:2
+	B:2 = (EXP:(A:2):라이브경험+ABL:(A:2):가창기능)/3
+SIF A:3
+	B:3 = (EXP:(A:3):라이브경험+ABL:(A:3):가창기능)/3
+SIF A:4
+	B:4 = (EXP:(A:4):라이브경험+ABL:(A:4):가창기능)/3
+SIF A:5
+	B:5 = (EXP:(A:5):라이브경험+ABL:(A:5):가창기능)/3
+
+IF F
+	B:0 *= 2
+	SIF A:1
+		B:1 *= 2
+	SIF A:2
+		B:2 *= 2
+	SIF A:3
+		B:3 *= 2
+	SIF A:4
+		B:4 *= 2
+	SIF A:5
+		B:5 *= 2
+ENDIF
+
+IF TIME != 0
+	B:0 *= 2
+	SIF A:1
+		B:1 *= 2
+	SIF A:2
+		B:2 *= 2
+	SIF A:3
+		B:3 *= 2
+	SIF A:4
+		B:4 *= 2
+	SIF A:5
+		B:5 *= 2
+ENDIF
+
+
+;--------------------------------------------------------
+;사진촬영
+;--------------------------------------------------------
+Q = (B:0)/5
+EXP:A:피사경험 += Q
+PRINTFORML %CALLNAME:A%의 %EXPNAME:63%＋{Q}
+
+IF A:1
+	Q:1 = (B:1)/5
+	EXP:(A:1):피사경험 += Q:1
+	PRINTFORML %CALLNAME:(A:1)%의 %EXPNAME:63%＋{Q:1}
+ENDIF
+IF A:2
+	Q:2 = (B:2)/5
+	EXP:(A:2):피사경험 += Q:2
+	PRINTFORML %CALLNAME:(A:2)%의 %EXPNAME:63%＋{Q:2}
+ENDIF
+IF A:3
+	Q:3 = (B:3)/5
+	EXP:(A:3):피사경험 += Q:3
+	PRINTFORML %CALLNAME:(A:3)%의 %EXPNAME:63%＋{Q:3}
+ENDIF
+IF A:4
+	Q:4 = (B:4)/5
+	EXP:(A:4):피사경험 += Q:4
+	PRINTFORML %CALLNAME:(A:4)%의 %EXPNAME:63%＋{Q:4}
+ENDIF
+IF A:5
+	Q:5 = (B:5)/5
+	EXP:(A:5):피사경험 += Q:5
+	PRINTFORML %CALLNAME:(A:5)%의 %EXPNAME:63%＋{Q:5}
+ENDIF
+
+
+;--------------------------------------------------------
+;엣치한 서비스
+;[팬티 엿보기] [젖 보이고] [부카케]
+D = 0
+E = 0
+F = 0
+;--------------------------------------------------------
+IF TIME != 0
+	;전원의인기도를발 해, 그 자리의 인원수를 계산
+	D = (B:0+B:1+B:2+B:3+B:4+B:5)/10
+	SIF D < 3
+		D = 3+(RAND:4+1)
+	SIF D > 30
+		D = 30
+	
+	;자위한 인원수
+	E = (D+ABL:A:노출벽+ABL:A:봉사정신)/5
+	;부카케는 1/3
+	F = E/3
+	IF F
+		EXP:A:정액경험 += F
+		PRINTFORML %CALLNAME:A%의정액경험＋{F}
+	ENDIF
+	
+	;욕정
+	JUEL:A:욕정 += E*15
+	PRINTFORML %CALLNAME:A%의욕정의 구슬＋{E*15}
+	
+	;수치
+	IF TALENT:A:부끄럼쟁이
+		E = E*45
+	ELSEIF TALENT:A:수치심없음
+		E = E*20
+	ELSE
+		E = E*30
+	ENDIF
+	JUEL:A:수치 += E
+	PRINTFORML %CALLNAME:A%의수치의 구슬＋{E}
+	
+	IF A:1
+		E:1 = (D+ABL:(A:1):노출벽+ABL:(A:1):봉사정신)/5
+		F = (E:1)/3
+		IF F
+			EXP:(A:1):정액경험 += F
+			PRINTFORML %CALLNAME:(A:1)%의정액경험＋{F}
+		ENDIF
+		
+		;욕정
+		JUEL:(A:1):욕정 += E:1*15
+		PRINTFORML %CALLNAME:(A:1)%의욕정의 구슬＋{E:1*15}
+		
+		;수치
+		IF TALENT:(A:1):부끄럼쟁이
+			E = E:1*45
+		ELSEIF TALENT:(A:1):수치심없음
+			E = E:1*20
+		ELSE
+			E = E:1*30
+		ENDIF
+		JUEL:(A:1):수치 += E
+		PRINTFORML %CALLNAME:(A:1)%의수치의 구슬＋{E}
+	ENDIF
+	IF A:2
+		E:2 = (D+ABL:(A:2):노출벽+ABL:(A:2):봉사정신)/5
+		F = (E:2)/3
+		IF F
+			EXP:(A:2):정액경험 += F
+			PRINTFORML %CALLNAME:(A:2)%의정액경험＋{F}
+		ENDIF
+		
+		;욕정
+		JUEL:(A:2):욕정 += E:2*15
+		PRINTFORML %CALLNAME:(A:2)%의욕정의 구슬＋{E:2*15}
+		
+		;수치
+		IF TALENT:(A:2):부끄럼쟁이
+			E = E:2*45
+		ELSEIF TALENT:(A:2):수치심없음
+			E = E:2*20
+		ELSE
+			E = E:2*30
+		ENDIF
+		JUEL:(A:2):수치 += E
+		PRINTFORML %CALLNAME:(A:2)%의수치의 구슬＋{E}
+	ENDIF
+	IF A:3
+		E:3 = (D+ABL:(A:3):노출벽+ABL:(A:3):봉사정신)/5
+		F = (E:3)/3
+		IF F
+			EXP:(A:3):정액경험 += F
+			PRINTFORML %CALLNAME:(A:3)%의정액경험＋{F}
+		ENDIF
+		
+		;욕정
+		JUEL:(A:3):욕정 += E:3*15
+		PRINTFORML %CALLNAME:(A:3)%의욕정의 구슬＋{E:3*15}
+		
+		;수치
+		IF TALENT:(A:3):부끄럼쟁이
+			E = E:3*45
+		ELSEIF TALENT:(A:3):수치심없음
+			E = E:3*20
+		ELSE
+			E = E:3*30
+		ENDIF
+		JUEL:(A:3):수치 += E
+		PRINTFORML %CALLNAME:(A:3)%의수치의 구슬＋{E}
+	ENDIF
+	IF A:4
+		E:4 = (D+ABL:(A:4):노출벽+ABL:(A:4):봉사정신)/5
+		F = (E:4)/3
+		IF F
+			EXP:(A:4):정액경험 += F
+			PRINTFORML %CALLNAME:(A:4)%의정액경험＋{F}
+		ENDIF
+		
+		;욕정
+		JUEL:(A:4):욕정 += E:4*15
+		PRINTFORML %CALLNAME:(A:4)%의욕정의 구슬＋{E:4*15}
+		
+		;수치
+		IF TALENT:(A:4):부끄럼쟁이
+			E = E:4*45
+		ELSEIF TALENT:(A:4):수치심없음
+			E = E:4*20
+		ELSE
+			E = E:4*30
+		ENDIF
+		JUEL:(A:4):수치 += E
+		PRINTFORML %CALLNAME:(A:4)%의수치의 구슬＋{E}
+	ENDIF
+	IF A:5
+		E:5 = (D+ABL:(A:5):노출벽+ABL:(A:5):봉사정신)/5
+		F = (E:5)/3
+		IF F
+			EXP:(A:5):정액경험 += F
+			PRINTFORML %CALLNAME:(A:5)%의정액경험＋{F}
+		ENDIF
+		
+		;욕정
+		JUEL:(A:5):욕정 += E:5*15
+		PRINTFORML %CALLNAME:(A:5)%의욕정의 구슬＋{E:5*15}
+		
+		;수치
+		IF TALENT:(A:5):부끄럼쟁이
+			E = E:5*45
+		ELSEIF TALENT:(A:5):수치심없음
+			E = E:5*20
+		ELSE
+			E = E:5*30
+		ENDIF
+		JUEL:(A:5):수치 += E
+		PRINTFORML %CALLNAME:(A:5)%의수치의 구슬＋{E}
+	ENDIF
+ENDIF
+
+
+;--------------------------------------------------------
+;습득의 구슬
+;--------------------------------------------------------
+JUEL:A:습득 += R
+IF A:1
+	JUEL:(A:1):습득 += R
+ENDIF
+IF A:2
+	JUEL:(A:2):습득 += R
+ENDIF
+IF A:3
+	JUEL:(A:3):습득 += R
+ENDIF
+IF A:4
+	JUEL:(A:4):습득 += R
+ENDIF
+IF A:5
+	JUEL:(A:5):습득 += R
+ENDIF
+
+SIF G > 1
+	PRINT 전원의
+PRINTFORML 습득의 구슬＋{R}
+
+;--------------------------------------------------------
+;체력의 감소와 금욕 포인트, 스트레스
+;--------------------------------------------------------
+IF TIME != 0
+	V = 600
+ELSE
+	V = 300
+ENDIF
+
+;체력의 감소
+BASE:A:체력 -= V
+SIF A:1
+	BASE:(A:1):체력 -= V
+SIF A:2
+	BASE:(A:2):체력 -= V
+SIF A:3
+	BASE:(A:3):체력 -= V
+SIF A:4
+	BASE:(A:4):체력 -= V
+SIF A:5
+	BASE:(A:5):체력 -= V
+
+;정조대 붙고 있으면 밤은 금욕 포인트 증가
+SIF TEQUIP:A:정조대 && TIME != 0
+	CFLAG:602 += V/2
+SIF A:1 && TEQUIP:(A:1):정조대 && TIME != 0
+	CFLAG:(A:1):602 += V/2
+SIF A:2 && TEQUIP:(A:2):정조대 && TIME != 0
+	CFLAG:(A:2):602 += V/2
+SIF A:3 && TEQUIP:(A:3):정조대 && TIME != 0
+	CFLAG:(A:3):602 += V/2
+SIF A:4 && TEQUIP:(A:4):정조대 && TIME != 0
+	CFLAG:(A:4):602 += V/2
+SIF A:5 && TEQUIP:(A:5):정조대 && TIME != 0
+	CFLAG:(A:5):602 += V/2
+
+;스트레스 해소(낮만)
+IF TIME == 0
+	CFLAG:A:10 -= ABL:A:가창기능
+	SIF A:1
+		CFLAG:(A:1):10 -= ABL:(A:1):가창기능
+	SIF A:2
+		CFLAG:(A:2):10 -= ABL:(A:2):가창기능
+	SIF A:3
+		CFLAG:(A:3):10 -= ABL:(A:3):가창기능
+	SIF A:4
+		CFLAG:(A:4):10 -= ABL:(A:4):가창기능
+	SIF A:5
+		CFLAG:(A:5):10 -= ABL:(A:5):가창기능
+ENDIF
+
+
+;--------------------------------------------------------
+;금액 계산
+;--------------------------------------------------------
+;사진 1매 20고슈금
+S += (Q+Q:1+Q:2+Q:3+Q:4+Q:5)*20
+
+;간파해 1회 300고슈금
+S += D*300
+
+PRINTFORMW 도검뢰무로 노래를 피로[披露] 한 결과,{S}고슈금의 이윤을 얻을 수 있었습니다
+MONEY += S
+
+;사용한 플래그는 정리합시다
+IF A > 0
+	CFLAG:A:12 = 0
+	CFLAG:A:18 = 0
+ENDIF
+IF A:1 > 0
+	CFLAG:(A:1):12 = 0
+	CFLAG:(A:1):18 = 0
+ENDIF
+IF A:2 > 0
+	CFLAG:(A:2):12 = 0
+	CFLAG:(A:2):18 = 0
+ENDIF
+IF A:3 > 0
+	CFLAG:(A:3):12 = 0
+	CFLAG:(A:3):18 = 0
+ENDIF
+IF A:4 > 0
+	CFLAG:(A:4):12 = 0
+	CFLAG:(A:4):18 = 0
+ENDIF
+IF A:5 > 0
+	CFLAG:(A:5):12 = 0
+	CFLAG:(A:5):18 = 0
+ENDIF
+
+DRAWLINE
+
+;휴게 플래그를 세운다
+FLAG:0 = 1
+BEGIN TURNEND
+
+
+
+
+;====================================================================
+;라이브로 노래하는 노예를 선택 2
+;====================================================================
+@SET_LIVE_SUP
+REPEAT CHARANUM
+	SIF COUNT == MASTER
+		CONTINUE
+	SIF CFLAG:COUNT:1 < 2
+		CONTINUE
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+	C = COUNT
+	CALL CHECK_CHILD_CARE
+	SIF RESULT == 1
+		CONTINUE
+	SIF (CFLAG:COUNT:151 & 2) && BASE:COUNT:체력 >= 800 && CFLAG:COUNT:18 > 0
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%를 제외한다
+	SIF (CFLAG:COUNT:151 & 2) && BASE:COUNT:체력 >= 800 && CFLAG:COUNT:18 == 0 && V < 5
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%를 선택
+REND
+
+
+
+;====================================================================
+;멤버에 의해 부대를 세트
+;====================================================================
+@SET_UNIT
+#DIM DYNAMIC UNIT , 200
+VARSET UNIT
+FOR UNIT, 0, CHARANUM
+	C = UNIT
+	;선택되지 않은 캐릭터를 제외
+	SIF CFLAG:C:18 == 0
+		CONTINUE
+	;도파(산죠우)
+	;초승달, 코기츠네마루, 이시키리마루, 이와토오시, 이마노츠루기
+	SIF CFLAG:C:31 == 1
+		UNIT:1 += 1
+	;도파(미이케)
+	;대전태, 소하야
+	SIF CFLAG:C:31 == 2
+		UNIT:2 += 1
+	;도파(아오에)
+	;염주환, 에 빚
+	SIF CFLAG:C:31 == 3
+		UNIT:3 += 1
+	;도파(아와타입)
+	;오니마루, 나키키츠네, 한에, 나마즈꼬리, 골식, 히라노, 후, 후 후지, 시나노, 마에다, 아키타, 하카타, 란, 고코타이, 제약 기구, 부엌칼, 털리, 하쿠산
+	SIF CFLAG:C:31 == 4
+		UNIT:4 += 1
+	;도파(고비젠)
+	;오오카네히라, 앵
+	SIF CFLAG:C:31 == 5
+		UNIT:5 += 1
+	;도파(와)
+	;쿠니유키, 반디, 아이젠
+	SIF CFLAG:C:31 == 6
+		UNIT:6 += 1
+	;도파(무라마사)
+	;무라마사, 톤보키리
+	SIF CFLAG:C:31 == 7
+		UNIT:7 += 1
+	;도파(사다무네)
+	;물길, 북종, 귀갑
+	SIF CFLAG:C:31 == 8
+		UNIT:8 += 1
+	;도파(오사후네)
+	;촛대절, 대반야, 소용, 켄신, 빨간콩, 후쿠시마
+	SIF CFLAG:C:31 == 9
+		UNIT:9 += 1
+	;도파(산몬지)
+	;강설, 소우산, 사야, 타이코
+	SIF CFLAG:C:31 == 10
+		UNIT:10 += 1
+	;도파(카네사다)
+	;명인, 카네상
+	SIF CFLAG:C:31 == 11
+		UNIT:11 += 1
+	;도파(호리카와)
+	;수도자, 야마우바절, 호리카와
+	SIF CFLAG:C:31 == 12
+		UNIT:12 += 1
+	;도파(코테츠)
+	;하치스가, 장 소네, 우라시마
+	SIF CFLAG:C:31 == 13 || CFLAG:C:31 == 14
+		UNIT:13 += 1
+	;도파(강)
+	;바구니손절, 토요마에, 쿠와나, 마츠이, 장마, 무라쿠모, 이나바
+	SIF CFLAG:C:31 == 15
+		UNIT:14 += 1
+	;도파(마사무네)
+	;양지
+	SIF CFLAG:C:31 == 16
+		UNIT:15 += 1
+	;도파(1문자)
+	;미나이즈미, 산쵸모, 일광, 칙종, 희학
+	SIF CFLAG:C:31 == 17
+		UNIT:16 += 1
+	;도파(풍후쿠니유키 히로시)
+	;고금, 지장
+	SIF CFLAG:C:31 == 18
+		UNIT:17 += 1
+	
+	;도종(단도)
+	SIF CFLAG:C:30 == 2 || CFLAG:C:30 == 12
+		UNIT:21 += 1
+	;도종(호신용 단도)
+	SIF CFLAG:C:30 == 3 || CFLAG:C:30 == 13
+		UNIT:22 += 1
+	;도종(타도)
+	SIF CFLAG:C:30 == 4 || CFLAG:C:30 == 14
+		UNIT:23 += 1
+	;도종(칼)
+	SIF CFLAG:C:30 == 5 || CFLAG:C:30 == 15
+		UNIT:24 += 1
+	;도종(대칼)
+	SIF CFLAG:C:30 == 6 || CFLAG:C:30 == 16
+		UNIT:25 += 1
+	;도종(창)
+	SIF CFLAG:C:30 == 7 || CFLAG:C:30 == 17
+		UNIT:26 += 1
+	;도종(나기나타)
+	SIF CFLAG:C:30 == 8 || CFLAG:C:30 == 18
+		UNIT:27 += 1
+	;도종(검)
+	SIF CFLAG:C:30 == 9 || CFLAG:C:30 == 19
+		UNIT:28 += 1
+		
+	;천하 5검
+	;초승달, 대전태, 염주환, 오니마루, 도우지키리,
+	SIF NO:C == 3 || NO:C == 5 || NO:C == 17 || NO:C == 21
+		UNIT:31 += 1
+	;천하 3명창
+	;톤보키리, 오테기네, 니혼고
+	SIF NO:C == 65 || NO:C == 66 || NO:C == 136 || NO:C == 137 || NO:C == 138 || NO:C == 139
+		UNIT:32 += 1
+	;초기 도조
+	;카슈우, 명인, 무츠수, 야마우바절, 하치스가
+	SIF NO:C == 85 || NO:C == 86 || NO:C == 89 || NO:C == 93 || NO:C == 95 || NO:C == 101 || NO:C == 102
+		UNIT:33 += 1
+	
+	;헌상조
+	;오니마루, 한 오빠, 히라노, 우구이스마루, 츠루마루
+	SIF NO:C == 21 || NO:C == 25 || NO:C == 31 || NO:C == 55 || NO:C == 130 || NO:C == 131
+		UNIT:36 += 1
+	;류큐보검
+	;치요가네마루, 챠탄나키리, 치가네마루
+	SIF NO:C == 156 || NO:C == 157 || NO:C == 170 || NO:C == 186
+		UNIT:37 += 1
+	;일광 후타라산
+	;네네키리마루
+	SIF NO:C == 162
+		UNIT:38 += 1
+	
+	;토하크조
+	;초승달, 나키키츠네, 후, 오오카네히라, 귀갑, 대반야, 소용, 시시오
+	SIF NO:C == 3 || NO:C == 23 || NO:C == 33 || NO:C == 34 || NO:C == 53 || NO:C == 71 || NO:C == 72 || NO:C == 75 || NO:C == 77 || NO:C == 122 || NO:C ==123
+		UNIT:41 += 1
+	
+	;덕미조
+	;나마즈꼬리, 후 후지, 물길, 미나이즈미, 장의, 장마
+	SIF NO:C == 27 || NO:C == 28 || NO:C == 35 || NO:C == 67 || NO:C == 68 || NO:C == 154 || NO:C == 155|| NO:C == 158 || NO:C == 192
+		UNIT:42 += 1
+	
+	;평안조
+	;초승달, 코기츠네마루, 이시키리마루, 이와토오시, 이마노츠루기, 우구이스마루, 시시오, 코가라스마루, 츠루마루
+	SIF NO:C == 3 || NO:C == 5 || NO:C == 7 || NO:C == 8 || NO:C ==  9 || NO:C == 10 || NO:C == 11 || NO:C == 12 || NO:C == 55 || NO:C == 122 || NO:C == 123 || NO:C == 124 || NO:C == 130 || NO:C == 131
+		UNIT:46 += 1
+	;에도막부 말기조
+	;카슈우, 안정, 카네상, 무츠수, 호리카와, 장 소네, 남해, 히젠
+	SIF NO:C == 85 || NO:C == 86 || NO:C == 87 || NO:C == 88 || NO:C == 91 || NO:C == 92 || NO:C == 93 || NO:C == 99 || NO:C == 100 || NO:C == 105 || NO:C == 106 || NO:C == 166 || NO:C == 168
+		UNIT:47 += 1
+	
+	;의경 주종 콤비
+	;이와토오시, 이마노츠루기
+	SIF NO:C == 9 || NO:C == 10 || NO:C == 11 || NO:C == 12
+		UNIT:51 += 1
+	;발리조
+	;초승달, 대전태, 오니마루, 이치고히토후리, 골식, 후, 고코타이, 제약 기구, 우구이스마루, 대반야, 히게키리, 니혼고,
+	SIF NO:C == 3 || NO:C == 13 || NO:C == 21 || NO:C ==25 || NO:C == 29 || NO:C == 30 || NO:C == 33 || NO:C == 34 || NO:C ==47 || NO:C == 48 || NO:C == 49 || NO:C == 55 || NO:C == 75 || NO:C == 107 || NO:C == 111 || NO:C == 136 || NO:C == 137
+		UNIT:52 += 1
+	;오다조
+	;제약 기구, 소우산, 에 해 절, 부동
+	SIF NO:C == 49 || NO:C == 81 || NO:C == 82 || NO:C == 118 || NO:C == 120 || NO:C == 121
+		UNIT:53 += 1
+	;다테조
+	;북종, 촛대절, 오오쿠리카라, 츠루마루
+	SIF NO:C == 69 || NO:C == 73 || NO:C == 116 || NO:C == 130 || NO:C == 131
+		UNIT:54 += 1
+	;구로다구미
+	;후, 하카타, 사야, 에 해 절, 니혼고, 일광
+	SIF NO:C == 33 || NO:C == 34 || NO:C == 43 || NO:C == 44 || NO:C == 83 || NO:C == 84 || NO:C == 118 || NO:C == 136 || NO:C == 137 || NO:C == 188
+		UNIT:55 += 1
+	;오키타조
+	;카슈우, 안정
+	SIF NO:C == 85 || NO:C == 86 || NO:C == 87 || NO:C == 88
+		UNIT:56 += 1
+	;막노동자조
+	;카네상, 호리카와
+	SIF NO:C == 91 || NO:C == 92 || NO:C == 99 || NO:C == 100
+		UNIT:57 += 1
+	;신선조
+	;카슈우, 안정, 카네상, 호리카와, 장 소네
+	SIF NO:C == 85 || NO:C == 86 || NO:C == 87 || NO:C == 88 || NO:C == 91 || NO:C == 92 || NO:C == 99 || NO:C == 100 || NO:C == 105 || NO:C == 106
+		UNIT:58 += 1
+	;호소카와조
+	;사야, 명인, 바구니손절, 마츠이, 고금, 지장
+	SIF NO:C == 83 || NO:C == 84 || NO:C == 89 || NO:C == 144 || NO:C == 178 || NO:C == 182 || NO:C == 184
+		UNIT:59 += 1
+	;토쿠가와조
+	;소하야, 후 후지, 부엌칼, 무라마사, 톤보키리, 물길
+	SIF NO:C == 13 || NO:C == 35 || NO:C == 51 || NO:C == 52 || NO:C == 63  || NO:C == 64 || NO:C == 65 || NO:C == 66 || NO:C == 67 || NO:C == 68
+		UNIT:60 += 1
+	;도요토미조
+	;초승달, 한 오빠, 나마즈꼬리, 골식, 소우산
+	SIF NO:C == 3 || NO:C == 25 || NO:C == 27 || NO:C == 28 || NO:C == 29 || NO:C == 30 || NO:C == 81 || NO:C == 82
+		UNIT:61 += 1
+	;우에스기가
+	;고코타이, 켄신, 빨간콩, 산쵸모, 희학
+	SIF NO:C == 47 || NO:C == 48 || NO:C == 146 || NO:C == 148 || NO:C == 180 || NO:C == 202
+		UNIT:62 += 1
+	;마에다가
+	;대전태, 히라노, 마에다, 아이젠, 하쿠산
+	SIF NO:C == 13 || NO:C == 31 || NO:C == 39 || NO:C == 61 || NO:C == 164
+		UNIT:63 += 1
+	;사나다조
+	;치도리, 한진
+	SIF NO:C == 194 || NO:C == 196
+		UNIT:64 += 1
+	;후쿠시마조
+	;니혼고, 후쿠시마
+	SIF NO:C == 136 || NO:C == 137 || NO:C == 204
+		UNIT:65 += 1
+	
+	;겐지 형제
+	;히게키리, 히자마루
+	SIF NO:C == 107 || NO:C == 111 || NO:C == 112 || NO:C == 115
+		UNIT:81 += 1
+	;대장조
+	;후, 후 후지, 시나노, 제약 기구
+	SIF NO:C == 33 || NO:C == 34 || NO:C == 35 || NO:C == 37 || NO:C == 49
+		UNIT:82 += 1
+	;오사카죠조
+	;후 후지, 시나노, 하카타, 부엌칼, 털리, 하쿠산
+	SIF NO:C == 35 || NO:C == 37 || NO:C == 43 || NO:C == 44 || NO:C == 51 || NO:C == 52 || NO:C == 142 || NO:C == 164
+		UNIT:83 += 1
+	;여우 트리오/여우 콤비
+	;코기츠네마루, 나키키츠네, 하쿠산
+	SIF NO:C == 5 || NO:C == 23 || NO:C == 164
+		UNIT:84 += 1
+	;새칼
+	;우구이스마루, 츠루마루, 코가라스마루, 산쵸모
+	SIF NO:C == 55 || NO:C == 124 || NO:C == 130 || NO:C == 131 || NO:C == 180
+		UNIT:85 += 1
+	;무용조
+	;동타누키, 오테기네
+	SIF NO:C == 128 || NO:C == 138 || NO:C == 139
+		UNIT:86 += 1
+	;백중 콤비
+	;야만바기리 쿠니히로, 야만바기리 쵸우기
+	SIF NO:C == 95 || NO:C == 158
+		UNIT:87 += 1
+	;분큐 토사조
+	;무츠수, 남해, 히젠
+	SIF NO:C == 93 || NO:C == 166 || NO:C == 168
+		UNIT:88 += 1
+	;수행 다하고 남사
+	;나키키츠네, 고코타이, 시시오, 하쿠산
+	SIF NO:C == 23 || NO:C == 47 || NO:C == 48 || NO:C == 122 || NO:C == 123 || NO:C == 164
+		UNIT:89 += 1
+	;안경남사
+	;하카타, 제약 기구, 쿠니유키, 귀갑, 바구니손절, 남해, 일광
+	SIF NO:C == 43 || NO:C == 44 || NO:C == 49 || NO:C == 57 || NO:C == 71 || NO:C == 72 || NO:C == 144 || NO:C == 166 || NO:C == 188
+		UNIT:90 += 1
+	;도종변경조
+	;카네상, 오오쿠리카라, 동타누키
+	SIF NO:C == 91 || NO:C == 92 || NO:C == 116 || NO:C == 128
+		UNIT:91 += 1
+	;에도 세번째 작품
+	;수심자, 청마
+	SIF NO:C == 174 || NO:C == 176
+		UNIT:92 += 1
+	;팀 정부 칼
+	;장의, 남해, 히젠, 수심자, 청마, 고금, 지장, 칙종
+	SIF NO:C == 158 || NO:C == 166 || NO:C == 168 || NO:C == 174 || NO:C == 176 || NO:C == 182 || NO:C == 184 || NO:C == 198
+		UNIT:93 += 1
+	;오니키리 콤비
+	;오니마루, 히게키리
+	SIF NO:C == 21 || NO:C == 107 || NO:C == 111
+		UNIT:94 += 1
+	;감사관 콤비
+	;장의, 칙종
+	SIF NO:C == 158 || NO:C == 198
+		UNIT:95 += 1
+	;팀 선행 조사원
+	;남해, 히젠, 수심자, 청마, 고금, 지장
+	SIF NO:C == 166 || NO:C == 168 || NO:C == 174 || NO:C == 176 || NO:C == 182 || NO:C == 184
+		UNIT:96 += 1
+	;작은 것 클럽
+	;라인 이하(털리를 포함하지 않는다) 유닛명은 우선 이것으로…
+	;이마노츠루기, 히라노, 마에다, 아키타, 부엌칼, 호타루마루, 아이젠, 사야, 켄신, 키타다니
+	SIF NO:C == 11 || NO:C == 12 || NO:C == 31 || NO:C == 39 || NO:C == 41 || NO:C == 42 || NO:C == 51 || NO:C == 52 || NO:C == 59 || NO:C == 60 || NO:C == 61 || NO:C == 83 || NO:C == 84 || NO:C == 146 || NO:C == 170
+		UNIT:97 += 1
+	
+	;국보조
+	;초승달, 대전태, 후, 후 후지, 오오카네히라, 쿠니유키, 귀갑, 대반야, 소용, 강설, 에 해 절, 켄신, 양지, 치요가네마루, 하쿠산, 챠탄나키리, 산쵸모, 고금, 치가네마루, 타이코, 일광
+	SIF NO:C == 3 || NO:C == 13 || NO:C == 33 || NO:C == 34 || NO:C == 35 || NO:C == 53 || NO:C == 57 || NO:C == 71 || NO:C ==72 || NO:C == 75 || NO:C == 77 || NO:C == 79 || NO:C == 80 || NO:C == 118 || NO:C == 146 || NO:C == 150 || NO:C == 156 || NO:C == 157 || NO:C == 164 || NO:C == 170 || NO:C == 180 || NO:C == 182 || NO:C == 186 || C == 188 || NO:C == 190
+		UNIT:100 += 1
+	
+	;소질에서도 판정할 수 있을 것으로 실험하는 김에
+	;도검 여사
+	;부대의 전원이 여자, 후타나리, 쉬메일의 언젠가
+	SIF MALE(C) == 0
+		UNIT:101 += 1
+	
+	
+	
+	
+	
+NEXT
+
+;리더에 의해 부대명의 우선도를 바꾸는 테스트
+;리더마다 우선도를 바꾼다.
+
+;멤버가 혼자라면, 대는 짜지 않는다
+IF G == 1
+
+;멤버가 2명이, 동일 도검(특과극)이라면, 대는 짜지 않는다
+ELSEIF G == 2 && SAME_TOKEN(A:1, A:0, 0)
+
+;-----------------------------------------
+;천하 5검, 천하 3명창, 초기 칼
+;-----------------------------------------
+;천하 5검·천하 5(?) 검
+ELSEIF UNIT:31 == G
+	W = 31
+	;5사람 전원 있다
+	IF G == 5
+		STR:80 =천하 5검
+	;5사람 미만
+	ELSE
+		STR:80 =천하 5(?) 검
+	ENDIF
+;천하 3명창·강림나고(?) 3명창
+ELSEIF UNIT:32 == G
+	W = 32
+	;3사람 전원 있다
+	IF G == 3
+		STR:80 =천하 3명창
+	;3사람 미만
+	ELSE
+		STR:80 =천하 3(?) 명창
+	ENDIF
+;초기 도조
+ELSEIF UNIT:33 == G && G == 5
+	W = 33
+	STR:80 =초기 도조
+
+;-----------------------------------------
+;전의 주관련
+;-----------------------------------------
+;의경 주종 콤비
+ELSEIF UNIT:51 == G
+	W = 51
+	STR:80 =의경 주종 콤비
+;발리보검·발리조
+ELSEIF UNIT:52 == G
+	;초승달, 골식만이라면발리보검
+	IF ((NO:A || NO:(A:1)) == 3 && ((NO:A || NO:(A:1)) == 29 || (NO:A || NO:(A:1)) == 30) && G == 2)
+		W = 52
+		STR:80 = 발리보검
+	;멤버가 오니마루, 히게키리라면 오니키리 콤비 우선
+	ELSEIF UNIT:94 == G
+		W = 94
+		STR:80 =오니키리 콤비
+	;멤버 전원이 아와타입라면 아와타입우선
+	;오니마루, 이치고히토후리, 골식, 후, 고코타이, 제약 기구,
+	ELSEIF UNIT:4 == G
+		W = 4
+		;오니마루가 있으면 「형제」는 아니고 「파」에
+		IF (NO:A || NO:(A:1) || NO:(A:2) || NO:(A:3) || NO:(A:4) || NO:(A:5)) == 21
+			STR:80 =아와타입파
+		;멤버 전원이 아와타입 또한 단도
+		ELSEIF UNIT:21 == G
+			STR:80 =아와타입단도
+		ELSE
+			STR:80 =아와타입형제
+		ENDIF
+	ELSE
+		W = 52
+		STR:80 = 발리조
+	ENDIF
+;오다조
+ELSEIF UNIT:53 == G
+	W = 53
+	STR:80 =오다조
+;다테조
+ELSEIF UNIT:54 == G
+	W = 54
+	STR:80 =다테조
+;구로다구미
+ELSEIF UNIT:55 == G
+	;멤버 전원이 구로다구미 또한 아와타입라면 아와타입를 우선
+	;지금 현재는 후·하카타의 편성 마셔
+	IF UNIT:4 == G
+		W = 4
+		STR:80 =아와타입단도
+	ELSE
+		W = 55
+		STR:80 =구로다구미
+	ENDIF
+;오키타조
+ELSEIF UNIT:56 == G
+	W = 56
+	STR:80 =오키타조
+;막노동자조
+ELSEIF UNIT:57 == G
+	W = 57
+	STR:80 =막노동자조
+;신선조
+ELSEIF UNIT:58 == G
+	W = 58
+	STR:80 =신선조
+;호소카와조
+ELSEIF UNIT:59 == G
+	;멤버가 전원강이라면 강우선
+	;지금 현재는 바구니손절과 마츠이의 편성 마셔
+	IF UNIT:59 == G
+		W = 14
+		STR:80 =강
+	ELSE
+		W = 59
+		STR:80 =호소카와조
+	ENDIF
+;토쿠가와조
+ELSEIF UNIT:60 == G
+	;멤버 전원이 토쿠가와조 또한 아와타입라면 아와타입를 우선
+	;지금 현재는후 후지·부엌칼의 편성 마셔
+	IF UNIT:4 == G
+		W = 4
+		STR:80 =아와타입단도
+	ELSE
+		W = 60
+		STR:80 =토쿠가와조
+	ENDIF
+;도요토미조
+ELSEIF UNIT:61 == G
+	;멤버 전원이 도요토미조 또한 아와타입라면 아와타입를 우선
+	;지금 현재는 한 오빠·나마즈미·골식의 편성 마셔
+	IF UNIT:4 == G
+		W = 4
+		STR:80 =아와타입형제
+	ELSE
+		W = 61
+		STR:80 =도요토미조
+	ENDIF
+;우에스기가
+ELSEIF UNIT:62 == G
+	W = 62
+	STR:80 =우에스기조
+;마에다가
+ELSEIF UNIT:63 == G
+	;멤버 전원이 마에다가 또한 아와타입라면 아와타입를 우선
+	;지금 현재는 히라노·마에다의 편성 마셔
+	IF UNIT:4 == G
+		W = 4
+		STR:80 =아와타입단도
+	ELSE
+		W = 63
+		STR:80 =마에다가
+	ENDIF
+;사나다조
+ELSEIF UNIT:64 == G
+	W = 64
+	STR:80 =사나다조
+;후쿠시마조
+ELSEIF UNIT:65 == G
+	W = 65
+	STR:80 =후쿠시마조
+
+;-----------------------------------------
+;잡다
+;-----------------------------------------
+;겐지 형제
+ELSEIF UNIT:81 == G
+	W = 81
+	STR:80 =겐지 형제
+;대장조
+ELSEIF UNIT:82 == G
+	W = 82
+	STR:80 =대장조
+;오사카죠조
+ELSEIF UNIT:83 == G
+	W = 83
+	STR:80 =오사카죠조
+;여우 콤비·여우 트리오
+ELSEIF UNIT:84 == G
+	W = 84
+	;2사람이라면 콤비
+	IF G == 2
+		STR:80 =여우 콤비
+	ELSE
+		STR:80 =여우 트리오
+	ENDIF
+;새칼
+ELSEIF UNIT:85 == G
+	W = 85
+	STR:80 =새칼
+;무용조
+ELSEIF UNIT:86 == G
+	W = 86
+	STR:80 =무용조
+;백중 콤비
+ELSEIF UNIT:87 == G
+	W = 87
+	STR:80 =백중 콤비
+;분큐 토사조
+ELSEIF UNIT:88 == G
+	W = 88
+	STR:80 =분큐 토사조
+;수행 다하고 남사
+ELSEIF UNIT:89 == G
+	W = 89
+	STR:80 =수행 다하고 남사
+;안경남사
+ELSEIF UNIT:90 == G
+	W = 90
+	STR:80 =안경남사
+;도종변경조
+ELSEIF UNIT:91 == G
+	W = 91
+	STR:80 = 도종변경조
+;에도 세번째 작품
+ELSEIF UNIT:92 == G
+	W = 92
+	IF G == 3
+		STR:80 =에도 세번째 작품
+	ELSE
+		STR:80 =에도 세번째 작품 콤비
+	ENDIF
+;오니키리 콤비
+ELSEIF UNIT:94 == G
+	W = 94
+	STR:80 =오니키리 콤비
+;감사관 콤비
+ELSEIF UNIT:95 == G
+	W = 95
+	STR:80 =감사관 콤비
+;팀 선행 조사원
+ELSEIF UNIT:96 == G
+	W = 96
+	STR:80 =팀 선행 조사원
+;팀 정부 칼
+ELSEIF UNIT:93 == G
+	W = 93
+	STR:80 =팀 정부 칼
+;작은 것 클럽
+ELSEIF UNIT:97 == G
+	W = 97
+	STR:80 =작은 것 클럽
+
+
+
+;;국보조(디폴트에서는 comment out)
+;ELSEIF UNIT:100 == G
+;	W = 100
+;	STR:80 =국보조
+
+;-----------------------------------------
+;소장
+;-----------------------------------------
+;헌상조
+ELSEIF UNIT:36 == G
+	;멤버 전원이 헌상조 또한 아와타입라면 아와타입를 우선
+	;지금 현재는 오니마루·한 오빠, 히라노의 편성 마셔
+	IF UNIT:4 == G
+		W = 4
+		;오니마루가 있으면 「형제」는 아니고 「파」에
+		IF (NO:A || NO:(A:1) || NO:(A:2) || NO:(A:3) || NO:(A:4) || NO:(A:5)) == 21
+			STR:80 =아와타입파
+		ELSE
+			STR:80 =아와타입형제
+		ENDIF
+	ELSE
+		W = 36
+		STR:80 =헌상조
+	ENDIF
+;류큐보검
+ELSEIF UNIT:37 == G
+	W = 37
+	STR:80 =류큐보검
+;일광
+ELSEIF UNIT:38 == G
+	W = 38
+	STR:80 =일광
+
+;토하크조
+ELSEIF UNIT:41 == G
+	;멤버 전원이 토하크조 또한 아와타입라면 아와타입를 우선
+	;지금 현재는나키키츠네·후의 편성 마셔
+	IF UNIT:4 == G
+		W = 4
+		STR:80 =아와타입파
+	;멤버 전원이 토하크조 또한 오사후네라면 오사후네를 우선
+	;지금 현재는 대반야·소용의 편성 마셔
+	ELSEIF UNIT:9 == G
+		W = 9
+		STR:80 =오사후네파
+	ELSE
+		W = 41
+		STR:80 =토하크조
+	ENDIF
+;덕미조
+ELSEIF UNIT:42 == G
+	;멤버 전원이 덕미조 또한 아와타입라면 아와타입를 우선
+	;지금 현재는 나마즈꼬리·후 후지의 편성 마셔
+	IF UNIT:4 == G
+		W = 4
+		STR:80 =아와타입형제
+	ELSE
+		W = 42
+		STR:80 =덕미조
+	ENDIF
+
+;-----------------------------------------
+;시대
+;-----------------------------------------
+;평안조
+ELSEIF UNIT:46 == G
+	;멤버 전원이 평안조 또한 산죠우라면 세제곱을 우선
+	IF UNIT:1 == G
+		W = 1
+		STR:80 =산죠우파
+	ELSE
+		W = 46
+		STR:80 =평안조
+	ENDIF
+;에도막부 말기조
+ELSEIF UNIT:47 == G
+	W = 47
+	STR:80 =에도막부 말기조
+
+;-----------------------------------------
+;도파별
+;-----------------------------------------
+;산죠우
+ELSEIF UNIT:1 == G
+	W = 1
+	STR:80 =산죠우파
+;미이케
+ELSEIF UNIT:2 == G
+	W = 2
+	STR:80 =미이케
+;아오에
+ELSEIF UNIT:3 == G
+	W = 3
+	STR:80 =아오에파
+;아와타입
+ELSEIF UNIT:4 == G
+	W = 4
+	;오니마루나나키키츠네가 있으면 「형제」는 아니고 「파」에
+	IF (NO:A || NO:(A:1) || NO:(A:2) || NO:(A:3) || NO:(A:4) || NO:(A:5)) == ( 21 || 23 || 24)
+		STR:80 =아와타입파
+	ELSE
+		;멤버 전원이 아와타입 또한 단도
+		IF UNIT:21 == G
+			STR:80 =아와타입단도
+		ELSE
+			STR:80 =아와타입형제
+		ENDIF
+	ENDIF
+;고비젠
+ELSEIF UNIT:5 == G
+	W = 5
+	STR:80 =고비젠파
+;와
+ELSEIF UNIT:6 == G
+	W = 6
+	STR:80 =래파
+;무라마사
+ELSEIF UNIT:7 == G
+	W = 7
+	STR:80 =무라마사
+;사다무네
+ELSEIF UNIT:8 == G 
+	W = 8
+	STR:80 =사다무네
+;오사후네
+ELSEIF UNIT:9 == G
+	W = 9
+	;촛대절·후쿠시마
+	IF ((NO:A == 73 && NO:(A:1) == 204) || (NO:A == 204 && NO:(A:1) == 73)) && G == 2
+		STR:80 =미쓰타다 콤비
+	;대반야·빨간콩
+	ELSEIF ((NO:A == 75 && NO:(A:1) == 148) || (NO:A == 148 && NO:(A:1) == 75)) && G == 2
+		STR:80 =나가미츠 콤비
+	;소용·켄신
+	ELSEIF ((NO:A == 77 && NO:(A:1) == 146) || (NO:A == 146 && NO:(A:1) == 77)) && G == 2
+		STR:80 =경광콤비
+	ELSE
+		STR:80 =오사후네파
+	ENDIF
+;산몬지
+ELSEIF UNIT:10 == G
+	W = 10
+	IF G == 4
+		STR:80 =산몬지 4 형제
+	ELSE
+		STR:80 =산몬지 형제
+	ENDIF
+;카네사다
+ELSEIF UNIT:11 == G
+	W = 11
+	STR:80 =카네사다
+;호리카와
+ELSEIF UNIT:12 == G
+	W = 12
+	STR:80 =호리카와파
+;코테츠
+ELSEIF UNIT:13 == G
+	W = 13
+	;장 소네가 있으면 「코테츠」는 아니고 「코테츠…?」에
+	IF ((NO:A || NO:(A:1) || NO:(A:2) || NO:(A:3) || NO:(A:4) || NO:(A:5)) == 105) || ((NO:A || NO:(A:1) || NO:(A:2) || NO:(A:3) || NO:(A:4) || NO:(A:5)) == 106)
+		STR:80 =코테츠 형제…?
+	ELSE
+		STR:80 =코테츠 형제
+	ENDIF
+;강
+ELSEIF UNIT:14 == G
+	W = 14
+	STR:80 =강
+;마사무네
+ELSEIF UNIT:15 == G
+	W = 15
+	STR:80 =마사무네
+;후쿠오카 1문자
+ELSEIF UNIT:16 == G
+	W = 16
+	STR:80 =후쿠오카 1문자
+	
+;-----------------------------------------
+;소질
+;-----------------------------------------
+ELSEIF UNIT:101 == G
+	W = 101
+	STR:80 =도검 여사
+
+;-----------------------------------------
+;도종별
+;-----------------------------------------
+;단도
+ELSEIF UNIT:21 == G
+	W = 21
+	STR:80 =단도 부대
+;호신용 단도
+ELSEIF UNIT:22 == G
+	W = 22
+	STR:80 =호신용 단도 부대
+;타도
+ELSEIF UNIT:23 == G
+	W = 23
+	STR:80 =타도부대
+;칼
+ELSEIF UNIT:24 == G
+	W = 24
+	STR:80 =칼부대
+;대칼
+ELSEIF UNIT:25 == G
+	W = 25
+	STR:80 =대칼부대
+;창
+ELSEIF UNIT:26 == G
+	W = 26
+	STR:80 =창부대
+;나기나타
+ELSEIF UNIT:27 == G
+	W = 18
+	STR:80 =나기나타 부대
+;검
+ELSEIF UNIT:28 == G
+	W = 28
+	STR:80 =검부대
+
+ENDIF
+
+
+;====================================================================
+;라이브의 성공 여부 판정
+;====================================================================
+@CHECK_LIVE_FAV
+
+;유닛을 짜고 있어도, 판정에 관련되는 것은 메인의 가창력과 운
+IF ABL:A:가창기능 == 0
+	IF RAND:5 == 0
+		F = 1
+		Z = S
+		TIMES Z , 0.05
+		S += Z
+	ELSE
+		F = 0
+		Z = S
+		TIMES Z , 0.05
+		S -= Z
+	ENDIF
+ELSEIF ABL:A:가창기능 < 4
+	IF RAND:3 == 0
+		F = 1
+		Z = S
+		TIMES Z , 0.05
+		S += Z
+	ELSE
+		F = 0
+		Z = S
+		TIMES Z , 0.05
+		S -= Z
+	ENDIF
+ELSE
+	IF RAND:5 == 0
+		F = 0
+		Z = S
+		TIMES Z , 0.05
+		S -= Z
+	ELSE
+		F = 1
+		Z = S
+		TIMES Z , 0.05
+		S += Z
+	ENDIF
+ENDIF
+
+
+
+
+
+
+;-------------------------------------------------
+;가창기교에 응한 가창명 함수
+;-------------------------------------------------
+@SONG_NAME_TOHO
+;캐릭터의 레퍼터리
+;유닛 결성
+;
+;IF W == 0
+;	PRINT 『』
+;ELSEIF W == 1
+;	PRINT 『』
+;ENDIF
+;IF NO:TARGET == 2
+;	PRINT 『』
+;ENDIF
+
+
+
+
+
+

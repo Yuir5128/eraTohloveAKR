@@ -1,0 +1,115 @@
+﻿;-----------------------------------------------------------
+;このファイルは"eratohoYM v0-proto2"に同梱されているDAILY_LIFE.ERBを
+;"eratohoYM Mk-0 Rev.11"に改造したものを、さらにerahetaA私家改造版用に改変したものです
+;
+;【使用変数】
+;CFLAG:140 おもちゃの指輪フラグ
+;CFLAG:141 罠にかけたフラグ
+;CFLAG:142 アドバイスフラグ
+;------------------------------------------------------------
+@DAILY_LIFE
+;変数初期化
+VARSET LOCAL
+;キャラ登録数が1以下の時は引き返すフラグ
+SIF CHARANUM <= 1
+	LOCAL:4++
+REPEAT CHARANUM
+	;日常イベントに出場可能なキャラの人数を数える
+	SIF DAILYLIFE_CHARA(COUNT)
+		LOCAL++
+REND
+;日常イベントに出場可能なキャラがいなければ帰るフラグ
+SIF !LOCAL
+	LOCAL:4++
+;帰るフラグが立っていたらイベントを呼んで終了
+IF LOCAL:4
+	DRAWLINE
+	CALL DAILY_LIFE_RETURN
+	RETURN 1
+ENDIF
+
+DRAWLINE
+;まず、メインキャラを選ぶ
+B = -1
+C = -1
+A = -1
+A = DAILYLIFE_GETCHARA(0)
+
+;調教者変更対応、思慕対象をオフにする
+D = 1
+CALL DAILY_LIFE_MASTER_CHANGE
+
+;キャラ登録番号ごとに口上を呼び出す
+RESULT = 0
+CALL DAILY_LIFE_MASSAGE
+;キャラ個別日常イベントが呼ばれたら終了処理にとばす
+SIF RESULT
+	GOTO DAILY_END
+
+;変数の初期化
+VARSET LOCAL
+B = -1
+C = -1
+
+;どのイベントを発生させることが可能か判定し、可能イベント数をLOCAL:1に、イベントの種類をLOCAL:10～に記録
+FOR LOCAL, 0, 500
+	RESULT = 0
+	TRYCALLFORM DAILY_LIFE_ABLE_{LOCAL}
+	IF RESULT
+		LOCAL:(10 + LOCAL:1) = LOCAL
+		LOCAL:1++
+	ENDIF
+NEXT
+;発生可能イベントが無い
+SIF !LOCAL:1
+	RETURN 1
+
+;イベントの呼び出し
+;体力が一定値より低ければ休憩中
+IF MAXBASE:A:体力 >= 3000
+	Z = 1200
+ELSEIF MAXBASE:A:体力 <= 1200
+	Z = 800
+ELSE
+	Z = 1000
+ENDIF
+IF BASE:A:体力 <= Z
+	CALL DAILY_LIFE_SLEEP
+ELSE
+	LOCAL:2 = RAND:(LOCAL:1)
+	LOCAL:3 = LOCAL:(10 + LOCAL:2)
+	CALLFORM DAILY_LIFE_{LOCAL:3}
+ENDIF
+
+$DAILY_END
+;日常面識のセット
+CALL DAILY_MENSIKI(MASTER, A, B, C)
+
+;調教者変更対応、主人以外への恋慕・服従をオンにする
+D = 0
+CALL DAILY_LIFE_MASTER_CHANGE
+
+;体力気力回復数値オーバーを戻す
+SIF BASE:MASTER:体力 > MAXBASE:MASTER:体力
+	BASE:MASTER:体力 = MAXBASE:MASTER:体力
+SIF BASE:MASTER:気力 > MAXBASE:MASTER:気力
+	BASE:MASTER:気力 = MAXBASE:MASTER:気力
+IF A > -1
+	SIF BASE:A:体力 > MAXBASE:A:体力
+		BASE:A:体力 = MAXBASE:A:体力
+	SIF BASE:A:気力 > MAXBASE:A:気力
+		BASE:A:気力 = MAXBASE:A:気力
+ENDIF
+IF B > -1
+	SIF BASE:B:体力 > MAXBASE:B:体力
+		BASE:B:体力 = MAXBASE:B:体力
+	SIF BASE:B:気力 > MAXBASE:B:気力
+		BASE:B:気力 = MAXBASE:B:気力
+ENDIF
+IF C > -1
+	SIF BASE:C:体力 > MAXBASE:C:体力
+		BASE:C:体力 = MAXBASE:C:体力
+	SIF BASE:C:気力 > MAXBASE:C:気力
+		BASE:C:気力 = MAXBASE:C:気力
+ENDIF
+

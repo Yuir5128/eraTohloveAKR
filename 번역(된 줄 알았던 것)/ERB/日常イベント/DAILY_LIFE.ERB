@@ -1,0 +1,115 @@
+﻿;-----------------------------------------------------------
+;이 파일은"eratohoYM v0-proto2"에 동고 되고 있는 DAILY_LIFE.ERB를
+;"eratohoYM Mk-0 Rev. 11"에 개조한 것을,한층 더 erahetaA 사가 개조판용으로 개변한 것입니다
+;
+;【사용 변수】
+;CFLAG:140 장난감의 반지 플래그
+;CFLAG:141함정에 걸친 플래그
+;CFLAG:142 어드바이스 플래그
+;------------------------------------------------------------
+@DAILY_LIFE
+;변수 초기화
+VARSET LOCAL
+;캐릭터 등록수가 1 이하의 때는 되돌리는 플래그
+SIF CHARANUM <= 1
+	LOCAL:4++
+REPEAT CHARANUM
+	;일상 이벤트에 출장 가능한 캐릭터의 인원수를 센다
+	SIF DAILYLIFE_CHARA(COUNT)
+		LOCAL++
+REND
+;일상 이벤트에 출장 가능한 캐릭터가 없으면 돌아가는 플래그
+SIF !LOCAL
+	LOCAL:4++
+;돌아가는 플래그가 서 있으면 이벤트를 불러 종료
+IF LOCAL:4
+	DRAWLINE
+	CALL DAILY_LIFE_RETURN
+	RETURN 1
+ENDIF
+
+DRAWLINE
+;우선,메인 캐릭터를 선택한다
+B = -1
+C = -1
+A = -1
+A = DAILYLIFE_GETCHARA(0)
+
+;조교자 변경 대응,사모 대상을 오프로 한다
+D = 1
+CALL DAILY_LIFE_MASTER_CHANGE
+
+;캐릭터 등록 번호 마다입상을 호출한다
+RESULT = 0
+CALL DAILY_LIFE_MASSAGE
+;캐릭터 개별 일상 이벤트가 불리면 종료 처리에 날린다
+SIF RESULT
+	GOTO DAILY_END
+
+;변수의 초기화
+VARSET LOCAL
+B = -1
+C = -1
+
+;어느 이벤트를 발생시키는 것이 가능한가 판정해,가능 이벤트수를 LOCAL:1에,이벤트의 종류를 LOCAL:10~에 기록
+FOR LOCAL,0,500
+	RESULT = 0
+	TRYCALLFORM DAILY_LIFE_ABLE_{LOCAL}
+	IF RESULT
+		LOCAL:(10 + LOCAL:1) = LOCAL
+		LOCAL:1++
+	ENDIF
+NEXT
+;발생 가능 이벤트가 없다
+SIF !LOCAL:1
+	RETURN 1
+
+;이벤트의 호출
+;체력가 일정치보다 낮으면 휴게중
+IF MAXBASE:A:체력 >= 3000
+	Z = 1200
+ELSEIF MAXBASE:A:체력 <= 1200
+	Z = 800
+ELSE
+	Z = 1000
+ENDIF
+IF BASE:A:체력 <= Z
+	CALL DAILY_LIFE_SLEEP
+ELSE
+	LOCAL:2 = RAND:(LOCAL:1)
+	LOCAL:3 = LOCAL:(10 + LOCAL:2)
+	CALLFORM DAILY_LIFE_{LOCAL:3}
+ENDIF
+
+$DAILY_END
+;일상 안면세트
+CALL DAILY_MENSIKI(MASTER,A,B,C)
+
+;조교자 변경 대응,주인 이외에의연모·복종를 온으로 한다
+D = 0
+CALL DAILY_LIFE_MASTER_CHANGE
+
+;체력기력회복 수치 오버를 되돌린다
+SIF BASE:MASTER:체력 > MAXBASE:MASTER:체력
+	BASE:MASTER:체력 = MAXBASE:MASTER:체력
+SIF BASE:MASTER:기력 > MAXBASE:MASTER:기력
+	BASE:MASTER:기력 = MAXBASE:MASTER:기력
+IF A > -1
+	SIF BASE:A:체력 > MAXBASE:A:체력
+		BASE:A:체력 = MAXBASE:A:체력
+	SIF BASE:A:기력 > MAXBASE:A:기력
+		BASE:A:기력 = MAXBASE:A:기력
+ENDIF
+IF B > -1
+	SIF BASE:B:체력 > MAXBASE:B:체력
+		BASE:B:체력 = MAXBASE:B:체력
+	SIF BASE:B:기력 > MAXBASE:B:기력
+		BASE:B:기력 = MAXBASE:B:기력
+ENDIF
+IF C > -1
+	SIF BASE:C:체력 > MAXBASE:C:체력
+		BASE:C:체력 = MAXBASE:C:체력
+	SIF BASE:C:기력 > MAXBASE:C:기력
+		BASE:C:기력 = MAXBASE:C:기력
+ENDIF
+

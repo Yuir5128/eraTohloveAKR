@@ -1,0 +1,1143 @@
+﻿;=============================================================================
+;「거치고 싶고 실마리응」v1. 00 「erahetaA」용 범용 함수 파일
+;무단재배포 OK입니다만, erahetaA 이외에서의 용도는 전무일까하고 생각됩니다(특히 생일 서치 기능)
+;=============================================================================
+
+;--------------------------------------------------
+;이 파일안에 들어가 있는 기능 일람
+
+;erahetaA의 사양에 관한 함수군
+;COMF999						사랑의 도피 이벤트용 「조교를 강제 종료시킨다」기능
+;								사랑의 도피 이벤트에 한정하지 않고 개막으로 조교를 강제 종료시키고 싶은 경우도 이용 가능
+;								사용 변수… TFLAG:400 ~ 401
+
+;MASTERBIRTHDAY					「주인의 생일을 서치 한다」기능
+;								사용 변수… B:1
+
+;COMPARE_BSIZE					「가슴의 사이즈를 비교한다」기능
+;								사용 변수… A, A:1, A:2, B, B:1, B:2
+
+;COMPARE_CSIZE					「아래의 사이즈를 비교한다」기능
+;								사용 변수… A, A:1, A:2, B, B:1, B:2
+
+;안면 기능에 관한 함수군
+;SAVE_MEMBER					「요 일주일간 이내의 조교 대상과 조수를 기록한다」기능
+;								사용 변수… PREVCOM:801 ~ 828
+
+;SAVE_MEMBER					「요 일주일간 이내의 조교 대상과 조수를 기록한다」기능
+;								사용 변수… PREVCOM:801 ~ 830
+
+;SAVE_MEMBER_MASTER				「요 일주일간 이내의 주인을 기록한다」기능 ※eraToloveA02 사가 개조판에서 덧붙여 씀
+;								사용 변수… PREVCOM:831 ~ 845
+
+;SAVE_ACQUAINTANCE_DAILY_LIFE
+;SAVE_ACQUAINTANCE_ASSI			「조수나 일상 패치에서의 안면 관리」기능
+;								사용 변수… CFLAG:799 ~ 898
+;								→eraToloveA02 사가 개조판 CFLAG:2099 ~ 3098
+
+;GET_MEMBER_TARGET				「요 일주일간 이내의 조교 대상을 서치 한다」기능
+;								사용 변수… R, D:1, D:2
+
+;GET_MEMBER_ASSI				「요 일주일간 이내의 조수를 서치 한다」기능
+;								사용 변수… R, D:3, D:4
+
+;GET_MEMBER_MASTER				「요 일주일간 이내의 주인을 서치 한다」기능 ※eraToloveA02 사가 개조판에서 덧붙여 씀
+;								사용 변수… R, D:5, D:6
+
+;GET_LOSTPURE					「입상주의동정, 처녀, 후처녀를 빼앗은 상대를 서치 한다」기능
+;								사용 변수… R, L
+
+;GET_EATPURE					「입상주가 빼앗아 온동정, 처녀, 후처녀의 인원수를 서치 한다」기능
+;								사용 변수… R, E:1, E:2, E:3
+
+;GET_JIBUN						「처녀·동정·후처녀상실용으로꼬맹이 서치」
+;								사용 변수… R, L, A
+
+;승손에 우후후 기능에 관한 함수군
+;TARGETPLAY_NEXT				「조교 대상으로부터 봉사·역조교커맨드를 실행해 준다」기능
+;								사용 변수… NEXTCOM:0 ~ 7
+;--------------------------------------------------
+
+;=============================================================================
+;erahetaA의 사양에 관한 함수군
+;=============================================================================
+;-------------------------------------------------
+;사랑의 도피 이벤트용 「조교를 강제 종료시킨다」기능
+;NEXTCOM = 999로 이 처리를 호출할 수 있다
+;TFLAG:400 == 1하고 나서 호출하면 캐릭터를 소거 할 수 있다
+;TFLAG:400 == 0이라면 소거하지 않고 일자만을 보낸다
+;TFLAG:401에 캐릭터 번호를 넣는 것으로 사랑의 도피상대의 구입 가능 플래그도 만질 수 있습니다(요점에 싶고 실마리응확장)
+;999는 조교 종료인 것으로, 지금후도 사용하는 것이 없을 것. 이런 일로 점유
+;-------------------------------------------------
+@COM999
+;소거되는 경우용의 처리
+IF TFLAG:400 == 1
+	;노예가 탈주해손원으로부터 없어진다.
+	T = TARGET
+	A = ASSI
+	DELCHARA T
+	IF A != -1
+		IF A > T
+			ASSI = A-1
+		ELSE
+			ASSI = A
+		ENDIF
+	ENDIF
+	TARGET = -1
+	;-----------------------
+	;텐프레용:앙미츠 전용 처리
+	;IF TFLAG:401 == 1
+	;	FLAG:1023 = 0
+	;데릴 수 있어 도망치는 (분)편(키요미츠)를 X, 키요미츠를 데리고 가는 (분)편(안정)를 Y로서
+	;X에 키요미츠의 캐릭터 번호, Y에 안정의 캐릭터 번호-1을 넣는 것으로, 사랑의 도피상대를 살 수 없게 된다
+	;ELSEIF TFLAG:401 == 85
+	;	FLAG:1086 == 0
+	;ENDIF
+	;-----------------------
+	;-----------------------
+	;텐프레
+	;IF TFLAG:401 == 1
+	;	FLAG:1023 = 0
+	;ELSEIF TFLAG:401 == X
+	;	FLAG:10Y == 0
+	;ENDIF
+	;-----------------------
+ENDIF
+;소거의 유무에 관계없이 행해지는, 조교를 강제 종료해 일자를 보내는 처리
+REPEAT CHARANUM
+	;기력의 회복
+	IF TALENT:기절
+		TALENT:기절 -= 1
+	ELSE
+		BASE:COUNT:기력 = MAXBASE:COUNT:기력
+	ENDIF
+
+	;노역중의 캐릭터는체력회복 처리 없음
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+
+	;체력회복 정지 처리
+	IF CFLAG:COUNT:6 > 0
+		CFLAG:COUNT:6 -= 1
+		CONTINUE
+	ENDIF
+
+	;체력의 회복(오후의 조교후는 밤의 휴일이 들어가므로 회복 크다)
+	IF TIME == 0
+		A = MAXBASE:COUNT:체력 / 15
+	ELSE
+		A = MAXBASE:COUNT:체력 / 5
+	ENDIF
+
+	;회복빠름, 회복느림, 발정기, 불사신
+	IF TALENT:COUNT:회복빠름
+		TIMES A , 1.50
+	ELSEIF TALENT:COUNT:회복느림 || TALENT:COUNT:발정기
+		TIMES A , 0.75
+	ELSEIF TALENT:COUNT:불사신
+		TIMES A , 1.80
+	ENDIF
+
+	;일광욕, 월광욕, 흡혈귀
+	IF TIME == 0
+		SIF TALENT:COUNT:일광욕
+			A += 100
+	ELSE
+		SIF TALENT:COUNT:흡혈귀
+			TIMES A , 1.50
+		SIF TALENT:COUNT:월광욕
+			A += 100
+	ENDIF
+
+	;치료
+	IF ASSI >= 0
+		SIF TALENT:ASSI:치료
+		A += 150
+	ENDIF
+
+	;휴게 플래그(휴게 플래그가 지나 있다, 혹은 조교 대상이 아니다)
+	IF FLAG:0 || TARGET != COUNT
+		A += 100
+		CFLAG:COUNT:10 -= 1
+	ENDIF
+
+	;숍에서 휴게를 선택시
+	IF FLAG:0 == 2
+		TIMES A , 2.00
+		CFLAG:COUNT:10 -= 1
+	ENDIF
+
+	BASE:COUNT:체력 += A
+	SIF BASE:COUNT:체력 > MAXBASE:COUNT:체력
+		BASE:COUNT:체력 = MAXBASE:COUNT:체력
+
+	;스트레스치가 0 미만의 경우는 0으로 한다
+	SIF CFLAG:COUNT:10 < 0
+		CFLAG:COUNT:10 = 0
+
+REND
+
+CALL EVENTCHECK_ABL
+FLAG:0 = 0
+
+;오후라면 다음날, 오전이라면 오후로 한다
+IF TIME == 1
+	FLAG:81 += 1
+	FLAG:82 += 1
+
+	;일자 변경시의 이벤트 호출
+	CALL EVENT_NEXTDAY
+
+	DAY = DAY+1
+	PRINTW 하루가 끝났다……
+	TIME = 0
+	;배드 엔드의 판정
+	SIF DAY > 50 && FLAG:5 == 0
+		CALL BADENDING_1
+	SIF MONEY < 0 && FLAG:5 == 0
+		CALL BADENDING_2
+
+	;아침이 되었을 때의 이벤트 호출
+	CALL EVENT_NEWDAY
+	CALL EVENT_NEWDAY_SELF
+ELSE
+	;전체의임신판정의 처리
+	CALL IN_VAGINA_ANAL_ALL
+
+	PRINTL 
+	PRINTW 밤이 되었습니다
+	TIME = 1
+ENDIF
+
+BEGIN SHOP
+
+
+;-------------------------------------------------
+;주인의 생일 서치 기능
+;CALL MASTERBIRTHDAY로 이 처리를 호출할 수 있다
+;당일이 생일이면 B:1에 1이, 일주일간 이내에 생일이 온다면 B:1에 2가 대입되어 되돌아 온다
+;-------------------------------------------------
+@MASTERBIRTHDAY
+;상자를 비운다
+B:1 = 0
+
+
+
+;-------------------------------------------------
+;가슴의 사이즈를 비교하는 기능
+;A와 B와 비교하고 싶은 상대의 등록 번호를 넣어 CALL
+;B:1에 컸던 (분)편의 등록 번호, B:2에 그 차이를 돌려줍니다. 무승부시에는 B:1이-1이 됩니다
+;등록 번호는@NO든지 TARGET와 ASSI로 판정하든지 해 사용해 주세요
+;-------------------------------------------------
+@COMPARE_BSIZE
+A:1 = 0
+A:2 = 0
+B:1 = 0
+B:2 = 0
+IF TALENT:A:절벽
+	A:1 = 0
+ELSEIF TALENT:A:빈유
+	A:1 = 1
+ELSEIF TALENT:A:거유
+	A:1 = 3
+ELSEIF TALENT:A:폭유
+	A:1 = 4
+ELSE
+	A:1 = 2
+ENDIF
+
+IF TALENT:B:절벽
+	A:2 = 0
+ELSEIF TALENT:B:빈유
+	A:2 = 1
+ELSEIF TALENT:B:거유
+	A:2 = 3
+ELSEIF TALENT:B:폭유
+	A:2 = 4
+ELSE
+	A:2 = 2
+ENDIF
+
+IF A:1 > A:2
+	B:1 = A
+	B:2 = A:1
+	B:2 -= A:2
+ELSEIF A:1 < A:2
+	B:1 = B
+	B:2 = A:2
+	B:2 -= A:2
+ELSE
+	B:1 = -1
+	B:2 = 0
+ENDIF
+
+;-------------------------------------------------
+;아래의 사이즈를 비교하는 기능
+;A와 B와 비교하고 싶은 상대의 등록 번호를 넣어 CALL
+;B:1에 컸던 (분)편의 등록 번호, B:2에 그 차이를 돌려줍니다. 무승부시에는 B:1이-1이 됩니다
+;등록 번호는@NO든지 TARGET와 ASSI로 판정하든지 해 사용해 주세요
+;-------------------------------------------------
+@COMPARE_CSIZE
+A:1 = 0
+A:2 = 0
+B:1 = 0
+B:2 = 0
+IF TALENT:A:아이사이즈
+	A:1 = 0
+ELSEIF TALENT:A:단소
+	A:1 = 1
+ELSEIF TALENT:A:거근
+	A:1 = 3
+ELSEIF TALENT:A:말자지
+	A:1 = 4
+ELSE
+	A:1 = 2
+ENDIF
+
+IF TALENT:B:아이사이즈
+	A:2 = 0
+ELSEIF TALENT:B:단소
+	A:2 = 1
+ELSEIF TALENT:B:거근
+	A:2 = 3
+ELSEIF TALENT:B:말자지
+	A:2 = 4
+ELSE
+	A:2 = 2
+ENDIF
+
+IF A:1 > A:2
+	B:1 = A
+	B:2 = A:1
+	B:2 -= A:2
+ELSEIF A:1 < A:2
+	B:1 = B
+	B:2 = A:2
+	B:2 -= A:1
+ELSE
+	B:1 = -1
+	B:2 = 0
+ENDIF
+
+;=============================================================================
+;안면 기능에 관한 함수군
+;=============================================================================
+;-------------------------------------------------
+;기록 기능용의@EVENT 함수
+;-------------------------------------------------
+@EVENTEND
+	CALL SAVE_ACQUAINTANCE_ASSI
+	PREVCOM:829 = NO:TARGET
+	IF ASSI >= 0
+		PREVCOM:830 = NO:ASSI
+	ELSE
+		PREVCOM:830 = -1
+	ENDIF
+	PREVCOM:845 = NO:MASTER
+@EVENTTURNEND
+	CALL SAVE_MEMBER
+	CALL SAVE_MEMBER_MASTER
+
+;-------------------------------------------------
+;요 일주일간의 조수와 조교 대상을 기록하는 기능
+;PREVCOM:800이후를 성대하게 사용합니다
+;801 ~ 814 =요 일주일간의 노예의 캐릭터 번호
+;815 ~ 828 =요 일주일간의 조수
+;829보존용
+;830보존용
+;-------------------------------------------------
+@SAVE_MEMBER
+;노예의 캐릭터 번호를 등록
+I = 814
+REPEAT 14
+	IF I != 801
+		PREVCOM:I = PREVCOM:(I-1)
+	ELSE
+		IF TARGET > 0
+			IF PREVCOM:829 == NO:TARGET
+				PREVCOM:801 = NO:TARGET
+			ELSE
+				PREVCOM:801 = -1
+			ENDIF
+		ELSE
+			PREVCOM:801 = -1
+		ENDIF
+	ENDIF
+	I -= 1
+REND
+;조수의 캐릭터 번호를 등록
+I = 828
+REPEAT 14
+	IF I != 815
+		PREVCOM:I = PREVCOM:(I-1)
+	ELSE
+		IF ASSI >= 0
+			IF PREVCOM:830 == NO:ASSI
+				PREVCOM:815 = NO:ASSI
+			ELSE
+				PREVCOM:815 = -1
+			ENDIF
+		ELSE
+			PREVCOM:815 = -1
+		ENDIF
+	ENDIF
+	I -= 1
+REND
+PREVCOM:829 = -1
+PREVCOM:830 = -1
+
+;-------------------------------------------------
+;요 일주일간의 주인을 기록하는 기능 ※eraToloveA02 사가 개조판에서 덧붙여 씀
+;만약을 위해 함수 나누었습니다
+;PREVCOM:800이후를 성대하게 사용합니다
+;831 ~ 844 =요 일주일간의 주인의 캐릭터 번호
+;845보존용
+;-------------------------------------------------
+@SAVE_MEMBER_MASTER
+;조수의 캐릭터 번호를 등록
+I = 844
+REPEAT 14
+	IF I != 831
+		PREVCOM:I = PREVCOM:(I-1)
+	ELSE
+		IF MASTER >= 0
+			IF PREVCOM:845 == NO:MASTER
+				PREVCOM:831 = NO:MASTER
+			ELSE
+				PREVCOM:831 = -1
+			ENDIF
+		ELSE
+			PREVCOM:831 = -1
+		ENDIF
+	ENDIF
+	I -= 1
+REND
+PREVCOM:845 = -1
+
+;-------------------------------------------------
+;일상에서의 안면을 갱신하는 기능
+;거치고 싶고 실마리응도입으로 승손에 보존되게 됩니다
+;갱신에는입위쪽의 제어가 필요한 것으로 주의
+;-------------------------------------------------
+@SAVE_ACQUAINTANCE_DAILY_LIFE
+;B가 등장하지 않는 경우는 무시
+IF B > 0 && B < CHARANUM
+	G = (2099 + NO:A)
+	H = (2099 + NO:B)
+	CFLAG:A:H |= 1
+	CFLAG:B:G |= 1
+	;C가 있다면 C의 분도 판정
+	IF C > 0 && C < CHARANUM && C != B
+		I = (2099 + NO:C)
+		CFLAG:A:I |= 1
+		CFLAG:B:I |= 1
+		CFLAG:C:G |= 1
+		CFLAG:C:H |= 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;조수조교에서의 안면을 갱신하는 기능
+;거치고 싶고 실마리응도입으로 승손에 보존되게 됩니다
+;이것도 갱신에는입위쪽의 제어가 필요한 것으로 주의
+;-------------------------------------------------
+@SAVE_ACQUAINTANCE_ASSI
+H = (2099 + NO:TARGET)
+I = (2099 + NO:MASTER)
+CFLAG:TARGET:I |= 2
+CFLAG:MASTER:H |= 2
+;ASSI가 없는 경우는 무시
+IF ASSI >= 0
+	G = (2099 + NO:ASSI)
+	CFLAG:ASSI:H |= 2
+	CFLAG:ASSI:I |= 2
+	CFLAG:TARGET:G |= 2
+	CFLAG:MASTER:G |= 2
+ENDIF
+IF ASSIPLAY
+	CFLAG:ASSI:H |= 8
+	CFLAG:TARGET:G |= 4
+ELSE
+	CFLAG:MASTER:H |= 8
+	CFLAG:TARGET:I |= 4
+ENDIF
+
+;-------------------------------------------------
+;요 일주일간의 조교 대상을 서치 하는 기능
+;R에 조교 대상의 캐릭터 번호를 넣어 CALL
+;D:1에 조교 대상과 만난 날을 돌려준다. D:2에 실제로 만났던 것이 몇회전인지를 돌려준다
+;-------------------------------------------------
+@GET_MEMBER_TARGET
+;조교 대상 서치
+I = 814
+D:1 = -1
+D:2 = -1
+REPEAT 14
+	SIF PREVCOM:I == R
+		D:1 = (I - 800)
+	I -= 1
+REND
+IF D:1 >= 0
+	D:2 = D:1
+	;나누어 나머지가 나오지 않을 때는, 그대로÷2로 일자가 나온다
+	IF (D:1 % 2) == 0
+		D:1 /= 2
+	;나누어 나머지가 나올 때는, 지금이 낮이나 밤인가로 결과가 바뀐다
+	ELSE
+		;낮이라면 전날인 것으로, 1을발
+		IF TIME == 0
+			D:1 += 1
+		;밤이라면 그 날 안을 만나고 있으므로 1을 뺀다
+		ELSE
+			D:1 -= 1
+		ENDIF
+		D:1 /= 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;요 일주일간의 조수를 서치 하는 기능
+;R에 조수의 캐릭터 번호를 넣어 CALL
+;D:3에 조수와 만난 날을, D:4에 실제로 만났던 것이 몇회전인가 돌려준다
+;당일의 조수? 조수입상에서 판정하면 좋다고 생각한다!
+;-------------------------------------------------
+@GET_MEMBER_ASSI
+;조수서치
+I = 828
+D:3 = -1
+D:4 = -1
+REPEAT 14
+	SIF PREVCOM:I == R
+		D:3 = (I - 814)
+	I -= 1
+REND
+IF D:3 >= 0
+	D:4 = D:3
+	;나누어 나머지가 나오지 않을 때는, 그대로÷2로 일자가 나온다
+	IF (D:3 % 2) == 0
+		D:3 /= 2
+	;나누어 나머지가 나올 때는, 지금이 낮이나 밤인가로 결과가 바뀐다
+	ELSE
+		;낮이라면 전날인 것으로, 1을발
+		IF TIME == 0
+			D:3 += 1
+		;밤이라면 그 날 안을 만나고 있으므로 1을 뺀다
+		ELSE
+			D:3 -= 1
+		ENDIF
+		D:3 /= 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;요 일주일간의 주인을 서치 하는 기능
+;R에 주인의 캐릭터 번호를 넣어 CALL
+;D:5에 조수와 만난 날을, D:6에 실제로 만났던 것이 몇회전인가 돌려준다
+;-------------------------------------------------
+@GET_MEMBER_MASTER
+;조수서치
+I = 844
+D:5 = -1
+D:6 = -1
+REPEAT 14
+	SIF PREVCOM:I == R
+		D:5 = (I - 830)
+	I -= 1
+REND
+IF D:5 >= 0
+	D:6 = D:5
+	;나누어 나머지가 나오지 않을 때는, 그대로÷2로 일자가 나온다
+	IF (D:5 % 2) == 0
+		D:5 /= 2
+	;나누어 나머지가 나올 때는, 지금이 낮이나 밤인가로 결과가 바뀐다
+	ELSE
+		;낮이라면 전날인 것으로, 1을발
+		IF TIME == 0
+			D:5 += 1
+		;밤이라면 그 날 안을 만나고 있으므로 1을 뺀다
+		ELSE
+			D:5 -= 1
+		ENDIF
+		D:5 /= 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;입상주의동정, 처녀, 후처녀를 빼앗은 상대를 서치 하는 기능
+;R에동정라면 1, 처녀라면 4, 후처녀라면 16을 넣어 CALL
+;존재하면 L에 빼앗은 상대의 캐릭터 번호가 격납됩니다. 하는 김에 이름도 STR:300에 격납되어 있습니다
+;-------------------------------------------------
+@GET_LOSTPURE
+R *= 32
+L = -1
+REPEAT FLAG:44
+	G = (2099 + COUNT)
+	SIF (CFLAG:G & R)
+		L = COUNT
+REND
+SIF L > 0
+	CALLF LOSTNAME, L
+	
+;-------------------------------------------------
+;입상주가 지금까지 빼앗아 온동정, 처녀, 후처녀의 인원수를 서치 하는 기능
+;E:1에동정, E:2에처녀, E:3에후처녀를 빼앗아 온 인원수를 격납합니다
+;-------------------------------------------------
+@GET_EATPURE
+E:1 = 0
+E:2 = 0
+E:3 = 0
+REPEAT FLAG:44
+	G = (2099 + COUNT)
+	SIF (CFLAG:G & 16)
+		E:1 += 1
+	SIF (CFLAG:G & 32)
+		E:2 += 1
+	SIF (CFLAG:G & 64)
+		E:3 += 1
+REND
+
+;-------------------------------------------------
+;처녀·동정·후처녀상실용이상경험서치
+;자신(같은 나라)이라고 눈치채면 이상하다고 생각할지도
+;인 것으로 꼬맹이→큰 (분)편은 판정하고 있지 않습니다
+;R에 상실하는 대상, L에 상실상대를 넣어 CALL 하면,
+;A에이상경험취득이라면 1, 하지 않으면 0이 돌아갑니다
+;-------------------------------------------------
+@GET_JIBUN
+A = 0
+
+;동일 도검이라면이상경험가 붙는다(동일 도검의 특과극끼리 따위)
+SIF SAME_TOKEN(R, L, 1) == 1
+	A = 1
+
+;샘플
+;키요미츠가 안정에처녀상실 당했을 경우에 이상이 붙는다
+;IF R == 85
+;	SIF L == 87
+;		A = 1
+;ENDIF
+
+
+;=============================================================================
+;승손에 우후후 기능에 관한 함수군
+;=============================================================================
+;-------------------------------------------------
+;조교 대상이 승손에 다음의 커맨드를 선택하는 기능
+;실행하고 싶은 곳으로 CALL TARGETPLAY_NEXT
+;아무것도안한다, 느긋하게한다, 스킨십근처에서 호출하면 좋은 것이 아닐까
+;「조교 대상으로부터 플래그」로서 NEXTCOM:5가 1이 되므로, 입상은 그래서 분기 당합니다
+;-------------------------------------------------
+@TARGETPLAY_NEXT
+
+A = 0
+B = 0
+;우선 대체로의 방향성을 결정한다
+;매도와풋잡는 방향성에 차이가 있으므로역조교계와 함께 먼저 처리
+IF PREVCOM == 152 || PREVCOM == 80 || (PREVCOM >= 260 && PREVCOM < 286)
+	B += 20
+;전의 커맨드가애무·봉사·스킨십계이면 봉사계에 치우친다
+ELSEIF (PREVCOM >=0 && PREVCOM < 1) || (PREVCOM >= 70 && PREVCOM < 87) || (PREVCOM >= 200 && PREVCOM < 207)
+	A += 20
+;그 이외라면 비슷비슷
+ENDIF
+
+;ABL:마조끼에 의한 영향
+A += ABL:마조끼 * 5
+
+;ABL:조교자의새드끼에 의한 영향
+A += ABL:PLAYER:새드끼 * 5
+
+;ABL:새드끼에 의한 영향
+B += ABL:새드끼 * 5
+
+;ABL:조교자의마조끼에 의한 영향
+B += ABL:PLAYER:마조끼 * 5
+
+;연모와친애는 봉사 측에 치우치기 쉽다
+SIF TALENT:연모 || TALENT:친애
+	A += 50
+
+;복종와예속는 거의 봉사 측에 간다
+SIF TALENT:복종 || TALENT:예속
+	A += 200
+
+;상당한 랜덤 요소가 들어간다
+A += RAND:25
+B += RAND:25
+
+
+;겁쟁이 봉사 측에 치우치기 쉽다
+IF TALENT:겁쟁이
+	TIMES A , 1.20
+	TIMES B , 0.80
+ENDIF
+
+;반항적 역조교측에 치우치기 쉽다
+IF TALENT:반항적
+	TIMES A , 0.80
+	TIMES B , 1.20
+ENDIF
+
+;솔직함 어느 쪽의 영향도 강해진다
+IF TALENT:솔직함
+	TIMES A , 1.20
+	TIMES B , 1.20
+ENDIF
+
+;얌전함 봉사 측에 치우치기 쉽다
+IF TALENT:얌전함
+	TIMES A , 1.20
+	TIMES B , 0.60
+ENDIF
+
+;프라이드높음 역조교측에 치우치기 쉽다
+IF TALENT:프라이드높음
+	TIMES A , 0.70
+	TIMES B , 1.30
+ENDIF
+
+;건방짐 역조교측에 치우치기 쉽다
+IF TALENT:건방짐
+	TIMES A , 0.90
+	TIMES B , 1.30
+ENDIF
+
+;프라이드낮음 봉사 측에 치우치기 쉽다
+IF TALENT:프라이드낮음
+	TIMES A , 1.30
+	TIMES B , 0.70
+ENDIF
+
+;자제심 봉사 측에 치우치기 쉽다
+IF TALENT:자제심
+	TIMES A , 1.20
+	TIMES B , 0.80
+ENDIF
+
+;무관심 어느 쪽의 영향도 약해진다
+IF TALENT:무관심
+	TIMES A , 0.80
+	TIMES B , 0.80
+ENDIF
+
+;감정부족 어느 쪽의 영향도 약해진다
+IF TALENT:감정부족
+	TIMES A , 0.80
+	TIMES B , 0.80
+ENDIF
+
+;호기심 역조교측에 치우치기 쉽다
+IF TALENT:호기심
+	TIMES A , 0.70
+	TIMES B , 1.20
+ENDIF
+
+;보수적 봉사 측에 치우치기 쉽다
+IF TALENT:보수적
+	TIMES A , 1.30
+	TIMES B , 0.70
+ENDIF
+
+;눈에띄고싶음 역조교측에 매우 치우치기 쉽다
+IF TALENT:눈에띄고싶음
+	TIMES A , 0.60
+	TIMES B , 1.40
+ENDIF
+
+;부끄럼쟁이 봉사 측에 치우치기 쉽다
+IF TALENT:부끄럼쟁이
+	TIMES A , 1.20
+	TIMES B , 0.80
+ENDIF
+
+;새드 역조교측에 매우 치우치기 쉽다
+IF TALENT:새드
+	TIMES A , 0.50
+	TIMES B , 2.00
+ENDIF
+
+;마조 봉사 측에 매우 치우치기 쉽다
+IF TALENT:마조
+	TIMES A , 2.00
+	TIMES B , 0.50
+ENDIF
+
+;소악마 역조교측에 치우치기 쉽다
+IF TALENT:소악마
+	TIMES A , 0.80
+	TIMES B , 1.20
+ENDIF
+
+;요호 역조교측에 치우치기 쉽다
+IF TALENT:요호
+	TIMES A , 0.80
+	TIMES B , 1.20
+ENDIF
+
+;매력 어느 쪽의 영향도 강해진다
+IF TALENT:매력
+	TIMES A , 1.10
+	TIMES B , 1.10
+ENDIF
+
+;매혹 어느 쪽의 영향도 강해진다
+IF TALENT:매혹
+	TIMES A , 1.10
+	TIMES B , 1.10
+ENDIF
+
+;수수께끼의매력 어느 쪽의 영향도 강해진다
+IF TALENT:수수께끼의매력
+	TIMES A , 1.20
+	TIMES B , 1.20
+ENDIF
+
+;고무적 특히 봉사 측에 치우치기 쉽다
+IF TALENT:고무적
+	TIMES A , 1.50
+	TIMES B , 0.80
+ENDIF
+
+;여기로부터 조교자의 소질
+;새드마조 이외는 거의 봉사 측에 치우치기 쉬워진다
+;새드
+IF TALENT:PLAYER:새드
+	TIMES A , 1.50
+	TIMES B , 0.80
+ENDIF
+
+;마조
+IF TALENT:PLAYER:마조
+	TIMES A , 0.80
+	TIMES B , 1.50
+ENDIF
+
+;소악마
+IF TALENT:PLAYER:소악마
+	TIMES A , 1.20
+ENDIF
+
+;요호
+IF TALENT:PLAYER:요호
+	TIMES A , 1.20
+ENDIF
+
+;매력
+IF TALENT:PLAYER:매력
+	TIMES A , 1.10
+ENDIF
+
+;매혹
+IF TALENT:PLAYER:매혹
+	TIMES A , 1.10
+ENDIF
+
+;수수께끼의매력
+IF TALENT:PLAYER:수수께끼의매력
+	TIMES A , 1.20
+	TIMES B , 1.10
+ENDIF
+
+;고무적
+IF TALENT:PLAYER:고무적
+	TIMES A , 1.20
+	TIMES B , 0.90
+ENDIF
+
+
+;A가 높으면 봉사계의 처리
+IF A >= B
+	;전의 커맨드가스킨십라면 키스인가 기다리거나 하고 싶어한다
+	IF PREVCOM == 202
+		IF RAND:3 == 0
+			NEXTCOM:1 = 1
+		ELSEIF RAND:2 == 0
+			NEXTCOM:1 = 203
+		ELSE
+			CALL NEXT_COM_ORDER_H
+		ENDIF
+	;기다리거나 하고 있으면 키스나스킨십 하고 싶어한다
+	ELSEIF PREVCOM == 203
+		IF RAND:3 == 0
+			NEXTCOM:1 = 1
+		ELSEIF RAND:2 == 0
+			NEXTCOM:1 = 202
+		ELSE
+			CALL NEXT_COM_ORDER_H
+		ENDIF
+	;그 이외라면 적당
+	ELSE
+		CALL NEXT_COM_ORDER_H
+	ENDIF
+;그렇지 않으면역조교처리
+ELSE
+	CALL NEXT_COM_ORDER_G
+ENDIF
+
+;봉사 커맨드에 좁히고 싶을 때는 여기
+@TARGETPLAY_NEXT_H
+A = 1
+B = 0
+;전의 커맨드가스킨십라면 키스인가 기다리거나 하고 싶어한다
+IF PREVCOM == 202
+	IF RAND:3 == 0
+		NEXTCOM:1 = 1
+	ELSEIF RAND:2 == 0
+		NEXTCOM:1 = 203
+	ELSE
+		CALL NEXT_COM_ORDER_H
+	ENDIF
+;기다리거나 하고 있으면 키스나스킨십 하고 싶어한다
+ELSEIF PREVCOM == 203
+	IF RAND:3 == 0
+		NEXTCOM:1 = 1
+	ELSEIF RAND:2 == 0
+		NEXTCOM:1 = 202
+	ELSE
+		CALL NEXT_COM_ORDER_H
+	ENDIF
+;그 이외라면 적당
+ELSE
+	CALL NEXT_COM_ORDER_H
+ENDIF
+
+
+;역조교커맨드에 좁히고 싶을 때는 여기
+@TARGETPLAY_NEXT_G
+A = 0
+B = 1
+CALL NEXT_COM_ORDER_G
+
+
+
+
+;----------------------------------------------------------------
+;다음번 커맨드 강제 결정 함수 관계
+;----------------------------------------------------------------
+@NEXT_COM_ORDER_H
+NEXTCOM:6 = 1
+;봉사계 커맨드를 랜덤으로 선택
+;세로파이즈리는거유나폭유 때만
+IF RAND:10 == 0 && (TALENT:폭유 || TALENT:거유)
+	NEXTCOM:1 = 74
+;파이즈리펠라는 남자와절벽불가
+ELSEIF RAND:9 == 0 && TALENT:남자 == 0 && TALENT:절벽 == 0
+	NEXTCOM:1 = 75
+;파이즈리는 남자 불가
+ELSEIF RAND:8 == 0 && TALENT:남자 == 0
+	NEXTCOM:1 = 73
+;발호된 훈련은새드없음때만(새드실 밟기 때문에)
+ELSEIF RAND:6 == 0 && TALENT:새드 == 0
+	NEXTCOM:1 = 80
+;느긋하게한다는연모나친애때만
+ELSEIF RAND:5 == 0 && (TALENT:연모 || TALENT:친애)
+	NEXTCOM:1 = 203
+;스킨십는연모나친애때만
+ELSEIF RAND:4 == 0 && (TALENT:연모 || TALENT:친애)
+	NEXTCOM:1 = 202
+;키스한다
+ELSEIF RAND:3 == 0
+	NEXTCOM:1 = 1
+;수음
+ELSEIF RAND:2 == 0
+	NEXTCOM:1 = 70
+;펠라치오
+ELSE
+	NEXTCOM:1 = 71
+ENDIF
+
+@NEXT_COM_ORDER_G
+NEXTCOM:6 = 1
+;역조교계 커맨드를 랜덤으로 선택
+;발호된 훈련은새드 있고의 때만
+IF RAND:7 == 0 && TALENT:새드
+	NEXTCOM:1 = 80
+;채찍치는 것은새드끼 3 이상으로채찍 가지고 있을 때 마셔
+ELSEIF RAND:6 == 0 && (ITEM:13 || NOITEM) && ABL:새드끼 >= 3
+	NEXTCOM:1 = 284
+;커닐링구스는 여자 아이만
+ELSEIF RAND:5 == 0 && TALENT:남자 == 0 && TALENT:후타나리 == 0 && TALENT:반음반양 == 0 && TALENT:쉬메일 == 0
+	NEXTCOM:1 = 40
+;페라는 뚜껑이나 사내 아이만
+ELSEIF RAND:5 == 0 && (TALENT:남자 || TALENT:후타나리 || TALENT:반음반양 || TALENT:쉬메일)
+	NEXTCOM:1 = 31
+;애무시킨다
+ELSEIF RAND:4 == 0
+	NEXTCOM:1 = 220
+;매도시킨다
+ELSEIF RAND:3 == 0
+	NEXTCOM:1 = 281
+;스팽킹 시킨다
+ELSEIF RAND:2 == 0
+	NEXTCOM:1 = 283
+;발을핥는다
+ELSE
+	NEXTCOM:1 = 282
+ENDIF
+
+@NEXT_COM_ABLE
+;기본적으로는 COMABLE와 같음
+;NEXTCOM:7이 10이 되면 엔들레스 루프 들어갔다고 판정해 유감스럽지만아무것도안한다에 이동
+IF NEXTCOM:7 == 10
+	NEXTCOM:1 = 21
+	RETURN 1
+;커닐링구스실행 판정
+ELSEIF NEXTCOM:1 == 40
+	CALL COM_ABLE40
+;펠라한다실행 판정
+ELSEIF NEXTCOM:1 == 31
+	CALL COM_ABLE31
+;키스한다실행 판정
+ELSEIF NEXTCOM:1 == 1
+	CALL COM_ABLE1
+;스킨십
+ELSEIF NEXTCOM:1 == 202
+	CALL COM_ABLE202
+;느긋하게한다
+ELSEIF NEXTCOM:1 == 203
+	CALL COM_ABLE203
+;수음실행 판정
+ELSEIF NEXTCOM:1 == 70
+	CALL COM_ABLE70
+;펠라치오실행 판정
+ELSEIF NEXTCOM:1 == 71
+	CALL COM_ABLE71
+
+;파이즈리실행 판정
+ELSEIF NEXTCOM:1 == 73
+	CALL COM_ABLE73
+
+;발호된 훈련 실행 판정
+ELSEIF NEXTCOM:1 == 80
+	CALL COM_ABLE80
+;세로파이즈리
+ELSEIF NEXTCOM:1 == 74
+	CALL COM_ABLE74
+;파이즈리펠라
+ELSEIF NEXTCOM:1 == 75
+	CALL COM_ABLE75
+;가슴을주무르게한다실행 판정
+ELSEIF NEXTCOM:1 == 221
+	CALL COM_ABLE221
+;애무시킨다실행 판정
+ELSEIF NEXTCOM:1 == 220
+	CALL COM_ABLE220
+;매도시키는 실행 판정
+ELSEIF NEXTCOM:1 == 281
+	CALL COM_ABLE281
+;스팽킹 시키는 실행 판정
+ELSEIF NEXTCOM:1 == 283
+	CALL COM_ABLE283
+;채찍 치게 하는 실행 판정
+ELSEIF NEXTCOM:1 == 284
+	CALL COM_ABLE284
+;발을핥는다실행 판정
+ELSEIF NEXTCOM:1 == 282
+	CALL COM_ABLE282
+ENDIF
+
+;----------------------------------------------------------------
+;NEXTCOM의 버그 방지용
+;----------------------------------------------------------------
+@EVENTCOM
+;소거 기다리는 경우는 소거
+IF NEXTCOM:6 < 0
+	NEXTCOM = -1
+	NEXTCOM:1 = 0
+	NEXTCOM:5 = 0
+	NEXTCOM:6 = 0
+;실행 기다리는 경우는 우선 실행 판정
+ELSEIF NEXTCOM:6 > 0
+	CALL NEXT_COM_ABLE
+	;RETURN 1으로 돌아오면 진행
+	;NEXTCOM:6을 소거 대기에 갱신
+	IF RESULT == 1
+		NEXTCOM = NEXTCOM:1
+		NEXTCOM:6 = -1
+		NEXTCOM:5 = 1
+	;RETURN 0으로 돌아오면, NEXTCOM:1을 파괴해도 야 다음의 커맨드를 취득
+	ELSE
+		NEXTCOM:1 = -1
+		NEXTCOM:7 += 1
+		;A가 높으면 봉사계의 처리
+		IF A >= B
+			;전의 커맨드가스킨십라면 키스인가 기다리거나 하고 싶어한다
+			IF PREVCOM == 202
+				IF RAND:3 == 0
+					NEXTCOM:1 = 1
+				ELSEIF RAND:2 == 0
+					NEXTCOM:1 = 203
+				ELSE
+					CALL NEXT_COM_ORDER_H
+				ENDIF
+			;기다리거나 하고 있으면 키스나스킨십 하고 싶어한다
+			ELSEIF PREVCOM == 203
+				IF RAND:3 == 0
+					NEXTCOM:1 = 1
+				ELSEIF RAND:2 == 0
+					NEXTCOM:1 = 202
+				ELSE
+					CALL NEXT_COM_ORDER_H
+				ENDIF
+			;그 이외라면 적당
+			ELSE
+				CALL NEXT_COM_ORDER_H
+			ENDIF
+		;그렇지 않으면역조교처리
+		ELSE
+			CALL NEXT_COM_ORDER_G
+		ENDIF
+	ENDIF
+ENDIF
+
+@EVENTCOMEND
+;소거 기다리는 경우는 소거
+IF NEXTCOM:6 < 0
+	NEXTCOM = -1
+	NEXTCOM:1 = 0
+	NEXTCOM:5 = 0
+	NEXTCOM:6 = 0
+;실행 기다리는 경우는 우선 실행 판정
+ELSEIF NEXTCOM:6 > 0
+	CALL NEXT_COM_ABLE
+	;RETURN 1으로 돌아오면 진행
+	;NEXTCOM:6을 소거 대기에 갱신
+	IF RESULT == 1
+		NEXTCOM = NEXTCOM:1
+		NEXTCOM:6 = -1
+		NEXTCOM:5 = 1
+	;RETURN 0으로 돌아오면, NEXTCOM:1을 파괴해도 야 다음의 커맨드를 취득
+	ELSE
+		NEXTCOM:1 = -1
+		NEXTCOM:7 += 1
+		;A가 높으면 봉사계의 처리
+		IF A >= B
+			;전의 커맨드가스킨십라면 키스인가 기다리거나 하고 싶어한다
+			IF PREVCOM == 202
+				IF RAND:3 == 0
+					NEXTCOM:1 = 1
+				ELSEIF RAND:2 == 0
+					NEXTCOM:1 = 203
+				ELSE
+					CALL NEXT_COM_ORDER_H
+				ENDIF
+			;기다리거나 하고 있으면 키스나스킨십 하고 싶어한다
+			ELSEIF PREVCOM == 203
+				IF RAND:3 == 0
+					NEXTCOM:1 = 1
+				ELSEIF RAND:2 == 0
+					NEXTCOM:1 = 202
+				ELSE
+					CALL NEXT_COM_ORDER_H
+				ENDIF
+			;그 이외라면 적당
+			ELSE
+				CALL NEXT_COM_ORDER_H
+			ENDIF
+		;그렇지 않으면역조교처리
+		ELSE
+			CALL NEXT_COM_ORDER_G
+		ENDIF
+	ENDIF
+ENDIF
+

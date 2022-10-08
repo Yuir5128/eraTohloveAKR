@@ -1,0 +1,103 @@
+﻿;-------------------------------------------------
+;정조대
+;SM-구속계 커맨드
+;-------------------------------------------------
+@COM133
+
+PRINTL 정조대
+STR:0 = 정조대
+CALL KOJO_MESSAGE_COM
+
+
+;착탈의 처리
+IF TEQUIP:속옷（아래） != 5
+	TEQUIP:정조대 = 1
+	TEQUIP:속옷（아래） = 5
+ELSE
+	TEQUIP:정조대 = 0
+	TEQUIP:속옷（아래） = 0
+ENDIF
+
+IF BOTTOMS(TARGET) >= 3
+	SIF TEQUIP:하의 >= 1 && TEQUIP:하의 <= 10
+		TEQUIP:상의 = 0
+	TEQUIP:하의 = 0
+ENDIF
+IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TEQUIP:특수 2 = 0
+	TEQUIP:신발 = 0
+	IF TFLAG:55 == 0
+		SIF TEQUIP:특수 2 == 5
+			ITEM:36 += 1
+		SIF TEQUIP:특수 2 == 6
+			ITEM:37 += 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 0
+LOSEBASE:기력 += 50
+
+SOURCE:쾌C += 20
+
+SOURCE:두려움 += 20
+SOURCE:노출 += 20
+SOURCE:굴복 += 60
+SOURCE:일탈 += 200
+SOURCE:반발 += 400
+
+;PALAM:욕정를 본다
+IF PALAM:욕정 < PALAMLV:1
+	SOURCE:욕정 += 100
+ELSEIF PALAM:욕정 < PALAMLV:2
+	SOURCE:욕정 += 110
+ELSEIF PALAM:욕정 < PALAMLV:3
+	SOURCE:욕정 += 120
+ELSEIF PALAM:욕정 < PALAMLV:4
+	SOURCE:욕정 += 130
+ELSE
+	SOURCE:욕정 += 140
+ENDIF
+
+;ABL:마조끼를 본다
+IF ABL:마조끼 == 0
+	TIMES SOURCE:욕정, 0.80
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:욕정, 1.00
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:욕정, 1.30
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:욕정, 1.60
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:욕정, 2.00
+ELSE
+	TIMES SOURCE:욕정, 3.00
+ENDIF
+
+;도착적
+SIF TALENT:도착적
+	TIMES SOURCE:욕정, 2.00
+;조교자가새드, 새드끼 3 이상
+SIF TALENT:PLAYER:새드 || ABL:PLAYER:10 > 2
+	TIMES SOURCE:반발, 1.20
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;의존도 벡터
+TFLAG:33 = 3
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+

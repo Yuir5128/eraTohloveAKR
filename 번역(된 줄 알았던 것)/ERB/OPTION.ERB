@@ -1,0 +1,857 @@
+﻿;--------------------------------------------------
+;옵션 설정 처리
+;--------------------------------------------------
+@OPTION
+PRINTL 
+PRINTL 
+PRINTL 
+PRINTL 
+PRINTL 설정 항목을 선택해 주세요
+
+PRINT [  0] - 텍스트 표시
+	IF FLAG:6 == 1 && FLAG:7 == 2
+		PRINTL 　　　　　　　【입상 텍스트(항상 표시)＋정경 텍스트】
+	ELSEIF FLAG:6 == 1 && FLAG:7 == -1
+		PRINTL 　　　　　　　　　　　　　　　　　　【정경 텍스트만】
+	ELSEIF FLAG:6 == 0 && FLAG:7 == -1
+		PRINTL 　　　　　　　　　　　　　　　　【텍스트를 표시하지 않는다】
+	ENDIF
+PRINTL 
+PRINT [  1] - 사정개소 설정
+	IF FLAG:99 == 0
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　　　【머리카락】
+	ELSEIF FLAG:99 == 1
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　　　【얼굴】
+	ELSEIF FLAG:99 == 2
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　　　【가슴】
+	ELSEIF FLAG:99 == 3
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　　　【배】
+	ELSEIF FLAG:99 == 4
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　　　【겨드랑이】
+	ELSEIF FLAG:99 == 5
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　【허벅지】
+	ELSEIF FLAG:99 == 6
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　【균열】
+	ELSEIF FLAG:99 == 7
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　　　【엉덩이】
+	ELSEIF FLAG:99 == 8
+		PRINTL 　　　　　　　　　　　　　　　　　　　　【그대로사정】
+	ELSEIF FLAG:99 == 9
+		PRINTL 　　　　　　　　　　　　　　　　　　　　【그때마다 선택】
+	ENDIF
+PRINT [  2] - 착의 초기설정
+	IF FLAG:1 == 0
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　　【전착】
+	ELSEIF FLAG:1 == 1
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　【노 팬츠】
+	ELSEIF FLAG:1 == 2
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　【속옷 모습】
+	ELSEIF FLAG:1 == 3
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　　　【전라】
+	ELSEIF FLAG:1 == 5
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　【상반신알몸】
+	ELSEIF FLAG:1 == 6
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　　【하반신알몸】
+	ELSEIF FLAG:1 == 4
+		PRINTL 　　　　　　　　　　　　　　　　　　　　　【전회 종료시】
+	ELSEIF FLAG:1 == 9
+		PRINTL 　　　　　　　　　　　　　　　　　　【특수(경장)】
+	ELSEIF FLAG:1 == 10
+		PRINTL 　　　　　　　　　　　　　　　　　　【특수(내번의상)】
+	ELSEIF FLAG:1 == 99
+		PRINTL 　　　　　　　　　　　　　　　　　　【독자 설정】
+	ENDIF
+PRINT [  3] - 스테이터스 표시 설정
+	IF (FLAG:26 & 3) == 0
+		PRINTL 　　　　　　　　　【스테이터스/스케줄 표시】
+	ELSEIF (FLAG:26 & 3) == 1
+		PRINTL 　　　　　　　　　　　　　　　【스케줄 표시】
+	ELSEIF (FLAG:26 & 3) == 2
+		PRINTL 　　　　　　　　　　　　　　　　【스테이터스 표시】
+	ELSEIF (FLAG:26 & 3) == 3
+		PRINTL 　　　　　　　　　　　　　　　　　　【표시하지 않는다】
+	ENDIF
+PRINT [  4] - 캐릭터입상
+IF !FLAG:97
+	PRINTL 　　　　　　　　　　　　　　　　　　　　　　　　【칼라】
+ELSE
+	PRINTL 　　　　　　　　　　　　　　　　　　　　　【디폴트색】
+ENDIF
+PRINT [  5] - 범용 허덕여 사용 설정
+IF FLAG:152 == 1
+	PRINTL 　　　　　　　　　　　　　　　　　　　【사용하지 않는다】
+ELSE
+	PRINTL 　　　　　　　　　【전용입상이 없는 경우에 사용한다】
+ENDIF
+PRINTL 
+;FLAG:2 = ●비트 연산으로 확장 기능 전체에 적용한다(것으로 하면 만지기 쉬울까)
+;		|1  |2  |4  |8  |16 
+;		|32엽기인 커맨드 확장(지하실에의 문을 연다)
+;		|64 
+;		|128데이트시노출플레이 확장
+;		|256 남자모유취득 가부
+PRINT [  6] - 확장- 엽기인 커맨드
+	IF FLAG:2 & 32
+		PRINTL 　　　　　　　　　　　　　　　　　　　　【ON】
+	ELSE
+		PRINTL 　　　　　　　　　　　　　　　　　　　【OFF】
+	ENDIF
+PRINT [  7] - 확장- 데이트시노출플레이
+	IF FLAG:2 & 128
+		PRINTL 　　　　　　　　　　　　　　　　　　【ON】
+	ELSE
+		PRINTL 　　　　　　　　　　　　　　　　　【OFF】
+	ENDIF
+PRINTL [  8] - 확장- 노역 옵션
+PRINT [  9] - 확장- 남자모유취득 가부
+	IF FLAG:2 & 256
+		PRINTL 　【남자/반음반양/컨트보이도모유체질를 취득】
+	ELSE
+		PRINTL 　　　　　　　　　　　　　【취득하지 않는다】
+	ENDIF
+PRINTL 
+PRINTL [ 20] - 개체차이 설정
+PRINTL [ 30] - 소모품 자동 보충 설정
+PRINTL 
+PRINTL [ 70] - 세이브 데이터명 변경
+PRINTL [ 80] - 커맨드 필터 설정
+PRINT [ 90] - PALAM 획득 애니메이션 설정
+	IF FLAG:153 == 0
+		PRINTL 　　　　　　　　　　　　　 【사용하지 않는다】
+	ELSE
+		PRINTL 　　　　　　　　　　　　　　 【사용한다】
+	ENDIF
+PRINTL 
+PRINTL [100]-돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	IF FLAG:6 == 1 && FLAG:7 == 2
+		FLAG:6 = 1
+		FLAG:7 = -1
+	ELSEIF FLAG:6 == 1 && FLAG:7 == -1
+		FLAG:6 = 0
+		FLAG:7 = -1
+	ELSE
+		FLAG:6 = 1
+		FLAG:7 = 2
+	ENDIF
+
+ELSEIF RESULT == 1
+	CALL SAMENPLACE_SETTING
+ELSEIF RESULT == 2
+	CALL CLOTHES_SETTING
+ELSEIF RESULT == 3
+	CALL STATUS_SETTING
+
+ELSEIF RESULT == 4
+	IF FLAG:97
+		FLAG:97 = 0
+	ELSE
+		FLAG:97 = 1
+	ENDIF
+ELSEIF RESULT == 5
+	IF FLAG:152 == 1
+		FLAG:152 = 0
+	ELSE
+		FLAG:152 = 1
+	ENDIF
+
+ELSEIF RESULT == 6
+	IF FLAG:2 & 32
+		FLAG:2 -= 32
+	ELSE
+		FLAG:2 |= 32
+	ENDIF
+ELSEIF RESULT == 7
+	IF FLAG:2 & 128
+		FLAG:2 -= 128
+	ELSE
+		FLAG:2 |= 128
+	ENDIF
+
+ELSEIF RESULT == 8
+	CALL OPTION_WORK
+ELSEIF RESULT == 9
+	IF FLAG:2 & 256
+		FLAG:2 -= 256
+	ELSE
+		FLAG:2 |= 256
+	ENDIF
+ELSEIF RESULT == 20
+	CALL SET_DIFFERENCE
+ELSEIF RESULT == 30
+	CALL SET_ITEM_AUTO_SUPPLY
+ELSEIF RESULT == 70
+	CALL SET_SAVEDATANAME
+ELSEIF RESULT == 80
+	CALL COMMAND_CONTROL
+ELSEIF RESULT == 90
+	IF FLAG:153 == 0
+		FLAG:153 = 1
+	ELSE
+		FLAG:153 = 0
+	ENDIF
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+
+
+;--------------------------------------------------
+;사정위치 설정
+;--------------------------------------------------
+@SAMENPLACE_SETTING
+PRINTL 사정시에 자동으로 선택하는사정개소를 선택해 주세요
+PRINTL 
+PRINTL [ 0] 「머리카락」
+PRINTL [ 1] 「얼굴」
+PRINTL [ 2] 「가슴」
+PRINTL [ 3] 「배」
+PRINTL [ 4] 「겨드랑이」
+PRINTL [ 5] 「허벅지」
+PRINTL [ 6] 「균열」
+PRINTL [ 7] 「엉덩이」
+PRINTL [ 8] 「그대로사정」or 「콘돔에사정」
+PRINTL [ 9] 「그때마다 선택」
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	PRINTW -사정처를머리카락에 고정했습니다―
+	FLAG:99 = 0
+ELSEIF RESULT == 1
+	PRINTW -사정처를 얼굴에 고정했습니다―
+	FLAG:99 = 1
+ELSEIF RESULT == 2
+	PRINTW -사정처를가슴에 고정했습니다―
+	FLAG:99 = 2
+ELSEIF RESULT == 3
+	PRINTW -사정처를 배에 고정했습니다―
+	FLAG:99 = 3
+ELSEIF RESULT == 4
+	PRINTW -사정처를 겨드랑이에 고정했습니다―
+	FLAG:99 = 4
+ELSEIF RESULT == 5
+	PRINTW -사정처를 허벅지에 고정했습니다―
+	FLAG:99 = 5
+ELSEIF RESULT == 6
+	PRINTW -사정처를 균열에 고정했습니다―
+	FLAG:99 = 6
+ELSEIF RESULT == 7
+	PRINTW -사정처를 엉덩이에 고정했습니다―
+	FLAG:99 = 7
+ELSEIF RESULT == 8
+	PRINTW -선택하지 않고 그대로사정 하도록(듯이) 설정했습니다―
+	FLAG:99 = 8
+ELSEIF RESULT == 9
+	PRINTW -사정의 번에 선택하도록(듯이) 설정했습니다―
+	FLAG:99 = 9
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+
+
+
+;--------------------------------------------------
+;초기 착의 설정
+;--------------------------------------------------
+@CLOTHES_SETTING
+Z = 0
+PRINTL 초기의 착의를 설정해 주세요
+PRINTL 조교 개시시, 항상 여기서 설정한 착의 상태로부터 시작되게 됩니다
+PRINTL 
+PRINTL [  0] - 전착
+PRINTL [  1] - 노 팬츠
+PRINTL [  2] - 속옷 모습
+PRINTL [  3] - 전라
+PRINTL [  4] - 상반신알몸
+PRINTL [  5] - 하반신알몸
+PRINTL [  8] - 특수(경장)
+PRINTL [  9] - 특수(내번의상)
+PRINTL [ 99] - 독자 설정
+PRINTL [100] - 전회 종료시
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	PRINTW 초기의 착의를 전착으로 설정했습니다
+	FLAG:1 = 0
+ELSEIF RESULT == 1
+	PRINTW 초기의 착의를 노 팬츠로 설정했습니다
+	FLAG:1 = 1
+ELSEIF RESULT == 2
+	PRINTW 초기의 착의를 속옷 모습으로 설정했습니다
+	FLAG:1 = 2
+ELSEIF RESULT == 3
+	PRINTW 초기의 착의를 전라로 설정했습니다
+	FLAG:1 = 3
+ELSEIF RESULT == 4
+	PRINTW 초기의 착의를 상반신알몸으로 설정했습니다
+	FLAG:1 = 5
+ELSEIF RESULT == 5
+	PRINTW 초기의 착의를 하반신알몸으로 설정했습니다
+	FLAG:1 = 6
+ELSEIF RESULT == 8
+	PRINTL 초기의 착의를 경장으로 설정했습니다
+	PRINTW 경장을 입손 하고 있지 않는 경우는 전착이 됩니다
+	FLAG:1 = 9
+ELSEIF RESULT == 9
+	PRINTW 초기의 착의를 내번의상으로 설정했습니다
+	FLAG:1 = 10
+ELSEIF RESULT == 99
+	PRINTW 초기의 착의를 독자 설정으로 설정했습니다
+	FLAG:1 = 99
+ELSEIF RESULT == 100
+	PRINTW 초기의 착의를 전회 종료시 상태로 설정했습니다
+	FLAG:1 = 4
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+
+
+;--------------------------------------------------
+@STATUS_SETTING
+;--------------------------------------------------
+PRINTL 스테이터스 표시의 설정을 해 주세요
+PRINTL 
+PRINTL [  0] - 스테이터스/스케줄 표시
+PRINTL [  1] - 스케줄 표시
+PRINTL [  2] - 스테이터스 표시
+PRINTL [  3] - 표시하지 않는다
+PRINTL [100]-돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTL 【스테이터스/스케줄 표시】로 설정했습니다
+	SIF FLAG:26 & 1
+		FLAG:26 -= 1
+	SIF FLAG:26 & 2
+		FLAG:26 -= 2
+ELSEIF RESULT == 1
+	PRINTL 【스케줄 표시】로 설정했습니다
+	FLAG:26 |= 1
+	SIF FLAG:26 & 2
+		FLAG:26 -= 2
+ELSEIF RESULT == 2
+	PRINTL 【스테이터스 표시】로 설정했습니다
+	FLAG:26 |= 2
+	SIF FLAG:26 & 1
+		FLAG:26 -= 1
+ELSEIF RESULT == 3
+	PRINTL 【표시하지 않는다】로 설정했습니다
+		FLAG:26 |= 3
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+
+
+;FLAG:2 = ●비트 연산으로 확장 기능 전체에 적용한다(것으로 하면 만지기 쉬울까)
+;		|1  |2  |4  |8  |16 
+;		|32엽기인 커맨드 확장(지하실에의 문을 연다)
+;		|64 
+;		|128데이트시노출플레이 확장
+
+@OPTION_WORK
+DRAWLINE
+PRINTL 「노역」으로 손님이 이용 가능한 옵션을 설정합니다.
+PRINTL 
+PRINTL ※옵션은, 모든 노역에 일괄로 적용됩니다.
+PRINTL ※이하의 노역에는, 옵션이 적용되지 않으므로 주의해 주세요.
+PRINTL 「정식포장마차(낮/밤의 부)」 「도검뢰무(낮/밤의 부)」
+PRINTL 「스트립 쇼」 「고문 쇼」
+DRAWLINE
+PRINT [ 0] - 처녀관통
+	IF FLAG:160 & 1
+		PRINTL 　　　　　　　　　　　○［노예의 하지메테를 당신에게］
+	ELSE
+		PRINTL 　　　　　　　　　　　NG!
+	ENDIF
+PRINT [ 1] - 백버진관통
+	IF FLAG:160 & 2
+		PRINTL 　　　　　　○［노예의 하지메테를 당신에게］
+	ELSE
+		PRINTL 　　　　　　NG!
+	ENDIF
+PRINT [ 2] - 동정 먹어
+	IF FLAG:160 & 4
+		PRINTL 　　　　　　　　　　　○［노예의 하지메테를 당신에게］
+	ELSE
+		PRINTL 　　　　　　　　　　　NG!
+	ENDIF
+PRINT [ 3] - 하도SM
+	IF FLAG:160 & 8
+		PRINTL 　　　　　　　　　　○［채찍/촛불/바늘/전극/삼각목마etc］
+	ELSE
+		PRINTL 　　　　　　　　　　NG!
+	ENDIF
+PRINT [ 4] - 복수인 플레이
+	IF FLAG:160 & 16
+		PRINTL 　　　　　　　　　○［복수 남편님, 타노예와의 관련도 OK］
+	ELSE
+		PRINTL 　　　　　　　　　NG!
+	ENDIF
+PRINT [ 5] - 수간
+	IF FLAG:160 & 32
+		PRINTL 　　　　　　　　　　　　　○［짐승의 종류는 묻지 않습니다］
+	ELSE
+		PRINTL 　　　　　　　　　　　　　NG!
+	ENDIF
+PRINT [ 6] - 성수 플레이
+	IF FLAG:160 & 128
+		PRINTL 　　　　　　　　　　○［음뇨플레이도 OK］
+	ELSEIF FLAG:160 & 64
+		PRINTL 　　　　　　　　　　△［방뇨 감상만 가능］
+	ELSEIF (FLAG:160 & 192) == 0
+		PRINTL 　　　　　　　　　　NG!
+	ENDIF
+PRINT [ 7] - 황금 플레이
+	IF FLAG:160 & 512
+		PRINTL 　　　　　　　　　　○［식분플레이도 OK］
+	ELSEIF FLAG:160 & 256
+		PRINTL 　　　　　　　　　　△［관장·감상만 가능］
+	ELSEIF (FLAG:160 & 768) == 0
+		PRINTL 　　　　　　　　　　NG!
+	ENDIF
+PRINTL [50] - 모두 유효하게 한다
+PRINTL [51] - 모두 무효로 한다
+PRINTL [100]-돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+;처녀관통
+ELSEIF RESULT == 0
+	IF FLAG:160 & 1
+		FLAG:160 -= 1
+	ELSE
+		FLAG:160 |= 1
+	ENDIF
+;백버진관통
+ELSEIF RESULT == 1
+	IF FLAG:160 & 2
+		FLAG:160 -= 2
+	ELSE
+		FLAG:160 |= 2
+	ENDIF
+;동정 먹어
+ELSEIF RESULT == 2
+	IF FLAG:160 & 4
+		FLAG:160 -= 4
+	ELSE
+		FLAG:160 |= 4
+	ENDIF
+;하도SM
+ELSEIF RESULT == 3
+	IF FLAG:160 & 8
+		FLAG:160 -= 8
+	ELSE
+		FLAG:160 |= 8
+	ENDIF
+;복수인 플레이
+ELSEIF RESULT == 4
+	IF FLAG:160 & 16
+		FLAG:160 -= 16
+	ELSE
+		FLAG:160 |= 16
+	ENDIF
+;수간
+ELSEIF RESULT == 5
+	IF FLAG:160 & 32
+		FLAG:160 -= 32
+	ELSE
+		FLAG:160 |= 32
+	ENDIF
+;성수 플레이
+ELSEIF RESULT == 6
+	IF FLAG:160 & 128
+		FLAG:160 -= 128
+		FLAG:160 |= 64
+	ELSEIF FLAG:160 & 64
+		FLAG:160 -= 64
+	ELSEIF (FLAG:160 & 192) == 0
+		FLAG:160 |= 128
+	ENDIF
+;황금 플레이
+ELSEIF RESULT == 7
+	IF FLAG:160 & 512
+		FLAG:160 -= 512
+		FLAG:160 |= 256
+	ELSEIF FLAG:160 & 256
+		FLAG:160 -= 256
+	ELSEIF (FLAG:160 & 768) == 0
+		FLAG:160 |= 512
+	ENDIF
+;모두 유효하게 한다
+ELSEIF RESULT == 50
+	FLAG:160 |= 703
+;모두 무효로 한다
+ELSEIF RESULT == 51
+	FLAG:160 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+
+
+;FLAG:3 = ▲개체차이 설정 플래그
+;1:CSV의 소질 우선 |2:성전환 |4:반음반양 후타나리 |8:오메가 |16:쇼타화 |32:대형화 |64:젖기 쉬움 |128:술의 약함
+;|256:둔감 민감 |512:페니스의 크기 |1024:페니스의 특징 |2048:가슴의 크기 |4096:그 외
+
+@SET_DIFFERENCE
+PRINTL 
+PRINTL 캐릭터의 개체차이를 설정할 수가 있습니다
+PRINTL 이것들의 설정하는 것에 의해, 캐릭터를 주인·공범자·노예로서 끌어 들일 때
+PRINTL 본래라면 가지지 않는 소질을 얻어 현현하는 일이 있습니다
+DRAWLINE
+PRINTL 
+
+IF FLAG:3 & 1
+	PRINTBUTTONLC "[0]우선도 CSV의 소질을 우선한다", 0
+ELSE
+	PRINTBUTTONLC "[0]우선도 개체차이를 우선한다", 0
+ENDIF
+PRINTL
+PRINTL 관련【소인체형/작은체구/큰체구/술꾼/알콜쓰레기/아이사이즈/단소/포경/요리치/요리고수】
+PRINTL
+
+IF (FLAG:3 & 2) && (FLAG:3 & 4)
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[1]성전환 있어(반음반양·후타나리·컨트보이·쉬메일 포함한다)", 1
+ELSEIF FLAG:3 & 2
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[1]성전환 있어", 1
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[1]성전환 없음", 1
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【남자/반음반양/후타나리/컨트보이/쉬메일】
+PRINTL
+
+IF FLAG:3 & 8
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[2]오메가성 있어", 2
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[2]오메가성 없음", 2
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【오메가】
+PRINTL
+
+IF FLAG:3 & 16
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[3]쇼타화 있어", 3
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[3]쇼타화 없음", 3
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【소인체형/작은체구】
+PRINTL
+
+IF FLAG:3 & 32
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[4]큰 몸집화 있어", 4
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[4]큰 몸집화 없음", 4
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【큰체구】
+PRINTL
+
+IF FLAG:3 & 64
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[5]젖기 쉬움 있어", 5
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[5]젖기 쉬움 없음", 5
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【젖기쉬움/젖기어려움】
+PRINTL
+
+IF FLAG:3 & 128
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[6]술의 약함 있어", 6
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[6]술의 약함 없음", 6
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【술꾼/알콜쓰레기】
+PRINTL
+
+IF FLAG:3 & 256
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[7]부위별 특징 있어", 7
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[7]부위별 특징 없음", 7
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【C둔감/C민감/V둔감/V민감/A둔감/A민감/B둔감/B민감/함몰유두】
+PRINTL
+
+IF FLAG:3 & 512
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[8]페니스의 크기 있어", 8
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[8]페니스의 크기 없음", 8
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【아이사이즈/단소/거근/말자지】
+PRINTL
+
+IF FLAG:3 & 1024
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[9]페니스의 특징 있어", 9
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[9]페니스의 특징 없음", 9
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【조루/지루/절륜/포경】
+PRINTL
+
+IF FLAG:3 & 2048
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[10]가슴의 크기 있어", 10
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[10]가슴의 크기 없음", 10
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【절벽/빈유/거유/폭유】
+PRINTL
+
+IF FLAG:3 & 4096
+	SETCOLOR 0x6699FF
+	PRINTBUTTONLC "[11]그 외 있어", 11
+ELSE
+	RESETCOLOR
+	PRINTBUTTONLC "[11]그 외 없음", 11
+ENDIF
+RESETCOLOR
+PRINTL 
+PRINTL 관련【음모없음/요리치/독약내성/모유체질】
+PRINTL
+
+PRINTL 
+
+RESETCOLOR
+PRINTL [12]모두 온으로 한다
+PRINTL [13]모두 오프로 한다
+PRINTL [100]돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	IF FLAG:3 & 1
+		FLAG:3 -= 1
+	ELSE
+		FLAG:3 |= 1
+	ENDIF
+ELSEIF RESULT == 1
+	IF (FLAG:3 & 2) && (FLAG:3 & 4)
+		FLAG:3 -= 4
+	ELSEIF FLAG:3 & 2
+		FLAG:3 -= 2
+	ELSE
+		FLAG:3 |= 2
+		FLAG:3 |= 4
+	ENDIF
+ELSEIF RESULT == 2
+	IF FLAG:3 & 8
+		FLAG:3 -= 8
+	ELSE
+		FLAG:3 |= 8
+	ENDIF
+ELSEIF RESULT == 3
+	IF FLAG:3 & 16
+		FLAG:3 -= 16
+	ELSE
+		FLAG:3 |= 16
+	ENDIF
+ELSEIF RESULT == 4
+	IF FLAG:3 & 32
+		FLAG:3 -= 32
+	ELSE
+		FLAG:3 |= 32
+	ENDIF
+ELSEIF RESULT == 5
+	IF FLAG:3 & 64
+		FLAG:3 -= 64
+	ELSE
+		FLAG:3 |= 64
+	ENDIF
+ELSEIF RESULT == 6
+	IF FLAG:3 & 128
+		FLAG:3 -= 128
+	ELSE
+		FLAG:3 |= 128
+	ENDIF
+ELSEIF RESULT == 7
+	IF FLAG:3 & 256
+		FLAG:3 -= 256
+	ELSE
+		FLAG:3 |= 256
+	ENDIF
+ELSEIF RESULT == 8
+	IF FLAG:3 & 512
+		FLAG:3 -= 512
+	ELSE
+		FLAG:3 |= 512
+	ENDIF
+ELSEIF RESULT == 9
+	IF FLAG:3 & 1024
+		FLAG:3 -= 1024
+	ELSE
+		FLAG:3 |= 1024
+	ENDIF
+ELSEIF RESULT == 10
+	IF FLAG:3 & 2048
+		FLAG:3 -= 2048
+	ELSE
+		FLAG:3 |= 2048
+	ENDIF
+ELSEIF RESULT == 11
+	IF FLAG:3 & 4096
+		FLAG:3 -= 4096
+	ELSE
+		FLAG:3 |= 4096
+	ENDIF
+ELSEIF RESULT == 12
+	FLAG:3 = 8190
+ELSEIF RESULT == 13
+	RESETCOLOR
+	FLAG:3 = 0
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+
+@SET_ITEM_AUTO_SUPPLY
+LOCAL:0 = 0
+LOCAL:1 = 1
+PRINTL
+PRINTL 소모품의 소지 기준수를 설정할 수가 있습니다
+PRINTL 기준수에 차지 않는 아이템은 자동 보충됩니다.
+PRINTL 
+PRINTL 소지 기준수
+PRINTFORML [40]  로션　　　{FLAG:50}개
+PRINTFORML [43]  비디오테이프　　{FLAG:51}개 ※비디오카메라를 소지하고 있지 않는 경우는 보충되지 않습니다
+PRINTFORML [44]  필름　　　　{FLAG:52}개 ※카메라를 소지하고 있지 않는 경우는 보충되지 않습니다
+PRINTFORML [45]  콘돔　　　{FLAG:53}개
+PRINTFORML [999] 돌아온다
+$INPUT_LOOP_1
+INPUT
+SELECTCASE RESULT
+	CASE 40, 43 TO 45
+		LOCAL:0 = RESULT
+		PRINTFORML %ITEMNAME:LOCAL%의 소지 기준수를 설정합니다
+		PRINTL 몇개로 합니까? ※9999를 입력으로 돌아온다
+		$INPUT_LOOP_2
+		INPUT
+		IF RESULT == 9999
+			RESTART
+		ELSEIF RESULT
+			LOCAL:1 = RESULT
+			PRINTFORML {LOCAL:1}개로 좋습니까?
+			PRINTL [0] 네
+			PRINTL [1] 아니오
+			$INPUT_LOOP_3
+			INPUT
+			IF RESULT == 0
+				PRINTL
+				PRINTFORML {LOCAL:1}개로 설정했습니다
+				IF LOCAL:0 == 40
+					FLAG:(LOCAL:0 + 10) = LOCAL:1
+				ELSE
+					FLAG:(LOCAL:0 + 8) = LOCAL:1
+				ENDIF
+				RESTART
+			ELSEIF RESULT == 1
+				RESTART
+			ELSE
+				CLEARLINE 1
+				GOTO INPUT_LOOP_3
+			ENDIF
+		
+		ELSE
+			CLEARLINE 1
+			GOTO INPUT_LOOP_2
+		ENDIF
+		
+	CASE 999
+		RETURN 0
+	CASEELSE
+		CLEARLINE 1
+		GOTO INPUT_LOOP_1
+ENDSELECT
+
+@SET_SAVEDATANAME
+PRINTL 디폴트의 표시 형식으로부터 임의의 명칭에
+PRINTL 세이브 데이터의 이름을 변경할 수가 있습니다
+IF STRLENS(SAVESTR:5)
+	PRINTFORML 현재의 명칭은 %SAVESTR:5% 입니다
+ELSE
+	PRINTFORML 현재의 명칭은 디폴트입니다
+ENDIF
+PRINTL 
+PRINTL [0] 디폴트로 한다
+PRINTL [1] 임의의 세이브 데이터명으로 한다
+PRINTKL [100] 돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	PRINTW 세이브 데이터의 이름을 디폴트로 했습니다
+	SAVESTR:5 = 
+	RETURN 0
+ELSEIF RESULT == 1
+	PRINTL 세이브 데이터의 이름을 입력해 주세요
+	$INPUT_SAVE_NAME
+	INPUTS
+	LOCALS = %RESULTS%
+	PRINTFORML %LOCALS%로 좋습니까?
+	PRINTL [0] 네
+	PRINTL [1] 아니오
+	PRINTL [100] 변경을 그만둔다
+	$INPUT_LOOP2
+	INPUT
+	IF RESULT == 0
+		SAVESTR:5 = %LOCALS%
+		RETURN 0
+	ELSEIF RESULT == 1
+		PRINTW 에서는, 입력을 다시 해 주세요
+		GOTO INPUT_SAVE_NAME
+	ELSEIF RESULT == 100
+		RETURN 0
+	ENDIF
+	GOTO INPUT_LOOP2
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+GOTO INPUT_LOOP

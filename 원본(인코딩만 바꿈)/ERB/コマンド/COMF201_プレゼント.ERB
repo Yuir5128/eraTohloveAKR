@@ -1,0 +1,79 @@
+﻿;-------------------------------------------------
+;プレゼント
+;コミュニケーション系コマンド
+;-------------------------------------------------
+@COM201
+
+PRINTL プレゼント
+STR:0 = プレゼント
+
+CALL KOJO_MESSAGE_COM
+
+;あげなかった場合は戻る
+SIF TFLAG:17 == 99
+	RETURN 0
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+
+;消費体力、気力
+LOSEBASE:体力 += 0
+LOSEBASE:気力 += 10
+
+IF TALENT:親愛 || TALENT:娼婦 || TALENT:隷属
+	SOURCE:恭順 += 2000
+	SOURCE:情愛 += 200
+ELSEIF TALENT:恋慕 || TALENT:淫乱 || TALENT:服従
+	SOURCE:恭順 += 1000
+	SOURCE:情愛 += 100
+ELSE
+	SOURCE:恭順 += 500
+	SOURCE:恐れ += 50
+ENDIF
+
+SOURCE:逸脱 += 200
+
+IF TFLAG:17 == 1
+	TIMES SOURCE:恭順 , 0.80
+ELSEIF TFLAG:17 == 2
+	TIMES SOURCE:恭順 , 1.00
+ELSEIF TFLAG:17 == 3
+	TIMES SOURCE:恭順 , 1.20
+ELSEIF TFLAG:17 == 4
+	TIMES SOURCE:恭順 , 1.40
+ELSEIF TFLAG:17 == 5
+	TIMES SOURCE:恭順 , 1.60
+ELSEIF TFLAG:17 == 6
+	TIMES SOURCE:恭順 , 1.80
+ELSEIF TFLAG:17 == 7
+	TIMES SOURCE:恭順 , 2.00
+ELSEIF TFLAG:17 == 50
+	TIMES SOURCE:恭順 , 3.00
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;愛情経験
+IF (TALENT:恋慕 == 1 || TALENT:親愛 == 1) && ASSIPLAY == 0 && TFLAG:17 > 0 && TFLAG:17 < 99
+	A = TFLAG:17
+	PRINTS EXPNAME:23
+	PRINTVL +A
+	EXP:愛情経験 += A
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 4
+
+;依存度補正値
+SIF (TALENT:恋慕 == 1 || TALENT:親愛 == 1) && ASSIPLAY == 0 && TFLAG:17 < 99
+	TFLAG:30 += TFLAG:17
+
+
+RETURN 1
+
+
+
+

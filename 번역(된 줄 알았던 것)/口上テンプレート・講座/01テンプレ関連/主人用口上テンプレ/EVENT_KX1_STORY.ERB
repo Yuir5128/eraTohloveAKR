@@ -1,0 +1,105 @@
+﻿;-------------------------------------------------
+;00주인공용 스토리입상(캐릭터의 이름을 넣는,아래에 컨셉 따위 한 마디 있으면 들어갈 수 있다)
+;START 모드로 열매 꼭지 리어 캐릭터를 주인공으로 선택했을 경우에 표시되는입상입니다
+;-------------------------------------------------
+;erahetaA 전용 주인공입상 템플릿
+;X1를 캐릭터 번호에 치환해,Y1를 조수의 캐릭터 번호에 치환해 주세요
+;다만,캐릭터 번호가 1자리수의 캐릭터의 경우,X1,Y1는 1,X2는 01과 같이 바꾸어 주세요
+;그리고 커맨드내의 적당한 조건아래의 PRINTFORMW의후에 반각 스페이스를 두어 대사를 추가해 주세요
+;입상을 추가하지 않는 커맨드는 무기입에서도 상관하지 않습니다만,CFLAG:XXX의 머리에 『;』를 붙여 comment out 하면 더욱 좋을 것입니다
+;엑스트라 구문 따위,comment out 되고 있는 구문을 사용하는 때는,『;』를 제외해 comment out를 해제할 필요가 있습니다
+;최후에 read me에도 대충 훑어봐 두는 것을 추천합니다
+;-------------------------------------------------
+;--------------------------------------------------
+;엑스트라 모드 구문
+;네를 선택했을 때에 주인의 소질을 변경할 수 있습니다
+;아래와 같이에처녀화하는 경우의 구문을 샘플로서 실어 둡니다
+;코피페 해 오프닝입상에 돌입해 주세요
+;--------------------------------------------------
+;IF TALENT:MASTER:140 == 0
+;	PRINTFORML 곳에서,%CALLNAME:MASTER%는처녀입니까?
+;	PRINTL [0] 네
+;	PRINTL [1] 아니오
+;	$INPUT_LOOP
+;	INPUT
+;	IF RESULT == 0
+;		PRINTFORMW -%CALLNAME:MASTER%는처녀였습니다―
+;		TALENT:MASTER:0 = 1
+;		ABL:MASTER:4 = 0
+;		EXP:MASTER:0 = 0
+;	ELSEIF RESULT == 1
+;		PRINTFORMW -%CALLNAME:MASTER%는 경험이 끝난 상태였습니다―
+;		TALENT:MASTER:0 = 0
+;	ELSE
+;		GOTO INPUT_LOOP
+;	ENDIF
+;ENDIF
+;-------------------------------------------------
+;오프닝입상(X1를 캐릭터 번호에 치환한다)
+;-------------------------------------------------
+@KOJO_PRE_OPENING_STORY_KX1
+;데포의 오프닝전에 표시된다
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 
+
+;아래의 행의 comment out를 제외하면 데포의 오프닝과 @KOJO_POST_OPENING_STORY_KX1는 표시되지 않는다
+;RETURN 1
+
+@KOJO_POST_OPENING_STORY_KX1
+;데포의 오프닝후에 표시되는입상
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 
+
+;-------------------------------------------------
+;배드 엔드 1입상(X1를 캐릭터 번호에 치환한다)
+;기한 초과 엔드
+;-------------------------------------------------
+@KOJO_BAD1_ENDING_STORY_KX1
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 
+
+;아래의 행을 comment out 하면 디폴트의 엔딩도 표시된다
+RETURN 1
+
+;-------------------------------------------------
+;배드 엔드 2입상(X1를 캐릭터 번호에 치환한다)
+;자금불발엔드
+;-------------------------------------------------
+@KOJO_BAD2_ENDING_STORY_KX1
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 
+
+;아래의 행을 comment out 하면 디폴트의 엔딩도 표시된다
+RETURN 1
+
+;-------------------------------------------------
+;노멀 엔드입상(X1를 캐릭터 번호에 치환한다)
+;-------------------------------------------------
+@KOJO_NORMAL_ENDING_STORY_KX1
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 
+
+;아래의 행을 comment out 하면 디폴트의 엔딩도 표시된다
+RETURN 1
+
+

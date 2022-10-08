@@ -1,0 +1,91 @@
+﻿【CLOTHES用外部呼出し可能関数一覧】
+
+　CLOTHES.ERB内にある、他の使用目的にも使えそうな関数をまとめておきます。
+　衣装の名前表示、改行処理、疑似調教ターンエンド、体格差取得
+
+@CLOTHES_NAME
+　現在身につけている衣装の名前が表示されるよ！
+　Aに表示させたい衣装の部位を入れて（上着だったらA = 5）CALLして下さい。
+　ただし、身につけていない場合は空っぽが返されるので
+	IF TEQUIP:5 > 0
+		A = 5
+		PRINTFORM %CALLNAME:MASTER%は%CALLNAME:TARGET%の
+		CALL CLOTHES_NAME
+		PRINTL をゆっくりと脱がせた……
+	ENDIF
+　みたいな記述方法がいいような。
+
+@LINE_FEED
+　任意の項目群を４列で改行する処理。
+　項目表示の前にE = 0とし、
+	E = 0
+	IF A:1 = 1
+		PRINT A:1は1です
+		CALL LINE_FEED
+	ENDIF
+	IF A:2 = 1
+		PRINT A:2は1です
+		CALL LINE_FEED
+	ENDIF
+	IF A:3 = 1
+		PRINT A:3は1です
+		CALL LINE_FEED
+	ENDIF
+	;表示項目数が4の倍数でなかった場合、ここで改行を行います
+	SIF E % 4 != 0
+		PRINTL 
+　といったリストを作成することで使用できます。
+　どういった形で表示されるのかは、衣装変更画面や所持アイテム一覧などを参照してください。
+　同様に、@CHECK_NEWLINEを用いると３列での改行が行えます（こちらの関数はUSERCOM.ERB内）
+　@CHECK_NEWLINEの場合はEではなくFLAG:45を用います。
+
+@SP_CLOTHES
+　本来はエプロン・アイマスクといったプレイ用のアイテムを着衣扱いにするための関数です。
+	;衣装側で新妻プレイを呼びだすための処理
+	IF TEQUIP:0 == 2 && Z == 60
+		SELECTCOM = 189
+		CALL COM189
+		CALL SP_CLOTHES
+			RESTART
+	ENDIF
+　口上内で別のコマンドと同等の演出を行った時に
+　SELECTCOM = （コマンド）としてCALL COM●と一緒に呼び出すことで、
+　調教ターンエンドと同等の数値処理が二重に呼び出されます。
+
+@BUILD
+　調教者（PLAYER）と調教対象の体格差を取得します。
+　S = 3 のときに調教者が大柄男性で調教対象が小柄or小人
+　S = 0 のときに体格差なし
+　S = -3のときに調教者が小柄or小人で調教対象が大柄男性
+　といった振れ幅で、-3～3の間でどれだけ体格差があるのかを返します。
+　一応性別差を考慮しているので↓こんな感じのイメージ
+　　オトコ　：大柄＞普通 ＞ 小柄 ＞ 小人
+　　それ以外：　　大柄＞普通＞小柄＞小人
+	CALL BUILD
+	;調教者の方がかなり大きい
+	IF S > 1
+		PRINTFORML %CALLNAME:MASTER%は%CALLNAME:TARGET%を軽々抱き上げた
+	;調教者の方が少しだけ大きい
+	ELSEIF S > -1
+		PRINTFORML %CALLNAME:MASTER%は%CALLNAME:TARGET%を何とか抱き上げた
+	;調教対象の方が少しだけ大きい
+	ELSEIF S > -3
+		PRINTFORML %CALLNAME:MASTER%は%CALLNAME:TARGET%を抱き上げようとしたが、必死で止められた
+	ELSE
+		PRINTFORML %CALLNAME:MASTER%は%CALLNAME:TARGET%に軽々抱き上げられてしまった
+	ENDIF
+といった分岐が作れます。
+
+@CLOTHES_STAIN
+@CLOTHES_STAIN_2
+　服の汚れを付着させる関数です。
+　Aに汚れが付くであろう衣装の部位を代入し、@CLOTHES_STAINをCALLすると汚れを移すことができます。
+　また@CLOTHES_STAIN_2は、特定の部位の汚れの付着の可否を判定する関数です。
+　※仕様上、「ターゲットの汚れ」を「付着させる」ことにしか対応できていません。
+　Mに汚すキャラ、Bに汚す箇所を代入し（STAIN:M:B）、接触する部位をS(STAIN:S)に代入してCALLします。
+　ターゲットの靴の汚れを調教者の口に移したいとき、
+	M = PLAYER
+	B = 0
+	S = 17
+	CALL CLOTHES_STAIN_2
+　とすると、靴の汚れが「靴の中」なのか「靴の外」なのかを判定して汚れの可否を判断する……はずです。

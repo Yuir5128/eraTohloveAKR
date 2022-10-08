@@ -1,0 +1,89 @@
+﻿;-------------------------------------------------
+;電気触手
+;触手-拷問系コマンド
+;-------------------------------------------------
+@COM372
+
+PRINTL 電気触手
+STR:0 = 電気触手
+
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 500
+LOSEBASE:気力 += 700
+
+IF EXP:触手経験 < EXPLV:1
+	TIMES LOSEBASE:体力 , 1.10
+	TIMES LOSEBASE:気力 , 2.00
+ELSEIF EXP:触手経験 < EXPLV:2
+	TIMES LOSEBASE:体力 , 0.90
+	TIMES LOSEBASE:気力 , 1.80
+ELSEIF EXP:触手経験 < EXPLV:3
+	TIMES LOSEBASE:体力 , 0.80
+	TIMES LOSEBASE:気力 , 1.50
+ELSEIF EXP:触手経験 < EXPLV:4
+	TIMES LOSEBASE:体力 , 0.70
+	TIMES LOSEBASE:気力 , 1.20
+ELSEIF EXP:触手経験 < EXPLV:5
+	TIMES LOSEBASE:体力 , 0.60
+	TIMES LOSEBASE:気力 , 1.00
+ELSE
+	TIMES LOSEBASE:体力 , 0.50
+	TIMES LOSEBASE:気力 , 0.50
+ENDIF
+
+IF TEQUIP:ニプルキャップ || TEQUIP:搾乳機
+	SOURCE:快Ｂ += 500
+	SOURCE:痛み += 500
+ENDIF
+IF TEQUIP:クリキャップ || TEQUIP:電動オナホール
+	SOURCE:快Ｃ += 500
+	SOURCE:痛み += 500
+ENDIF
+IF TEQUIP:バイブ
+	SOURCE:快Ｖ += 500
+	SOURCE:痛み += 500
+ENDIF
+IF TEQUIP:アナルバイブ
+	SOURCE:快Ａ += 500
+	SOURCE:痛み += 500
+ENDIF
+IF TEQUIP:カテーテル
+	SOURCE:快Ｃ += 500
+	SOURCE:痛み += 500
+ENDIF
+
+SOURCE:痛み += 5000
+SOURCE:恐れ += 4000
+SOURCE:露出 += 1200
+SOURCE:屈従 += 1200
+SOURCE:逸脱 += 2200
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;電極初体験のとき、異常経験追加
+IF EXP:電極経験 == 0
+	EXP:異常経験 += 1
+	PRINTL 電極初経験で異常経験＋１
+ENDIF
+EXP:電極経験 += 2
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(服従で1、隷属で2）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+

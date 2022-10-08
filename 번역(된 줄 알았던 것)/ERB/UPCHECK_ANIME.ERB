@@ -1,0 +1,620 @@
+﻿;-------------------------------------
+;바ー애니메이션 붙어, UPCHECK
+;-------------------------------------
+@UPCHECK_ANIME, ARG = -1
+#LOCALSIZE 3
+;--------------------------------------
+;수의 정의가 필요한 변수
+;--------------------------------------
+;--------------------------------------
+;이하는 PALAM와 동수만 필요합니다
+;Variablesize.csv의 정의 수많은 있고는 표시량에 맞추어 조정해 주세요
+;J통계에서는 200인 것으로 200으로 하고 있습니다
+;--------------------------------------
+#DIM 초기치, 200
+#DIM 가산치, 200
+#DIM 표시치, 200
+#DIM 바_속도, 200
+#DIMS 표시순서, 200
+#DIM 바_가속_지정_플래그
+;---------------------------------------
+;수의 정의가 불필요한 변수
+;---------------------------------------
+#DIM CHARA
+#DIM COLOR
+#DIM LINE
+#DIM NEXTP
+#DIM NOWP
+#DIM MAXPLV
+#DIM NOWPLV
+#DIM PUP
+#DIM MAXNAMELENS
+#DIM MAXPLENS
+#DIM MAXPUPLENS
+#DIM MAXPLVLENS
+#DIM BARLENS
+#DIM MAXBAR
+#DIM 증감이_있던_PALAM만
+#DIMS 제외_PALAM
+#DIMS 쾌계, 20
+#DIMS 절정, 20
+#DIM 절정_강도, 10
+#DIMS 절정명, 10
+#DIM 윤활최대치
+#DIM 시색
+#DIM 종색
+;------------------------------------------
+;사용 변수의 초기화
+;------------------------------------------
+VARSET LOCAL
+VARSET 초기치
+VARSET 가산치
+VARSET 표시치
+VARSET 절정_강도, -1
+MAXNAMELENS = 6
+MAXPLENS = 6
+MAXPUPLENS = 6
+
+;------------------------------------------
+;오른쪽 클릭시 동작 지정 플래그
+;옵션으로 사용하는 플래그를 지정해 주세요
+;FLAG:바_가속_지정_플래그가 진정한 때, 오른쪽 클릭으로 바가 스킵이 아니고
+;가속되게 됩니다
+;------------------------------------------
+
+바_가속_지정_플래그 = -1
+;----------------------------------------
+;바ー최장의 길이의 정의
+;반각의 수를 넣어 주세요
+;데포는 우선 16자
+;----------------------------------------
+BARLENS = 16
+MAXBAR = BARLENS * 8 - 1
+
+;----------------------------------------
+;이것을 1으로 하는 것으로, 증감이 없었던 PALAM는 표시하지 않게 된다
+;----------------------------------------
+증감이_있던_PALAM만 = 0
+
+;------------------------------------------
+;정의되고 있지만 JUEL 전용 따위로 UP에 관련되지 않는 것은
+;<ⓒⓒ>그렇다고 하는 형태로 추가해 주세요
+;------------------------------------------
+제외_PALAM = <부정><××>
+
+;------------------------------------------
+;쾌계 PALAM는 여기서 정의해 주세요
+;------------------------------------------
+SPLIT "쾌C/쾌V/쾌A/쾌B", "/", 쾌계
+
+;------------------------------------------
+;절정_강도의 정의
+;강도 따위가 있는 경우는 여기서 반응을 일으키는 최소의 물리량을 설정해 주세요
+;------------------------------------------
+SPLIT "10000/20000", "/", 절정명
+FOR LOCAL, 0, RESULT
+	절정_강도:LOCAL = TOINT(절정명:LOCAL)
+NEXT
+;-------------------------------------------
+;절정명의 정의
+;표시에 사용합니다
+;-------------------------------------------
+SPLIT "절정!/강절정!!", "/", 절정명
+
+;------------------------------------------
+;표시순서를 정의하고 싶은 경우는 여기서
+;그대로 좋은 경우는 comment out 혹은 삭제해 주세요
+;------------------------------------------
+;SPLIT "쾌C/쾌V/쾌A/쾌B/윤활/순종/욕정/굴복/습득/수치/고통/공포/반감/불쾌/억울", "/", 표시순서
+;FOR LOCAL, 0, VARSIZE("PALAM")
+;	SIF PALAMNAME:LOCAL == ""
+;		CONTINUE
+;	SIF STRFIND(제외_PALAM, "<"+PALAMNAME:LOCAL+">") >= 0
+;		CONTINUE
+;	SIF FINDELEMENT(표시순서, PALAMNAME:LOCAL, 0, 50, 1) >= 0
+;		CONTINUE
+;	PRINTFORMW %PALAMNAME:LOCAL%가 표시순서로부터 빠지고 있습니다
+;NEXT
+
+;------------------------------------------
+;윤활최대치
+;정의되어 있는 경우, 윤활가 일정치를 넘었을 경우, MAX와 표기됩니다
+;------------------------------------------
+윤활최대치 = 0
+
+;------------------------------------------
+;PALAMLV의 최대치를 취득
+;------------------------------------------
+MAXPLV = FINDELEMENT(PALAMLV, MAXARRAY(PALAMLV))
+
+;------------------------------------------
+;돌리는 캐릭터를 설정
+;------------------------------------------
+CHARA = ARG == -1? TARGET # ARG
+;CUP/COWN가 채용되어 있지 않았다고 생각되는 경우, UP를 옮긴다
+IF !MAXARRAY(CUP:CHARA:0) && !MAXARRAY(CDOWN:CHARA:0)
+	CHARA = TARGET
+	FOR LOCAL, 0, VARSIZE("PALAM")
+		CUP:CHARA:LOCAL = UP:LOCAL
+		CDOWN:CHARA:LOCAL = DOWN:LOCAL
+	NEXT
+ENDIF
+
+;행수와 원래의 색의 확보
+LINE = LINECOUNT
+COLOR = GETCOLOR()
+
+FOR LOCAL, 0, VARSIZE("PALAM")
+	SIF PALAMNAME:LOCAL == ""
+		CONTINUE
+	SIF 증감이_있던_PALAM만 && CUP:CHARA:LOCAL == 0 && CDOWN:CHARA:LOCAL == 0
+		CONTINUE
+	SIF STRFIND(제외_PALAM, "<"+PALAMNAME:LOCAL+">") >= 0
+		CONTINUE
+	;이름의 길이를 취한다
+	MAXNAMELENS = MAX(MAXNAMELENS, STRLENS(PALAMNAME:LOCAL))
+	;--------------------------
+	;초기치를 취득
+	;--------------------------
+	;카운터스톱
+	IF PALAM:CHARA:LOCAL >= PALAMLV:(MAXPLV)
+		초기치:LOCAL = MAXBAR
+	ELSE
+		;현재의 PALAM량과 다음의 레벨 업에 필요한 PALAM량을 취한다
+		NOWP = PALAM:CHARA:LOCAL - PALAMLV:GETPALAMLV(PALAM:CHARA:LOCAL, MAXPLV)
+		NEXTP = PALAMLV:(GETPALAMLV(PALAM:CHARA:LOCAL, MAXPLV) + 1) - PALAMLV:GETPALAMLV(PALAM:CHARA:LOCAL, MAXPLV)
+		초기치:LOCAL = NOWP * MAXBAR / NEXTP
+	ENDIF
+	;---------------------------
+	;가산치를 계산
+	;---------------------------
+	;계산용의 PALAMLV를 취해 둔다
+	NOWPLV = GETPALAMLV(PALAM:CHARA:LOCAL, MAXPLV)
+	;UP와 DOWN를 정리하고 푸는 다만, 쾌계는 UP만을 취한다
+	PUP = FINDELEMENT(쾌계, PALAMNAME:LOCAL, 0, 20, 1) >= 0? CUP:CHARA:LOCAL # CUP:CHARA:LOCAL - CDOWN:CHARA:LOCAL
+	;최대 레벨 도달시는 가산이 없다
+	SIF NOWPLV == MAXPLV
+		PUP = 0
+	SIF 윤활최대치 > 0 && PALAMNAME:LOCAL == "윤활" && (PUP + PALAM:CHARA:LOCAL > 윤활최대치)
+		PUP = 윤활최대치 - PALAM:CHARA:LOCAL
+	;결과 PALAM와 가산량의 최대의 길이를 취해 둔다
+	MAXPLENS = MAX(MAXPLENS, STRLENS(TOSTR(PALAM:CHARA:LOCAL+CUP:CHARA:LOCAL+CDOWN:CHARA:LOCAL)))
+	MAXPUPLENS = MAX(MAXPUPLENS, STRLENS(TOSTR(ABS(PUP))))
+	WHILE PUP
+		;레벨 올라가는 경우
+		IF NEXTP <= (PUP + NOWP)
+			PUP -= (NEXTP - NOWP)
+			가산치:LOCAL += MAXBAR+1
+			;레벨 업 1회째는 바ー한 개분은 가산하지 않는다
+			IF NOWPLV == GETPALAMLV(PALAM:CHARA:LOCAL, MAXPLV)
+				가산치:LOCAL -=초기치:LOCAL
+				NOWP = 0
+			ENDIF
+			;NOWPLV를 증가 최대 레벨이라면 여기서 종료
+			IF ++NOWPLV == MAXPLV
+				PUP = 0
+			ELSE
+				;쾌계로 LV4를 넘는 경우 특별조치
+				IF FINDELEMENT(쾌계, PALAMNAME:LOCAL, 0, 20, 1) >= 0 && NOWPLV >= 4
+					;최후에 남는 분량을 가산
+					가산치:LOCAL += (PALAM:CHARA:LOCAL + CUP:CHARA:LOCAL - CDOWN:CHARA:LOCAL) * MAXBAR / 10000
+					;-----------------------------------------------
+					;절정_강도에 의한 추가
+					;-----------------------------------------------
+					FOR LOCAL:1, 1, 10
+						SIF 절정_강도:(LOCAL:1) <= 0
+							BREAK
+						SIF 절정_강도:(LOCAL:1) > PALAM:CHARA:LOCAL + CUP:CHARA:LOCAL
+							BREAK
+						가산치:LOCAL += MAXBAR
+						MAXPUPLENS = MAX(MAXPUPLENS, STRLENS(절정명:(LOCAL:1)))
+					NEXT
+					PUP = 0
+				ELSE
+					;다음에 필요한 수치를 갱신
+					NEXTP =  PALAMLV:(NOWPLV+1) - PALAMLV:(NOWPLV)
+				ENDIF
+			ENDIF
+		ELSE
+			가산치:LOCAL += MAXBAR * PUP / NEXTP
+			PUP = 0
+		ENDIF
+	WEND
+	표시치:LOCAL =초기치:LOCAL
+	바_속도:LOCAL = 1 + MIN(ABS(가산치:LOCAL)/18, 35)
+NEXT
+FOR LOCAL , 0, VARSIZE("PALAM")
+	SIF PALAMNAME:LOCAL == ""
+		CONTINUE
+	SIF 증감이_있던_PALAM만 && CUP:CHARA:LOCAL == 0 && CDOWN:CHARA:LOCAL == 0
+		CONTINUE
+NEXT
+;쓰는 붙는 경우가 있으므로 억제
+REDRAW 0
+;자수 조정. 부속의 수치를 가산하면서, 전각 괘선에 맞추어 짝수화
+MAXNAMELENS = (MAXNAMELENS + 1) / 2 * 2
+;이름은(LvX)을 포함하므로 그 만큼 가산한다
+MAXPLVLENS = (STRLENS(TOSTR(MAXPLV)) + 1 + 4) / 2 * 2
+MAXPLENS = (MAXPLENS+1) / 2 * 2
+;+-의 부호분 증가
+MAXPUPLENS = (MAXPUPLENS + 1 +1) / 2 * 2
+LOCAL:2 = 0
+;표시
+DO
+	SIF 증감이_있던_PALAM만 && !MAXARRAY(가산치) && !MINARRAY(가산치)
+		BREAK
+	CLEARLINE LINECOUNT -LINE
+	PRINTFORM %"┌"+"─"*((MAXNAMELENS+MAXPLVLENS)/2)%
+	PRINTFORM %"┬"+"─"*(BARLENS/2)%
+	PRINTFORM %"┬"+"─"*(MAXPLENS/2)%
+	PRINTFORML %"┬"+"─"*(MAXPUPLENS/2)+"┐"%
+	
+	PRINTFORM │%"PALAM", MAXNAMELENS+MAXPLVLENS, LEFT%
+	PRINTFORM │%"BAR", BARLENS, LEFT%
+	PRINTFORM │%"TOTAL", MAXPLENS, LEFT%
+	PRINTFORML │%"GET", MAXPUPLENS, LEFT%│
+	
+	PRINTFORM %"├"+"─"*((MAXNAMELENS+MAXPLVLENS)/2)%
+	PRINTFORM %"┼"+"─"*(BARLENS/2)%
+	PRINTFORM %"┼"+"─"*(MAXPLENS/2)%
+	PRINTFORML %"┼"+"─"*(MAXPUPLENS/2)+"┤"%
+	FOR LOCAL:1, 0, VARSIZE("PALAM")
+		IF 표시순서 == ""
+			LOCAL = LOCAL:1
+		ELSE
+			SIF 표시순서:(LOCAL:1) == ""
+				CONTINUE
+			LOCAL = GETNUM(PALAM, 표시순서:(LOCAL:1))
+		ENDIF
+		SIF PALAMNAME:LOCAL == ""
+			CONTINUE
+		SIF 증감이_있던_PALAM만 && CUP:CHARA:LOCAL == 0 && CDOWN:CHARA:LOCAL == 0
+			CONTINUE
+		SIF STRFIND(제외_PALAM, "<"+PALAMNAME:LOCAL+">") >= 0
+			CONTINUE
+		IF MESSKIP()
+			;가속 모드자는 묘화 모드를 바꾼다
+			IF 바_가속_지정_플래그 >= 0 && FLAG:바_가속_지정_플래그
+				REDRAW 1
+			;스킵 모드자는 가산을 단번에 끝낸다
+			ELSE
+				표시치:LOCAL +=가산치:LOCAL
+				가산치:LOCAL = 0
+			ENDIF
+		ENDIF
+		;첫회는 수치 가산을 하지 않는다
+		IF LOCAL:2
+			IF 가산치:LOCAL >= 0
+				표시치:LOCAL += MIN(가산치:LOCAL, 바_속도:LOCAL)
+				가산치:LOCAL -= MIN(가산치:LOCAL, 바_속도:LOCAL)
+			ELSE
+				표시치:LOCAL += MAX(가산치:LOCAL, -바_속도:LOCAL)
+				가산치:LOCAL -= MAX(가산치:LOCAL, -바_속도:LOCAL)
+			ENDIF
+		ENDIF
+		;드럼롤용으로 필요량을 산출
+		NOWPLV = MIN(GETPALAMLV(PALAM:CHARA:LOCAL, MAXPLV) + ((표시치:LOCAL-1) / MAXBAR), MAXPLV)
+		NEXTP = PALAMLV:(NOWPLV+1) - PALAMLV:NOWPLV
+		PRINTFORM │%PALAMNAME:LOCAL, MAXNAMELENS, LEFT%(Lv
+		SELECTCASE NOWPLV
+			CASE IS > 4
+				SETCOLOR 0xCD2990
+			CASE 4
+				SETCOLOR 0xFF0000
+			CASE 3
+				SETCOLOR 0xEE7942
+			CASE 2
+				SETCOLOR 0xEEAD0E
+			CASE 1
+				SETCOLOR 0xFFF68F
+		ENDSELECT
+		PRINTFORM {NOWPLV, MAXPLVLENS-4}
+		SETCOLOR COLOR
+		PRINT )│
+		SELECTCASE PALAMNAME:LOCAL
+			;적
+			CASE "공포", "고통", "수치"
+				시색 =  0xC07070
+				종색 =  0xC0C0C0
+			;청
+			CASE "쾌C", "쾌∨", "쾌A", "쾌B"
+				시색 =  0x7070C0
+				종색 =  0xC0C0C0
+			;록
+			CASE "순종", "욕정", "굴복", "습득"
+				시색 =  0x70C070
+				종색 =  0xC0C0C0
+			;자
+			CASE "반감", "불쾌", "억울"
+				시색 =  0xC070C0
+				종색 =  0xC0C0C0
+			;황
+			CASE " "
+				시색 =  0xC0C070
+				종색 =  0xC0C0C0
+			;청록색
+			CASE " "
+				시색 =  0x70C0C0
+				종색 =  0xC0C0C0
+			CASEELSE
+				시색 =  0xC0C0C0
+				종색 =  0xFFFFFF
+		ENDSELECT
+		CALL PRINT_EIGHT_BAR, 표시치:LOCAL, BARLENS, 시색, 종색, 1, 1
+		;색을 되돌린다
+		SETCOLOR COLOR
+		SIF BARLENS%2
+			PRINT  
+		PRINT │
+		;최대 레벨 도달시
+		IF NOWPLV == MAXPLV || (윤활최대치 > 0 && PALAMNAME:LOCAL == "윤활" && PALAMLV:NOWPLV + NEXTP * (표시치:LOCAL % (MAXBAR+1)) / MAXBAR >= 윤활최대치)
+			PRINTFORM %"MAX!!", MAXPLENS%│
+			PRINTFORM %"MAX!!", MAXPUPLENS%
+		;절정 하고 있는 경우는 특수 표시
+		ELSEIF FINDELEMENT(쾌계, PALAMNAME:LOCAL, 0, 20, 1) >= 0 && NOWPLV >= 4
+			PRINTFORM {가산치:LOCAL == 0? PALAM:CHARA:LOCAL + CUP:CHARA:LOCAL - CDOWN:CHARA:LOCAL # 10000 * (표시치:LOCAL % (MAXBAR+1)) / MAXBAR, MAXPLENS}│
+			PRINTFORM %절정명:(NOWPLV - 4), MAXPUPLENS%
+		;다 가산해있는 경우는 정확한 수치를 내기 위해서(때문에) 분기
+		ELSEIF 가산치:LOCAL == 0
+			;결과 PALAM
+			PRINTFORM {PALAM:CHARA:LOCAL+CUP:CHARA:LOCAL+CDOWN:CHARA:LOCAL, MAXPLENS}│
+			PRINTFORM 
+			;증감량
+			PRINTFORM %@"\@CUP:CHARA:LOCAL-CDOWN:CHARA:LOCAL >= 0? + # - \@{ABS(CUP:CHARA:LOCAL-CDOWN:CHARA:LOCAL)}", MAXPUPLENS%
+		ELSE
+			PRINTFORM {PALAMLV:NOWPLV + NEXTP * (표시치:LOCAL % (MAXBAR+1)) / MAXBAR, MAXPLENS}│
+			PRINTFORM 
+			PRINTFORM %@"\@가산치:LOCAL >= 0? + # - \@{MAX(PALAMLV:NOWPLV - PALAM:CHARA:LOCAL, 0) + NEXTP * (ABS(표시치:LOCAL - (표시치:LOCAL <= MAXBAR ? 초기치:LOCAL # 0)) % (MAXBAR+1)) / MAXBAR}", MAXPUPLENS%
+		ENDIF
+		PRINTL │
+	NEXT
+	PRINTFORM %"└"+"─"*((MAXNAMELENS+MAXPLVLENS)/2)%
+	PRINTFORM %"┴"+"─"*(BARLENS/2)%
+	PRINTFORM %"┴"+"─"*(MAXPLENS/2)%
+	PRINTFORML %"┴"+"─"*(MAXPUPLENS/2)+"┘"%
+	TWAIT 100, 0
+	LOCAL:2++
+LOOP MAXARRAY(가산치) || MINARRAY(가산치)
+;PALAM에의 가산
+FOR LOCAL, 0, VARSIZE("PALAM")
+	SIF PALAMNAME:LOCAL == ""
+		CONTINUE
+	PALAM:CHARA:LOCAL += (CUP:CHARA:LOCAL - CDOWN:CHARA:LOCAL)
+NEXT
+VARSET CUP:CHARA:0
+VARSET CDOWN:CHARA:0
+VARSET UP:0
+VARSET DOWN:0
+
+;-------------------------------------------------
+;8분할 칼라바ー표시 함수@PRINT_EIGHT_BAR
+;	인수 0:바의 길이(반각 1/8문자 단위)
+;	인수 1:바ー전체의 길이(반각 1/8문자 단위)
+;		덧붙여 바의 길이가 최장의 수치(ARG:1*8-1)를 넘고 있는 경우, 표시는 0에 돌아온다
+;	인수 2:바시단의 색(16진. RGBCOLOR 함수 사용 가능. 생략 하면 현재의 문자색에)
+;	인수 3:바ー종단의 색(전술. 생략 하면 단색 바에)
+;	인수 4:시색비율(시단의 색이 진해진다)
+;	인수 5:종색비율(종단의 색이 진해진다)
+;
+;독자 형식의 인수입니다. 주의해 주세요
+;@PRINT_EIGHT_BAR의 인수가 독자 형식인 것으로, 종래의 BAR의 형식에서도 호출할 수 있도록(듯이) 준비했습니다.
+;반각의 1/8잘게 썰기로 바를 표시할 수 있습니다만, 바에 사용하는 문자를 지정은 할 수 없습니다. 또, 바의 키 경치도 사용할 수 없습니다.
+;인수 3·4를 지정하는 것으로 그라데이션이 생깁니다만, 이 경우색의 바뀌는 단위는 반각 1문자 마다 됩니다.
+;-------------------------------------------------
+@PRINT_EIGHT_BAR(ARG, ARG:1 = 32, ARG:2 = -1, ARG:3 = -1, ARG:4 = 1, ARG:5 = 1)
+#DIM COLOR
+#DIM RED, 3
+#DIM BLUE, 3
+#DIM GREEN, 3
+#DIM 시색비율
+#DIM 종색비율
+시색비율 = ARG:4
+종색비율 = ARG:5
+COLOR = GETCOLOR()
+IF ARG:2  >= 0 && ARG:3 >= 0
+	RED:1 = ARG:2 / 256 / 256
+	GREEN:1 = ARG:2 / 256 % 256
+	BLUE:1 = ARG:2 % 256
+	RED:2 = ARG:3 / 256 / 256
+	GREEN:2 = ARG:3 / 256 % 256
+	BLUE:2 = ARG:3 % 256
+ELSEIF ARG:2 >= 0
+	SETCOLOR ARG:2
+ENDIF
+FOR LOCAL, 0, ARG:1
+	IF ARG:2 >= 0 && ARG:3 >= 0
+		RED = (RED:1 * (ARG:1 - LOCAL) * 시색비율 + RED:2 * LOCAL * 종색비율) / ((ARG:1 -LOCAL) * 시색비율 + LOCAL * 종색비율)
+		GREEN = (GREEN:1 * (ARG:1 - LOCAL) * 시색비율 + GREEN:2 * LOCAL * 종색비율) / ((ARG:1 -LOCAL) * 시색비율 + LOCAL * 종색비율)
+		BLUE = (BLUE:1 * (ARG:1 - LOCAL) * 시색비율 + BLUE:2 * LOCAL * 종색비율) / ((ARG:1 -LOCAL) * 시색비율 + LOCAL * 종색비율)
+		SETCOLOR RED, GREEN, BLUE
+	ENDIF
+	IF LOCAL < MAX((ARG % (ARG:1 * 8) / 8), 0)
+		PRINTFORM %UNICODE(0x2588)%
+	ELSEIF LOCAL == MAX((ARG % (ARG:1 * 8) / 8), 0)
+		PRINTFORM \@ARG % (ARG:1 * 8) % 8? %UNICODE(0x2588 + 8 - (ARG % (ARG:1 * 8) % 8))%# %" "%\@
+	ELSE
+		PRINTFORM  
+	ENDIF
+NEXT
+SETCOLOR COLOR
+;-----------------------------------
+;ARG를 16진표기로 해 돌려줍니다
+;-----------------------------------
+@TO16, ARG
+#FUNCTIONS
+#LOCALSSIZE 3
+VARSET LOCALS
+LOCALS:2 = \@ARG < 0? - #\@
+SIF ARG == 0
+	RETURNF "0"
+WHILE ARG
+	SELECTCASE ABS(ARG) % 16
+		CASE IS < 10
+			LOCALS:1 = %TOSTR(ABS(ARG)%16)%
+		CASE 10
+			LOCALS:1 = a
+		CASE 11
+			LOCALS:1 = b
+		CASE 12
+			LOCALS:1 = c
+		CASE 13
+			LOCALS:1 = d
+		CASE 14
+			LOCALS:1 = e
+		CASE 15
+			LOCALS:1 = f
+	ENDSELECT
+	LOCALS = %LOCALS:1%%LOCALS%
+	ARG /= 16
+WEND
+RETURNF LOCALS:2 + LOCALS
+
+@GRADATIONTEST
+#LOCALSIZE 5
+#LOCALSSIZE 3
+#DIM LINE
+#DIM RED, 10
+#DIM BLUE, 10
+#DIM GREEN, 10
+#DIM NUM1
+#DIM NUM2
+#DIMS COLORNUM1
+#DIMS COLORNUM2
+#DIMS COLOR
+LINE = LINECOUNT
+FOR LOCAL, 0, 5
+	SELECTCASE LOCAL
+		CASE 0
+			LOCAL:1 = 0xff0000
+			LOCAL:2 = 0xff7a7a
+		CASE 1
+			LOCAL:1 = 0x0000ff
+			LOCAL:2 = 0x7a7aff
+		CASE 2
+			LOCAL:1 = 0x00ff00
+			LOCAL:2 = 0x7aff7a
+		CASE 3
+			LOCAL:1 = 0x7f00ff
+			LOCAL:2 = 0xbc7aff
+		CASE 4
+			LOCAL:1 = 0xffff00
+			LOCAL:2 = 0xffff7a
+	ENDSELECT
+	RED:(LOCAL*2) = LOCAL:1 / 256 / 256
+	RED:(LOCAL*2+1) = LOCAL:2 / 256 /256
+	GREEN:(LOCAL*2) = LOCAL:1 / 256 % 256
+	GREEN:(LOCAL*2+1) = LOCAL:2 / 256 % 256
+	BLUE:(LOCAL*2) = LOCAL:1 % 256
+	BLUE:(LOCAL*2+1) = LOCAL:2 % 256
+NEXT
+REDRAW 0
+LOCAL:1 = RAND:5 * 2
+$START
+CLEARLINE LINECOUNT - LINE
+DRAWLINE
+FONTSTYLE 2
+FOR LOCAL, 0, 16
+	LOCAL:2 = (RED:(LOCAL:1) * (15- LOCAL) + RED:(LOCAL:1+1) * LOCAL) / 15
+	LOCAL:3 = (GREEN:(LOCAL:1) * (15- LOCAL) + GREEN:(LOCAL:1+1) * LOCAL) / 15
+	LOCAL:4 = (BLUE:(LOCAL:1) * (15- LOCAL) + BLUE:(LOCAL:1+1) * LOCAL) / 15
+	SETCOLOR LOCAL:2, LOCAL:3, LOCAL:4
+	PRINTFORM %SUBSTRINGU(" GRADATION TEST", LOCAL, 1)%
+	RESETCOLOR
+NEXT
+PRINTL 
+FONTSTYLE 0
+FOR LOCAL, 0, 5
+	NUM1 = LOCAL * 2
+	NUM2 = LOCAL * 2 + 1
+	DRAWLINE
+	PRINT □시색　
+	SETCOLOR RED:NUM1*256*256+GREEN:NUM1*256+BLUE:NUM1
+	PRINTFORM %UNICODE(0x2586)*20%
+	RESETCOLOR
+	PRINTFORM %" "*11%
+	PRINT □종색　
+	SETCOLOR RED:NUM2*256*256+GREEN:NUM2*256+BLUE:NUM2
+	PRINTFORM %UNICODE(0x2586)*20%
+	RESETCOLOR
+	PRINTFORML %" "*11%
+	FOR LOCAL:1, 0, 3
+		IF LOCAL:1 == 0
+			COLOR = RED
+			COLORNUM1 = %TO16(RED:NUM1)%
+			COLORNUM2 = %TO16(RED:NUM2)%
+		ELSEIF LOCAL:1 == 1
+			COLOR = GREEN
+			COLORNUM1 = %TO16(GREEN:NUM1)%
+			COLORNUM2 = %TO16(GREEN:NUM2)%
+		ELSE
+			COLOR = BLUE
+			COLORNUM1 = %TO16(BLUE:NUM1)%
+			COLORNUM2 = %TO16(BLUE:NUM2)%
+		ENDIF
+		PRINTBUTTON "[++]", @"%COLOR%/{NUM1}/++"
+		PRINT 　
+		PRINTBUTTON "[+]", @"%COLOR%/{NUM1}/+"
+		PRINT 　
+		PRINTFORM %COLOR, 7, LEFT%<%COLORNUM1,2%>　
+		PRINTBUTTON "[--]", @"%COLOR%/{NUM1}/--"
+		PRINT 　
+		PRINTBUTTON "[-]", @"%COLOR%/{NUM1}/-"
+		PRINT 　　　
+		PRINTBUTTON "[++]", @"%COLOR%/{NUM2}/++"
+		PRINT 　
+		PRINTBUTTON "[+]", @"%COLOR%/{NUM2}/+"
+		PRINT 　
+		PRINTFORM %COLOR, 7, LEFT%<%COLORNUM2,2%>　
+		PRINTBUTTON "[-]", @"%COLOR%/{NUM2}/-"
+		PRINT 　
+		PRINTBUTTON "[--]", @"%COLOR%/{NUM2}/--"
+		PRINTL 　
+	NEXT
+	PRINT 
+	CALL PRINT_EIGHT_BAR, 143, 16, RED:NUM1*256*256+GREEN:NUM1*256+BLUE:NUM1, RED:NUM2*256*256+GREEN:NUM2*256+BLUE:NUM2
+	PRINT  　　　　　　　　　　　
+	CALL PRINT_EIGHT_BAR, 287, 32, RED:NUM1*256*256+GREEN:NUM1*256+BLUE:NUM1, RED:NUM2*256*256+GREEN:NUM2*256+BLUE:NUM2
+	PRINTL 
+NEXT
+INPUTS
+SPLIT RESULTS, "/", LOCALS
+LOCAL = TOINT(LOCALS:1)
+SELECTCASE LOCALS
+	CASE "RED"
+		SELECTCASE LOCALS:2
+			CASE "++"
+				RED:LOCAL = MIN(RED:LOCAL+16, 255)
+			CASE "+"
+				RED:LOCAL = MIN(RED:LOCAL+1, 255)
+			CASE "-"
+				RED:LOCAL = MAX(RED:LOCAL-1, 0)
+			CASE "--"
+				RED:LOCAL = MAX(RED:LOCAL-16, 0)
+		ENDSELECT
+	CASE "GREEN"
+		SELECTCASE LOCALS:2
+			CASE "++"
+				GREEN:LOCAL = MIN(GREEN:LOCAL+16, 255)
+			CASE "+"
+				GREEN:LOCAL = MIN(GREEN:LOCAL+1, 255)
+			CASE "-"
+				GREEN:LOCAL = MAX(GREEN:LOCAL-1, 0)
+			CASE "--"
+				GREEN:LOCAL = MAX(GREEN:LOCAL-16, 0)
+		ENDSELECT
+	CASE "BLUE"
+		SELECTCASE LOCALS:2
+			CASE "++"
+				BLUE:LOCAL = MIN(BLUE:LOCAL+16, 255)
+			CASE "+"
+				BLUE:LOCAL = MIN(BLUE:LOCAL+1, 255)
+			CASE "-"
+				BLUE:LOCAL = MAX(BLUE:LOCAL-1, 0)
+			CASE "--"
+				BLUE:LOCAL = MAX(BLUE:LOCAL-16, 0)
+		ENDSELECT
+ENDSELECT
+LOCAL:1 = (LOCAL / 2)*2
+GOTO START
+
+

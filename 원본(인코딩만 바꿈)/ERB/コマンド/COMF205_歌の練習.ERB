@@ -1,0 +1,127 @@
+﻿;-------------------------------------------------
+;歌の練習
+;コミュニケーション系コマンド
+;-------------------------------------------------
+@COM205
+
+PRINTL 歌の練習
+STR:0 = 歌の練習
+CALL KOJO_MESSAGE_COM
+
+
+;実行者が奴隷であるフラグ
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 50
+LOSEBASE:気力 += 20
+
+SOURCE:性行動 += 300
+SOURCE:達成感 += 200
+SOURCE:露出 += 50
+SOURCE:屈従 += 100
+SOURCE:逸脱 += 100
+SOURCE:反発 += 100
+
+;歌唱力高いとストレス減少
+IF ABL:歌唱技能 >= 5
+	CFLAG:TARGET:10 -= 5
+ELSEIF ABL:歌唱技能 >= 3
+	CFLAG:TARGET:10 -= 2
+ENDIF
+SIF CFLAG:TARGET:10 < 0
+	CFLAG:TARGET:10 = 0
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;歌唱技能は先に処理しておく
+IF ABL:歌唱技能 == 0
+	TIMES SOURCE:性行動 , 0.50
+	TIMES SOURCE:恭順 , 0.50
+	TIMES SOURCE:逸脱 , 2.50
+	TIMES SOURCE:反発 , 2.50
+ELSEIF ABL:歌唱技能 == 1
+	TIMES SOURCE:性行動 , 0.70
+	TIMES SOURCE:恭順 , 0.70
+	TIMES SOURCE:逸脱 , 1.20
+	TIMES SOURCE:反発 , 1.20
+ELSEIF ABL:歌唱技能 == 2
+	TIMES SOURCE:性行動 , 0.90
+	TIMES SOURCE:恭順 , 0.90
+	TIMES SOURCE:逸脱 , 0.90
+	TIMES SOURCE:反発 , 0.90
+ELSEIF ABL:歌唱技能 == 3
+	TIMES SOURCE:性行動 , 1.10
+	TIMES SOURCE:恭順 , 1.10
+	TIMES SOURCE:逸脱 , 0.60
+	TIMES SOURCE:反発 , 0.60
+ELSEIF ABL:歌唱技能 == 4
+	TIMES SOURCE:性行動 , 1.30
+	TIMES SOURCE:恭順 , 1.30
+	TIMES SOURCE:逸脱 , 0.30
+	TIMES SOURCE:反発 , 0.30
+ELSEIF ABL:歌唱技能 == 5
+	TIMES SOURCE:性行動 , 1.50
+	TIMES SOURCE:恭順 , 1.50
+	TIMES SOURCE:逸脱 , 0.10
+	TIMES SOURCE:反発 , 0.10
+ELSEIF ABL:歌唱技能 == 6
+	TIMES SOURCE:性行動 , 1.70
+	TIMES SOURCE:恭順 , 1.70
+	TIMES SOURCE:逸脱 , 0.10
+	TIMES SOURCE:反発 , 0.10
+ELSEIF ABL:歌唱技能 == 7
+	TIMES SOURCE:性行動 , 1.90
+	TIMES SOURCE:恭順 , 1.90
+	TIMES SOURCE:逸脱 , 0.10
+	TIMES SOURCE:反発 , 0.10
+ELSEIF ABL:歌唱技能 == 8
+	TIMES SOURCE:性行動 , 2.30
+	TIMES SOURCE:恭順 , 2.30
+	TIMES SOURCE:逸脱 , 0.10
+	TIMES SOURCE:反発 , 0.10
+ELSEIF ABL:歌唱技能 == 9
+	TIMES SOURCE:性行動 , 2.70
+	TIMES SOURCE:恭順 , 2.70
+	TIMES SOURCE:逸脱 , 0.10
+	TIMES SOURCE:反発 , 0.10
+ELSEIF ABL:歌唱技能 >= 10
+	TIMES SOURCE:性行動 , 4.00
+	TIMES SOURCE:恭順 , 4.00
+	TIMES SOURCE:逸脱 , 0.10
+	TIMES SOURCE:反発 , 0.10
+ENDIF
+
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;ヘッドセット着用中はボーナス
+A = ABL:歌唱技能/3
+A += 1
+B = 1
+IF TEQUIP:頭部装飾 == 4
+	A += 1
+	B += 1
+ENDIF
+
+PRINTFORML %EXPNAME:64%＋{A}
+EXP:歌唱経験 += A
+PRINTFORML %EXPNAME:23%＋{B}
+EXP:愛情経験 += B
+
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+
+RETURN 1
+
+
+

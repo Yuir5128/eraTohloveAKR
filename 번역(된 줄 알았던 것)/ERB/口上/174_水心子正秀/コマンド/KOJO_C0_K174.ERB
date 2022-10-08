@@ -1,0 +1,212 @@
+﻿;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+;eraeraA 신입상 템플릿 v1. 00
+;174를 캐릭터 번호에 치환해 사용해 주세요(페리시아노라면 1,알프레드라면 10)
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+;==================================================
+;00입상
+;==================================================
+;커맨드입상의 직전에 불린다
+;RETURN 1하면입상이 표시되지 않게 되어,지문만 표시된다
+;개별적으로 설정하고 싶은 경우는 이 함수내에서 스킵 한다/하지 않는 것 판정을 실시한다
+;-------------------------------------------------
+@KOJO_TRAIN_MESSAGE_SKIP_K174
+
+;==================================================
+;특정의 조건을 채우고 있는 경우,커맨드를 실행할 때에 소스가 추가
+;노출벽라든지마조끼라든지 취미에 맞은 커맨드나 상태로체력·기력회복하는 사양에.
+;마조끼똥 높은데 곧기절 하는 것 어떻게든 하고 싶었던 것으로 테스트.
+;==================================================
+;봉사계의 커맨드 실행시에체력/uA력회복.
+IF ABL:봉사정신 >= 3
+	SELECTCASE SELECTCOM
+		;수몸봉사는체력회복
+		CASE 70,71,73 TO 80,85 TO 87,317,420,421,422
+			BASE:0 += ABL:봉사정신*2
+		;공봉사는기력회복
+		CASE 220 TO 225,260,261,263,264,318
+			BASE:1 += ABL:봉사정신*2
+		;체력기력양쪽 모두 회복한다
+		CASE 243 TO 245,319,503,504
+			BASE:0 += ABL:봉사정신*2
+			BASE:1 += ABL:봉사정신*2
+	ENDSELECT
+ENDIF
+
+;옷을 입지 않았다고기력회복,노출플레이중은체력회복.
+IF ABL:노출벽 >= 3
+	;전라 루트
+	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래） && !TEQUIP:특수 2 && !TEQUIP:특수 1
+		BASE:1 += ABL:노출벽*2
+	;반나체 루트
+	ELSEIF (TEQUIP:전신상의 || (TEQUIP:상의 && TEQUIP:하의)) && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래）
+		BASE:1 += ABL:노출벽*2
+	ENDIF
+	SIF TEQUIP:비디오카메라 || TEQUIP:야외플레이 || TEQUIP:수치플레이 || SELECTCOM == 3
+		BASE:0 += ABL:노출벽*2
+ENDIF
+
+;구속되고 있으면기력회복.
+;고통커맨드 실행시에체력회복.
+IF ABL:마조끼 >= 3
+	SIF TEQUIP:밧줄 || TEQUIP:아이마스크 || TEQUIP:볼개그 || TEQUIP:정조대 || TEQUIP:사정관리 || TEQUIP:전신상의 == 9
+		BASE:1 += ABL:마조끼*2
+	SELECTCASE SELECTCOM
+		CASE 16,25,44,56,62,140 TO 155
+			BASE:0 += ABL:마조끼*2
+	ENDSELECT
+ENDIF
+
+;노예공커맨드 실행시에체력/uA력회복.
+IF ABL:새드끼 >= 3
+	SIF TEQUIP:신발 > 0 && SELECTCOM == 80
+		BASE:0 += ABL:새드끼*2
+	SIF ABL:PLAYER:마조끼 >= 3 && (SELECTCOM == 226 || SELECTCOM == 227)
+		BASE:0 += ABL:새드끼*2
+		BASE:1 += ABL:새드끼*2
+	SIF SELECTCOM >= 226 && SELECTCOM <= 227
+		BASE:1 += ABL:새드끼*2
+ENDIF
+
+;자위를 하면체력·기력회복.
+IF ABL:자위중독 >= 3
+	SELECTCASE SELECTCOM
+		CASE 4,5,6,7
+			BASE:1 += ABL:자위중독*2
+	ENDSELECT
+ENDIF
+
+;정액 마셔체력회복.
+;정액을 받을 수 있을 것 같은 커맨드 실행시는기력회복.
+IF ABL:정액중독 >= 3
+	SIF TFLAG:0 == 0 && TFLAG:43 == 13
+		BASE:0 += ABL:정액중독*2
+	SELECTCASE SELECTCOM
+		CASE 70 TO 75,226,227,407,420,421,516
+			BASE:1 += ABL:정액중독*2
+		CASE 410,412
+			BASE:0 += ABL:정액중독*2
+	ENDSELECT
+ENDIF
+
+;섹스 하면체력·기력회복. 음란√라면 특수 섹스에서도 회복.
+IF ABL:섹스중독 >= 3
+	IF TALENT:음란 || TALENT:창부
+		SELECTCASE SELECTCOM
+			CASE 322,381,405,406,430,431,511 TO 515,517 TO 525
+				BASE:0 += ABL:섹스중독*2
+				BASE:1 += ABL:섹스중독*2
+		ENDSELECT
+	ENDIF
+	SELECTCASE SELECTCOM
+		CASE 100 TO 116,260 TO 265,507 TO 510,526
+			BASE:0 += ABL:섹스중독*2
+			BASE:1 += ABL:섹스중독*2
+	ENDSELECT
+ENDIF
+
+;스카계 커맨드 실행으로체력회복.
+;변의/mA의가 있을 때기력회복.
+IF ABL:스캇중독 >= 3
+	SIF BASE:4 >= 60 || BASE:6 >= 60
+		BASE:1 += ABL:스캇중독*2
+	SELECTCASE SELECTCOM
+		CASE 182 TO 185,285,286,302,304
+			BASE:0 += ABL:스캇중독*2
+	ENDSELECT
+	;움직이는지 모르지만 일단 들어갈 수 있어 본다
+	SIF TFLAG:58 == 1 || TFLAG:68 == 1
+		BASE:0 += ABL:스캇중독*2
+ENDIF
+
+
+
+;==================================================
+;그 외 제어
+;==================================================
+;장비품 보완입상을 사용하지 않는다
+;TFLAG:59 = 1
+
+;볼개그 붙어,촉수구욕중의 경우는 지문만
+SIF TEQUIP:볼개그 || TEQUIP:촉수구욕
+	RETURN 1
+
+;붕괴 하고 있는 경우는 지문만
+SIF TALENT:붕괴
+	RETURN 1
+
+;주인이 청마가 아닌 것도 깔고는 조수가 있는 경우
+SIF NO:MASTER != 176 || ASSI > 0
+	RETURN 1
+
+
+;==================================================
+;입상 제어
+;==================================================
+;CFLAG5005로 제어
+;기본적인 우선도는 무서워하고＞망집＞반발 녹고＞반발＞녹고 강＞마조＞새드＞녹고 약＞소＞조
+;※경우에 따라서는 전후 한다
+
+;무서워하고 공포LV4 이상,혹은공포LV3 이상+망집 플래그 온+맹신미취득,혹은공포LV3+미함락
+SIF PALAM:공포 >= PALAMLV:4 || (PALAM:공포 >= PALAMLV:3 && (CFLAG:5002 && 4) && TALENT:맹신 == 0) || (PALAM:공포 >= PALAMLV:3 && !KANRAKU(TARGET))
+	CFLAG:5005 |= 64
+
+;망집 망집 플래그 온
+SIF (CFLAG:5002 & 4)
+	CFLAG:5005 |= 4
+
+;반발 녹고 욕정LV4+(반발각인 3,혹은 PALAM:반감LV4 이상)
+SIF PALAM:욕정 >= 4 && (MARK:반발각인 == 3 || PALAM:반감 >= PALAMLV:4)
+	CFLAG:5005 |= 128
+
+;반발 반발각인 3,혹은 PALAM:반감LV4 이상
+SIF MARK:반발각인 == 3 || PALAM:반감 >= PALAMLV:4
+	CFLAG:5005 |= 32
+
+;녹고 강함락이 끝난+욕정LV4,혹은 미함락+욕정LV5 전제:반발각인 3 미만,혹은 PALAM:반감LV4 미만
+SIF ((KANRAKU(TARGET) && PALAM:욕정 >= PALAMLV:4) || (!KANRAKU(TARGET) && PALAM:욕정 >= PALAMLV:5)) && (MARK:반발각인!= 3 || PALAM:반감 < PALAMLV:4)
+	CFLAG:5005 |= 16
+
+;배타 반발와 녹고 강이 양쪽 모두 붙었을 경우는반발만으로 한다
+SIF (CFLAG:5005 & 32) && (CFLAG:5005 & 16)
+	CFLAG:5005 -= 16
+
+;배타 두려움과 녹고 강이 양쪽 모두 붙어 있어,개시시에 발정 이벤트 보고 있었던 경우는 녹고 강만으로 한다
+SIF (CFLAG:5005 & 64) && (CFLAG:5005 & 16) && (CFLAG:5004 & 4)
+	CFLAG:5005 -= 64
+
+;마조 TALENT:마조,혹은마조끼 5 이상
+SIF TALENT:마조 || ABL:마조끼 >= 5
+	CFLAG:5005 |= 256
+
+;새드 TALENT:새드,혹은새드끼 5 이상
+SIF TALENT:새드 || ABL:새드끼 >= 5
+	CFLAG:5005 |= 512
+
+;녹고 미만 욕정LV3 이상
+SIF PALAM:욕정 >= PALAMLV:3
+	CFLAG:5005 |= 8
+
+;소진우√
+SIF (CFLAG:5001 & 2)
+	CFLAG:5005 |= 2
+
+;선조 하트풀 모드
+SIF (CFLAG:5001 & 1)
+	CFLAG:5005 |= 1
+
+
+;==================================================
+;랜덤소입상
+;==================================================
+;절정 회수
+IF (EX:0 + EX:1 + EX:2 + EX:3 >= 20)
+	PRINTFORML 20회 이상의 절정을 거쳐,%CALLNAME%는 머리의 나사가 날아가 버린 것 같다
+	PRINTFORML 야무지지 못하게 얼굴을 느슨해지게 해 말씨가 돌지 않는입조로 멋없는 허덕임을 누설하고 있다
+ELSEIF (EX:0 + EX:1 + EX:2 + EX:3 >= 10) && (EX:0 + EX:1 + EX:2 + EX:3 < 20)  && MARK:반발각인!= 3
+	PRINTFORML 절정을 몇번이나 맛보여져%CALLNAME%는 숨도 끊어질듯 끊어질듯이 허덕이고 있다
+ENDIF
+
+RETURN 0
+
+
+

@@ -1,0 +1,1423 @@
+﻿;--------------------------------------------------------------------------------------------
+;이 파일내에서는 아이템·네타바레 Q＆A·
+;게임 모드·엔딩 조건·확장 기능의 기술이 있습니다.
+;--------------------------------------------------------------------------------------------
+;=============================================================================
+;용어 사전――아이템
+;=============================================================================
+;--------------------------------------------------
+;아이템 해설 메인 페이지
+;--------------------------------------------------
+@DICTIONARY_ITEM_MAIN
+P = 0
+FLAG:45 = 0
+$PRINT_LIST
+DRAWLINE
+PRINTFORML 「아이템」에 관한 대범한 설명입니다. (※현단계에서는 아직 미완성입니다)
+PRINTFORML ＜page. {P+1}/2＞
+DRAWLINE
+;각 페이지를 표시
+FOR LOCAL:1, 0, 50
+	LOCAL = LOCAL:1 + P*50
+	Q:LOCAL = 0
+	STRLENS ITEMNAME:LOCAL
+	IF RESULT > 0
+		PRINTFORMLC [{LOCAL, 2}] %ITEMNAME:LOCAL%
+		CALL CHECK_NEWLINE
+		Q:LOCAL = 1
+	ENDIF
+NEXT
+PRINTL 
+DRAWLINE
+PRINTFORMLC \@(P <= 0) ? %" " * 16% # [1001]전의 페이지\@
+PRINTLC [1000]돌아온다
+PRINTFORMLC \@(P >= 1) ? %" " * 16% # [1009]차의 페이지\@
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+	GOTO PRINT_LIST
+ELSEIF RESULT == 1009 && P < 2
+	P += 1
+	GOTO PRINT_LIST
+ELSE
+	SIF Q:RESULT == 0
+		GOTO INPUT_LOOP
+	PRINTFORML 【%ITEMNAME:RESULT%】
+	TRYCALLFORM DICTIONARY_ITEM_{RESULT}
+	PRINTW 
+	GOTO PRINT_LIST
+ENDIF
+
+;--------------------------------------------------
+;아이템 해설
+;--------------------------------------------------
+;로터
+@DICTIONARY_ITEM_0
+PRINTL 초심자에게도 안심인, 사랑스러운 달걀형을 한로터의 알뜰구매 세트.
+PRINTL 비부[秘部]에 맞혀, 삽입해, 진동하는 것으로 쾌감을 주는 성구[性具].
+PRINTL 방수가공도 확실히인 것으로, 물에 젖어도 괜찮아.
+PRINTL 작기 때문에, 노예의처녀막을 찢어 버릴 걱정도 없다.
+PRINTL 로터를 사용하는 커맨드에 필수.
+
+;진동마사지기
+@DICTIONARY_ITEM_1
+PRINTL 전동 맛사지기라고도 불리는 맛사지 기구…… 를, 성구[性具]로 개량한 것.
+PRINTL 로터보다 강한 자극을 주지만, 크기 때문에 삽입은 할 수 없다.
+PRINTL 커맨드 「진동마사지기」에는 필수.
+
+;클리캡
+@DICTIONARY_ITEM_2
+PRINTL 클리토리스에 들러 붙게 해 쾌감을 주는 성구[性具]. 장착형.
+PRINTL 흡인식을 위해서(때문에), 통증는 거의 주지 않는다.
+PRINTL 커맨드 「클리캡」에 필수.
+
+;전동오나홀
+@DICTIONARY_ITEM_3
+PRINTL 실리콘제의 통을페니스에 씌워, 쾌감을 주는 성구[性具]. 장착형.
+PRINTL 전동식인 것으로, 아무것도 하지 않아도 기분이 좋다.
+PRINTL 커맨드 「전동오나홀」에 필수.
+
+;바이브
+@DICTIONARY_ITEM_4
+PRINTL 바기나에 삽입할 수 있는, 일반적인바이브. 장착형.
+PRINTL 안팎의 사이즈가 있기 (위해)때문에, 노예의[처녀]를 찢어 버린다.
+PRINTL 커맨드 「바이브」에 필수.
+
+;애널바이브
+@DICTIONARY_ITEM_5
+PRINTL 애널에 삽입할 수 있는, 애널용의바이브. 장착형.
+PRINTL 남의 virgin는 개념인 것으로, 완구로 찢을 걱정은 없어요.
+PRINTL 커맨드 「애널바이브」에 필수.
+
+;애널비즈
+@DICTIONARY_ITEM_6
+PRINTL 애널에 삽입할 수 있는, 복수의 구슬을 연결한 형태를 한 성구[性具]. 장착형.
+PRINTL 넣을 때보다, 뽑을 때(분)편이 기분이 좋은 것 같다.
+PRINTL 커맨드 「애널비즈」에 필수.
+
+;바디클립
+@DICTIONARY_ITEM_7
+PRINTL 여러가지 개소에 사용 가능한 클립 세트. 장착형.
+PRINTL 용수철은 약한이지만, 끼일 수 있으면 물론 아프다.
+PRINTL 커맨드 「유두클립」 「음핵클립」에 필수.
+
+;확장벌룬
+@DICTIONARY_ITEM_8
+PRINTL 풍선과 공기를 보내는 기구세트. 장착형.
+PRINTL 기본적으로는애널용이지만, 어떤 기구와 세트로 요도에도 사용 가능.
+PRINTL 커맨드 「확장벌룬」에 필수.
+
+;관장도구세트
+@DICTIONARY_ITEM_9
+PRINTL 노예에게관장를 행하기 위한, 의료용의관장도구세트.
+PRINTL 관장 된 노예는 「변의」를 개최한다.
+PRINTL 커맨드 「관장」에 필수.
+
+
+;니틀캡
+@DICTIONARY_ITEM_10
+PRINTL 유두에 들러 붙게 해 쾌감을 주는 성구[性具]. 장착형.
+PRINTL 흡인식을 위해서(때문에), 통증는 거의 주지 않는다.
+PRINTL 커맨드 「니틀캡」에 필수.
+
+;착유기
+@DICTIONARY_ITEM_11
+PRINTL 착유하기 위해서 유방에 장착하는 기구. 장착형.
+PRINTL 노예가[모유체질]가 아니면 사용할 수 없다.
+PRINTL 커맨드 「착유기」에 필수.
+
+;페니스밴드
+@DICTIONARY_ITEM_12
+PRINTL 페니스가 없는 인간이 허리에 붙여 사용하는 유사페니스.
+PRINTL 상대에 삽입하는 섹스계 커맨드가 사용 가능하게 되지만, 당연, 사정기능은 없다.
+
+;채찍
+@DICTIONARY_ITEM_13
+PRINTL 노예를 고정시켜두기 위한채찍.
+PRINTL 장미채찍나 한 개채찍, 긴 것으로부터 짧은 것까지, 그 종류는 풍부.
+PRINTL 장미채찍는 실은 너무 아프지 않은 것 알고 있었어?
+PRINTL 커맨드 「채찍」 「채찍으로맞는다」에 필수.
+
+;바늘
+@DICTIONARY_ITEM_14
+PRINTL 날카롭게 날카로워진 보통바늘. 세트로 많이 들어가있는 싸고 좋은 물건.
+PRINTL 인체에 사용하는 경우, 소독은 잊지 않고.
+PRINTL 커맨드 「바늘」에 필수.
+
+;아이마스크
+@DICTIONARY_ITEM_15
+PRINTL 시야를 덮어 가리는아이마스크. 장착형.
+PRINTL 커맨드 「아이마스크」에 필수.
+
+;밧줄
+@DICTIONARY_ITEM_16
+PRINTL 노예를 묶어, 그 움직임을 봉하기 위한밧줄. 장착형.
+PRINTL 길이도 강도도 충분히, 노예에게 상처를 입힐 것도 없는 뛰어나고 것.
+PRINTL 커맨드 「밧줄」에 필수.
+
+;볼개그
+@DICTIONARY_ITEM_17
+PRINTL 노예의입를 봉하는 구속도구. 장착형.
+PRINTL 씹게 하는 볼 부분에는 구멍이 열리고 있어 호흡을 저해하지 않는다.
+PRINTL 커맨드 「볼개그」에 필수.
+
+;비디오카메라
+@DICTIONARY_ITEM_18
+PRINTL 노예를비디오촬영하기 위한비디오카메라.
+PRINTL 기록하기 위한비디오테이프가 없으면 사용할 수 없는 외,
+PRINTL 테이프의 잔량이 없어졌을 경우에는, 자동으로 촬영이 종료된다.
+PRINTL 찍은 비디오는손바탕으로 남기는 일도, 매각할 수도 있다.
+PRINTL 커맨드 「비디오촬영」에 필수.
+
+;카메라
+@DICTIONARY_ITEM_19
+PRINTL 사진촬영하기 위한카메라. 필름가 없으면 사용할 수 없다.
+PRINTL 찍은 사진은 매각해, 돈으로 바꿀 수가 있다.
+PRINTL 커맨드 「사진촬영」에 필수.
+
+;플레이매트
+@DICTIONARY_ITEM_20
+PRINTL 목욕탕로 플레이의 폭이 넓어지는, 큰플레이매트.
+PRINTL 목욕탕는 미끄러지기 쉽기 때문에, 이것이 없으면 대부분의 플레이는 실행 불가.
+
+;대거울
+@DICTIONARY_ITEM_21
+PRINTL 노예의 모습을 비추는, 큰 거울. 수치플레이가 가능하게 된다.
+PRINTL 흐림 방지 가공 첨부인 것으로, 목욕탕에서도 사용할 수 있다.
+PRINTL 커맨드 「수치플레이」에 필수.
+
+;목걸이+리드
+@DICTIONARY_ITEM_22
+PRINTL 노예를 연결해, 밖에 데리고 나가기 위한 산책 세트.
+PRINTL 커맨드 「야외플레이」에 필수.
+
+;전극플레이키트
+@DICTIONARY_ITEM_23
+PRINTL 여러가지 개소에 사용할 수 있는, 전극와 전원세트.
+PRINTL 전기 플레이는 꽤 상급자전용이라고 생각합니다.
+PRINTL 전극를 사용한 커맨드 각종에 필수.
+
+;리본
+@DICTIONARY_ITEM_24
+PRINTL 사정관리가 가능하게 된다. 꼭 끼게 감아도 안심. 장착형.
+PRINTL 정조대의 어태치먼트로서도 사용할 수 있다.
+PRINTL 커맨드 「사정관리」에 필수.
+
+;카테터
+@DICTIONARY_ITEM_25
+PRINTL 요도 개발용의카테터와 세정액세트. 장착형.
+PRINTL 통 모양이 되어 있기 (위해)때문에, 이것을 꽂아져도 노예는 방뇨가 가능.
+PRINTL 전극나 벌룬과 짜맞추는 것으로, 플레이의 폭이 넓어진다.
+PRINTL 커맨드 「카테터」에 필수.
+
+;삼각목마
+@DICTIONARY_ITEM_26
+PRINTL 노예를 실어 사용하는, 조교용의삼각목마. 장착형.
+PRINTL 상처 따위 하지 않도록, 키는 약간폭을 붙인 구조가 되어 있지만,
+PRINTL 전체중이 비부[秘部]에 걸리는 그고통는 상당한의.
+PRINTL 커맨드 「삼각목마」에 필수.
+
+;정조대
+@DICTIONARY_ITEM_30
+PRINTL 노예의 정조를 지키는, 시정 가능한 특수한 속옷. 장착형.
+PRINTL C, V를 막아, 노예의자위를 방지할 수가 있지만, 주인도 접하지 않는다.
+PRINTL 상시 장착해도 아무렇지도 않은 것 같게, 요도 부근과 엉덩이 부분은 열려 있기 (위해)때문에,
+PRINTL 방뇨시키거나 A조교를 실시하는 것은 가능.
+PRINTL 「리본」를 병용 하는 것으로사정관리의 효과도 기대할 수 있다.
+PRINTL 커맨드 「정조대」에 필수.
+
+;네코미미
+@DICTIONARY_ITEM_31
+PRINTL 그 이름과 같은 고양이의 귀. 장착형.
+PRINTL 고양이의 종류는 상상에 맡겨 주시길.
+PRINTL 동물귀를 장착중, 애널바이브가 동물의 꼬리를 본뜬 형태에 변화한다.
+
+;이누미미
+@DICTIONARY_ITEM_32
+PRINTL 그 이름과 같은 개의 귀. 장착형.
+PRINTL 개의 종류는 상상에 맡겨 주시길.
+PRINTL 동물귀를 장착중, 애널바이브가 동물의 꼬리를 본뜬 형태에 변화한다.
+
+;우사미미
+@DICTIONARY_ITEM_33
+PRINTL 그 이름과 같은 토끼의 귀. 장착형.
+PRINTL 토끼의 종류는 상상에 맡겨 주시길.
+PRINTL 동물귀를 장착중, 애널바이브가 동물의 꼬리를 본뜬 형태에 변화한다.
+
+;헤드셋
+@DICTIONARY_ITEM_34
+PRINTL 마이크 첨부의헤드셋. 장착형.
+
+;스타킹
+@DICTIONARY_ITEM_36
+PRINTL 아무런 특색도 없는스타킹. 찌릿찌릿 하고 즐긴다. 일회용.
+
+;타이츠
+@DICTIONARY_ITEM_37
+PRINTL 아무런 특색도 없는타이츠. 찌릿찌릿 하고 즐긴다. 일회용.
+
+;에이프런
+@DICTIONARY_ITEM_38
+PRINTL 아무런 특색도 없는에이프런. 장착형.
+PRINTL 「밥으로 해? 욕실로 해? 그렇지 않으면……」라고 할 수가 있다.
+PRINTL 커맨드 「신혼부부플레이」에 필수.
+
+;웨딩 세트
+@DICTIONARY_ITEM_39
+PRINTL 결혼식에 입는 의상과 베일세트.
+PRINTL 웨딩 드레스는 사랑스러운 것이 입는 것, 이라고 동서 고금 정평이 나 있다.
+
+;로션
+@DICTIONARY_ITEM_40
+PRINTL 노예의윤활를 올리기 위한윤활제. 일회용.
+PRINTL 인체에 상냥한 성분으로 되어 있기 (위해)때문에, 입에 넣어도 괜찮아.
+PRINTL 커맨드 「로션」에 필수.
+
+;미약
+@DICTIONARY_ITEM_41
+PRINTL 성적인 흥분을 재촉하는 약. 의존성은 없기 때문에 안심. 일회용.
+PRINTL 커맨드 「미약」에 필수.
+
+;이뇨제
+@DICTIONARY_ITEM_42
+PRINTL 뇨의를 재촉하는 약. 일회용.
+PRINTL 커맨드 「이뇨제」에 필수.
+
+;비디오테이프
+@DICTIONARY_ITEM_43
+PRINTL 비디오카메라의 사용에 필요한비디오테이프. 일회용.
+PRINTL 커맨드 「비디오촬영」에 필수.
+
+;필름
+@DICTIONARY_ITEM_44
+PRINTL 사진촬영에는 필수의필름. 일회용.
+PRINTL 커맨드 「사진촬영」에 필수.
+
+;콘돔
+@DICTIONARY_ITEM_45
+PRINTL 기본 스타일의 피임구. 피임에는 충분하지만, 일회용.
+PRINTL 중에 모아 둔 정액을, 노예나 조수에 먹이는 일도 할 수 있다.
+
+;저온초
+@DICTIONARY_ITEM_46
+PRINTL 촛불플레이에 필요. 맨살을 손상시키지 않는 뛰어나고 것. 비싼 가격치고 일회용.
+PRINTL 촛불플레이는 일본인 고안으로, 옛날은 버너가 일반적이었던 것입니다 라고.
+PRINTL 커맨드 「촛불」에 필수.
+
+;강정신약
+@DICTIONARY_ITEM_47
+PRINTL 어떤 특수한 효과를 가진 수수께끼의 흰 가루. 일회용.
+PRINTL 의존성? 그런 것 없어 없어. 없다니까!
+PRINTL 커맨드 「강정신약」에 필수.
+
+;구토제
+@DICTIONARY_ITEM_48
+PRINTL 변의를 재촉하는 약. 요컨데 설사약이다. 일회용.
+PRINTL 커맨드 「구토제」에 필수.
+
+;가려움증약
+@DICTIONARY_ITEM_49
+PRINTL 바른 부분이 매우 가려워지는 약. 일회용.
+PRINTL 노예의 성감에 바르는 것으로, 가려움를 느끼게 된다.
+PRINTL 커맨드 「가려움증약」에 필수.
+
+;더러움무시
+@DICTIONARY_ITEM_50
+PRINTL TALENT【더러움무시】를 부여할 수가 있다.
+
+;조제지식
+@DICTIONARY_ITEM_51
+PRINTL TALENT【조제지식】를 부여할 수가 있다.
+
+;금지된지식
+@DICTIONARY_ITEM_52
+PRINTL TALENT【금단의지식】를 부여할 수가 있다.
+
+;천리안
+@DICTIONARY_ITEM_53
+PRINTL TALENT【천리안】를 부여할 수가 있다.
+
+;절륜
+@DICTIONARY_ITEM_54
+PRINTL TALENT【절륜】를 부여할 수가 있다.
+
+;수
+@DICTIONARY_ITEM_55
+PRINTL 대상을【수】로 한다.
+
+;공
+@DICTIONARY_ITEM_56
+PRINTL 대상을【공】로 한다.
+
+;촉수사역술
+@DICTIONARY_ITEM_57
+PRINTL 촉수를 사역할 수 있게 되기 위한 수수께끼의 힘.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+PRINTL 모든촉수계 조교에 필수이다.
+
+;진화의비법
+@DICTIONARY_ITEM_58
+PRINTL 촉수를 진화시킨다!
+PRINTL 보다 신사적이고 높은 수준의촉수조교를 실시할 수 있게 된다.
+PRINTL 벌써촉수를 취급할 수 있게 되지 않으면, 살 수가 없다.
+
+;오메가
+@DICTIONARY_ITEM_59
+PRINTL 대상을【오메가】로 한다.
+
+;갓빠의 묘약
+@DICTIONARY_ITEM_60
+PRINTL 체력를 회복한다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+PRINTL [독약내성]소유에는 효능이 둔하기 때문에 주의.
+
+;약의 재료(쌍)
+@DICTIONARY_ITEM_61
+PRINTL 후타나리로 한다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;약의 재료(소)
+@DICTIONARY_ITEM_62
+PRINTL 후타나리를 소거한다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;푸른환약
+@DICTIONARY_ITEM_63
+PRINTL 모유체질가 된다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;붉은환약
+@DICTIONARY_ITEM_64
+PRINTL 체가 젊어지는 환약. 처녀막이 재생한다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;풍유환
+@DICTIONARY_ITEM_65
+PRINTL 가슴의 크기를 1단계 올린다. 폭유사용 불가.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;축유환
+@DICTIONARY_ITEM_66
+PRINTL 가슴의 크기를 1단계 내린다. 절벽사용 불가.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;억프로라크틴제
+@DICTIONARY_ITEM_67
+PRINTL 모유가 나오지 않게 된다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;3환계항우울제
+@DICTIONARY_ITEM_68
+PRINTL 실금하는 버릇이 회복된다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;절반성전환약
+@DICTIONARY_ITEM_69
+PRINTL 투여한 대상의 하반신의 성별을 역전시킨다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;성전환약
+@DICTIONARY_ITEM_70
+PRINTL 투여한 대상의 성별을 역전시킨다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;천사의기적
+@DICTIONARY_ITEM_71
+PRINTL 체의 크기를 1단계 내린다. 소인체형에는 사용 불가.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;악마의저주
+@DICTIONARY_ITEM_72
+PRINTL 체의 크기를 1단계 올린다. 큰 몸집 체계에는 사용 불가.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;풍근환
+@DICTIONARY_ITEM_73
+PRINTL 페니스의 크기를 1단계 올린다. 말자지사용 불가.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;축근환
+@DICTIONARY_ITEM_74
+PRINTL 페니스의 크기를 1단계 내린다. 아이사이즈사용 불가.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;포근환
+@DICTIONARY_ITEM_75
+PRINTL 대상의페니스를【포경】로 한다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;기억소거제
+@DICTIONARY_ITEM_80
+PRINTL 처녀, 후타나리, 모유체질, 경험, 감각의 변화를 남긴 상태로,
+PRINTL 나머지의 파라미터를 모두 초기화한다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;되감기약
+@DICTIONARY_ITEM_81
+PRINTL 기억은 그대로, 신체만을 조교전에 되돌리는 약.
+PRINTL 함락 소질, 변화한 소질, 각인, 플래그 따위를 남긴 상태로,
+PRINTL 나머지의 파라미터를 모두 초기화한다.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;배란유발제
+@DICTIONARY_ITEM_82
+PRINTL 배란을 유발하는 약제. 일회용.
+PRINTL 감히 임신하게 하는 경우에 사용한다.
+
+;고성능피임구
+@DICTIONARY_ITEM_83
+PRINTL 임신를 저해하기 위한 피임구. 일회용.
+PRINTL 자궁내에 결계를 치는고성능피임구로, 쾌감도 해치지 않지만, 하루 밖에 가지지 않는다.
+
+;노란환약
+@DICTIONARY_ITEM_84
+PRINTL 임신중에 사용하면 산란 해, 임신를 잃는다.
+PRINTL 임신캔슬이 가능하지만, 하이리스크.
+PRINTL 보통은 구입 할 수 없지만, 주인에게 특수한 지식이 있으면 숍에 줄서게 된다.
+
+;긴급피임약
+@DICTIONARY_ITEM_85
+PRINTL 후회 필의 일.
+PRINTL 질내사정하고 싶지만임신는 싫다고 하는 이기적임씨전용.
+PRINTL 확실한 효과가 생길까하고 말해지면 조금 불안.
+
+;감주
+@DICTIONARY_ITEM_86
+PRINTL 감주. 도수가 낮기 때문에, 알콜쓰레기라도 안심하고 마실 수 있다.
+PRINTL 커맨드 「꽐라플레이」에 필수.
+
+;맥주
+@DICTIONARY_ITEM_87
+PRINTL 보리를 발효 시킨 술.
+PRINTL 커맨드 「꽐라플레이」에 필수.
+
+;사케
+@DICTIONARY_ITEM_88
+PRINTL 술. 도수가 강하기 때문에, 취기가 돌기 쉽다.
+PRINTL 커맨드 「꽐라플레이」에 필수.
+
+;수술도구세트
+@DICTIONARY_ITEM_90
+PRINTL 손 방법을 실시하기 위해서(때문에) 필요한 도구 세트.
+PRINTL 절제손 방법이나발치손 방법에 필요. 광기를 느낀다.
+
+;우리
+@DICTIONARY_ITEM_91
+PRINTL 짐승을 잡아 올 수가 있다. 짐승의 종류는 상상에 맡겨 주시길.
+PRINTL 커맨드 「수간」에 필수.
+
+;포장마차
+@DICTIONARY_ITEM_92
+PRINTL 노역 「정식포장마차」를 행하기 위한포장마차를 만든다.
+PRINTL 서포트를 붙이기 위해서는, 포장마차·증축가 필요.
+
+;포장마차·증축
+@DICTIONARY_ITEM_93
+PRINTL 노역 「정식포장마차」를 행하기 위한포장마차를 증축한다.
+PRINTL 넓어지므로, 서포트를 붙일 수가 있게 된다.
+
+;플랜카드
+@DICTIONARY_ITEM_94
+PRINTL 노역 「공중 변소」를 시키기 위해서(때문에) 필요한플랜카드.
+PRINTL 가격 따위를 써, 노예에게 갖게해 사용한다.
+
+;부적
+@DICTIONARY_ITEM_96
+PRINTL 노예에게 장비 시키는 일을 할 수 있는부적.
+PRINTL 장비 하고 있으면 1번만【파괴】를 방지해 준다.
+
+;부적·극
+@DICTIONARY_ITEM_97
+PRINTL 「부적」의, 한층 더 효과를 높인 것.
+PRINTL 장비 하고 있으면 1번만【파괴】를 방지해, 스트레스도 회복해 준다.
+
+
+;=============================================================================
+;네타바레 Q＆A
+;=============================================================================
+;시스템 관계의 네타바레를 넣는다
+;우선 작성이라고 하는 정도. 구체적으로 무엇을 실을까는 미정
+@DICTIONARY_NETABARE_QA
+;현재의 페이지를 나타낸다
+P = 0
+;최대 페이지수를 나타낸다
+LOCAL = 1
+;LOCAL = 8
+$NETABARE_QA_HELP
+DRAWLINE
+PRINTL 이하 eraToLoveA02 사가판의 시스템등에 관한 Q＆A입니다.
+PRINTFORML 내용을 알고 싶은 항목의 번호를 입력해 주세요. ＜page. {P+1}/{LOCAL+1}＞
+PRINTL ※어느 항목도 중증의 네타바레를 포함합니다. 보는 경우는 그럴 생각으로.
+PRINTL 　당연히 미완성입니다.
+DRAWLINE
+IF P == 0
+	PRINTL [ 0] Q. 노예를 「매각」한다
+	PRINTL [ 1] Q. 노예를 「조수」로서 일하게 한다
+	PRINTL [ 2] Q. 노예를 「함락」시킨다
+	PRINTL [ 3] Q. 노예에게 「부위 개발계 소질」을 취득시킨다
+	PRINTL [ 4] Q. 「특수성버릇 소질」을 취득한다
+	PRINTL [ 5] Q. 「혀놀림」를 취득한다
+	PRINTL [ 6] Q. 「수수께끼의매력」를 취득한다
+	PRINTL [ 7] Q. 「절륜」를 취득한다
+	PRINTL [ 8] Q. 「임신」 「출산」에 대해
+	PRINTL [ 9] Q. 「이상경험」를 취득하는 타이밍
+ELSEIF P == 1
+	PRINTL [10] Q. 주인으로부터 노예에게 「집착」을 향한다
+	PRINTL [11] Q. 「주회 플레이」에 대해
+	PRINTL [12] Q. 「공범자」에 대해
+	PRINTL [13] Q. 「특별한선물」에 대해
+	PRINTL [14] Q. 「도검뢰무」의 「부대 결성」에 대해
+;	PRINTL [15] Q. (미정도리)
+;	PRINTL [16] Q. (미정도리)
+;	PRINTL [17] Q. (미정도리)
+;	PRINTL [18] Q. (미정도리)
+;	PRINTL [19] Q. (미정도리)
+ENDIF
+DRAWLINE
+PRINTFORMLC \@(P <= 0) ? %" " * 18% # [1001]전의 페이지\@
+PRINTLC [1000]돌아온다
+PRINTFORMLC \@(P >= LOCAL) ? %" " * 18% # [1009]후의 페이지\@
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+	GOTO NETABARE_QA_HELP
+ELSEIF RESULT == 1009 && P < LOCAL
+	P += 1
+	GOTO NETABARE_QA_HELP
+ELSEIF RESULT >= 0 && RESULT <= (LOCAL+1) * 10
+	TRYCALLFORM DICTIONARY_NETABARE_Q{RESULT}
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+GOTO NETABARE_QA_HELP
+
+;매각 가능한 조건
+@DICTIONARY_NETABARE_Q0
+PRINTL 【노예를 「매각」한다】
+PRINTL 이하의 조건을 모두 채우고 있으면 매각하는 것이 가능하게 됩니다
+PRINTL ※소질[낙인]나[상사상애]가 붙은 캐릭터는, 원칙으로서 매각 할 수 없다
+PRINTL 
+PRINTL ·순종와욕망의 Lv합계가 6이상이다
+PRINTL ※다만, 복종·예속함락 이외의 소질[반항적]를 가지는 캐릭터
+PRINTL [꿋꿋함]의 것을 가지는 캐릭터는순종가 Lv4 이상,
+PRINTL 　소질[억압],[저항],[자제심]의 어느쪽이든을 가지는 캐릭터는욕망가 Lv4 이상이 필요
+PRINTL 
+PRINTL ·다음의 1~6의 어느쪽이든을 채운다
+PRINTL 　1:기교가 Lv3 이상이다
+PRINTL 　2:봉사정신가 Lv3 이상이다
+PRINTL 　3:마조끼가 Lv3 이상이다
+PRINTL 　4:순종가 Lv5이다
+PRINTL 　5:욕망가 Lv5이다
+PRINTW 　6:C감각, V감각, A감각, B감각의 합계가 13이상
+
+;조수 가능한 조건
+@DICTIONARY_NETABARE_Q1
+PRINTL 【노예를 「조수」로서 일하게 한다】
+PRINTL 이하의 조건을 모두 채우고 있으면 조교의 조수(주인 대신에 조교할 수 있다)를 시키는 것이 가능하게 됩니다
+PRINTL 
+PRINTL ·순종와욕망의 Lv합계가 6이상이다
+PRINTL ※다만, 복종·예속함락 이외의 소질[반항적]를 가지는 캐릭터
+PRINTL [꿋꿋함]의 것을 가지는 캐릭터는순종가 Lv4 이상,
+PRINTL 　소질[억압],[저항],[자제심]의 어느쪽이든을 가지는 캐릭터는욕망가 Lv4 이상이 필요
+PRINTL 
+PRINTL ·다음의 1~6의 어느쪽이든을 채운다
+PRINTL 　1:기교가 Lv3 이상이다
+PRINTL 　2:봉사정신가 Lv3 이상이다
+PRINTL 　3:마조끼가 Lv3 이상이다
+PRINTL 　4:순종가 Lv5이다
+PRINTL 　5:욕망가 Lv5이다
+PRINTL 　6:C감각, V감각, A감각, B감각의 합계가 13이상
+PRINTL 
+PRINTL ·다음의 1~2의 어느쪽이든을 채운다
+PRINTL 　1:순종·욕망·기교·C감각·레즈끼·게이끼의 레벨의 합계가 12이상이다
+PRINTW 　2:순종가 Lv5 한편, 욕망가 Lv4 이상이다
+
+;함락 조건
+@DICTIONARY_NETABARE_Q2
+PRINTL 【노예를 「함락」시킨다】
+PRINTL 일정한 조건을 채우면, 노예는 주인에 대해서 「함락」합니다.
+PRINTL 함락에는 「하위 함락」과 「상위 함락」의 2종류가 있어, 조건을 채울 때마다,
+PRINTL 「미함락」→「하위 함락」→「상위 함락」이라고, 차례로 취득해 나가는 일이 됩니다.
+PRINTL 
+PRINTL 취득 조건을 확인하고 싶은 함락 소질을 선택해 주세요
+PRINTL [ 0] 연모(하위 함락)
+PRINTL [ 1] 음란(하위 함락)
+PRINTL [ 2] 복종(하위 함락)
+PRINTL [ 3] 친애(상위 함락)
+PRINTL [ 4] 창부(상위 함락)
+PRINTL [ 5] 예속(상위 함락)
+PRINTL [ 6] 상사상애(특수)
+PRINTL 
+PRINTL [99] 돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT == 0
+	CLEARLINE 1
+	PRINTFORML 【연모함락의 조건】
+	PRINTFORML 
+	PRINTFORML 1:「　　　　순종」Lv3 이상
+	PRINTFORML 2:「　　봉사정신」Lv3 이상
+	PRINTFORML 3:「봉사쾌락경험」200이상
+	PRINTFORML 4:「　　이상경험」2 미만
+	PRINTFORML 5:「　　굴복각인」Lv3
+	PRINTFORML 6:「　　반발각인」Lv0
+	PRINTFORML 7:「　　　의존도」1000이상
+	PRINTFORML 8:「현재의 주인으로부터의 피조교경험」1000이상
+ELSEIF RESULT == 1
+	CLEARLINE 1
+	PRINTFORML 【음란함락의 조건】
+	PRINTFORML 
+	PRINTFORML 전제 조건으로서 미함락의 노예가 이하의 조건을 채우고 있다
+	PRINTFORML 1:「　　　　욕망」Lv3 이상
+	PRINTFORML 2:「C/V/A/B감각」Lv합계가 10이상
+	PRINTFORML 3:「　　절정경험」50이상
+	PRINTFORML 4:「　　쾌락각인」Lv3
+	PRINTFORML 5:「　　굴복각인」Lv3
+	PRINTFORML 6:「　　반발각인」Lv0
+	PRINTFORML 
+	PRINTFORML 한편, 이하의 조건의 어떤 것인지를 채울 필요가 있다.
+	PRINTFORML 1:「　　이상경험」3이상
+	PRINTFORML 2:「　　이상경험」1이상＋「조수조교경험」1000이상
+	PRINTFORMW 3:「조수조교경험」2000이상
+ELSEIF RESULT == 2
+	CLEARLINE 1
+	PRINTFORML 【복종함락의 조건】
+	PRINTFORML 
+	PRINTFORML 1:「　　　　순종」Lv3 이상
+	PRINTFORML 2:「C/V/A/B감각」Lv합계가 10 미만
+	PRINTFORML 3:「　　마조끼」Lv3 이상
+	PRINTFORML 4:「고통쾌락경험」＋「속박경험」합계가 200이상
+	PRINTFORML 5:「　　이상경험」2이상
+	PRINTFORML 6:「　　굴복각인」Lv3
+	PRINTFORML 7:「　　반발각인」Lv0
+	PRINTFORMW 8:「　　　의존도」마이너스 1000 이하
+ELSEIF RESULT == 3
+	CLEARLINE 1
+	PRINTFORML 【친애함락의 조건】
+	PRINTFORML 
+	PRINTFORML 1:「　　　　순종」Lv5 이상
+	PRINTFORML 2:「　　봉사정신」Lv5 이상
+	PRINTFORML 3:「　　애정경험」200이상
+	PRINTFORML 4:「봉사쾌락경험」400이상
+	PRINTFORML 5:「　　이상경험」5 미만
+	PRINTFORML 6:「　　반발각인」Lv0
+	PRINTFORML 7:「　　　의존도」3000이상
+	PRINTFORML 8:「현재의 주인으로부터의 피조교경험」1500이상
+ELSEIF RESULT == 4
+	CLEARLINE 1
+	PRINTFORML 【창부함락의 조건】
+	PRINTFORML 
+	PRINTFORML 전제 조건으로서 미함락의 노예가 이하의 조건을 채우고 있어
+	PRINTFORML 1:「　　　　욕망」Lv5 이상
+	PRINTFORML 2:「C/V/A/B감각」Lv합계가 20이상
+	PRINTFORML 3:「　　절정경험」200이상
+	PRINTFORML 4:「　　반발각인」Lv0
+	PRINTFORML 
+	PRINTFORML 한편, 이하의 조건의 어떤 것인지를 채울 필요가 있다.
+	PRINTFORML 1:「　　이상경험」6이상
+	PRINTFORML 2:「　　이상경험」4이상＋「조수조교경험」2000이상
+	PRINTFORMW 3:「　　이상경험」3이상＋「조수조교경험」3000이상
+ELSEIF RESULT == 5
+	CLEARLINE 1
+	PRINTFORML 【예속함락의 조건】
+	PRINTFORML 
+	PRINTFORML 1:「　　　　순종」Lv5 이상
+	PRINTFORML 2:「C/V/A/B감각」Lv합계가 15 미만
+	PRINTFORML 3:「　　마조끼」Lv5 이상
+	PRINTFORML 4:「고통쾌락경험」＋「속박경험」500이상
+	PRINTFORML 5:「　　이상경험」5이상
+	PRINTFORML 6:「　　반발각인」Lv0
+	PRINTFORMW 7:「　　　의존도」마이너스 3000 이하
+ELSEIF RESULT == 6
+	CLEARLINE 1
+	PRINTFORML 【상사상애취득의 조건】
+	PRINTFORML 
+	PRINTFORML 서로 「친애함락」한 캐릭터가 있는 경우, 소질이 변화합니다.
+	PRINTFORML 
+	PRINTFORML 최초로 선택한 주인을 조교할 수 없습니다만,
+	PRINTFORML 자신에 대해서 「친애함락」한 캐릭터에 「집착」을 향하는 것으로,
+	PRINTFORMW 주인도 「상사상애」소질을 입손 하는 것이 가능합니다.
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+PRINTL 
+RESTART
+
+;음란계(부위 개발계) 소질 취득 조건
+@DICTIONARY_NETABARE_Q3
+PRINTL 【노예에게 「부위 개발계 소질」을 취득시킨다】
+PRINTL 노예의 능력이 일정치에 이르면, 이하의 소질의 어느쪽이든을 취득합니다.
+PRINTL 동시에 복수의 조건을 채웠을 경우는 숫자의 젊은 것으로부터 우선되기 (위해)때문에,
+PRINTL 한 번의 플레이로, 중복 해 취득시키는 것은 불가능합니다.
+PRINTL 다만, 주회 플레이로 전주까지 취득한 소질은, 중복 취득이 가능하게 됩니다.
+PRINTL 
+PRINTL 취득 조건을 확인하고 싶은 함락 소질을 선택해 주세요
+PRINTL [ 0] 섹스광
+PRINTL [ 1] 자위광
+PRINTL [ 2] 음란구멍
+PRINTL [ 3] 항문광
+PRINTL [ 4] 음란가슴
+PRINTL [10] 즉각함락
+PRINTL 
+PRINTL [99] 돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT == 0
+	CLEARLINE 1
+	PRINTFORML 【섹스광】
+	PRINTFORML 
+	PRINTFORML :「섹스중독」Lv4 이상
+	PRINTFORML :「　　성교경험」250이상
+	PRINTFORMW :「　　절정경험」200이상
+ELSEIF RESULT == 1
+	CLEARLINE 1
+	PRINTFORML 【자위광】
+	PRINTFORML 
+	PRINTFORML :「　　　C감각」Lv5 이상
+	PRINTFORML :「조교자위경험」＋「자위경험」합계가 300이상
+	PRINTFORMW :「　　절정경험」200이상
+ELSEIF RESULT == 2
+	CLEARLINE 1
+	PRINTFORML 【음란구멍】
+	PRINTFORML 
+	PRINTFORML :「V감각」Lv5 이상
+	PRINTFORML :「V경험」400이상
+	PRINTFORMW :「절정경험」200이상
+ELSEIF RESULT == 3
+	CLEARLINE 1
+	PRINTFORML 【항문광】
+	PRINTFORML 
+	PRINTFORML :「A감각」Lv5 이상
+	PRINTFORML :「A경험」400이상
+	PRINTFORMW :「절정경험」200이상
+ELSEIF RESULT == 4
+	CLEARLINE 1
+	PRINTFORML 【음란가슴】
+	PRINTFORML 
+	PRINTFORML :「B감각」Lv5 이상
+	PRINTFORML :「분유경험」+「B사정경험」150이상
+	PRINTFORMW :「절정경험」200이상
+ELSEIF RESULT == 10
+	CLEARLINE 1
+	PRINTFORML 【즉각함락】
+	PRINTFORML 
+	PRINTFORML 「섹스광」 「자위광」 「음란구멍」 「항문광」 「음란가슴」
+	PRINTFORMW 　이상의 모든 소질을 취득한다.
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+PRINTL 
+RESTART
+
+
+;특수성버릇 소질 취득 조건
+@DICTIONARY_NETABARE_Q4
+PRINTL 【「특수성버릇 소질」을 취득한다】
+PRINTL 어느 캐릭터도, 일정한 조건을 채우면, 「새드」나 「마조」,
+PRINTL 또는 각각의 상위 소질인 「도S」나 「드 M」의 소질을 취득합니다.
+PRINTL 조건조차 채우면, 중복 취득이 가능한 소질입니다.
+PRINTL 
+PRINTL [새드]
+PRINTL :「　　새드끼」Lv5 이상
+PRINTL :「가학쾌락경험」300이상
+PRINTL [도S]
+PRINTL :「　　새드끼」Lv8 이상
+PRINTL :「가학쾌락경험」800이상
+PRINTL 
+PRINTL [마조]
+PRINTL :「　　마조끼」Lv5 이상
+PRINTL :「고통쾌락경험」300이상
+PRINTL [드 M]
+PRINTL :「　　마조끼」Lv8 이상
+PRINTW :「고통쾌락경험」800이상
+
+;[혀놀림]취득 조건
+@DICTIONARY_NETABARE_Q5
+PRINTL 【「혀놀림」를 취득한다】
+PRINTL 이하의 양쪽 모두의 조건을 채우면, 「혀놀림」를 취득합니다.
+PRINTL 1:펠라경험 200 이상
+PRINTW 2:정음절정경험 50 이상, 또는정액중독Lv4 이상
+
+;[수수께끼의매력]취득 조건
+@DICTIONARY_NETABARE_Q6
+PRINTL 【「수수께끼의매력」를 취득한다】
+PRINTL 
+PRINTL 이 소질은, 주인 밖에 취득할 수가 없습니다.
+PRINTL 「연모계」혹은 「복종계」함락자의 누계가 5명 이상이 되면, 조교 종료시에 취득합니다.
+PRINTW 「음란계」의 함락자수는 수에 들어가지 않기 때문에 주의해 주세요.
+
+;[절륜]취득 조건
+@DICTIONARY_NETABARE_Q7
+PRINTL 【「절륜」를 취득한다】
+PRINTL 
+PRINTL 이 소질은 주인 밖에 취득할 수가 없습니다.
+PRINTW 남자를 가지는 주인의 「사정경험」가 200이상이 되면, 조교 종료시에 취득합니다.
+
+;임신·출산
+@DICTIONARY_NETABARE_Q8
+PRINTL 【「임신」 「출산」에 대해】
+PRINTL 
+PRINTL 「여성」 「후타나리」는, 질 쏘아 맞혀에 의해 랜덤으로임신 하는 일이 있습니다.
+PRINTL 또오메가를 가지는 「남자」 「반음반양」 「컨트보이」는 장 쏘아 맞혀에 의해 랜덤으로임신 하는 일이 있습니다.
+PRINTL ※「반음반양」 「컨트보이」는바기나가 있어도임신 할 것은 없습니다.
+PRINTL 
+PRINTL 임신 하면, 50 일정도의 기간을 거쳐 출산, 게다가 20일의 육아 기간후,
+PRINTL 아이를 「독립」시키는지, 노예로서 「조교」하는지 선택할 수가 있습니다.
+PRINTL 아이캐릭터는 누구의아이인가에 관계없이, 10 사람까지 밖에 가질 수 없습니다.
+PRINTL 
+PRINTL 실제의임신로부터임신발각까지는 약간의 타임랙이 있어,
+PRINTW 그 기간에 「어느 약」을 사용하는 것으로, 처녀잉태시킬 수가 있습니다.
+
+;이상경험취득 조건
+@DICTIONARY_NETABARE_Q9
+$DECTIONARY_NETABARE_IJOU
+PRINTL 【이상경험취득 조건】
+PRINTL [ 0] 이상한 조교의 첫체험시, 조교 대상으로＋1
+PRINTL [ 1] 확장계 첫경험시에＋1
+PRINTL [ 2] 이상한처녀·동정·백버진상실시, 상실한 대상으로＋1
+PRINTL [ 3] 그 외＋1
+PRINTL 
+PRINTL [99] 돌아온다
+$INPUT_LOOP_IJOU
+INPUT
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTL 【이상한 조교의 첫체험시, 조교 대상으로＋1】
+	PRINTL 
+	PRINTL ·공개자위를 시킨다 ※음란함락시를 제외하다
+	PRINTL ·U확장경험를 수반하는 조교
+	PRINTL ·M확장 경험을 수반하는 조교
+	PRINTL ·스캇경험를 수반하는 조교
+	PRINTL ·관장
+	PRINTL ·식분
+	PRINTL ·전극경험를 수반하는 조교
+	PRINTL ·윤간
+	PRINTL ·수간
+	PRINTL ·뱀장어탕
+	PRINTL ·곤충탕
+	PRINTL ·낙인
+	PRINTL ·촉수소환
+	PRINTL ·촉수관통
+	PRINTL ·촉수뇌간
+	PRINTL ·최면촉수
+	PRINTW ·산란
+ELSEIF RESULT == 1
+	PRINTL 【확장계 첫경험시에＋1】
+	PRINTL 
+	PRINTL ·피스트계·이륜 꽂아 계·촉수확장계 커맨드 실행시(넣을 수 있는 측)
+	PRINTL ·섹스계 커맨드로 넣는 측이【말자지】, 한편 넣을 수 있는 측이【소인체형】때(넣을 수 있는 측)
+	PRINTL ·기승위한다·기승위애널한다커맨드로 넣는 측이【말자지】, 한편 넣을 수 있는 측이【소인체형】때(노예)
+	PRINTW ·조수를범하게시킨다·조수의A를범하게시킨다커맨드로 넣는 측이【말자지】, 한편 넣을 수 있는 측이【소인체형】때(노예)
+ELSEIF RESULT == 2
+	PRINTL 【이상한처녀·동정·백버진상실시, 상실한 대상으로＋1】
+	PRINTL 
+	PRINTL ·바이브로처녀상실
+	PRINTL ·기승위로처녀상실
+	PRINTL ·남자 이외에기승위로처녀상실
+	PRINTL ·조수가 있을 때, 기승위로처녀상실
+	PRINTL ·기승위한다로처녀상실(조교자)
+	PRINTL ·기승위애널로백버진상실
+	PRINTL ·남자 이외에기승위애널로백버진상실
+	PRINTL ·조수가 있을 때, 기승위애널로백버진상실
+	PRINTL ·기승위애널한다로백버진상실(조교자)
+	PRINTL ·육변기로백버진상실
+	PRINTL ·육변기로동정상실(조교자)
+	PRINTL ·남자에기승위애널한다를 되어동정상실
+	PRINTL ·윤간·뱀장어탕·수간·촉수·목을 졸려지면서처녀·백버진상실
+	PRINTL ·3 P계 커맨드로처녀·동정·백버진상실
+	PRINTL ·비디오촬영중에처녀·동정·백버진상실
+	PRINTL ·눈·입·신체가 구속된 상태로처녀·동정·백버진상실
+	PRINTL ·창관, 노예 쇼, 공중 변소 플레이, 노예의 렌탈로처녀·동정·백버진상실
+	PRINTL ·자기 자신이 상대로처녀·동정·백버진상실 ※특과극 등
+	PRINTL ·노예→주인의 궁합이 100이상 한편, 촉수에범하게시킨다커맨드로 주인이처녀상실했을 때(노예)
+	PRINTL ·노예→주인의 궁합이 100이상 한편, 촉수에A를범하게시킨다커맨드로 주인이처녀상실했을 때(노예)
+	PRINTL ·노예→조수의 궁합이 100이상 한편, 조수를범한다커맨드로 조수가처녀상실했을 때(노예)
+	PRINTL ·노예→조수의 궁합이 100이상 한편, 조수의A를범한다커맨드로 조수가처녀상실했을 때(노예)
+	PRINTL ·노예→조수의 궁합이 100이상 한편, 조수를범하게시킨다커맨드로 조수가처녀상실했을 때(노예)
+	PRINTL ·조수→노예의 궁합이 100이상 한편, 조수를범하게시킨다커맨드로 조수가처녀상실했을 때(조수)
+	PRINTL ·노예→조수의 궁합이 100이상 한편, 조수의A를범하게시킨다커맨드로 조수가처녀상실했을 때(노예)
+	PRINTW ·조수→노예의 궁합이 100이상 한편, 조수의A를범하게시킨다커맨드로 조수가처녀상실했을 때(조수)
+ELSEIF RESULT == 3
+	PRINTL 【그 외＋1】
+	PRINTL 
+	PRINTL ·처음으로기절 했을 때
+	PRINTL ·남자가 아닐 때 첫사정
+	PRINTL ·모성도임신도 없을 때 첫분유
+	PRINTL ·정음절정이 가능하게 되었을 때
+	PRINTL ·고통각인 3 취득
+	PRINTL ·고통각인 3 취득시에, 조교자가【새드】를 가지고 있다
+	PRINTL 　혹은고통각인 3 취득시에, 바늘커맨드 실행으로 조교자가【바느질잘함】를 가지고 있을 때
+	PRINTL ·출산경험가 없는 경우에노란환약사용시 ※＋2
+	PRINTW ·한쪽팔절단, 편발절단, 발치를 실행했을 때
+ELSE
+	GOTO INPUT_LOOP_IJOU
+ENDIF
+GOTO DECTIONARY_NETABARE_IJOU
+
+;주인으로부터 노예에게 「집착」을 향한다
+@DICTIONARY_NETABARE_10
+PRINTL 【전제 조건】
+PRINTL 주인의 「조교경험」가 1000이상
+PRINTL 
+PRINTL 【집착심의 발아】
+PRINTL 주인의 「조교경험」중, 대상의 노예에 대한 「조교경험」가 7할 이상이 되면,
+PRINTL 주인이 노예의 일을 걱정하기 시작하는 순간이 있습니다.
+PRINTL 그 때에 자신의 기분을 인정하면, 노예에 대한 「집착」이 싹틉니다.
+PRINTL 
+PRINTL 한층 더 「집착」을 향한 노예가 주인에 대해 「친애함락」하고 있으면,
+PRINTL 그 노예와 주인은, 「상사상애」의 관계가 됩니다.
+PRINTL 
+PRINTL 【집착심의 상실】
+PRINTL 절대적인 「함락」이란 달라, 「집착」은 어디까지나 일시적인 것입니다.
+PRINTL 다른 노예에게 바보 리카 지고 있으면, 집착은 서서히 희미해져 가는 일이 됩니다.
+PRINTL 
+PRINTL 주인의 「조교경험」중, 대상의 노예에 대한 「조교경험」가 5할 이하가 되면,
+PRINTL 주인은 노예에게로의 「집착」을 잃는 일이 됩니다.
+PRINTL 
+PRINTL 그러나, 「집착」을 가진 기간중, 그 노예에게 「프로미스 링」을 건네주어,
+PRINTW 수 취해 받을 수가 있었다면, 그 기분은 영원의 것이 되겠지요.
+
+
+;주회 플레이에 대해
+@DICTIONARY_NETABARE_Q11
+PRINTL 【「주회 플레이」에 대해】
+PRINTL "START"모드로 게임을 시작해, 기한내에 목표를 달성해 클리어 하면,
+PRINTL 그대로 게임을 계속하는지, 종료할까를 선택할 수가 있습니다.
+PRINTL 게임을 계속하는 일로, 「강해서 뉴 게임(주회 플레이)」가 선택 가능하게 됩니다.
+PRINTL 
+PRINTL 게임을 클리어 하는 것으로 얻은 「BP(보너스 포인트)」를 사용하면,
+PRINTL 여러가지 특전을 얻은 상태로, 새로운 조교 생활을 시작할 수가 있습니다.
+PRINTL 또, 주회 플레이 개시시에는, 주인과 난이도를 다시 선택합니다.
+PRINTL 
+PRINTL 주회 플레이로 얻을 수 있는 보너스는, 이하와 같습니다.
+PRINTL 
+PRINTL 1:「주인(당신)」의 소질 선택으로 선택할 수 있는 소질이 증가한다(BP소비 없음)
+PRINTL 2:「부위 개발계 소질」의 중복 취득이 가능하게 된다(BP소비 없음)
+PRINTL 3:주인의 「기교」를 3 상승시킨다(BP1)
+PRINTL 4:「공범자」를 부를 수가 있다(1명에 대해 BP1)
+PRINTL 5:「금지된지식」를 몸에 익힐 수가 있다(BP1)
+PRINTL 6:「조제지식」를 몸에 익힐 수가 있다(BP1)
+PRINTL 7:「새드」를 몸에 익힐 수가 있다(BP1)
+PRINTL 8:「마조」를 몸에 익힐 수가 있다(BP1)
+PRINTL 9:「수수께끼의매력」를 몸에 익힐 수가 있다(BP1)
+PRINTL 
+PRINTW 보너스 포인트는 주회 마다 누적하기 위해(때문에), 몇번이나 플레이 해 효율화를 꾀합시다.
+
+
+;「공범자」에 대해
+@DICTIONARY_NETABARE_Q12
+PRINTL 【「공범자」에 대해】
+PRINTL 「공범자」란, 주인(당신)(와)과 뜻을 같이 하는 것이어, 말하자면, 제 2의 주인입니다.
+PRINTL 최초부터 조수로서 노예를 조교할 수가 있기 (위해)때문에,
+PRINTL 초기에는 꽤 올리기 힘든 「조수조교경험」등을 올리는데 도움이 되어 주겠지요.
+PRINTL 
+PRINTL 그러나 게임내에서는 어디까지나 조수취급이며, 주인(당신)에 비하면 제한이 많습니다.
+PRINTW 또, 「공범자」를 노예로서 조교하거나 노역을 실시하게 할 수 없습니다.
+
+;특별한선물출현 조건
+@DICTIONARY_NETABARE_Q13
+PRINTL 【「특별한선물」에 대해】
+PRINTL 이하의 조건을 채우면,[201]선물커맨드를 선택했을 때,
+PRINTL 선물메뉴에[특별한선물]가 출현해, 건네줄 수가 있게 됩니다.
+PRINTL 
+PRINTL 이선물는 「프로미스 링」이라고도 불려
+PRINTL 주인과 이것을 준 노예와의 관계를 약속하는 것입니다.
+PRINTL 잃고 싶지 않은 상대가 있다면, 용기를 가지고 건네주어 보는 일을 추천합니다.
+PRINTL 
+PRINTL (특별한선물의 출현 조건)
+PRINTL ·주인이 대상의 노예에 대해 「집착」을 안고 있는,
+PRINTL 　혹은, 주인이 대상의 노예에 대해 「친애함락」이 끝난 상태이다
+PRINTL 
+PRINTL ※같은 주인으로부터, 복수의 노예에게 「프로미스 링」을 줄 수 없습니다.
+PRINTW ※한 번 건네주어, 수 취해 받은 반지를 돌려주어 받을 수 없습니다.
+
+;「도검뢰무」의 「부대 결성」에 대해
+@DICTIONARY_NETABARE_Q14
+PRINTL 【「도검뢰무」의 「부대 결성」에 대해】
+$DICTIONARY_Q12_LIST
+DRAWLINE
+PRINTFORML 노역 커맨드 「도검뢰무」에서는, 일정한 조건을 채우면,
+PRINTFORML 노예가 다른 노예와 「부대」를 짜 라이브를 실시하는 경우가 있습니다.
+PRINTFORML 현상, 「부대」를 짜는 것에 의한 메리트는 특별히 없습니다만,
+PRINTFORMW 입상이 준비되어 있으면, 「부대」한정의 이벤트가 발생할지도……
+
+
+
+
+;=============================================================================
+;용어 사전――게임 모드
+;=============================================================================
+;--------------------------------------------------
+;게임 모드 해설 메인 페이지
+;--------------------------------------------------
+@DICTIONARY_GAMEMODE_MAIN
+$PRINT_LIST
+DRAWLINE
+PRINTFORML eraToLoveA02 사가판에 준비된 게임 모드에 관한 대범한 설명입니다.
+PRINTFORML 게임 모드를 변경하려면 게임 그 자체를 다시 할 수 밖에 없습니다.
+DRAWLINE
+PRINTL [ 0] START 모드
+PRINTL [ 1] FREE MISSION 모드(※현재미실장)
+PRINTL [ 2] EXTRA 모드
+DRAWLINE
+PRINTLC [1000]돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT > 8
+	GOTO INPUT_LOOP
+ENDIF
+Q = RESULT
+TRYCALLFORM DICTIONARY_GAMEMODE_{Q}
+GOTO PRINT_LIST
+
+;--------------------------------------------------
+;게임 모드 해설
+;--------------------------------------------------
+;start 모드
+@DICTIONARY_GAMEMODE_0
+PRINTL "START 모드"
+PRINTL eraToLoveA02 사가판의 주력 모드로 제일 기본적인 게임 모드입니다.
+PRINTL 주인의 「당신」, 또는 선택한 전 용. 캐릭터가
+PRINTL 기한내로 설정된 목표를 달성하기 위하여 노력하는 것입니다.
+PRINTL 「당신」의 소질을 선택해, 여주인나마조주인을 만드는 일도 가능합니다.
+PRINTL 기한내에 목표를 달성한 뒤도 계속할 수가 있어
+PRINTL 그후, 「강해서 뉴 게임」을 선택하면, 클리어 한 회수나
+PRINTW 본 엔드에 응한 보너스를 얻어 주회 플레이를 할 수가 있습니다.
+
+;FREE 모드
+@DICTIONARY_GAMEMODE_1
+PRINTL "FREE MISSION 모드"
+PRINTL 통칭 미션 모드입니다.
+PRINTW 기한내로 설정된 특수한 목표를 달성하기 위하여 노력하는 것입니다.
+
+;EXTRA 모드
+@DICTIONARY_GAMEMODE_2
+PRINTL "EXTRA 모드"
+PRINTL 주인, 공범자를 자유롭게 선택할 수가 있는 기한이 없는 게임 모드입니다.
+PRINTL 게임 개시시에 노예를 1명 받을 수가 있습니다.
+PRINTL eraToLoveA02 사가판의 하나 더의 주력 모드이며, 이 모드만의 특수 요소도 존재합니다.
+PRINTL 기본적으로 배드 엔드 이외의 엔딩은 존재합니다만,
+PRINTW 입상에 따라서는, 거기에 가까운 것이 준비되어 있는 경우도 있습니다.
+
+
+
+
+;=============================================================================
+;용어 사전――엔딩 조건
+;=============================================================================
+;--------------------------------------------------
+;엔딩 조건 해설 메인 페이지
+;--------------------------------------------------
+@DICTIONARY_ENDING_MAIN
+P = 0
+$PRINT_LIST
+DRAWLINE
+PRINTFORML 스토리를 진행시키고 있는 동안, 일정한 조건을 채우면 엔딩이 발생합니다.
+PRINTFORML 통상은, 설정 금액의 「납금」을 실시하는 것으로 엔딩이 되어,
+PRINTFORML 복수의 엔딩 조건을 동시에 채웠을 경우는, 그 어느쪽인지를 선택할 수 있습니다만,
+PRINTFORML 반대로 조건을 채우지 못하고 배드 엔드가 되는 경우는, 유무를 말하게 하지 않고 게임이 종료합니다.
+PRINTFORML 
+PRINTFORML 또, "EXTRA 모드"나, "START 모드"클리어후의 계속 플레이에서는,
+PRINTFORML 배드 엔드 이외의 엔딩은 발생하지 않습니다.
+PRINTFORML 다만, 입위쪽으로 엔딩이 준비되어 있는 경우,
+PRINTFORML 조건조차 채우면, 어느 모드여도 엔딩이 발생합니다.
+PRINTFORML 
+PRINTFORML 내용을 알고 싶은 항목의 번호를 입력해 주세요.
+PRINTFORML ※이하는 네타바레 요소가 많기 때문에, 열람에는 주의해 주세요.
+;PRINTFORML 내용을 알고 싶은 항목의 번호를 입력해 주세요. ＜page. {P+1}/2＞
+DRAWLINE
+IF P == 0
+	PRINTL [ 1] 노멀 엔드
+	PRINTL [ 2] 상위 함락 엔드
+	PRINTL [ 3] 하렘 엔드
+;	PRINTL [ 4] (테두리 확보)
+;	PRINTL [ 5] (테두리 확보)
+;	PRINTL [ 6] (테두리 확보)
+;	PRINTL [ 7] (테두리 확보)
+;	PRINTL [ 8] (테두리 확보)
+;	PRINTL [ 9] (테두리 확보)
+;ELSE
+ENDIF
+DRAWLINE
+;PRINTFORMLC \@(P <= 0) ? %" " * 18% # [1001]전의 페이지\@
+PRINTLC [1000]돌아온다
+;PRINTFORMLC \@(P >= 1) ? %" " * 18% # [1009]후의 페이지\@
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+	GOTO PRINT_LIST
+ELSEIF RESULT == 1009 && P < 1
+	P += 1
+	GOTO PRINT_LIST
+ELSEIF RESULT < 1 || RESULT > 68
+	GOTO INPUT_LOOP
+ENDIF
+Q = RESULT
+TRYCALLFORM DICTIONARY_ENDING_{Q}
+GOTO PRINT_LIST
+
+
+;--------------------------------------------------
+;엔딩 조건 해설 해설
+;--------------------------------------------------
+;노멀 엔드
+@DICTIONARY_ENDING_1
+PRINTL 〔노멀 엔드〕
+PRINTL 연모, 음란, 복종의 어느 쪽인가에 함락 한 노예가 있는 경우,
+PRINTL 가장 기본적인 엔딩을 볼 수가 있습니다.
+PRINTL 
+PRINTL 「상위 함락 엔드」의 조건을 채우고 있는 경우에서도,
+PRINTL 납금액을 「직접 납입한다」일로, 「노멀 엔드」를 볼 수가 있습니다.
+PRINTL 
+PRINTL (노멀 엔드 달성 조건)
+PRINTW 1:기간내에, 목표액 이상의 금액을 소지해, 납금액을 「직접 납입한다」.
+
+;상위 함락 엔드
+@DICTIONARY_ENDING_2
+PRINTL 〔상위 함락 엔드〕
+PRINTL 친애, 창부, 예속의 어느 쪽인가에 함락 한 노예가 있는 경우,
+PRINTL 각각 대응한 아이템을 구입하는 것으로,
+PRINTL 「노멀 엔드」보다 캐릭터에 들른 엔딩을 볼 수가 있습니다.
+PRINTL 
+PRINTL 함락 끝난 노예가 복수 있는 경우는, 현재 조교중의 노예가 선택되기 (위해)때문에,
+PRINTL 특정의 노예의 엔딩을 보고 싶으면, 먼저 「조교 대상」을 변경해 둡시다.
+PRINTL 
+PRINTL 입위쪽으로 개별의 「상위 함락 엔드」가 설정되어 있는 경우는,
+PRINTL 엔딩의 내용이 변화합니다.
+PRINTL 
+PRINTL (상위 함락 엔드 달성 조건)
+PRINTL 1:기간내에, 목표액 이상의 금액을 소지하고 있다.
+PRINTL 2:노예가 「친애」 「창부」 「예속」의 어느 쪽인가에 함락 하고 있다.
+PRINTL 3:1~2를 채운 다음 「납금」을 선택해, 대응한 아이템을 구입한다.
+PRINTL ※각각의 대응 아이템
+PRINTW 　「친애」=반지, 「창부」=바이브, 「예속」=목걸이
+
+;하렘 엔드
+@DICTIONARY_ENDING_3
+PRINTL 〔하렘 엔드〕
+PRINTL 많은 노예를 함락시켜, 하렘을 만들었을 경우에 출현하는 엔딩입니다.
+PRINTL 
+PRINTL 입위쪽으로 「특수 하렘 엔드」가 설정되어 있어
+PRINTL 그 쪽의 조건을 채우고 있는 경우, 「특수 하렘 엔드」가 우선됩니다.
+PRINTL 
+PRINTL (하렘 엔드 달성 조건)
+PRINTL 1:기간내에, 목표액 이상의 금액을 소지하고 있다.
+PRINTL 2:함락 끝난 노예가, 5명 이상 존재한다.
+PRINTL 3:함락 끝난 노예의 안, 1명 이상이 상위 함락이다.
+PRINTW 4:1~3을 채운 다음 「납금」을 선택해, 「관의 권리서를 산다」.
+
+
+;=============================================================================
+;콘피그 설명
+;=============================================================================
+;--------------------------------------------------
+;콘피그 해설 메인 페이지
+;--------------------------------------------------
+@DICTIONARY_EXPANSION
+$PRINT_LIST
+DRAWLINE
+PRINTFORML [600]콘피그로 설정할 수 있는 각종 기능의 해설입니다.
+PRINTFORML 내용을 알고 싶은 항목의 번호를 입력해 주세요.
+DRAWLINE
+PRINTL [ 0] 텍스트 표시
+PRINTL [ 1] 사정개소 설정
+PRINTL [ 2] 착의 초기설정
+PRINTL [ 3] 스테이터스 표시 설정
+PRINTL [ 4] 캐릭터입상
+PRINTL [ 5] 범용 허덕여 사용 설정
+PRINTL [ 6] 확장- 엽기인 커맨드
+PRINTL [ 7] 확장- 데이트시노출플레이
+PRINTL [ 8] 확장- 노역 옵션
+PRINTL [ 9] 확장- 남자모유취득 가부
+PRINTL [20] 개체차이 설정
+PRINTL [30] 소모품 자동 보충 설정
+PRINTL [70]세이브 데이터명 변경
+PRINTL [80] 커맨드 필터 설정
+PRINTL [90] PALAM 획득 애니메이션 설정
+PRINTL 
+PRINTL [100]돌아온다
+DRAWLINE
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSE
+	TRYCALLFORM DICTIONARY_EXPANSION_{RESULT}
+	GOTO PRINT_LIST
+ENDIF
+
+@DICTIONARY_EXPANSION_0
+PRINTL 〔텍스트 표시〕
+PRINTL 
+PRINTL ·입상 텍스트(항상 표시)＋정경 텍스트
+PRINTL 　캐릭터의입상이 준비되어 있는 경우, 그입상과
+PRINTL 　기본적인 캐릭터의 행동 따위를 그리는 지문을, 양쪽 모두 표시합니다.
+PRINTL 　입위쪽으로 지문의 표시가 컷 되고 있는 경우, 지문은 표시되지 않습니다.
+PRINTL 　
+PRINTL ·정경 텍스트만
+PRINTL 　캐릭터의입상의 유무에 관련되지 않고, 입상은 표시되지 않고,
+PRINTL 　기본적인 캐릭터의 행동 따위를 그리는 지문만이 표시됩니다.
+PRINTL 　입위쪽으로 설정되어 있는 개별 이벤트 따위도 발생하지 않게 됩니다.
+PRINTL 　
+PRINTL ·텍스트를 표시하지 않는다
+PRINTW 　캐릭터의입상, 지문의 양쪽 모두가 표시되지 않습니다.
+
+@DICTIONARY_EXPANSION_1
+PRINTL 〔사정개소 설정〕
+PRINTL 　주인이사정 할 때, 노예의 어디를 노릴지를 선택할 수 있습니다.
+PRINTL 　기본적으로는 본 채로인 것으로, 상세한 설명을 생략합니다.
+PRINTL 　
+PRINTL ·그대로사정
+PRINTL 　조교시에 가고 있던 커맨드에 의해, 사정개소가 다릅니다.
+PRINTL 　예를 들어 SEX계 조교중이라면질내에, 펠라치오라면입, 라고 하는 상태입니다.
+PRINTL 　특히 부카케에의 구애됨이 없는 경우, 이것을 선택해 두면 좋을 것입니다.
+PRINTL 　
+PRINTL ·그때마다 선택
+PRINTL 　사정 할 것 같게 될 때, 노예의 어디를 노릴지가 선택 가능하게 됩니다.
+PRINTW 　그러나, 실행중의 커맨드에 따라서는, 겨눌 수 없는 경우도 있습니다.
+
+@DICTIONARY_EXPANSION_2
+PRINTL 〔착의 초기설정〕
+PRINTL 　조교 개시시의, 노예의 착의 상태를 설정할 수가 있습니다.
+PRINTL 　하나 하나옷을 벗게 하는 것이 귀찮은 사람은 설정해 두면 좋을 것입니다.
+PRINTL 　
+PRINTL 　설정을 「전회 종료시」로 해, 「정조대」를 신게 한 채로 조교를 종료하면,
+PRINTW 　주인이 보지 않은 곳으로, 노예가 승손에자위를 하는 것을 막을 수가 있습니다.
+
+@DICTIONARY_EXPANSION_3
+PRINTL 〔스테이터스 표시 설정〕
+PRINTL 　메인 메뉴 화면에서, 캘린더에 준거한 스케줄이나,
+PRINTW 　현재의 노예 상태를 나타내는 스테이터스를, 표시할지 어떨지를 선택할 수 있습니다.
+
+
+@DICTIONARY_EXPANSION_4
+PRINTL 〔캐릭터입상〕
+PRINTL 　캐릭터입상을 「칼라」 「디폴트색」의 어디에서 표시하는지를 선택할 수 있습니다.
+PRINTW 　입위쪽으로 색이 설정되어 있지 않은 경우, 설정에 관련되지 않고 디폴트색으로 표시됩니다.
+
+@DICTIONARY_EXPANSION_5
+PRINTL 〔범용 허덕여 사용 설정〕
+PRINTL 　전용입상이 없는 캐릭터를 조교할 때, 범용입상을 표시할지 어떨지를 선택할 수 있습니다.
+PRINTW 　간단한 허덕이는 소리나부정문 따위, 어느 정도 말하게 됩니다.
+
+@DICTIONARY_EXPANSION_6
+PRINTL 〔엽기 커맨드 확장〕
+PRINTL 　ON로 하면, 지하실에의 문이 열립니다.
+PRINTL 　지하실는 고문을 위한 방이며, 지하실에 있으면 일부 커맨드로
+PRINTL 　조교의 내용이 하드하게 되는 것 외, 노예에게낙인를 누르거나와 특수한 행위가 가능하게 됩니다.
+PRINTL 　반대로, 쾌락만을 주는 것 같은 커맨드는 실행 할 수 없게 됩니다.
+PRINTW 　「수술도구세트」와 「어느 소질」이 있으면, 인체 개조에도손를 낼 수 있을지도…?
+
+@DICTIONARY_EXPANSION_7
+PRINTL 〔데이트시노출플레이 확장〕
+PRINTL 　ON로 해 일정한 조건을 채우면, 데이트시에노출플레이를 실시할 수 있게 됩니다.
+PRINTW 　건전한 데이트만을 즐기고 싶은 사람은, OFF로 해 두면 좋을 것입니다.
+
+@DICTIONARY_EXPANSION_8
+PRINTL 〔노역 옵션〕
+PRINTL 　노역 커맨드에는, 각각 독립한 옵션 플레이가 존재해,
+PRINTL 　ON로 하는 것으로, 관련하는 플레이를 실시하게 할 수가 있게 됩니다.
+PRINTL 　게임 개시시점에서는 모두 OFF가 되어 있기 때문에, 기호에 설정해 주세요.
+PRINTL 　예를 들어[처녀]나[백버진]를 노역으로 가라앉힐 수 있었던 구 없는, 이라고 하는 경우에는,
+PRINTL 　관통 옵션을 OFF로 해 두면 좋을 것입니다.
+PRINTL 　
+PRINTW 　「정식포장마차」 「야외 라이브」의 「낮의 부」에는, 옵션이 적용되지 않습니다.
+
+@DICTIONARY_EXPANSION_9
+PRINTL 〔남자모유취득 가부〕
+PRINTL 　ON로 하는 것으로,[남자][반음반양][컨트보이]를 가지는 캐릭터라도
+PRINTW 　모유체질를 취득하게 됩니다.
+
+@DICTIONARY_EXPANSION_20
+PRINTL 〔개체차이 설정〕
+PRINTL 　ON로 하는 것으로, 캐릭터를 구입했을 경우에
+PRINTL 　CSV로 붙어 있는 소질과는 별도로, 소질이 추가되는 일이 있습니다.
+PRINTL 　추가되는 소질은 항목 마다 ON와 OFF를 선택할 수 있으므로,
+PRINTL 　적당 선택해 주세요.
+PRINTW 　또, 원래의 CSV와 상반되는 소질을 붙이는 일도 가능합니다.
+
+@DICTIONARY_EXPANSION_30
+PRINTL 〔소모품 자동 보충 설정〕
+PRINTL 　복수 소지 가능한 아이템의 소지 기준수를 설정할 수가 있습니다.
+PRINTL 　소지 기준수에 차지 않는 아이템은 자동으로 구입됩니다.
+PRINTL 　소지 코우슈우금이발리나 있고 경우는, 가능한 한 구입됩니다.
+PRINTL 　대상이 되는 아이템은, 로션·비디오테이프·필름·콘돔입니다.
+PRINTW 　디폴트의 소지 기준수는, 모두 0개입니다.
+
+@DICTIONARY_EXPANSION_70
+PRINTL 〔세이브 데이터명 변경〕
+PRINTL 　세이브 데이터명을 임의의 것으로 변경할 수 있습니다.
+
+@DICTIONARY_EXPANSION_80
+PRINTL 〔커맨드 필터 설정〕
+PRINTL 　조교시, 표시되는 커맨드에 필터를 걸 수가 있습니다.
+PRINTL 　표시 커맨드가 너무 많아서 보고 괴로울 때나,
+PRINTW 　잘못해도 선택하고 싶지 않은 커맨드가 있는 경우에 사용해 주세요.
+
+@DICTIONARY_EXPANSION_90
+PRINTL 〔PALAM 획득 애니메이션 설정〕
+PRINTL 　노예의 파라미터 변화시, 변화한 값이 애니메이션으로 표시되게 됩니다.
+PRINTW 　동작이 무거워지는 경우에는 OFF를 설정해 주세요.
+
+;=============================================================================
+;콘피그 설명
+;=============================================================================
+;--------------------------------------------------
+;콘피그 해설 메인 페이지
+;--------------------------------------------------
+@DICTIONARY_CHARA_EXPANSION
+$PRINT_LIST
+DRAWLINE
+PRINTFORML [610]캐라콘피그로 설정할 수 있는 각종 기능의 해설입니다.
+PRINTFORML 내용을 알고 싶은 항목의 번호를 입력해 주세요.
+DRAWLINE
+PRINTL [ 0] 별명 설정
+PRINTL [ 1] 의상의 독자 설정
+PRINTL [ 2] 범용 허덕여 설정
+PRINTL 
+PRINTL [100]돌아온다
+DRAWLINE
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSE
+	TRYCALLFORM DICTIONARY_CHARA_EXPANSION_{RESULT}
+	GOTO PRINT_LIST
+ENDIF
+
+@DICTIONARY_CHARA_EXPANSION_0
+PRINTL 〔별명 설정〕
+PRINTL 　캐릭터의 별명을 변경할 수가 있습니다.
+PRINTW 　변경했을 경우는 지문이나 각종 항목으로 표시되는 이름이 변경됩니다.
+
+@DICTIONARY_CHARA_EXPANSION_1
+PRINTL 〔의상의 독자 설정〕
+PRINTL 　캐릭터의 의상 설정을 변경할 수가 있습니다.
+PRINTL 　의상 설정을 「독자 의상」으로 설정하는 것으로 반영됩니다.
+PRINTW 　사양상, 전라에는 설정할 수 없습니다.
+
+@DICTIONARY_CHARA_EXPANSION_2
+PRINTL 〔범용 허덕여 설정〕
+PRINTL 　캐릭터의 범용입상의입조 따위를 변경할 수가 있습니다.
+PRINTW 　이 항목은, 조교 화면에도 표시되고 있습니다.
+

@@ -1,0 +1,295 @@
+﻿;순종의 가부
+@ISABLUP0
+;연모, 친애, 복종, 예속는 MAXLV10
+IF ABL:순종 >= 10
+	RETURN 0
+ELSEIF ABL:순종 >= 5 && TALENT:연모 == 0 && TALENT:친애  == 0 && TALENT:복종  == 0 && TALENT:예속 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP0
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+
+;순종
+@ABLUP0
+DRAWLINE
+;연모, 친애, 복종, 예속는 MAXLV10
+IF ABL:순종 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:순종 >= 5 && TALENT:연모 == 0 && TALENT:친애  == 0 && TALENT:복종  == 0 && TALENT:예속 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP0
+
+
+;LV4로부터 5에 올릴 때는이상경험필요(소질:[겁쟁이][솔직함][연모][친애]라면 무시할 수 있다)
+IF ABL:순종 == 4 && !TALENT:겁쟁이 && !TALENT:솔직함 && !TALENT:연모 && !TALENT:친애
+	PRINTFORML %EXPNAME:50%있어, 한편
+;LV7로부터 8에 올릴 때는이상경험 3 이상 필요(소질:[겁쟁이][솔직함][연모][친애]라면 무시할 수 있다)
+ELSEIF ABL:순종 == 7 && !TALENT:겁쟁이 && !TALENT:솔직함 && !TALENT:연모 && !TALENT:친애
+	PRINTFORML %EXPNAME:50%3이상, 한편
+ENDIF
+
+PRINTFORM [0] - %PALAMNAME:11%의 구슬×{A}……
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+ENDIF
+PRINTL 
+
+PRINTFORM [1] - %PALAMNAME:5%의 구슬×{B}……
+
+IF J == 0
+	PRINT OK
+ELSE
+	SIF J & 1
+		PRINT 주불발 
+	SIF J & 2
+		PRINT 경험불발 
+ENDIF
+PRINTL 
+
+IF C > 0
+	;욕정의 구슬로 올린다
+	SIF JUEL:욕정 < C
+		K |= 1
+
+	PRINTFORM [2] - %PALAMNAME:6%의 구슬×{C}……
+
+	IF K == 0
+		PRINT OK
+	ELSE
+		SIF K & 1
+			PRINT 주불발 
+		SIF K & 2
+			PRINT 경험불발 
+	ENDIF
+	PRINTL 
+ELSE
+	K = 256
+ENDIF
+
+IF D > 0
+	;굴복의 구슬로 올린다
+	SIF JUEL:굴복 < D
+		L |= 1
+
+	PRINTFORM [3] - %PALAMNAME:7%의 구슬×{D}……
+
+	IF L == 0
+		PRINT OK
+	ELSE
+		SIF L & 1
+			PRINT 주불발 
+		SIF L & 2
+			PRINT 경험불발 
+	ENDIF
+	PRINTL 
+ELSE
+	L = 256
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+INPUT
+IF (RESULT < 0 || RESULT > 3) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF K == 256 && RESULT == 2
+	RESTART
+ELSEIF K != 0 && RESULT == 2
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF L == 256 && RESULT == 3
+	RESTART
+ELSEIF L != 0 && RESULT == 3
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:순종 += 1
+
+IF RESULT == 0
+	JUEL:공포 -= A
+ELSEIF RESULT == 1
+	JUEL:순종 -= B
+ELSEIF RESULT == 2
+	JUEL:욕정 -= C
+ELSEIF RESULT == 3
+	JUEL:굴복 -= D
+ENDIF
+
+PRINTFORMW %ABLNAME:0%의 레벨이{ABL:순종}가 되었습니다
+
+;순종LvUP 판정
+@DECIDE_ABLUP0
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+J = 0
+K = 0
+L = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:순종 == 0
+	A = 10
+	B = 10
+	C = 150
+	D = 100
+ELSEIF ABL:순종 == 1
+	A = 150
+	B = 100
+	C = 450
+	D = 600
+ELSEIF ABL:순종 == 2
+	A = 500
+	B = 300
+	C = 1000
+	D = 1200
+ELSEIF ABL:순종 == 3
+	A = 3000
+	B = 3000
+	C = 0
+	D = 0
+ELSEIF ABL:순종 == 4
+	A = 6000
+	B = 6000
+	C = 0
+	D = 0
+ELSEIF ABL:순종 == 5
+	A = 8000
+	B = 10000
+	C = 0
+	D = 0
+ELSEIF ABL:순종 == 6
+	A = 10000
+	B = 15000
+	C = 0
+	D = 0
+ELSEIF ABL:순종 == 7
+	A = 14000
+	B = 20000
+	C = 0
+	D = 0
+ELSEIF ABL:순종 == 8
+	A = 18000
+	B = 25000
+	C = 0
+	D = 0
+ELSEIF ABL:순종 == 9
+	A = 25000
+	B = 35000
+	C = 0
+	D = 0
+ENDIF
+
+
+;연모
+SIF TALENT:연모
+	TIMES B , 0.80
+;친애
+SIF TALENT:친애
+	TIMES B , 0.60
+;복종
+SIF TALENT:복종
+	TIMES A , 0.70
+;예속
+SIF TALENT:예속
+	TIMES A , 0.40
+
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (!TALENT:연모 && !TALENT:친애 && !TALENT:음란 && !TALENT:창부 && !TALENT:복종 && !TALENT:예속)
+	TIMES A , 2.00
+	TIMES B , 2.00
+	TIMES C , 2.00
+	TIMES D , 2.00
+ENDIF
+
+;위압
+IF TALENT:위압 && !TALENT:연모 && !TALENT:친애 && !TALENT:음란 && !TALENT:창부 && !TALENT:복종 && !TALENT:예속
+	TIMES A , 2.00
+	TIMES D , 2.00
+ENDIF
+
+;LV4로부터 5에 올릴 때는이상경험필요(소질:[겁쟁이][솔직함][연모][친애]라면 무시할 수 있다)
+IF ABL:순종 == 4 && !TALENT:겁쟁이 && !TALENT:솔직함 && !TALENT:연모 && !TALENT:친애
+	IF EXP:이상경험 == 0
+		;이상경험가 없다
+		I |= 2
+		J |= 2
+		K |= 2
+		L |= 2
+	ENDIF
+;LV7로부터 8에 올릴 때는이상경험 3 이상 필요(소질:[겁쟁이][솔직함][연모][친애]라면 무시할 수 있다)
+ELSEIF ABL:순종 == 7 && !TALENT:겁쟁이 && !TALENT:솔직함 && !TALENT:연모 && !TALENT:친애
+	IF EXP:이상경험 < 3
+		;이상경험가 3 미만
+		I |= 2
+		J |= 2
+		K |= 2
+		L |= 2
+	ENDIF
+ENDIF
+
+;공포의 구슬로 올린다
+SIF JUEL:공포 < A
+	I |= 1
+
+IF I == 0
+	Z = 1
+ENDIF
+
+;순종의 구슬로 올린다
+SIF JUEL:순종 < B
+	J |= 1
+
+IF J == 0
+	Z = 1
+ENDIF
+
+IF C
+	;욕정의 구슬로 올린다
+	SIF JUEL:욕정 < C
+		K |= 1
+
+	IF K == 0
+		Z = 1
+	ENDIF
+ELSE
+	K = 256
+ENDIF
+
+IF D
+	;굴복의 구슬로 올린다
+	SIF JUEL:굴복 < D
+		L |= 1
+
+	IF L == 0
+		Z = 1
+	ENDIF
+ELSE
+	L = 256
+ENDIF
+RETURN 1
+

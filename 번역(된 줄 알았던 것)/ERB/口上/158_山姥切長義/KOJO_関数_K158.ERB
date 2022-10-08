@@ -1,0 +1,253 @@
+﻿;=================================================
+;장의입상용의 함수 따위
+;가필 개변,유용 자유롭게 아무쪼록
+;버그등 미안해요
+;=================================================
+;-------------------------------------------------
+;함수명:SHIBO_IHU
+;개요:TARGET와 ARG의 사모·공포 대상이 감싸고 있는지 어떤지를 판정한다
+;인수:ARG… 캐릭터의 등록 번호 ASSI 등
+;반환값:0. 사모·공포 대상이 없는,또는 무효 |1. TARGET→LOCAL:1또한 ARG→LOCAL:1|
+;2. TARGET→ARG 또한 ARG→TARGET |3. TARGET→ARG(→별캐릭터) |4. ARG→TARGET→LOCAL:1|
+;5. TARGET→LOCAL:1또한 ARG→별 캐릭터
+;비고:식 나카노세키수
+;TARGET에 사모·공포 대상 LOCAL:1이 있는 전제
+;사모인가 공포인가의 판정은 하고 있지 않는 사모·공포 대상이 누군가는 돌려주지 않는다
+;-------------------------------------------------
+@SHIBO_IHU(TARGET,ARG)
+#FUNCTION
+
+;TARGET에 사모·공포 대상이 없으면 무효 미함락·음란창부·실의·붕괴
+SIF !CFLAG:40
+	RETURNF 0
+
+;TARGET의 사모·공포 대상의 캐릭터 고유 번호를을 LOCAL:1에 대입
+;CFLAG:41 = LOCAL:1
+
+LOCAL = 0
+
+;TARGET→ARG
+SIF CFLAG:41 == NO:ARG
+	LOCAL |= 1
+
+;ARG→TARGET
+SIF CFLAG:ARG:41 == NO:TARGET
+	LOCAL |= 2
+
+;ARG가 미함락 혹은음란루트라면 분기
+IF !KANRAKU(ARG) || KANRAKU(ARG) == 2
+	;TARGET→ARG
+	IF LOCAL == 1
+		RETURNF 3 
+	ELSE
+		RETURNF 0
+	ENDIF
+ENDIF
+
+;사모·공포 대상이 감싸고 있다
+IF CFLAG:41 == CFLAG:ARG:41
+	RETURNF 1
+ELSE
+	;TARGET→ARG 또한 ARG→TARGET
+	;사모끼리인 것이나 사모와 공포인 것인가 등은 판정하고 있지 않다
+	;그렇지만 사모끼리 밖에 채울 수 없어? 아마
+	IF LOCAL == 3
+		RETURNF 2
+	;TARGET→ARG→별 캐릭터
+	ELSEIF LOCAL == 1
+		RETURNF 3
+	;ARG→TARGET→LOCAL:1
+	ELSEIF LOCAL == 2
+		RETURNF 4
+	;TARGET→LOCAL:1또한 ARG→별 캐릭터
+	;어느쪽이나 사모·공포 대상 자체는 있다
+	ELSE
+		RETURNF 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;함수명:NAME_CALL_158_51(ARG)
+;개요:부르는 법 판정 함수
+;인수:캐릭터 등록 번호
+;비고:CSTR:51에 PLAYER의 부르는 법을 격납하는 CSTR:50은 사모·공포 대상의 부르는 법
+;-------------------------------------------------
+@NAME_CALL_158_51(ARG)
+
+;음란·창부 붕괴 미함락
+IF CFLAG:40 == 0 && !TALENT:실의
+	CSTR:51 = %NAME_CALL_158(ARG)%
+ELSE
+	;캐릭터의 통칭 고정 플래그가 서 있지 않다
+	SIF CFLAG:640 == 0
+		CSTR:51 = %NAME_CALL_158_50(ARG)%
+
+	;조교자가 사모·공포 대상 이외
+	IF KANRAKU(ARG) == 4 || KANRAKU(ARG) == 5
+		CSTR:51 = %NAME_CALL_158(ARG)%
+	ELSE
+		CSTR:51 = %CSTR:50%
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;함수명:NAME_CALL_158(ARG)
+;개요:부르는 법 설정 함수
+;인수:캐릭터 등록 번호
+;반환값:부르는 법을 돌려준다
+;비고:문중 함수
+;음란·창부 붕괴 미함락 사모 공포 대상 이외가 조교자의 경우의 부르는 법을 설정한다
+;-------------------------------------------------
+@NAME_CALL_158(ARG)
+#FUNCTIONS
+
+IF NO:PLAYER == 95
+	LOCALS =가짜군
+	
+ELSEIF NO:PLAYER == 154
+	LOCALS =고양이 살인 훈
+ELSE
+	LOCALS = %CALLNAME:PLAYER%
+ENDIF
+RETURNF LOCALS
+
+;-------------------------------------------------
+;함수명:NAME_CALL_158_50(ARG)
+;개요:사모·공포 대상의 부르는 법 설정 함수
+;인수:캐릭터 등록 번호
+;반환값:부르는 법을 돌려준다
+;비고:문중 함수 CSTR:50에 사모·공포 대상의 부르는 법을 격납한다
+;NAME_CALL_158_SET(ARG)로 재차 부르는 법을 결정할 때까지는 이것에 준거하고 불린다
+;-------------------------------------------------
+@NAME_CALL_158_50(ARG)
+#FUNCTIONS
+
+IF CFLAG:41 == 95 || CFLAG:38 == 95
+	LOCALS =가짜군
+ELSEIF CFLAG:41 == 154 || CFLAG:38 == 154
+	LOCALS =고양이 살인 훈
+ELSE
+	;매각이 끝난 상태였다
+	IF CFLAG:38 > 0
+		LOCAL = CFLAG:38
+		LOCALS = %CSVNAME(LOCAL ,0)%
+	ELSE
+		;캐릭터 고유 번호로부터 등록 번호를 추출
+		LOCAL:41 = LOCAL
+		LOCAL:1 = GETCHARA(LOCAL)
+		LOCALS = %CALLNAME:(LOCAL:1)%
+	ENDIF
+ENDIF
+CSTR:50 = %LOCALS%
+RETURNF LOCALS
+
+;-------------------------------------------------
+;함수명:NAME_CALL_158_SET
+;개요:사모·공포 대상의 부르는 법 설정 함수
+;인수:캐릭터 등록 번호
+;반환값:부르는 법을 돌려준다
+;비고:CSTR:50에 사모·공포 대상의 부르는 법을 격납한다
+;입우에우치에서 부르므로 대사 붙어 있는
+;CFLAG:640 =통칭 고정 플래그
+;-------------------------------------------------
+@NAME_CALL_158_SET
+
+;벌써 통칭 고정 플래그가 서 있는 경우에,기록해 둔다
+IF CFLAG:640
+	LOCAL = CFLAG:640
+ELSE
+	LOCAL = 0
+ENDIF
+
+$INPUT_NAME_158_1
+PRINTFORML %CALLNAME:PLAYER%의 부르는 법을 결정합니다
+PRINTFORML [0] %CALLNAME:PLAYER%
+PRINTFORML [1] %CALLNAME:PLAYER%모양
+;사모 공포 대상이 「당신」
+IF CFLAG:41 == 0
+	PRINTFORML [2] 주
+	PRINTFORML [3] 심신자군
+;사모 공포 대상이야만바기리 쿠니히로
+ELSEIF CFLAG:41 == 95
+	PRINTFORML [2] 가짜군
+	PRINTFORML [3] 쿠니히로
+;사모 공포 대상이난센 이치몬지
+ELSEIF CFLAG:41 == 154
+	PRINTFORML [2] 고양이 살인 훈
+	PRINTFORML [3] 미나이즈미
+ELSE
+	PRINTFORML [2] %CALLNAME:PLAYER%훈
+	PRINTFORML [3] %CALLNAME:PLAYER%씨
+ENDIF
+PRINTFORML [4] 주인님
+PRINTFORML [9] 스스로 결정한다
+PRINTFORML [100] 역시 그만둔다
+INPUT
+IF RESULT == 0
+	LOCALS = %CALLNAME:PLAYER%
+	CFLAG:640 = 10
+ELSEIF RESULT == 1
+	LOCALS = %CALLNAME:PLAYER%모양
+	CFLAG:640 = 11
+ELSEIF RESULT == 2
+	;「당신」
+	IF CFLAG:41 == 0
+		LOCALS =주
+	;야만바기리 쿠니히로
+	ELSEIF CFLAG:41 == 95
+		LOCALS =가짜군
+	;난센 이치몬지
+	ELSEIF CFLAG:41 == 154
+		LOCALS =고양이 살인 훈
+	ELSE
+		LOCALS = %CALLNAME:PLAYER%훈
+	ENDIF
+	CFLAG:640 = 12
+ELSEIF RESULT == 3
+	;「당신」
+	IF CFLAG:41 == 0
+		LOCALS =심신자군
+	;야만바기리 쿠니히로
+	ELSEIF CFLAG:41 == 95
+		LOCALS =쿠니히로
+	;난센 이치몬지
+	ELSEIF CFLAG:41 == 154
+		LOCALS =미나이즈미
+	ELSE
+		LOCALS = %CALLNAME:PLAYER%씨
+	ENDIF
+	CFLAG:640 = 13
+ELSEIF RESULT == 4
+	LOCALS =주인님
+	CFLAG:640 = 14
+ELSEIF RESULT == 9
+	PRINTFORML 「스스로 결정하고 싶어? 어쩔 수 없구나」
+	PRINTFORML %CALLNAME:PLAYER%에의 부르는 법을 입력해 주세요
+	INPUTS
+	LOCALS = %RESULTS%
+	CFLAG:640 = 19
+ELSEIF RESULT == 100
+	PRINTFORML 「무엇이다 그만두는지 상당히 변덕스럽다」
+	PRINTW 
+	CFLAG:640 = LOCAL
+	RETURN 0
+ELSE
+	GOTO INPUT_NAME_158_1
+ENDIF
+
+PRINTFORML 「『%LOCALS%』로 좋은 걸까나?」
+PRINTFORML [0] 이것으로 좋다
+PRINTFORML [1] 역시 바꾼다
+$INPUT_NAME_158_2
+INPUT
+IF RESULT == 0
+	CSTR:50 = %LOCALS%
+	PRINTFORML 「%CSTR:50%… 과연,알았어」
+	PRINTFORMW 「그러면 재차 잘 부탁드립니다 %CSTR:50%」
+ELSEIF RESULT == 1
+	GOTO INPUT_NAME_158_1
+ELSE
+	GOTO INPUT_NAME_158_2
+ENDIF
+
+

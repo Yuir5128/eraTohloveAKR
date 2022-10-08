@@ -1,0 +1,313 @@
+﻿
+
+@SHOW_INFO_PALAM
+F = 0
+REPEAT 15
+
+;パラメータを表示する順番を並べ替える
+
+IF COUNT == 0
+;快Ｃ
+	A = 0
+ELSEIF COUNT == 1
+;快Ｖ
+	A = 1
+ELSEIF COUNT == 2
+;快Ａ
+	A = 2
+ELSEIF COUNT == 3
+;快Ｂ
+	A = 3
+ELSEIF COUNT == 4
+;潤滑
+	A = 4
+ELSEIF COUNT == 5
+;恭順
+	A = 5
+ELSEIF COUNT == 6
+;欲情
+	A = 6
+ELSEIF COUNT == 7
+;屈服
+	A = 7
+ELSEIF COUNT == 8
+;習得
+	A = 8
+ELSEIF COUNT == 9
+;恥情
+	A = 9
+ELSEIF COUNT == 10
+;苦痛
+	A = 10
+ELSEIF COUNT == 11
+;恐怖
+	A = 11
+ELSEIF COUNT == 12
+;反感
+	A = 12
+ELSEIF COUNT == 13
+;不快
+	A = 13
+ELSEIF COUNT == 14
+;抑鬱
+	A = 14
+ENDIF
+
+
+;現在のパラメータレベルをBに代入
+IF PALAM:A < PALAMLV:1
+	B = 0
+ELSEIF PALAM:A < PALAMLV:2
+	B = 1
+ELSEIF PALAM:A < PALAMLV:3
+	B = 2
+ELSEIF PALAM:A < PALAMLV:4
+	B = 3
+ELSEIF PALAM:A < PALAMLV:5
+	B = 4
+ELSEIF PALAM:A < PALAMLV:6
+	B = 5
+ELSEIF PALAM:A < PALAMLV:7
+	B = 6
+ELSEIF PALAM:A < PALAMLV:8
+	B = 7
+ELSEIF PALAM:A < PALAMLV:9
+	B = 8
+ELSE
+	B = 9
+ENDIF
+
+;パラメータの名前・パラメータレベル・ゲージを表示
+IF PALAM:A == 0
+	GOTO SHOW_INFO_PALAM_NUM_END
+ELSE
+	SETCOLOR 0xC0C0C0 - (B*2048)
+	SIF COUNT == 4
+		SETCOLOR 0xB0B0B0 + (B*328965)
+	PRINTFORM 　%PALAMNAME:A%Lv{B}
+	RESETCOLOR
+	PRINTFORM %UNICODE(0x0208D)%
+ENDIF
+
+;パラメータレベルが9以上なら余計な処理は飛ばす
+IF B >= 9
+	SETCOLOR 0xFF8866
+	SIF COUNT == 4
+		SETCOLOR 0xDDDDDD
+	PRINTFORM %UNICODE(0x2583)*8%
+	RESETCOLOR
+	GOTO SHOW_INFO_PALAM_END2
+ENDIF
+
+;パラメータレベルごとの閾値の8分の1を1メモリとする
+;C = PALAM:A/(PALAMLV:(B+1)/8)
+E = B+1
+N = 1
+
+;Lv9以下での処理（上書き）↑if内へのgotoがeramakerで出来ない為
+C = (PALAM:A-PALAMLV:B)/((PALAMLV:E-PALAMLV:B)/8)
+
+;↓のコメントアウトした部分を戻すと、パラメータ表示のゲージが
+;↓パラメータの総量を基準にしたものから、
+;↓現在のレベル→次のレベルに必要な量を基準としたものになります。
+;↓例えば、パラメータが5000（レベル３）のときはこんな感じに。
+;↓　従来 [****>>>>] Now:5000 / Next:10000 （総量として必要な10000が基準）
+;↓　これ [**>>>>>>] Now:2000 / Next: 7000 （LV3→LV4に必要な7000が基準）
+
+;C = (PALAM:A-PALAMLV:B)/((PALAMLV:E-PALAMLV:B)/8)
+
+D = 8-C
+
+$SHOW_INFO_PALAM_COL
+SIF C <= 0
+	GOTO SHOW_INFO_PALAM_D2
+IF B >= 0
+	IF COUNT == 4
+		SETCOLOR 0xC0C0C0
+	ELSEIF COUNT <= 3
+		SETCOLOR 0x7070C0
+	ELSEIF COUNT <= 8
+		SETCOLOR 0x70C070
+	ELSEIF COUNT <= 11
+		SETCOLOR 0xC07070
+	ELSE
+		SETCOLOR 0xC070C0
+	ENDIF
+	PRINTFORM %UNICODE(0x2583)%
+	RESETCOLOR
+ENDIF
+C -= 1
+GOTO SHOW_INFO_PALAM_COL
+
+;溜まっていない部分に1Lv下の記号を表示
+$SHOW_INFO_PALAM_D2
+SIF D <= 0
+	GOTO SHOW_INFO_PALAM_END2
+IF B >= 0
+	IF COUNT == 4
+		;潤滑を多少分かりやすく
+		SETCOLOR 0xFFFFFF
+		PRINTFORM %UNICODE(0x2581)%
+	ELSEIF 4 >=  COUNT
+		SETCOLOR 0x553300
+		PRINTFORM %UNICODE(0x2581)%
+	ELSEIF 12 <= COUNT
+		SETCOLOR 0x103040
+		PRINTFORM %UNICODE(0x2583)%
+	ELSE
+		SETCOLOR 0x103040
+		PRINTFORM %UNICODE(0x2583)%
+	ENDIF
+	RESETCOLOR
+ENDIF
+D -= 1
+GOTO SHOW_INFO_PALAM_D2
+
+$SHOW_INFO_PALAM_END2
+SIF COUNT <= 3 && EX:COUNT > 0
+	SETCOLOR 0xFF9999
+PRINTFORM %UNICODE(0x208E)%
+RESETCOLOR
+;潤滑値による摩擦0表記（これだけ特殊）
+;IF A == 3 && PALAM:A >= 20000
+;	PRINT 摩擦 0
+;	GOTO SHOW_INFO_PALAM_NUM_END
+;ENDIF
+
+;↓↓↓↓kMGT表示↓↓↓↓
+A = PALAM:A
+B = 0
+;6桁までノーマル
+IF A > 999999
+	;kキロ(1000)
+	A /= 1000
+	B += 1
+	IF A > 99999
+		;Mメガ(百万)
+		A /= 1000
+		B += 1
+		;2^31 ≒ 21億 = 2100M = 2.1G
+		;eramakerの32ビット整数ならメガまでで十分
+		IF A > 99999
+			;Gギガ(十億)
+			A /= 1000
+			B += 1
+			IF A > 99999
+				;Tテラ(兆)
+				A /= 1000
+				B += 1
+				IF A > 99999
+					;Pペタ(千兆)
+					A /= 1000
+					B += 1
+					;2^63 ≒ 920京 = 9200P = 9.2E
+					;Emueraの64ビット整数でもペタまでで十分
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;数値の桁数に応じて間隔を調整
+SIF A < 10
+	PRINT  
+SIF A < 100
+	PRINT  
+SIF A < 1000
+	PRINT  
+SIF A < 10000
+	PRINT  
+;接尾語が入るなら1つ減らす
+SIF A < 100000 && B == 0
+	PRINT  
+
+PRINTFORM {A}
+IF B == 1
+	PRINT k
+ELSEIF B == 2
+	PRINT M
+ELSEIF B == 3
+	PRINT G
+ELSEIF B == 4
+	PRINT T
+ELSEIF B == 5
+	PRINT P
+ENDIF
+;↑↑↑↑kMGT表示↑↑↑↑
+
+;↓↓↓↓通常表示↓↓↓↓
+;
+;	;数値の桁数に応じて間隔を調整
+;	SIF PALAM:A < 10
+;		PRINT  
+;	SIF PALAM:A < 100
+;		PRINT  
+;	SIF PALAM:A < 1000
+;		PRINT  
+;	SIF PALAM:A < 10000
+;		PRINT  
+;	SIF PALAM:A < 100000
+;		PRINT  
+;	;数値を表示・999999を超えたら999999
+;	IF PALAM:A > 999999
+;		PRINT 999999
+;	ELSE
+;		PRINTFORM {PALAM:A}
+;	ENDIF
+;
+;↑↑↑↑通常表示↑↑↑↑
+
+RESETCOLOR
+
+;3回ごとに改行
+F += 1
+SIF F%3 == 0
+	PRINTL 
+
+$SHOW_INFO_PALAM_NUM_END
+
+REND
+
+SIF F == 0
+	PRINTL 
+SIF F%3 != 0
+	PRINTL 
+
+;=============================================================================
+;PRINT_MARK （刻印）との入れ替え
+@SHOW_INFO_MARK(ARG)
+REPEAT 4
+	PRINTFORM %MARKNAME:COUNT%:LV{MARK:ARG:COUNT} 
+	BAR MARK:ARG:COUNT, 3, 3
+	
+	;最後のループ以外では間隔をあける
+	SIF COUNT < 3
+		PRINT 　
+REND
+PRINTL 
+
+
+;=============================================================================
+;SHOW_JUEL の珠表示部分を独立した関数に
+@SHOW_INFO_JUEL(ARG)
+PRINTL □ 珠 □-----------------------------------------------------------------------
+VARSET LOCAL
+FOR LOCAL:1, 0, 16
+	LOCAL = LOCAL:1
+	SIF LOCAL:1 == 15
+		LOCAL = 100
+	SIF TALENT:ARG:攻め && (LOCAL == 1 || LOCAL == 2)
+		CONTINUE
+	PRINTFORM 　%PALAMNAME:LOCAL%の珠:{JUEL:ARG:LOCAL,7}
+	LOCAL:2++
+		IF LOCAL:2 % 4 == 0
+		PRINTL 
+	ELSE
+		PRINT 　
+	ENDIF
+NEXT
+;最後のループで改行してなかったら、ここで改行しておく
+SIF LOCAL:2 % 4 != 0
+	PRINTL 
+
+

@@ -1,0 +1,1690 @@
+﻿;--------------------------------------------------
+;아이템 구입
+;--------------------------------------------------
+@EVENTBUY
+;이 가게의 상품은 아닌,판매 조건을 채우지 않았다
+IF !SHOW_ITEM(TFLAG:1,BOUGHT) || !ITEMSALES:BOUGHT
+	CLEARLINE 1
+	RETURN 0
+ENDIF
+
+;--------------------------------------------------
+;구입 처리
+;--------------------------------------------------
+;아이템 설명 표시
+MONEY += ITEMPRICE:BOUGHT
+ITEM:BOUGHT--
+CALL ITEM_LIST
+SELECTCASE BOUGHT
+	;【더러움무시】
+	CASE 50
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_64
+	;【조제지식】
+	CASE 51
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_55
+	;【금단의지식】
+	CASE 52
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_144
+	;【천리안】
+	CASE 53
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_156
+	;【절륜】
+	CASE 54
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_47
+	;【수】
+	CASE 55
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_157
+	;【공】
+	CASE 56
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_158
+	;【오메가】
+	CASE 59
+		PRINTFORML %ITEMNAME:BOUGHT%
+		TRYCALL DICTIONARY_TALENT_170
+	CASEELSE
+		PRINTFORML 【%ITEMNAME:BOUGHT%】
+		TRYCALLFORM DICTIONARY_ITEM_{BOUGHT}
+		PRINTL 
+ENDSELECT
+SETCOLOR 140,140,140
+DRAWLINE
+RESETCOLOR
+SELECTCASE BOUGHT
+	;기본 아이템
+	;0~26 어덜트 상품,30정조대,31~33동물귀,34헤드셋,38에이프런,39 웨딩 세트
+	;57촉수사역술,58진화의비법,90손 방법 도구,91우리,92~93포장마차(증축),94플랜카드
+	CASE 0 TO 26,30 TO 34,38,39,57,58,90 TO 94,96 TO 94
+		PRINTFORML 구입합니까?
+		SETCOLOR 140,140,140
+		DRAWLINE
+		RESETCOLOR
+		PRINTBUTTON "[999 캔슬]",999
+		PRINT 　
+		PRINTBUTTON "[0구입한다]",0
+		PRINTL 
+		$INPUT_LOOP_2
+		INPUT
+		SIF RESULT == 999
+			RETURN 0
+		IF RESULT != 0
+			CLEARLINE 1
+			GOTO INPUT_LOOP_2
+		ELSEIF MONEY < ITEMPRICE:BOUGHT
+			CLEARLINE 1
+			PRINTW 돈이 충분하지 않습니다
+			GOTO INPUT_LOOP_2
+		ENDIF
+		IF BOUGHT == 57 || BOUGHT == 58
+			PRINTFORMW ＜%ITEMNAME:BOUGHT%를 몸에 익혔습니다＞
+		ELSE
+			PRINTFORMW ＜%ITEMNAME:BOUGHT%를 구입했습니다＞
+		ENDIF
+		ITEMSALES:BOUGHT = 0
+		ITEM:BOUGHT++
+		MONEY -= ITEMPRICE:BOUGHT
+		TFLAG:13 = 28
+		CALL KOJO_MESSAGE_EVENT
+	;소비 아이템
+	;36,37스타킹,타이츠,40~49 약품계,86~88 주류
+	CASE 36,37,40 TO 49,86 TO 88
+		IF (100 - ITEM:BOUGHT) <= (MONEY / ITEMPRICE:BOUGHT)
+			LOCAL:3 = 100 - ITEM:BOUGHT
+		ELSE
+			LOCAL:3 = MONEY / ITEMPRICE:BOUGHT
+			LOCAL:4 = 1
+		ENDIF
+		SETCOLOR 140,140,140
+		DRAWLINE
+		RESETCOLOR
+		PRINTFORML %ITEMNAME:BOUGHT%를 몇개 구입합니까? (1-{LOCAL:3}개까지)
+		PRINTFORML 숫자를 입력할까 이하의 버튼을 클릭 해 주세요
+		PRINTL 
+		PRINTBUTTON "[999 캔슬]",999
+		PRINT 　
+		PRINTBUTTON "[1개]",1
+		IF LOCAL:3 >= 5
+			PRINT 　
+			PRINTBUTTON "[5개]",5
+		ENDIF
+		IF LOCAL:3 >= 10
+			PRINT 　
+			PRINTBUTTON "[10개]",10
+		ENDIF
+		PRINT 　
+		IF LOCAL:4
+			PRINTBUTTON "[살 수 있을 뿐]",LOCAL:3
+		ELSE
+			PRINTBUTTON "[가질 수 있을 뿐]",LOCAL:3
+		ENDIF
+		PRINTL 
+		$INPUT_LOOP_3
+		INPUT
+		SIF RESULT == 999
+			RETURN 0
+		IF RESULT < 0
+			CLEARLINE 1
+			GOTO INPUT_LOOP_3
+		ELSEIF RESULT > LOCAL:3
+			CLEARLINE 1
+			IF RESULT > LOCAL:3 && !LOCAL:4
+				PRINTW 그렇게 가질 수 없습니다
+			ELSEIF RESULT > LOCAL:3 && LOCAL:4
+				PRINTW 돈이발선
+			ENDIF
+			GOTO INPUT_LOOP_3
+		ENDIF
+		PRINTFORMW ＜%ITEMNAME:BOUGHT%를{RESULT}개 구입했습니다＞
+		ITEM:BOUGHT += RESULT
+		MONEY -= ITEMPRICE:BOUGHT * RESULT
+		TFLAG:13 = 28
+		CALL KOJO_MESSAGE_EVENT
+	;사용 아이템
+	;50더러움무시,51조제지식,52금지된지식,53천리안,54절륜,55수,56공,59오메가
+	;60~85 체질 변화계의 약,96부적,97부적·극
+	CASE 50 TO 56,59 TO 85,96,97
+		IF BOUGHT < 60
+			PRINTFORML 누가 몸에 익힙니까?
+		ELSEIF BOUGHT > 95
+			PRINTFORML 누구에게 갖게합니까?
+		ELSE
+			PRINTFORML 누구에게 사용합니까?
+		ENDIF
+		SETCOLOR 140,140,140
+		DRAWLINE
+		RESETCOLOR
+		FOR COUNT,0,CHARANUM
+			;아이템 사용 가능
+			SIF !ITEM_USE_CHECK(COUNT,BOUGHT)
+				CONTINUE
+			SETCOLOR 0x8888FF
+			SIF (BOUGHT:96 || BOUGHT:97) && COUNT == MASTER
+				CONTINUE
+			IF COUNT == MASTER
+				PRINTFORM %UNICODE(0x27A0)%
+			ELSEIF COUNT == ASSI
+				PRINT 조
+			ELSEIF CFLAG:COUNT:1 == 3
+				PRINT 모두
+			ELSEIF COUNT == TARGET
+				PRINT ☆
+			ELSE
+				PRINT 　
+			ENDIF
+			RESETCOLOR
+			PRINTFORM [{COUNT,2}] %CALLNAME:COUNT,16,LEFT%
+			PRINTFORM %UNICODE(0x208D)%
+			CALL PRINT_COLORBAR,BASE:COUNT:체력,MAXBASE:COUNT:체력,8,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("빨강"),RESULT:1,327685
+			PRINTFORM %UNICODE(0x208E)%
+			PRINTFORM %UNICODE(0x208D)%
+			CALL PRINT_COLORBAR,BASE:COUNT:기력,MAXBASE:COUNT:기력,8,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("파랑"),RESULT:1,327685
+			PRINTFORM %UNICODE(0x208E)%
+			IF TALENT:MASTER:천리안
+				PRINT  스트레스
+				IF CFLAG:COUNT:10 >= 95
+					SETCOLOR 0xC0C0C0
+				ELSEIF CFLAG:COUNT:10 >= 80
+					SETCOLOR 0x7070C0
+				ELSEIF CFLAG:COUNT:10 >= 50
+					SETCOLOR 0x70C070
+				ELSEIF CFLAG:COUNT:10 >= 30
+					SETCOLOR 0xC07070
+				ELSE
+					SETCOLOR 0xC070C0
+				ENDIF
+				PRINTFORM {CFLAG:COUNT:10,3} 
+				RESETCOLOR
+			ENDIF
+			;변경계는 현재의 소질 표시
+			SELECTCASE BOUGHT
+				CASE 55,56,59
+					IF TALENT:COUNT:수
+						PRINT  수
+					ELSEIF TALENT:COUNT:공
+						PRINT  공
+					ELSEIF TALENT:COUNT:오메가
+						PRINT  오메가
+					ENDIF
+				CASE 73,74,75
+					IF TALENT:COUNT:아이사이즈
+						PRINT  아이사이즈
+					ELSEIF TALENT:COUNT:단소
+						PRINT  단소
+					ELSEIF TALENT:COUNT:거근
+						PRINT  거근
+					ELSEIF TALENT:COUNT:말자지
+						PRINT  말자지
+					ELSE
+						PRINT  남들 수준
+					ENDIF
+				CASE 65,66
+					IF TALENT:COUNT:빈유
+						PRINT  빈유
+					ELSEIF TALENT:COUNT:절벽
+						PRINT  절벽
+					ELSEIF TALENT:COUNT:거유
+						PRINT  거유
+					ELSEIF TALENT:COUNT:폭유
+						PRINT  폭유
+					ELSE
+						PRINT  남들 수준
+					ENDIF
+				CASE 71,72
+					IF TALENT:COUNT:소인체형
+						PRINT  소인체형
+					ELSEIF TALENT:COUNT:작은체구
+						PRINT  작은체구
+					ELSEIF TALENT:COUNT:큰체구
+						PRINT  큰체구
+					ELSE
+						PRINT  남들 수준
+					ENDIF
+				CASE 61,62,69,70
+					IF TALENT:COUNT:반음반양 || TALENT:COUNT:후타나리
+						SETCOLOR 0x999999
+						PRINT  쌍
+					ENDIF
+					IF TALENT:COUNT:컨트보이
+						SETCOLOR 0x8491c3
+						PRINTFORM 상♂하♀
+					ELSEIF TALENT:COUNT:쉬메일
+						SETCOLOR 0xcc7eb1
+						PRINTFORM 상♀하♂
+					ELSEIF MALE(COUNT)
+						SETCOLOR 0x8491c3
+						PRINTFORM  ♂
+					ELSE
+						SETCOLOR 0xcc7eb1
+						PRINTFORM  ♀
+					ENDIF
+					RESETCOLOR
+				CASE 96,97
+					SIF CFLAG:COUNT:693 == 0
+						SETCOLOR 0x808080
+						PRINTFORM  부적({CFLAG:COUNT:693})
+						RESETCOLOR
+					PRINTFORM  /
+					SIF CFLAG:COUNT:694 == 0
+						SETCOLOR 0x808080
+						PRINTFORM  부적·극({CFLAG:COUNT:694})
+						RESETCOLOR
+					ENDSELECT
+			PRINTL 
+		NEXT
+		SETCOLOR 140,140,140
+		DRAWLINE
+		RESETCOLOR
+		PRINT [999] 돌아온다　　　　　　　　
+		$INPUT_LOOP_4
+		INPUT
+		IF RESULT == 999
+			TFLAG:0 = -2
+			RETURN 0
+		ELSEIF MONEY < ITEMPRICE:BOUGHT
+			CLEARLINE 1
+			PRINTW 돈이 충분하지 않습니다
+			GOTO INPUT_LOOP_2
+		ELSEIF !ITEM_USE_CHECK(RESULT,BOUGHT)
+			CLEARLINE 1
+			GOTO INPUT_LOOP_2
+		ENDIF
+		MONEY -= ITEMPRICE:BOUGHT
+		LOCAL:5 = RESULT
+		LOCAL:6 = TARGET
+		TARGET = LOCAL:5
+		;아이템 사용
+		CALL USE_ITEM
+		;입상 호출 처리
+		;산란 이벤트는 이벤트입상을 별도 기준으로 호출한다(아이템:노란환약분의 텐프레는 없다)
+		IF BOUGHT == 84
+			TFLAG:13 = 10
+		ELSE
+			TFLAG:13 = 28
+		ENDIF
+		CALL KOJO_MESSAGE_EVENT
+		TARGET = LOCAL:6
+ENDSELECT
+TFLAG:0 = -2
+
+
+;--------------------------------------------------
+;아이템 구입의 처리
+;--------------------------------------------------
+@SHOP_ITEM_LIST(ARG)
+DRAWLINE
+CALL ITEM_LIST
+LOCALS = 
+LOCAL:1 = 0
+FOR LOCAL,0,199
+		CALL SALEITEM_CHECK(LOCAL)
+NEXT
+
+;미션 모드
+SIF FLAG:5 == 8
+	CALL FREE_MISSION_SALEITEM_CHECK
+
+FOR LOCAL,0,199
+	;이 가게에서 살 수 있는 상품인가,판매 플래그가 있을까
+	SIF !SHOW_ITEM(ARG,LOCAL) || !ITEMSALES:LOCAL
+		CONTINUE
+	LOCALS = [{LOCAL,2}] %ITEMNAME:LOCAL%(%MONEY_FORM(ITEMPRICE:LOCAL)%고슈금)
+	IF STRLENS(LOCALS)
+		IF STRLENS(LOCALS) > 26
+			LOCAL:1++
+			SIF (LOCAL:1 % 3) == 0
+				PRINTL 
+			PRINTFORM %LOCALS,52,LEFT%
+			PRINT  
+			SIF (LOCAL:1 % 3) == 0
+				LOCAL:1++
+		ELSE
+			PRINTFORM %LOCALS,26,LEFT%
+		ENDIF
+		LOCAL:1++
+	ENDIF
+	IF (LOCAL:1 % 3) == 0
+		PRINTL 
+	ELSE
+		PRINT  
+	ENDIF
+NEXT
+SIF (LOCAL:1 % 3) != 0
+	PRINTL 
+SETCOLOR 140,140,140
+DRAWLINE
+RESETCOLOR
+TFLAG:0 = -1
+
+
+;--------------------------------------------------
+@USE_ITEM
+;--------------------------------------------------
+VARSET LOCAL
+TFLAG:407 = 0
+SELECTCASE BOUGHT
+	;【더러움무시】
+	CASE 50
+		TALENT:더러움무시 = 1
+	;【조제지식】
+	CASE 51
+		TALENT:조제지식 = 1
+	;【금단의지식】
+	CASE 52
+		TALENT:금지된지식 = 1
+	;【천리안】
+	CASE 53
+		TALENT:천리안 = 1
+	;【절륜】
+	CASE 54
+		TALENT:절륜 = 1
+	;수
+	CASE 55
+		;공라면 소질 삭제
+		IF TALENT:공
+			TALENT:공 = 0
+		;없으면[수]추가
+		ELSE
+			TALENT:수 = 1
+		ENDIF
+	;공
+	CASE 56
+		;수라면 소질 삭제
+		IF TALENT:수
+			TALENT:수 = 0
+		;없으면[공]추가
+		ELSE
+			TALENT:공 = 1
+		ENDIF
+	;오메가
+	CASE 59
+		TALENT:오메가 = 1
+		;발정기의 카운트 0-6으로 랜덤으로 초기치를 부여
+		CFLAG:700 = RAND:7
+	;갓빠의 묘약
+	CASE 60
+		;체력기력 500 회복,기절회복,스트레스 5 추가
+		;주인이나 조수가[치료]나[조제지식]소유라면 추가로체력기력 300 회복
+		CFLAG:10 += 5
+		BASE:체력 += 500
+		BASE:기력 += 500
+		IF TALENT:MASTER:치료 || TALENT:MASTER:조제지식 || (ASSI >= 0 && (TALENT:ASSI:치료 || TALENT:ASSI:조제지식))
+			BASE:체력 += 300
+			BASE:기력 += 300
+		ENDIF
+		SIF BASE:체력 > MAXBASE:체력
+			BASE:체력 = MAXBASE:체력
+		SIF BASE:기력 > MAXBASE:기력
+			BASE:기력 = MAXBASE:기력
+		TALENT:기절 = 0
+	;약의재료(후타)
+	CASE 61
+		;스트레스 30 추가
+		CFLAG:10 += 30
+		;남자 때는반음반양(남성 체형에바기나 있어)(이)가 된다
+		IF TALENT:남자
+			;바기나 난 경험 플래그가 없으면 랜덤으로 V관계 소질＆[처녀]추가
+			SIF !CFLAG:24
+				CALL VAGINA_SET(TARGET)
+			;바기나 난 경험 플래그,페니스 있던 적 있는 경험 플래그
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[남자]소거[반음반양]추가
+			TALENT:남자 = 0
+			TALENT:반음반양 = 1
+		;여자 때는후타나리(여성 체형에페니스 있어)(이)가 된다
+		ELSE
+			;페니스 난 경험 없으면,랜덤으로페니스사이즈 설정＆랜덤으로 싸는＆[동정]
+			IF !CFLAG:25
+				CALL PENIS_SET(TARGET)
+				;입상 추가 표시 플래그
+				TFLAG:407 = 1
+			ENDIF
+			;페니스 난 경험 플래그,바기나·가슴 있던 적 있는 경험 플래그
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[후타나리]추가
+			TALENT:후타나리 = 1
+		ENDIF
+	;약의재료(소멸)
+	CASE 62
+		;스트레스 10 추가
+		CFLAG:10 += 10
+		;반음반양 때는 남자에게
+		IF TALENT:반음반양
+			;바기나 난 경험 플래그,페니스 있던 적 있는 경험 플래그
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[반음반양]소거[남자]추가
+			TALENT:남자 = 1
+			TALENT:반음반양 = 0
+		;후타나리 때는 여자에게
+		ELSE
+			;페니스 난 경험 플래그,바기나·가슴 있던 적 있는 경험 플래그
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[후타나리]소거
+			TALENT:후타나리 = 0
+		ENDIF
+	;푸른환약
+	CASE 63
+		;스트레스 5 추가
+		CFLAG:10 += 5
+		;[모유체질]추가
+		TALENT:모유체질 = 1
+	;붉은환약
+	CASE 64
+		;스트레스 10 추가
+		CFLAG:10 += 10
+		;[재생처녀]추가
+		TALENT:재생처녀 = 1
+	;풍유환
+	CASE 65
+		;스트레스 10 추가
+		CFLAG:10 += 10
+		;절벽→빈유
+		IF TALENT:절벽
+			TALENT:절벽 = 0
+			TALENT:빈유 = 1
+		;빈유→보유
+		ELSEIF TALENT:빈유
+			TALENT:빈유 = 0
+		;보유→거유
+		ELSEIF !TALENT:거유
+			TALENT:거유 = 1
+		;거유→폭유
+		ELSE
+			TALENT:거유 = 0
+			TALENT:폭유 = 1
+		ENDIF
+	;축유환
+	CASE 66
+		;스트레스 10 추가
+		CFLAG:10 += 10
+		;폭유→거유
+		IF TALENT:폭유
+			TALENT:거유 = 1
+			TALENT:폭유 = 0
+		;거유→보유
+		ELSEIF TALENT:거유
+			TALENT:거유 = 0
+		;보유→빈유
+		ELSEIF !TALENT:빈유
+			TALENT:빈유 = 1
+		;빈유→절벽,모유도 나오지 않게 된다
+		ELSE
+			TALENT:절벽 = 1
+			TALENT:빈유 = 0
+			;입상 추가 표시 플래그
+			SIF TALENT:모유체질
+				TFLAG:407 = 1
+			TALENT:모유체질 = 0
+		ENDIF
+	;프롤락틴억제제
+	CASE 67
+		;스트레스 5 추가
+		CFLAG:10 += 5
+		;[모유체질]삭제
+		TALENT:모유체질 = 0
+	;3환계항우울제
+	CASE 68
+		;스트레스 5 추가
+		CFLAG:10 += 5
+		;[실금버릇]삭제
+		TALENT:실금버릇 = 0
+	;노란환약
+	CASE 84
+		;LOCAL =최종적으로 가산되는 스트레스치
+		;LOCAL:1 =감산되는 스트레스치(산란경험) LCOAL:2 =가산되는 스트레스치(부친)
+		;LOCAL:3 =가산되는이상경험의 수
+		;PREGNANT = 임신 하고 있는 캐릭터의 등록 번호 FATHER =부친의 등록 번호
+		PREGNANT = TARGET
+		;[임신]삭제
+		TALENT:PREGNANT:임신 = 0
+		;임신이벤트로 줄어든체력의 최대치가 회복(적은)
+		MAXBASE:PREGNANT:체력 += 300
+		;질로 임신하고 있다면 여자
+		IF CFLAG:PREGNANT:101 / 100 == 1
+			;가슴의 축소 처리를 실행
+			CALL REVERSE_B_SIZE
+		ENDIF
+		;임신관계의 플래그 처리
+		CALL CLEAR_FLAG
+		
+		;스트레스치의 계산
+		;산란경험를 본다
+		IF EXP:PREGNANT:산란경험 < EXPLV:1
+			LOCAL:1 = 0
+		ELSEIF EXP:PREGNANT:산란경험 < EXPLV:2
+			LOCAL:1 = 2
+		ELSEIF EXP:PREGNANT:산란경험 < EXPLV:3
+			LOCAL:1 = 4
+		ELSEIF EXP:PREGNANT:산란경험 < EXPLV:4
+			LOCAL:1 = 6
+		ELSEIF EXP:PREGNANT:산란경험 < EXPLV:5
+			LOCAL:1 = 8
+		ELSE
+			LOCAL:1 = 10
+		ENDIF
+		;임신상대와 함락 소질을 본다
+		;모친이 미함락
+		IF !KANRAKU2(PREGNANT)
+			LOCAL:2 = 100
+		;부친이 고객
+		ELSEIF CFLAG:PREGNANT:101 % 100 == 5
+			;모친이복종함락
+			IF KANRAKU2(PREGNANT) == 3
+				LOCAL:2 = 30
+			;모친이연모함락
+			ELSEIF KANRAKU2(PREGNANT) == 1
+				LOCAL:2 = 80
+			;모친이음란함락
+			ELSE
+				LOCAL:2 = 50
+			ENDIF
+		;모친이음란함락
+		ELSEIF KANRAKU2(PREGNANT) == 2
+			LOCAL:2 = 50
+		;부친이 매각된 원사모·공포 대상
+		ELSEIF CFLAG:PREGNANT:38 > 0 && CFLAG:PREGNANT:111 == CFLAG:PREGNANT:38
+			LOCAL:2 = 200
+		;모친이복종함락
+		ELSEIF KANRAKU2(PREGNANT) == 3
+			LOCAL:2 = 30
+		;모친이연모함락
+		ELSE
+			;사모 대상이 부친
+			FATHER = GETCHARA(CFLAG:PREGNANT:111)
+			IF FATHER >= 0 && CFLAG:PREGNANT:41 == NO:(FATHER)
+				LOCAL:2 = 120
+			;그 이외
+			ELSE
+				LOCAL:2 = 80
+			ENDIF
+		ENDIF
+		LOCAL = LOCAL:2 - (LOCAL:1 + ABL:PREGNANT:순종 * 4 + ABL:PREGNANT:V감각 * 2) + TALENT:PREGNANT:모성 * 5 - TALENT:PREGNANT:꿋꿋함 * 2 - TALENT:PREGNANT:감정부족 * 5
+		SIF LOCAL < 0
+			LOCAL = 0
+		
+		;최종적인 스트레스치의 가산
+		CFLAG:PREGNANT:10 += LOCAL
+		
+		;경험의 추가
+		;질로 임신하고 있다
+		IF CFLAG:PREGNANT:101 / 100 == 1
+			EXP:PREGNANT:V확장경험 += 5
+			PRINTL V확장경험＋5
+		;애널로 임신하고 있다
+		ELSEIF CFLAG:PREGNANT:101 / 100 == 7
+			EXP:PREGNANT:A확장경험 += 5
+			PRINTL A확장경험＋5
+		ENDIF
+		
+		EXP:PREGNANT:산란경험 += 1
+		PRINTL 산란경험＋1
+		
+		;출산,V확장경험·A확장경험가 없으면이상경험
+		SIF !EXP:PREGNANT:출산경험
+			LOCAL:3 += 2
+		SIF EXP:PREGNANT:V확장경험 == 5 && (CFLAG:PREGNANT:101 / 100 == 1)
+			LOCAL:3 += 1
+		SIF EXP:PREGNANT:A확장경험 == 5 && (CFLAG:PREGNANT:101 / 100 == 7)
+			LOCAL:3 += 1
+		IF LOCAL:3
+			EXP:PREGNANT:이상경험 += LOCAL:3
+			PRINTFORML 이상경험＋{LOCAL:3}
+		ENDIF
+		;체력는 10이 된다
+		BASE:PREGNANT:체력 = 10
+		;붕괴처리
+		SIF CFLAG:PREGNANT:10 >= 100 && !TALENT:PREGNANT:붕괴
+			CALL COLLAPSE_MIND
+		;휴게 플래그를 세워 턴 엔드
+		PRINTW 
+		FLAG:0 = 1
+		BEGIN TURNEND
+	;절반성전환약
+	CASE 69
+		;스트레스 30 추가
+		CFLAG:10 += 30
+		;컨트보이로부터 남자에게
+		IF TALENT:컨트보이
+			;페니스 난 경험 없으면,랜덤으로페니스사이즈 설정＆랜덤으로 싸는＆[동정]
+			IF !CFLAG:25
+				CALL PENIS_SET(TARGET)
+				;입상 추가 표시 플래그
+				TFLAG:407 = 1
+			ENDIF
+			;페니스 난 경험 플래그,바기나 있던 적 있는 경험 플래그
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[컨트보이]소거
+			TALENT:컨트보이 = 0
+			;[남자]추가
+			TALENT:남자 = 1
+		;쉬메일로부터 여자에게
+		ELSEIF TALENT:쉬메일
+			;바기나 난 경험 플래그가 없으면 랜덤으로 V관계 소질＆[처녀]추가
+			SIF !CFLAG:24
+				CALL VAGINA_SET(TARGET)
+			;바기나 난 경험 플래그,페니스 있던 적 있는 경험 플래그
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[쉬메일]소거
+			TALENT:쉬메일 = 0
+		;후타나리로부터쉬메일
+		ELSEIF TALENT:후타나리
+			;바기나 있던 적 있는 경험 플래그
+			CFLAG:24 = 1
+			;[후타나리]소거
+			TALENT:후타나리 = 0
+			;[쉬메일]추가
+			TALENT:쉬메일 = 1
+		;반음반양로부터컨트보이
+		ELSEIF TALENT:반음반양
+			;페니스 있던 적 있는 경험 플래그
+			CFLAG:25 = 1
+			;[반음반양]소거
+			TALENT:반음반양 = 0
+			;[컨트보이]추가
+			TALENT:컨트보이 = 1
+		;남자로부터컨트보이에
+		ELSEIF TALENT:남자
+			;바기나 난 경험 플래그가 없으면 랜덤으로 V관계 소질＆[처녀]추가
+			SIF !CFLAG:24
+				CALL VAGINA_SET(TARGET)
+			;바기나 난 경험 플래그,페니스 있던 적 있는 경험 플래그
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[남자]소거
+			TALENT:남자 = 0
+			;[컨트보이]추가
+			TALENT:컨트보이 = 1
+		;여자로부터쉬메일에
+		ELSE
+			;페니스 난 경험 없으면,랜덤으로페니스사이즈 설정＆랜덤으로 싸는＆[동정]
+			IF !CFLAG:25
+				CALL PENIS_SET(TARGET)
+				;입상 추가 표시 플래그
+				TFLAG:407 = 1
+			ENDIF
+			;페니스 난 경험 플래그,바기나 있던 적 있는 경험 플래그
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[쉬메일]추가
+			TALENT:쉬메일 = 1
+		ENDIF
+	;성전환약
+	CASE 70
+		;스트레스 30 추가
+		CFLAG:10 += 30
+		;후타나리로부터반음반양
+		IF TALENT:후타나리
+			;페니스·바기나·가슴 난 경험 플래그
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[후타나리]소거
+			TALENT:후타나리 = 0
+			;[반음반양]추가
+			TALENT:반음반양 = 1
+		;반음반양로부터후타나리
+		ELSEIF TALENT:반음반양
+			;가슴 난 경험 없으면,랜덤으로가슴사이즈 설정
+			IF !CFLAG:23
+				CALL BREAST_SET(TARGET)
+				;입상 추가 표시 플래그
+				TFLAG:407 = 1
+			ENDIF
+			;페니스·바기나·가슴 난 경험 플래그
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[반음반양]소거
+			TALENT:반음반양 = 0
+			;[후타나리]추가
+			TALENT:후타나리 = 1
+		;컨트보이로부터쉬메일에
+		ELSEIF TALENT:컨트보이
+			;가슴 난 경험 없으면,랜덤으로가슴사이즈 설정
+			IF !CFLAG:23
+				CALL BREAST_SET(TARGET)
+				;입상 추가 표시 플래그
+				TFLAG:407 = 1
+			ENDIF
+			;페니스 난 경험 없으면,랜덤으로페니스사이즈 설정＆랜덤으로 싸는＆[동정]
+			IF !CFLAG:25
+				CALL PENIS_SET(TARGET)
+				;입상 추가 표시 플래그
+				TFLAG:407 = 1
+			ENDIF
+			;페니스·가슴 난 경험 플래그,바기나 있던 적 있는 경험 플래그
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[컨트보이]소거
+			TALENT:컨트보이  = 0
+			;[쉬메일]추가
+			TALENT:쉬메일  = 1
+		;쉬메일로부터컨트보이에
+		ELSEIF TALENT:쉬메일
+			;바기나 난 경험 플래그가 없으면 랜덤으로 V관계 소질＆[처녀]추가
+			SIF !CFLAG:24
+				CALL VAGINA_SET(TARGET)
+			;바기나 난 경험 플래그,페니스·가슴 있던 적 있는 경험 플래그
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[쉬메일]소거
+			TALENT:쉬메일  = 0
+			;[컨트보이]추가
+			TALENT:컨트보이  = 1
+		;남자로부터 여자에게
+		ELSEIF TALENT:남자
+			;가슴 난 경험 없으면,랜덤으로가슴사이즈 설정
+			IF !CFLAG:23
+				CALL BREAST_SET(TARGET)
+				;입상 추가 표시 플래그
+				TFLAG:407 = 1
+			ENDIF
+			;바기나 난 경험 플래그가 없으면 랜덤으로 V관계 소질＆[처녀]추가
+			SIF !CFLAG:24
+				CALL VAGINA_SET(TARGET)
+			;바기나,가슴 난 경험 플래그,페니스 있던 적 있는 경험 플래그
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[남자]소거
+			TALENT:남자 = 0
+		;여자로부터 남자에게
+		ELSE
+			;페니스 난 경험 없으면,랜덤으로페니스사이즈 설정＆랜덤으로 싸는＆[동정]
+			IF !CFLAG:25
+				CALL PENIS_SET(TARGET)
+				;입상 추가 표시 플래그
+				TFLAG:407 = 1
+			ENDIF
+			;페니스 난 경험 플래그,바기나·가슴 있던 적 있는 경험 플래그
+			CFLAG:23 = 1
+			CFLAG:24 = 1
+			CFLAG:25 = 1
+			;[남자]추가
+			TALENT:남자 = 1
+		ENDIF
+	;천사의기적
+	CASE 71
+		;스트레스 20 추가
+		CFLAG:10 += 20
+		;작은체구→소인체형
+		IF TALENT:작은체구
+			;[음모없음][소인체형]추가[작은체구]삭제
+			TALENT:음모없음 = 1
+			TALENT:소인체형 = 1
+			TALENT:작은체구 = 0
+			;페니스 있어
+			IF PENIS(TARGET)
+				;[아이사이즈][포경]추가,다른페니스사이즈 소질을 삭제
+				TALENT:아이사이즈 = 1
+				TALENT:포경 = 1
+				TALENT:단소 = 0
+				TALENT:거근 = 0
+				TALENT:말자지 = 0
+			ENDIF
+		;보통 체형→작은체구
+		ELSEIF !TALENT:큰체구
+			;[작은체구]추가
+			TALENT:작은체구 = 1
+		;큰체구→보통 체형
+		ELSE
+			;[큰체구]삭제
+			TALENT:큰체구 = 0
+		ENDIF
+	;악마의저주
+	CASE 72
+		;스트레스 20 추가
+		CFLAG:10 += 20
+		;소인체형→작은체구
+		IF TALENT:소인체형
+			;[음모없음][소인체형]삭제[작은체구]추가
+			TALENT:음모없음 = 0
+			TALENT:소인체형 = 0
+			TALENT:작은체구 = 1
+			;페니스 있어
+			IF PENIS(TARGET)
+				;[아이사이즈]삭제[단소]추가
+				TALENT:아이사이즈 = 0
+				TALENT:단소 = 1
+			ENDIF
+		;작은체구→보통 체형
+		ELSEIF TALENT:작은체구
+			;[작은체구]삭제
+			TALENT:작은체구 = 0
+		;보통 체형→큰체구
+		ELSEIF !TALENT:큰체구
+			;[큰체구]추가
+			TALENT:큰체구 = 1
+		ENDIF
+	;포근환
+	CASE 75
+		;스트레스 5 추가
+		CFLAG:10 += 5
+		;[포경]추가
+		TALENT:포경 = 1
+	;기억소거제
+	CASE 80
+		;기억 소거 경험
+		CFLAG:51++
+		;소질의 일부 초기화
+		FOR LOCAL,0,170
+			SELECTCASE LOCAL
+				;[연모][음란][복종][친애][창부][예속][붕괴][실의][상사상애]
+				CASE 3 TO 9,162,165
+					TALENT:LOCAL = 0
+				;신체 특징 소질은 그대로
+				CASE 10 TO 37,44,63,82 TO 94,141,150,151,155
+					;아이에는 효과 없음
+					SIF NO:TARGET >= 890 && NO:TARGET <= 899
+						CONTINUE
+					CSVTALENT NO:TARGET,LOCAL,TFLAG:407
+					TALENT:LOCAL = RESULT
+					;개체차이 처리 요리치만
+					SIF DIFF_GET_TALENT(TARGET,12) == 2
+						TALENT:LOCAL:요리치 = 1
+			ENDSELECT
+		NEXT
+		;각인의 초기화
+		FOR LOCAL,0,5
+			MARK:LOCAL = 0
+		NEXT
+		;능력의 일부 초기화
+		FOR LOCAL,0,23
+			SIF LOCAL >= 3 && LOCAL <= 6
+				CONTINUE
+			ABL:LOCAL = 0
+		NEXT
+		;상사상애가 있는 경우,상사상애상대의[상사상애]를 지워,함락 소질 기록 플래그를[친애]에 되돌린다
+		IF CFLAG:39 == 165
+			LOCAL = RESULT
+			TALENT:(NO2(CFLAG:LOCAL:41)):상사상애 = 0
+			CFLAG:(NO2(CFLAG:LOCAL:41)):39 = 6
+		ENDIF
+		;캐릭터 플래그의 일부 초기화
+		;입상용 CFLAG중 5000~(분)편은 초기화하지 않기 때문에,부적당이 있는 경우입우에우치에서 초기화해 주세요
+		FOR LOCAL,0,1300
+			SELECTCASE LOCAL
+				CASE 1,2,10,38 TO 41,140 TO 147,201 TO 600,1099 TO 2098,2099 TO 3098
+					CFLAG:LOCAL = 0
+			ENDSELECT
+		NEXT
+		;FIRSTTIME 함수의 초기화
+		CSTR:20 = 
+		;스트레스 50 추가
+		CFLAG:10 += 50
+	;배란유발제
+	CASE 82
+		CFLAG:109 = 1
+	;고성능피임구
+	CASE 83
+		CFLAG:108 = 1
+	;긴급피임약
+	CASE 85
+		PREGNANT = TARGET
+		;임신관계의 플래그 처리
+		CALL CLEAR_FLAG
+	;풍근환
+	CASE 73
+		;스트레스 10 추가
+		CFLAG:10 += 10
+		;아이사이즈→단소
+		IF TALENT:아이사이즈
+			;[아이사이즈]삭제[단소]추가
+			TALENT:아이사이즈 = 0
+			TALENT:단소 = 1
+		;단소→남들 수준
+		ELSEIF TALENT:단소
+			;[단소]삭제
+			TALENT:단소 = 0
+		;남들 수준→거근
+		ELSEIF !TALENT:거근 && !TALENT:말자지
+			;[거근]추가
+			TALENT:거근 = 1
+		;거근→말자지
+		ELSE
+			;[거근]삭제[말자지]추가
+			TALENT:거근 = 0
+			TALENT:말자지 = 1
+		ENDIF
+	;축근환
+	CASE 74
+		;스트레스 15 추가
+		CFLAG:10 += 15
+		;말자지→거근
+		IF TALENT:말자지
+			;[말자지]삭제[거근]추가
+			TALENT:거근 = 1
+			TALENT:말자지 = 0
+		;거근→남들 수준
+		ELSEIF TALENT:거근
+			;[거근]삭제
+			TALENT:거근 = 0
+		;남들 수준→단소
+		ELSEIF !TALENT:단소 && !TALENT:아이사이즈
+			;[단소]추가
+			TALENT:단소 = 1
+		;단소→아이사이즈
+		ELSE
+			;[단소]삭제[아이사이즈]추가
+			TALENT:아이사이즈 = 1
+			TALENT:단소 = 0
+		ENDIF
+	;되감기약
+	CASE 81
+		;CSV의 설정으로부터 호출하므로,입상에서 선천적으로 여체화,미경험 따위의 설정을 붙일 때는
+		;이벤트입상:되감아 약으로 소질 변경을 가르치는 것
+		
+		;체격은 되돌리지 않고,CSV가소인체형가 아니고 현소인체형 때,경험·능력·처녀계 소질도 백지로 한다
+		
+		;원래는소인체형가 아니다
+		SIF !CSVTALENT(NO:TARGET,142,CFLAG:0)
+			LOCAL:1 = 1
+		;개체차이로소인체형를 얻지 않았다
+		SIF DIFF_GET_TALENT(TARGET ,4) != 1
+			LOCAL:1 = 1
+		;되감아 경험
+		CFLAG:52++
+		;스트레스 30 추가
+		CFLAG:10 += 30
+		;체력의 초기화
+		MAXBASE:체력 = CSVBASE(NO:TARGET,0,CFLAG:0)
+		SIF BASE:체력 > MAXBASE:체력
+			BASE:체력 = MAXBASE:체력
+		;경험의 초기화
+		FOR LOCAL,0,70
+			EXP:LOCAL = CSVEXP(NO:TARGET,LOCAL,CFLAG:0)
+			SIF LOCAL:1
+				EXP:LOCAL = 0
+		NEXT
+		;능력의 일부 초기화
+		FOR LOCAL,0,23
+			SIF LOCAL < 2 || (LOCAL > 6 && LOCAL < 12) || LOCAL > 14
+				CONTINUE
+			ABL:LOCAL = CSVABL(NO:TARGET,LOCAL,CFLAG:0)
+			SIF LOCAL:1
+				ABL:LOCAL = 0
+		NEXT
+		;소질의 일부 초기화
+		FOR LOCAL,0,205
+			SELECTCASE LOCAL
+				;낙인결손은 지운다
+				CASE 159,200 TO 205
+					TALENT:LOCAL = 0
+				;변화하고 있을지도 모르는 소질을 원래대로 되돌린다
+				;요리치,독약내성,실금버릇,악취민감
+				;신체 특징 소질,성별,동물귀,모유체질,절륜,낙인결손
+				CASE 1,44 TO 47,56,57,62,100 TO 140,142,143,149,163,172,173
+					;아이에는 효과 없음
+					SIF NO:TARGET >= 890 && NO:TARGET <= 899
+						CONTINUE
+					TALENT:LOCAL = CSVTALENT(NO:TARGET,LOCAL,CFLAG:0)
+				;처녀계 소질
+				CASE 0,160,161
+					TALENT:LOCAL = CSVTALENT(NO:TARGET,LOCAL,CFLAG:0)
+					SIF LOCAL:1
+						TALENT:LOCAL = 1
+			ENDSELECT
+		NEXT
+		;개체차이 처리
+		CALL DIFF_GET_BUY(TARGET)
+		;고통/쾌락각인의 초기화
+		MARK:고통각인 = 0
+		MARK:쾌락각인 = 0
+		;경험계 플래그를 초기화
+		CFLAG:23 = 0
+		CFLAG:24 = 0
+		CFLAG:25 = 0
+		CFLAG:43 = 0
+		CFLAG:44 = 0
+		CFLAG:45 = 0
+		CFLAG:46 = 0
+		CFLAG:47 = 0
+		CFLAG:49 = 0
+		CFLAG:50 = 0
+		;임신패치 주위의 플래그를 리셋트
+		SIF !CFLAG:110
+			CALL CLEAR_FLAG
+	CASE 96
+		CFLAG:693 += 1
+	CASE 97
+		CFLAG:694 += 1
+ENDSELECT
+;아이템에 의한붕괴의 처리
+SIF CFLAG:10 >= 100 && !TALENT:붕괴
+	CALL COLLAPSE_MIND
+
+
+;--------------------------------------------------
+;각각의 가게에서 살 수 있는 상품
+;--------------------------------------------------
+@SHOW_ITEM(ARG,ARG:1)
+#FUNCTION
+LOCAL = 0
+;어덜트 숍
+;로터 진동마사지기 클리캡 전동오나홀 바이브 애널바이브 애널비즈
+;바디클립 확장벌룬 관장도구세트 니틀캡 착유기 페니스밴드
+;채찍 바늘 아이마스크 밧줄 볼개그 비디오카메라 카메라 플레이매트 대거울
+;목걸이+리드 전극플레이키트 리본 카테터 삼각목마
+;비디오테이프 필름 저온초 술
+;(약국 겸용)로션 미약 이뇨제 콘돔 강정신약 구토제
+;(부띠크 겸용)정조대
+IF ARG == 1
+	SELECTCASE ARG:1
+		CASE 0 TO 26,30 TO 34,36 TO 39,40 TO 75,80 TO 88,90 TO 94,96,97,
+			LOCAL = 1
+	ENDSELECT
+ENDIF
+RETURNF LOCAL
+
+
+;--------------------------------------------------
+;판매 조건
+;--------------------------------------------------
+@SALEITEM_CHECK(ARG)
+VARSET LOCAL
+ITEMSALES:ARG = 1
+;존재하지 않는 아이템은 팔리지 않는다
+SIF !STRLENS(ITEMNAME:ARG)
+	ITEMSALES:ARG = 0
+;아이템 번호 이상
+SIF ARG >= 200
+	ITEMSALES:ARG = 0
+;기본 아이템
+IF (ARG >= 0 && ARG != 36 && ARG != 37 && ARG <= 39) || ARG == 57 || ARG == 58 || (ARG >= 90 && ARG <= 94)
+	;벌써 소지하고 있다면 판매하지 않는다
+	SIF ITEM:ARG
+		ITEMSALES:ARG = 0
+ENDIF
+;소비 아이템
+IF ARG == 36 || ARG == 37 || (ARG >= 40 && ARG <= 49) || (ARG >= 86 && ARG <= 88)
+	;벌써 99개 가지고 있다면 판매하지 않는다
+	SIF ITEM:ARG >= 99
+		ITEMSALES:ARG = 0
+ENDIF
+;주인이나 조수가금지된지식를 가지고 있다
+SIF TALENT:MASTER:금지된지식 || (ASSI >= 0 && TALENT:ASSI:금지된지식)
+	LOCAL:1 = 1
+;주인이나 조수가조제지식를 가지고 있다
+SIF TALENT:MASTER:조제지식 || (ASSI >= 0 && TALENT:ASSI:조제지식)
+	LOCAL:2 = 1
+FOR LOCAL,0,CHARANUM
+	;주인이나 공범자,조수경험자중 한쪽이금지된지식를 가지고 있다
+	IF TALENT:LOCAL:금지된지식
+		SIF CFLAG:LOCAL:1 == 3 || ISASSI:LOCAL == 1
+			LOCAL:3++
+	ENDIF
+	;주인이나 공범자,조수경험자중 한쪽이조제지식를 가지고 있다
+	IF TALENT:LOCAL:조제지식
+		SIF CFLAG:LOCAL:1 == 3 || ISASSI:LOCAL == 1
+			LOCAL:4++
+	ENDIF
+	;상사상애커플이 있다
+	SIF TALENT:LOCAL:상사상애
+		LOCAL:5++
+	;더러움무시를 가지고 있다
+	SIF TALENT:LOCAL:더러움무시
+		LOCAL:6++
+	;조제지식를 가지고 있다
+	SIF TALENT:LOCAL:조제지식
+		LOCAL:7++
+	;금지된지식를 가지고 있다
+	SIF TALENT:LOCAL:금지된지식
+		LOCAL:8++
+	;천리안를 가지고 있다
+	SIF TALENT:LOCAL:천리안
+		LOCAL:9++
+	;절륜를 가지고 있다
+	SIF TALENT:LOCAL:절륜
+		LOCAL:10++
+	;수를 가지고 있다
+	SIF TALENT:LOCAL:수
+		LOCAL:11++
+	;공를 가지고 있다
+	SIF TALENT:LOCAL:공
+		LOCAL:12++
+	;함락이 끝난 노예가 있다
+	SIF TALENT:LOCAL:복종 || TALENT:LOCAL:예속 || TALENT:LOCAL:연모 || TALENT:LOCAL:친애 || TALENT:LOCAL:음란 || TALENT:LOCAL:창부
+		LOCAL:13++
+	
+	;아이템 사용 개인 조건
+	SIF ARG >= 60 && ARG <= 85
+		LOCAL:(ARG - 50) += ITEM_USE_CHECK(LOCAL,ARG)
+NEXT
+
+;주인이나 공범자,조수경험자의 아무도금지된지식를 가지고 있지 않다
+;촉수사역술 진화의비법 약의재료(후타) 절반성전환약 수술도구세트
+SELECTCASE ARG
+	CASE 57,58,61,69,90
+		SIF !LOCAL:3
+			ITEMSALES:ARG = 0
+ENDSELECT
+
+;【조제지식】주인이나 공범자,조수경험자의 아무도조제지식를 가지고 있지 않다
+SIF ARG == 52 && !LOCAL:4
+	ITEMSALES:ARG = 0
+
+;주인이나 조수의조제지식가 필수
+;약의재료(후타) 약의재료(소멸) 푸른환약 붉은환약 풍유환 축유환
+;프롤락틴억제제 3환계항우울제 절반성전환약 성전환약 풍근환 축근환 포근환
+;노란환약 기억소거제 되감기약 긴급피임약
+SELECTCASE ARG
+	CASE 61 TO 70,73 TO 75,80,81,84,85
+		SIF !LOCAL:2
+			ITEMSALES:ARG = 0
+ENDSELECT
+
+;주인이나 조수의금지된지식가 필수
+;천리안 【오메가】 천사의기적 악마의저주 기억소거제 되감기약 노란환약
+SELECTCASE ARG
+	CASE 53,59,71,72,80,81,84
+		SIF !LOCAL:1
+			ITEMSALES:ARG = 0
+ENDSELECT
+;그 외 조건
+SELECTCASE ARG
+	;우리,포장마차,플랜카드
+	CASE 91,92,94
+		;함락이 끝난 노예가 없다
+		SIF !LOCAL:13
+			ITEMSALES:ARG = 0
+	;포장마차·증축
+	CASE 93
+		;포장마차를 가지고 있지 않다
+		SIF !ITEM:92
+			ITEMSALES:ARG = 0
+	;진화의비법
+	CASE 58
+		;촉수사역술를 가지고 있지 않다
+		SIF !ITEM:57
+			ITEMSALES:ARG = 0
+	;웨딩세트
+	CASE 39
+		;상사상애의 커플이 없다
+		SIF !LOCAL:5
+			ITEMSALES:ARG = 0
+	;수술도구세트
+	CASE 90
+		;엽기 커맨드 확장 오프
+		SIF (FLAG:2 & 32) == 0
+			ITEMSALES:ARG = 0
+	;비디오테이프
+	CASE 43
+		;비디오카메라가 없다
+		SIF !ITEM:18
+			ITEMSALES:ARG = 0
+	;필름
+	CASE 44
+		;카메라가 없다
+		SIF !ITEM:19
+			ITEMSALES:ARG = 0
+	;【더러움무시】【조제지식】【금단의지식】【천리안】【절륜】【수】【공】
+	;전원 소지하고 있다
+	CASE 50 TO 56
+		SIF LOCAL:(ARG - 35) == CHARANUM
+			ITEMSALES:ARG = 0
+ENDSELECT
+
+
+;--------------------------------------------------
+;소지 아이템의 표시
+;--------------------------------------------------
+@ITEM_LIST
+TFLAG:0 = -1
+SETCOLOR 140,140,140
+DRAWLINE
+RESETCOLOR
+PRINTFORML 소지 코우슈우금:{MONEY}고슈금
+PRINT 소지 아이템:
+LOCAL:1 = 0
+FOR LOCAL,0,199
+	IF ITEM:LOCAL
+		SIF (LOCAL >= 50 && LOCAL <= 56) || (LOCAL >= 59 && LOCAL <= 85)
+			CONTINUE
+		LOCAL:2 = STRLENS(ITEMNAME:LOCAL)
+		LOCAL:1 += LOCAL:2 + 3
+		IF LOCAL:1 > 60
+			PRINTL 
+			PRINT 　　　　　　　
+			LOCAL:1 = LOCAL:2 + 3
+		ENDIF
+		PRINTFORM [%ITEMNAME:LOCAL%
+		IF ITEM:LOCAL > 1
+			PRINTFORM ×{ITEM:LOCAL}
+			LOCAL:1 += 5
+		ENDIF
+		PRINTFORM ] 
+	ENDIF
+NEXT
+SIF !LOCAL:1
+	PRINT 없음
+PRINTL 
+SETCOLOR 140,140,140
+DRAWLINE
+RESETCOLOR
+
+
+;--------------------------------------------------
+;아이템 사용 개인 조건
+;--------------------------------------------------
+@ITEM_USE_CHECK(ARG,ARG:1)
+#FUNCTION
+;노역중의 캐릭터는 제외
+SIF CFLAG:ARG:12 > 0
+	RETURNF 0
+;성장전의아이는 제외
+SIF CFLAG:ARG:26
+	RETURNF 0
+;육아 방으로 이동하고 있는 캐릭터는 제외
+SIF (TALENT:ARG:임신 && CFLAG:ARG:110 - 3 <= DAY) || TALENT:ARG:육아중
+	RETURNF 0
+SELECTCASE ARG:1
+	;【더러움무시】【조제지식】【금단의지식】【천리안】【절륜】는 조수가능 캐릭터만
+	CASE 50 TO 54
+		SIF CFLAG:ARG:1 >= 2
+			RETURNF 1
+	;수
+	CASE 55
+		;수가 아니다
+		SIF !TALENT:ARG:수
+			RETURNF 1
+	;공
+	CASE 56
+		;공가 아니다
+		SIF !TALENT:ARG:공
+			RETURNF 1
+	;오메가
+	CASE 59
+		;오메가가 아니다
+		SIF !TALENT:ARG:오메가
+			RETURNF 1
+	;갓빠의 묘약
+	CASE 60
+		;체력기력의 어느 쪽인지가 감소하고 있다
+		SIF BASE:ARG:체력 < MAXBASE:ARG:체력 || BASE:ARG:기력 < MAXBASE:ARG:기력
+			RETURNF 1
+	;약의재료(후타)
+	CASE 61
+		;후타나리/반음반양/컨트보이/쉬메일가 아니고,주인이나 조수가금지된지식를 가지고 있을까 대상으로이상한뿌리나구현가 필요
+		SIF !TALENT:ARG:후타나리 && !TALENT:ARG:반음반양 && !TALENT:ARG:컨트보이 && !TALENT:ARG:쉬메일 && ((TALENT:MASTER:금지된지식 || (ASSI >= 0 && TALENT:ASSI:금지된지식)) || (TALENT:ARG:이상한뿌리 || TALENT:ARG:구현))
+			RETURNF 1
+	;약의재료(소멸)
+	CASE 62
+		;후타나리/반음반양를 갖고 있다
+		SIF TALENT:ARG:후타나리 || TALENT:ARG:반음반양
+			RETURNF 1
+	;푸른환약
+	CASE 63
+		;모유체질가 아니다
+		SIF !TALENT:ARG:모유체질 && ((FLAG:2 & 256) || ((BREAST(ARG) || TALENT:ARG:절벽) && (FLAG:2 & 256) == 0))
+			RETURNF 1
+	;붉은환약
+	CASE 64
+		;처녀/재생처녀가 아니고,바기나가 있다
+		SIF !TALENT:ARG:처녀 && !TALENT:ARG:재생처녀 && VAGINA(ARG)
+			RETURNF 1
+	;풍유환
+	CASE 65
+		;남자가 아니고,폭유가 아니다
+		SIF !MALE(ARG) && !TALENT:ARG:폭유
+			RETURNF 1
+	;축유환
+	CASE 66
+		;남자가 아니고,절벽가 아니다
+		SIF !MALE(ARG) && !TALENT:ARG:절벽
+			RETURNF 1
+	;프롤락틴억제제
+	CASE 67
+		;모유체질이다
+		SIF TALENT:ARG:모유체질
+			RETURNF 1
+	;3환계항우울제
+	CASE 68
+		;실금버릇이다
+		SIF TALENT:ARG:실금버릇
+			RETURNF 1
+	;절반성전환약
+	CASE 69
+		;주인이나 조수가금지된지식를 가지고 있을까 개 임신 하고 있지 않다(발각전 포함한다)
+		SIF (TALENT:MASTER:금지된지식 || (ASSI >= 0 && TALENT:ASSI:금지된지식)) && CFLAG:ARG:110 <= 0
+			RETURNF 1
+	;성전환약
+	CASE 70
+		;임신 하고 있지 않다(발각전 포함한다)
+		SIF CFLAG:ARG:110 <= 0
+			RETURNF 1
+	;천사의기적
+	CASE 71
+		;소인체형가 아니다
+		SIF !TALENT:ARG:소인체형
+			RETURNF 1
+	;악마의저주
+	CASE 72
+		;큰체구가 아니다
+		SIF !TALENT:ARG:큰체구
+			RETURNF 1
+	;풍근환
+	CASE 73
+		;페니스가 있어말자지가 아니다
+		SIF PENIS(ARG) && !TALENT:ARG:말자지
+			RETURNF 1
+	;축근환
+	CASE 74
+		;페니스가 있어아이사이즈가 아니다
+		SIF PENIS(ARG) && !TALENT:ARG:아이사이즈
+			RETURNF 1
+	;포근환
+	CASE 75
+		;페니스가 있어 휩싸일 수 있지 않았다
+		SIF PENIS(ARG) && !TALENT:ARG:포경
+			RETURNF 1
+	;기억소거제
+	CASE 80
+		;공범자 플래그가 서 있지 않아서임신중,육아중가 아니다
+		SIF CFLAG:ARG:1 <= 2 && !TALENT:ARG:임신 && !TALENT:ARG:육아중
+			RETURNF 1
+	;되감기약
+	CASE 81
+		;공범자 플래그가 서 있지 않아서임신중,육아중가 아니고,공범자 플래그가 없다
+		SIF CFLAG:ARG:1 <= 2 && !TALENT:ARG:임신 && !TALENT:ARG:육아중 && CFLAG:ARG:1 < 3
+			RETURNF 1
+	;배란유발제
+	CASE 82
+		;남자가 아닌가오메가소유 또한배란유발제효과 발동중이 아니고,공범자 플래그가 없다
+		SIF (!MALE(ARG) || TALENT:ARG:오메가) && !CFLAG:ARG:109 && CFLAG:ARG:1 < 3
+			RETURNF 1
+	;고성능피임구
+	CASE 83
+		;남자가 아닌가오메가소유 또한고성능피임구효과 발동중이 아니고,공범자 플래그가 없다
+		SIF (!MALE(ARG) || TALENT:ARG:오메가) && !CFLAG:ARG:108 && CFLAG:ARG:1 < 3
+			RETURNF 1
+	;노란환약
+	CASE 84
+		;임신중에서 임월이며,공범자 플래그가 없다
+		SIF TALENT:ARG:임신 && (CFLAG:ARG:110 - 3) > DAY && CFLAG:ARG:1 < 3
+			RETURNF 1
+	;긴급피임약
+	CASE 85
+		;남자가 아니고 나카타씨 플래그가 서 있는 것도 깔고는 오메가소유남자로 장나카타씨 플래그가 서 있다
+		SIF (!MALE(ARG) && (CFLAG:ARG:102 || CFLAG:ARG:103 || CFLAG:ARG:104 || CFLAG:ARG:105)) || (MALE(ARG) && TALENT:ARG:오메가 && (CFLAG:ARG:702 || CFLAG:ARG:703 || CFLAG:ARG:704 || CFLAG:ARG:705))
+			RETURNF 1
+	CASEELSE
+		RETURNF 1
+ENDSELECT
+RETURNF 0
+
+
+;--------------------------------------------------
+;【붕괴】를 얻었을 경우의 처리
+;--------------------------------------------------
+@COLLAPSE_MIND
+TFLAG:13 = 52
+;입카미분기플래그
+TFLAG:53 = 4
+CALL KOJO_MESSAGE_EVENT
+;부적가 있으면 부활
+IF CFLAG:693 || CFLAG:694
+	TFLAG:13 = 72
+	CALL KOJO_MESSAGE_EVENT
+	IF CFLAG:694
+		CFLAG:10 = 0
+		CFLAG:694 -= 1
+	ELSE
+		CFLAG:10 = 90
+		CFLAG:693 -= 1
+	ENDIF
+ELSE
+	TALENT:붕괴 = 1
+	TALENT:연모 = 0
+	TALENT:음란 = 0
+	TALENT:복종 = 0
+	TALENT:친애 = 0
+	TALENT:창부 = 0
+	TALENT:예속 = 0
+	TALENT:상사상애 = 0
+	;상사상애가 있는 경우,상사상애상대의[상사상애]를 지워,함락 소질 기록 플래그를[친애]에 되돌린다
+	IF CFLAG:39 == 165
+		TALENT:(NO2(CFLAG:LOCAL:41)):상사상애 = 0
+		CFLAG:(NO2(CFLAG:LOCAL:41)):39 = 6
+	ENDIF
+	CFLAG:40 = 0
+	CFLAG:41 = -1
+	CFLAG:10 = 0
+ENDIF
+
+
+;--------------------------------------------------
+;성전환·후타나리용페니스를 기르는 처리
+;--------------------------------------------------
+@PENIS_SET(ARG)
+;페니스용 소질이 이미 있는 경우
+SIF TALENT:ARG:아이사이즈 || TALENT:ARG:단소 || TALENT:ARG:거근 || TALENT:ARG:말자지
+	RETURN 0
+;체형에 응해 랜덤인 크기의페니스가 난다
+LOCAL = RAND:100
+IF TALENT:ARG:소인체형
+	IF LOCAL >= 20
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 5
+		LOCAL:1 = 1
+	ELSE
+		LOCAL:1 = 2
+	ENDIF
+ELSEIF TALENT:ARG:작은체구
+	IF LOCAL >= 95
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 45
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 10
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 3
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ELSEIF !TALENT:ARG:큰체구
+	IF LOCAL >= 97
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 80
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 20
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 5
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ELSE
+	IF LOCAL >= 99
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 90
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 30
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 10
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ENDIF
+IF LOCAL:1 == 0
+	TALENT:ARG:아이사이즈 = 1
+ELSEIF LOCAL:1 == 1
+	TALENT:ARG:단소 = 1
+ELSEIF LOCAL:1 == 3
+	TALENT:ARG:거근 = 1
+ELSEIF LOCAL:1 == 4
+	TALENT:ARG:말자지 = 1
+ENDIF
+;체형에 응해 랜덤으로 휩싸일 수 있다
+SIF (TALENT:아이사이즈 && RAND:4 > 0) || (TALENT:단소 && RAND:2) || (!TALENT:아이사이즈 && !TALENT:단소 && !RAND:5)
+	TALENT:ARG:포경 = 1
+;랜덤으로페니스관련의 소질이 붙는다
+IF !RAND:5
+	TALENT:ARG:조루 = 1
+	TALENT:ARG:지루 = 0
+ELSEIF !RAND:4
+	TALENT:ARG:지루 = 1
+	TALENT:ARG:조루 = 0
+ENDIF
+;[동정]추가
+TALENT:ARG:동정 = 1
+
+
+;--------------------------------------------------
+;성전환용가슴를 기르는 처리
+;--------------------------------------------------
+@BREAST_SET(ARG)
+;가슴용 소질이 이미 있는 경우
+SIF TALENT:ARG:절벽 || TALENT:ARG:빈유 || TALENT:ARG:거유 || TALENT:ARG:폭유
+	RETURN 0
+;체형에 응해 랜덤인 크기의가슴가 난다
+LOCAL = RAND:100
+IF TALENT:ARG:소인체형
+	IF LOCAL >= 20
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 5
+		LOCAL:1 = 1
+	ELSE
+		LOCAL:1 = 2
+	ENDIF
+ELSEIF TALENT:ARG:작은체구
+	IF LOCAL >= 95
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 45
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 10
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 3
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ELSEIF !TALENT:ARG:큰체구
+	IF LOCAL >= 97
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 80
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 20
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 5
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ELSE
+	IF LOCAL >= 99
+		LOCAL:1 = 0
+	ELSEIF LOCAL >= 90
+		LOCAL:1 = 1
+	ELSEIF LOCAL:1 >= 30
+		LOCAL:1 = 2
+	ELSEIF LOCAL >= 10
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+ENDIF
+IF LOCAL:1 == 0
+	TALENT:ARG:절벽 = 1
+ELSEIF LOCAL:1 == 1
+	TALENT:ARG:빈유 = 1
+ELSEIF LOCAL:1 == 3
+	TALENT:ARG:거유 = 1
+ELSEIF LOCAL:1 == 4
+	TALENT:ARG:폭유 = 1
+ENDIF
+
+
+;--------------------------------------------------
+;성전환용 V관련 소질 처리
+;--------------------------------------------------
+@VAGINA_SET(ARG)
+;랜덤으로 V관련의 소질이 붙는다
+IF !RAND:5
+	TALENT:ARG:V민감 = 1
+	TALENT:ARG:V둔감 = 0
+ELSEIF !RAND:4
+	TALENT:ARG:V둔감 = 1
+	TALENT:ARG:V민감 = 0
+ENDIF
+;[처녀]추가
+TALENT:ARG:처녀 = 1
+
+;--------------------------------------------------
+;소모품의 자동 보충
+;--------------------------------------------------
+@ITEM_AUTO_SUPPLY
+;보충 개수
+#DIM DYNAMIC SUPPLY = 0
+;소비 금액
+#DIM DYNAMIC USED_MONEY = 0
+
+;소지 기준수를 가지고 있는 플래그 번호
+;FLAG:50=로션,FLAG:51=비디오테이프,FLAG:52=필름,FLAG:53=콘돔
+#DIM DYNAMIC FLG = 49
+
+;COUNT의 수는 아이템 번호와 일치
+;40=로션,43=비디오테이프,44=필름,45=콘돔
+FOR COUNT,40,46
+	;자동 보충의 대상이 아닌 아이템은 스킵
+	SIF COUNT == 41 || COUNT == 42
+		CONTINUE
+	
+	FLG++
+	
+	;현재의 소지 개수가,소지 기준수를 웃돈다면 스킵
+	SIF ITEM:COUNT >= FLAG:FLG
+		CONTINUE
+	
+	;비디오테이프는비디오카메라를 소지하고 있지 않으면 보충되지 않는다
+	SIF COUNT == 43 && ITEM:비디오카메라 == 0
+		CONTINUE
+	
+	;필름는카메라를 소지하고 있지 않으면 보충되지 않는다
+	SIF COUNT == 44 && ITEM:카메라 == 0
+		CONTINUE
+	
+	;이하,아이템 보충 처리
+	
+	;보충 개수를 산출
+	SUPPLY = FLAG:FLG - ITEM:COUNT
+	;소비 금액을 산출
+	USED_MONEY = SUPPLY * ITEMPRICE:COUNT
+	
+	;소비 금액 > 소지금
+	IF USED_MONEY > MONEY
+		;소지금으로 살 수 있는 최대수를 산출
+		SUPPLY = MONEY / ITEMPRICE:COUNT
+		
+		IF SUPPLY
+			;소비 금액을 산출
+			USED_MONEY = SUPPLY * ITEMPRICE:COUNT
+		ELSE
+			PRINTFORML 소지금이발리나 손상해 %ITEMNAME:COUNT%를 보충할 수 없었습니다. (현재 소지수:{ITEM:COUNT}개)
+			CONTINUE
+		ENDIF
+	ENDIF
+	
+	MONEY = MONEY - USED_MONEY
+	ITEM:COUNT += SUPPLY
+	PRINTFORML {SUPPLY}개의 %ITEMNAME:COUNT%가 보충되어{USED_MONEY}엔소비했습니다. (현재 소지수:{ITEM:COUNT}개)
+NEXT
+
+
+
+

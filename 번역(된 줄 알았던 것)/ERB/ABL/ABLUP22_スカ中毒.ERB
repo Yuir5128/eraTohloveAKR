@@ -1,0 +1,260 @@
+﻿;스캇중독의 가부
+@ISABLUP22
+;친애, 복종, 예속는 MAXLV5
+IF ABL:스캇중독 >= 5
+	RETURN 0
+ELSEIF ABL:스캇중독 >= 3 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:예속 == 0
+	RETURN 0
+ELSEIF EXP:스캇경험  == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP22
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;스캇중독
+@ABLUP22
+DRAWLINE
+;친애, 복종, 예속는 MAXLV5
+IF ABL:스캇중독 >= 5
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:스캇중독 >= 3 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:예속 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+;LV1로부터 2에 올릴 때는이상경험필요(소질:[중독되기쉬움][수치심없음][악취둔감][더러움무시][유아/유아 퇴행][유치]라면 무시할 수 있다)
+IF ABL:스캇중독 == 1 && TALENT:수치심없음 == 0 && TALENT:자위하기쉬움 == 0 && TALENT:악취둔감 == 0 && TALENT:더러움무시 == 0 && TALENT:중독되기쉬움 == 0 && TALENT:유아／유아퇴행 == 0 && TALENT:유치 == 0
+	PRINTFORML %EXPNAME:50%있어, 한편
+;LV2로부터 3에 올릴 때는이상경험필요(소질:[중독되기쉬움][더러움무시][유아/유아 퇴행][유치]라면 무시할 수 있다)
+ELSEIF ABL:스캇중독 == 2 && TALENT:악취둔감 == 0 && TALENT:더러움무시 == 0 && TALENT:중독되기쉬움 == 0 && TALENT:유아／유아퇴행 == 0 && TALENT:유치 == 0
+	PRINTFORML %EXPNAME:50%2이상, 한편
+;LV3로부터 4에 올릴 때는이상경험필요
+ELSEIF ABL:스캇중독 == 3
+	PRINTFORML %EXPNAME:50%3이상, 한편
+;LV4로부터 5에 올릴 때는이상경험필요
+ELSEIF ABL:스캇중독 == 4
+	PRINTFORML %EXPNAME:50%5이상, 한편
+ENDIF
+
+;노출벽가 필요
+PRINTFORM %ABLNAME:8%{ABL:스캇중독+1}이상, 한편
+
+;스캇경험가 필요
+;LV1에 올릴 때는스캇경험 10 필요
+IF ABL:스캇중독 == 0
+	PRINTFORML %EXPNAME:33%10이상, 한편
+;LV1로부터 2에 올릴 때는스캇경험 20 필요
+ELSEIF ABL:스캇중독 == 1
+	PRINTFORML %EXPNAME:33%20이상, 한편
+;LV2로부터 3에 올릴 때는스캇경험 30 필요
+ELSEIF ABL:스캇중독 == 2
+	PRINTFORML %EXPNAME:33%30이상, 한편
+;LV3로부터 4에 올릴 때는스캇경험 50 필요
+ELSEIF ABL:스캇중독 == 3
+	PRINTFORML %EXPNAME:33%50이상, 한편
+;LV4로부터 5에 올릴 때는스캇경험 100 필요
+ELSEIF ABL:스캇중독 == 4
+	PRINTFORML %EXPNAME:33%100이상, 한편
+ENDIF
+
+PRINTFORM [0] - %PALAMNAME:5%의 구슬×{A}, %PALAMNAME:9%의 구슬×{B}이상……
+
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+	SIF I & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+PRINTFORM [1] - %PALAMNAME:7%의 구슬×{C}, %PALAMNAME:9%의 구슬×{B}이상……
+
+IF J == 0
+	PRINT OK
+ELSE
+	SIF J & 1
+		PRINT 주불발 
+	SIF J & 2
+		PRINT 경험불발 
+	SIF J & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 1) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:스캇중독 += 1
+
+IF RESULT == 0
+	JUEL:순종 -= A
+	JUEL:수치 -= B
+ELSEIF RESULT == 1
+	JUEL:굴복 -= C
+	JUEL:수치 -= B
+ENDIF
+
+PRINTFORMW %ABLNAME:22%의 레벨이{ABL:스캇중독}가 되었습니다
+
+;스캇중독LVUP 판정
+@DECIDE_ABLUP22
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+J = 0
+;능력 업 가능이라면 1으로 한다
+Z = 0
+
+IF ABL:스캇중독 == 0
+	A = 1000
+	B = 1000
+	C = 3000
+ELSEIF ABL:스캇중독 == 1
+	A = 2000
+	B = 3000
+	C = 5000
+ELSEIF ABL:스캇중독 == 2
+	A = 3000
+	B = 10000
+	C = 20000
+ELSEIF ABL:스캇중독 == 3
+	A = 5000
+	B = 20000
+	C = 30000
+ELSEIF ABL:스캇중독 == 4
+	A = 10000
+	B = 50000
+	C = 100000
+ENDIF
+
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (!TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속)
+	TIMES A , 2.00
+	TIMES B , 2.00
+	TIMES C , 2.00
+ENDIF
+;중독되기쉬움
+IF TALENT:중독되기쉬움
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+ENDIF
+
+;LV1로부터 2에 올릴 때는이상경험필요(소질:[중독되기쉬움][수치심없음][악취둔감][더러움무시][유아/유아 퇴행][유치]라면 무시할 수 있다)
+IF ABL:스캇중독 == 1 && !TALENT:수치심없음 && !TALENT:자위하기쉬움 && !TALENT:악취둔감 && !TALENT:더러움무시 && !TALENT:중독되기쉬움 && !TALENT:유아／유아퇴행 && !TALENT:유치
+	IF EXP:이상경험 == 0
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV2로부터 3에 올릴 때는이상경험필요(소질:[중독되기쉬움][더러움무시][유아/유아 퇴행][유치]라면 무시할 수 있다)
+ELSEIF ABL:스캇중독 == 2 && !TALENT:악취둔감 && !TALENT:더러움무시 && !TALENT:중독되기쉬움 && !TALENT:유아／유아퇴행 && !TALENT:유치
+	IF EXP:이상경험 < 2
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV3로부터 4에 올릴 때는이상경험필요
+ELSEIF ABL:스캇중독 == 3
+	IF EXP:이상경험 < 3
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV4로부터 5에 올릴 때는이상경험필요
+ELSEIF ABL:스캇중독 == 4
+	IF EXP:이상경험 < 5
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+ENDIF
+
+;노출벽가 필요
+IF ABL:노출벽 < ABL:스캇중독 + 1
+	I |= 4
+	J |= 4
+ENDIF
+
+;스캇경험가 필요
+;LV1에 올릴 때는스캇경험 10 필요
+IF ABL:스캇중독 == 0
+	IF EXP:스캇경험 < 10
+		;스캇경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV1로부터 2에 올릴 때는스캇경험 20 필요
+ELSEIF ABL:스캇중독 == 1
+	IF EXP:스캇경험 < 20
+		;스캇경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV2로부터 3에 올릴 때는스캇경험 30 필요
+ELSEIF ABL:스캇중독 == 2
+	IF EXP:스캇경험 < 30
+		;스캇경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV3로부터 4에 올릴 때는스캇경험 50 필요
+ELSEIF ABL:스캇중독 == 3
+	IF EXP:스캇경험 < 50
+		;스캇경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+;LV4로부터 5에 올릴 때는스캇경험 100 필요
+ELSEIF ABL:스캇중독 == 4
+	IF EXP:스캇경험 < 100
+		;스캇경험가 불발
+		I |= 2
+		J |= 2
+	ENDIF
+ENDIF
+
+;순종의 구슬로 올린다
+IF JUEL:순종 < A
+	I |= 1
+ENDIF
+;굴복의 구슬로 올린다
+IF JUEL:굴복 < C
+	J |= 1
+ENDIF
+;치욕의 구슬로 올린다
+IF JUEL:수치 < B
+	I |= 1
+	J |= 1
+ENDIF
+
+SIF !I || !J
+	Z = 1
+
+RETURN 1
+

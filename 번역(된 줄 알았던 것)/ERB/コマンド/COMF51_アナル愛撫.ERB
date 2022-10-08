@@ -1,0 +1,135 @@
+﻿;-------------------------------------------------
+;애널애무
+;A계 조교 커맨드
+;-------------------------------------------------
+@COM51
+
+;-------------------------------------------------
+;특수 파생 처리
+;-------------------------------------------------
+;전회와 이번 조교자가 같음
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;전회의 조교가애널애무, 전립선 자극이라면 전립선 자극에
+	IF PREVCOM == 51 || PREVCOM == 501
+		CALL COM_ABLE501
+		SIF RESULT == 1
+			JUMP COM501
+	ENDIF
+ENDIF
+
+PRINTL 애널애무
+STR:0 = 애널애무
+CALL KOJO_MESSAGE_COM
+
+;스타킹 찌릿찌릿 플래그
+SIF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TFLAG:55 = 1
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 50
+
+SOURCE:쾌A += 80
+
+IF TEQUIP:확장벌룬
+	TIMES SOURCE:쾌A , 1.80
+	SOURCE:통증 += 200
+ELSEIF TEQUIP:애널바이브
+	TIMES SOURCE:쾌A , 1.50
+	SOURCE:통증 += 200
+ELSEIF TEQUIP:애널비즈
+	TIMES SOURCE:쾌A , 1.35
+	SOURCE:통증 += 200
+ELSEIF TEQUIP:로터A삽입
+	TIMES SOURCE:쾌A , 1.20
+	SOURCE:통증 += 130
+ELSE
+	IF PREVCOM == 77
+		SOURCE:통증 += 80
+	ELSE
+		SOURCE:통증 += 100
+	ENDIF
+ENDIF
+
+SOURCE:굴복 += 100
+SOURCE:일탈 += 80
+SOURCE:반발 += 60
+
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 100
+
+;스킨십선호라면애정의 소스 추가
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+;A에의고통는 먼저 처리해 둔다
+;EXP:A경험를 본다
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:통증, 3.00
+	TIMES SOURCE:반발, 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:통증, 1.20
+	TIMES SOURCE:반발, 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:통증, 0.80
+	TIMES SOURCE:반발, 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:통증, 0.60
+	TIMES SOURCE:반발, 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:통증, 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:통증, 0.20
+ENDIF
+
+;PALAM:윤활를 본다
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증, 1.20
+	TIMES SOURCE:반발, 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증, 1.00
+	TIMES SOURCE:반발, 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증, 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증, 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증, 0.20
+ENDIF
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+;조교자의손⇔노예의 A장내의 더러움이 이동
+;도구를 사용하는 경우는 더러움은 이동하지 않는다
+IF TEQUIP:확장벌룬 || TEQUIP:애널바이브 || TEQUIP:애널비즈 || TEQUIP:로터A삽입
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+EXP:A경험 += 1
+PRINTL A경험＋1
+
+;게이경험라든지 가산
+CALL COM_EXP(2)
+
+;의존도 벡터
+TFLAG:33 = 3
+
+
+RETURN 1
+
+

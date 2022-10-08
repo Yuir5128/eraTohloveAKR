@@ -1,0 +1,107 @@
+﻿;-------------------------------------------------
+;掻痒剤
+;薬品系コマンド
+;-------------------------------------------------
+@COM305
+
+IF TEQUIP:触手
+	PRINTL 触手掻痒剤
+	STR:0 = 触手掻痒剤
+ELSE
+	PRINTL 掻痒剤
+	STR:0 = 掻痒剤
+ENDIF
+
+;場所選択は触手がいないときだけ
+IF !TEQUIP:触手
+	;どこに塗るか
+	PRINTL どこに塗りますか？
+	PRINTL [ 0] - 胸
+	IF PENIS(TARGET) && !TEQUIP:貞操帯
+		PRINTL [ 1] - ペニス
+	ELSEIF !TEQUIP:貞操帯
+		PRINTL [ 1] - クリトリス
+	ENDIF
+	PRINTL [ 2] - アナル
+	SIF VAGINA(TARGET)
+		PRINTL [ 3] - 膣内
+	PRINTL [10] - 全身に塗りたくる
+	SIF !TALENT:PLAYER:両腕欠損 && !TALENT:PLAYER:達磨
+		PRINTL [99] - 自分の指につける
+	
+	$INPUT_LOOP
+	INPUT
+	
+	IF RESULT == 99 && !TALENT:PLAYER:両腕欠損 && !TALENT:PLAYER:達磨
+		TFLAG:56 = 99
+	ELSEIF RESULT == 0
+			TFLAG:56 = 0
+	ELSEIF RESULT == 1
+		TFLAG:56 = 1
+	ELSEIF RESULT == 2
+		TFLAG:56 = 2
+	ELSEIF RESULT == 3 && VAGINA(TARGET)
+		TFLAG:56 = 3
+	ELSEIF RESULT == 10
+		TFLAG:56 = 10
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+;使ったアイテム減らす
+ITEM:49 -= 1
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 0
+LOSEBASE:気力 += 50
+
+IF !TEQUIP:触手
+	;胸
+	IF TFLAG:56 == 0
+		SOURCE:快Ｂ += 10
+	;ＰorＶ
+	ELSEIF TFLAG:56 == 1
+		SOURCE:快Ｃ += 10
+	;アナル
+	ELSEIF TFLAG:56 == 2
+		SOURCE:快Ａ += 10
+	;ヴァギナ
+	ELSEIF TFLAG:56 == 3
+		SOURCE:快Ｖ += 10
+	;塗れるとこ全部
+	ELSEIF TFLAG:56 == 10
+		SOURCE:快Ｂ += 10
+		SIF !TEQUIP:貞操帯
+			SOURCE:快Ｃ += 10
+		SOURCE:快Ａ += 10
+		SIF VAGINA(TARGET)
+			SOURCE:快Ｖ += 10
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+CALL COM_STAIN
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+
+;ゲイ経験とか加算
+CALL COM_EXP(1)
+
+;依存度ベクトル
+TFLAG:33 = 0
+
+RETURN 1
+
+
+
+

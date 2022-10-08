@@ -1,0 +1,1383 @@
+﻿;--------------------------------------------------
+;「응구분 처리응」v1. 05 「-와」향해 범용 함수 파일
+;무단재배포 OK, 그 때 개변은 불가. 덧붙여 씀은 원래의 기능을 해치지 않는 범위로 부탁합니다
+;
+;erahetaA에 무리하게 이식할 때에, 사용 플래그의 차이 따위로 버그의 원이 되는 부분을 삭제·개변하고 있습니다.
+;-와 작자님, 미안해요.
+
+;eraToloveA02 사가판 배포시에 사용하고 있지 않는 것, 경고 나오고 있었던 것을 comment out
+;--------------------------------------------------
+;↓-와 이외에도 사용할 수 있는 추가 함수군↓
+;--------------------------------------------------
+;등록 번호 추출 함수@NO
+;R에 검색 대상의 캐릭터 번호를 넣어 CALL.
+;손원의 전캐릭터와 조합해 등록 번호를 변수 M에 돌려줍니다.
+;손바탕으로 없는 경우, M == -1이 돌아갑니다.
+;--------------------------------------------------
+;NO가 예약어(reserved word)로 경고 나오므로 comment out
+[SKIPSTART]
+@NO
+M = -1
+REPEAT CHARANUM
+	SIF NO:COUNT == R
+		M = COUNT
+REND
+RETURN M
+[SKIPEND]
+;comment out 여기까지
+
+;등록 번호 추출 함수@NO2
+;@NO를 식 나카노세키수로 한 것 뿐입니다
+@NO2(ARG)
+#FUNCTION
+FOR LOCAL, 0, CHARANUM
+	SIF NO:LOCAL == ARG
+		RETURNF LOCAL
+NEXT
+RETURNF -1
+
+;RELATION가 예약어(reserved word)로 경고 나오므로 comment out
+[SKIPSTART]
+;--------------------------------------------------
+;궁합 검색 함수@RELATION
+;R에 검색 대상(요점:손바탕으로 있는 것. 없는 경우 ADDCHARA 하고 나서)의 캐릭터 번호, S에 검색 조건을 넣어 CALL.
+;S의 값은 0으로 지정하지 않는, 1으로 없는 캐릭터만 선택하는, 2로 있는 캐릭터만 선택한다
+;파르스로 지정 없음의 경우 R = 79, S = 0하고 나서 CALL RELATION
+;전캐릭터와의 궁합을 검색해, 가장 궁합의 좋은 상대를 추출합니다.
+;그 캐릭터가손바탕으로 있으면 등록 번호가 변수 M에.
+;있지 않아도 캐릭터 번호가 변수 L, 캐릭터명이 STR:300, 통칭이 STR:301에 돌아갑니다.
+;그 캐릭터와의 궁합이 100 이하라면 RESULT에 0, 101~199라면 1, 200이상이라면 2를 돌려줍니다.
+;즉 RESULT == 0은 「궁합이 좋은 캐릭터는 지정한 범위에는 없습니다」의 뜻
+;동치의 캐릭터가 있으면 랜덤으로 선택됩니다.
+;현상, 분명하게 반찬으로 할 것 같지 않은 인형이나 랜덤 캐릭터(87번 이후)는 서치로부터 제외하고 있습니다
+;자신용의 기능입니다만, 생각해 내자위의 반찬을 찾을 때라도 사용해 주세요…… 괴로울까.
+;--------------------------------------------------
+@RELATION
+;검색 대상의 등록 번호를 추출
+CALL NO
+U = M
+L = 0
+;손원으로부터 검색
+IF S == 2
+	M = -1
+	REPEAT CHARANUM
+		A = NO:COUNT
+		;동치의 경우 랜덤으로 남긴다
+		IF RELATION:U:A == RELATION:U:L
+			D = RAND:2
+			IF D == 0
+				L = NO:COUNT
+				M = COUNT
+			ENDIF
+		;후에 당기는 편이 큰 경우 그것을 보존
+		ELSEIF RELATION:U:A > RELATION:U:L
+			L = NO:COUNT
+			M = COUNT
+		ENDIF
+	REND
+	;수치에 응해 RETURN
+	SIF RELATION:U:L > 199
+		RETURN 2
+	SIF RELATION:U:L > 100
+		RETURN 1
+	RETURN 0
+ENDIF
+
+
+;=========================================================
+;전체로부터 검색
+;궁합을 총검색해 캐릭터 번호와 궁합치를 추출
+;↓100은 잠정. 지금후캐릭터수가 증가하면 좀 더 늘려도 OK?
+;다만 현상 88회 이후는 무의미
+;=========================================================
+REPEAT FLAG:44
+	B = RELATION:U:L
+	C = RELATION:U:COUNT
+	;동치의 경우 랜덤으로 남긴다
+	IF B == C
+		D = RAND:2
+		IF D == 0
+			M = 0
+			R = COUNT
+			SIF S == 1
+				CALL NO
+			SIF M < 1
+				L = R
+			COUNT = R
+		ENDIF
+	;후에 당기는 편이 큰 경우 그것을 보존
+	ELSEIF C > B
+		M = 0
+		R = COUNT
+		SIF S == 1
+			CALL NO
+		SIF M < 1
+			L = R
+		COUNT = R
+	ENDIF
+REND
+;이름과 등록 번호를 취득
+CALL LOSTNAME
+R = L
+CALL NO
+
+;수치에 응해 RETURN
+SIF RELATION:U:L > 199
+	RETURN 2
+SIF RELATION:U:L > 100
+	RETURN 1
+RETURN 0
+
+[SKIPEND]
+;comment out 여기까지
+
+;--------------------------------------------------
+;부재 캐릭터명 획득 함수@LOSTNAME
+;대상의 캐릭터 번호를 인수에 넣어 CALL 한다
+;이 장소에 없는 캐릭터의 번호로부터 이름·별명·도종·도파를 취득한다.
+;eraToloveA02 사가판에 수반해 식 나카노세키수로 했습니다
+
+;획득한 이름은 STR:300, 별명은 301, 도종가 302, 도파가 303에 격납됩니다.
+;누구에게도 들어맞지 않았던 경우 RESULT에 0, 그 이외의 경우는도종를 돌려준다
+
+;도검 난무용으로 RESULT가
+;「1=인간, 2=단도, 3=호신용 단도, 4=타도, 5=칼, 6=대칼, 7=창, 8=나기나타, 9=검
+;12=극단도, 13=극호신용 단도, 14=극타도, 15=극칼, 16=극대칼, 17=극창, 18=극나기나타, 19=극검」
+;도파
+;1=산죠우 2=미이케 3=아오에 4=아와타입 5=고비젠 6=와 7=무라마사 8=사다무네 9=오사후네
+;10=산몬지 11=카네사다 12=호리카와 13=코테츠 14=코테츠…? 15=강 16=마사무네 17=후쿠오카 1문자 18=풍후쿠니유키 히로시
+;--------------------------------------------------
+@LOSTNAME(ARG)
+#FUNCTION
+
+#DIM DYNAMIC 도종
+#DIM DYNAMIC 도파
+
+;CSV가 정의되어 있지 않은 캐릭터
+IF EXISTCSV(ARG, 0) == 0
+	STR:300 =누군가
+	STR:301 =누군가
+	RETURNF 0
+ENDIF
+
+;이름
+STR:300 = CSVNAME(ARG, 0)
+
+;별명
+STR:301 =  CSVCALLNAME(ARG, 0)
+
+;도종
+도종 = CSVCFLAG(ARG, 30, 0)
+SELECTCASE 도종
+	CASE 1
+		STR:302 =인간
+	CASE 2
+		STR:302 =단도
+	CASE 3
+		STR:302 =호신용 단도
+	CASE 4
+		STR:302 =타도
+	CASE 5
+		STR:302 =칼
+	CASE 6
+		STR:302 =대칼
+	CASE 7
+		STR:302 =창
+	CASE 8
+		STR:302 =나기나타
+	CASE 9
+		STR:302 =검
+	CASE 12
+		STR:302 = 극단도
+	CASE 13
+		STR:302 = 극호신용 단도
+	CASE 14
+		STR:302 = 극타도
+	CASE 15
+		STR:302 = 극칼
+	CASE 16
+		STR:302 = 극대칼
+	CASE 17
+		STR:302 = 극창
+	CASE 18
+		STR:302 = 극나기나타
+	CASE 19
+		STR:302 = 극검
+ENDSELECT
+
+;도파
+도파 = CSVCFLAG(ARG, 31, 0)
+SELECTCASE 도파
+	CASE 0
+		STR:303  =없음
+	CASE 1
+		STR:303 =산죠우
+	CASE 2
+		STR:303 =미이케
+	CASE 3
+		STR:303 =아오에
+	CASE 4
+		STR:303 =아와타입
+	CASE 5
+		STR:303 =고비젠
+	CASE 6
+		STR:303 =와
+	CASE 7
+		STR:303 =무라마사
+	CASE 8
+		STR:303 =사다무네
+	CASE 9
+		STR:303 =오사후네
+	CASE 10
+		STR:303 =산몬지
+	CASE 11
+		STR:303 =카네사다
+	CASE 12
+		STR:303 =호리카와
+	CASE 13
+		STR:303 =코테츠
+	CASE 14
+		STR:303 =코테츠…?
+	CASE 15
+		STR:303 =강
+	CASE 16
+		STR:303 =마사무네
+	CASE 17
+		STR:303 =후쿠오카 1문자
+	CASE 18
+		STR:303 =풍후쿠니유키 히로시
+ENDSELECT
+
+RETURNF 도종
+
+;이하 사용하지 않기 때문에 여기로부터 comment out
+[SKIPSTART]
+;--------------------------------------------------
+;이하, -와 탑재 기능의 처리를 위한 함수군.
+;외에 유용하는 경우는 조금, 이용가치가 낮다고 생각됩니다.
+;CFLAG등 독특하게 먹기 (위해)때문에, 전연 유용할 수 있는 형태로 만들어지고 있지 않습니다. 미안해요.
+;주로 -라는 눈? (이)가 되는 「안면 관리 기능」 「오나금기능」으로 사용합니다.
+;--------------------------------------------------
+;안면 검색 함수@MENSIKI
+;R에 검색 대상의 캐릭터 번호를 넣어 CALL.
+;파르스의 경우 R = 79하고 나서 CALL MENSIKI
+;전캐릭터와의 안면을 검색해, 가장 깊은 관계가 있는 상대의 등록 번호를 변수 M에 돌려줍니다.
+;동등의 안면의 캐릭터가 있는 경우는 랜덤에 1 인선 발각됩니다.
+;안면의 내용을 N에 돌려주므로, 그것을 이용해입상의 분기가 생깁니다.
+;입상주의 650대 CFLAG를 사용합니다. 캐릭터수 많아지면 기능하지 않을지도 모릅니다.
+;650받침대 CFLAG와 같은 표기로, N의 값이(1 원작으로 안면, 2 노예끼리안면, 3입상주가가 상대를 조교한,
+;4상대가입상주를 조교한, 5 서로 조교한, 6입상주가 조교해처녀를 빼앗은, 7처녀를 빼앗아 조교도 되었다)의 뜻.
+;숫자가 높은 것이 남기 쉬워집니다. 안면도 1의 캐릭터는 이 장소에 없는 것이 많기 때문에, 있는 사람을 우선합니다.
+;최종적으로 선택된 상대가 이 장소에 없는 경우는 M에-1을 돌려줍니다.
+;안면도 1의 캐릭터 밖에 없었던 경우를 제외하면, M < 0은 대상의 캐릭터가 팔렸다고 하는 의미가 됩니다(현재 상태로서는)
+;안면도 1의 캐릭터 밖에 없었던 경우는 N == 1, M < 0이 됩니다.
+;어느 쪽의 경우에서도, 캐릭터명은 STR:300, 통칭은 STR:301에 격납됩니다.
+;--------------------------------------------------
+@MENSIKI
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+N = 0
+;검색 대상의 등록 번호를 추출
+CALL NO
+U = M
+;안면 판정을 총검색해 캐릭터 번호와 안면도를 추출
+;↓100은 잠정. 지금후캐릭터수가 증가하면 좀 더 늘려도 OK?
+REPEAT FLAG:44
+	B = 650+COUNT
+	C = CFLAG:U:B
+	;같은 안면도의 상대 당겼다
+	;그 2명의 안면도가 1(원작 안면 or질투이벤트)
+	;궁합이 좋은 편을 보존. 같으면 1/2으로 남긴다
+	IF N == C && C == 1
+		F = RELATION:U:E
+		G = RELATION:U:COUNT
+		SIF F == 0
+			F = 100
+		SIF G == 0
+			G = 100
+		IF F == G
+			D = RAND:2
+			SIF D == 0
+				E = COUNT
+		ELSEIF G > F
+			E = COUNT
+		ENDIF
+	;2이상으로 동치의 경우 1/2로 남긴다
+	ELSEIF N == C
+		D = RAND:2
+		SIF D == 0
+			E = COUNT
+	;안면도의 높은 상대 당기면 3/4로 남긴다
+	ELSEIF C > N
+		D = RAND:4
+		SIF D != 0
+			E = COUNT
+		SIF D != 0
+			N = C
+	ENDIF
+REND
+
+;등록 번호에 컨버트
+R = E
+CALL NO
+
+;부재 캐릭터 나토리 이득 함수를 콜
+;캐릭터 번호는 L, 이름은 STR:300, 통칭은 STR:301에 출력
+L = E
+CALL LOSTNAME
+
+
+;RESULT=0으로 부재 캐릭터를 끌어들이었던 것이 판별 가능(N == 1을 조건으로 하는 것도 좋은 동작)
+SIF M < 0
+	RETURN 0
+RETURN 1
+
+;--------------------------------------------------
+;자위인내 함수@SELFPLAY
+;사전에 R에입상주의 캐릭터 번호, S에 확률 보정, T에 상한을 입력해 CALL.
+;예) 파르스로, 확률+5%, 상한 40%의 인내 시츄의 경우
+;R = 79
+;S = 5
+;T = 40
+;CALL SELFPLAY
+;의 4행을 쓰면 OK입니다
+;참을 수 있으면 0·할 수 없으면 1을 RESULT에 돌려줍니다
+;「-와」의 오나금기능용으로 설계되어 있어,
+;입상주의 CFLAG208를 「현재의 오나금계속 일수(0이라면 오나금 하고 있지 않다)」로서 사용합니다.
+;조교후자위 이외의 오나금판정은 여기를 사용하는 느낌으로 합니다
+;--------------------------------------------------
+@SELFPLAY
+;(일수*3)+(자위중독Lv*10)-(순종*5)%의 확률로 참지 못하고 오나금실패
+;순종 4자위중독 3로 3일째라면 19% 이것에 각 소질 보정이라고 불러 방편원의 보정을 더한다
+;다만 상한 50%까지. 조정 적당
+
+CALL NO
+A = M
+
+;기초 확률
+C = CFLAG:A:208
+B = ABL:A:새드끼
+D = ABL:A:순종
+C = C*3
+B = B*10
+D = D*5
+C = C+B-D
+;보정치 S를 더한다(얼마나 인내 할 수 없는 상황이었는가)
+C += S
+
+;자위하기쉬움소유라면+10%
+SIF TALENT:A:자위하기쉬움
+	C += 10
+;음란라면+5%
+SIF TALENT:A:항문광
+	C += 5
+;수치심없음·해방·후타나리·중독되기쉬움소유라면+2%
+SIF TALENT:A:수치심없음
+	C += 2
+SIF TALENT:A:해방
+	C += 2
+SIF TALENT:A:121
+	C += 2
+SIF TALENT:A:중독되기쉬움
+	C += 2
+;부끄럼쟁이·자제심·억압소유라면-5%
+SIF TALENT:A:부끄럼쟁이
+	C -= 5
+SIF TALENT:A:자제심
+	C -= 5
+SIF TALENT:A:억압
+	C -= 5
+;C민감(둔감)라면+2%(-2%)
+SIF TALENT:A:C민감
+	C += 2
+SIF TALENT:A:C둔감
+	C -= 2
+;상한을 넘으면 잘라 버린다
+SIF C > T
+	C = T
+
+;참을 수 있으면 0, 할 수 없으면 1을 돌려주어 돌아온다
+B = RAND:100
+SIF C > B
+	RETURN 1
+RETURN 0
+
+
+;--------------------------------------------------
+;조교후자위함수@SELFPLAY_2
+;조교후자위는 계산식이↑의와 별도인 것으로 독립시켰습니다.
+;사전에 R에입상주의 캐릭터 번호를 입력해 CALL.
+;예) 파르스의 경우
+;@SELF_KOJO_K79아래의 IF TFLAG:13 == 1안의 어디선가
+;R = 79
+;CALL SELFPLAY_2
+;의 2행을 쓰면 OK입니다
+;현상의 사양에서는, 확률 보정과 상한의 지정은 할 수 없습니다.
+;참을 수 있으면 0·할 수 없으면 1을 RESULT에 돌려줍니다
+;「-와」의 오나금기능용으로 설계되어 있어,
+;입상주의 CFLAG208를 「현재의 오나금계속 일수(0이라면 오나금 하고 있지 않다)」로서 사용합니다.
+;조교후자위 이외의 오나금판정은 여기를 사용하는 느낌으로 합니다
+;--------------------------------------------------
+@SELFPLAY_2
+;조교후자위의 오나금판정은 통상과 다른 형식을 사용합니다
+;(이번 조교후자위회수*10)+(자위중독레벨*10)+(오나금일수*3)-(순종*5)
+;의 확률로 가 버려 오나금실패가 된다
+;3회자위·자위중독 2·3일째·순종 4라면 39%. 다만 최저 10%·최대로 75%.
+CALL NO
+A = M
+
+C = CFLAG:208
+B = A+ABL:새드끼
+D = ABL:순종
+C = C*3
+B = B*10
+D = D*5
+C = C+B-D
+;자위하기쉬움소유라면+15%
+SIF TALENT:A:자위하기쉬움
+	C += 15
+;음란라면+10%
+SIF TALENT:A:항문광
+	C += 10
+;수치심없음·해방·후타나리·중독되기쉬움소유라면+5%
+SIF TALENT:A:수치심없음
+	C += 5
+SIF TALENT:A:해방
+	C += 5
+SIF TALENT:A:121
+	C += 5
+SIF TALENT:A:중독되기쉬움
+	C += 5
+;부끄럼쟁이·자제심·억압소유라면-10%
+SIF TALENT:A:부끄럼쟁이
+	C -= 10
+SIF TALENT:A:자제심
+	C -= 10
+SIF TALENT:A:억압
+	C -= 10
+;C민감(둔감)라면+5%(-5%)
+SIF TALENT:A:C민감
+	C += 5
+SIF TALENT:A:C둔감
+	C -= 5
+;최대치의 처리
+;첫날은 계산 결과에-15%해, 한편 최대 20%, 그 이후는 최대 50%. 최저 10%
+IF CFLAG:A:208 == 1
+	C -= 15
+	SIF C > 20
+		C = 30
+ENDIF
+SIF C > 50
+	C = 50
+SIF C < 10
+	C = 10
+
+;참을 수 있으면 0, 할 수 없으면 1을 돌려주어 돌아온다
+B = RAND:100
+SIF C > B
+	RETURN 1
+RETURN 0
+
+
+;--------------------------------------------------
+;자위판정 함수@SELFPLAY_3
+;사전에 R에입상주의 캐릭터 번호를 입력해 CALL.
+;다만@EVENTTURNEND, #PRI아래에 두는 것
+;일자 변경시의 오나금판정을 실시해, 참을 수 있으면 RESULT0, 할 수 없으면 1을 돌려주어 돌아옵니다
+;처리되지 않았을 때는 2를 돌려줍니다.
+;--------------------------------------------------
+@SELFPLAY_3
+;밤 밖에 처리하지 않는다
+SIF TIME == 0
+	RETURN 2
+;입상주의 등록 번호를 추출
+CALL NO
+;입상주가 없는 경우 처리하지 않는다
+SIF M < 1
+	RETURN 2
+;입상주가 오나금 하고 있지 않는 경우 처리하지 않는다
+SIF CFLAG:M:208 == 0
+	RETURN 2
+;입상주를 조교하고 있었을 경우 처리하지 않는다
+IF NO:TARGET == R && FLAG:0 == 0
+	;오나금일수 카운트를＋1한다
+	CFLAG:M:208 += 1
+	A = 3
+	CALL SELFPLAY_4
+	DRAWLINE
+	RETURN 2
+ENDIF
+;조교 대상이 아닌가 쉬었을 경우, 밤이라면 오나금실패 판정에
+;기본 확률에+5%의 보정
+S = 5
+;확률 상한 50%
+T = 50
+;자신이 조수를 하고 있었을 경우, 보정+20상한 60으로 변경된다
+;조교 신을 생각해 내 시이미지로
+IF ASSI > 0 && FLAG:0 == 0
+	IF NO:ASSI == 79
+		S = 20
+		T = 60
+	ENDIF
+ENDIF
+CALL SELFPLAY
+SIF RESULT == 1
+	RETURN 1
+;오나금일수 카운트를＋1한다
+CFLAG:M:208 += 1
+RETURN 0
+
+;--------------------------------------------------
+;자위결과 함수@SELFPLAY_4
+;사전에 R에입상주의 캐릭터 번호, A에 오나금의 성공 여부(0으로 성공, 1으로 실패, 2로 중단, 3으로 웨이트 없음 성공, 4로 오나금개시)를 입력해 CALL.
+;오나금의 결과를 표시한다.
+;--------------------------------------------------
+@SELFPLAY_4
+CALL NO
+SIF A != 3
+	WAIT
+IF A == 0 || A == 3
+	SIF CFLAG:M:208 > CFLAG:M:207
+		CFLAG:M:207 = CFLAG:M:208
+	PRINTFORML (%CALLNAME:M%의 오나금:{CFLAG:M:208}일째)
+	PRINTFORML (현재의 기록:{CFLAG:M:207}일)
+ELSEIF A == 4
+	CFLAG:M:208 = 1
+	PRINTFORML (%CALLNAME:M%가 오나금을 시작했습니다)
+ELSE
+	SIF CFLAG:M:208 > CFLAG:M:207
+		CFLAG:M:207 = CFLAG:M:208
+	PRINTFORM (%CALLNAME:M%의 오나금:{CFLAG:M:208}일째에서
+	SIF A == 1
+		PRINTFORML 종료)
+	SIF A == 2
+		PRINTFORML 중단)
+	PRINTFORML (현재의 기록:{CFLAG:M:207}일)
+	CFLAG:M:208 = 0
+ENDIF
+SIF A != 3
+	WAIT
+RETURN 0
+
+
+;--------------------------------------------------------
+;견학자위함수@SELFPLAY_5
+;@KOJO_MESSAGE_COM_ASSI_X1아래에서 R에입상주의 캐릭터 번호를 넣어 CALL
+;견학시(조수로서 붙어 있지만, 조교자가 주인일 때)에 행해지는 오나금판정.
+;커맨드에 응한 보정치와 최대치를 가져 오나금함수를 부르러 갑니다
+;요컨데, 보게 되어 인내 할 수 없게 되어 버리는 판정
+;참을 수 있으면 RESULT0, 할 수 없으면 1을 돌려주어 돌아옵니다
+;오나금 하고 있지 않는 경우도 약간 수치를 느슨하게해 판정을 실시합니다.
+;노예와 주인의 행위에질투 하는 조수를 연출한다 따위에 부디. 마음 속 파르스용의 기능.
+;--------------------------------------------------------
+@SELFPLAY_5
+IF ASSIPLAY == 0 && NO:MASTER != R
+	;상한 30 보정 10의 커맨드군(자위유발고)
+	;대면좌위·배면좌위·자위·주사계·삽입 고문계
+	IF SELECTCOM == 24 || SELECTCOM == 25 || SELECTCOM == 3 || SELECTCOM == 111 || SELECTCOM == 112 || SELECTCOM == 113 || SELECTCOM == 114 || SELECTCOM == 255 || SELECTCOM == 256
+		IF CFLAG:ASSI:208 >= 1
+			S = 10
+			T = 30
+		ELSE
+			S = 20
+			T = 50
+		ENDIF
+		CALL SELFPLAY
+		SIF RESULT == 1
+			RETURN 1
+	RETURN 0
+	;상한 20 보정 0의 커맨드군(자위유발중)
+	;로터~배면좌위애널·기승위~기승위애널·관장~전극·미약
+	ELSEIF (SELECTCOM >= 10 && SELECTCOM <= 29) || (SELECTCOM >= 34 && SELECTCOM <= 36) || (SELECTCOM >= 46 && SELECTCOM <= 49) || SELECTCOM == 51
+		IF CFLAG:ASSI:208 >= 1
+			S = 0
+			T = 20
+		ELSE
+			S = 10
+			T = 40
+		ENDIF
+		CALL SELFPLAY
+		SIF RESULT == 1
+			RETURN 1
+	;상한 15 보정-10의 커맨드군(자위유발저)
+	;남는 대부분
+	ELSEIF SELECTCOM <= 33 || SELECTCOM == 80 || SELECTCOM == 85 || SELECTCOM >= 130
+		IF CFLAG:ASSI:208 >= 1
+			S = -10
+			T = 15
+		ELSE
+			S = 0
+			T = 25
+		ENDIF
+		CALL SELFPLAY
+		SIF RESULT == 1
+			RETURN 1
+	ENDIF
+ENDIF
+RETURN 0
+
+
+;--------------------------------------------------
+;조교 대상 보존 함수@TARGETSAVE
+;R에입상주의 캐릭터 번호를 넣어, 주로@EVENTEND아래에서 CALL
+;대상의 CFLAG:717에 전회 조교한 상대의 캐릭터 번호를 보존합니다.
+;또, 「입상주(조교 대상)→조수」와 「입상주(조수)→조교 대상」의 안면 판정도 갱신, 입상주의 CFLAG:650~를 사용
+;--------------------------------------------------
+@TARGETSAVE
+CALL NO
+;입상주가 있는 경우
+IF M > 0
+	;조교한 캐릭터를 보존
+	CFLAG:M:719 = NO:TARGET
+	;입상주가 조수로서 전회 조교한 캐릭터 번호를 리셋트
+	;조수로서 들어간 직후가 아니고 사이를 비워도입상을 바꾸는 경우는↓의 행을 comment out
+	CFLAG:M:717 = 0
+ENDIF
+;조수가 있는 경우 안면 판정을 갱신
+IF ASSI > 0
+	;입상주가 조수의 경우
+	IF NO:ASSI == 1
+		A = 650+NO:TARGET
+		SIF CFLAG:ASSI:A <= 1
+			CFLAG:ASSI:A = 2
+		;입상주가 조수로서 전회 조교한 캐릭터 번호로서 보존
+		CFLAG:ASSI:717 = NO:TARGET
+	;입상주가 조교 대상의 경우
+	ELSEIF NO:TARGET == 1
+		A = 650+NO:ASSI
+		SIF CFLAG:TARGET:A <= 1
+			CFLAG:TARGET:A = 2
+	ENDIF
+ENDIF
+RETURN 0
+
+
+;--------------------------------------------------
+;조수플레이 내용 보존 함수@ASSIDATA
+;대상의@KOJO_MESSAGE_COM_ASSI_X1아래에서 CALL
+;대상이 조수로서 조교에 어느 정도 관련되었는지를 CFLAG:211~215에 보존합니다.
+;211(전회의 조교로 조교자로서 한 번 이상 조교 커맨드를 실행했다)
+;212(1=조수로서 노예의처녀를 빼앗은, 2=더해 그 노예가연모, 3으로 4는 각각 1으로 2와 같아, 입상주가페니스를 사용)
+;213(입상주가 조수로서처녀를 빼앗은 수의 누계)
+;214(1=조수인입상주의처녀를 주인이 빼앗은, 2=노예에게 빼앗게 했다)
+;215(조수로서의 일이 어느 정도 있었는지.
+;	0은 일절 기회없음, 1은카메라만, 2는 가벼운 행위 참가, 3은 노예끼리의 행위, 4는 주인과의 행위, 5는 원래 노예가남자)
+;또, 「입상주(조수)→조교 대상」의 안면 판정도 갱신, 입상주의 CFLAG:650대를 사용
+;--------------------------------------------------
+@ASSIDATA
+;주인이 선택하는 커맨드로 조수의 차례가 있었는지 기록
+;기승위한다·조수(의애널를)를 범하게 하는·3 P(노예끼리의 행위)
+IF SELECTCOM == 400 || SELECTCOM == 401 || SELECTCOM == 402 || SELECTCOM == 403 || SELECTCOM == 404 || SELECTCOM == 405 || SELECTCOM == 406 || SELECTCOM == 407 || SELECTCOM == 430 || SELECTCOM == 431 || SELECTCOM == 515 || SELECTCOM == 517 || SELECTCOM == 518 || SELECTCOM == 519 || SELECTCOM == 520 || SELECTCOM == 521 || SELECTCOM == 522 || SELECTCOM == 523 || SELECTCOM == 524 || SELECTCOM == 525
+	;플레이 내용 갱신
+	SIF CFLAG:ASSI:215 <= 2
+		CFLAG:ASSI:215 = 3
+	;상대가남자
+	SIF TALENT:남자
+		CFLAG:ASSI:215 = 5
+	;조수(입상주)가처녀로 V삽입(노예에게 빼앗겼다)
+	SIF TALENT:ASSI:처녀 && (SELECTCOM == 430)
+		CFLAG:ASSI:214 = 2
+;조수를범한다/조수에애널를 범해진다(주인과의 행위)
+ELSEIF SELECTCOM == 440 || SELECTCOM == 441 || SELECTCOM == 270 || SELECTCOM == 271
+	;플레이 내용 갱신
+	SIF CFLAG:ASSI:215 <= 3
+		CFLAG:ASSI:215 = 4
+	;조수(입상주)가처녀로 V삽입(주인에게 바쳤다)
+	SIF TALENT:ASSI:처녀 && SELECTCOM == 440
+		CFLAG:ASSI:214 = 1
+;더블펠라, 더블파이즈리, 더블스마타, 2 개 페라(가벼운 행위)
+ELSEIF SELECTCOM == 420 || SELECTCOM == 421 || SELECTCOM == 422 || SELECTCOM == 516
+	;플레이 내용 갱신
+	SIF CFLAG:ASSI:215 <= 1
+		CFLAG:ASSI:215 = 2
+;비디오카메라(촬영 담당 시켜지고 있다고 해석)
+ELSEIF SELECTCOM == 310 && FLAG:22 == 2
+	;플레이 내용 갱신
+	SIF CFLAG:ASSI:215 == 0
+		CFLAG:ASSI:215 = 1
+ENDIF
+
+;처녀상실의 기록
+IF TALENT:처녀
+	;정상위·후배위·기승위(페니스사용)
+	IF (SELECTCOM == 100 || SELECTCOM == 101 || SELECTCOM == 106) && (TALENT:ASSI:121 || TALENT:ASSI:122 || TALENT:ASSI:포경)
+		SIF TALENT:질투
+			CFLAG:ASSI:212 = 4
+		SIF TALENT:질투 == 0
+			CFLAG:ASSI:212 = 3
+		CFLAG:ASSI:213 += 1
+		A = 650+NO:TARGET
+		IF CFLAG:ASSI:A == 5
+			CFLAG:ASSI:A = 7
+		ELSEIF CFLAG:ASSI:A <= 4
+			CFLAG:ASSI:A = 6
+		ENDIF
+	;바이브·정상위·후배위·손가락삽입
+	ELSEIF SELECTCOM == 43 || SELECTCOM == 100 || SELECTCOM == 101 || SELECTCOM == 41
+		SIF TALENT:질투
+			CFLAG:ASSI:212 = 2
+		SIF TALENT:질투 == 0
+			CFLAG:ASSI:212 = 1
+		CFLAG:ASSI:213 += 1
+		A = 650+NO:TARGET
+		IF CFLAG:ASSI:A == 5
+			CFLAG:ASSI:A = 7
+		ELSEIF CFLAG:ASSI:A <= 4
+			CFLAG:ASSI:A = 6
+		ENDIF
+	ENDIF
+ENDIF
+
+;안면 판정의 갱신
+IF ASSIPLAY
+	CFLAG:211 = 1
+	A = 650+NO:TARGET
+	IF CFLAG:ASSI:A == 4
+		CFLAG:ASSI:A = 5
+	ELSEIF CFLAG:ASSI:A <= 2
+		CFLAG:ASSI:A = 3
+	ENDIF
+ENDIF
+RETURN 0
+
+
+;--------------------------------------------------
+;조수플레이 안면 보존 함수@ASSIDATA_2
+;대상의@KOJO_MESSAGE_COM_X1아래에서 CALL
+;대상이 조수에 조교되었을 때, 그 조수와의 안면 판정을 갱신합니다.
+;「입상주(조교 대상)→조수」의 안면 판정을 갱신, 입상주의 CFLAG:650대를 사용
+;--------------------------------------------------
+@ASSIDATA_2
+IF ASSI > 0
+	IF ASSIPLAY
+		A = 650+NO:ASSI
+		IF CFLAG:TARGET:A == 3
+			CFLAG:TARGET:A = 5
+		ELSEIF CFLAG:TARGET:A == 6
+			CFLAG:TARGET:A = 7
+		ELSEIF CFLAG:TARGET:A <= 2
+			CFLAG:TARGET:A = 4
+		ENDIF
+	ENDIF
+ENDIF
+RETURN 0
+[SKIPEND]
+;comment out 여기까지
+
+
+;--------------------------------------------------
+;장비품입상 보완 함수@EQUIPTEXT의 eraheta용 개변
+;장비품에 응한 보완 메세지를입상의후에 표시해, 실제감을 기분 높입니다.
+;--------------------------------------------------
+@EQUIPTEXT
+R:1 = 0
+R:2 = 0
+R:3 = 0
+R:4 = 0
+R:5 = 0
+
+;약품류, 주류, 뇨의, 변의, 구역질
+SIF TEQUIP:미약 || TEQUIP:꽐라플레이 || ZUIKI(TARGET) || BASE:뇨의 >= 60 || BASE:변의 >= 60 || BASE:구역질 >= 60
+	R:1 = 1
+
+;삽입(V) 계
+SIF TEQUIP:로터삽입 || TEQUIP:바이브 || TEQUIP:촉수질내산란
+	R:2 += 1
+
+;삽입(A) 계
+SIF TEQUIP:로터A삽입 || TEQUIP:애널비즈 || TEQUIP:애널바이브 || TEQUIP:확장벌룬 || TEQUIP:촉수장내산란
+	R:2 += 1
+
+;B계
+SIF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기 || TEQUIP:촉수유선삽입
+	R:3 = 1
+
+;C계
+SIF TEQUIP:클리캡 || TEQUIP:음핵클립 || TEQUIP:전동오나홀 || TEQUIP:카테터 || TEQUIP:요도벌룬
+	R:4 = 1
+
+;약품류, 뇨의, 변의
+IF R:1
+	SIF TEQUIP:꽐라플레이
+		PRINTFORM 취기
+	SIF TEQUIP:꽐라플레이 && TEQUIP:미약 && (ZUIKI(TARGET) || BASE:뇨의 >= 60 || BASE:변의 >= 60 || BASE:구역질 >= 60)
+		PRINTFORM 와
+	SIF TEQUIP:미약
+		PRINTFORM 약물에 의한욕정
+	SIF TEQUIP:미약 && (ZUIKI(TARGET) || BASE:뇨의 >= 60 || BASE:변의 >= 60 || BASE:구역질 >= 60)
+		PRINTFORM 와
+	IF ZUIKI(TARGET) && (BASE:뇨의 >= 60 || BASE:변의 >= 60)
+		PRINTFORM 참기 어려운가려움, 배설감
+	ELSEIF ZUIKI(TARGET)
+		PRINTFORM 참기 어려운가려움
+	ELSEIF BASE:뇨의 >= 60 && BASE:변의 >= 60
+		PRINTFORM 저항하기 어려운뇨의, 변의
+	ELSEIF BASE:뇨의 >= 60
+		PRINTFORM 저항하기 어려운뇨의
+	ELSEIF BASE:변의 >= 60
+		PRINTFORM 저항하기 어려운변의
+	ELSEIF BASE:구역질 >= 60
+		PRINTFORM 저항하기 어려운구역질
+	ENDIF
+	PRINTFORM 에 시달린다
+ENDIF
+
+;뭔가 있으면
+IF R:1 || R:2 || R:3 || R:4 || TEQUIP:삼각목마
+	PRINTFORM %CALLNAME%
+	;삽입계
+	IF R:2
+		PRINTFORM 의
+	ELSE
+		PRINTFORM 는,
+	ENDIF
+ENDIF
+
+;V계(로터삽입, 바이브, 촉수질내산란, 조수V애무, 조수V 삽입)
+IF TEQUIP:로터삽입 || TEQUIP:바이브 || TEQUIP:촉수질내산란
+	PRINTFORM 바기나에서는,
+	;로터삽입
+	SIF TEQUIP:로터삽입
+		PRINTFORM 로터가 조금씩 떨려
+	;바이브
+	SIF TEQUIP:바이브 && !TEQUIP:촉수
+		PRINTFORM 바이브가 저음으로 신음소리를 내
+	;촉수삽입
+	SIF TEQUIP:바이브 && TEQUIP:촉수
+		PRINTFORM 촉수가 꾸불꾸불해
+	;촉수질내산란
+	SIF TEQUIP:촉수질내산란
+		PRINTFORM 붉은 미육[媚肉]의 사이부터 알의 모습이 들여다 봐
+	IF R:2 > 1
+		PRINTFORML 내려
+	ELSE
+		PRINTFORMW 있다……
+	ENDIF
+ENDIF
+
+;A계(로터A삽입, 애널바이브, 애널비즈, 확장벌룬, 촉수장내산란, 조수A애무, 조수A 삽입
+IF TEQUIP:로터A삽입 || TEQUIP:애널바이브 || TEQUIP:애널비즈 || TEQUIP:확장벌룬 || TEQUIP:촉수장내산란
+	PRINTFORM 애널에서는,
+	;로터A삽입
+	SIF TEQUIP:로터A삽입
+		PRINTFORM 로터가 조금씩 떨려
+	;애널바이브
+	SIF TEQUIP:애널바이브 && !TEQUIP:촉수
+		PRINTFORM 애널바이브가 저음으로 신음소리를 내
+	;애널촉수
+	SIF TEQUIP:애널바이브 && TEQUIP:촉수
+		PRINTFORM 호리호리한 몸매의촉수가 코기쿠를 탐내
+	;애널비즈
+	SIF TEQUIP:애널비즈
+		PRINTFORM 비즈가 기지 기지와 서로 삐걱거려
+	;확장벌룬
+	SIF TEQUIP:확장벌룬
+		PRINTFORM 풍선이 국혈을 있을 수 없는 크기로 확장해
+	;촉수장내산란
+	SIF TEQUIP:촉수장내산란
+		PRINTFORM 배를 가득 부풀려 다 들어가지 않는 알이 모습을 들여다 보게 해
+	PRINTFORMW 있다……
+ENDIF
+
+;삼각목마
+IF TEQUIP:삼각목마
+	PRINTFORM 목마에 이상
+	IF R:3 || R:4
+		PRINTFORM
+	ELSE
+		PRINTFORML 꾸짖어지고 있다……
+	ENDIF
+ELSEIF R:1 && !R:2 && !R:3 && !R:4
+	IF ZUIKI(TARGET)
+		PRINTFORM 끊임없이 신체를 욧
+	ELSEIF BASE:뇨의 >= 60 || BASE:변의 >= 60 || BASE:구역질 >= 60
+		PRINTFORM 신체를 조금씩 진동시키고
+	ENDIF
+	IF TEQUIP:미약 && ZUIKI(TARGET)
+		PRINTFORM 라고,
+	ELSEIF TEQUIP:미약 && (BASE:뇨의 >= 60 || BASE:변의 >= 60)
+		PRINTFORM ,
+	ENDIF
+	SIF TEQUIP:미약
+		PRINTFORM 물기를 띤 눈동자로 정욕을 견디고
+	SIF TEQUIP:꽐라플레이
+		PRINTFORM 얼굴을 붉게 해
+	PRINTFORML 라고 있다…
+ENDIF
+
+SIF R:2 && (R:3 || R:4)
+	PRINTFORM 또
+
+;B계(니틀캡, 유두클립, 착유기, 조수B애무, 촉수유선삽입
+IF R:3
+	;니틀캡
+	IF TEQUIP:니틀캡 && !TEQUIP:촉수
+		PRINTFORM 완구에 유두를 빨아내져
+	;촉수유두고문
+	ELSEIF TEQUIP:니틀캡 && TEQUIP:촉수
+		PRINTFORM 촉수의입에 유두를 희롱해져
+	;유두클립
+	ELSEIF TEQUIP:유두클립
+		PRINTFORM 유두에 클립을 끼여,
+	;착유기
+	ELSEIF TEQUIP:착유기 && TEQUIP:촉수
+		PRINTFORM 꿈틀거리는촉수에모유를 짜져
+	;촉수착유
+	ELSEIF TEQUIP:착유기 && !TEQUIP:촉수
+		PRINTFORM 들이마셔지는 대로모유를 짜져
+	;촉수유선삽입
+	ELSEIF TEQUIP:촉수유선삽입
+		PRINTFORM 실과 같은촉수에 유선을 범해져
+	ENDIF
+	SIF !R:4
+		PRINTFORMW 색기를 늘리고 있다……
+ENDIF
+
+;C·P계(클리캡, 음핵클립, 전동오나홀, 카테터, 요도벌룬, 조수C애무)
+IF R:4
+	;클리캡
+	IF TEQUIP:클리캡 && !TEQUIP:촉수
+		PRINTFORM 음핵을 완구로 팽창시키고
+	;촉수클리고문
+	ELSEIF TEQUIP:클리캡 && TEQUIP:촉수
+		PRINTFORM 촉수의 끝에 집요하게 음핵을 희롱해지고
+	;음핵클립
+	ELSEIF TEQUIP:음핵클립
+		PRINTFORM 음핵을 클립으로 끼여라
+	;전동오나홀
+	ELSEIF TEQUIP:전동오나홀 && !TEQUIP:촉수
+		PRINTFORM 통에페니스를 휩싸여라
+	;촉수페니스고문
+	ELSEIF TEQUIP:전동오나홀 && TEQUIP:촉수
+		PRINTFORM 촉수에페니스를 잡아당겨지고
+	;카테터
+	ELSEIF TEQUIP:카테터 && !TEQUIP:촉수
+		PRINTFORM 카테터에 요도를 범해지고
+	;촉수요도삽입
+	ELSEIF TEQUIP:카테터 && TEQUIP:촉수
+		PRINTFORM 가는촉수에 요도까지 범해지고
+	;요도벌룬
+	ELSEIF TEQUIP:요도벌룬
+		PRINTFORM 풍선에 서서히 요도가 확장되고
+	ENDIF
+	PRINTFORMW , 쾌락에 떨고 있다……
+ENDIF
+
+;시츄계(수치플레이, 비디오촬영)
+IF TEQUIP:수치플레이 || TEQUIP:비디오카메라
+	PRINTFORM 그 모습은
+	;수치플레이
+	SIF TEQUIP:수치플레이
+		PRINTFORM 거울에 비쳐,%CALLNAME%를 유혹해
+	SIF TEQUIP:수치플레이 && TEQUIP:비디오카메라
+		PRINTFORM 개개
+	;비디오
+	SIF TEQUIP:비디오카메라
+		PRINTFORM 담담하게 테이프에 녹화되고
+	PRINTFORMW 라고 있다……
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------------
+;조수에 맡기는 커맨드
+;--------------------------------------------------
+@ASSI_SELECT_TRAIN
+;랜덤 선택에 의한 행선지를 모두 실행 할 수 없는 경우는 되돌리므로.
+VARSET LOCAL
+
+;조수의 능력에 의해 실행치를 결정
+;조수가 노예에 대해서연모함락 하고 있다
+IF CFLAG:ASSI:40 > -1 && (CFLAG:ASSI:39 == 3 || CFLAG:ASSI:39 == 6 || CFLAG:ASSI:39 == 165) && CFLAG:ASSI:41 == NO:TARGET
+	;키스한다, 정상위, 대면좌위＋
+	LOCAL:1++
+	LOCAL:100++
+	LOCAL:110++
+	LOCAL:104++
+	LOCAL:114++
+	;노예에게[마조]가 없으면 가학계─
+	IF !TALENT:마조
+		LOCAL:140--
+		LOCAL:141--
+		LOCAL:142--
+		LOCAL:143--
+		LOCAL:144--
+		LOCAL:145--
+		LOCAL:151--
+		LOCAL:152--
+		LOCAL:153--
+		LOCAL:154--
+		IF !TEQUIP:사정관리
+			LOCAL:134--
+		ELSE
+			LOCAL:134++
+		ENDIF
+		LOCAL:150--
+		LOCAL:314--
+		LOCAL:155--
+		LOCAL:242--
+		LOCAL:72--
+		LOCAL:160--
+		LOCAL:161--
+		LOCAL:162--
+		LOCAL:180--
+		LOCAL:181--
+		LOCAL:182--
+		LOCAL:183--
+		LOCAL:184--
+		LOCAL:185--
+		LOCAL:380--
+		LOCAL:381--
+		LOCAL:382--
+		LOCAL:383--
+		LOCAL:156--
+		LOCAL:16--
+		LOCAL:25--
+		LOCAL:44--
+		LOCAL:56--
+		LOCAL:224--
+		LOCAL:61--
+		LOCAL:62--
+		IF !TEQUIP:촉수
+			LOCAL:340--
+		ELSE
+			LOCAL:340++
+		ENDIF
+		LOCAL:280--
+		LOCAL:281--
+		LOCAL:282--
+		LOCAL:283--
+		LOCAL:284--
+		LOCAL:285--
+		LOCAL:286--
+	ENDIF
+ENDIF
+;[무관심]가 있으면아무것도안한다＋
+SIF TALENT:ASSI:무관심
+	LOCAL:2++
+;[습득빠름][억압][악취민감][스킨십불편]로 도구계＋
+IF TALENT:ASSI:습득빠름 || TALENT:ASSI:억압 || TALENT:ASSI:악취민감 || TALENT:ASSI:스킨십불편
+	LOCAL:12++
+	SIF !TEQUIP:니틀캡
+		LOCAL:13++
+	SIF !TEQUIP:유두클립
+		LOCAL:15++
+	SIF !TEQUIP:착유기
+		LOCAL:17++
+	LOCAL:20++
+	LOCAL:21++
+	SIF !TEQUIP:클리캡
+		LOCAL:22++
+	SIF !TEQUIP:음핵클립
+		LOCAL:24++
+	SIF !TEQUIP:전동오나홀
+		LOCAL:32++
+	SIF !TEQUIP:로터삽입
+		LOCAL:42++
+	SIF !TEQUIP:바이브
+		LOCAL:43++
+	SIF !TEQUIP:로터A삽입
+		LOCAL:52++
+	SIF !TEQUIP:애널바이브
+		LOCAL:54++
+	SIF !TEQUIP:애널비즈
+		LOCAL:53++
+	SIF !TEQUIP:카테터
+		LOCAL:60++
+ENDIF
+;[보수적][스킨십선호]로 도구계─
+IF TALENT:ASSI:보수적 || TALENT:ASSI:스킨십선호
+	LOCAL:12--
+	SIF !TEQUIP:니틀캡
+		LOCAL:13--
+	SIF !TEQUIP:유두클립
+		LOCAL:15--
+	SIF !TEQUIP:착유기
+		LOCAL:17--
+	LOCAL:20--
+	LOCAL:21--
+	SIF !TEQUIP:클리캡
+		LOCAL:22--
+	SIF !TEQUIP:음핵클립
+		LOCAL:24--
+	SIF !TEQUIP:전동오나홀
+		LOCAL:32--
+	SIF !TEQUIP:로터삽입
+		LOCAL:42--
+	SIF !TEQUIP:바이브
+		LOCAL:43--
+	SIF !TEQUIP:로터A삽입
+		LOCAL:52--
+	SIF !TEQUIP:애널바이브
+		LOCAL:54--
+	SIF !TEQUIP:애널비즈
+		LOCAL:53--
+	SIF !TEQUIP:카테터
+		LOCAL:60--
+ENDIF
+;[악취민감][스킨십불편]로 더러워질 것 같아─
+IF TALENT:ASSI:악취민감 || TALENT:ASSI:스킨십불편
+	LOCAL:40--
+	LOCAL:31--
+	LOCAL:50--
+	LOCAL:51--
+	LOCAL:18--
+	LOCAL:282--
+ENDIF
+;[호기심][헌신적][스킨십선호]로애무계＋
+IF TALENT:ASSI:호기심 || TALENT:ASSI:헌신적 || TALENT:ASSI:스킨십선호
+	LOCAL:0++
+	LOCAL:40++
+	LOCAL:31++
+	LOCAL:41++
+	LOCAL:50++
+	LOCAL:51++
+	LOCAL:10++
+	LOCAL:11++
+	LOCAL:14++
+	LOCAL:30++
+	LOCAL:1++
+	LOCAL:242++
+	LOCAL:243++
+	LOCAL:244++
+	LOCAL:245++
+	LOCAL:282++
+ENDIF
+;[눈에띄고싶음][프라이드높음][건방짐]로 봉사계＋
+IF TALENT:ASSI:눈에띄고싶음 || TALENT:ASSI:프라이드높음 || TALENT:ASSI:건방짐
+	LOCAL:70++
+	LOCAL:71++
+	LOCAL:73++
+	LOCAL:74++
+	LOCAL:75++
+	LOCAL:76++
+	LOCAL:77++
+	LOCAL:81++
+	LOCAL:82++
+	LOCAL:83++
+	LOCAL:85++
+	LOCAL:220++
+	LOCAL:221++
+ENDIF
+;[프라이드높음]로발호된 훈련─, 풋잡한다＋
+IF TALENT:ASSI:프라이드높음
+	LOCAL:80--
+	LOCAL:282++
+ENDIF
+;부위 함락 소질이 있으면 봉사시킨다
+IF TALENT:ASSI:즉각함락 || TALENT:ASSI:자위광
+	LOCAL:226++
+ENDIF
+IF TALENT:ASSI:즉각함락 || TALENT:ASSI:음란구멍
+	LOCAL:260++
+	LOCAL:261++
+	LOCAL:262++
+ENDIF
+IF TALENT:ASSI:즉각함락 || TALENT:ASSI:항문광
+	LOCAL:224++
+	LOCAL:263++
+	LOCAL:264++
+	LOCAL:265++
+ENDIF
+IF TALENT:ASSI:즉각함락 || TALENT:ASSI:음란가슴
+	LOCAL:317++
+	LOCAL:243++
+	LOCAL:220++
+	LOCAL:221++
+ENDIF
+IF TALENT:ASSI:즉각함락 || TALENT:ASSI:섹스광 || TALENT:ASSI:정조무관심
+	LOCAL:100++
+	LOCAL:101++
+	LOCAL:102++
+	LOCAL:103++
+	LOCAL:104++
+	LOCAL:105++
+	LOCAL:106++
+	LOCAL:110++
+	LOCAL:111++
+	LOCAL:112++
+	LOCAL:113++
+	LOCAL:114++
+	LOCAL:115++
+	LOCAL:116++
+	LOCAL:260++
+	LOCAL:261++
+	LOCAL:262++
+	LOCAL:263++
+	LOCAL:264++
+	LOCAL:265++
+ENDIF
+IF TALENT:ASSI:정조관념
+	LOCAL:100--
+	LOCAL:101--
+	LOCAL:102--
+	LOCAL:103--
+	LOCAL:104--
+	LOCAL:105--
+	LOCAL:106--
+	LOCAL:110--
+	LOCAL:111--
+	LOCAL:112--
+	LOCAL:113--
+	LOCAL:114--
+	LOCAL:115--
+	LOCAL:116--
+	LOCAL:260--
+	LOCAL:261--
+	LOCAL:262--
+	LOCAL:263--
+	LOCAL:264--
+	LOCAL:265--
+ENDIF
+;[새드][광기]로 가학＋, 없으면 하드 가학에─
+IF TALENT:ASSI:새드 || TALENT:ASSI:광기
+	SIF !TEQUIP:밧줄
+		LOCAL:130++
+	SIF !TEQUIP:아이마스크
+		LOCAL:131++
+	SIF !TEQUIP:볼개그
+		LOCAL:132++
+	SIF !TEQUIP:정조대
+		LOCAL:133++
+	SIF !TEQUIP:사정관리
+		LOCAL:134++
+	LOCAL:140++
+	LOCAL:141++
+	LOCAL:142++
+	LOCAL:143++
+	LOCAL:144++
+	SIF !TEQUIP:삼각목마
+		LOCAL:145++
+	LOCAL:150++
+	LOCAL:151++
+	LOCAL:152++
+	LOCAL:153++
+	LOCAL:154++
+	LOCAL:155++
+	LOCAL:156++
+	LOCAL:160++
+	LOCAL:161++
+	LOCAL:162++
+	LOCAL:180++
+	LOCAL:181++
+	LOCAL:182++
+	LOCAL:183++
+	SIF !TEQUIP:유두클립
+		LOCAL:15++
+	SIF !TEQUIP:음핵클립
+		LOCAL:24++
+	LOCAL:33++
+	SIF !TEQUIP:확장벌룬
+		LOCAL:55++
+	SIF !TEQUIP:요도벌룬
+		LOCAL:61++
+ELSE
+	SIF !TEQUIP:밧줄
+		LOCAL:130--
+	SIF !TEQUIP:아이마스크
+		LOCAL:131--
+	SIF !TEQUIP:볼개그
+		LOCAL:132--
+	SIF !TEQUIP:정조대
+		LOCAL:133--
+	SIF !TEQUIP:사정관리
+		LOCAL:134--
+	LOCAL:140--
+	LOCAL:141--
+	LOCAL:142--
+	LOCAL:143--
+	LOCAL:144--
+	SIF !TEQUIP:삼각목마
+		LOCAL:145--
+	LOCAL:150--
+	LOCAL:151--
+	LOCAL:152--
+	LOCAL:153--
+	LOCAL:154--
+	LOCAL:155--
+	LOCAL:156--
+	LOCAL:160--
+	LOCAL:161--
+	LOCAL:162--
+	LOCAL:180--
+	LOCAL:181--
+	LOCAL:182--
+	LOCAL:183--
+	SIF !TEQUIP:유두클립
+		LOCAL:15--
+	SIF !TEQUIP:음핵클립
+		LOCAL:24--
+	LOCAL:33--
+	SIF !TEQUIP:확장벌룬
+		LOCAL:55--
+	SIF !TEQUIP:요도벌룬
+		LOCAL:61--
+ENDIF
+;[마조]로 피학＋, 없으면 피학─
+IF TALENT:ASSI:마조
+	LOCAL:280++
+	LOCAL:281++
+	LOCAL:282++
+	LOCAL:283++
+	LOCAL:284++
+	LOCAL:285++
+	LOCAL:286++
+ELSE
+	LOCAL:280--
+	LOCAL:281--
+	LOCAL:282--
+	LOCAL:283--
+	LOCAL:284--
+	LOCAL:285--
+	LOCAL:286--
+ENDIF
+
+;노예의 능력으로 보정
+;[위압]로 봉사─
+IF TALENT:위압
+	LOCAL:70--
+	LOCAL:71--
+	LOCAL:73--
+	LOCAL:74--
+	LOCAL:75--
+	LOCAL:76--
+	LOCAL:77--
+	LOCAL:81--
+	LOCAL:82--
+	LOCAL:83--
+	LOCAL:85--
+	LOCAL:220--
+	LOCAL:221--
+ENDIF
+
+;실행치 이상의 커맨드에 랜덤 추가
+FOR LOCAL:400, 0, 350
+	SIF LOCAL:(LOCAL:400) > -1
+		LOCAL:(LOCAL:400) += RAND:2
+NEXT
+
+FOR LOCAL:400, 0, 350
+	IF LOCAL:(LOCAL:400) > -1 && (LOCAL:(LOCAL:401) < LOCAL:(LOCAL:400) || (!LOCAL:402 || (LOCAL:(LOCAL:401) == LOCAL:(LOCAL:400) && !RAND:4)))
+		STRLENS TRAINNAME:(LOCAL:400)
+		SIF RESULT <= 0
+			CONTINUE
+		CALLFORM COM_ABLE{LOCAL:400}
+		IF RESULT
+			LOCAL:401 = LOCAL:400
+			LOCAL:402++
+		ENDIF
+	ENDIF
+NEXT
+
+IF !LOCAL:402
+	PRINTFORML %CALLNAME:ASSI%에는, 특별히 하고 싶은 조교는 없는 것 같습니다…
+	RETURN 999
+ENDIF
+TFLAG:406 = 1
+RETURN LOCAL:401
+

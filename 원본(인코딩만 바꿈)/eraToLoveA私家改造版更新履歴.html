@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>eraToLoveA私家改造版更新履歴.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="eratolovea%E7%A7%81%E5%AE%B6%E6%94%B9%E9%80%A0%E7%89%88-ver07-20220603">eraToLoveA私家改造版　ver0.7　2022/06/03</h1>
+<h2 id="%E8%AB%B8%E6%B3%A8%E6%84%8F">諸注意</h2>
+<ul>
+<li><strong>このゲームに出てくるキャラクターは、実在の物・人・団体とは一切関係ありません</strong></li>
+<li><strong>公式（DMMやニトロプラス）とは無関係です</strong><br>
+公式への問い合わせ等は絶対にお止めください</li>
+<li>eraToLoveA私家改造版は18禁調教ゲームです<br>
+<strong>18歳未満の方が閲覧を許可されているサイト、掲示板、コミュニティなどにおいてeraシリーズの名称、感想などを書き込むことはお控えください</strong></li>
+<li>Emuera専用バリアントのため、eramakerではプレイできません</li>
+<li>私の作った範囲については他のeraバリアントに流用・改造など自由にしてください</li>
+</ul>
+<hr>
+<h2 id="%E8%B3%AA%E5%95%8F%E3%82%A8%E3%83%A9%E3%83%BC%E3%81%AA%E3%81%A9%E3%81%AE%E5%A0%B1%E5%91%8A%E5%85%88">質問/エラーなどの報告先</h2>
+<ul>
+<li>質問/感想/エラー報告などありましたら、掲示板で呼びかけてもらうか、<a href="https://twitter.com/BvrP28R5CHXSaWV" title="@BvrP28R5CHXSaWV">こちらのツイ垢</a>にご一報ください（ＤＭ開放しています）</li>
+</ul>
+<hr>
+<h2 id="%E6%94%B9%E9%80%A0%E5%85%83">改造元</h2>
+<ul>
+<li>こちらはeraToloveA0.2に下記パッチを当てたものを改変元バリアントとし、私家版として改造したものです
+<ul>
+<li>eraToLoveA02用パッチまとめ20190410</li>
+<li>eraToLoveA02まとめ20191104</li>
+<li>eraToloveA20210309パッチまとめ</li>
+</ul>
+</li>
+<li>eraToloveA作者様、およびパッチ・口上作者様に深く感謝いたします</li>
+</ul>
+<hr>
+<h2 id="%E6%A5%B5%E3%82%AD%E3%83%A3%E3%83%A9%E3%81%AE%E5%AE%9F%E8%A3%85%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">極キャラの実装について</h2>
+<ul>
+<li><strong>未実装となっている極キャラのCSVファイルを募集しています</strong><br>
+素質、相性のみ書いたtxtファイルなどのアップロードでも助かります</li>
+<li>ver0.6までで、当方で実装可能な極キャラは一通り実装しました</li>
+</ul>
+<hr>
+<h2 id="%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">更新履歴</h2>
+<h3 id="20220603-ver07%E5%85%AC%E9%96%8B"><strong>2022/06/03　ver0.7公開</strong></h3>
+<blockquote>
+<ul>
+<li>稲葉江の実装</li>
+<li>スレ&gt;&gt;267の「eraToloveA私家版20220427パッチ」の取り込み
+<ul>
+<li>七星剣の実装
+<ul>
+<li>神技は未実装です</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>「本体姦」コマンドの実装
+<ul>
+<li>触手脳姦と催眠触手を足して２で割ったようなコマンド
+<ul>
+<li>触手系コマンドではないため上記２つと違って実行しやすいですが、効果は下位互換的っぽくしてます</li>
+</ul>
+</li>
+<li>「あなた」のみ実行可能</li>
+<li>脳姦経験が加算されます</li>
+</ul>
+</li>
+<li>「授乳手コキ」コマンドの実装
+<ul>
+<li>手淫→母乳飲み、または母乳飲み→手淫からの派生コマンド</li>
+<li>実行判定あるので実行できない場合があります</li>
+</ul>
+</li>
+<li>フリーミッションクリア後、そのままエクストラモードでゲーム続行できるように変更</li>
+<li>畑当番/馬当番の地の文の追加</li>
+<li>PLAYERのスカ経験が0でスカ系コマンドを実行した際に、PLAYERに異常経験が付与されないバグの修正</li>
+<li>その他、軽微な変更修正</li>
+</ul>
+</blockquote>
+<h3 id="20220205-ver06%E5%85%AC%E9%96%8B"><strong>2022/02/05　ver0.6公開</strong></h3>
+<blockquote>
+<ul>
+<li>福島光忠の実装
+<ul>
+<li>内番衣装で、エプロンと手袋を装着していますが、同時装着ができないため、エプロンを優先しています</li>
+</ul>
+</li>
+<li>極キャラの追加
+<ul>
+<li>加州清光</li>
+<li>大和守安定</li>
+<li>髭切</li>
+<li>膝丸</li>
+<li>南泉一文字</li>
+</ul>
+</li>
+<li>[頭部装飾]に鉢巻を追加<br>
+合わせて、和泉守兼定　極の通常衣装の[頭部装飾]に鉢巻を追加</li>
+<li>南泉一文字の素質からTALENT:解放を削除　※特キャラの方</li>
+<li>小豆長光の内番衣装の[特殊1]を手袋→エプロンに変更</li>
+<li>消耗品アイテムの自動補充機能を追加
+<ul>
+<li>自動補充対象アイテム：ローション、ビデオテープ、フィルム、コンドーム</li>
+<li>FLAG:50-53を使用</li>
+</ul>
+</li>
+<li>異常経験取得条件を変更<br>
+合わせて、資料フォルダの【ネタバレ】異常経験条件.txtを追記修正</li>
+<li>特定の素質の組合せを持っている場合に、売却価格がアップするように変更
+<ul>
+<li>例：貞操観念と尻穴狂いを持っている奴隷を売却した場合 etc...</li>
+</ul>
+</li>
+<li>スレ&gt;&gt;264の、「eraToloveA私家版20211206パッチ」の取り込み
+<ul>
+<li>巻き戻しの薬を使った場合に、正常な素質に巻き戻らない場合があったバグを修正</li>
+<li>コンフィグの設定に関わらず、個体差で母乳体質を取得することがあったバグを修正</li>
+<li>個体差取得処理で、普通体型/普通の酒の強さ/普通の濡れやすさ/普通のペニスの大きさになることがあるように変更</li>
+</ul>
+</li>
+<li>その他、軽微な変更修正</li>
+</ul>
+</blockquote>
+<h3 id="20211201-ver05%E5%85%AC%E9%96%8B"><strong>2021/12/01　ver0.5公開</strong></h3>
+<blockquote>
+<ul>
+<li>極キャラを追加
+<ul>
+<li>今剣　※素質に妄信を付けましたが、デフォルトではコメントアウトです</li>
+<li>和泉守兼定</li>
+<li>鶴丸国永</li>
+<li>千代金丸</li>
+</ul>
+</li>
+<li>フリーミッションモードの実装
+<ul>
+<li>サンプルとして、次のミッションを追加しました→　「始まりの刀」</li>
+</ul>
+</li>
+<li>「電気あんま」コマンドの追加</li>
+<li>畑当番/馬当番の地の文の追加</li>
+<li>キャラ図鑑で内番衣装/軽装衣装の設定を確認できるように変更</li>
+<li>調教後自慰で「淫壺」を考慮して処理をするように変更</li>
+<li>奴隷購入時に「だれでも」を選択した際にエラー落ちする場合があったのを修正</li>
+<li>KOJO_FUNCTION.ERBの以下の関数で、TARGET以外が引数に入った場合に適切に判定できていなかったのを修正
+<ul>
+<li>該当関数は以下の通りです<br>
+@CCHECK(ARG)、@VCHECK(ARG)、@ACHECK(ARG)、@BCHECK(ARG)、@ZUIKI(ARG)、@A_BIND_CHECK、@U_BIND_CHECK</li>
+</ul>
+</li>
+<li>育児室の様子を見に行った時の地の文、処理など修正</li>
+<li>リファクタリング</li>
+<li>その他、軽微な修正</li>
+<li>資料フォルダのeraToloveA私家改造版キャラ追加方法.txtを追記修正</li>
+</ul>
+</blockquote>
+<h3 id="20211004-ver04%E5%85%AC%E9%96%8B"><strong>2021/10/04　ver0.4公開</strong></h3>
+<blockquote>
+<ul>
+<li>姫鶴一文字の実装
+<ul>
+<li>eraToLoveA私家改造版用20210923パッチを取り込み<br>
+※追加で、素質:人気を付与しています</li>
+</ul>
+</li>
+<li>極キャラを追加
+<ul>
+<li>厚藤四郎</li>
+<li>五虎退</li>
+<li>蛍丸</li>
+<li>蜂須賀虎徹</li>
+<li>浦島虎徹</li>
+<li>長曽祢虎徹</li>
+</ul>
+</li>
+<li>軽装の追加
+<ul>
+<li>治金丸</li>
+<li>太閤左文字</li>
+<li>五月雨江</li>
+<li>大千鳥十文字槍</li>
+<li>泛塵</li>
+<li>村雲江</li>
+</ul>
+</li>
+<li>水心子正秀口上の更新</li>
+<li>個体差で、部位別の鈍感敏感素質を複数取得できるように変更</li>
+<li>舌使いが取得できないバグの修正</li>
+<li>主人受けセックスで奴隷がゴム射精してもコンドームが消費されないバグの修正</li>
+<li>カテーテル使用時に、Ｕ拡張経験がない場合に異常経験が足されないバグの修正</li>
+<li>意図しない条件で異常経験を足されていたのを修正(触手ヴァギナ拡張)</li>
+<li>セックス系調教で、貞操観念持ちが反発のソースを取得する場合の条件の修正</li>
+<li>おもらし癖、絶頂放尿関連の処理を調整</li>
+<li>刀剣雷舞のユニットの追加、修正</li>
+<li>資料フォルダのeraToloveA私家改造版キャラ追加方法.txtを追記修正</li>
+<li>資料フォルダにeraToloveA私家改造版衣装追加方法.txtを追加</li>
+</ul>
+</blockquote>
+<h3 id="20210801-ver03%E5%85%AC%E9%96%8B"><strong>2021/08/01　ver0.3公開</strong></h3>
+<blockquote>
+<ul>
+<li>極キャラを追加
+<ul>
+<li>江雪左文字</li>
+<li>宗三左文字</li>
+<li>小夜左文字</li>
+<li>山伏国広</li>
+<li>堀川国広</li>
+<li>日本号</li>
+</ul>
+</li>
+<li>軽装の追加
+<ul>
+<li>鬼丸国綱</li>
+<li>山鳥毛</li>
+<li>古今伝授の太刀</li>
+<li>地蔵行平</li>
+<li>日光一文字</li>
+<li>一文字則宗</li>
+</ul>
+</li>
+<li>スレ&gt;&gt;259の、へし切長谷部口上ver1.1の取り込み</li>
+<li>水心子正秀口上の更新</li>
+<li>「見せ槍」コマンドの追加</li>
+<li>初期設定のコマンドフィルタをeraToLoveAに対応</li>
+<li>主人か助手が禁断の知識を持っていない場合に半性転換の薬を買えないように変更</li>
+<li>1週間の主人を記録するように変更</li>
+<li>「クンニ」コマンドで、取得できるものをSOURCE:快Ｃ→SOURCE:快Ｖに変更</li>
+<li>着衣設定画面で「ひんむく」を実行した際にマントも脱げるように変更</li>
+<li>個体差でオフにした素質がつく場合があったのを修正</li>
+<li>「輪姦」コマンドで、ギャラリーが犬だった場合に獣姦経験が足されるように修正<br>
+獣姦経験がない場合は異常経験+1されるように修正</li>
+<li>「輪姦」コマンドで、ギャラリーが女性で調教対象が女性だった場合にも逆レされていたのを修正<br>
+金額計算も修正</li>
+<li>調教者がほぼ珠:快Ｖを取得できなかったのを修正</li>
+<li>騎乗位する/騎乗位アナルするで調教者の処女/バックバージンが喪失した際に、調教対象に異常経験が足されていたのを修正</li>
+<li>独自衣装設定画面で貞操帯を装着させた際に「貞操帯」コマンドが実行されないように修正</li>
+<li>#DIMで定義していた一部の変数に、DYNAMICを追記</li>
+<li>その他、軽微な修正</li>
+</ul>
+</blockquote>
+<h3 id="20210607-ver02%E5%85%AC%E9%96%8B"><strong>2021/06/07　ver0.2公開</strong></h3>
+<blockquote>
+<ul>
+<li>極キャラを追加
+<ul>
+<li>鯰尾藤四郎</li>
+<li>骨喰藤四郎</li>
+<li>博多藤四郎</li>
+<li>包丁藤四郎</li>
+<li>千子村正</li>
+<li>蜻蛉切</li>
+</ul>
+</li>
+<li>水心子正秀口上の追加</li>
+<li>新テンプレのメンテナンス　および、それに伴うEVENT_K.ERBの修正
+<ul>
+<li>コマンド番号などをeraToLoveA私家改造版に対応、口上テンプレの追加、ファイルの分割など</li>
+<li>場所→　\口上テンプレート・講座\01テンプレ関連\奴隷用口上テンプレ\新テンプレート</li>
+</ul>
+</li>
+<li>ゲーム起動時の画面ウィンドウの大きさの調整</li>
+<li>ザーメンキスコマンドの実行条件を変更</li>
+<li>SHOPメニューで表示されないメニューがあったのを修正</li>
+<li>キャラコンフィグで共犯者のキャラは汎用喘ぎ設定、独自衣装設定を設定できないように変更</li>
+<li>能力上昇画面で、上昇できない能力にも「レベルアップ可能」と表示されていたのを修正</li>
+<li>快Ｃを用いてセックス中毒が上昇できなくなっていたのを修正</li>
+<li>娼館奉公、奴隷ショー、公衆便所プレイの金額計算でバックバージンが処女と表示されていたのを修正</li>
+<li>奴隷のレンタルでバックバージンが金額計算に入っていなかったのを修正</li>
+<li>その他、軽微な修正</li>
+</ul>
+</blockquote>
+<h3 id="20210403-ver01%E5%85%AC%E9%96%8B"><strong>2021/04/03　ver0.1公開</strong></h3>
+<blockquote>
+<p>覚えている限りの追加、変更点を記載していますが、もしかしたら抜け漏れあるかもしれません。すみません</p>
+<ul>
+<li>極キャラを追加
+<ul>
+<li>石切丸</li>
+<li>岩融</li>
+<li>にっかり青江</li>
+<li>鳴狐</li>
+<li>秋田藤四郎</li>
+<li>物吉貞宗</li>
+<li>亀甲貞宗</li>
+<li>不動行光</li>
+<li>獅子王</li>
+<li>御手杵</li>
+</ul>
+</li>
+<li>キャラの素質の調整</li>
+<li>個体差の実装</li>
+<li>極修行の実装</li>
+<li>素質の追加
+<ul>
+<li>カントボーイ</li>
+<li>シーメール</li>
+<li>オメガ</li>
+<li>陥没乳首</li>
+<li>上戸</li>
+<li>下戸</li>
+<li>神技</li>
+<li>極</li>
+</ul>
+</li>
+<li>アイテムの追加
+<ul>
+<li>半性転換の薬</li>
+<li>甘酒、ビール、日本酒</li>
+</ul>
+</li>
+<li>経験の追加
+<ul>
+<li>挿入経験</li>
+<li>腸射経験</li>
+<li>切断経験</li>
+<li>嘔吐経験</li>
+<li>妊娠経験</li>
+</ul>
+</li>
+<li>「酩酊プレイ」コマンドの追加</li>
+<li>労役の追加
+<ul>
+<li>畑当番</li>
+<li>馬当番</li>
+</ul>
+</li>
+<li>労役の制限の変更</li>
+<li>各種フラグの移動
+<ul>
+<li>お守り関連</li>
+<li>淫系素質獲得履歴取得</li>
+<li>面識フラグ</li>
+<li>助手調教経験フラグ</li>
+<li>キャラの呼び名固定フラグ</li>
+<li>CFLAG:102</li>
+</ul>
+</li>
+<li>フラグの追加
+<ul>
+<li>刀種フラグ</li>
+<li>刀派フラグ</li>
+</ul>
+</li>
+<li>キャラにあだ名・独自衣装を設定可能に</li>
+<li>マント、変装グッズをアクセサリ化</li>
+<li>軽装入手の金額設定の変更</li>
+<li>淫系素質取得条件・恋慕/親愛の取得条件の変更</li>
+<li>舌使い取得処理追加</li>
+<li>朝イベント3P・夜イベント3Pの処理の変更</li>
+<li>キャラ所持可能数と追加上限を800人まで拡張</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="%E5%90%84%E7%A8%AE%E3%83%AA%E3%83%B3%E3%82%AF">各種リンク</h2>
+<ul>
+<li><a href="http://www.nitroplus.co.jp/license/">ニトロプラス 著作物転載ガイドライン</a></li>
+<li><a href="http://www.nitroplus.co.jp/license/fanbook.php">二次創作活動における同人誌等の活動に関する取り扱いについて</a></li>
+<li><a href="http://seesaawiki.jp/eratoho/">eratohoまとめ V3</a></li>
+<li><a href="http://seesaawiki.jp/eraseries/">eraシリーズを語るスレ　まとめWiki　V3</a></li>
+<li><a href="http://seesaawiki.jp/eraheta/">erahetaまとめ</a></li>
+</ul>
+<hr>
+<p>りりー拝</p>
+
+</body>
+</html>

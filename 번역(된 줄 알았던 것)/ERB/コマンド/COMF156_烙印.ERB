@@ -1,0 +1,149 @@
+﻿;-------------------------------------------------
+;낙인
+;SM-하드계 커맨드
+;-------------------------------------------------
+@COM156
+
+PRINTL 낙인
+STR:0 = 낙인
+
+TFLAG:56 = 0
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;어느낙인를 붙였는지
+IF TFLAG:56
+	;통증, 두려움, 굴복, 일탈, 반발
+	SOURCE:통증 += 6000
+	SOURCE:두려움 += 6000
+	SOURCE:굴복 += 2000
+	SOURCE:일탈 += 800
+	SOURCE:반발 += 2500
+
+	;첫낙인 때이상경험, 굴복·일탈·반발의 소스
+	IF TALENT:TARGET:낙인 == 0
+		EXP:이상경험 += 1
+		PRINTL 낙인첫경험으로이상경험＋1
+		SOURCE:굴복 += 500
+		SOURCE:일탈 += 800
+		SOURCE:반발 += 2000
+	ENDIF
+
+	;상흔
+	IF TALENT:낙인 & 1
+		;소비체력, 기력
+		LOSEBASE:체력 += 100
+		LOSEBASE:기력 += 300
+		
+		TALENT:낙인 |= 1
+	ENDIF
+	;문신
+	IF TALENT:낙인 & 2
+		;소비체력, 기력
+		LOSEBASE:체력 += 500
+		LOSEBASE:기력 += 400
+		
+		TALENT:낙인 |= 2
+	ENDIF
+	;소인
+	IF TALENT:낙인 & 4
+		;소비체력, 기력
+		LOSEBASE:체력 += 500
+		LOSEBASE:기력 += 400
+		
+		TALENT:낙인 |= 4
+	ENDIF
+	;피어스
+	IF TALENT:낙인 & 8
+		;벌써 피어스가 붙어 있을 때, 새로 붙일 뿐(만큼)인 것로통증는 적은… 이라고 하는 설정
+		IF TALENT:낙인 & 8
+			;소비체력, 기력
+			LOSEBASE:체력 += 0
+			LOSEBASE:기력 += 20
+			
+			TIMES SOURCE:통증, 0.00
+			TIMES SOURCE:두려움, 0.50
+			TIMES SOURCE:반발, 1.50
+		ELSE
+			;소비체력, 기력
+			LOSEBASE:체력 += 100
+			LOSEBASE:기력 += 300
+			
+			TALENT:낙인 |= 8
+		ENDIF
+	ENDIF
+
+	PRINTFORML %CALLNAME%의 몸에【낙인】를 붙여졌다
+
+	;거치고 싶고 실마리응용 안면 판정의 갱신
+	IF TALENT:낙인 && NO:MASTER != S
+		;최대 사용 비트수를 17 비트와 가정
+		G = GETCHARA(S)
+		H = (2099 + NO:TARGET)
+		LOCAL = S + 2099
+		SIF G >= 0
+			CFLAG:G:H &= 130047
+		CFLAG:TARGET:(LOCAL) &= 129023
+		G = (2099 + NO:PLAYER)
+	ELSE
+		G = (2099 + NO:PLAYER)
+		H = (2099 + NO:TARGET)
+	ENDIF
+	
+	CFLAG:PLAYER:H |= 1024
+	CFLAG:TARGET:G |= 2048
+
+	;낙인를 누른 상대의 이름을 기록
+	CSTR:1 = %CALLNAME:MASTER%
+ENDIF
+
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+IF TFLAG:56
+	;연모·친애·복종·예속로낙인가 붙어 있을 때순종의 소스 추가, 두려움와반발의 소스 감소
+	IF TALENT:낙인 && (TALENT:연모 || TALENT:복종 || TALENT:친애 || TALENT:예속)
+		SOURCE:순종 += 2000
+		TIMES SOURCE:두려움, 0.80
+		TIMES SOURCE:반발, 0.50
+	ENDIF
+
+	;고통의 파라미터에 의한고통의 소스 증가는 먼저 처리해 둔다
+	IF PALAM:고통 < PALAMLV:1
+		TIMES SOURCE:통증, 1.00
+	ELSEIF PALAM:고통 < PALAMLV:2
+		TIMES SOURCE:통증, 1.50
+	ELSEIF PALAM:고통 < PALAMLV:3
+		TIMES SOURCE:통증, 2.00
+	ELSEIF PALAM:고통 < PALAMLV:4
+		TIMES SOURCE:통증, 2.50
+	ELSEIF PALAM:고통 >= PALAMLV:4
+		TIMES SOURCE:통증, 3.00
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+IF TFLAG:56
+	;게이경험라든지 가산
+	CALL COM_EXP(5)
+	
+	;의존도 벡터
+	TFLAG:33 = 3
+	
+	;의존도 보정치(연모·복종로 1, 친애·예속로 2)
+	IF TALENT:연모 || TALENT:복종
+		TFLAG:30 += 1
+	ELSEIF TALENT:친애 || TALENT:예속
+		TFLAG:30 += 2
+	ENDIF
+ENDIF
+
+
+RETURN 1
+

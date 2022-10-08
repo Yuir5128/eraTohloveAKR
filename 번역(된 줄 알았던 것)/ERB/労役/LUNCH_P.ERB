@@ -1,0 +1,564 @@
+﻿
+;====================================================================
+;노예에게 요리를 만들게 했을 때, 독을 담아질지 어떨지 판정
+;====================================================================
+@LUNCH_JUDGE
+TFLAG:14 = 0
+
+;주인과의 궁합이 좋은, 혹은 상위 함락 노예는 독 번창하지 않는다
+A = NO:MASTER
+IF RELATION:A > 100 || TALENT:친애 || TALENT:창부 || TALENT:예속
+	CALL LUNCH_SALE
+ELSE
+	IF !TALENT:연모 && (MARK:반발각인 >= 2 || ABL:순종 < 5)
+		IF TALENT:조제지식 && TALENT:약점잡힘 == 0
+			IF RAND:2 == 0
+				CALL POISONED_LUNCH
+			ELSE
+				CALL LUNCH_SALE
+			ENDIF
+		ELSEIF (TALENT:반항적 || TALENT:저항) && TALENT:약점잡힘 == 0
+			IF RAND:3 == 0
+				CALL POISONED_LUNCH
+			ELSE
+				CALL LUNCH_SALE
+			ENDIF
+		ELSEIF TALENT:조제지식 == 0 && TALENT:약점잡힘
+			IF RAND:6 == 0
+				CALL POISONED_LUNCH
+			ELSE
+				CALL LUNCH_SALE
+			ENDIF
+		ELSE
+			IF RAND:4 == 0
+				CALL POISONED_LUNCH
+			ELSE
+				CALL LUNCH_SALE
+			ENDIF
+		ENDIF
+	ELSE
+		CALL LUNCH_SALE
+	ENDIF
+ENDIF
+
+RETURN 0
+
+
+
+
+
+
+;====================================================================
+;만든 요리의 성공 여부 판정
+;어디에서라도 누구에게라도 사용할 수 있는 성공 여부 판정. 하는 김에 가격도 판정.
+;P가 비쌀 정도 요리가 맛있다. F=1은 성공, F=0은 실패.
+;====================================================================
+@LUNCH_RESULT(ARG)
+
+;요리기능(기초치)
+IF ABL:ARG:요리기능
+	P = ABL:ARG:요리기능*12
+ELSE
+	P = 0
+ENDIF
+
+;EXP:조리 경험을 본다
+IF EXP:ARG:가사경험 >= EXPLV:5
+	P += 50
+ELSEIF EXP:ARG:가사경험 >= EXPLV:4
+	P += 40
+ELSEIF EXP:ARG:가사경험 >= EXPLV:3
+	P += 30
+ELSEIF EXP:ARG:가사경험 >= EXPLV:2
+	P += 20
+ELSEIF EXP:ARG:가사경험 >= EXPLV:1
+	P += 10
+ELSE
+	P += 0
+ENDIF
+
+;기교
+IF ABL:ARG:기교
+	P += ABL:ARG:기교*5
+ELSE
+	P += 0
+ENDIF
+
+;요리고수/mA리치
+IF TALENT:ARG:요리고수
+	P += 50
+ELSEIF TALENT:ARG:요리치
+	P -= 100
+ENDIF
+
+;프로급의 솜씨. 실패하는 일은 없다. (성공 10:실패 0)
+IF P >= 200
+	F = 1
+;꽤 잘 되었다. 드물게 실패한다. (성공 9:실패 1)
+ELSEIF P >= 100
+	IF RAND:9 < 1
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;능숙해져 왔다. 이따금 실패한다. (성공 6:실패 4)
+ELSEIF P >= 50
+	IF RAND:9 < 4
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;아직도 아마추어. 실패가 많다. (성공 3:실패 7)
+ELSEIF P >= 0
+	IF RAND:9 < 7
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;요리치. 어쩔 도리가 없다. (성공 0:실패 100)
+ELSE
+	F = 0
+ENDIF
+
+;가격의 판정
+IF P > 0
+	M = P
+	SIF F
+		M *= 2
+ELSE
+	M = 10
+ENDIF
+
+
+
+;====================================================================
+;만든 요리의 이름을 판정·2
+;어떤 요리였는지 약간 세세하고. 그렇지만 종류까지.
+;====================================================================
+@LUNCH_NAME
+IF P >= 200
+	F = 1
+;꽤 잘 되었다. 드물게 실패한다. (성공 9:실패 1)
+ELSEIF P >= 100
+	IF RAND:9 < 1
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;능숙해져 왔다. 이따금 실패한다. (성공 6:실패 4)
+ELSEIF P >= 50
+	IF RAND:9 < 4
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;아직도 아마추어. 실패가 많다. (성공 3:실패 7)
+ELSEIF P >= 0
+	IF RAND:9 < 7
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;요리치. 어쩔 도리가 없다. (성공 0:실패 100)
+ELSE
+	F = 0
+ENDIF
+
+SIF P < 0
+	PRINTFORM …?
+
+
+;====================================================================
+;만든 요리의 이름을 판정·3
+;요리명까지 세세하게 판정. 캐릭터 마다의 요리도 여기서.
+;====================================================================
+@LUNCH_NAME_DETAIL(ARG, ARG:1)
+#FUNCTIONS
+;텐프레용
+;IF NO:ARG == 
+	;캐릭터
+;	RETURNF "(요리명)"
+;ELSE
+	;샐러드
+	IF RAND:11 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:11
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:5
+		ELSE
+			K:1 = RAND:3
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "샐러드"
+			CASE 1
+				RETURNF "포테이토 샐러드"
+			CASE 2
+				RETURNF "시저 샐러드"
+			CASE 3
+				RETURNF "일본식 샐러드"
+			CASE 4
+				RETURNF "서양식 샐러드"
+			CASE 5
+				RETURNF "코울슬로"
+			CASE 6
+				RETURNF "씨푸드 샐러드"
+			CASE 7
+				RETURNF "마카로니 샐러드"
+			CASE 8
+				RETURNF "핫 샐러드"
+			CASE 9
+				RETURNF "마리네"
+			CASE 10
+				RETURNF "카르파초"
+		ENDSELECT
+	;밥의
+	ELSEIF RAND:10 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:15
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:8
+		ELSE
+			K:1 = RAND:4
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "계란덮밥"
+			CASE 1
+				RETURNF "오야코동"
+			CASE 2
+				RETURNF "카츠동"
+			CASE 3
+				RETURNF "볶음밥"
+			CASE 4
+				RETURNF "튀김덮밥"
+			CASE 5
+				RETURNF "해산물사발"
+			CASE 6
+				RETURNF "소고기 덮밥"
+			CASE 7
+				RETURNF "오무라이스"
+			CASE 8
+				RETURNF "비빔밥"
+			CASE 9
+				RETURNF "오목 밥"
+			CASE 10
+				RETURNF "필라프"
+			CASE 11
+				RETURNF "리좃트"
+			CASE 12
+				RETURNF "초밥"
+			CASE 13
+				RETURNF "소금정식"
+			CASE 14
+				RETURNF "스시"
+		ENDSELECT
+	;빵
+	ELSEIF RAND:9 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:10
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:7
+		ELSE
+			K:1 = RAND:3
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "샌드위치"
+			CASE 1
+				RETURNF "프렌치 토스트"
+			CASE 2
+				RETURNF "갈릭 토스트"
+			CASE 3
+				RETURNF "햄버거"
+			CASE 4
+				RETURNF "BLT 샌드"
+			CASE 5
+				RETURNF "커틀릿 샌드"
+			CASE 6
+				RETURNF "핫도그"
+			CASE 7
+				RETURNF "베이글 샌드"
+			CASE 8
+				RETURNF "스콘"
+			CASE 9
+				RETURNF "피자"
+		ENDSELECT
+	;분물, 면
+	ELSEIF RAND:8 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:13
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:8
+		ELSE
+			K:1 = RAND:5
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "우동"
+			CASE 1
+				RETURNF "곁"
+			CASE 2
+				RETURNF "소면"
+			CASE 3
+				RETURNF "너구리 우동"
+			CASE 4
+				RETURNF "여우 곁"
+			CASE 5
+				RETURNF "카레 우동"
+			CASE 6
+				RETURNF "나베 야끼우동"
+			CASE 7
+				RETURNF "야끼소바"
+			CASE 8
+				RETURNF "튀김 곁"
+			CASE 9
+				RETURNF "라면"
+			CASE 10
+				RETURNF "냉면"
+			CASE 11
+				RETURNF "오코노미야키"
+			CASE 12
+				RETURNF "타코야끼"
+		ENDSELECT
+	;고기 요리
+	ELSEIF RAND:7 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:17
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:10
+		ELSE
+			K:1 = RAND:5
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "고기감자조림"
+			CASE 1
+				RETURNF "햄버거"
+			CASE 2
+				RETURNF "돈까스"
+			CASE 3
+				RETURNF "고로케"
+			CASE 4
+				RETURNF "돼지의 생강구이"
+			CASE 5
+				RETURNF "닭튀김"
+			CASE 6
+				RETURNF "스키야키"
+			CASE 7
+				RETURNF "포크 소테"
+			CASE 8
+				RETURNF "멘치카트"
+			CASE 9
+				RETURNF "교자"
+			CASE 10
+				RETURNF "스테이크"
+			CASE 11
+				RETURNF "로스트 비프"
+			CASE 12
+				RETURNF "탕수육"
+			CASE 13
+				RETURNF "돼지고기 조림"
+			CASE 14
+				RETURNF "슈마이"
+			CASE 15
+				RETURNF "모트 삶어"
+			CASE 16
+				RETURNF "roll cabbage"
+		ENDSELECT
+	;물고기 요리
+	ELSEIF RAND:6 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:10
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:5
+		ELSE
+			K:1 = RAND:3
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "생선구이"
+			CASE 1
+				RETURNF "생선회"
+			CASE 2
+				RETURNF "소규정식"
+			CASE 3
+				RETURNF "브리 무"
+			CASE 4
+				RETURNF "무니엘"
+			CASE 5
+				RETURNF "사바의 된장을 넣은 조림요리"
+			CASE 6
+				RETURNF "가자미의 졸임"
+			CASE 7
+				RETURNF "브리의 양념구이"
+			CASE 8
+				RETURNF "새우 플라이"
+			CASE 9
+				RETURNF "감 플라이"
+		ENDSELECT
+	;스튜, 카레
+	ELSEIF RAND:5 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:10
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:5
+		ELSE
+			K:1 = RAND:3
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "카레"
+			CASE 1
+				RETURNF "크림 스튜"
+			CASE 2
+				RETURNF "치킨 카레"
+			CASE 3
+				RETURNF "야채 카레"
+			CASE 4
+				RETURNF "드라이 카레"
+			CASE 5
+				RETURNF "소고기 카레"
+			CASE 6
+				RETURNF "스프 카레"
+			CASE 7
+				RETURNF "비프 스튜─"
+			CASE 8
+				RETURNF "햄버거 카레"
+			CASE 9
+				RETURNF "돈까스카레"
+		ENDSELECT
+	;그라탕, 도리아, 파스타
+	ELSEIF RAND:4 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:11
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:7
+		ELSE
+			K:1 = RAND:3
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "그라탕"
+			CASE 1
+				RETURNF "도리아"
+			CASE 2
+				RETURNF "파스타"
+			CASE 3
+				RETURNF "미트 소스 스파게티"
+			CASE 4
+				RETURNF "카르보나라"
+			CASE 5
+				RETURNF "나폴리탄"
+			CASE 6
+				RETURNF "포테이토 그라탕"
+			CASE 7
+				RETURNF "마카로니 그라탕"
+			CASE 8
+				RETURNF "페페론치노"
+			CASE 9
+				RETURNF "명란 파스타"
+			CASE 10
+				RETURNF "그라스파"
+		ENDSELECT
+	;계란 요리
+	ELSEIF RAND:3 == 0
+		IF P:ARG >= 100
+			K:1 = RAND:6
+		ELSE
+			K:1 = RAND:2
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "계란부침"
+			CASE 1
+				RETURNF "달걀 볶음"
+			CASE 2
+				RETURNF "오믈렛"
+			CASE 3
+				RETURNF "옴 곁"
+			CASE 4
+				RETURNF "이고 계란말이"
+			CASE 5
+				RETURNF "계란찜"
+		ENDSELECT
+	;찌개, 스프
+	ELSEIF RAND:2 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:14
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:8
+		ELSE
+			K:1 = RAND:4
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "냄비"
+			CASE 1
+				RETURNF "된장국"
+			CASE 2
+				RETURNF "콘 스프"
+			CASE 3
+				RETURNF "국"
+			CASE 4
+				RETURNF "토마토 스프"
+			CASE 5
+				RETURNF "야채 스프"
+			CASE 6
+				RETURNF "돼지고기 된장국"
+			CASE 7
+				RETURNF "오뎅"
+			CASE 8
+				RETURNF "비시소워즈"
+			CASE 9
+				RETURNF "포트후"
+			CASE 10
+				RETURNF "김치찌개"
+			CASE 11
+				RETURNF "클램 차우더"
+			CASE 12
+				RETURNF "미네스트로네"
+			CASE 13
+				RETURNF "양파 그라탕 스프"
+		ENDSELECT
+	;디저트
+	ELSE
+		IF P:ARG >= 200
+			K:1 = RAND:13
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:8
+		ELSE
+			K:1 = RAND:5
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "팥소 경단"
+			CASE 1
+				RETURNF "초콜릿 케이크"
+			CASE 2
+				RETURNF "아이스크림"
+			CASE 3
+				RETURNF "치즈 케이크"
+			CASE 4
+				RETURNF "컵 케이크"
+			CASE 5
+				RETURNF "쑥경단"
+			CASE 6
+				RETURNF "미타라시 당고"
+			CASE 7
+				RETURNF "삼색 경단"
+			CASE 8
+				RETURNF "팬케이크"
+			CASE 9
+				RETURNF "크레페"
+			CASE 10
+				RETURNF "계절의 샤벳"
+			CASE 11
+				RETURNF "달걀의 과일 파이"
+			CASE 12
+				RETURNF "애플 파이"
+		ENDSELECT
+	ENDIF
+;ENDIF
+
+

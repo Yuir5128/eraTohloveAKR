@@ -1,0 +1,565 @@
+﻿;-------------------------------------------------
+;범용 함수 두는 곳
+;소질 관련(소질 분류계 따위)
+;-------------------------------------------------
+;-------------------------------------------------
+;함수명:GET_TALENTNAME
+;개요:소질 나토리 이득 함수
+;인수:ARG:0… 캐릭터 등록 번호
+;　　　:ARG:1…TALENT 번호
+;반환값:소질명
+;비고:문중 함수
+;소질의 이름을 돌려준다. 상위 소질명의 처리를 실시한다
+;-------------------------------------------------
+@GET_TALENTNAME(ARG:0, ARG:1)
+#FUNCTIONS
+SELECTCASE ARG:1
+	CASE 65
+		RETURNF "스킨십호"
+	CASE 66
+		RETURNF "스킨십싫어"
+	;새드/도S
+	CASE 83
+		RETURNF @"\@ TALENT:ARG:새드 == 2? 도S # %TALENTNAME:83% \@"
+	;마조/도M
+	CASE 84
+		RETURNF @"\@ TALENT:ARG:마조 == 2? 도M # %TALENTNAME:84% \@"
+ENDSELECT
+RETURNF TALENTNAME:(ARG:1)
+
+;-------------------------------------------------
+;함수명:GET_SEX
+;개요:성별 취득 함수
+;인수:ARG:0… 캐릭터 등록 번호
+;반환값:성별을 나타내는 캐릭터 라인
+;비고:문중 함수
+;-------------------------------------------------
+@GET_SEX(ARG)
+#FUNCTIONS
+IF TALENT:ARG:반음반양
+	RETURNF TALENTNAME:137
+ELSEIF TALENT:ARG:후타나리
+	RETURNF TALENTNAME:139
+ELSEIF TALENT:ARG:남자
+	RETURNF TALENTNAME:140
+ELSEIF TALENT:ARG:컨트보이
+	RETURNF TALENTNAME:172
+ELSEIF TALENT:ARG:쉬메일
+	RETURNF TALENTNAME:173
+ELSE
+	RETURNF "여자 아이"
+ENDIF
+
+;-------------------------------------------------
+;함수명:TALENT_TYPE
+;개요:소질 분류 함수
+;인수:ARG:0…TALENT 번호, ARG:1… 캐릭터 등록 번호
+;반환값:소질 분류 번호
+;       (0. 비표시/1. 성별/2. 성격/3. 체질/4. 기능/5. 후 하늘 소질/6. 함락 소질/7. 미분류)
+;비고:문중 함수
+;소질 분류 테이블. 소질의 분류 번호를 돌려준다.
+;소질 정돈 표시에 이용한다
+;
+;-------------------------------------------------
+@TALENT_TYPE(ARG:0, ARG:1)
+#FUNCTION
+SELECTCASE ARG:0
+	;페니스 있는 때 표시시키는 소질
+	;동정/아이사이즈/단소/거근/말자지/포경/절륜
+	CASE 114 TO 117, 119, 152
+		IF PENIS(ARG:1)
+			RETURNF 3
+		ELSE
+			RETURNF 0
+		ENDIF
+	CASE 160
+		IF PENIS(ARG:1)
+			RETURNF 1
+		ELSE
+			RETURNF 0
+		ENDIF
+	;여성기 있는 때 표시시키는 소질
+	;처녀/재생처녀/음란구멍/V둔감/V민감
+	CASE 75, 103, 104
+		IF !VAGINA(ARG:1)
+			RETURNF 0
+		ELSE
+			RETURNF 3
+		ENDIF
+	CASE 0, 1
+		IF !VAGINA(ARG:1)
+			RETURNF 0
+		ELSE
+			RETURNF 1
+		ENDIF
+	;가슴 있는 때 표시시키는 소질
+	;빈유/절벽/거유/폭유
+	CASE 109 TO 112
+		RETURNF 3
+;	;0. 비표시(표시시키지 않는 소질)
+;	CASE 
+;		RETURNF 0
+	;1. 성별
+	CASE 0, 1, 137 TO 140, 157, 158, 160, 161, 170, 172, 173
+		RETURNF 1
+	;2. 성격
+	CASE 10 TO 36, 38, 63 TO 71, 82, 87, 88, 151, 166 TO 168
+		RETURNF 2
+	;3. 체질
+	CASE 40 TO 49, 54, 56, 57, 60 TO 62, 72 TO 84, 90 TO 134, 142, 143, 145 TO 150, 171,
+		RETURNF 3
+	;4. 기능
+	CASE 50 TO 53, 55, 58, 59, 135, 136, 144, 156, 169, 181
+		RETURNF 4
+	;5. 후 하늘 소질
+	CASE 37, 85, 86, 141, 153 TO 155, 159, 163, 165, 200 TO 205, 180
+		RETURNF 5
+	;6. 함락 소질
+	CASE 3 TO 9, 162
+		RETURNF 6
+ENDSELECT
+;7. 미분류(이것이 있는 것은 바람직하지 않다)
+RETURNF 7
+
+
+;-------------------------------------------------
+;함수명:TALENT_TYPENAME
+;개요:소질 분류 나토리 이득 함수
+;인수:ARG…TALENT 분류 번호
+;반환값:소질 분류를 나타내는 캐릭터 라인
+;       (0. 비표시/1. 성별/2. 성격/3. 체질/4. 기능/5. 후 하늘 소질/6. 종족 특성/7. 미분류)
+;비고:문중 함수
+;소질의 분류명을 돌려준다. 소질 정돈 표시에 이용한다
+;-------------------------------------------------
+@TALENT_TYPENAME(ARG)
+#FUNCTIONS
+SIF !STRLENS(LOCALS)
+	SPLIT "비표시/성별/성격/체질/기능/후 하늘 소질/함락 소질/미분류", "/", LOCALS
+RETURNF LOCALS:ARG
+
+;-------------------------------------------------
+;범용 함수 두는 곳
+;미분류
+;-------------------------------------------------
+;-------------------------------------------------
+;함수명:CHOICE
+;개요:2~10택함수
+;인수:ARGS:0… 질문 내용
+;      :ARGS:1~10… 선택지의 캐릭터 라인( 3이후는 생략가능)
+;반환값:유저 입력 결과(0~9)
+;선택 조건이 없는, 심플한 선택지 작성 함수
+;입상등으로도 사용할 수 있을지도 모른다
+;우선 10택까지. 늘려도 괜찮지만
+;-------------------------------------------------
+@CHOICE(ARGS:0, ARGS:1, ARGS:2, ARGS:3, ARGS:4, ARGS:5, ARGS:6, ARGS:7, ARGS:8, ARGS:9, ARGS:10)
+PRINTSL ARGS:0
+FOR LOCAL, 0, 10
+	PRINTFORML [{LOCAL}] - %ARGS:(1 + LOCAL)%
+	SIF LOCAL && !STRLENS(ARGS:(2 + LOCAL))
+		BREAK
+NEXT
+$INPUT_LOOP
+INPUT
+SELECTCASE RESULT
+	CASE 0 TO LOCAL - 1
+	CASEELSE
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+ENDSELECT
+RETURN RESULT
+
+;-------------------------------------------------
+;함수명:PRINT_BASE
+;개요:BASE 표시용 함수
+;인수:ARGS …BASE의 이름
+;　　　 ARG:0… 캐릭터 등록 번호
+;       ARG:1… 표시하는 BASE
+;       ARG:2…BAR의 길이(생략 했을 경우 32)
+;       ARG:3… 진이라면 BASE의 값을 0이상으로 보정한다
+;              (생략 했을 경우, 보정하지 않는다)
+;반환값:없음
+;-------------------------------------------------
+@PRINT_BASE(ARGS, ARG:0, ARG:1, ARG:2, ARG:3)
+PRINTS ARGS
+LOCAL:0 = ARG:3? MAX(BASE:(ARG:0):(ARG:1), 0) # BASE:(ARG:0):(ARG:1)
+LOCAL:1 = MAXBASE:(ARG:0):(ARG:1)
+BAR LOCAL:0, LOCAL:1, ARG:2? ARG:2 # 32
+PRINTFORM ({LOCAL:0, 5}/{LOCAL:1, 5})
+
+@PRINT_BASEL(ARGS, ARG:0, ARG:1, ARG:2, ARG:3)
+CALL PRINT_BASE(ARGS, ARG:0, ARG:1, ARG:2, ARG:3)
+PRINTL 
+
+@PRINT_BASEW(ARGS, ARG:0, ARG:1, ARG:2, ARG:3)
+CALL PRINT_BASE(ARGS, ARG:0, ARG:1, ARG:2, ARG:3)
+WAIT
+
+;-------------------------------------------------
+;함수명:COM_EXP
+;개요:게이경험라든지 추가 함수
+;인수: ARG… 추가되는 경험
+;반환값:없음
+;-------------------------------------------------
+@COM_EXP(ARG)
+IF MALE(TARGET) && MALE(PLAYER)
+	PRINTFORML %EXPNAME:41%+{ARG}
+	EXP:게이경험 += ARG
+ELSEIF MALE(TARGET) == 0 && MALE(PLAYER) == 0
+	PRINTFORML %EXPNAME:40%+{ARG}
+	EXP:레즈경험 += ARG
+ENDIF
+;조교자를 기록
+LOCAL = NO:PLAYER +1099
+CFLAG:(LOCAL) += ARG
+
+;-------------------------------------------------
+;함수명:MALE
+;개요:남성이나 여성이나 판정 함수
+;인수: ARG… 캐릭터 등록 번호
+;반환값:남성이라면 1, 여성이라면 0
+;-------------------------------------------------
+@MALE(ARG)
+#FUNCTION
+IF TALENT:ARG:남자 || TALENT:ARG:반음반양 || TALENT:ARG:컨트보이
+	RETURNF 1
+ELSE
+	RETURNF 0
+ENDIF
+
+;-------------------------------------------------
+;함수명:MALE2
+;개요:원이 남성이나 여성이나 판정 함수
+;인수: ARG… 캐릭터 등록 번호
+;반환값:남성이라면 1, 여성이라면 0
+;-------------------------------------------------
+@MALE2(ARG)
+#FUNCTION
+;
+;성전환 하고 있는 경우에 대비해 원의 성별을 본다
+;CSV로남자·반음반양·컨트보이
+IF CSVTALENT(NO:ARG, 140, CFLAG:0) || CSVTALENT(NO:ARG, 137, CFLAG:0) || CSVTALENT(NO:ARG, 172, CFLAG:0)
+	;개체차이에 의해 여체화·후타나리·쉬메일화했다
+	IF DIFF_GET_TALENT(ARG, 2) == 1 || DIFF_GET_TALENT(ARG, 2) == 3 ||  DIFF_GET_TALENT(ARG, 2) == 5
+		RETURNF 0
+	ELSE
+		RETURNF 1
+	ENDIF
+;CSV로후타나리
+ELSEIF CSVTALENT(NO:ARG, 139, CFLAG:0)
+	;개체차이에 의해 남체화·반음반양·컨트보이화했다
+	SIF DIFF_GET_TALENT(ARG, 2) == 0 || DIFF_GET_TALENT(ARG, 2) == 2 ||  DIFF_GET_TALENT(ARG, 2) == 4
+		RETURNF 1
+;CSV로 여자
+ELSE
+	;개체차이에 의해 남체화·반음반양·컨트보이화했다
+	SIF DIFF_GET_TALENT(ARG, 2) == 0 || DIFF_GET_TALENT(ARG, 2) == 2 ||  DIFF_GET_TALENT(ARG, 2) == 4
+		RETURNF 1
+ENDIF
+RETURNF 0
+
+;-------------------------------------------------
+;함수명:POSITION(ARG)
+;개요:V수·A수·삽입의 어떤 것이 가능한가(복수 가능 있음)
+;인수: ARG… 캐릭터 등록 번호
+;반환값:0… 모두 불가 1…V수가능 2…A수가능 3…V수A수가능
+;4… 삽입 가능 5…V수삽입 가능 6…A수삽입 가능 7…V수A수삽입 가능
+;(비트 연산으로 계산 000001010011 100 101 110 111)
+;-------------------------------------------------
+@POSITION(ARG)
+#FUNCTION
+
+#DIM DYNAMIC ABLE_POSITION = 0
+
+;V수
+;공를 가지고 있지 않다
+IF TALENT:ARG:공 == 0
+	;V가 있을까 개V가 개발되고 있다
+	IF VAGINA(ARG) == 1 && ABL:ARG:V감각 >= 3
+		;처녀와재생처녀를 가지고 있지 않다
+		IF TALENT:ARG:처녀 == 0 && TALENT:ARG:재생처녀 == 0
+			ABLE_POSITION |= 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;A수
+;공를 가지고 있지 않다
+IF TALENT:ARG:공 == 0
+	;백버진를 가지고 있지 않은가 개A가 개발되고 있다
+	IF TALENT:ARG:백버진 == 0 && ABL:ARG:A감각 >= 3
+		ABLE_POSITION |= 2
+	ENDIF
+ENDIF
+
+;삽입
+;수와오메가를 가지고 있지 않다
+IF TALENT:ARG:수 == 0 && TALENT:ARG:오메가 == 0
+	;페니스가 있을까 개C가 개발되고 있다
+	IF PENIS(ARG) == 1 && ABL:ARG:C감각 >= 3
+		;동정를 가지고 있지 않다
+		IF TALENT:ARG:동정 == 0
+			ABLE_POSITION |= 4
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURNF ABLE_POSITION
+
+;-------------------------------------------------
+;함수명:PRIORITY_POSITION(ARG)
+;개요:V수·A수·삽입의 어떤 것을 우선할까
+;인수: ARG… 캐릭터 등록 번호
+;반환값:0… 모두 불가 1…V수우선 2…A수우선 3… 삽입 우선
+;-------------------------------------------------
+@PRIORITY_POSITION(ARG)
+#FUNCTION
+
+#DIM DYNAMIC POSITION
+;어느 포지션이 가능한가
+POSITION = POSITION(ARG)
+
+;모두 불가
+SIF POSITION == 0
+	RETURNF 0
+;V수만 가능
+SIF POSITION == 1
+	RETURNF 1
+;A수만 가능
+SIF POSITION == 2
+	RETURNF 2
+;삽입만 가능
+SIF POSITION == 4
+	RETURNF 3
+
+;V수와 A수가 가능
+IF POSITION == 3
+	;원의 성별로 한정하지 않고, 능력과 경험으로 우선하는 (분)편을 결정하는 동치라면 V우선
+	;V우선
+	IF (ABL:ARG:V감각 * 10 + EXP:ARG:V경험 + EXP:ARG:V사정경험) >= (ABL:ARG:A감각 * 10 + EXP:ARG:A경험 + EXP:ARG:A사정경험)
+		RETURNF 1
+	;A우선
+	ELSE
+		RETURNF 2
+	ENDIF
+;수와 삽입이 가능
+ELSEIF POSITION >= 4
+	;원의 성별로 한정하지 않고, 능력과 경험으로 우선하는 (분)편을 결정한다
+	;삽입 우선 동치의 경우 포함한다
+	{
+		IF (ABL:ARG:C감각 * 10 + EXP:ARG:사정경험 + EXP:ARG:삽입경험) >= (ABL:ARG:V감각 * 10 + EXP:ARG:V사정경험 + (EXP:ARG:성교경험 - EXP:ARG:삽입경험))
+		|| (ABL:ARG:C감각 * 10 + EXP:ARG:사정경험 + EXP:ARG:삽입경험) >= (ABL:ARG:A감각 * 10 + EXP:ARG:A사정경험 + (EXP:ARG:성교경험 - EXP:ARG:삽입경험))
+	}
+		RETURNF 3
+	;V우선 동치의 경우 포함한다
+	ELSEIF (ABL:ARG:V감각 * 10 + EXP:ARG:V경험 + EXP:ARG:V사정경험) >= (ABL:ARG:A감각 * 10 + EXP:ARG:A경험 + EXP:ARG:A사정경험)
+		RETURNF 1
+	;A우선
+	ELSE
+		RETURNF 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;함수명:ABLE_SHOOT(ARG)
+;개요:사정가 가능한가 어떤가
+;밤이벤트의 3 P플레이로 사용하는 용
+;인수: ARG… 캐릭터 등록 번호
+;반환값:1… 사정가능
+;-------------------------------------------------
+@ABLE_SHOOT(ARG)
+#FUNCTION
+
+SIF TALENT:ARG:아이사이즈
+	RETURNF 0
+
+SIF PENIS(ARG) == 0
+	RETURNF 0
+
+;사정잔수
+SIF CFLAG:ARG:11 <= 0
+	RETURNF 0
+
+RETURNF 1
+
+;-------------------------------------------------
+;함수명: INTTU(ARG:0, ARG:1)
+;개요:{인수 1}의{인수 2}자리수째를 요구한다
+;인수:
+;ARG:0… 원이 되는 수(수치)
+;ARG:1… 자리수(수치)
+;반환값:수치
+;비고:CHARATU(캐릭터 라인, 수치)의 수치 ver와 같은 것을 만들고 싶었다
+
+;예) 인수 1=56200 인수 2=4 때,56200%10000 = 6200 → 6200/ 1000 = 6
+;-------------------------------------------------
+@INTTU(ARG:0, ARG:1)
+#FUNCTION
+
+SIF ARG:1 <= 0
+	RETURNF 0
+
+LOCAL = ARG:0 % POWER(10, ARG:1) / POWER(10, ARG:1 - 1)
+
+RETURNF LOCAL
+
+;-------------------------------------------------------------------------------
+;    BAR 색채화(eraMeiQ외전보다)
+;-------------------------------------------------------------------------------
+;    예  PRINTFORM %PRINT_COLORBAR(40, 100, 8,%UNICODE(0x2584)%,%UNICODE(0x2584)%, , 0x404040, )% 
+;        [===     ]
+;	인수는 BAR와 거의 함께 + ARGS로 묘사 문자의 변경이 가능(지정하지 않는 경우는 BAR와 같은 사양)
+;	ARG:6은 바색(0xFFFFFF 형식에서 지정),
+;	ARG:7은 바키 경치(0xFFFFFF 형식에서 지정),
+;	ARG:8은 바그라데이션폭(바 색 가지수치에 10진으로 사칙 연산)
+;===============================================================================
+@PRINT_COLORBAR(ARG, ARG:1, ARG:2, ARGS = "*", ARGS:1 = ".", ARG:3, ARG:4, ARG:5 = 0)
+LOCAL:2 = GETCOLOR()
+LOCAL:3 = COUNT
+
+REPEAT ARG:2
+ARG = ARG - LOCAL:1
+IF ARG >= 0
+	SETCOLOR ARG:3 - (ARG:5 * COUNT)
+	PRINTFORM %ARGS%
+ELSE
+	SETCOLOR ARG:4
+	PRINTFORM %ARGS:1%
+ENDIF
+REND
+COUNT = LOCAL:3
+SETCOLOR LOCAL:2
+
+@PRINT_TARGET_SHOOT_COLORBAR
+LOCAL:1 = MAXBASE:사정 / 33
+LOCAL:2 = GETCOLOR()
+LOCAL:3 = BASE:사정
+LOCALS = %UNICODE(0x2583)%
+FOR LOCAL, 0, 32
+	LOCAL:3 = LOCAL:3 - LOCAL:1
+	;재장전 기간
+	IF CFLAG:9 > 0
+		;게이지가 모여 있다
+		IF LOCAL:3 >= 0
+			;10000이상
+			IF LOCAL > 22
+				SETCOLOR 0xb3b3b3
+			ELSE
+				SETCOLOR 0x666666
+			ENDIF
+		ELSE
+			SIF LOCAL > 22
+				LOCALS = %UNICODE(0x2581)%
+			SETCOLOR 0x333333
+		ENDIF
+	ELSE
+		;게이지가 모여 있다
+		IF LOCAL:3 >= 0
+			;10000이상
+			IF LOCAL > 22
+				SETCOLOR 0xFF99FF
+			ELSE
+				SETCOLOR 0xFFCCFF
+			ENDIF
+		ELSE
+			SIF LOCAL > 22
+				LOCALS = %UNICODE(0x2581)%
+			SETCOLOR 0x300020
+		ENDIF
+	ENDIF
+	PRINTFORM %LOCALS%
+NEXT
+SETCOLOR LOCAL:2
+
+;-------------------------------------------------
+;커스텀 바용색세트 함수@BARCOLORSET(eraMeiQ외전보다)
+;PRINT_COLORBAR의 ARG:3에 이용해, ARG;4에 RESULT를 사용한다
+;-------------------------------------------------
+@BARCOLORSET, ARGS
+#FUNCTION
+ ;LOCAL에 색을 대입
+SELECTCASE ARGS
+	CASE "농적"
+		RESULT:1 = 0x701000
+		RETURNF 0xF06050
+	CASE "빨강"
+		RESULT:1 = 0x502020
+		RETURNF 0xC07070
+	CASE "파랑"
+		RESULT:1 = 0x202050
+		RETURNF 0x7070C0
+	CASE "감색"
+		RESULT:1 = 0x000000
+		RETURNF 0x6666FF
+	CASE "초록"
+		RESULT:1 = 0x205020
+		RETURNF 0x66DD66
+	CASE "보라색"
+		RESULT:1 = 0x502050
+		RETURNF 0xC070C0
+	CASE "노랑"
+		RESULT:1 = 0x505020
+		RETURNF 0xC0B050
+	CASE "복숭아"
+		RESULT:1 = 0x300020
+		RETURNF 0xFFCCFF
+	CASE "청록색"
+		RESULT:1 = 0x205050
+		RETURNF 0x70C0C0
+	CASE "재"
+		RESULT:1 = 0x333333
+		RETURNF 0x666666
+	 ;흰색
+	 CASEELSE
+		RESULT:1 = 0x202020
+		RETURNF 0xC0C0C0
+ENDSELECT
+
+@PRINT_BASE_SHOP(ARG)
+PRINTFORM 　체력%UNICODE(0x208D)%
+CALL PRINT_COLORBAR, BASE:ARG:체력, MAXBASE:ARG:체력, 10, UNICODE(0x2583), UNICODE(0x2583), BARCOLORSET("빨강"), RESULT:1, 327685
+PRINTFORM %UNICODE(0x208E)%
+PRINTFORM  {BASE:ARG:체력}/{MAXBASE:ARG:체력} 
+PRINTFORM 기력%UNICODE(0x208D)%
+CALL PRINT_COLORBAR, BASE:ARG:기력, MAXBASE:ARG:기력, 10, UNICODE(0x2583), UNICODE(0x2583), BARCOLORSET("감색"), RESULT:1, 327685
+PRINTFORM %UNICODE(0x208E)%
+PRINTFORML  {BASE:ARG:기력}/{MAXBASE:ARG:기력} \@ TALENT:ARG:기절? [기절] # \@
+
+;-------------------------------------------------
+;한수자 표기@MONEY_FORM
+;-------------------------------------------------
+@MONEY_FORM(ARG)
+#FUNCTIONS
+;~억~만 표기
+LOCALS:1 = {ABS(ARG)}
+STRLENS LOCALS:1
+LOCAL:2 = RESULT
+LOCALS = 
+LOCAL:1 = 0
+
+FOR LOCAL, LOCAL:2, 0,-1
+	IF LOCALS == ""
+		SUBSTRING LOCALS:1, LOCAL-1, 1
+		IF RESULTS != "0"
+			SELECTCASE LOCAL:1 / 4
+				CASE 1
+					LOCALS:2 =만
+				CASEELSE
+					LOCALS:2 = 
+			ENDSELECT
+			LOCAL:12 = LOCAL:1 % 4
+			IF LOCAL:12 > 0
+				LOCALS = %RESULTS%%"0" * LOCAL:12%%LOCALS:2%
+			ELSE
+				LOCALS = %RESULTS%%LOCALS:2%
+			ENDIF
+		ENDIF
+	ELSE
+		SIF LOCAL:1 == 4
+			LOCALS =만 %LOCALS%
+		SUBSTRING LOCALS:1, LOCAL-1, 1
+		LOCALS = %RESULTS%%LOCALS%
+	ENDIF
+	LOCAL:1++
+NEXT
+RETURNF LOCALS
+

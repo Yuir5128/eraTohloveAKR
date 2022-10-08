@@ -1,0 +1,226 @@
+﻿;-------------------------------------------------
+;수간
+;인간세상 밖계 커맨드
+;-------------------------------------------------
+@COM381
+
+PRINTL 수간
+STR:0 = 수간
+
+CALL KOJO_MESSAGE_COM
+
+;A와 V양쪽 모두 열려 있지 않다
+IF (TEQUIP:정조대 || TEQUIP:바이브 && ABL:V감각 <= 5 || TALENT:남자) && (TEQUIP:애널바이브 && ABL:A감각 <= 5 || TEQUIP:애널비즈 || TEQUIP:확장벌룬)
+	TFLAG:705 = 4
+;V가 메워지고 있을까남자의 경우, A를 사용한다
+ELSEIF TEQUIP:정조대 || TEQUIP:바이브 && ABL:V감각 <= 5 || TALENT:남자
+	SIF TALENT:백버진
+		TFLAG:161 |= 1
+	TFLAG:705 = 1
+;A개발제에서도 V가 비어 있으면 V에 삽입
+ELSEIF (!TEQUIP:정조대 || !TEQUIP:바이브) && TEQUIP:애널바이브 && ABL:A감각 >= 6
+	;V경험을 수반하는 커맨드의 플래그(처녀막재생 대응)
+	SIF TALENT:처녀 || TALENT:재생처녀
+		TFLAG:19 |= 1
+	TFLAG:705 = 0
+;V가 메워지고 있어 A가 개발제의 경우, A를 사용한다
+ELSEIF (TEQUIP:정조대 || TEQUIP:바이브) && TEQUIP:애널바이브 && ABL:A감각 >= 6
+	SIF TALENT:백버진
+		TFLAG:161 |= 1
+	TFLAG:705 = 1
+;그 외는 V에 삽입
+ELSE
+	;V경험을 수반하는 커맨드의 플래그(처녀막재생 대응)
+	SIF TALENT:처녀 || TALENT:재생처녀
+		TFLAG:19 |= 1
+	TFLAG:705 = 0
+ENDIF
+
+;스타킹 찌릿찌릿 플래그
+IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 100
+LOSEBASE:기력 += 250
+
+SOURCE:통증 += 700
+SOURCE:두려움 += 1000
+SOURCE:굴복 += 1200
+SOURCE:불결 += 800
+SOURCE:일탈 += 1000
+SOURCE:반발 += 1000
+
+;하반신 착의, 또는 A와 V양쪽 모두 열려 있지 않다
+IF TFLAG:705 == 4
+;남자, 또는 V에 도구 삽입
+ELSEIF TFLAG:705 == 1
+	SOURCE:쾌A += 200
+	SOURCE:통증 += 400
+	SOURCE:두려움 += 400
+ELSEIF TFLAG:705 == 0
+	SOURCE:쾌V += 200
+	SOURCE:통증 += 400
+	SOURCE:두려움 += 400
+ENDIF
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;A와 V양쪽 모두 열려 있지 않다
+IF TFLAG:705 == 4
+;남자, 또는 V에 도구 삽입
+ELSEIF TFLAG:705 == 1
+	;A에의고통는 먼저 처리해 둔다
+	;EXP:A경험를 본다
+	IF EXP:A경험 < EXPLV:1
+		TIMES SOURCE:통증, 3.00
+		TIMES SOURCE:반발, 3.00
+	ELSEIF EXP:A경험 < EXPLV:2
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 2.00
+	ELSEIF EXP:A경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:반발, 1.50
+	ELSEIF EXP:A경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.60
+		TIMES SOURCE:반발, 1.20
+	ELSEIF EXP:A경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:A경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.20
+	ENDIF
+
+	;PALAM:윤활를 본다
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 2.00
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증, 1.00
+		TIMES SOURCE:반발, 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증, 0.60
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증, 0.30
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증, 0.20
+	ENDIF
+ELSEIF TFLAG:705 == 0
+	;처녀였던 경우는, 고통의 소스와반발의 소스를 추가한다
+	IF TALENT:처녀
+		SOURCE:통증 += 5000
+		SOURCE:반발 += 3000
+	;재생처녀였던 경우는, 고통의 소스와반발의 소스를 추가한다
+	ELSEIF TALENT:재생처녀
+		SOURCE:통증 += 5000
+		SOURCE:반발 += 1000
+	ENDIF
+	
+	;V에의고통는 먼저 처리해 둔다
+	;EXP:V경험를 본다(처녀의반감는 별도 처리필 보고인 것으로 생략)
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증, 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증, 0.80
+		TIMES SOURCE:반발, 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증, 0.00
+	ENDIF
+	
+	;PALAM:윤활를 본다
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증, 1.20
+		TIMES SOURCE:반발, 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증, 0.70
+		TIMES SOURCE:반발, 1.20
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증, 0.40
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증, 0.10
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증, 0.10
+	ENDIF
+ENDIF
+
+;특히 하드한 커맨드에서는, 이상경험에 응해 효과를 줄인다
+IF EXP:이상경험 < EXPLV:1
+	TIMES SOURCE:두려움, 1.20
+	TIMES SOURCE:일탈, 1.20
+	TIMES SOURCE:반발, 1.20
+ELSEIF EXP:이상경험 < EXPLV:2
+	TIMES SOURCE:두려움, 0.90
+	TIMES SOURCE:일탈, 0.90
+	TIMES SOURCE:반발, 0.90
+ELSEIF EXP:이상경험 < EXPLV:3
+	TIMES SOURCE:두려움, 0.80
+	TIMES SOURCE:일탈, 0.80
+	TIMES SOURCE:반발, 0.80
+ELSEIF EXP:이상경험 < EXPLV:4
+	TIMES SOURCE:두려움, 0.70
+	TIMES SOURCE:일탈, 0.70
+	TIMES SOURCE:반발, 0.70
+ELSEIF EXP:이상경험 < EXPLV:5
+	TIMES SOURCE:두려움, 0.60
+	TIMES SOURCE:일탈, 0.60
+	TIMES SOURCE:반발, 0.60
+ELSE
+	TIMES SOURCE:두려움, 0.50
+	TIMES SOURCE:일탈, 0.50
+	TIMES SOURCE:반발, 0.50
+ENDIF
+
+
+;-------------------------------------------------
+;경험의 처리
+;더러움의 처리
+;-------------------------------------------------
+;A와 V양쪽 모두 열려 있지 않다
+IF TFLAG:705 == 4
+;남자, 또는 V에 도구 삽입
+ELSEIF TFLAG:705 == 1
+	EXP:A경험 += 2
+	PRINTL A경험＋2
+	STAIN:장내 = 32
+	STAIN:애널 = 32
+ELSEIF TFLAG:705 == 0
+	IF TALENT:처녀 == 1 || TALENT:재생처녀 == 1
+		STAIN:질내 |= 64
+		STAIN:바기나 |= 64
+	ENDIF
+	EXP:V경험 += 2
+	PRINTL V경험＋2
+	STAIN:질내 = 32
+	STAIN:바기나 = 32
+ENDIF
+
+;수간 첫체험에 의해이상경험
+IF EXP:수간경험 == 0
+	EXP:이상경험 += 1
+	PRINTL 수간첫경험으로이상경험＋1
+ENDIF
+EXP:수간경험 += 1
+
+;의존도 벡터
+TFLAG:33 = 5
+
+;의존도 보정치(복종로 1, 예속로 2)
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+

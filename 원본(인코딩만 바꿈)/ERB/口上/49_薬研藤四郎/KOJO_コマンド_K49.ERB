@@ -1,0 +1,5073 @@
+﻿
+;==================================================
+;@KOJO_MESSAGE_COM関係（Xをキャラ番号に置換）
+;コマンド実行時に出力されます
+;==================================================
+@KOJO_MESSAGE_COM_K49
+;助手が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0
+;ボールギャグ着用時には地の文を表示して口上をスキップする
+IF TEQUIP:ボールギャグ &&  SELECTCOM != 107
+	CALL TRAIN_MESSAGE
+	RETURN 0
+ENDIF
+
+;--------------------------------------------------
+;特定助手、主人時に特殊助手口上を呼び出す(Y1を特定助手、Zを主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL MESSAGE_COM_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL MESSAGE_COM_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;==================================================
+;特定の条件を満たしている場合、コマンドを実行する度にソースが追加
+;露出癖とかマゾっ気とか趣味に合ったコマンドや状態で体力・気力回復する仕様に。
+;マゾっ気くそ高いのにすぐ気絶するのなんとかしたかったんでテスト。
+;==================================================
+;奉仕系のコマンド実行時に体力／気力回復。
+IF ABL:奉仕精神 >= 3
+	SELECTCASE SELECTCOM
+		;受け身奉仕は体力回復
+		CASE 70,71,73 TO 80,85 TO 87,317,420,421,422
+			BASE:0 += ABL:奉仕精神*2
+		;攻め奉仕は気力回復
+		CASE 220 TO 225,260,261,263,264,318
+			BASE:1 += ABL:奉仕精神*2
+		;体力気力両方回復する
+		CASE 243 TO 245,319,503,504
+			BASE:0 += ABL:奉仕精神*2
+			BASE:1 += ABL:奉仕精神*2
+	ENDSELECT
+ENDIF
+
+;服を着てないと気力回復、露出プレイ中は体力回復。
+IF ABL:露出癖 >= 3
+	;全裸ルート
+	IF !TEQUIP:全身上着 && !TEQUIP:上衣 && !TEQUIP:下衣 && !TEQUIP:下着（上） && !TEQUIP:下着（下） && !TEQUIP:特殊２ && !TEQUIP:特殊１
+		BASE:1 += ABL:露出癖*2
+	;半裸ルート
+	ELSEIF (TEQUIP:全身上着 || (TEQUIP:上衣 && TEQUIP:下衣)) && !TEQUIP:下着（上） && !TEQUIP:下着（下）
+		BASE:1 += ABL:露出癖*2
+	ENDIF
+	SIF TEQUIP:ビデオカメラ || TEQUIP:野外プレイ || TEQUIP:羞恥プレイ || SELECTCOM == 3
+		BASE:0 += ABL:露出癖*2
+ENDIF
+
+;拘束されてると気力回復。
+;苦痛コマンド実行時に体力回復。
+IF ABL:マゾっ気 >= 3
+	SIF TEQUIP:縄 || TEQUIP:アイマスク || TEQUIP:ボールギャグ || TEQUIP:貞操帯 || TEQUIP:射精止め || TEQUIP:全身上着 == 9
+		BASE:1 += ABL:マゾっ気*2
+	SELECTCASE SELECTCOM
+		CASE 16,25,44,56,62,140 TO 155
+			BASE:0 += ABL:マゾっ気*2
+	ENDSELECT
+ENDIF
+
+;奴隷攻めコマンド実行時に体力／気力回復。
+IF ABL:サドっ気 >= 3
+	SIF TEQUIP:靴 > 0 && SELECTCOM == 80
+		BASE:0 += ABL:サドっ気*2
+	SIF ABL:PLAYER:マゾっ気 >= 3 && (SELECTCOM == 226 || SELECTCOM == 227)
+		BASE:0 += ABL:サドっ気*2
+		BASE:1 += ABL:サドっ気*2
+	SIF SELECTCOM >= 226 && SELECTCOM <= 227
+		BASE:1 += ABL:サドっ気*2
+ENDIF
+
+;自慰をすると体力・気力回復。
+IF ABL:自慰中毒 >= 3
+	SELECTCASE SELECTCOM
+		CASE 4,5,6,7
+			BASE:1 += ABL:自慰中毒*2
+	ENDSELECT
+ENDIF
+
+;精液飲んで体力回復。
+;精液がもらえそうなコマンド実行時は気力回復。
+IF ABL:精液中毒 >= 3
+	SIF TFLAG:0 == 0 && TFLAG:43 == 13
+		BASE:0 += ABL:精液中毒*2
+	SELECTCASE SELECTCOM
+		CASE 70 TO 75,226,227,407,420,421,516
+			BASE:1 += ABL:精液中毒*2
+		CASE 410,412
+			BASE:0 += ABL:精液中毒*2
+	ENDSELECT
+ENDIF
+
+;セックスすると体力・気力回復。淫乱√なら特殊セックスでも回復。
+IF ABL:セックス中毒 >= 3
+	IF TALENT:淫乱 || TALENT:娼婦
+		SELECTCASE SELECTCOM
+			CASE 322,381,405,406,430,431,511 TO 515,517 TO 525
+				BASE:0 += ABL:セックス中毒*2
+				BASE:1 += ABL:セックス中毒*2
+		ENDSELECT
+	ENDIF
+	SELECTCASE SELECTCOM
+		CASE 100 TO 116,260 TO 265,507 TO 510,526
+			BASE:0 += ABL:セックス中毒*2
+			BASE:1 += ABL:セックス中毒*2
+	ENDSELECT
+ENDIF
+
+;スカ系コマンド実行で体力回復。
+;便意／尿意のあるときに気力回復。
+IF ABL:スカ中毒 >= 3
+	SIF BASE:4 >= 60 || BASE:6 >= 60
+		BASE:1 += ABL:スカ中毒*2
+	SELECTCASE SELECTCOM
+		CASE 182 TO 185,285,286,302,304
+			BASE:0 += ABL:スカ中毒*2
+	ENDSELECT
+	;動くかわからんけど一応入れてみる
+	SIF TFLAG:58 == 1 || TFLAG:68 == 1
+		BASE:0 += ABL:スカ中毒*2
+ENDIF
+
+
+;==================================================
+;ランダム小口上
+;==================================================
+;絶頂回数
+IF (EX:0 + EX:1 + EX:2 + EX:3 >= 20)
+	PRINTFORMW 二十回以上の絶頂を経て、%CALLNAME%は頭のネジが飛んでしまったようだ
+	PRINTFORMW だらしなく顔を緩ませ、呂律の回らない口調で品の無い喘ぎを洩らしている
+ELSEIF (EX:0 + EX:1 + EX:2 + EX:3 >= 10) && (EX:0 + EX:1 + EX:2 + EX:3 < 20)  && MARK:反発刻印 != 3
+	PRINTFORMW 絶頂を何度も味あわされ、%CALLNAME%は息も絶え絶えに喘いでいる
+ENDIF
+
+
+;-------------------------------------------------
+;コマンド実行時のセリフ CFLAG 300～500
+;実行条件は資料フォルダ内、コマンド実行条件ファイルを参照
+;-------------------------------------------------
+
+;=================================================
+;基本系コマンド
+;=================================================
+;-------------------------------------------------
+;0,愛撫　CFLAG:300
+;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:300 == 0
+		IF NO:MASTER == 0 || ((ASSI > 0 && ASSIPLAY) && NO:ASSI == 0)
+			PRINTFORMW 「なんだ、大将。こそばゆいんだが」
+		ELSE
+			PRINTFORMW 「なんだ、こそばゆいんだが」
+		ENDIF
+		CFLAG:300 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:300 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				SIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「大将に触られんの好きだなぁ。気持ちイイし気分もいい%UNICODE(0x2661)%」
+			;淫乱、娼婦
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+			;服従、隷属
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+			ENDIF
+			CFLAG:300 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:300 < 3 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF RAND:2 == 0
+					PRINTFORMW 「ふ、ちょっと、待ってくれや大将。そ、んなとこまで触るかよっ、……ぁんっ%UNICODE(0x2661)%」
+				ELSE
+					PRINTFORMW 「大将の手、気持ちイイな」
+				ENDIF
+			ELSEIF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「ふぁ……んっ！」
+			ELSE
+				PRINTFORMW 「はぁ……あぁ、あ……っ」
+			ENDIF
+			CFLAG:300 = 3
+		;それ以外
+		ELSEIF CFLAG:300 < 2 || FLAG:7 == 2
+			PRINTFORMW 「よせって、くすぐってぇ」
+		CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;1,キスする　CFLAG:301
+;-------------------------------------------------
+IF SELECTCOM == 1
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:301 == 0
+		PRINTFORMW 「ん、ぐ……ふはっ。なあ、口の中まで舐めるってなぁどうかと思うぜ」
+		CFLAG:301 = 1
+	;二回目以降
+	ELSE
+		;屈服刻印Lv3
+		IF MARK:2 == 3 && (CFLAG:301 < 3 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「ふぁ%UNICODE(0x2661)%　たいしょ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW %CALLNAME%は足りない酸素を補うように肩で息をしている……
+			ENDIF
+		ELSEIF CFLAG:301 < 2 || FLAG:7 == 2
+			PRINTFORMW 「んぅ……」
+		ENDIF
+		CFLAG:301 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;2,何もしない　CFLAG:302
+;-------------------------------------------------
+IF SELECTCOM == 2
+	CALL TRAIN_MESSAGE
+	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		IF PALAM:欲情 > 30000
+			PRINTFORMW 「たいしょ、頼むぜ、やめちゃやだ……っ！」
+			PRINTFORMW %CALLNAME%は欲情で上気した顔を%CALLNAME:PLAYER%に向けて\@KANRAKU(TARGET) ? 行為 # 調教\@の続きを懇願している……
+		ELSE
+			PRINTFORMW 「おっと、休憩か。白湯か茶でも用意しようか？」
+		ENDIF
+	ELSE
+		PRINTFORMW 「休憩か」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;3,秘貝開帳　CFLAG:303
+;-------------------------------------------------
+IF SELECTCOM == 3
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:303 == 0
+		;審神者
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				;処女
+				IF TALENT:0
+					PRINTFORML 「まあ、未通娘だからなあ、きれいなもんだろ」
+					PRINTFORM %CALLNAME%は幼いワレメを開いて未開発の膣口を
+						IF TALENT:161 == 0 && ABL:Ａ感覚 > 3
+						PRINTFORML 晒した。
+						PRINTFORMW 「……こっちがこうじゃ未通娘ってのもなんだが……後ろだけじゃなくてココにも大将のカタチ覚えさせてくれよ」
+						PRINTFORM 更に片手を伸ばし、アヌスにも指を差し入れ両方の穴を
+						ENDIF
+					PRINTFORMW 広げてよく見えるように腰を突き出す。
+					PRINTFORMW 「なあ、ほら。早いとこ散らしてくれや、たぁーいしょ%UNICODE(0x2661)%」
+				;非処女
+				ELSE
+					;中田氏済み
+					IF CFLAG:TARGET:102 > 0
+						PRINTFORML 「こんな、広げたら大将の種零れちまう……」
+						PRINTFORML 「ふ、その分たっぷり注いでくれるんだろうなあ？　な、たいしょ%UNICODE(0x2661)%」
+					ELSE
+						PRINTFORMW 「俺っちはどこでも大将のものだから、好きなだけ見てくれていいぜ」
+						PRINTFORMW 「……けど、見るだけでお仕舞って事はねぇよな？」
+					ENDIF
+				ENDIF
+			;恋慕、親愛以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;審神者以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:303 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:303 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;処女
+					IF TALENT:0
+						IF TEQUIP:ローター挿入
+							PRINTFORMW %CALLNAME%がワレメを広げると、震えるローターを覗かせた小さな膣口からとろとろと蜜が溢れた。
+							PRINT 「なあ、こんなドロドロなんだぜ。
+								SIF (TALENT:MASTER:巨根 && EXP:Ｖ経験 >= 120) || (TALENT:MASTER:馬並み && EXP:Ｖ経験 >= 180)
+								PRINT もう大将のでっかいの突っ込んでも大丈夫だって。
+							PRINTFORMW 見てるだけでいいのかよ、大将？」
+						ELSE
+							IF RAND:2 == 0
+								PRINTFORMW 「大将、そろそろ俺っちの処女喰ってくれねえかなあ？」
+								PRINTFORMW 閉じた陰唇を割り拡げ、秘部を晒しながら%CALLNAME%は不満げに口をとがらせている。
+							ELSE
+								PRINTFORMW 「たーいしょ、お預けが過ぎるとこっちから襲っちまうぞ？」
+								PRINTFORMW 足をＭ字に開き、股の上下から両手でワレメを広げながら、%CALLNAME%は誘うように卑猥に腰を振っている……
+							ENDIF
+						ENDIF
+					ELSE
+						;中田氏済み
+						IF CFLAG:TARGET:102 > 0
+							PRINTFORML 「ん……%UNICODE(0x2661)%　たいしょの、零れてら%UNICODE(0x2661)%」
+							PRINTFORML 「あは、やらしい？興奮する？　んじゃ、もっとたっぷり中に大将の子種くれよ%UNICODE(0x2661)%」
+						ELSE
+							PRINTFORMW 「ん？　ココは何だって？　大将気持ちよくして俺も気持ちよくなる穴だろ%UNICODE(0x2661)%」
+							PRINTFORMW 「見るだけでいいのかよ、たぁいしょ%UNICODE(0x2661)%　こっちだって待ちかねてんだぜ？」
+						ENDIF
+					ENDIF
+				ELSE
+					PRINTFORMW 
+				ENDIF
+			;淫乱、娼婦
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+			;服従、隷属
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+			ENDIF
+		CFLAG:303 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:303 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+		CFLAG:303 = 3
+		;それ以外
+		ELSEIF CFLAG:303 < 2 || FLAG:7 == 2
+			PRINTFORMW 
+		ENDIF
+		CFLAG:303 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;4,自慰　CFLAG:304
+;-------------------------------------------------
+IF SELECTCOM == 4
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:304 == 0
+		PRINTFORMW 「俺が一人でする所みせろって？　いーい趣味してんなあ？」
+		CFLAG:304 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:304 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;アナルバイブかバイブ＋Ａ感覚LV3以上かＶ感覚LV2
+					IF (TEQUIP:アナルバイブ || TEQUIP:バイブ) && (ABL:Ａ感覚 >= 3 || ABL:Ｖ感覚 >= 2)
+						PRINTFORMW 「あぁ…%UNICODE(0x2661)%　や、大将っ、俺、玩具でイクの、も、やだって……っ！」
+						PRINTFORMW %CALLNAME%はそう哀願しながらも腰を揺らし、バイブを抜き差ししする手は止められない様だ……
+					ELSEIF TEQUIP:ローター挿入 || TEQUIP:ローターＡ挿入
+						;処女
+						IF TALENT:0
+							IF RAND:2 == 0
+								PRINTFORMW 「ふは、たいしょ、これでいいか？」
+								PRINTFORMW %CALLNAME%は命じられるまま、半ば抜き出したローターを手を使わずに再び飲み込んで見せた
+							ELSE
+								PRINTFORMW 「ああぁっ%UNICODE(0x2661)%　あ、や、あんま見るな、大将っ%UNICODE(0x2661)%」
+								PRINTFORMW 大きく股を開かせているため、%CALLNAME%が水音を立てて弄る\@TALENT:オトコ ? 陰茎 # イイ所\@も、
+								PRINTFORMW びくりと体が震える度に咥えこんだローターが飛び出ない様きゅうきゅう締めている\@TEQUIP:ローター挿入 ? 膣口 # 菊穴\@もよく見える……
+							ENDIF
+						;非処女
+						ELSE
+							PRINTFORMW 「んあ、これっ、慣らすにゃいいけど、なっ！　ほら、トロットロで、いい具合だぜ、たーいしょ%UNICODE(0x2661)%」
+							PRINTFORMW %CALLNAME%は薄い舌で唇を舐めながら%CALLNAME:PLAYER%の股間を熱っぽい目で見つめた。
+						ENDIF
+					ELSE
+						IF PALAM:6 >= PALAMLV:4
+							PRINTFORMW 「たいしょ%UNICODE(0x2661)%　たいしょおっ%UNICODE(0x2661)%　うあ、ふ、ぅあ、あああぁっ%UNICODE(0x2661)%」
+							PRINTFORM %CALLNAME%はうつ伏せで尻を高く上げ、晒した\@TALENT:オトコ ? 陰茎 # イイ所\@をぐちゅぐちゅ音を立てて擦り、身悶えている。
+						ELSE
+							IF RAND:2 == 0
+								PRINTFORMW 「ふぁ、あん%UNICODE(0x2661)%　たいしょ、大将っ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+								PRINTFORMW 真っ赤に上気した顔で%CALLNAME%は夢中で\@TALENT:オトコ ? 陰茎 # 陰核\@を擦っている……
+							ELSE
+								PRINTFORMW 「ああぁっ%UNICODE(0x2661)%　あ、や、あんま見るな、大将っ%UNICODE(0x2661)%」
+								PRINTFORMW %CALLNAME%は従順に股を開き、くちゅくちゅと音を立てて股間を弄りながら涙目で%CALLNAME:MASTER%をにらんだ……
+							ENDIF
+						ENDIF
+					ENDIF
+				ENDIF
+			;淫乱、娼婦
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+			;服従、隷属
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+			ENDIF
+			CFLAG:304 = 4
+		;従順Lv3以上
+		ELSEIF ABL:0 >= 3 && (CFLAG:304 < 3 || FLAG:7 == 2)
+			PRINTFORMW 「あー、そう見られてると、ヤり難いんだが」
+			PRINTFORMW そう言っていても薄っすらと頬を染め乍ら%CALLNAME%が\@TALENT:オトコ ? 扱いている # 擦っている\@\@TALENT:オトコ ? 陰茎 # 陰核\@は、ぬめりを帯びて音を立てていた
+		CFLAG:304 = 3
+		;それ以外
+		ELSEIF CFLAG:304 < 2 || FLAG:7 == 2
+			PRINTFORMW 「どうにもなあ、こりゃ気分が乗らねえよ」
+			PRINTFORMW %CALLNAME%はおざなりに自らの反応の薄い性器を弄っている
+		CFLAG:304 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;5,胸自慰　CFLAG:305
+;-------------------------------------------------
+IF SELECTCOM == 5
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:305 == 0
+		CFLAG:305 = 1
+	;二回目以降
+	ELSE
+		CFLAG:305 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;6,アナニー　CFLAG:306
+;-------------------------------------------------
+IF SELECTCOM == 6
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:306 == 0
+		PRINTFORMW 「ケツ穴弄れってなあ。いや、やるけどよ。……あんまり見ててくれるなよ」
+		CFLAG:306 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:306 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF RAND:2 == 0
+						PRINTFORMW 「たいしょおっ、あふ、たいしょのはやく、欲しい……っ」
+						PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%のペニスを強請りながら、くちくちと音を立てアヌスを弄っている。
+							SIF TALENT:161 && ((TALENT:MASTER:巨根 && EXP:Ａ経験 <= 110) || (TALENT:MASTER:馬並み && EXP:Ａ経験 <= 170))
+							PRINTFORMW だが、%CALLNAME%のアヌスはまだ%CALLNAME:PLAYER%のペニスを受け入れる準備が整っていないようだ。
+					ELSE
+						PRINTFORMW 「たいしょ、頼む、俺の指じゃあイイ所まで届かねぇんだよぉ」
+						PRINTFORMW %CALLNAME%はアヌスに指を根元まで埋めてもまだ足りないらしく、さらに奥を抉る様にぐりぐりと動かしている。
+					ENDIF
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:306 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:306 < 3 || FLAG:7 == 2)
+			;バックバージン
+			IF TALENT:161
+				IF RAND:2 == 0
+					PRINTFORMW 「ぅく、入れてるって。見りゃあ分かるだろ？」
+				ELSE
+					PRINTFORMW 「ん、ぁん%UNICODE(0x2661)%　ふ、なんか変な……っ！」
+				ENDIF
+				PRINTFORMW %CALLNAME%は顔をしかめながらアヌスに入れた指をゆるゆると動かしている
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:306 = 3
+		;それ以外
+		ELSEIF CFLAG:306 < 2 || FLAG:7 == 2
+			PRINTFORMW 「んな、しげしげ見るんじゃねぇよ……」
+			PRINTFORMW %CALLNAME%の指は肛門の周辺を撫でるだけだったが、その顔は羞恥のためか赤くなっていた
+		ENDIF
+		CFLAG:306 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;7,両穴オナニー　CFLAG:307
+;-------------------------------------------------
+IF SELECTCOM == 7
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:307 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				;処女
+				IF TALENT:0
+					IF TEQUIP:ローター挿入 && TEQUIP:ローターＡ挿入
+						PRINTFORMW 「りょ、両方に入ってんの、すげえ……」
+						PRINTFORMW ローターの刺激で%CALLNAME%は既に顔を上気させ、力なく足を開いている
+					ELSE
+						PRINTFORMW 「穴だけ弄って、イけって？　っとに大将やらしいなあ」
+					ENDIF
+				;非処女
+				ELSE
+					IF TEQUIP:ローター挿入 && TEQUIP:ローターＡ挿入
+						PRINTFORMW 「大将、どっちも慣らしてくからよ、好きな方から突っ込んでくれ、よ？」
+					ELSEIF TEQUIP:バイブ && TEQUIP:アナルバイブ
+						PRINTFORMW 「両方でけぇの入っててっ、俺、もうっ！　こ、腰抜けちまうっ！」
+					ELSE
+						PRINTFORMW 「ほら、見ろよ大将。大将の仕込みでこんなずっぷり入るようになったんだぜ？」
+						PRINTFORMW %CALLNAME%は足を大きく開くと、秘部がよく見えるように腰を突き出し、晒したちいさな膣口と菊穴に指を添える。
+						PRINTFORMW %CALLNAME:PLAYER%に悪戯に笑いかけると、%CALLNAME%は両方の穴に添えた指を2本ずつゆっくりと挿入させていった。
+					ENDIF
+				ENDIF
+			;恋慕、親愛以外
+			ELSE
+				PRINTFORMW 「穴だけ弄って、イけってかよ」
+			ENDIF
+		;審神者以外
+		ELSE
+			PRINTFORMW 「穴だけ弄って、イけってかよ」
+		ENDIF
+		CFLAG:307 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:307 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;処女
+					IF TALENT:0
+						IF TEQUIP:ローター挿入 && TEQUIP:ローターＡ挿入
+							IF RAND:2 == 0
+								PRINTFORMW 「こんな、おれ、ここ、気持ちよくてっ%UNICODE(0x2661)%」
+								PRINTFORMW 真っ赤に上気した顔で%CALLNAME%は、夢中で前後の穴を弄っている
+							ELSE
+								PRINTFORMW 「あ、あはっ%UNICODE(0x2661)%　これでこんなイイなら、大将のなら、どれだけっ……」
+								PRINTFORMW %CALLNAME%は潤んだ目に期待を満たして%CALLNAME:PLAYER%を見ている
+							ENDIF
+						ELSE
+							PRINTFORMW 「こんな、おれ、ここ、気持ちよくてっ%UNICODE(0x2661)%」
+							PRINTFORMW 真っ赤に上気した顔で%CALLNAME%は、夢中で前後の穴を弄っている
+						ENDIF
+					;非処女
+					ELSE
+						IF TEQUIP:ローター挿入 && TEQUIP:ローターＡ挿入
+							PRINTFORMW 「大将、今日はどっちから可愛がってくれるんだ？　そら、準備は万端だぜ」
+							PRINTFORMW %CALLNAME%は入れたローターが見える様に両方の穴を広げて%CALLNAME:PLAYER%に蕩けた目を向けた。
+						ELSEIF TEQUIP:バイブ && TEQUIP:アナルバイブ
+							PRINTFORMW 「まえっ、後ろどっちもヨくて、あぁああっ！　たいしょ俺っ、おれもうっ！」
+							PRINTFORMW はしたなくも大股を開いて、%CALLNAME%は両穴のバイブを抜き差ししている
+						ELSE
+							SIF TEQUIP:バイブ || TEQUIP:アナルバイブ
+								PRINTFORMW 「あ、あっ！　んな玩具じゃあ、ぁふ、余計、奥、切ねぇよ……　それに、」
+							PRINTFORMW 「俺の指じゃあ足りねぇよぉ、なあ大将ぉ……」
+							PRINTFORMW %CALLNAME%は\@ TEQUIP:バイブ || TEQUIP:アナルバイブ ? 両穴をバイブと # 前後の穴を \@根元まで突き入れた指でくちゅくちゅ音を立てながら弄っている
+						ENDIF
+					ENDIF
+				ENDIF
+			;恋慕、信愛、審神者以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:307 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:307 < 3 || FLAG:7 == 2)
+			;処女
+			IF TALENT:0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 「ふぁ、んっ！　みっともねえ、からっ、見てくれるな、よ……！」
+				PRINTFORMW %CALLNAME%は大きく股を開いて、前後の穴を音を立てながら弄っている
+			ENDIF
+		CFLAG:307 = 3
+		;それ以外
+		ELSEIF CFLAG:307 < 2 || FLAG:7 == 2
+			PRINTFORMW 「う…く、」
+			PRINTFORMW %CALLNAME%は前後の穴をくちゅくちゅ音を立てながら弄っている
+		ENDIF
+		CFLAG:307 = 2
+	ENDIF
+ENDIF
+
+
+;=================================================
+;Ｂ系コマンド
+;=================================================
+;-------------------------------------------------
+;10,胸愛撫　CFLAG:308
+;-------------------------------------------------
+IF SELECTCOM == 10
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:308 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「別に柔らかいわけでもねぇし、んな平らなの弄って、大将楽しいのか？」
+			PRINTFORMW %CALLNAME%はつるりとした自分の胸を見下ろして首を傾げた
+		ELSE
+			PRINTFORMW 「……楽しいか？」
+		ENDIF
+		CFLAG:308 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:308 < 3 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF PALAM:欲情 > 30000
+					PRINTFORMW 「あぁ、イイっ！　大将っ、おれココ気持ちイイっ%UNICODE(0x2661)%　もっとしてくれよぉっ！」
+				ELSE
+					PRINTFORMW 「ん、あふ%UNICODE(0x2661)%　気持ちイイぜ、たいしょ%UNICODE(0x2661)%」
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:308 = 3
+		ELSEIF CFLAG:308 < 2 || FLAG:7 == 2
+			IF NO:MASTER == 0
+				PRINTFORMW 「大将、くすぐってぇよ」
+			ELSE
+				PRINTFORMW 「あー、うん。楽しいならいいか」
+			ENDIF
+		CFLAG:308 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;11,胸揉み　CFLAG:309
+;-------------------------------------------------
+IF SELECTCOM == 11
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:309 == 0
+		;恋慕、親愛
+		IF TALENT:3 || TALENT:6
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「大将、んな平らなの揉んで楽しいか？　でかくする薬とか使った方がいいんじゃねぇか？」
+					PRINTFORMW %CALLNAME:PLAYER%がどうせ大きくするなら薬より揉んですると言うと、%CALLNAME%は噴出した。
+					PRINTFORMW 「んじゃまあ、大将。でっかくなるまでたっぷり揉んでくれや」
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ELSE
+			PRINTFORMW 「揉む？　どこをだ？」
+			PRINTFORMW %CALLNAME%はつるりとした自分の胸を見下ろして首を傾げた
+		ENDIF
+		CFLAG:309 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:309 < 3 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			IF PALAM:欲情 > 30000
+					PRINTFORMW 「大将っ、おれココ気持ちイイっ%UNICODE(0x2661)%　もっとしてくれよぉっ！」
+				ELSE
+					PRINTFORMW 「どうかねえ、ちったあでかくなったかな？」
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:309 = 3
+		ELSEIF CFLAG:309 < 2 || FLAG:7 == 2
+			PRINTFORMW 「あー、うん。楽しいならいいか」
+		ENDIF
+		CFLAG:309 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;12,乳首ローター　CFLAG:310
+;-------------------------------------------------
+IF SELECTCOM == 12
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:310 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「ん？大将、こりゃなんだ？」
+		ELSE
+			PRINTFORMW 「ん？こりゃなんだ？」
+		ENDIF
+		CFLAG:310 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「んっ、ん、ぁあ……」
+		PRINTFORMW %CALLNAME%は呼吸を乱し小さな喘ぎを漏らしている
+		CFLAG:310 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;13,ニプルキャップ　CFLAG:311
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 13 && TEQUIP:ニプルキャップ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:311 == 0
+		PRINTFORMW 「っく、痛ぇよ……」
+		CFLAG:311 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「んっ、ん、ぁあ……」
+		PRINTFORMW %CALLNAME%は呼吸を乱し小さな喘ぎを漏らしている
+		CFLAG:311 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 13 && TEQUIP:ニプルキャップ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;14,乳首責め　CFLAG:312
+;-------------------------------------------------
+IF SELECTCOM == 14
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:312 == 0
+		PRINTFORMW 「んっ……、んな、ひっぱったら取れる……っ」
+		CFLAG:312 = 1
+	;二回目以降
+	ELSE
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:312 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0 && ASSIPLAY)
+					IF RAND:2 == 0
+						PRINTFORMW くりくりと尖りをこね回すのに合わせ%CALLNAME%の身体が跳ねた
+					ELSE
+						PRINTFORMW 乳首をやわやわと撫でるのと強く抓り上げるのを何度も繰り返すと、
+						PRINTFORMW %CALLNAME%は瞳を潤ませて呼吸を荒げた
+					ENDIF
+					PRINTFORMW 「あ、ああっ%UNICODE(0x2661)%　大将気持ちイイ、もっと……%UNICODE(0x2661)%」
+				ELSE
+					PRINTFORMW 
+				ENDIF
+			;淫乱、娼婦
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+			;服従、隷属
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+			ENDIF
+		CFLAG:312 = 3
+		;それ以外
+		ELSEIF CFLAG:312 < 2 || FLAG:7 == 2
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「んっ……%CALLNAME:PLAYER%、んな、ひっぱったら取れる……っ」
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF RAND:2 == 0
+					PRINTFORMW 「っく、たいしょ、痛ぇよ」
+				ELSE
+					PRINTFORMW 「う、うう……ぁく、んんっ！」
+					PRINTFORMW 乳首への刺激に%CALLNAME%は身体を震わせている
+				ENDIF
+			ELSE
+				PRINTFORMW 「んっ……%CALLNAME:PLAYER%、んな、ひっぱったら取れる……っ」
+			ENDIF
+		CFLAG:312 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;15,乳首クリップ　CFLAG:313
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 15 && TEQUIP:乳首クリップ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:313 == 0
+		PRINTFORMW 「……っ、なにを……！」
+		CFLAG:313 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:313 < 3 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「あ、んっ！　乳首、ぎゅって噛まれんの、気持ちイイ%UNICODE(0x2661)%」
+				PRINTFORMW クリップで両乳首を挟まれ、%CALLNAME%は熱い息を吐いた
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:313 = 3
+		ELSEIF CFLAG:313 < 2 || FLAG:7 == 2
+			IF PALAM:TARGET:欲情 >= PALAMLV:3
+				PRINTFORMW 「ぁう、はっ%UNICODE(0x2661)%　乳首じんじんして、っ！」
+			ELSE
+				PRINTFORMW 「なんか、乳首取れそうだよなあ、これ」
+			ENDIF
+		CFLAG:313 = 2
+		ENDIF
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 15 && TEQUIP:乳首クリップ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;16,乳房電極　CFLAG:314
+;-------------------------------------------------
+IF SELECTCOM == 16
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:314 == 0
+		CFLAG:314 = 1
+	;二回目以降
+	ELSE
+		CFLAG:314 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;17,搾乳機　CFLAG:315
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 17 && TEQUIP:搾乳機 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:315 == 0
+		CFLAG:315 = 1
+	;二回目以降
+	ELSE
+		CFLAG:315 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 17 && TEQUIP:搾乳機
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;18,母乳飲み　CFLAG:316
+;-------------------------------------------------
+IF SELECTCOM == 18
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:316 == 0
+		CFLAG:316 = 1
+	;二回目以降
+	ELSE
+		CFLAG:316 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;Ｃ系コマンド
+;=================================================
+;-------------------------------------------------
+;20,ローター　CFLAG:317
+;-------------------------------------------------
+IF SELECTCOM == 20
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:317 == 0
+		PRINTFORMW 「うん、まぁ、なんだ。いやらしい事用の玩具かよ」
+		CFLAG:317 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「んは、ぁあ……」
+		PRINTFORMW %CALLNAME%は呼吸を乱し小さな喘ぎを漏らしている
+		CFLAG:317 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;21,Ｅマッサージャ　CFLAG:318
+;-------------------------------------------------
+IF SELECTCOM == 21
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:318 == 0
+		PRINTFORMW 「ん？　こりゃなんだ？」
+		CFLAG:318 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「これっ、キツイんだって！　ぐりぐりしたら、もぉっ！！」
+		CFLAG:318 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;22,クリキャップ　CFLAG:319
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 22 && TEQUIP:クリキャップ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:319 == 0
+		CFLAG:319 = 1
+	;二回目以降
+	ELSE
+		CFLAG:319 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 22 && TEQUIP:クリキャップ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;23,クリ責め　CFLAG:320
+;-------------------------------------------------
+IF SELECTCOM == 23
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:320 == 0
+		CFLAG:320 = 1
+	;二回目以降
+	ELSE
+		CFLAG:320 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;24,陰核クリップ　CFLAG:321
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 24 && TEQUIP:陰核クリップ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:321 == 0
+		CFLAG:321 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「う、うあっ、きつ……っ」
+		PRINTFORMW %CALLNAME%は敏感な部分への刺激から逃れる様に腰を引いている……
+		CFLAG:321 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 24 && TEQUIP:陰核クリップ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;25,陰核電極　CFLAG:322
+;-------------------------------------------------
+IF SELECTCOM == 25
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:322 == 0
+		CFLAG:322 = 1
+	;二回目以降
+	ELSE
+		CFLAG:322 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;Ｐ系コマンド
+;=================================================
+;-------------------------------------------------
+;30,手淫する　CFLAG:323
+;-------------------------------------------------
+IF SELECTCOM == 30
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:323 == 0
+		PRINTFORMW 「……っう、ふぅっ……！」
+		PRINTFORMW %CALLNAME%は性器への分かりやすい刺激に顔をしかめた
+		CFLAG:323 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ふ、く、あぅ……んんっ！」
+		PRINTFORMW 性器を扱かれ、%CALLNAME%の身体がびくびくと反応している
+		CFLAG:323 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;31,フェラする　CFLAG:324
+;-------------------------------------------------
+IF SELECTCOM == 31
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:324 == 0
+		PRINTFORMW 「お、おい、待てって……ひあっ！　く、口に入れるもんじゃねえだろっ！」
+		PRINTFORMW ペニスを咥えられた%CALLNAME%は、腰を引いて逃れようとしている
+		CFLAG:324 = 1
+	;二回目以降
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORMW 「ふ、く、あぅ……んんっ！」
+			PRINTFORMW 性器を舐られ、%CALLNAME%の身体がびくびくと反応している
+		ELSE
+			PRINTFORMW 「んは、ぁあ……」
+			PRINTFORMW %CALLNAME%は呼吸を乱し小さな喘ぎを漏らしている
+		ENDIF
+		CFLAG:324 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;32,電動オナホール　CFLAG:325
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 32 && TEQUIP:電動オナホール == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:325 == 0
+		PRINTFORMW 「……っう、くそ……」
+		PRINTFORMW %CALLNAME%は性器への分かりやすい刺激に顔をしかめた
+		CFLAG:325 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「んは、ぁあ……」
+		PRINTFORMW %CALLNAME%は呼吸を乱し小さな喘ぎを漏らしている
+		CFLAG:325 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 32 && TEQUIP:電動オナホール
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;33,亀頭責め　CFLAG:326
+;-------------------------------------------------
+IF SELECTCOM == 33
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:326 == 0
+		CFLAG:326 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:326 < 3 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「ぁうんっ%UNICODE(0x2661)%　たいしょ、そこぉ……」
+				PRINTFORM %CALLNAME%は
+					SIF TALENT:包茎
+						PRINT 皮から露出させた
+				PRINTFORMW 敏感な部分への刺激に、強請るように腰を突き出している……
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:326 = 3
+		ELSEIF CFLAG:326 < 2 || FLAG:7 == 2
+			PRINTFORMW 「う、うあっ、きつ……っ」
+			PRINTFORMW %CALLNAME%は敏感な部分への刺激から逃れる様に腰を引いている……
+		CFLAG:326 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;34,玉愛撫　CFLAG:327
+;-------------------------------------------------
+IF SELECTCOM == 34
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:327 == 0
+		CFLAG:327 = 1
+	;二回目以降
+	ELSE
+		CFLAG:327 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;35,玉責め　CFLAG:328
+;-------------------------------------------------
+IF SELECTCOM == 35
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:328 == 0
+		PRINTFORMW 「ぎっ！　ぐあぁああっ！」
+		CFLAG:328 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ふぐっ！　ぐうぅうう……」
+		PRINTFORMW %CALLNAME%は血の気が引いた顔に脂汗を滲ませながら呻き声をあげている……
+		CFLAG:328 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;36,剥いてやる　CFLAG:329
+;-------------------------------------------------
+IF SELECTCOM == 36
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;Ｖ系コマンド
+;=================================================
+;-------------------------------------------------
+;40,クンニ　CFLAG:330
+;-------------------------------------------------
+IF SELECTCOM == 40
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:330 == 0
+		CFLAG:330 = 1
+	;二回目以降
+	ELSE
+		CFLAG:330 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;41,指挿入れ　CFLAG:331
+;-------------------------------------------------
+IF SELECTCOM == 41
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:331 == 0
+		;処女
+		IF TALENT:0
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF TEQUIP:ローター挿入
+						PRINTFORMW 「お、玩具、奥入ってっ%UNICODE(0x2661)%　たいしょ、俺、なんか変だっ！」
+					ELSE
+						PRINTFORMW 「なんつーか、何とも言えねえ感覚だなあ。大将ん指が入ってくんのは良くわかるんだが」
+					ENDIF
+				ENDIF
+			ENDIF
+		ELSE
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF TEQUIP:ローター挿入 || TEQUIP:バイブ
+						PRINTFORMW 「あ、あぁあっ、大将に動かしてもらうと、すっげえクるっ%UNICODE(0x2661)%」
+						PRINTFORMW 「たいしょ、イイ%UNICODE(0x2661)%　俺、おれぇ……っ！」
+					ELSE
+						PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%に、にんまりと悪戯に笑うと秘肉を分け入ってくる指を締め付けて腰を振り、自ら抜き差しをし始めた。
+					ENDIF
+				ENDIF
+			ENDIF
+		ENDIF
+		CFLAG:331 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:331 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+			;処女
+			IF TALENT:0
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF PALAM:欲情 > 30000
+						PRINTFORMW 「は、んっ！　気持ちイイっ%UNICODE(0x2661)%　たいしょイイ、もっと、奥まで掻き混ぜてくれ、よっ%UNICODE(0x2661)%」
+					ELSE
+						IF RAND:2 == 0
+							PRINTFORMW 「もう大将の入るくれぇ慣れたと思うんだがなあ、まだ駄目か？」
+						ELSE
+							PRINTFORMW 「は、んっ！　イイ、たいしょ%UNICODE(0x2661)%　頼む、もっと……%UNICODE(0x2661)%」
+						ENDIF
+					ENDIF
+				ENDIF
+			;非処女
+			ELSE
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				LOCAL = RAND:100
+					IF LOCAL < 5
+					;5%の確率で実行
+						PRINTFORMW 「ん、ふぁ%UNICODE(0x2661)%　ここ、も、気持ちよくなってきたなぁ……」
+						PRINTFORMW %CALLNAME:PLAYER%の手を、ひくつく膣肉に根元まで指を飲み込ませた状態で掴み止めると、%CALLNAME%は潤んだ瞳で%CALLNAME:PLAYER%を見上げた。
+						PRINTFORMW 「大将、俺は大将のもんだからどう弄ってもイイが、なあ。今の俺は大将の好みに適っているか？」
+					ELSE
+						IF TEQUIP:ローター挿入 || TEQUIP:バイブ
+							PRINTFORMW 「たいしょ、もっと%UNICODE(0x2661)%　奥っ！　奥までっ、頼むっ！」
+							PRINTFORMW 「あ、あぁあっ、大将に動かしてもらうと、すっげえクるっ%UNICODE(0x2661)%」
+						ELSE
+							PRINTFORMW 「ふぁ、ああぁっ！　大将っ、そこぉ%UNICODE(0x2661)%」
+							PRINTFORMW じゅぶじゅぶ音を立てて膣内を掻き混ぜてやると、%CALLNAME%は甘い嬌声をあげた
+						ENDIF
+					ENDIF
+				ENDIF
+			ENDIF
+			CFLAG:331 = 3
+		ELSE
+			IF ASSI > 0 && ASSIPLAY
+			ELSE
+			ENDIF
+		ENDIF
+		CFLAG:331 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;42,ローター挿入　CFLAG:332
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 42 && TEQUIP:ローター挿入 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:332 == 0
+		;恋慕、親愛
+		IF TALENT:3 || TALENT:6
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				;処女
+				IF TALENT:0
+					PRINT 「大将の入れられるようにこれで慣らすのか。
+						SIF TALENT:MASTER:巨根 || TALENT:MASTER:馬並み
+						PRINT 大将の、でけぇもんなあ。
+					PRINTFORMW よし、じゃあ、ちゃちゃっとやっちまおうぜ」
+				ELSE
+					PRINTFORMW 「ぅん、こんな玩具じゃあものたりねぇなあ……あっ！」
+					PRINTFORMW %CALLNAME%は見せつける様に自らローターのコードを引っ張りながら腰を振っている
+				ENDIF
+			;
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:332 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「なかで、ぶるぶるってして……っ！く、あっ」
+		CFLAG:332 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 42 && TEQUIP:ローター挿入
+	IF ASSI > 0 && ASSIPLAY
+	CALL TRAIN_MESSAGE
+	ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		;恋慕、親愛
+		IF TALENT:3 || TALENT:6
+			;処女
+			IF TALENT:0 || TALENT:1
+				PRINTFORMW 震えるローターが何度も膣口から顔を出しては奥に引っ込む。
+				PRINTFORMW イきそうなのを我慢しながら%CALLNAME%は、かなり苦労して手を使わずにローターを膣内から出した
+				PRINTFORMW 「ふ、あぁ%UNICODE(0x2661)%　ちゃーんと出来たんだから、今日こそご褒美くれよ？　大将%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 「なぁ、こんなんじゃあちっとも足りねえんだがなあ？　判ってんだろ、たーいしょ%UNICODE(0x2661)%」
+				PRINTFORMW 殊更ゆっくりと引き抜いた、蜜でべっとりと濡れたローターをかざして%CALLNAME%は艶美に笑っている
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;43,バイブ　CFLAG:333
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 43 && TEQUIP:バイブ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:333 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;処女
+			IF TALENT:0
+				;恋慕、親愛
+				IF TALENT:3 || TALENT:6
+					PRINTFORMW 「え、待て大将、それ使うのか？」
+					PRINTFORMW 「初めては大将ので散らしたかったんだが……」
+				ENDIF
+			;それ以外
+			ELSE
+				PRINTFORMW 「はん、大将の時代でも張り型はあんだなぁ……。あ、え？　ぁん、ふぁ%UNICODE(0x2661)%
+				PRINTFORMW 「な、これ動く、待てっていきなり奥…っ%UNICODE(0x2661)%　おくっきて、あ、あああっ%UNICODE(0x2661)%」
+			ENDIF
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:333 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:333 < 4 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「あ、奥、当たるっ%UNICODE(0x2661)%　当たって、気持ちイイっ、たいしょおぉ%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:333 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:333 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:333 = 3
+		;それ以外
+		ELSEIF CFLAG:333 < 2 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:333 = 2
+		ENDIF
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 43 && TEQUIP:バイブ
+	CALL TRAIN_MESSAGE
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				PRINTFORMW 「ふは、ドロッドロのここ、次は大将の入れてくれんだろ？」
+				PRINTFORMW %CALLNAME%はゆるく足を広げると、くぱくぱと開き閉じする度に蜜を溢す膣口を%CALLNAME:PLAYER%に向けて晒した
+			ENDIF
+		ELSE
+			PRINTFORMW 
+		ENDIF
+ENDIF
+
+;-------------------------------------------------
+;44,ヴァギナ電極　CFLAG:334
+;-------------------------------------------------
+IF SELECTCOM == 44
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:334 == 0
+		CFLAG:334 = 1
+	;二回目以降
+	ELSE
+		CFLAG:334 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;Ａ系コマンド
+;=================================================
+;-------------------------------------------------
+;50,アナル舐め　CFLAG:335
+;-------------------------------------------------
+IF SELECTCOM == 50
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:335 == 0
+		PRINTFORMW 「な、何するんだ！　んな所舐めるもんじゃねぇだろ！」
+		PRINTFORMW 珍しく%CALLNAME%は焦った声をあげた。
+		CFLAG:335 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:335 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「頼むから、濡らすんなら他のもんにしちゃあくれねぇか……。見てらんねえ」
+					PRINTFORMW %CALLNAME%は真っ赤な顔を背けている
+				ELSE
+					PRINTFORMW 
+				ENDIF
+			;淫乱、娼婦
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+			;服従、隷属
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+			ENDIF
+				CFLAG:335 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:335 < 3 || FLAG:7 == 2)
+			PRINTFORMW 皺のひとつまでじっくり舐ってやると%CALLNAME%は身体をひくつかせながら呻き声をあげている……
+			CFLAG:335 = 3
+		;それ以外
+		ELSEIF CFLAG:335 < 2 || FLAG:7 == 2
+			PRINTFORMW %CALLNAME%は固く目を瞑り、浅い呼吸を繰り返している……
+		CFLAG:335 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;51,アナル愛撫　CFLAG:336
+;-------------------------------------------------
+IF SELECTCOM == 51
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:336 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				;バックバージン
+				IF TALENT:161
+					IF TEQUIP:ローターＡ挿入
+						PRINTFORMW 「なか、で、ぶるぶるしてんの……動かし、ひゃっ！　たいしょ、そこダメだってっ！」
+					ELSE
+						PRINT 「む。慣らさなけりゃ大将の入らんか。
+							SIF TALENT:MASTER:巨根 || TALENT:MASTER:馬並み
+							PRINT 大将の、でけぇもんなあ。
+						PRINTFORMW 自分でやってもいいんだが……　いや、そんな顔しなさんな。大将に頼むって」
+					ENDIF
+				ELSE
+					PRINTFORMW 「大将だけだぜ、こんなんさせんの」
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;
+		ELSE
+			PRINTFORMW 「乱暴にはしねぇでくれよ」
+		ENDIF
+		CFLAG:336 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:336 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;バックバージン
+					IF TALENT:161
+						IF TEQUIP:ローターＡ挿入
+							PRINTFORMW 「ふ、あぁああっ%UNICODE(0x2661)%　たいしょ、イイ、たいしょおっ！」
+							PRINTFORMW 「ああんっ、大将に弄られるとイイの止まんねぇっ！」
+						ELSE
+							IF RAND:2 == 0
+								PRINTFORMW 「ん……あとどれくらい慣らせば大将の入るかねぇ？」
+							ELSE
+								PRINTFORMW 「あ、んっ！　たいしょ、奥、弄ってくれよぉ%UNICODE(0x2661)%」
+							ENDIF
+						ENDIF
+					ELSE
+						IF TEQUIP:アナルバイブ
+							PRINTFORMW 「あ%UNICODE(0x2661)%　あっ%UNICODE(0x2661)%　たいしょ、それっ、深すぎるっ%UNICODE(0x2661)%」
+							PRINTFORMW 「イイ、けど大将っ、ど、せならっ、ぁっ%UNICODE(0x2661)%　たいしょの、本身を通しちゃくれねぇかっ！」
+						ELSE
+							PRINTFORMW 「ふぁ%UNICODE(0x2661)%　な、大将もう指、いいだろ……？」
+							PRINTFORMW 「……違っ、たいしょ、指がイイんじゃなくてっ！　あっ、ひゃあ、あああっ%UNICODE(0x2661)%」
+						ENDIF
+					ENDIF
+				;
+				ELSE
+					PRINTFORMW 
+				ENDIF
+			;
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:336 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:336 < 3 || FLAG:7 == 2)
+			IF TEQUIP:ローターＡ挿入
+				PRINTFORMW 「お、玩具、奥入ってっ%UNICODE(0x2661)%　俺、なんか変だっ！」
+			ELSE
+				PRINTFORMW 「う……くぅ、気持ち悪ぃよ」
+				PRINTFORMW 不満げな言葉を無視して指を動かし続けると%CALLNAME%の足が時折ぴくぴくと跳ねだす。
+				PRINTFORMW 顔も朱を刷いた様になって呼吸も乱れ出した%CALLNAME%の様子を楽しみながら、%CALLNAME:PLAYER%は腸壁を探る指を増やしていった……
+			ENDIF
+			CFLAG:336 = 3
+		;それ以外
+		ELSEIF CFLAG:336 < 2 || FLAG:7 == 2
+			PRINTFORMW %CALLNAME%は固く目を瞑り、浅い呼吸を繰り返している……
+		CFLAG:336 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;52,ローターＡ挿入　CFLAG:337
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 52 && TEQUIP:ローターＡ挿入 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:337 == 0
+		PRINTFORMW 「いや、待てって、ドコに入れようって……っ！　んんっ！」
+		CFLAG:337 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:337 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;バックバージン
+					IF TALENT:161
+						IF RAND:2 == 0
+							PRINTFORMW 「俺、早くココの奥の奥まで突っ込んで大将に気持ちよくなって欲しいんだがなあ。まだか」
+						ELSE
+							PRINTFORMW 「んんっ、気持ちイイぜ、大将%UNICODE(0x2661)%」
+						ENDIF
+					ELSE
+						PRINTFORMW 「ふぁ、気持ちイイけど、やっぱ物足りねぇなあ……」
+					ENDIF
+				ENDIF
+			;その他陥落
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:336 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:337 < 3 || FLAG:7 == 2)
+			PRINTFORMW 「ああ……%UNICODE(0x2661)%　ダ、ダメだ、ふぁあっ！」
+			PRINTFORMW %CALLNAME%はびくびくと体を震わせている
+			CFLAG:337 = 3
+		;それ以外
+		ELSEIF CFLAG:337 < 2 || FLAG:7 == 2
+			PRINTFORMW 「んぁ……ヘンな感じだ、ぜ……」
+		CFLAG:337 = 2
+		ENDIF
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 52 && TEQUIP:ローターＡ挿入
+	IF ASSI > 0 && ASSIPLAY
+	CALL TRAIN_MESSAGE
+	ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		;恋慕、親愛
+		IF TALENT:3 || TALENT:6
+			;バックバージン
+			IF TALENT:161
+				IF (TALENT:MASTER:巨根 && EXP:Ａ経験 <= 110) || (TALENT:MASTER:馬並み && EXP:Ａ経験 <= 170)
+					PRINTFORMW 「ふぁ……待ってくれ。取っちまったら、慣らすの、遅くなっちまうだろ」
+					PRINTFORMW 「たいしょのでけぇの、早く中で感じてぇのに……」
+					PRINTFORMW ローターを抜き取る%CALLNAME:PLAYER%に、%CALLNAME%は唇を尖らしている
+				ELSE
+					PRINTFORMW 「あ、ぁあ……ちゃんと見ててくれよ、大将%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%は言われるまま体内のローターを手を使わずにひり出して見せた
+				ENDIF
+			ELSE
+				PRINTFORMW 「ん、もうこいつはいいだろう？　大将、なあ、早くここにくれよ%UNICODE(0x2661)%」
+				PRINTFORMW %CALLNAME%は抜いた淫具を放り出すと、柔らかくなったアヌスを指で広げてみせた
+			ENDIF
+		ENDIF
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;53,アナルビーズ　CFLAG:338
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 53 && TEQUIP:アナルビーズ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:338 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			IF ABL:Ａ感覚 == 0
+				PRINTFORMW 「ひ、ぁぐっ！……んな、急に、入るもんじゃねぇ、よ、大将っ」
+				PRINTFORMW 顔をゆがめびっしりと冷や汗を浮かべた%CALLNAME%は元から白い顔色を更に青白くして呻いている……
+			ELSE
+				PRINTFORMW 「大将の時代は、こーゆーもん、なんか色々あるよなあ……」
+				PRINTFORMW 玉が幾つも体内に入っていく感覚を、ふ、ふ、と小さく息を吐く事で逸らしながら%CALLNAME%は口角をあげている……
+			ENDIF
+		ELSE
+			PRINTFORMW 「う……ぐ、んな、急に、入るもんじゃねぇ、よ」
+			PRINTFORMW 顔をゆがめ%CALLNAME%は呻いている……
+		ENDIF
+		CFLAG:338 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:338 < 3 || FLAG:7 == 2)
+			PRINTFORMW 「ふぁ%UNICODE(0x2661)%%UNICODE(0x2661)%　腹ん中きっつ……%UNICODE(0x2661)%」
+			CFLAG:338 = 3
+		ELSEIF CFLAG:338 < 2 || FLAG:7 == 2
+			PRINTFORMW 「……また入れんのか、それ。あんま好きじゃねぇんだけどなあ」
+		CFLAG:338 = 2
+		ENDIF
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 53 && TEQUIP:アナルビーズ
+	CALL TRAIN_MESSAGE
+	PRINTFORMW 「ひゃああっ！　ぜんぶぅ、出……っ、壊れるっ！」
+ENDIF
+
+;-------------------------------------------------
+;54,アナルバイブ　CFLAG:339
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 54 && TEQUIP:アナルバイブ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:339 == 0
+		;陥落済み
+		IF TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8
+			IF (NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0))
+				PRINTFORMW 「張り型か。結構でかくねえか？　入るかな……あ%UNICODE(0x2661)%　大将いきなり全部っ！」
+				PRINTFORMW 「な、待て！　動いて、たいしょそこダメ当たるっ！　ひぃあっ、あんっ！」
+			ENDIF
+		;未陥落
+		ELSE
+			PRINTFORMW 「尻用の張り型ねぇ……入るもんかなあ」
+			PRINTFORMW %CALLNAME%はアナルバイブの大きさを見て眉を寄せている
+		ENDIF
+		CFLAG:339 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:339 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF (NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)) && (TALENT:MASTER:オトコ || TALENT:MASTER:半陰半陽 || TALENT:MASTER:ふたなり)
+					IF TEQUIP:7 == 1
+						PRINTFORMW %CALLNAME%に尻尾を模したバイブを示し、着けている間猫の鳴きまねをしてほしいと告げると%CALLNAME%はあっさり頷いた。
+						PRINTFORMW 「まあ、それくらい別に構わねぇよ、大将。しかしまたけったいな……」
+						PRINTFORMW %CALLNAME%はふと言葉を切ると、にんまりと笑った。
+						PRINTFORMW 「たーいしょ。まぁたけったいな趣味だ、にゃあ♪」
+					ELSE
+						IF RAND:2 == 0
+							PRINTFORMW 「あ%UNICODE(0x2661)%　あ%UNICODE(0x2661)%　コレもイイ、けどっ、たいしょのが欲し……っ%UNICODE(0x2661)%」
+						ELSE
+							PRINTFORMW 「ふぁ%UNICODE(0x2661)%　ん、あ、大将、いつまで、俺っちをっ、んんっ%UNICODE(0x2661)%　こんな玩具で遊ばせてんだ、よっ！」
+						ENDIF
+						PRINTFORMW 深々とバイブを咥えこんだアヌスを%CALLNAME:PLAYER%に向け、%CALLNAME%は切なげに%CALLNAME:PLAYER%のペニスを強請っている。
+					ENDIF
+				ENDIF
+			;その他陥落済
+			ELSE
+				PRINTFORMW 「ふぁ%UNICODE(0x2661)%%UNICODE(0x2661)%　腹ん中きっつ……%UNICODE(0x2661)%%UNICODE(0x2661)%」
+			ENDIF
+			CFLAG:339 = 3
+		;未陥落
+		ELSEIF CFLAG:339 < 2 || FLAG:7 == 2
+			PRINTFORMW 「う、く……はやく、抜けって……！」
+		CFLAG:339 = 2
+		ENDIF
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 54 && TEQUIP:アナルバイブ
+	IF ASSI > 0 && ASSIPLAY
+	CALL TRAIN_MESSAGE
+	;恋慕、親愛
+	ELSEIF TALENT:3 || TALENT:6
+		IF (NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)) && (TALENT:MASTER:オトコ || TALENT:MASTER:半陰半陽 || TALENT:MASTER:ふたなり)
+			PRINTFORMW 「あは%UNICODE(0x2661)%　は、ほら大将、イイ具合になってるぜ……%UNICODE(0x2661)%」
+			PRINTFORMW %CALLNAME%は性具で柔らかくなった菊座を指で広げて%CALLNAME:PLAYER%の陰茎を強請っている……
+		ELSE
+			PRINTFORMW %CALLNAME%は未だ異物感があるのかしきりに太腿をこすり合わせながら呼吸を整えている……
+		ENDIF
+	ELSE
+		PRINTFORMW %CALLNAME%は未だ異物感があるのかしきりに太腿をこすり合わせながら呼吸を整えている……
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;55,拡張バルーン　CFLAG:340
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 55 && TEQUIP:拡張バルーン == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:340 == 0
+		CFLAG:340 = 1
+	;二回目以降
+	ELSE
+		CFLAG:340 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 55 && TEQUIP:拡張バルーン
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;56,アナル電極　CFLAG:341
+;-------------------------------------------------
+IF SELECTCOM == 56
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:341 == 0
+		CFLAG:341 = 1
+	;二回目以降
+	ELSE
+		CFLAG:341 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;Ｕ系コマンド
+;=================================================
+;-------------------------------------------------
+;60,カテーテル　CFLAG:342
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 60 && TEQUIP:カテーテル == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:342 == 0
+		CFLAG:342 = 1
+	;二回目以降
+	ELSE
+		CFLAG:342 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 60 && TEQUIP:カテーテル
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;61,尿道バルーン　CFLAG:343
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 61 && TEQUIP:尿道バルーン == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:343 == 0
+		CFLAG:343 = 1
+	;二回目以降
+	ELSE
+		CFLAG:343 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 61 && TEQUIP:尿道バルーン
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;62,電極カテーテル　CFLAG:344
+;-------------------------------------------------
+IF SELECTCOM == 62
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:344 == 0
+		CFLAG:344 = 1
+	;二回目以降
+	ELSE
+		CFLAG:344 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;奉仕系コマンド
+;=================================================
+;-------------------------------------------------
+;70,手淫　CFLAG:345
+;-------------------------------------------------
+IF SELECTCOM == 70
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:345 == 0
+		CFLAG:345 = 1
+	;二回目以降
+	ELSE
+		CFLAG:345 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;71,フェラチオ　CFLAG:346
+;-------------------------------------------------
+IF SELECTCOM == 71
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:346 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「んむ……ひもち、ひーふぁ？ふぁいひょ%UNICODE(0x2661)%」
+			PRINTFORMW 「っぷ、咥えて喋るなって？いや、大将がよさそうなのが楽しくて、つい、な」
+		ELSE
+			PRINTFORMW 「んむ……ひもち、ひーふぁ？」
+			PRINTFORMW 音を立てて陰茎を舐めしゃぶていた%CALLNAME%は、そのまま上目使いで%CALLNAME:PLAYER%を見上げた。
+		ENDIF
+		CFLAG:346 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:346 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF RAND:2 == 0
+						;非処女、非バックバージン　非処女だけだとオトコでも口上が出てしまうのでｗ
+						IF (TALENT:オトコ == 0 && TALENT:処女 == 0) || TALENT:バックバージン == 0
+							PRINTFORMW 何を思ったか%CALLNAME%は、あぐ、と開けた口を閉じ手の中の怒張をしげしげと見つめた。
+							PRINTFORM 「毎度こいつが俺の\@TALENT:オトコ ? ケツ # ナカ\@で暴れてんだよなぁ……
+							SIF TALENT:MASTER:巨根 || TALENT:MASTER:馬並み
+								PRINTFORMW 我ながらよく入ったもんだ。口じゃあちと余るぞ。
+							PRINTFORMW イイ思いさせてもらってる感謝も込めて、しっかりお世話してやるぜ%UNICODE(0x2661)%」
+						ENDIF
+					ELSE
+						PRINTFORMW 「んんっ、ぷはっ%UNICODE(0x2661)%　たいしょの、しゃぶってると体の奥がじんじんしてくる……%UNICODE(0x2661)%」
+						PRINTFORMW 口辱で興奮したのか%CALLNAME%は蕩けた顔で%CALLNAME:PLAYER%を見上げている……
+					ENDIF
+				ELSE
+					PRINTFORMW 
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:346 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:346 < 3 || FLAG:7 == 2)
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「んんっ！　んくっ」
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF RAND:2 == 0
+					PRINT 「く、ぅんっ！　ぷふぁ、
+						SIF TALENT:MASTER:巨根 || TALENT:MASTER:馬並み
+						PRINT いーかげん、顎外れそうだぜ。
+					PRINTFORMW まだ、でっかくなるかよ……」
+				ELSE
+					PRINTFORMW 「あ……%UNICODE(0x2661)%　んむ、大将イイか…？」
+				ENDIF
+			ELSE
+				PRINTFORMW 「ふ、んむっ！　んんっ！」
+			ENDIF
+			CFLAG:346 = 3
+		;それ以外
+		ELSEIF CFLAG:346 < 2 || FLAG:7 == 2
+			PRINTFORMW 「ふ、んむっ！　んんっ！」
+		CFLAG:346 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;72,イラマチオ　CFLAG:347
+;-------------------------------------------------
+IF SELECTCOM == 72
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:347 == 0
+		PRINTFORMW 「う、ぐ……んんっ」
+		CFLAG:347 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:347 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 激しく喉の奥を蹂躙されていても、%CALLNAME%は涙の浮かぶ目に笑みを浮かべて
+					PRINTFORMW 指先で悪戯に%CALLNAME:MASTER%の腰をくすぐっている……
+				ELSE
+					PRINTFORMW 
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			CFLAG:347 = 3
+			ENDIF
+		;それ以外
+		ELSEIF CFLAG:347 < 2 || FLAG:7 == 2
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「ぅぐ！　うぅ、んっ！」
+			ELSE
+				PRINTFORMW 「ふぅっ……んぐ、んんっ！」
+			ENDIF
+		CFLAG:347 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;73,パイズリ　CFLAG:348
+;-------------------------------------------------
+IF SELECTCOM == 73
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:348 == 0
+		CFLAG:348 = 1
+	;二回目以降
+	ELSE
+		CFLAG:348 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;74,縦パイズリ　CFLAG:349
+;-------------------------------------------------
+IF SELECTCOM == 74
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:349 == 0
+		CFLAG:349 = 1
+	;二回目以降
+	ELSE
+		CFLAG:349 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;75,パイズリフェラ　CFLAG:350
+;-------------------------------------------------
+IF SELECTCOM == 75
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:350 == 0
+		CFLAG:350 = 1
+	;二回目以降
+	ELSE
+		CFLAG:350 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;76,素股　CFLAG:351
+;-------------------------------------------------
+IF SELECTCOM == 76
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:351 == 0
+		PRINTFORMW 「これ、つっこんでねぇだけでまぐわうのとあんまり変わらんよなあ」
+		CFLAG:351 = 1
+	;二回目以降
+	ELSE
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:351 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「大将のが、\@ RAND:2 == 0 ? やらしい所に # 熱くて \@ぬるぬる擦れて気持ちイイぜ%UNICODE(0x2661)%」
+				;
+				ELSE
+					PRINTFORMW 「どうだ、気持ちイイか？　こっちは、ほら、こんなぐちゃぐちゃだ。酷ぇ音だろ」
+					PRINTFORMW 腰を振りながら%CALLNAME%は太腿に広がった体液をすくって指先でもて遊んでいる……
+				ENDIF
+			ENDIF
+		CFLAG:351 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:351 < 3 || FLAG:7 == 2)
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「ふぁ%UNICODE(0x2661)%　悪い。滑りよくなり過ぎて抜けそうになった」
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF RAND:3 == 0
+					PRINTFORML 不意に動きを止めた%CALLNAME%に%CALLNAME:PLAYER%は何だと声をかけた。
+					PRINTFORMW 「ふぁ%UNICODE(0x2661)%　たいしょ、悪い。滑りよくなり過ぎて抜けそうになった」
+				ELSEIF RAND:2 == 0
+					PRINTFORMW 「大将は気持ちイイか？　こっちは、ほら、こんなぐちゃぐちゃだ。酷ぇ音だろ」
+					PRINTFORMW 腰を振りながら%CALLNAME%は太腿に広がった体液をすくって指先で持て遊んでいる……
+				ELSE
+					PRINTFORMW 「んん、大将。もっと早く、音立つくらいに動いていいか？」
+					PRINTFORMW %CALLNAME%は上気した顔で%CALLNAME:PLAYER%に淫猥に笑いかけた……
+				ENDIF
+			ELSE
+				PRINTFORMW 「んん、もっと早く、音立つくらいに動いていいか？」
+				PRINTFORMW %CALLNAME%は上気した顔で%CALLNAME:PLAYER%に淫猥に笑いかけた……
+			ENDIF
+		CFLAG:351 = 3
+		;それ以外
+		ELSEIF CFLAG:351 < 2 || FLAG:7 == 2
+			PRINTFORMW 「こう……こうか？これでどうだ」
+		CFLAG:351 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;77,指チュパ　CFLAG:352
+;-------------------------------------------------
+IF SELECTCOM == 77
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:352 == 0
+		CFLAG:352 = 1
+	;二回目以降
+	ELSE
+		CFLAG:352 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;80,足コキ　CFLAG:353
+;-------------------------------------------------
+IF SELECTCOM == 80
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:353 == 0
+		PRINTFORMW 「はあ、足？　足の裏で擦ればいいのか？」
+		PRINTFORMW 「……今更だが、どーゆー趣味なんだよ？」
+		CFLAG:353 = 1
+	;二回目以降
+	ELSE
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:353 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW %CALLNAME%は器用に%CALLNAME:PLAYER%の股間を弄んでいる。
+					PRINTFORMW 「俺っちの足、そんなにイイのかねえ？　ガチガチじゃねえかよ、大将」
+				ENDIF
+			ENDIF
+		ELSEIF CFLAG:353 < 3 || FLAG:7 == 2
+			;靴下
+			SIF TEQUIP:1 == 1
+				PRINT 靴下をはいたまま
+			PRINTFORMW %CALLNAME%は器用に%CALLNAME:PLAYER%の股間を弄んでいる。
+			PRINTFORMW 「ほら、俺っちのあんよがイイんだろ？　このまま子種汁ぶちまけちまえよ%UNICODE(0x2661)%」
+			PRINTFORMW むしろその見下した風な視線がいいです……
+		CFLAG:353 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;81,髪コキ　CFLAG:354
+;-------------------------------------------------
+IF SELECTCOM == 81
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:354 == 0
+		CFLAG:354 = 1
+	;二回目以降
+	ELSE
+		CFLAG:354 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;82,脇コキ　CFLAG:355
+;-------------------------------------------------
+IF SELECTCOM == 82
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:355 == 0
+		CFLAG:355 = 1
+	;二回目以降
+	ELSE
+		CFLAG:355 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;83,尻扱き　CFLAG:356
+;-------------------------------------------------
+IF SELECTCOM == 83
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:356 == 0
+		CFLAG:356 = 1
+	;二回目以降
+	ELSE
+		CFLAG:356 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;84,乳ファック　CFLAG:357
+;-------------------------------------------------
+IF SELECTCOM == 84
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:357 == 0
+		CFLAG:357 = 1
+	;二回目以降
+	ELSE
+		CFLAG:357 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;85,足舐め強制　CFLAG:358
+;-------------------------------------------------
+IF SELECTCOM == 85
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;86,玉揉み強制　CFLAG:359
+;-------------------------------------------------
+IF SELECTCOM == 86
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:359 == 0
+		CFLAG:359 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:359 < 3 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「お、大分重たくなってきたな。俺っちがしっかり抜いてやるからなぁ」
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:359 = 3
+		;それ以外
+		ELSEIF CFLAG:359 < 2 || FLAG:7 == 2
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:359 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;87,玉舐め強制　CFLAG:360
+;-------------------------------------------------
+IF SELECTCOM == 87
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:360 == 0
+		CFLAG:360 = 1
+	;二回目以降
+	ELSE
+		CFLAG:360 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;セックス系コマンド
+;=================================================
+;-------------------------------------------------
+;100,正常位　CFLAG:361
+;-------------------------------------------------
+IF SELECTCOM == 100
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:361 == 0
+		IF TALENT:処女
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW %CALLNAME:PLAYER%に組み敷かれた%CALLNAME%は、楽しげに笑みを浮かべている。
+					PRINTFORMW 機嫌がよさそうだな、と問うと
+					PRINT 「そりゃあ、やっとこさ大将とデキるんだからなあ。ほら早く大将の
+						SIF TALENT:MASTER:巨根 || TALENT:MASTER:馬並み
+						PRINT でかいの
+					PRINTFORMW 突っ込んでくれよ？」
+					PRINTFORMW 言っている事と口調は全く情緒がない。が、自らひざ裏を抱えて腰を上げ、言葉通り%CALLNAME:PLAYER%を待ち望むように
+					PRINTFORMW わずかに口を開け蜜を溢す膣口を晒す%CALLNAME%の姿に%CALLNAME:PLAYER%の興奮は嫌でも増した。
+					PRINTFORMW 「ほれ、処女だけどだいぶ慣らしたし、大将きっと気持ちいいぜ？　奥に大将のこ～い子種ぶちまけてくれや。早く俺のカラダによ、大将の味教えてくれよ」
+					PRINTFORMW 「大将にやれるもんが増えて、俺、嬉しいんだぜ%UNICODE(0x2661)%　俺っちであげられるもんはぜーんぶ大将にやるつもりだからなあ」
+					PRINTFORMW ……これ以上喋らせるとこちらの心臓が持たない、と判断した%CALLNAME:PLAYER%は、%CALLNAME%の腰を抱え上げ、そのまだ幼い秘所を割り拓いていった
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「たいしょ、やーらしいイイ顔してるぜ……あぁ、あっ%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME:PLAYER%の顔に向かって手を伸ばし、緩やかになでる%CALLNAME%こそ、胎の奥を掻き回されて蕩けたいやらしい顔をしているのだが……
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:361 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:361 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「そこ、そこイイっ%UNICODE(0x2661)%　あ、あっ、たいしょおっ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%は、腰を振りながら%CALLNAME:PLAYER%に両脚を絡めてしがみついている……
+				ELSE
+					PRINTFORMW 
+				ENDIF
+			ENDIF
+		CFLAG:361 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:361 < 3 || FLAG:7 == 2)
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:361 = 3
+		;それ以外
+		ELSEIF CFLAG:361 < 2 || FLAG:7 == 2
+			PRINTFORMW 
+		CFLAG:361 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;101,後背位　CFLAG:362
+;-------------------------------------------------
+IF SELECTCOM == 101
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:362 == 0
+		IF TALENT:処女
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「ああ、やっと大将俺っちの処女ぶち抜いてくれるのか……」
+					PRINTFORMW 「早く来てくれや、たーいしょ%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%は自ら小さなワレメを指で広げて%CALLNAME:PLAYER%の陰茎を強請っている……
+				ENDIF
+			ELSE
+				IF ASSI > 0 && ASSIPLAY
+				ELSE
+				ENDIF
+			ENDIF
+		ELSE
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「あぁああっ%UNICODE(0x2661)%　奥、いっぱい突かれるのイイけどよっ！」
+					PRINTFORMW 「後ろからだと、ふぁっ！　たいしょの顔見えねえのがなっ！」
+				ENDIF
+			ELSE
+				IF ASSI > 0 && ASSIPLAY
+				ELSE
+				ENDIF
+			ENDIF
+		ENDIF
+		CFLAG:362 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:362 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && ASSIPLAY && NO:ASSI == 0)
+					IF TEQUIP:7 == 1 && TEQUIP:アナルバイブ
+						PRINTFORMW 「にゃ、あぁあああっ！　りょうほぉ無理っ！　にゃあ、たいしょ頼む、からぁ、にゃああ、ああんっ%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%は、言い付けておいた通りに律儀にも猫の鳴きまねをしながら限界を訴えるが、胎の奥まで突き込まれて
+						PRINTFORMW 猫尻尾と腰をくねらせる様は、更なる責めを強請っているようにしか見えない。
+					ELSE
+						PRINTFORMW 「んっ、う、ぁ……はぁ、ああっ%UNICODE(0x2661)%　たいしょおっ、も、もっと奥、奥までぇ%UNICODE(0x2661)%」
+					ENDIF
+				ENDIF
+			ENDIF
+			CFLAG:362 = 3
+		;それ以外
+		ELSEIF CFLAG:362 < 2 || FLAG:7 == 2
+			IF ASSI > 0 && ASSIPLAY
+				ELSE
+				ENDIF
+		CFLAG:362 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;102,対面座位　CFLAG:363
+;-------------------------------------------------
+IF SELECTCOM == 102
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:363 == 0
+		IF TALENT:処女
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「大将、なあ、早くココにぶち込んで、俺っち大将のモンにしてくれよ%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%は自ら小さなワレメを指で広げて%CALLNAME:PLAYER%の陰茎を強請っている……
+				ENDIF
+			ELSE
+				IF ASSI > 0 && ASSIPLAY
+				ELSE
+				ENDIF
+			ENDIF
+		ELSE
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				ENDIF
+			ELSE
+				IF ASSI > 0 && ASSIPLAY
+				ELSE
+				ENDIF
+			ENDIF
+		ENDIF
+		CFLAG:363 = 1
+	;二回目以降
+	ELSE
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:363 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF TEQUIP:7 == 1 && TEQUIP:アナルバイブ
+						PRINTFORMW 「にゃああっ！　気持ちイイよぉっ、イイっ%UNICODE(0x2661)%　ケツもナカも、両方イっちゃ、にゃあ、にゃあぁあああんっ%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%は、きつく%CALLNAME:PLAYER%の腰を挟み込んだ両足をびくびくさせながらも言い付けた通り猫の鳴き真似を入れた嬌声をあげている……
+					ELSEIF TEQUIP:4 == 3 || TEQUIP:4 == 6 || TEQUIP:4 == 11 || TEQUIP:3 == 11 || (TEQUIP:6 == 6 && TEQUIP:3 == 0)
+						PRINTFORMW 「大将の助平」
+					ELSE
+						PRINTFORMW 「あ%UNICODE(0x2661)%　あ%UNICODE(0x2661)%　気持ちイイっ%UNICODE(0x2661)%%UNICODE(0x2661)%　ああもう腰止まらねえ%UNICODE(0x2661)%」
+						PRINTFORMW 「ふぁああ、ああ、たいしょイイ、奥、気持ちい%UNICODE(0x2661)%　ああ、ああっ%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%の首に縋り付くように腕を回し、夢中で腰を振って快感を追っている……
+					ENDIF
+				ENDIF
+			ENDIF
+		CFLAG:363 = 3
+		;それ以外
+		ELSEIF CFLAG:363 < 2 || FLAG:7 == 2
+			PRINTFORMW 
+		CFLAG:363 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;103,背面座位　CFLAG:364
+;-------------------------------------------------
+IF SELECTCOM == 103
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:364 == 0
+		IF TALENT:処女
+		ELSE
+		ENDIF
+		CFLAG:364 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「あふ、あ%UNICODE(0x2661)%　はぁ……あぁ、んっ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+		PRINTFORMW 完全に背中を預けきり、揺すられるままに%CALLNAME%は声をあげている……
+		CFLAG:364 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;104,対面立位　CFLAG:365
+;-------------------------------------------------
+IF SELECTCOM == 104
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:365 == 0
+		IF TALENT:処女
+		ELSE
+		ENDIF
+		CFLAG:365 = 1
+	;二回目以降
+	ELSE
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:365 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF TEQUIP:4 == 3 || TEQUIP:4 == 6 || TEQUIP:4 == 11 || TEQUIP:3 == 11 || (TEQUIP:6 == 6 && TEQUIP:3 == 0)
+						PRINTFORMW 
+					ELSE
+						PRINTFORMW 
+					ENDIF
+				ENDIF
+			ENDIF
+		CFLAG:365 = 3
+		ELSEIF CFLAG:365 < 2 || FLAG:7 == 2
+			PRINTFORMW
+		CFLAG:365 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;105,背面立位　CFLAG:366
+;-------------------------------------------------
+IF SELECTCOM == 105
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:366 == 0
+		IF TALENT:処女
+		ELSE
+		ENDIF
+		CFLAG:366 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:366 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF RAND:2 == 0
+						;体格差あり
+						IF TALENT:MASTER:小柄体型 == 0 ||  TALENT:MASTER:小人体型 == 0 
+						PRINTFORMW 壁に向かって尻を突き出させた%CALLNAME%の腰を掴んで小さなワレメに肉棒を突き入れると、
+						PRINTFORMW 体格差からか%CALLNAME%の足が床から離れて宙に浮いてしまった。
+						PRINTFORMW 壁についた腕と%CALLNAME:PLAYER%の逸物で体を支える羽目になった%CALLNAME%の声は、いつもより大きかったようだ……
+						ENDIF
+					ELSE
+						PRINTFORMW 「たいしょ、ああ、頼む、も、もっと%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%は腰を振りながらもっと深い結合を望むのか、次第に壁に体を傾け%CALLNAME:PLAYER%の方に腰を突き出してきた……
+					ENDIF
+				ENDIF
+			ENDIF
+		CFLAG:366 = 3
+		;それ以外
+		ELSEIF CFLAG:366 < 2 || FLAG:7 == 2
+			PRINTFORMW 
+		CFLAG:366 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;106,騎乗位　CFLAG:367
+;-------------------------------------------------
+IF SELECTCOM == 106
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:367 == 0
+		IF TALENT:処女
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「たぁいしょ、大将。なあもういいだろ？ほら、ココ見てくれ。処女だっつうのに大将が欲しくてさ、こんなになってるんだぜ」
+					PRINTFORMW 「大将にあげられるモンならなんもかんもやるからさ。俺っちを大将のものにしてくれ。大将のを奥の奥まで通してくれよ……」
+					PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%に跨ると見せつけるように秘所を広げ、顕にした膣口に亀頭を押し付けながらゆっくりと腰を下ろしていった……
+				ENDIF
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF TEQUIP:7 == 1 && TEQUIP:アナルバイブ
+						PRINTFORMW 「たーいしょ%UNICODE(0x2661)%　たいしょの、ココに欲しいにゃあ%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%はアナルバイブのせいか内股まで濡らした股間を晒し、%CALLNAME:PLAYER%の陰茎を手で導いて膣肉に収めていった
+					ELSE
+						PRINTFORMW 「ふは、すげ、奥当たってる%UNICODE(0x2661)%　当たるつうか、押し上げて、あぁ%UNICODE(0x2661)%　びりびりくるよぅ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%の腰に跨り、激しく腰を振っている……
+					ENDIF
+				ENDIF
+			;その他
+			ELSE
+				PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%の腰に跨り、激しく腰を振っている……
+			ENDIF
+		ENDIF
+		CFLAG:367 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:367 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF TEQUIP:7 == 1 && TEQUIP:アナルバイブ
+						PRINTFORMW 「にゃあ、ああんっ%UNICODE(0x2661)%　イイ、たいしょ気持ちイイ、にゃっ！」
+						PRINTFORMW 猫耳と尻尾を付けた%CALLNAME%は%CALLNAME:PLAYER%の腰に跨り、妖しく腰をくねらしている……
+					ELSEIF TEQUIP:4 == 3 || TEQUIP:4 == 6 || TEQUIP:4 == 11 || TEQUIP:3 == 11 || (TEQUIP:6 == 6 && TEQUIP:3 == 0)
+						PRINTFORMW 「ん、この格好で大将の咥えこんでる所見たいって？　大将の助平」
+						PRINTFORMW %CALLNAME%は口角をあげると服の裾を自らめくり上げ、腰を揺すって肉棒を出し入れしている様を見せた
+					ELSE
+						PRINTFORMW 「たいしょおっ！　あ、これっ、深い%UNICODE(0x2661)%%UNICODE(0x2661)%　奥っ、イきそ……%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%の腹に手を突き、剛直を咥え込んだ膣肉がぐぽんぐぽんと音を立ててるほど激しく腰を振っている…
+					ENDIF
+				ENDIF
+			ENDIF
+			CFLAG:367 = 3
+		;それ以外
+		ELSEIF CFLAG:367 < 2 || FLAG:7 == 2
+			PRINTFORMW 
+		CFLAG:367 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;アナルセックス系コマンド
+;=================================================
+;-------------------------------------------------
+;110,正常位アナル　CFLAG:368
+;-------------------------------------------------
+IF SELECTCOM == 110
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:368 == 0
+		IF TALENT:バックバージン
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「んんっ%UNICODE(0x2661)%　大将、も、と、ぎゅっうって、抱いてて、くれよっ！」
+					PRINTFORMW 「俺っ、たいしょの腕の中、一番、好きだ……%UNICODE(0x2661)%」
+				ENDIF
+			ELSE
+				IF ASSI > 0 && ASSIPLAY
+				ENDIF
+			ENDIF
+		ELSE
+			IF ASSI > 0 && ASSIPLAY
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:368 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:368 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF PALAM:欲情 > 30000
+						PRINTFORMW 「イイ、気持ちイイっ%UNICODE(0x2661)%　たいしょ、頼む、もっと……っ！」
+						PRINTFORMW %CALLNAME:PLAYER%の身体に手を回し胸に頭を擦りつけながら%CALLNAME%は発情し蕩けた顔で嬌声をあげていた……
+					ELSE
+						IF RAND:2 == 0
+							PRINTFORMW 「へへ、俺っちのケツはどうだ？　気持ちよさそうな顔してんなぁ、たーいしょ%UNICODE(0x2661)%」
+							PRINTFORMW %CALLNAME%は上気した顔に嬉しそうな笑みを浮かべている……
+						ELSE
+							PRINTFORMW 「あ、んっ%UNICODE(0x2661)%　大将イイ、すげえ気持ちイイぜ%UNICODE(0x2661)%」
+						ENDIF
+					ENDIF
+				ENDIF
+			ENDIF
+			CFLAG:368 = 3
+		;それ以外
+		ELSEIF CFLAG:368 < 2 || FLAG:7 == 2
+			PRINTFORMW 「あ、ひ%UNICODE(0x2661)%　待てって……！」
+		CFLAG:368 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;111,後背位アナル　CFLAG:369
+;-------------------------------------------------
+IF SELECTCOM == 111
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:369 == 0
+		IF TALENT:バックバージン
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW %CALLNAME:PLAYER%が顕にした菊門に亀頭を押し付けた所で、%CALLNAME%から声がかかった。
+					PRINTFORMW 「大将、なあ、顔ちゃんと見えねえから……手ぇ握っててくれねえか」
+					PRINTFORMW 乞われるまま%CALLNAME:PLAYER%が%CALLNAME%に覆いかぶさるようにして手を重ね指を絡めると、%CALLNAME%は静かに吐息を漏らした。
+					PRINTFORMW 「……大丈夫、だ。来てくれ大将」
+					PRINTFORMW 顔だけを振り返らせると笑みを浮かべて続きを強請った%CALLNAME%の髪に口づけ乍ら、%CALLNAME:PLAYER%は強直を押し入れていった……
+				ENDIF
+			ENDIF
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:369 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:369 < 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					IF PALAM:欲情 > 30000
+						PRINTFORMW 「あぁーーっ！　そこイイっ、イイ所当たってるっ%UNICODE(0x2661)%　もっと、めちゃくちゃにしてくれよぉっ！」
+						PRINTFORMW 四つ這いの姿勢が腕が支えきれずに潰れ、%CALLNAME%は尻を高く突き出す格好で%CALLNAME:PLAYER%の怒張に責められている
+						PRINTFORMW 肉棒を咥え込んだ尻を自ら激しく振りながら%CALLNAME%は発情し蕩けた顔で嬌声をあげていた……
+					ELSE
+						IF RAND:2 == 0
+							PRINTFORMW 「たーいしょ%UNICODE(0x2661)%　そうがっつくなって……もっとゆっくりシてくれや%UNICODE(0x2661)%」
+						ELSE
+							PRINTFORMW 「あ、ひ%UNICODE(0x2661)%　大将待てって激し、お、俺壊れる……！」
+						ENDIF
+					ENDIF
+				ENDIF
+			ENDIF
+			CFLAG:369 = 4
+		;それ以外
+		ELSEIF CFLAG:369 < 2 || FLAG:7 == 2
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「あ、ひ%UNICODE(0x2661)%　待てって激し……っ！」
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:369 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;112,対面座位アナル　CFLAG:370
+;-------------------------------------------------
+IF SELECTCOM == 112
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:370 == 0
+		IF TALENT:バックバージン
+			PRINTFORMW 「ふあ%UNICODE(0x2661)%　中でびくびくって、こんな、あ、熱いっ%UNICODE(0x2661)%」
+		ELSE
+			PRINTFORMW 「ああ%UNICODE(0x2661)%　あ%UNICODE(0x2661)%　入って、入ってきたぁ%UNICODE(0x2661)%」
+			PRINTFORMW %CALLNAME:PLAYER%の首に手を回しながら%CALLNAME%は自分で腰を落とし、怒張を呑みこんだ……
+		ENDIF
+		CFLAG:370 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:370 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;女装、大き目シャツ
+					IF TEQUIP:4 == 3 || TEQUIP:4 == 6 || TEQUIP:4 == 11 || TEQUIP:3 == 11 || (TEQUIP:6 == 6 && TEQUIP:3 == 0)
+						PRINTFORMW 「ふは、あ、見てくれよ、たーいしょ%UNICODE(0x2661)%　大将のが根元まで全部ずっぷりだぜ%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%は服の裾を捲り上げ片手で押さえると、結合部が見える様に仰け反った身体をもう片方の手で支えながら
+						PRINTFORMW 奥まで咥え込んだ%CALLNAME:PLAYER%の肉棒を緩く抜き差しして見せている……
+					ELSE
+						PRINTFORMW 「んぁっ%UNICODE(0x2661)%　お、奥までくるっ！　あふ、あぁああああっ！」
+						PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%の胸にすがりついて腸内を掻き回される快感に嬌声をあげている……
+					ENDIF
+				ENDIF
+			ENDIF
+		CFLAG:370 = 3
+		ELSEIF CFLAG:370 < 2 || FLAG:7 == 2
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「ああぁっ！　も、もう俺っ！」
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:370 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;113,背面座位アナル　CFLAG:371
+;-------------------------------------------------
+IF SELECTCOM == 113
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:371 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF TALENT:バックバージン
+					PRINTFORMW 「ふは、……すげえしっくり嵌まって……いい、な。これ」
+					PRINTFORMW 背後から抱き込まれ腰を最後まで落とし切ったところで呟いた%CALLNAME%に、こっちも%CALLNAME%の具合はいいと言うと、振り返った%CALLNAME%にじとりとにらまれた。
+					PRINTFORMW 「違うぜ、たーいしょ。……いや、そっちもあるんだがなあ、この体勢だとなかも外も大将でいっぱいでいいなぁってな……					
+					PRINTFORMW 　え？　ちょ、なんだ、たいしょ？　なに、激し……あっ、あぁああっ%UNICODE(0x2661)%」
+				ELSE
+					PRINTFORMW 「こうな、大将に抱えられてすんの、他のヤリ方の時よりもずっといいなあ」
+					PRINTFORMW すっぽり小さい身体を抱き込まれた%CALLNAME%は、深々と%CALLNAME:PLAYER%の怒張を呑みこんだまま頭をそらし
+					PRINTFORMW 背後の%CALLNAME:PLAYER%を真下から潤んだ瞳で見つめて笑った
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:371 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:371 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;女装、大き目シャツ
+					IF TEQUIP:4 == 3 || TEQUIP:4 == 6 || TEQUIP:4 == 11 || TEQUIP:3 == 11 || (TEQUIP:6 == 6 && TEQUIP:3 == 0)
+						PRINTFORMW 
+						PRINTFORMW 
+					ELSE
+						PRINTFORMW 「あふ、あ%UNICODE(0x2661)%　はぁ……あぁ、んっ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+						PRINTFORMW 完全に背中を預けきり、揺すられるままに%CALLNAME%は声をあげている……
+					ENDIF
+				ENDIF
+			ENDIF
+		CFLAG:371 = 3
+		ELSEIF CFLAG:371 < 2 || FLAG:7 == 2
+			IF ASSI > 0 && ASSIPLAY
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:371 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;114,対面立位アナル　CFLAG:372
+;-------------------------------------------------
+IF SELECTCOM == 114
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:372 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF TALENT:バックバージン
+					PRINTFORMW 
+				ELSE
+					PRINTFORMW 「大将、こりゃあ無理がねぇか？　もちっとマトモな体勢でした方が大将も楽だろ？」
+					PRINTFORMW %CALLNAME:PLAYER%の肩に片足首をひっかけた%CALLNAME%の身体は、壁と%CALLNAME:PLAYER%の間でぷらりと宙に浮いてしまっている。
+					PRINTFORMW %CALLNAME:PLAYER%は、そのいかにも苦し気な体勢のままで%CALLNAME%の菊門を抉じ開けて行く。
+					PRINTFORMW %CALLNAME%はされるがまま、仕方のねえ大将だと小さく笑って腕を巻き付けて身を寄せると、%CALLNAME:PLAYER%の首筋に音を立てて口づけた
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ELSE
+		ENDIF
+		CFLAG:372 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:372 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;女装、大き目シャツ
+					IF TEQUIP:4 == 3 || TEQUIP:4 == 6 || TEQUIP:4 == 11 || TEQUIP:3 == 11 || (TEQUIP:6 == 6 && TEQUIP:3 == 0)
+						PRINTFORMW 「んーっ！　ぅん、ふー、ふーっ」
+						PRINTFORMW %CALLNAME%は息が苦しいのかしきりに首を振っているが、言い付けた通りたくし上げられ咥えている服の裾を口から放そうとはしなかった
+					ELSE
+						PRINTFORMW 「ひ、ぁう！　たいしょ、たいしょおぉ%UNICODE(0x2661)%　おれ、もうっ！」
+					ENDIF
+				ENDIF
+			ENDIF
+		CFLAG:372 = 3
+		;それ以外
+		ELSEIF CFLAG:372 < 2 || FLAG:7 == 2
+			IF ASSI > 0 && ASSIPLAY
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:372 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;115,背面立位アナル　CFLAG:373
+;-------------------------------------------------
+IF SELECTCOM == 115
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:373 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF TALENT:バックバージン
+					PRINTFORMW 
+				ELSE
+					PRINTFORMW 
+				ENDIF
+			ENDIF
+		ELSE
+		ENDIF
+		CFLAG:373 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:373 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;女装、大き目シャツ
+					IF TEQUIP:4 == 3 || TEQUIP:4 == 6 || TEQUIP:4 == 11 || TEQUIP:3 == 11 || (TEQUIP:6 == 6 && TEQUIP:3 == 0)
+						PRINTFORMW 
+					ELSE
+						PRINTFORMW 「あ%UNICODE(0x2661)%　イイ、そこイイっ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+						PRINTFORMW 壁に向かって尻を突き出させた%CALLNAME%を背後から貫くと、もっと深い結合を望むのか、次第に壁に体を傾け尻を振りながら%CALLNAME:PLAYER%の方に腰を突き出してきた……
+					ENDIF
+				ENDIF
+			ENDIF
+		CFLAG:373 = 3
+		;それ以外
+		ELSEIF CFLAG:373 < 2 || FLAG:7 == 2
+			IF ASSI > 0 && ASSIPLAY
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:373 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;116,騎乗位アナル　CFLAG:374
+;-------------------------------------------------
+IF SELECTCOM == 116
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:374 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF TALENT:バックバージン
+					PRINTFORMW 「あ、熱い、すげえ、ぁんっ！　ふぁ、俺、やっとたいしょのもんに……あ、あっ%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME:PLAYER%に跨った%CALLNAME%は、後ろ手で%CALLNAME:PLAYER%の反り返った陰茎を
+					PRINTFORMW 自らの菊座にあてがい、ゆっくりと腰を下ろして呑みこませていった……
+				ELSE
+					PRINTFORMW 「へへ、大将を見下ろすってのもいいねぇ」
+					PRINTFORMW %CALLNAME:PLAYER%に跨った%CALLNAME%は、ぺろりと薄い小さな舌で唇を舐め、深々と体内に飲み込んだ怒張を締め付けた
+				ENDIF
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:374 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:374 < 3 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					;女装、大き目シャツ
+					IF TEQUIP:4 == 3 || TEQUIP:4 == 6 || TEQUIP:4 == 11 || TEQUIP:3 == 11 || (TEQUIP:6 == 6 && TEQUIP:3 == 0)
+						PRINTFORMW 「ふは、お気に召したか？　いっつもよかガチガチだぜ。たいしょの助平%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%は服の裾を大きくたくし上げて持ち、見せつける様に殊更ゆっくりと%CALLNAME:PLAYER%の怒張を出し入れしている……
+					ELSEIF PALAM:欲情 > 30000
+						PRINTFORMW 「あっ、ああっ%UNICODE(0x2661)%　奥まで、とどいてる%UNICODE(0x2661)%　たいしょので奥まで一杯になってるよぉ%UNICODE(0x2661)%」
+						PRINTFORMW 「もっと深くっ%UNICODE(0x2661)%　そこイイ、イイっ！　……たいしょなかに出してっ%UNICODE(0x2661)%」
+					ELSE
+						IF RAND:2 == 0
+							PRINTFORML 「っは、今の大将の顔、可愛いぜ%UNICODE(0x2661)%　ほら、もっと気持ちよくしてやるからな%UNICODE(0x2661)%」
+							PRINTFORMW %CALLNAME%は息を切らしながらも激しい腰使いによって%CALLNAME:PLAYER%を責め立てた。
+						ELSE
+							PRINTFORMW 「大将、イイ、けど……頼むっ、から、あぁ%UNICODE(0x2661)%　たいしょおもっ、動い……っ%UNICODE(0x2661)%%UNICODE(0x2661)%」
+							PRINTFORMW じゅぼじゅぼと音を立てるほど腰を振りながら%CALLNAME%は更なる責めを強請っている……
+						ENDIF
+					ENDIF
+				ENDIF
+			ENDIF
+			CFLAG:374 = 3
+		;それ以外
+		ELSEIF CFLAG:374 < 2 || FLAG:7 == 2
+			IF ASSI > 0 && ASSIPLAY
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:374 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;拘束系コマンド
+;=================================================
+;-------------------------------------------------
+;130,縄　CFLAG:375
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 130 && TEQUIP:縄 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:375 == 0
+		CFLAG:375 = 1
+	;二回目以降
+	ELSE
+		CFLAG:375 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 130 && TEQUIP:縄
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;131,アイマスク　CFLAG:376
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 131 && TEQUIP:アイマスク == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:376 == 0
+		CFLAG:376 = 1
+	;二回目以降
+	ELSE
+		CFLAG:376 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 131 && TEQUIP:アイマスク
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;132,ボールギャグ　CFLAG:377
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 132 && TEQUIP:ボールギャグ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:377 == 0
+		CFLAG:377 = 1
+	;二回目以降
+	ELSE
+		CFLAG:377 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 132 && TEQUIP:ボールギャグ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;133,貞操帯　CFLAG:378
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 133 && TEQUIP:貞操帯 == 0
+	CALL TRAIN_MESSAGE
+		;初めて
+	IF CFLAG:378 == 0
+		CFLAG:378 = 1
+	;二回目以降
+	ELSE
+		CFLAG:378 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 133 && TEQUIP:貞操帯
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;134,射精止め　CFLAG:379
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 134 && TEQUIP:射精止め == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:379 == 0
+		CFLAG:379 = 1
+	;二回目以降
+	ELSE
+		CFLAG:379 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 134 && TEQUIP:射精止め
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;ＳＭ系コマンド
+;=================================================
+;-------------------------------------------------
+;140,スパンキング　CFLAG:380
+;-------------------------------------------------
+IF SELECTCOM == 140
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:380 == 0
+		PRINTFORMW 「うわ、なにを……っ！」
+		PRINTFORMW 痛みよりも尻を打たれる羞恥で%CALLNAME%は顔を赤くしている
+		CFLAG:380 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「あぅっ！　う……っ！」
+		PRINTFORMW 尻を音高く叩いてやると、%CALLNAME%は\@ KANRAKU(TARGET) ? %CALLNAME:PLAYER%の裾を掴んで # 唇を噛んで \@苦痛に耐えている様だ
+		CFLAG:380 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;141,乳スパンキング　CFLAG:381
+;-------------------------------------------------
+IF SELECTCOM == 141
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:381 == 0
+		PRINTFORMW 「うわ、なにを……っ！」
+		PRINTFORMW %CALLNAME:PLAYER%に打ち据えられ、%CALLNAME%は息をのんだ
+		CFLAG:381 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ふっ！　あ、んぅっ！」
+		PRINTFORMW 敏感な部分を執拗に叩かれ、%CALLNAME%は苦痛に呻いている……
+		CFLAG:381 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;142,鞭　CFLAG:382
+;-------------------------------------------------
+IF SELECTCOM == 142
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:382 == 0
+		CFLAG:382 = 1
+	;二回目以降
+	ELSE
+		CFLAG:382 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;143,針　CFLAG:383
+;-------------------------------------------------
+IF SELECTCOM == 143
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:383 == 0
+		CFLAG:383 = 1
+	;二回目以降
+	ELSE
+		CFLAG:383 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;144,蝋燭　CFLAG:374
+;-------------------------------------------------
+IF SELECTCOM == 144
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:374 == 0
+		CFLAG:374 = 1
+	;二回目以降
+	ELSE
+		CFLAG:374 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;145,三角木馬　CFLAG:375
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 145 && TEQUIP:三角木馬 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:375 == 0
+		CFLAG:375 = 1
+	;二回目以降
+	ELSE
+		CFLAG:375 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 145 && TEQUIP:三角木馬
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;暴力系コマンド
+;=================================================
+;-------------------------------------------------
+;150,家具にする　CFLAG:386
+;-------------------------------------------------
+IF SELECTCOM == 150
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:386 == 0
+		CFLAG:386 = 1
+	;二回目以降
+	ELSE
+		CFLAG:386 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;151,拷問　CFLAG:387
+;-------------------------------------------------
+IF SELECTCOM == 151
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:387 == 0
+		CFLAG:387 = 1
+	;二回目以降
+	ELSE
+		CFLAG:387 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;152,罵倒する　CFLAG:388
+;-------------------------------------------------
+IF SELECTCOM == 152
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:388 == 0
+		CFLAG:388 = 1
+	;二回目以降
+	ELSE
+		CFLAG:388 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;153,足で踏む　CFLAG:389
+;-------------------------------------------------
+IF SELECTCOM == 153
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:389 == 0
+		CFLAG:389 = 1
+	;二回目以降
+	ELSE
+		CFLAG:389 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;154,腹パン　CFLAG:390
+;-------------------------------------------------
+IF SELECTCOM == 154
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:390 == 0
+		CFLAG:390 = 1
+	;二回目以降
+	ELSE
+		CFLAG:390 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;155,首絞め　CFLAG:391
+;-------------------------------------------------
+IF SELECTCOM == 155
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:391 == 0
+		CFLAG:391 = 1
+	;二回目以降
+	ELSE
+		CFLAG:391 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;156,烙印　CFLAG:392
+;地の文に細かい設定があるので、初回／２回目以降を分けない。
+;台詞を入れたい場合は地の文呼び出しをカットして、地の文をコピペする。
+;-------------------------------------------------
+IF SELECTCOM == 156
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;157,水責め　CFLAG:532
+;-------------------------------------------------
+IF SELECTCOM == 157
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:532 == 0
+		CFLAG:532 = 1
+	;二回目以降
+	ELSE
+		CFLAG:532 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;158,くすぐる　CFLAG:533
+;-------------------------------------------------
+IF SELECTCOM == 158
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:533 == 0
+		CFLAG:533 = 1
+	;二回目以降
+	ELSE
+		CFLAG:533 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;フィスト系コマンド
+;=================================================
+;-------------------------------------------------
+;160,フィストファック　CFLAG:393
+;-------------------------------------------------
+IF SELECTCOM == 160
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:393 == 0
+		CFLAG:393 = 1
+	;二回目以降
+	ELSE
+		CFLAG:393 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;161,アナルフィスト　CFLAG:394
+;-------------------------------------------------
+IF SELECTCOM == 161
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;162,両穴フィスト　CFLAG:395
+;-------------------------------------------------
+IF SELECTCOM == 162
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;スカ系コマンド
+;=================================================
+;-------------------------------------------------
+;180,浣腸　CFLAG:396
+;-------------------------------------------------
+IF SELECTCOM == 180
+	CALL TRAIN_MESSAGE
+	CFLAG:396 += 1
+ENDIF
+
+;-------------------------------------------------
+;181,肉便器　CFLAG:397
+;-------------------------------------------------
+IF SELECTCOM == 181
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;182,放尿　CFLAG:398
+;-------------------------------------------------
+IF SELECTCOM == 182
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;183,排便　CFLAG:399
+;-------------------------------------------------
+IF SELECTCOM == 183
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;184,飲尿させる　CFLAG:400
+;-------------------------------------------------
+IF SELECTCOM == 184
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;185,食糞させる　CFLAG:401
+;-------------------------------------------------
+IF SELECTCOM == 185
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;コミュニケーション系コマンド
+;=================================================
+;-------------------------------------------------
+;200,会話　CFLAG:402
+;-------------------------------------------------
+IF SELECTCOM == 200
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:402 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;陥落済み
+			IF TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8
+				PRINTFORMW 「どうした、大将。悩み事から日頃の愚痴まで、俺っちでいいならなんだって聞くぜ？」
+				PRINTFORMW 「それとも閨以外でも睦言がご希望かい？　はは、可愛い所あるじゃねえか大将」
+				PRINTFORML 
+				PRINTFORMW 
+				PRINTFORMW 
+				PRINTFORMW 「……好きだぜ、たいしょ%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 「ん？　なんだ大将。聞きたい事でもあるのか？」
+			ENDIF
+		ELSE
+			PRINTFORMW 「ん？　聞きたい事でもあるのか？」
+		ENDIF
+		CFLAG:402 = 1
+	;二回目以降
+	ELSE
+	;各刀剣へのコメントは私のイメージです。いろいろ混じりまくり。
+	;つーか薬研さん関係者多いなｗｗ
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:402 < 3 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF RAND:3 == 0
+					PRINTFORMW 「兄弟の事はどれくらい話したっけな？」
+						IF RAND:12 == 0
+							PRINTFORMW 「後藤藤四郎は尾張徳川家に行った奴だな。調子よく見えるかもしれねぇが頼りになるんだぜ」
+						ELSEIF RAND:11 == 0
+							PRINTFORMW 「一期一振は、太刀で長兄的存在って奴だ。……俺っちにやーらしい事してる大将はお小言くらうかもな？」
+						ELSEIF RAND:10 == 0
+							PRINTFORMW 「鯰尾藤四郎、ちょいと変わった名前だろう？　下の弟たちより手ェ掛かるんだが、骨喰兄の面倒はよく見てくれるんだ」
+						ELSEIF RAND:9 == 0
+							PRINTFORMW 「骨喰藤四郎は兄弟中でも大人しい方だなあ。けど構ってやらねぇとすぐ拗ねるんだ。可愛いだろ？」
+						ELSEIF RAND:8 == 0
+							PRINTFORMW 「厚藤四郎はなあ、気がさっぱりしていい奴だ。刀としてもすげえいい出来でよ。戦場に出てたならよっぽど活躍できたろうな」
+						ELSEIF RAND:7 == 0
+							PRINTFORMW 「乱藤四郎は気がよくついて、下の弟の世話もよくやってくれてて助かるよ。……すかーと？　似合うからいいんじゃねぇか？」
+						ELSEIF RAND:6 == 0
+							PRINTFORMW 「秋田藤四郎は好奇心が強いのはいいんだが、ちょっと目を離すとふらふらどっか行っちまうのが困りものなんだよなあ」
+						ELSEIF RAND:5 == 0
+							PRINTFORMW 「平野藤四郎は寂しがりやでな。真面目な分、そうは言ってこねぇからなるべく目をかけてやらねぇと」
+						ELSEIF RAND:4 == 0
+							PRINTFORMW 「前田藤四郎は真面目な奴でなあ。俺っちよりしっかりしてるよ」
+						ELSEIF RAND:3 == 0
+							PRINTFORMW 「五虎退はなぁ、気を回し過ぎなんだよ。同じ吉光の作なんだから、鯰尾兄までとは言わんが好きに振舞っていいのにな」
+						ELSEIF RAND:2 == 0
+							PRINTFORMW 「博多藤四郎は商家に引き取られてった弟だな。大事にされてたみたいで嬉しいぜ」
+							PRINTFORMW 「……所で、じゃぱにーずびじねすまって何だ？」
+						ELSE
+							PRINTFORMW 「兄弟じゃあねぇが、同じ刀派で鳴狐って打刀がいるぜ」
+							PRINTFORMW 「無口で大人しそうだが騙されんなよ？　鯰尾兄と並んで派手な悪戯するのはこのお人なんだぜ」
+						ENDIF
+					PRINTFORMW 「兄弟に酷い事をしたら、大将でも怒るからな？」
+				ELSEIF RAND:2 == 0
+					PRINTFORMW 「兄弟刀じゃないヤツ？　そうだなあ」
+					PRINTFORMW %CALLNAME%は、ふむと奴隷購入用のリストを見て顎を撫でた。
+						IF RAND:6 == 0
+							PRINTFORMW 「不動行光はなぁ、なんでこう……いや、俺っちも言えた口じゃあねぇのは分かっちゃいるんだがな」
+						ELSEIF RAND:5 == 0
+							PRINTFORMW 「三日月宗近は、天下五剣だし有名だろ」
+							PRINTFORMW 「ま、食えねえじーさんだなあ」
+						ELSEIF RAND:4 == 0
+							PRINTFORMW 「へし切長谷部なぁ。真面目な奴だったな。小言多いのは大概だったが」
+						ELSEIF RAND:3 == 0
+							PRINTFORMW 「燭台切光忠……俺っちが見た時はまだ銘がついてなかったな」
+							PRINTFORMW 「へぇ、男ぶりがあがったんじゃねぇか？　……はは、大将。俺っちあんたが一番だって」
+						ELSEIF RAND:2 == 0
+							PRINTFORMW 「宗三左文字？　こいつは閨より戦で使ってやった方が喜ぶだろうなあ」
+						ELSE
+							PRINTFORMW 「鶴丸国永かあ。悪い奴じゃあねぇんだが。ま、見た目はすげえ綺麗だよなあ、見た目はよ」
+							PRINTFORMW %CALLNAME%。それ君が言っちゃいけない。
+						ENDIF
+				ELSE
+					PRINTFORMW 「今日は大将の事話してくれよ」
+				ENDIF
+			ELSE
+				IF RAND:2 == 0
+					PRINTFORMW 「%CALLNAME:PLAYER%の事話してくれよ」
+				ELSE
+					PRINTFORMW 「どうした、%CALLNAME:PLAYER%。悩み事から日頃の愚痴まで、俺っちでいいならなんだって聞くぜ？」
+				ENDIF
+			ENDIF
+		CFLAG:402 = 3
+		;それ以外
+		ELSEIF CFLAG:402 < 2 || FLAG:7 == 2
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「……ヤる事やらねぇでいいのかい？」
+			ELSE
+				PRINTFORMW 「さて、話って言ってもなあ」
+			ENDIF
+		CFLAG:402 = 2
+		ENDIF
+	ENDIF
+	
+ENDIF
+
+;-------------------------------------------------
+;201,プレゼント　CFLAG:403
+;何をあげてるか？は、コマンドフォルダ内プレゼントの項目に入ってます。
+;自分であげるものを決めたい場合、CALL TRAIN_MESSAGEを消して、自分で書く。
+;-------------------------------------------------
+IF SELECTCOM == 201
+	CALL TRAIN_MESSAGE
+	;笑顔
+	IF TFLAG:17 == 1
+	;食べ物
+	ELSEIF TFLAG:17 == 2
+	;日用品
+	ELSEIF TFLAG:17 == 3
+	;アクセサリ
+	ELSEIF TFLAG:17 == 4
+	;服
+	ELSEIF TFLAG:17 == 5
+	;高価な物
+	ELSEIF TFLAG:17 == 6
+	;特別なプレゼント（Extraモードエンディング用）
+	ELSEIF TFLAG:17 == 7
+		;エンゲージリング
+		IF CFLAG:5100 == 1
+		;オーダーメイドバイブ
+		ELSEIF CFLAG:5101 == 1
+		;オーダーメイド首輪
+		ELSEIF CFLAG:5102 == 1
+		ENDIF
+	;プロミスリング
+	ELSEIF TFLAG:17 == 50
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;202,スキンシップ　CFLAG:404
+;-------------------------------------------------
+IF SELECTCOM == 202
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:404 == 0
+		PRINTFORMW 「はは、こう言うのも悪かねぇな」
+		CFLAG:404 = 1
+	;二回目以降
+	ELSE
+		IF ASSI >= 0 && ASSIPLAY
+			PRINTFORMW 「くすぐってぇな！」
+		ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			IF PALAM:TARGET:欲情 >= PALAMLV:4
+				PRINTFORMW 「たいしょ、なあ、もっとちゃんと触ってくれよ……」
+				PRINTFORMW %CALLNAME%は欲情で潤んだ瞳で%CALLNAME:PLAYER%に身体をこすりつけている
+			ELSE
+				PRINT 「へへへ、たーいしょっ
+					SIF KANRAKU(TARGET)
+						PRINTFORM %UNICODE(0x2661)%　大将に撫でられるの、俺っち好きだぜ
+				PRINTFORMW ！」
+			ENDIF
+		ELSE
+			PRINTFORMW 「はは、こう言うのも悪かねぇな」
+		ENDIF
+		CFLAG:404 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;203,まったりする　CFLAG:405
+;-------------------------------------------------
+IF SELECTCOM == 203
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:405 == 0
+		IF ASSI >= 0 && ASSIPLAY
+			PRINTFORMW 「じゃあ%CALLNAME:PLAYER%、のんびりするか」
+		ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「はは、大将。これ以上俺っち甘やかしてどーすんだよ？」
+		ELSE
+			PRINTFORMW 「うん？　じゃあ%CALLNAME:PLAYER%、のんびりするか」
+		ENDIF
+		CFLAG:405 = 1
+	;二回目以降
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORMW 「俺っち甘やかしてどーすんだよ？」
+		ELSE
+			PRINTFORMW 「のんびりするのも悪くないな」
+		ENDIF
+		CFLAG:405 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;204,家事　CFLAG:406
+;-------------------------------------------------
+IF SELECTCOM == 204
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:406 == 0
+		IF ASSI >= 0 && ASSIPLAY
+			PRINTFORMW 「よしきた、ちゃっちゃと済ませちまうか！」
+		ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				PRINTFORMW 「大将が手伝うって？　下働きなんざ大将がするもんじゃねえ……いや、そうまで言うなら頼むとするか」
+				PRINTFORMW 「ああ、俺っちは大将と一緒ならなにやったって嬉しいからなあ」
+			ELSE
+				PRINTFORMW 「大将手伝うって？　あはは、下働きなんざ大将がするもんじゃねえぞ」
+			ENDIF
+		ELSE
+			PRINTFORMW 「よしきた、ちゃっちゃと済ませちまうか！」
+		ENDIF
+		CFLAG:406 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:406 < 3 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF ((TEQUIP:ローター挿入 || TEQUIP:バイブ || TEQUIP:ローターＡ挿入 || TEQUIP:アナルバイブ || TEQUIP:電動オナホール || TEQUIP:ニプルキャップ || TEQUIP:カテーテル) && PALAM:TARGET:欲情 >= PALAMLV:4)
+					PRINTFORMW 「ふぁ、あ、ああぁっ%UNICODE(0x2661)%　これっ、取って、くれってぇ%UNICODE(0x2661)%　仕事にっ、ひうっ、なんねぇ……っ！」
+					PRINTFORMW %CALLNAME%は、\@ RAND:2 == 0 ? シンクの縁 # 立てたモップ \@にすがりながらもへたり込んだ身体をびくびく震わせて喘いでいる
+				ELSE
+					PRINTFORMW 「おう、大将。一仕事終わらせたら、たーんと可愛がってくれよ？」
+				ENDIF
+			ELSE
+				PRINTFORMW 「%CALLNAME:PLAYER%、手伝ってくれるのか。ありがとな」
+			ENDIF
+		CFLAG:406 = 3
+		ELSEIF CFLAG:406 < 2 || FLAG:7 == 2
+			IF ASSI >= 0 && ASSIPLAY
+				PRINTFORMW 「%CALLNAME:PLAYER%、手伝ってくれるのか。ありがとな」
+			ELSE
+				PRINTFORMW 「ははは、下働きも二人でやればいいもんだなあ」
+			ENDIF
+		CFLAG:406 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;205,歌の練習　CFLAG:407
+;-------------------------------------------------
+IF SELECTCOM == 205
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:407 == 0
+		CFLAG:407 = 1
+	;二回目以降
+	ELSE
+		CFLAG:407 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;206,プレゼントさせる　CFLAG:408
+;-------------------------------------------------
+IF SELECTCOM == 206
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;207,デートに行く　CFLAG:409
+;-------------------------------------------------
+IF SELECTCOM == 207
+	CALL TRAIN_MESSAGE
+	;露出デート
+	IF TFLAG:17 == 2
+		;初めて
+		IF CFLAG:402 == 0
+			IF ASSI >= 0 && ASSIPLAY
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「くくっ、大将の助平」
+			ELSE
+			ENDIF
+			CFLAG:402 = 1
+		;二回目以降
+		ELSE
+			PRINTFORMW 「全く、趣味が悪いぜ」
+			PRINTFORMW %CALLNAME:TARGET%は落ち着かない様子で腿をすり合わせている
+			CFLAG:402 = 2
+		ENDIF
+	;普通のデート
+	ELSE
+		;初めて
+		IF CFLAG:402 == 0
+			IF ASSI >= 0 && ASSIPLAY
+				PRINTFORMW %CALLNAME:TARGET%は%CALLNAME:PLAYER%の手を引きながら歩いている
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「大将、何処に行こうか？」
+				PRINTFORMW %CALLNAME:TARGET%は上機嫌で%CALLNAME:PLAYER%の手を引きながら歩いている
+			ELSE
+				PRINTFORMW %CALLNAME:TARGET%は上機嫌で%CALLNAME:PLAYER%の手を引きながら歩いている
+			ENDIF
+			CFLAG:402 = 1
+		;二回目以降
+		ELSE
+			IF ASSI >= 0 && ASSIPLAY
+				PRINTFORMW 「さぁて、どこに行こうか？」
+			ELSE
+				PRINT 「さぁて、どこに行こうか？
+				SIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINT 　大将、あんたとなら何処へでもってね
+				PRINTFORMW 」
+				PRINTFORMW %CALLNAME:TARGET%は%CALLNAME:PLAYER%と手を絡めながら、楽しげに笑っている
+			ENDIF
+			CFLAG:402 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;愛撫させる系コマンド
+;=================================================
+;-------------------------------------------------
+;220,愛撫させる　CFLAG:410
+;-------------------------------------------------
+IF SELECTCOM == 220
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:220 == 0
+		CFLAG:220 = 1
+	;二回目以降
+	ELSE
+		CFLAG:220 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;221,胸を揉ませる　CFLAG:411
+;-------------------------------------------------
+IF SELECTCOM == 221
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;222,クンニ強制　CFLAG:412
+;-------------------------------------------------
+IF SELECTCOM == 222
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;223,指挿入れさせる　CFLAG:413
+;-------------------------------------------------
+IF SELECTCOM == 223
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;224,アナル舐め強制　CFLAG:414
+;-------------------------------------------------
+IF SELECTCOM == 224
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;225,アナル愛撫させる　CFLAG:415
+;-------------------------------------------------
+IF SELECTCOM == 225
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;226,自慰見せつけ　CFLAG:416
+;-------------------------------------------------
+IF SELECTCOM == 226
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;227,アナニー見せつけ　CFLAG:417
+;-------------------------------------------------
+IF SELECTCOM == 226
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;逆奉仕・レズプレイ系コマンド
+;=================================================
+;-------------------------------------------------
+;240,パイズリする　CFLAG:418
+;-------------------------------------------------
+IF SELECTCOM == 240
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:418 == 0
+		CFLAG:418 = 1
+	;二回目以降
+	ELSE
+		CFLAG:418 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;241,パイズリフェラする　CFLAG:419
+;-------------------------------------------------
+IF SELECTCOM == 241
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;242,足コキする　CFLAG:420
+;-------------------------------------------------
+IF SELECTCOM == 242
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;243,乳の揉み合い　CFLAG:421
+;-------------------------------------------------
+IF SELECTCOM == 243
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;244,貝合わせ　CFLAG:422
+;-------------------------------------------------
+IF SELECTCOM == 244
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;245,兜合わせ　CFLAG:423
+;-------------------------------------------------
+IF SELECTCOM == 245
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;奴隷×主人セックス系コマンド
+;=================================================
+;-------------------------------------------------
+;260,正常位させる　CFLAG:424
+;-------------------------------------------------
+IF SELECTCOM == 260
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:424 == 0
+		IF TALENT:PLAYER:処女
+		ELSE
+		ENDIF
+		CFLAG:424 = 1
+	;二回目以降
+	ELSE
+		CFLAG:424 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;261,後背位させる　CFLAG:425
+;-------------------------------------------------
+IF SELECTCOM == 261
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;262,騎乗位する　CFLAG:426
+;-------------------------------------------------
+IF SELECTCOM == 262
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;263,正常位アナルさせる　CFLAG:427
+;-------------------------------------------------
+IF SELECTCOM == 263
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:427 == 0
+		IF TALENT:PLAYER:バックバージン
+		ELSE
+		ENDIF
+		CFLAG:427 = 1
+	;二回目以降
+	ELSE
+		CFLAG:427 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;264,後背位アナルさせる　CFLAG:428
+;-------------------------------------------------
+IF SELECTCOM == 264
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;265,騎乗位アナルする　CFLAG:429
+;-------------------------------------------------
+IF SELECTCOM == 265
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;助手×主人セックス系コマンド
+;=================================================
+;-------------------------------------------------
+;270,助手に犯させる　CFLAG:430
+;-------------------------------------------------
+IF SELECTCOM == 270
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:430 == 0
+		IF TALENT:PLAYER:処女
+		ELSE
+		ENDIF
+		CFLAG:430 = 1
+	;二回目以降
+	ELSE
+		CFLAG:430 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;271,助手にＡを犯させる　CFLAG:431
+;-------------------------------------------------
+IF SELECTCOM == 271
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:431 == 0
+		IF TALENT:PLAYER:バックバージン
+		ELSE
+		ENDIF
+		CFLAG:431 = 1
+	;二回目以降
+	ELSE
+		CFLAG:431 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;主人マゾ系コマンド
+;=================================================
+;-------------------------------------------------
+;280,イラマチオさせる　CFLAG:432
+;-------------------------------------------------
+IF SELECTCOM == 280
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:432 == 0
+		CFLAG:432 = 1
+	;二回目以降
+	ELSE
+		CFLAG:432 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;281,罵ってもらう　CFLAG:433
+;-------------------------------------------------
+IF SELECTCOM == 281
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;282,足を舐める　CFLAG:434
+;-------------------------------------------------
+IF SELECTCOM == 282
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;283,叩いてもらう　CFLAG:435
+;-------------------------------------------------
+IF SELECTCOM == 283
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;284,鞭で打ってもらう　CFLAG:436
+;-------------------------------------------------
+IF SELECTCOM == 284
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;285,飲尿する　CFLAG:437
+;-------------------------------------------------
+IF SELECTCOM == 285
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;286,食糞する　CFLAG:438
+;-------------------------------------------------
+IF SELECTCOM == 286
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;薬品系コマンド
+;=================================================
+;-------------------------------------------------
+;300,ローション　CFLAG:439
+;-------------------------------------------------
+IF SELECTCOM == 300
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:439 == 0
+		CFLAG:439 = 1
+	;二回目以降
+	ELSE
+		CFLAG:439 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;301,媚薬　CFLAG:440
+;-------------------------------------------------
+IF SELECTCOM == 301
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:440 == 0
+		CFLAG:440 = 1
+	;二回目以降
+	ELSE
+		CFLAG:440 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;302,利尿剤　CFLAG:441
+;-------------------------------------------------
+IF SELECTCOM == 302
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:441 == 0
+		CFLAG:441 = 1
+	;二回目以降
+	ELSE
+		CFLAG:441 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;303,強精神薬　CFLAG:442
+;-------------------------------------------------
+IF SELECTCOM == 303
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:442 == 0
+		CFLAG:442 = 1
+	;二回目以降
+	ELSE
+		CFLAG:442 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;304,瀉下薬　CFLAG:443
+;-------------------------------------------------
+IF SELECTCOM == 304
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:443 == 0
+		CFLAG:443 = 1
+	;二回目以降
+	ELSE
+		CFLAG:443 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;305,掻痒剤　CFLAG:538
+;-------------------------------------------------
+IF SELECTCOM == 305
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:538 == 0
+		CFLAG:538 = 1
+	;二回目以降
+	ELSE
+		CFLAG:538 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;シチュエーション別コマンド
+;=================================================
+;-------------------------------------------------
+;310,ビデオ撮影　CFLAG:444
+;-------------------------------------------------
+;撮影開始時
+IF SELECTCOM == 310 && TEQUIP:ビデオカメラ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:444 == 0
+		PRINTFORMW 「こいつは何だよ？　ん？　名前を云やあいいのか？」
+		CFLAG:444 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「……最中はいいんだけどよ。後で見返すのとか、なあ」
+		PRINTFORMW 構えられたビデオカメラ越しに、薄っすら頬を染めた%CALLNAME%は恨みがましい目を向けてきた。
+		CFLAG:444 = 2
+	ENDIF
+;撮影止めた時の反応
+ELSEIF SELECTCOM == 310 && TEQUIP:ビデオカメラ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;311,ビデオ鑑賞　CFLAG:445
+;-------------------------------------------------
+IF SELECTCOM == 311
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:445 == 0
+		PRINTFORMW 「お、こいつはてれびってやつだろ？」
+		PRINTFORMW 「……はぁ？　何だこれ、俺っちかぁ？！　つか、いや待て、これっ」
+		PRINTFORMW 画面に映った自分の痴態に、%CALLNAME%の顔が見る間に真っ赤に染まった
+		CFLAG:445 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「うわぁ、いや、これ……。　頼む、勘弁してくれや……」
+		PRINTFORMW %CALLNAME%は顔を真っ赤にして耐えられないとばかりに両手で自分の目を覆っている。
+		CFLAG:445 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;312,写真撮影　CFLAG:446
+;-------------------------------------------------
+IF SELECTCOM == 312
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:446 == 0
+		CFLAG:446 = 1
+	;二回目以降
+	ELSE
+		CFLAG:446 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;313,羞恥プレイ　CFLAG:447
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 313 && TEQUIP:羞恥プレイ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:447 == 0
+		CFLAG:447 = 1
+	;二回目以降
+	ELSE
+		CFLAG:447 = 2
+	ENDIF
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 313 && TEQUIP:羞恥プレイ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;314,剃毛　CFLAG:448
+;-------------------------------------------------
+IF SELECTCOM == 314
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:448 == 0
+		CFLAG:448 = 1
+	;二回目以降
+	ELSE
+		CFLAG:448 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;315,お風呂場プレイ　CFLAG:449
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 315 && TEQUIP:お風呂場 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:449 == 0
+		CFLAG:449 = 1
+	;二回目以降
+	ELSE
+		CFLAG:449 = 2
+	ENDIF
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 315 && TEQUIP:お風呂場
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;316,シャワー　CFLAG:450
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 316 && TEQUIP:シャワー == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:450 == 0
+		CFLAG:450 = 1
+	;二回目以降
+	ELSE
+		CFLAG:450 = 2
+	ENDIF
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 316 && TEQUIP:シャワー
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;317,泡踊り　CFLAG:451
+;-------------------------------------------------
+IF SELECTCOM == 317
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:451 == 0
+		IF ASSI > 0 && ASSIPLAY
+			PRINTFORMW 「おお、泡だらけだな。これで洗えばいいのか？」
+		ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「大将、背中流すぞー。　？　そう言うんじゃねえのか？？」
+		ELSE
+			PRINTFORMW 「おお、泡だらけだな。これで洗えばいいのか？」
+		ENDIF
+		CFLAG:451 = 1
+	;二回目以降
+	ELSE
+		;陥落済み(服従・隷属除く)
+		IF (TALENT:3 || TALENT:4 || TALENT:6 || TALENT:7 ) && (CFLAG:451 < 4 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「大将%UNICODE(0x2661)%　ちゃーんと洗わねえとなぁ？」
+				PRINTFORMW %CALLNAME%は淫蕩な笑みを浮かべ身体を大胆に擦りつけ乍ら、両手で%CALLNAME:PLAYER%の陰茎を扱いている……
+			ENDIF
+			CFLAG:451 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:451 < 3 || FLAG:7 == 2)
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW %CALLNAME%は上気した身体を積極的にこすりつけている
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF RAND:3 == 0
+					IF PALAM:欲情 > 20000
+					PRINTFORMW 「た、大将、なあ。まだこれ続けんのか……？」
+					PRINTFORMW 勃起した陰茎を%CALLNAME:PLAYER%に擦りつけもどかし気に腰を振りながら%CALLNAME%は、はあはあと息を荒げている……
+				ELSEIF RAND:2 == 0
+					PRINTFORMW 「ふぁ、あっ！　ぬるって、擦れて……%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%は瞳を潤ませながら敏感な部分を%CALLNAME:PLAYER%に擦りつけている……
+				ELSE
+					PRINTFORMW 「たいしょ、あっ！　手伝うって、これぇっ！　ちがっ、だろっ！　あ、あぁああっ%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME:PLAYER%が%CALLNAME%の細い腰を掴んで局部を重ねて腰を回すと、%CALLNAME%は嬌声とともに面白いように身体をはねさせた
+				ENDIF
+			ELSE
+				IF RAND:2 == 0
+					PRINTFORMW 「ほら、口閉じてねえと。泡入ったってしらねぇぞ」
+				ELSE
+					PRINTFORMW 「んっ、ふは、%CALLNAME:PLAYER%……」
+					PRINTFORMW %CALLNAME%は上気した身体を積極的にこすりつけている
+				ENDIF
+			ENDIF
+		CFLAG:451 = 3
+		;それ以外
+		ELSEIF CFLAG:451 < 2 || FLAG:7 == 2
+			IF ASSI > 0 && ASSIPLAY
+				PRINTFORMW 「どうだ、%CALLNAME:PLAYER%？」
+			ELSEIF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				IF RAND:2 == 0
+					PRINTFORMW 「大将、これでちゃんと洗えてんのか？」
+					PRINTFORMW そういうモノではないと言うと、%CALLNAME%は不思議そうに首を傾げた
+				ELSE
+					PRINTFORMW 「ほら、口閉じてねえと。泡入ったってしらねぇぞ」
+				ENDIF
+			ELSE
+				PRINTFORMW 「こう……でいいのか？　どうだ、%CALLNAME:PLAYER%？」
+			ENDIF
+		CFLAG:451 = 2
+		ENDIF
+	ENDIF
+ENDIF
+ENDIF
+
+;-------------------------------------------------
+;318,泡踊りする　CFLAG:452
+;-------------------------------------------------
+IF SELECTCOM == 318
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;319,新妻プレイ　CFLAG:453
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 319 && TEQUIP:エプロン == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:451 == 0
+		CFLAG:451 = 1
+	;二回目以降
+	ELSE
+		CFLAG:451 = 2
+	ENDIF
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 319 && TEQUIP:エプロン
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;320,野外プレイ　CFLAG:454
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 320 && TEQUIP:野外プレイ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:454 == 0
+		CFLAG:454 = 1
+	;二回目以降
+	ELSE
+		CFLAG:454 = 2
+	ENDIF
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 320 && TEQUIP:野外プレイ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;321,人を呼ぶ　CFLAG:455
+;-------------------------------------------------
+IF SELECTCOM == 321
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:455 == 0
+		CFLAG:455 = 1
+	;二回目以降
+	ELSE
+		CFLAG:455 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;322,輪姦　CFLAG:456
+;-------------------------------------------------
+IF SELECTCOM == 322
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:456 == 0
+		CFLAG:456 = 1
+	;二回目以降
+	ELSE
+		CFLAG:456 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;323,地下室　CFLAG:457
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 323 && TEQUIP:地下室 == 0
+	CALL TRAIN_MESSAGE
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 323 && TEQUIP:地下室
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;触手系コマンド
+;=================================================
+;-------------------------------------------------
+;340,触手召喚　CFLAG:458
+;-------------------------------------------------
+;召喚時
+IF SELECTCOM == 340 && TEQUIP:触手 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:458 == 0
+		CFLAG:458 = 1
+	;二回目以降
+	ELSE
+		CFLAG:458 = 2
+	ENDIF
+;還した時の反応
+ELSEIF SELECTCOM == 340 && TEQUIP:触手
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;341,触手乳首責め　CFLAG:459
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 341 && TEQUIP:ニプルキャップ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:459 == 0
+		CFLAG:459 = 1
+	;二回目以降
+	ELSE
+		CFLAG:459 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 341 && TEQUIP:ニプルキャップ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;342,触手クリ責め　CFLAG:460
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 342 && TEQUIP:クリキャップ == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 342 && TEQUIP:クリキャップ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;343,触手ペニス責め　CFLAG:461
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 343 && TEQUIP:電動オナホール == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 343 && TEQUIP:電動オナホール
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;344,触手挿入　CFLAG:462
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 344 && TEQUIP:バイブ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:462 == 0
+		CFLAG:462 = 1
+	;二回目以降
+	ELSE
+		CFLAG:462 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 344 && TEQUIP:バイブ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;345,触手アナル　CFLAG:463
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 345 && TEQUIP:アナルバイブ == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:463 == 0
+		CFLAG:463 = 1
+	;二回目以降
+	ELSE
+		CFLAG:463 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 345 && TEQUIP:アナルバイブ
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;350,触手口辱　CFLAG:464
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 350 && TEQUIP:触手口辱 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 350 && TEQUIP:触手口辱
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;351,触手緊縛　CFLAG:465
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 351 && TEQUIP:縄 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 351 && TEQUIP:縄
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;352,触手浣腸　CFLAG:466
+;-------------------------------------------------
+;浣腸時
+IF SELECTCOM == 352
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;ハードな触手系コマンド
+;=================================================
+;-------------------------------------------------
+;360,触手搾乳　CFLAG:467
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 360 && TEQUIP:搾乳機 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 360 && TEQUIP:搾乳機
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;361,触手乳腺責め　CFLAG:468
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 361 && TEQUIP:触手乳腺挿入 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 361 && TEQUIP:触手乳腺挿入
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;362,触手Ｇスポ責め　CFLAG:469
+;-------------------------------------------------
+IF SELECTCOM == 362
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;363,触手子宮責め　CFLAG:470
+;-------------------------------------------------
+IF SELECTCOM == 362
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;364,触手前立腺刺激　CFLAG:471
+;-------------------------------------------------
+IF SELECTCOM == 364
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;365,触手尿道挿入　CFLAG:472
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 365 && TEQUIP:カテーテル == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 365 && TEQUIP:カテーテル
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;366,触手ヴァギナ拡張　CFLAG:473
+;-------------------------------------------------
+IF SELECTCOM == 366
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;367,触手アナル拡張　CFLAG:474
+;-------------------------------------------------
+IF SELECTCOM == 367
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;368,触手両穴拡張　CFLAG:475
+;-------------------------------------------------
+IF SELECTCOM == 368
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;369,触手産卵　CFLAG:476
+;-------------------------------------------------
+IF SELECTCOM == 369
+	CALL TRAIN_MESSAGE
+	;全部抜いたとき
+	IF TFLAG:56 == 0
+	;片方だけ抜いたとき
+	ELSEIF TFLAG:56 == 1
+	;最初に入れたとき
+	ELSEIF TFLAG:56 == 2
+	;さらに追加したとき
+	ELSE
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;370,触手アナル産卵　CFLAG:477
+;-------------------------------------------------
+IF SELECTCOM == 370
+	CALL TRAIN_MESSAGE
+	;全部抜いたとき
+	IF TFLAG:56 == 0
+	;片方だけ抜いたとき
+	ELSEIF TFLAG:56 == 1
+	;最初に入れたとき
+	ELSEIF TFLAG:56 == 2
+	;さらに追加したとき
+	ELSE
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;371,触手貫通　CFLAG:534
+;-------------------------------------------------
+IF SELECTCOM == 371
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;372,電気触手　CFLAG:535
+;-------------------------------------------------
+IF SELECTCOM == 372
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;373,触手脳姦　CFLAG:536
+;-------------------------------------------------
+IF SELECTCOM == 373
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;374,催眠触手　CFLAG:539
+;-------------------------------------------------
+IF SELECTCOM == 374
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;異種姦系コマンド
+;=================================================
+;-------------------------------------------------
+;380,バター犬　CFLAG:478
+;-------------------------------------------------
+IF SELECTCOM == 380
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:478 == 0
+		CFLAG:478 = 1
+	;二回目以降
+	ELSE
+		CFLAG:478 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;381,獣姦　CFLAG:479
+;-------------------------------------------------
+IF SELECTCOM == 381
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;382,鰻風呂　CFLAG:480
+;-------------------------------------------------
+IF SELECTCOM == 382
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;383,蟲風呂　CFLAG:481
+;-------------------------------------------------
+IF SELECTCOM == 383
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;狂気系コマンド
+;=================================================
+;-------------------------------------------------
+;390,片腕切断　CFLAG:482
+;-------------------------------------------------
+IF SELECTCOM == 390
+	CALL TRAIN_MESSAGE
+	;初めて
+	;ドラゴンボールで生き返らせりゃいい理論
+	IF CFLAG:482 == 0
+		PRINTFORMW 「ふぅん？　ま、かまわねえさ。ばっさりいってくんな」
+		PRINTFORMW 「どうせ戦にでないんだ、大将の世話ができれば腕一本くらい構わねえよ」
+		CFLAG:482 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「なんだよ、大将。切り落とす位置でもお気に召さなかったのか？　手入れしてやり直すかい？」
+		PRINTFORMW 「いや、さすがに両手とも無いと大将の世話ができねえだろ」
+		PRINTFORMW 「……ああ、両手無くても口なりケツなり大将の下の世話はできるからいいのか？」
+		PRINTFORMW 
+		PRINTFORMW 
+		PRINTFORMW 「大将？　どうしたよ、妙な顔して」
+		CFLAG:482 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;391,片脚切断　CFLAG:483
+;-------------------------------------------------
+IF SELECTCOM == 391
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;392,全抜歯　CFLAG:484
+;-------------------------------------------------
+IF SELECTCOM == 392
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;助手命令系コマンド
+;=================================================
+;-------------------------------------------------
+;400,クリトリス愛撫命令　CFLAG:485
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 400
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:485 == 0
+		CFLAG:485 = 1
+	;二回目以降
+	ELSE
+		CFLAG:485 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 400
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;401,ペニス愛撫命令　CFLAG:486
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 401
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:486 == 0
+		CFLAG:486 = 1
+	;二回目以降
+	ELSE
+		CFLAG:486 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 401
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;402,胸愛撫命令　CFLAG:487
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 402
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:487 == 0
+		CFLAG:487 = 1
+	;二回目以降
+	ELSE
+		CFLAG:487 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 402
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;403,指挿入れ命令　CFLAG:488
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 403
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:488 == 0
+		CFLAG:488 = 1
+	;二回目以降
+	ELSE
+		CFLAG:488 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 403
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;404,アナル愛撫命令　CFLAG:489
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 404
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:489 == 0
+		CFLAG:489 = 1
+	;二回目以降
+	ELSE
+		CFLAG:489 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 404
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;405,挿入命令　CFLAG:490
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 405
+	CALL TRAIN_MESSAGE
+;止めさせた時の反応
+ELSEIF SELECTCOM == 405
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;406,アナル挿入命令　CFLAG:491
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 406
+	CALL TRAIN_MESSAGE
+;止めさせた時の反応
+ELSEIF SELECTCOM == 406
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;407,口辱命令　CFLAG:492
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 407
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:492 == 0
+		CFLAG:492 = 1
+	;二回目以降
+	ELSE
+		CFLAG:492 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 407
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;精飲系コマンド
+;=================================================
+;-------------------------------------------------
+;410,コンドーム精飲（奴隷）　CFLAG:493
+;-------------------------------------------------
+IF SELECTCOM == 410
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:493 == 0
+		CFLAG:493 = 1
+	;二回目以降
+	ELSE
+		CFLAG:493 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;411,コンドーム精飲（助手）　CFLAG:494
+;-------------------------------------------------
+IF SELECTCOM == 411
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;412,ザーメンキス　CFLAG:495
+;-------------------------------------------------
+IF SELECTCOM == 412
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;ダブル奉仕系コマンド
+;=================================================
+;-------------------------------------------------
+;420,ダブルフェラ　CFLAG:496
+;-------------------------------------------------
+IF SELECTCOM == 420
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:496 == 0
+		CFLAG:496 = 1
+	;二回目以降
+	ELSE
+		CFLAG:496 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;421,ダブルパイズリ　CFLAG:497
+;-------------------------------------------------
+IF SELECTCOM == 421
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;422,ダブル素股　CFLAG:498
+;-------------------------------------------------
+IF SELECTCOM == 422
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;奴隷×助手系コマンド
+;=================================================
+;-------------------------------------------------
+;430,助手を犯させる　CFLAG:499
+;-------------------------------------------------
+IF SELECTCOM == 430
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:499 == 0
+		CFLAG:499 = 1
+	;二回目以降
+	ELSE
+		CFLAG:499 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;431,助手のＡを犯させる　CFLAG:502
+;-------------------------------------------------
+IF SELECTCOM == 431
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;主人×助手系コマンド
+;=================================================
+;-------------------------------------------------
+;440,助手を犯す　CFLAG:503
+;-------------------------------------------------
+IF SELECTCOM == 440
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:503 == 0
+		CFLAG:503 = 1
+	;二回目以降
+	ELSE
+		CFLAG:503 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;441,助手のＡを犯す　CFLAG:504
+;-------------------------------------------------
+IF SELECTCOM == 441
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:504 == 0
+		CFLAG:504 = 1
+	;二回目以降
+	ELSE
+		CFLAG:504 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;派生コマンド
+;=================================================
+;-------------------------------------------------
+;500,Ｇスポット刺激　CFLAG:505
+;-------------------------------------------------
+IF SELECTCOM == 500
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:505 == 0
+		PRINTFORMW 「っ！　な、なに、ぁあっ！　ナカびりびりくるっ%UNICODE(0x2661)%」
+		PRINTFORMW 膣内をこね回すと%CALLNAME:TARGET%は膣肉をキュウキュウ締め付けながら嬌声をあげた……
+		CFLAG:505 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ああぁあっ、イイっ！　気持ち、イイよぅ%UNICODE(0x2661)%」
+		PRINTFORMW %CALLNAME:TARGET%は膣肉をキュウキュウ締め付けながら嬌声をあげた……
+		CFLAG:505 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;501,前立腺刺激　CFLAG:506
+;-------------------------------------------------
+IF SELECTCOM == 501
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:506 == 0
+		PRINTFORMW 「っ！　ひ、あっ！」
+		PRINTFORMW 探り当てたしこりをぐりぐりこね回すと%CALLNAME:TARGET%はピクンピクンと内股を痙攣させた
+		CFLAG:506 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ひ、あっ！　そこ、そこばっかり、俺っ！　も、ダメになっちまうよぅ%UNICODE(0x2661)%」
+		CFLAG:506 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;502,搾乳　CFLAG:507
+;-------------------------------------------------
+IF SELECTCOM == 502
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;503,シックスナイン　CFLAG:508
+;-------------------------------------------------
+IF SELECTCOM == 503
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;504,６９パイズリ　CFLAG:509
+;-------------------------------------------------
+IF SELECTCOM == 504
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;507,挿入Ｇスポ責め　CFLAG:512
+;-------------------------------------------------
+IF SELECTCOM == 507
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:512 == 0
+		PRINTFORMW 「ひぁっ！　な、なんだ、そこ凄ぇ%UNICODE(0x2661)%　あ、や、そこやめ、止めちゃダメだっ！」
+		CFLAG:512 = 1
+	;二回目以降
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORMW 「あ、あぁああああっ%UNICODE(0x2661)%　イイ、そこぉ……頼むもっと突いてくれよぉっ！」
+		ELSE
+			PRINTFORMW 「ふぁ、あんっ%UNICODE(0x2661)%　たいしょのでけぇの、奥ごりごりしてっ！　ここ凄ぇっ、俺おかしくなるぅ%UNICODE(0x2661)%」
+		ENDIF
+		PRINTFORMW Ｇスポットを擦り上げられ、%CALLNAME%膣肉は%CALLNAME:PLAYER%の肉棒に絡みつくように蠢いている…
+		CFLAG:512 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;508,挿入子宮口責め　CFLAG:513
+;-------------------------------------------------
+IF SELECTCOM == 508
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:513 == 0
+		PRINTFORMW 「コツコツあた、当たってっ%UNICODE(0x2661)%　あは、ここにいっぱい出してくれっ%UNICODE(0x2661)%」
+		CFLAG:513 = 1
+	;二回目以降
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORML 「たいしょ、大将っ！　出して、もっと濃いの出して、奥まで全部犯して孕ませてくれよぉっ%UNICODE(0x2661)%」
+			PRINTFORMW %CALLNAME:PLAYER%の執拗で徹底的な子宮口責めに陥落した%CALLNAME%は、我を失って中出しを強請っている…
+		ELSE
+			PRINTFORMW 「そこ、イイっ！　なあ、ナカに出してくれっ%UNICODE(0x2661)%　あっ、あああっ！　子種、濃くて熱いのでナカ一杯にしてくれ……っ！」
+			PRINTFORMW %CALLNAME%が中出しを強請りながら腰を振って押し付けた子宮口は、%CALLNAME:PLAYER%の肉棒の、その先端に吸い付いている……
+		ENDIF
+		CFLAG:513 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;509,騎乗位乳房自慰　CFLAG:514
+;-------------------------------------------------
+IF SELECTCOM == 509
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;510,駅弁　CFLAG:515
+;-------------------------------------------------
+IF SELECTCOM == 510
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:515 == 0
+		CFLAG:515 = 1
+	;二回目以降
+	ELSE
+		CFLAG:515 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;511,スパンキングセックス　CFLAG:516
+;-------------------------------------------------
+IF SELECTCOM == 511
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;512,スパンキングアナル　CFLAG:517
+;-------------------------------------------------
+IF SELECTCOM == 512
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;513,首絞めセックス　CFLAG:518
+;-------------------------------------------------
+IF SELECTCOM == 513
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;514,首絞めアナル　CFLAG:519
+;-------------------------------------------------
+IF SELECTCOM == 514
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;515,サンドイッチ　CFLAG:520
+;-------------------------------------------------
+IF SELECTCOM == 515
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;516,二本フェラ　CFLAG:521
+;-------------------------------------------------
+IF SELECTCOM == 516
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;517,二輪挿し　CFLAG:522
+;-------------------------------------------------
+IF SELECTCOM == 517
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;518,二輪挿しアナル　CFLAG:523
+;-------------------------------------------------
+IF SELECTCOM == 518
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;519,連結　CFLAG:524
+;-------------------------------------------------
+IF SELECTCOM == 519
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+;-------------------------------------------------
+;520,サンドイッチさせる　CFLAG:525
+;-------------------------------------------------
+IF SELECTCOM == 520
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:525 == 0
+		CFLAG:525 = 1
+	;二回目以降
+	ELSE
+		CFLAG:525 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;521,助手をサンドイッチ　CFLAG:526
+;-------------------------------------------------
+IF SELECTCOM == 521
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;522,二輪挿しさせる　CFLAG:527
+;-------------------------------------------------
+IF SELECTCOM == 522
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;523,二輪挿しアナルさせる　CFLAG:528
+;-------------------------------------------------
+IF SELECTCOM == 523
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;524,助手を二輪挿し　CFLAG:529
+;-------------------------------------------------
+IF SELECTCOM == 524
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:529 == 0
+		CFLAG:529 = 1
+	;二回目以降
+	ELSE
+		CFLAG:529 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;525,助手を二輪挿しアナル　CFLAG:530
+;-------------------------------------------------
+IF SELECTCOM == 525
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:530 == 0
+		CFLAG:530 = 1
+	;二回目以降
+	ELSE
+		CFLAG:530 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;526,挿入前立腺刺激　CFLAG:531
+;-------------------------------------------------
+IF SELECTCOM == 526
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:531 == 0
+		PRINTFORMW 「ひぁ、や、そこっ！　ダメっ、俺そこダメだっ%UNICODE(0x2661)%」
+		PRINTFORMW 強い刺激に%CALLNAME%は背をしならせて嬌声をあげた……
+		CFLAG:531 = 1
+	;二回目以降
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORMW 「イイっ、イ、くっ！　そこ、ああぁあっ%UNICODE(0x2661)%　そこっ突かれたら俺、俺もう……%UNICODE(0x2661)%」
+		ELSE
+			PRINTFORMW 「き、気持ちい、ぁふ、あ……ああっ、気持ちイイっ%UNICODE(0x2661)%　堪んねぇ、あ、もっとぉっ%UNICODE(0x2661)%」
+		ENDIF
+		PRINTFORMW %CALLNAME:TARGET%は腰を振って自ら感じる場所を%CALLNAME:TARGET%亀頭に擦りつけている…
+		CFLAG:531 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;527,セルフ連結チューブ　CFLAG:540
+;-------------------------------------------------
+IF SELECTCOM == 527
+	CALL TRAIN_MESSAGE
+ENDIF
+
+

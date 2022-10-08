@@ -1,0 +1,317 @@
+﻿;-------------------------------------------------
+;촉수유선고문
+;촉수계 커맨드
+;-------------------------------------------------
+@COM361
+
+PRINTL 촉수유선고문
+STR:0 = 촉수유선고문
+CALL KOJO_MESSAGE_COM
+
+
+;착탈의 처리
+IF TEQUIP:촉수유선삽입 == 0
+	TEQUIP:촉수유선삽입 = 1
+ELSE
+	TEQUIP:촉수유선삽입 = 0
+ENDIF
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 150
+LOSEBASE:기력 += 300
+
+IF EXP:촉수경험 < EXPLV:1
+	TIMES LOSEBASE:체력, 1.10
+	TIMES LOSEBASE:기력, 2.00
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES LOSEBASE:체력, 0.90
+	TIMES LOSEBASE:기력, 1.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES LOSEBASE:체력, 0.80
+	TIMES LOSEBASE:기력, 1.50
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES LOSEBASE:체력, 0.70
+	TIMES LOSEBASE:기력, 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES LOSEBASE:체력, 0.60
+	TIMES LOSEBASE:기력, 1.00
+ELSE
+	TIMES LOSEBASE:체력, 0.50
+	TIMES LOSEBASE:기력, 0.50
+ENDIF
+
+IF TALENT:모유체질
+	LOSEBASE:체력 /= 2
+	LOSEBASE:기력 /= 2
+ENDIF
+
+;ABL:B감각를 본다
+IF ABL:B감각 == 0
+	SOURCE:쾌B += 50
+ELSEIF ABL:B감각 == 1
+	SOURCE:쾌B += 100
+ELSEIF ABL:B감각 == 2
+	SOURCE:쾌B += 200
+ELSEIF ABL:B감각 == 3
+	SOURCE:쾌B += 800
+ELSEIF ABL:B감각 == 4
+	SOURCE:쾌B += 1600
+ELSE
+	SOURCE:쾌B += 2800
+ENDIF
+
+;B민감·둔감 함몰유두
+IF TALENT:B민감 || TALENT:함몰유두
+	TIMES SOURCE:쾌B , 1.20
+ELSEIF TALENT:B둔감
+	TIMES SOURCE:쾌B , 0.70
+ENDIF
+
+;EXP:촉수경험를 본다
+IF EXP:촉수경험 < EXPLV:1
+	SOURCE:통증 += 10000
+	SOURCE:불결 += 10000
+	SOURCE:일탈 += 10000
+ELSEIF EXP:촉수경험 < EXPLV:2
+	SOURCE:통증 += 5000
+	SOURCE:불결 += 6500
+	SOURCE:일탈 += 8000
+ELSEIF EXP:촉수경험 < EXPLV:3
+	SOURCE:통증 += 3000
+	SOURCE:불결 += 4500
+	SOURCE:일탈 += 6000
+ELSEIF EXP:촉수경험 < EXPLV:4
+	SOURCE:통증 += 2000
+	SOURCE:불결 += 3000
+	SOURCE:일탈 += 4000
+ELSEIF EXP:촉수경험 < EXPLV:5
+	SOURCE:통증 += 1000
+	SOURCE:불결 += 1500
+	SOURCE:일탈 += 2000
+ELSE
+	SOURCE:통증 += 500
+	SOURCE:불결 += 750
+	SOURCE:일탈 += 1000
+ENDIF
+
+;가슴가 없는·빈유·거유·폭유
+IF BREAST(TARGET)
+	TIMES SOURCE:통증, 1.75
+ELSEIF TALENT:빈유
+	TIMES SOURCE:통증, 1.50
+ELSEIF TALENT:폭유
+	TIMES SOURCE:쾌B , 1.50
+ELSEIF TALENT:거유
+	TIMES SOURCE:쾌B , 1.20
+ENDIF
+
+;EXP:촉수경험를 본다
+IF EXP:촉수경험 < EXPLV:1
+	SOURCE:욕정 += 0
+	TIMES SOURCE:성행동, 0.50
+	TIMES SOURCE:성취감, 0.50
+	TIMES SOURCE:불결, 2.00
+	TIMES SOURCE:일탈, 4.00
+ELSEIF EXP:촉수경험 < EXPLV:2
+	SOURCE:욕정 += 60
+	TIMES SOURCE:성행동, 0.80
+	TIMES SOURCE:성취감, 0.80
+	TIMES SOURCE:불결, 1.50
+	TIMES SOURCE:일탈, 1.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	SOURCE:욕정 += 180
+	TIMES SOURCE:성행동, 1.00
+	TIMES SOURCE:성취감, 1.00
+	TIMES SOURCE:불결, 1.00
+	TIMES SOURCE:일탈, 1.00
+ELSEIF EXP:촉수경험 < EXPLV:4
+	SOURCE:욕정 += 360
+	TIMES SOURCE:성행동, 1.20
+	TIMES SOURCE:성취감, 1.20
+	TIMES SOURCE:불결, 0.50
+	TIMES SOURCE:일탈, 0.70
+ELSEIF EXP:촉수경험 < EXPLV:5
+	SOURCE:욕정 += 640
+	TIMES SOURCE:성행동, 1.50
+	TIMES SOURCE:성취감, 1.50
+	TIMES SOURCE:불결, 0.10
+	TIMES SOURCE:일탈, 0.20
+ELSE
+	SOURCE:욕정 += 900
+	TIMES SOURCE:성행동, 2.00
+	TIMES SOURCE:성취감, 2.00
+	TIMES SOURCE:불결, 0.00
+	TIMES SOURCE:일탈, 0.10
+ENDIF
+
+
+IF TEQUIP:촉수유선삽입
+	SIF TALENT:모유체질
+		STAIN:가슴 |= 16
+	TEQUIP:촉수유선삽입 = 0
+	T = 0
+ELSE
+	IF TALENT:모유체질 == 0
+		IF PALAM:욕정 > PALAMLV:5
+			UP:공포 += 3000
+			;남자모유취득 콘피그오후 때남자/반음반양/컨트보이는 취득 불가
+			SIF ((FLAG:2 & 256) == 0 && (BREAST(TARGET) || TALENT:절벽)) || (FLAG:2 & 256)
+				TALENT:모유체질 = 1
+			MAXBASE:모유 = 10000
+		ENDIF
+	ELSE
+		TIMES SOURCE:통증, 0.60
+	ENDIF
+	;첫체험 때이상경험+1
+	IF EXP:M경험 == 0
+		EXP:이상경험 += 1
+		PRINTL M확장 첫경험으로이상경험＋1
+	ENDIF
+	TEQUIP:촉수유선삽입 = 1
+	T = 1
+ENDIF
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+EXP:M경험 += 1
+PRINTL M경험＋1
+
+RETURN 1
+
+
+
+;--------------------------------------------------
+;촉수유선삽입중
+;--------------------------------------------------
+@EQUIP_COM361
+PRINTL ＜촉수유선삽입중＞
+
+LOSEBASE:체력 += 50
+LOSEBASE:기력 += 75
+
+;ABL:B감각를 본다
+IF ABL:B감각 == 0
+	A = 20
+ELSEIF ABL:B감각 == 1
+	A = 60
+ELSEIF ABL:B감각 == 2
+	A = 100
+ELSEIF ABL:B감각 == 3
+	A = 250
+ELSEIF ABL:B감각 == 4
+	A = 400
+ELSE
+	A = 600
+ENDIF
+
+;PALAM:욕정를 본다
+IF PALAM:욕정 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:욕정 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:욕정 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:욕정 < PALAMLV:4
+	TIMES A , 1.10
+ELSE
+	TIMES A , 1.20
+ENDIF
+
+;EXP:촉수경험를 본다
+IF EXP:촉수경험 <= EXPLV:0
+	TIMES A , 0.80
+	SOURCE:중독충족 += 10
+	SOURCE:일탈 += 2500
+ELSEIF EXP:촉수경험 <= EXPLV:1
+	TIMES A , 0.90
+	SOURCE:중독충족 += 40
+	SOURCE:일탈 += 1500
+ELSEIF EXP:촉수경험 <= EXPLV:2
+	TIMES A , 1.00
+	SOURCE:중독충족 += 100
+	SOURCE:굴복 += 10
+	SOURCE:일탈 += 500
+ELSEIF EXP:촉수경험 <= EXPLV:3
+	TIMES A , 1.10
+	SOURCE:중독충족 += 150
+	SOURCE:굴복 += 40
+	SOURCE:일탈 += 150
+ELSEIF EXP:촉수경험 <= EXPLV:4
+	TIMES A , 1.20
+	SOURCE:중독충족 += 300
+	SOURCE:굴복 += 70
+	SOURCE:일탈 += 10
+ELSE
+	TIMES A , 1.30
+	SOURCE:중독충족 += 450
+	SOURCE:굴복 += 100
+ENDIF
+
+;EXP:촉수경험를 본다
+IF EXP:촉수경험 <= EXPLV:0
+	TIMES A , 0.80
+	SOURCE:통증 += 500
+ELSEIF EXP:촉수경험 <= EXPLV:1
+	TIMES A , 1.00
+	SOURCE:통증 += 100
+ELSEIF EXP:촉수경험 <= EXPLV:2
+	TIMES A , 1.30
+	SOURCE:통증 += 50
+ELSEIF EXP:촉수경험 <= EXPLV:3
+	TIMES A , 1.60
+	SOURCE:통증 += 10
+ELSEIF EXP:촉수경험 <= EXPLV:4
+	TIMES A , 2.00
+ELSE
+	TIMES A , 2.25
+ENDIF
+
+;EXP:분유경험을 본다
+IF EXP:분유경험 <= EXPLV:0
+	TIMES A , 0.80
+ELSEIF EXP:분유경험 <= EXPLV:1
+	TIMES A , 1.00
+ELSEIF EXP:분유경험 <= EXPLV:2
+	TIMES A , 1.30
+ELSEIF EXP:분유경험 <= EXPLV:3
+	TIMES A , 1.60
+ELSEIF EXP:분유경험 <= EXPLV:4
+	TIMES A , 2.00
+ELSE
+	TIMES A , 2.25
+ENDIF
+
+;B둔감와 B민감와함몰유두
+IF TALENT:B민감
+	TIMES A , 1.40
+ELSEIF TALENT:B둔감
+	TIMES A , 0.60
+ELSEIF TALENT:함몰유두
+	TIMES A , 1.20
+ENDIF
+
+;거유와폭유, 빈유와절벽
+IF TALENT:폭유
+	TIMES A , 1.20
+ELSEIF TALENT:거유
+	TIMES A , 1.50
+ELSEIF TALENT:빈유
+	TIMES SOURCE:통증, 1.50
+ELSEIF TALENT:절벽 || BREAST(TARGET)
+	TIMES SOURCE:통증, 1.75
+ENDIF
+SOURCE:쾌B += A
+
+STAIN:가슴 |= 32
+T += 1
+
+RETURN 1
+
+
+

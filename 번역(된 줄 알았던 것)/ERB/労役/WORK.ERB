@@ -1,0 +1,1554 @@
+﻿;====================================================================
+;노역 지시
+;-----------------------------------------
+;우쭐해져 조건을 몽땅 바꾸었습니다.
+;지금까지는 연애계=콘서트와포장마차라든지, 복종계=렌탈과 변소라든지 소질에 의해
+;실행할 수 있는 노역이 정해져 있던 것이, 노예의 능력에 의해 실행할 수 있는 노역이 정해지게 됩니다.
+;다만, 모든 노역에 대해, 어느 방향에라도 함락 하고 있을 필요는 있습니다.
+;
+;-----------------------------------------
+;====================================================================
+;-------------------------------------------------
+@CHARA_WORKING
+;-------------------------------------------------
+
+D = 1
+CALL DAILY_LIFE_MASTER_CHANGE
+A = 0
+B = 0
+D = 0
+E = 0
+F = 0
+G = 0
+REPEAT CHARANUM
+	;주인은 제외
+	SIF COUNT == MASTER
+		CONTINUE
+	;조수 가능하게 되지 않은 캐릭터는 제외
+	SIF CFLAG:COUNT:1!= 2
+		CONTINUE
+	;벌써 노역중의 캐릭터는 제외
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+	;기절 하고 있는 캐릭터는 제외
+	SIF TALENT:COUNT:기절
+		CONTINUE
+	;함락 하고 있지 않는 캐릭터는 제외
+	SIF !KANRAKU2(COUNT)
+		CONTINUE
+	;육아 방으로 이동하고 있는 캐릭터는 제외
+	C = COUNT
+	CALL CHECK_CHILD_CARE
+	SIF RESULT == 1
+		CONTINUE
+	;정식포장마차와 라이브는, 사지 결손이 있는 것도 깔고는발정기로 불가
+	IF !TALENT:COUNT:한팔결손 && !TALENT:COUNT:양팔결손 && !TALENT:COUNT:달마 && !TALENT:COUNT:한다리결손 && !TALENT:COUNT:양다리결손 && !TALENT:COUNT:모두발치 && !TALENT:COUNT:발정기
+		;포장마차실행 가능=봉사정신 3 이상＋요리기능 2 이상
+		SIF ABL:COUNT:봉사정신 >= 3 && ABL:COUNT:요리기능 >= 2
+			CFLAG:COUNT:151 |= 1
+		;라이브 실행 가능=봉사정신 3 이상＋가창기능 2 이상
+		SIF ABL:COUNT:봉사정신 >= 3 && ABL:COUNT:가창기능 >= 2
+			CFLAG:COUNT:151 |= 2
+	ENDIF
+	;창관, 쇼는순종＋욕망＋봉사정신 합해 10이상 필요
+	IF ABL:COUNT:순종 + ABL:COUNT:욕망 + ABL:COUNT:봉사정신 >= 10
+		;창관실행 가능=CVAB감각합계 10이상
+		SIF (ABL:COUNT:C감각 + ABL:COUNT:V감각 + ABL:COUNT:A감각 + ABL:COUNT:B감각) >= 10
+			CFLAG:COUNT:151 |= 4
+		;쇼 실행 가능=노출벽 3 이상
+		SIF ABL:COUNT:노출벽 >= 3
+			CFLAG:COUNT:151 |= 8
+	ENDIF
+	;렌탈, 공중 변소는순종＋욕망＋봉사정신 합해 15이상 필요
+	IF ABL:COUNT:순종 + ABL:COUNT:욕망 + ABL:COUNT:봉사정신 >= 15
+		CFLAG:COUNT:151 |= 16
+		CFLAG:COUNT:151 |= 32
+	ENDIF
+	
+	SIF CFLAG:COUNT:151 & 1
+		A += 1
+	SIF CFLAG:COUNT:151 & 2
+		E += 1
+	SIF CFLAG:COUNT:151 & 4
+		B += 1
+	SIF CFLAG:COUNT:151 & 8
+		F += 1
+	SIF CFLAG:COUNT:151 & 16
+		D += 1
+	SIF CFLAG:COUNT:151 & 32
+		G += 1
+REND
+
+;조교자 변경에 대응
+SIF MASTER == 0 || CFLAG:MASTER:1 == 3
+	PRINTL [ 0]  - 매각
+IF A && ITEM:92
+	IF TIME == 0
+		PRINTL [ 1]  - 정식포장마차(낮의 부)
+	ELSE
+		PRINTL [ 1]  - 정식포장마차(밤의 부)
+	ENDIF
+ENDIF
+IF E
+	IF TIME == 0
+		PRINTL [ 2]  - 도검뢰무(낮의 부)
+	ELSE
+		PRINTL [ 2]  - 도검뢰무(밤의 부)
+	ENDIF
+ENDIF
+SIF B
+	PRINTL [ 3]  - 창관봉공
+SIF F
+	PRINTL [ 4]  - 구경거리 오두막
+SIF D && TIME == 0
+	PRINTL [ 5]  - 노예의 렌탈
+SIF G && ITEM:94
+	PRINTL [ 6]  - 공중 변소 플레이
+
+PRINTL [100]- 돌아온다
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSEIF RESULT == 0
+	CALL CHARA_SELL
+ELSEIF RESULT == 1 && A && ITEM:92
+	CALL LUNCH_STALL
+ELSEIF RESULT == 2 && E
+	CALL CONCERT
+ELSEIF RESULT == 3 && B
+	CALL PROSTITUTION
+ELSEIF RESULT == 4 && F
+	CALL PROMISCUOUS_SEX_LIVE
+ELSEIF RESULT == 5 && D && TIME == 0
+	CALL RENTAL_SLAVE
+ELSEIF RESULT == 6 && G && ITEM:94
+	CALL PUBLIC_TOILET
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+D = 0
+CALL DAILY_LIFE_MASTER_CHANGE
+
+RETURN 0
+
+
+;-------------------------------------------------
+;노예 매각의 처리
+;-------------------------------------------------
+@CHARA_SELL
+DRAWLINE
+PRINTL 누구를 팝니까?
+PRINTL 
+REPEAT CHARANUM
+	TFLAG:COUNT = 0
+	SIF COUNT == MASTER
+		CONTINUE
+	SIF CFLAG:COUNT:1 == 3
+		CONTINUE
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+	;육아 방으로 이동하고 있는 캐릭터는 제외
+	C = COUNT
+	CALL CHECK_CHILD_CARE
+	SIF RESULT == 1
+		CONTINUE
+	;낙인첨부는 팔리지 않는다
+	SIF TALENT:COUNT:낙인
+		CONTINUE
+	IF CFLAG:COUNT:1 >= 1 && CFLAG:COUNT:1 <= 3 && CFLAG:COUNT:7 == 0
+		PRINTFORM [{COUNT}] %NAME:COUNT% 
+		IF ASSI == COUNT
+			PRINT (조수)
+		ELSEIF ISASSI:COUNT == 1
+			PRINT (원조수)
+		ELSEIF CFLAG:COUNT:1 == 2
+			PRINT (조수 가능)
+		ENDIF
+		PRINTL 
+	ENDIF
+REND
+PRINTFORML [999] 돌아온다
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:1 < 1 || CFLAG:RESULT:1 == 3 || CFLAG:RESULT:7 > 0 || CFLAG:RESULT:12 > 0 || RESULT == MASTER
+	GOTO INPUT_LOOP
+ELSE
+	C = RESULT
+	CALL CHECK_CHILD_CARE
+	SIF RESULT == 1
+		GOTO INPUT_LOOP
+	;매각 처리
+	T = TARGET
+	A = ASSI
+	TARGET = C
+ENDIF
+
+S = 0
+
+;ABL에 의한 기초치 계산
+V = 0
+;ABL:순종를 본다
+IF ABL:순종 == 0
+	V = 0
+ELSEIF ABL:순종 == 1
+	V = 1200
+ELSEIF ABL:순종 == 2
+	V = 1800
+ELSEIF ABL:순종 == 3
+	V = 2500
+ELSEIF ABL:순종 == 4
+	V = 3300
+ELSEIF ABL:순종 == 5
+	V = 4200
+ELSEIF ABL:순종 == 6
+	V = 6200
+ELSEIF ABL:순종 == 7
+	V = 9000
+ELSEIF ABL:순종 == 8
+	V = 13000
+ELSEIF ABL:순종 == 9
+	V = 18000
+ELSE
+	V = 25000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:0%{ABL:순종}LV +{V}
+S += V
+
+
+;ABL:욕망를 본다
+IF ABL:욕망 == 0
+	V = 0
+ELSEIF ABL:욕망 == 1
+	V = 1000
+ELSEIF ABL:욕망 == 2
+	V = 1500
+ELSEIF ABL:욕망 == 3
+	V = 2100
+ELSEIF ABL:욕망 == 4
+	V = 2800
+ELSEIF ABL:욕망 == 5
+	V = 3600
+ELSEIF ABL:욕망 == 6
+	V = 5500
+ELSEIF ABL:욕망 == 7
+	V = 8000
+ELSEIF ABL:욕망 == 8
+	V = 12000
+ELSEIF ABL:욕망 == 9
+	V = 16000
+ELSE
+	V = 22000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:1%{ABL:욕망}LV +{V}
+S += V
+
+
+;ABL:기교를 본다
+IF ABL:기교 == 0
+	V = 0
+ELSEIF ABL:기교 == 1
+	V = 800
+ELSEIF ABL:기교 == 2
+	V = 1200
+ELSEIF ABL:기교 == 3
+	V = 1700
+ELSEIF ABL:기교 == 4
+	V = 2300
+ELSEIF ABL:기교 == 5
+	V = 3000
+ELSEIF ABL:기교 == 6
+	V = 4800
+ELSEIF ABL:기교 == 7
+	V = 7000
+ELSEIF ABL:기교 == 8
+	V = 11000
+ELSEIF ABL:기교 == 9
+	V = 15000
+ELSE
+	V = 21000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:2%{ABL:기교}LV +{V}
+S += V
+
+
+;ABL:C감각를 본다
+IF ABL:C감각 == 0
+	V = 0
+ELSEIF ABL:C감각 == 1
+	V = 800
+ELSEIF ABL:C감각 == 2
+	V = 1200
+ELSEIF ABL:C감각 == 3
+	V = 1700
+ELSEIF ABL:C감각 == 4
+	V = 2300
+ELSEIF ABL:C감각 == 5
+	V = 3000
+ELSEIF ABL:C감각 == 6
+	V = 4800
+ELSEIF ABL:C감각 == 7
+	V = 7000
+ELSEIF ABL:C감각 == 8
+	V = 11000
+ELSEIF ABL:C감각 == 9
+	V = 15000
+ELSE
+	V = 21000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:3%{ABL:C감각}LV +{V}
+S += V
+
+
+;ABL:V감각를 본다
+IF ABL:V감각 == 0
+	V = 0
+ELSEIF ABL:V감각 == 1
+	V = 800
+ELSEIF ABL:V감각 == 2
+	V = 1200
+ELSEIF ABL:V감각 == 3
+	V = 1700
+ELSEIF ABL:V감각 == 4
+	V = 2300
+ELSEIF ABL:V감각 == 5
+	V = 3000
+ELSEIF ABL:V감각 == 6
+	V = 4800
+ELSEIF ABL:V감각 == 7
+	V = 7000
+ELSEIF ABL:V감각 == 8
+	V = 11000
+ELSEIF ABL:V감각 == 9
+	V = 15000
+ELSE
+	V = 21000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:4%{ABL:V감각}LV +{V}
+S += V
+
+
+;ABL:A감각를 본다
+IF ABL:A감각 == 0
+	V = 0
+ELSEIF ABL:A감각 == 1
+	V = 800
+ELSEIF ABL:A감각 == 2
+	V = 1200
+ELSEIF ABL:A감각 == 3
+	V = 1700
+ELSEIF ABL:A감각 == 4
+	V = 2300
+ELSEIF ABL:A감각 == 5
+	V = 3000
+ELSEIF ABL:A감각 == 6
+	V = 4800
+ELSEIF ABL:A감각 == 7
+	V = 7000
+ELSEIF ABL:A감각 == 8
+	V = 11000
+ELSEIF ABL:A감각 == 9
+	V = 15000
+ELSE
+	V = 21000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:5%{ABL:A감각}LV +{V}
+S += V
+
+
+;ABL:B감각를 본다
+IF ABL:B감각 == 0
+	V = 0
+ELSEIF ABL:B감각 == 1
+	V = 800
+ELSEIF ABL:B감각 == 2
+	V = 1200
+ELSEIF ABL:B감각 == 3
+	V = 1700
+ELSEIF ABL:B감각 == 4
+	V = 2300
+ELSEIF ABL:B감각 == 5
+	V = 3000
+ELSEIF ABL:B감각 == 6
+	V = 4800
+ELSEIF ABL:B감각 == 7
+	V = 7000
+ELSEIF ABL:B감각 == 8
+	V = 11000
+ELSEIF ABL:B감각 == 9
+	V = 15000
+ELSE
+	V = 21000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:6%{ABL:B감각}LV +{V}
+S += V
+
+
+;ABL:봉사정신를 본다
+IF ABL:봉사정신 == 0
+	V = 0
+ELSEIF ABL:봉사정신 == 1
+	V = 1200
+ELSEIF ABL:봉사정신 == 2
+	V = 1800
+ELSEIF ABL:봉사정신 == 3
+	V = 2500
+ELSEIF ABL:봉사정신 == 4
+	V = 3300
+ELSEIF ABL:봉사정신 == 5
+	V = 4200
+ELSEIF ABL:봉사정신 == 6
+	V = 6200
+ELSEIF ABL:봉사정신 == 7
+	V = 9000
+ELSEIF ABL:봉사정신 == 8
+	V = 13000
+ELSEIF ABL:봉사정신 == 9
+	V = 18000
+ELSE
+	V = 25000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:7%{ABL:봉사정신}LV +{V}
+S += V
+
+
+;ABL:노출벽를 본다
+IF ABL:노출벽 == 0
+	V = 0
+ELSEIF ABL:노출벽 == 1
+	V = 800
+ELSEIF ABL:노출벽 == 2
+	V = 1200
+ELSEIF ABL:노출벽 == 3
+	V = 1700
+ELSEIF ABL:노출벽 == 4
+	V = 2300
+ELSEIF ABL:노출벽 == 5
+	V = 3000
+ELSEIF ABL:노출벽 == 6
+	V = 4800
+ELSEIF ABL:노출벽 == 7
+	V = 7000
+ELSEIF ABL:노출벽 == 8
+	V = 11000
+ELSEIF ABL:노출벽 == 9
+	V = 15000
+ELSE
+	V = 21000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:8%{ABL:노출벽}LV +{V}
+S += V
+
+
+;ABL:마조끼를 본다
+IF ABL:마조끼 == 0
+	V = 0
+ELSEIF ABL:마조끼 == 1
+	V = 1000
+ELSEIF ABL:마조끼 == 2
+	V = 1500
+ELSEIF ABL:마조끼 == 3
+	V = 2100
+ELSEIF ABL:마조끼 == 4
+	V = 2800
+ELSEIF ABL:마조끼 == 5
+	V = 3600
+ELSEIF ABL:마조끼 == 6
+	V = 5500
+ELSEIF ABL:마조끼 == 7
+	V = 8000
+ELSEIF ABL:마조끼 == 8
+	V = 12000
+ELSEIF ABL:마조끼 == 9
+	V = 16000
+ELSE
+	V = 22000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:9%{ABL:마조끼}LV +{V}
+S += V
+
+
+;ABL:새드끼를 본다
+IF ABL:새드끼 == 0
+	V = 0
+ELSEIF ABL:새드끼 == 1
+	V = 800
+ELSEIF ABL:새드끼 == 2
+	V = 1200
+ELSEIF ABL:새드끼 == 3
+	V = 1700
+ELSEIF ABL:새드끼 == 4
+	V = 2300
+ELSEIF ABL:새드끼 == 5
+	V = 3000
+ELSEIF ABL:새드끼 == 6
+	V = 4800
+ELSEIF ABL:새드끼 == 7
+	V = 7000
+ELSEIF ABL:새드끼 == 8
+	V = 11000
+ELSEIF ABL:새드끼 == 9
+	V = 15000
+ELSE
+	V = 21000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:10%{ABL:새드끼}LV +{V}
+S += V
+
+
+;ABL:레즈끼를 본다
+IF ABL:레즈끼 == 0
+	V = 0
+ELSEIF ABL:레즈끼 == 1
+	V = 1000
+ELSEIF ABL:레즈끼 == 2
+	V = 1500
+ELSEIF ABL:레즈끼 == 3
+	V = 2100
+ELSEIF ABL:레즈끼 == 4
+	V = 2800
+ELSEIF ABL:레즈끼 == 5
+	V = 3600
+ELSEIF ABL:레즈끼 == 6
+	V = 5500
+ELSEIF ABL:레즈끼 == 7
+	V = 8000
+ELSEIF ABL:레즈끼 == 8
+	V = 12000
+ELSEIF ABL:레즈끼 == 9
+	V = 16000
+ELSE
+	V = 22000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:11%{ABL:레즈끼}LV +{V}
+S += V
+
+
+;ABL:요리기능를 본다
+IF ABL:요리기능 == 0
+	V = 0
+ELSEIF ABL:요리기능 == 1
+	V = 600
+ELSEIF ABL:요리기능 == 2
+	V = 1000
+ELSEIF ABL:요리기능 == 3
+	V = 1500
+ELSEIF ABL:요리기능 == 4
+	V = 2100
+ELSEIF ABL:요리기능 == 5
+	V = 2800
+ELSEIF ABL:요리기능 == 6
+	V = 4800
+ELSEIF ABL:요리기능 == 7
+	V = 7000
+ELSEIF ABL:요리기능 == 8
+	V = 11000
+ELSEIF ABL:요리기능 == 9
+	V = 15000
+ELSE
+	V = 21000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:12%{ABL:요리기능}LV +{V}
+S += V
+
+
+;ABL:촬영기능를 본다
+IF ABL:촬영기능 == 0
+	V = 0
+ELSEIF ABL:촬영기능 == 1
+	V = 600
+ELSEIF ABL:촬영기능 == 2
+	V = 1000
+ELSEIF ABL:촬영기능 == 3
+	V = 1500
+ELSEIF ABL:촬영기능 == 4
+	V = 2100
+ELSEIF ABL:촬영기능 == 5
+	V = 2800
+ELSEIF ABL:촬영기능 == 6
+	V = 4800
+ELSEIF ABL:촬영기능 == 7
+	V = 7000
+ELSEIF ABL:촬영기능 == 8
+	V = 11000
+ELSEIF ABL:촬영기능 == 9
+	V = 15000
+ELSE
+	V = 21000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:13%{ABL:촬영기능}LV +{V}
+S += V
+
+
+;ABL:가창기능를 본다
+IF ABL:가창기능 == 0
+	V = 0
+ELSEIF ABL:가창기능 == 1
+	V = 600
+ELSEIF ABL:가창기능 == 2
+	V = 1000
+ELSEIF ABL:가창기능 == 3
+	V = 1500
+ELSEIF ABL:가창기능 == 4
+	V = 2100
+ELSEIF ABL:가창기능 == 5
+	V = 2800
+ELSEIF ABL:가창기능 == 6
+	V = 4800
+ELSEIF ABL:가창기능 == 7
+	V = 7000
+ELSEIF ABL:가창기능 == 8
+	V = 11000
+ELSEIF ABL:가창기능 == 9
+	V = 15000
+ELSE
+	V = 21000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:14%{ABL:가창기능}LV +{V}
+S += V
+
+
+;ABL:자위중독를 본다
+IF ABL:자위중독 == 0
+	V = 0
+ELSEIF ABL:자위중독 == 1
+	V = 1500
+ELSEIF ABL:자위중독 == 2
+	V = 2200
+ELSEIF ABL:자위중독 == 3
+	V = 3000
+ELSEIF ABL:자위중독 == 4
+	V = 3900
+ELSEIF ABL:자위중독 == 5
+	V = 4900
+ELSEIF ABL:자위중독 == 6
+	V = 8000
+ELSEIF ABL:자위중독 == 7
+	V = 11000
+ELSEIF ABL:자위중독 == 8
+	V = 15000
+ELSEIF ABL:자위중독 == 9
+	V = 20000
+ELSE
+	V = 30000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:15%{ABL:자위중독}LV +{V}
+S += V
+
+
+;ABL:정액중독를 본다
+IF ABL:정액중독 == 0
+	V = 0
+ELSEIF ABL:정액중독 == 1
+	V = 1500
+ELSEIF ABL:정액중독 == 2
+	V = 2200
+ELSEIF ABL:정액중독 == 3
+	V = 3000
+ELSEIF ABL:정액중독 == 4
+	V = 3900
+ELSEIF ABL:정액중독 == 5
+	V = 4900
+ELSEIF ABL:정액중독 == 6
+	V = 8000
+ELSEIF ABL:정액중독 == 7
+	V = 11000
+ELSEIF ABL:정액중독 == 8
+	V = 15000
+ELSEIF ABL:정액중독 == 9
+	V = 20000
+ELSE
+	V = 30000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:16%{ABL:정액중독}LV +{V}
+S += V
+
+
+;ABL:레즈중독를 본다
+IF ABL:레즈중독 == 0
+	V = 0
+ELSEIF ABL:레즈중독 == 1
+	V = 1500
+ELSEIF ABL:레즈중독 == 2
+	V = 2200
+ELSEIF ABL:레즈중독 == 3
+	V = 3000
+ELSEIF ABL:레즈중독 == 4
+	V = 3900
+ELSEIF ABL:레즈중독 == 5
+	V = 4900
+ELSEIF ABL:레즈중독 == 6
+	V = 8000
+ELSEIF ABL:레즈중독 == 7
+	V = 11000
+ELSEIF ABL:레즈중독 == 8
+	V = 15000
+ELSEIF ABL:레즈중독 == 9
+	V = 20000
+ELSE
+	V = 30000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:17%{ABL:레즈중독}LV +{V}
+S += V
+
+
+;ABL:섹스중독를 본다
+IF ABL:섹스중독 == 0
+	V = 0
+ELSEIF ABL:섹스중독 == 1
+	V = 1500
+ELSEIF ABL:섹스중독 == 2
+	V = 2200
+ELSEIF ABL:섹스중독 == 3
+	V = 3000
+ELSEIF ABL:섹스중독 == 4
+	V = 3900
+ELSEIF ABL:섹스중독 == 5
+	V = 4900
+ELSEIF ABL:섹스중독 == 6
+	V = 8000
+ELSEIF ABL:섹스중독 == 7
+	V = 11000
+ELSEIF ABL:섹스중독 == 8
+	V = 15000
+ELSEIF ABL:섹스중독 == 9
+	V = 20000
+ELSE
+	V = 30000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:18%{ABL:섹스중독}LV +{V}
+S += V
+
+
+;ABL:착유중독를 본다
+IF ABL:착유중독 == 0
+	V = 0
+ELSEIF ABL:착유중독 == 1
+	V = 1500
+ELSEIF ABL:착유중독 == 2
+	V = 2200
+ELSEIF ABL:착유중독 == 3
+	V = 3000
+ELSEIF ABL:착유중독 == 4
+	V = 3900
+ELSEIF ABL:착유중독 == 5
+	V = 4900
+ELSEIF ABL:착유중독 == 6
+	V = 8000
+ELSEIF ABL:착유중독 == 7
+	V = 11000
+ELSEIF ABL:착유중독 == 8
+	V = 15000
+ELSEIF ABL:착유중독 == 9
+	V = 20000
+ELSE
+	V = 30000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:19%{ABL:착유중독}LV +{V}
+S += V
+
+
+;ABL:게이끼를 본다
+IF ABL:게이끼 == 0
+	V = 0
+ELSEIF ABL:게이끼 == 1
+	V = 1000
+ELSEIF ABL:게이끼 == 2
+	V = 1500
+ELSEIF ABL:게이끼 == 3
+	V = 2100
+ELSEIF ABL:게이끼 == 4
+	V = 2800
+ELSEIF ABL:게이끼 == 5
+	V = 3600
+ELSEIF ABL:게이끼 == 6
+	V = 5500
+ELSEIF ABL:게이끼 == 7
+	V = 8000
+ELSEIF ABL:게이끼 == 8
+	V = 12000
+ELSEIF ABL:게이끼 == 9
+	V = 16000
+ELSE
+	V = 22000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:20%{ABL:게이끼}LV +{V}
+S += V
+
+
+;ABL:게이중독를 본다
+IF ABL:게이중독 == 0
+	V = 0
+ELSEIF ABL:게이중독 == 1
+	V = 1500
+ELSEIF ABL:게이중독 == 2
+	V = 2200
+ELSEIF ABL:게이중독 == 3
+	V = 3000
+ELSEIF ABL:게이중독 == 4
+	V = 3900
+ELSEIF ABL:게이중독 == 5
+	V = 4900
+ELSEIF ABL:게이중독 == 6
+	V = 8000
+ELSEIF ABL:게이중독 == 7
+	V = 11000
+ELSEIF ABL:게이중독 == 8
+	V = 15000
+ELSEIF ABL:게이중독 == 9
+	V = 20000
+ELSE
+	V = 30000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:21%{ABL:게이중독}LV +{V}
+S += V
+
+
+;ABL:스캇중독를 본다
+IF ABL:스캇중독 == 0
+	V = 0
+ELSEIF ABL:스캇중독 == 1
+	V = 1500
+ELSEIF ABL:스캇중독 == 2
+	V = 2200
+ELSEIF ABL:스캇중독 == 3
+	V = 3000
+ELSEIF ABL:스캇중독 == 4
+	V = 3900
+ELSEIF ABL:스캇중독 == 5
+	V = 4900
+ELSEIF ABL:스캇중독 == 6
+	V = 8000
+ELSEIF ABL:스캇중독 == 7
+	V = 11000
+ELSEIF ABL:스캇중독 == 8
+	V = 15000
+ELSEIF ABL:스캇중독 == 9
+	V = 20000
+ELSE
+	V = 30000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:22%{ABL:스캇중독}LV +{V}
+S += V
+
+
+;소질에 의한 매각액수 보정치 계산
+V = 100
+FOR LOCAL, 0, 210
+	IF TALENT:LOCAL
+		C = 0
+		LOCAL:1 = 0
+		SELECTCASE LOCAL
+			;처녀, 예속
+			CASE 0, 8
+				C = 100
+				V += 100
+			;창부
+			CASE 7
+				C = 60
+				V += 60
+			;복종, 매력, 수수께끼의매력
+			CASE 5, 92, 94
+				C = 50
+				V += 50
+			;꿋꿋함, 마조
+			CASE 12, 84
+				C = 40
+				V += 40
+			;음란, 일선을넘지않음, 헌신적, 쾌감을부정, 음란구멍, 음란가슴, 섹스광, 새드
+			;맹신, C민감, V민감, A민감, B민감, 폭유, 불사신, 절륜
+			CASE 4, 27, 47, 63, 71, 75, 77, 78, 83, 86, 102, 104, 106, 108, 112, 147
+				SIF LOCAL == 102 && ABL:C감각 < 3 || LOCAL == 104 && ABL:V감각 < 3 || LOCAL == 106 && ABL:A감각 < 3 || LOCAL == 108 && ABL:B감각 < 3
+					CONTINUE
+				C = 30
+				V += 30
+			;재생처녀, 반항적, 프라이드높음, 건방짐, 츤데레, 자제심, 정조관념, 고통에약함
+			;악취민감, 자위광, 항문광, 소악마, 요호, 인기, 거유, 함몰유두, 회복빠름, 모유체질
+			CASE 1, 11, 15, 16, 18, 20, 30, 41, 62, 74, 76, 87, 91, 111, 120, 130, 145, 149
+				C = 20
+				V += 20
+				
+				;정조관념 또한항문광라면 보너스
+				IF LOCAL == 30 && TALENT:항문광 == 0
+					LOCAL:1 = 76
+					C = 30
+					V += 10
+					;처녀라면 더욱 보너스
+					IF TALENT:처녀
+						C = 40
+						V += 10
+						PRINTFORML %TALENTNAME:LOCAL%과 %TALENTNAME:(LOCAL:1)%과 %TALENTNAME:0% ＋ {C}%
+						CONTINUE
+					ENDIF
+				ENDIF
+			;호기심, 보수적, 눈에띄고싶음, 혀놀림, 해방, 부끄럼쟁이, 젖기쉬움, 습득빠름, 실금버릇
+			;자위하기쉬움, 즉각함락, 도착적, 골드핑거, 소인체형, 말자지, 극, 달마
+			CASE 23, 24, 28, 33, 35, 42, 50, 52, 57, 58, 60, 73, 80, 117, 142, 180, 204
+				C = 10
+				V += 10
+				
+				;소인체형 한편(거근or말자지or거유or폭유)이라면 보너스
+				IF LOCAL == 142 && (TALENT:거근 || TALENT:말자지 || TALENT:거유 || TALENT:폭유)
+					IF TALENT:거근
+						LOCAL:1 = 116
+					ELSEIF TALENT:말자지
+						LOCAL:1 = 117
+					ELSEIF TALENT:거유
+						LOCAL:1 = 111
+					ELSEIF TALENT:폭유
+						LOCAL:1 = 112
+					ENDIF
+					C = 20
+					V += 10
+				ENDIF
+			;임신 ※이하의 조건을 채우지 않는 경우는 가산도 감산도 하지 않습니다
+			CASE 153
+				;임신 한편(소인체형or작은체구)이라면 보너스
+				IF LOCAL == 153 && (TALENT:소인체형 || TALENT:작은체구)
+					IF TALENT:소인체형
+						LOCAL:1 = 142
+					ELSEIF TALENT:작은체구
+						LOCAL:1 = 100
+					ENDIF
+					C = 10
+					V += 10
+				ENDIF
+			;반음반양, 후타나리, 동물귀, 컨트보이, 쉬메일, 신기
+			CASE 137, 139, 143, 172, 173, 181
+				SIF LOCAL == 143 && TALENT:동물귀 >= 10
+					CONTINUE
+				C = 5
+				V += 5
+		ENDSELECT
+		IF LOCAL:1 && C
+			PRINTFORML %TALENTNAME:LOCAL%과 %TALENTNAME:(LOCAL:1)% ＋ {C}%
+		ELSEIF C
+			PRINTFORML %TALENTNAME:LOCAL% ＋ {C}%
+		ENDIF
+		C = 0
+		SELECTCASE LOCAL
+			;수치심없음, 젖기어려움, 습득느림, 남자혐오, 여자혐오, 절벽, 한다리결손
+			CASE 35, 43, 51, 82, 88, 110, 202
+				C = 10
+				V -= 10
+			;겁쟁이, 솔직함, 얌전함, 프라이드낮음, 멘헤라, 무관심, 감정부족, 정조무관심, 고통에강함
+			;독약내성, 악취둔감, 더러움무시, 빈유, 회복느림,
+			CASE 10, 13, 14, 17, 21, 22, 31, 38, 40, 56, 61, 64, 109, 131,
+				C = 20
+				V -= 20
+				
+				;빈유 한편(소인체형or작은체구)이라면 보너스
+				IF LOCAL == 109 && (TALENT:소인체형 || TALENT:작은체구)
+					IF TALENT:소인체형
+						LOCAL:1 = 142
+					ELSEIF TALENT:작은체구
+						LOCAL:1 = 100
+					ENDIF
+					C = 10
+					V += 10
+				ENDIF
+			;쾌감에솔직, C둔감, V둔감, A둔감, B둔감, 유아／유아퇴행, 한팔결손, 양다리결손
+			CASE 70, 101, 103, 105, 107, 150, 200, 203
+				SIF LOCAL == 101 && ABL:C감각 >= 4 || LOCAL == 103 && ABL:V감각 >= 4 || LOCAL == 105 && ABL:A감각 >= 4 || LOCAL == 107 && ABL:B감각 >= 4
+					CONTINUE
+				C = 30
+				V -= 30
+				
+				;유아／유아퇴행로소인체형가 아니면 보너스
+				IF LOCAL == 150 && TALENT:소인체형 == 0
+					LOCAL:1 = 142
+					C = 20
+					V += 10
+				ENDIF
+			;연모, 양팔결손
+			CASE 3, 201
+				C = 50
+				V -= 50
+			;친애
+			CASE 6
+				C = 80
+				V -= 80
+		ENDSELECT
+		IF LOCAL:1 && C
+			PRINTFORML %TALENTNAME:LOCAL%과 %TALENTNAME:(LOCAL:1)% － {C}%
+		ELSEIF C
+			PRINTFORML %TALENTNAME:LOCAL% － {C}%
+		ENDIF
+	ENDIF
+NEXT
+
+;원조수
+IF ISASSI:TARGET == 1
+	C = 100
+	V -= 100
+	PRINTFORML 원조수 －{C}%
+ENDIF
+
+;보정치가 0 이하의 경우는 1으로 한다
+SIF V <= 0
+	V = 1
+
+PRINTFORML 최종 배율 {V}%
+
+;보정치의 적용
+S *= V
+S /= 100
+
+;붕괴, 광기, 임신는 매각액을 꽤 낮게 한다(순종에 의해,80%까지 회복)
+IF TALENT:붕괴 || TALENT:광기 || TALENT:임신
+PRINTL 
+	IF TALENT:붕괴
+		S *= ABL:순종
+		TIMES S , 0.08
+		Z = ABL:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:9% ×{Z}%
+	ELSEIF TALENT:광기
+		S *= ABL:순종
+		TIMES S , 0.08
+		Z = ABL:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:141% ×{Z}%
+	ELSEIF TALENT:임신
+		S *= ABL:순종
+		TIMES S , 0.08
+		Z = ABL:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:153% ×{Z}%
+	ENDIF
+PRINTL 
+ENDIF
+
+
+;난이도 처리
+;EASY
+IF FLAG:4 == 1
+	PRINTFORML 난이도:EASY ×120%
+	TIMES S , 1.20
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES S , 1.00
+;HARD
+ELSEIF FLAG:4 == 3
+	PRINTFORML 난이도:HARD ×80%
+	TIMES S , 0.80
+ENDIF
+
+;매각 확인
+PRINTFORML %NAME:TARGET%는{S}고슈금로 팔릴 것 같습니다
+PRINTL 매각합니까?
+PRINTL [0] 네
+PRINTL [1] 아니오
+$INPUT_LOOPSALE
+INPUT
+IF RESULT == 0
+	;매각시의 이벤트입상
+	TFLAG:13 = 18
+	CALL KOJO_MESSAGE_EVENT
+	;매각액
+	IF S > 0
+		PRINTFORMW 결과, %NAME:TARGET%는{S}고슈금로 팔렸습니다
+		MONEY += S
+	ELSEIF S == 0
+		PRINTFORMW 결과, %NAME:TARGET%는 업자에게 거두어 졌습니다
+	ENDIF
+	
+	;조교자 변경용
+	CALL SELLOUT_MASTER_CHANGE
+
+	;매각후에피소드 등록 처리
+	CALL SET_AFTERWARDS
+
+	;매각후에피소드 표시
+	CALL SHOW_AFTERWARDS
+	
+
+	;대상이아이였던 경우 현재의아이의 수플래그─
+	IF NO:TARGET >= 890 && NO:TARGET <= 899
+		FLAG:33--
+		;손바탕으로 번호 덮어 쓰는 것의 다른아이가 있을지 어떨지 체크
+		LOCAL = 0
+		REPEAT CHARANUM
+			SIF COUNT != TARGET && NO:COUNT == NO:TARGET
+				LOCAL = COUNT
+		REND
+		;매각하는아이에 대한 궁합을 리셋트
+		IF !LOCAL
+			REPEAT CHARANUM
+				RELATION:COUNT:(NO:TARGET) = 0
+			REND
+		ENDIF
+	ENDIF
+	Z = TARGET
+	DELCHARA Z
+	TARGET = -1
+	ASSI = -1
+	IF T != -1
+		IF T > Z
+			TARGET = T-1
+		ELSE
+			TARGET = T
+		ENDIF
+	ENDIF
+	
+	IF A != -1
+		IF A > Z
+			ASSI = A-1
+		ELSE
+			ASSI = A
+		ENDIF
+	ENDIF
+
+	SIF Z == T
+		TARGET = -1
+	SIF Z == A
+		ASSI = -1
+
+ELSEIF RESULT == 1
+	TARGET = T
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOPSALE
+ENDIF
+
+
+;-------------------------------------------------
+;비디오의 중복 사용을 처리하기 위해서, 미리 가격의 가산을 실시해 둔다
+;-------------------------------------------------
+@PRICE_VIDEO
+
+P = 0
+
+REPEAT TFLAG:70
+	A = COUNT + 11
+	SELECTCASE FLAG:A
+		CASE 0, 1, 10, 11, 20, 30, 31, 40, 50, 51, 52, 70, 131, 220, 221, 223, 225, 226, 227, 228, 300 TO 306, 314, 315, 316, 318, 319, 400 TO 402, 526,
+			P += 100
+		CASE 12, 14, 18, 32, 42, 76, 81 TO 83, 152 TO 154, 222, 224, 240, 241, 243, 245, 403, 404, 407, 410 TO 412, 500 TO 502
+			P += 150
+		CASE 13, 15, 21 TO 24, 33 TO 36, 44, 53, 54
+			P += 200
+		CASE 17, 71 TO 75, 77, 80, 84 TO 87, 130, 134 TO 142, 144, 150, 242, 246, 244, 280, 282 TO 284, 314, 317, 320, 321, 503, 504, 528
+			P += 300
+		CASE 3, 8, 100 TO 105, 110 TO 115, 263, 264, 281, 285, 311, 313, 405, 406, 420 TO 422, 505, 506, 516
+			P += 400
+		CASE 4 TO 7, 16, 25, 44, 55, 56, 60 TO 62, 106, 116, 143, 145, 151, 155, 160, 161, 180 TO 185, 262, 265 TO 271, 286, 511, 512
+			P += 500
+		CASE 430, 431, 440, 441, 507 TO 510, 513 TO 525
+			P += 600
+		CASE 340 TO 360, 362 TO 364, 366, 367, 380, 382, 517, 518
+			P += 700
+		CASE 156, 162, 322, 361, 365, 368 TO 370, 381, 383, 390 TO 392, 527
+			P += 1000
+		CASEELSE
+			P += 10
+	ENDSELECT
+REND
+
+;처녀상실 신이 있으면 가산
+IF TFLAG:39
+	P += 5000
+	PRINTFORML 비디오에는%CALLNAME%의처녀상실 신이 기록되고 있다
+ENDIF
+
+O = 100
+;소질:처녀를 본다
+SIF TALENT:처녀
+	O += 20
+;소질:무관심를 본다
+SIF TALENT:무관심
+	O -= 30
+;소질:감정부족를 본다
+SIF TALENT:감정부족
+	O -= 30
+;소질:부끄럼쟁이를 본다
+SIF TALENT:부끄럼쟁이
+	O += 10
+;소질:작은 몸집 체계를 본다
+SIF TALENT:작은체구
+	O += 20
+;소질:절벽를 본다
+SIF TALENT:절벽
+	O -= 10
+;소질:거유를 본다
+SIF TALENT:거유
+	O += 20
+;소질:폭유를 본다
+SIF TALENT:폭유
+	O += 10
+;소질:함몰유두를 본다
+SIF TALENT:함몰유두
+	O += 10
+;소질:동물귀를 본다
+SIF TALENT:동물귀
+	O += 10
+;소질:인기를 본다
+SIF TALENT:인기
+	O += 20
+;소질:수수께끼의매력를 본다
+SIF TALENT:수수께끼의매력
+	O += 30
+;소질:매력를 본다
+SIF TALENT:매력
+	O += 20
+;소질:발정기를 본다
+SIF TALENT:발정기
+	O += 10
+;-----------------------------------------------------------
+
+;노예의피사경험를 본다
+SIF EXP:TARGET:피사경험 >= EXPLV:3
+	O += 10
+
+;촬영자를 본다
+;주인
+IF FLAG:22 == 1
+	;촬영기능를 본다
+	IF ABL:MASTER:촬영기능 >= 5
+		O += 100
+	ELSEIF ABL:MASTER:촬영기능 == 4
+		O += 50
+	ELSEIF ABL:MASTER:촬영기능 == 3
+		O += 20
+	ELSEIF ABL:MASTER:촬영기능 <= 1
+		O -= 20
+	ENDIF
+;조수
+ELSEIF FLAG:22 == 2
+	;촬영기능를 본다
+	IF ABL:ASSI:촬영기능 >= 5
+		O += 100
+	ELSEIF ABL:ASSI:촬영기능 == 4
+		O += 50
+	ELSEIF ABL:ASSI:촬영기능 == 3
+		O += 20
+	ELSEIF ABL:ASSI:촬영기능 <= 1
+		O -= 20
+	ENDIF
+ENDIF
+
+;배율 처리
+SIF O < 0
+	O = 0
+
+P *= O
+P /= 100
+
+;난이도 처리
+;EASY
+IF FLAG:4 == 1
+	TIMES P , 1.20
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES P , 1.00
+;HARD
+ELSEIF FLAG:4 == 3
+	TIMES P , 0.80
+ENDIF
+
+TFLAG:36 += P
+TFLAG:70 = 0
+
+
+;-------------------------------------------------
+;조교시에 녹화한 비디오의 매각
+;TODO 가격 설정 재고·상황에 의한 가격을 플러스 할 수 있을까(처녀개통시 따위)
+;-------------------------------------------------
+@SELL_VIDEO
+
+;촬영중인 채 매각까지 왔을 경우는 테이프의 수를 줄인다
+;테이프의 감수는 촬영후처리를 위해서(때문에), 한층 더 비디오의 가격 및 경험도 여기서 처리를 한다
+IF TEQUIP:비디오카메라
+	CALL PRICE_VIDEO
+ENDIF
+
+;녹화하고 있지 않으면 종료
+SIF TFLAG:36 == 0
+	RETURN 0
+
+
+PRINTFORML 녹화한 비디오는{TFLAG:36}고슈금정도의 값이 붙을 것 같다
+PRINTL 녹화한 비디오를 어떻게 하든가 선택해 주세요
+PRINTL [0] - 판다
+PRINTL [1] - 손바탕으로 남긴다
+DRAWLINE
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	PRINTFORML 조교시에 녹화한 비디오를 팔아,{TFLAG:36}고슈금손에 넣었습니다
+	MONEY += TFLAG:36
+	TFLAG:36 = 0
+	;이벤트입상 호출(비디오 매각시)
+	TFLAG:13 = 19
+	CALL KOJO_MESSAGE_EVENT
+ELSEIF RESULT == 1
+	PRINTFORML 조교시에 녹화한 비디오를손바탕으로 남겨 두었다
+	CFLAG:20 += 1
+	;이벤트입상 호출(비디오 보유시) 23은 아침밥으로 사용
+	TFLAG:13 = 24
+	CALL KOJO_MESSAGE_EVENT
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+DRAWLINE
+
+
+
+;-------------------------------------------------
+@PRICE_PICTURE
+;-------------------------------------------------
+A = 100
+B = 0
+C = 0
+
+;조교자의 ABL:촬영기능를 본다
+IF ABL:PLAYER:13 == 0
+	B = 10
+ELSEIF ABL:PLAYER:촬영기능 == 1
+	B = 100
+ELSEIF ABL:PLAYER:촬영기능 == 2
+	B = 150
+ELSEIF ABL:PLAYER:촬영기능 == 3
+	B = 250
+ELSEIF ABL:PLAYER:촬영기능 == 4
+	B = 300
+ELSE
+	B = 500
+ENDIF
+
+;입계
+;볼개그장착, 촉수구욕
+IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+	A += 20
+	C += 1
+ENDIF
+;A계
+;로터A삽입, 애널바이브장착, 애널비즈장착, 벌룬 장착
+IF TEQUIP:로터A삽입 || TEQUIP:애널바이브 || TEQUIP:애널비즈 || TEQUIP:확장벌룬
+	A += 10
+	C += 1
+ENDIF
+;C계
+;클리캡장착, 전동오나홀장착, 음핵클립
+IF TEQUIP:클리캡 || TEQUIP:전동오나홀 || TEQUIP:음핵클립
+	A += 10
+	C += 1
+ENDIF
+;B계
+;니플캡장착, 착유기, 유두클립
+IF TEQUIP:니틀캡 || TEQUIP:착유기 || TEQUIP:유두클립
+	A += 15
+	C += 1
+ENDIF
+;V계
+;바이브장착, 로터삽입
+IF TEQUIP:바이브 || TEQUIP:로터삽입
+	A += 15
+	C += 1
+ENDIF
+;긴박계
+;아이마스크장착
+IF TEQUIP:아이마스크
+	A += 20
+	C += 1
+ENDIF
+;밧줄로 긴박
+IF TEQUIP:밧줄
+	A += 25
+	C += 1
+ENDIF
+;약제계
+;미약, 이뇨제
+IF TEQUIP:미약 || TEQUIP:이뇨제
+	A += 5
+	C += 1
+ENDIF
+;장소계
+;야외플레이, 수치플레이중, 목욕탕플레이
+IF TEQUIP:야외플레이 || TEQUIP:수치플레이 || TEQUIP:목욕탕
+	A += 20
+	C += 1
+ENDIF
+;상황계
+;샤워, 비디오촬영
+IF TEQUIP:샤워 || TEQUIP:비디오카메라
+	A += 10
+	C += 1
+ENDIF
+;촉수조교
+IF TEQUIP:촉수
+	A += 5
+	C += 1
+ENDIF
+;착의계외
+;신혼부부플레이중
+IF TEQUIP:에이프런
+	A += 10
+	C += 1
+ENDIF
+;아무것도 장착하고 있지 않는 경우의 보너스
+SIF C == 0
+	A += 50
+
+;정액의 보정을 설정하기 위해(때문에) C를 리셋트
+C = 0
+;정액의 더러워지고(입, 손, 페니스, 바기나, 애널의 순서)
+SIF STAIN:PLAYER:입 & 4
+	C += 1
+SIF STAIN:PLAYER:손 & 4
+	C += 1
+SIF STAIN:PLAYER:페니스 & 4
+	C += 1
+SIF STAIN:PLAYER:바기나 & 4
+	C += 1
+SIF STAIN:PLAYER:애널 & 4
+	C += 1
+;정액의 더러움이 없는 경우의 보너스
+SIF C == 0
+	A += 30
+
+
+;소질:무관심를 본다
+SIF TALENT:무관심
+	A -= 30
+;소질:감정부족를 본다
+SIF TALENT:감정부족
+	A -= 30
+;소질:부끄럼쟁이를 본다
+SIF TALENT:부끄럼쟁이
+	A += 10
+;소질:작은 몸집 체계를 본다
+SIF TALENT:작은체구
+	A += 20
+;소질:절벽를 본다
+SIF TALENT:절벽
+	A -= 10
+;소질:거유를 본다
+SIF TALENT:거유
+	A += 20
+;소질:폭유를 본다
+SIF TALENT:폭유
+	A += 10
+;소질:함몰유두를 본다
+SIF TALENT:함몰유두
+	A += 10
+;소질:동물귀를 본다
+SIF TALENT:동물귀
+	A += 10
+;소질:인기를 본다
+SIF TALENT:인기
+	A += 20
+;소질:수수께끼의매력를 본다
+SIF TALENT:수수께끼의매력
+	A += 30
+;소질:매력를 본다
+SIF TALENT:매력
+	A += 20
+;소질:발정기를 본다
+SIF TALENT:발정기
+	A += 10
+
+SIF A < 0
+	A = 0
+
+B *= A
+B /= 100
+
+;난이도 처리
+;EASY
+IF FLAG:4 == 1
+	TIMES B , 1.20
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES B , 1.00
+;HARD
+ELSEIF FLAG:4 == 3
+	TIMES B , 0.80
+ENDIF
+
+TFLAG:37 += B
+
+
+;-------------------------------------------------
+@SELL_PICTURE
+;-------------------------------------------------
+SIF TFLAG:73 == 0
+	RETURN 0
+SIF TFLAG:37 <= 0
+	RETURN 0
+
+PRINTFORMW 이번 찍은{TFLAG:73}매의 사진에는{TFLAG:37}의 매입가가 붙었다
+MONEY += TFLAG:37
+
+;플래그 리셋트. 이것으로 조교 메뉴 이외에도 재이용할 수 있도록(듯이)
+TFLAG:37 = 0
+TFLAG:73 = 0
+
+
+;-------------------------------------------------
+@SELL_MILK
+;-------------------------------------------------
+O = TFLAG:35 * 100
+IF O > 0
+	IF EXP:분유경험 <= EXPLV:0
+		O *= 1
+	ELSEIF EXP:분유경험 <= EXPLV:1
+		O *= 2
+	ELSEIF EXP:분유경험 <= EXPLV:2
+		O *= 3
+	ELSEIF EXP:분유경험 <= EXPLV:3
+		O *= 4
+	ELSEIF EXP:분유경험 <= EXPLV:4
+		O *= 5
+	ELSE
+		O *= 6
+	ENDIF
+
+	;난이도 처리
+	;EASY
+	IF FLAG:4 == 1
+		TIMES O , 1.20
+	;NORMAL
+	ELSEIF FLAG:4 == 2
+		TIMES O , 1.00
+	;HARD
+	ELSEIF FLAG:4 == 3
+		TIMES O , 0.80
+	ENDIF
+
+	PRINTFORML 착유기를 사용해%CALLNAME%로부터모유를 짜냈다
+	PRINTFORMW %CALLNAME%의모유에는{O}의 매입가가 붙었다
+	MONEY += O
+	PRINTFORMW 소지 코우슈우금 {O}증가
+ENDIF
+

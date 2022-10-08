@@ -1,0 +1,127 @@
+﻿;-------------------------------------------------
+;발을핥는다
+;주인마조계 커맨드
+;-------------------------------------------------
+@COM282
+
+IF TEQUIP:신발
+	PRINTL 신발를 빤다
+	STR:0 = 신발를 빤다
+ELSE
+	PRINTL 발을핥는다
+	STR:0 = 발을핥는다
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;사정게이지 체크(주인)
+;-------------------------------------------------
+B = 50
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;재장전 처리중은사정게이지는 20분의 1에
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 0
+LOSEBASE:기력 += 30
+
+SOURCE:욕정 =20
+SOURCE:노출 += 150
+SOURCE:불결 += 300
+SOURCE:일탈 += 100
+SOURCE:반발 += 100
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 200
+;신발를 신고 있으면불결·일탈소스 추가
+IF TEQUIP:신발 > 0
+	SOURCE:불결 += 100
+	SOURCE:일탈 += 100
+ENDIF
+;새드끼를 본다
+IF ABL:	10 == 0
+	TIMES SOURCE:불결, 1.00
+ELSEIF ABL:새드끼 == 1
+	TIMES SOURCE:불결, 0.95
+	SOURCE:욕정 += 30
+ELSEIF ABL:새드끼 == 2
+	TIMES SOURCE:불결, 0.80
+	SOURCE:욕정 += 50
+ELSEIF ABL:새드끼 == 3
+	TIMES SOURCE:불결, 0.75
+	SOURCE:욕정 += 80
+ELSEIF ABL:새드끼 == 4
+	TIMES SOURCE:불결, 0.60
+	SOURCE:욕정 += 100
+ELSEIF ABL:새드끼 == 5
+	TIMES SOURCE:불결, 0.50
+	SOURCE:욕정 += 150
+ELSEIF ABL:새드끼 == 6
+	TIMES SOURCE:불결, 0.45
+	SOURCE:욕정 += 200
+ELSEIF ABL:새드끼 == 7
+	TIMES SOURCE:불결, 0.40
+	SOURCE:욕정 += 250
+ELSEIF ABL:새드끼 == 8
+	TIMES SOURCE:불결, 0.35
+	SOURCE:욕정 += 300
+ELSEIF ABL:새드끼 == 9
+	TIMES SOURCE:불결, 0.30
+	SOURCE:욕정 += 350
+ELSEIF ABL:새드끼 >= 10
+	TIMES SOURCE:불결, 0.20
+	SOURCE:욕정 += 400
+ENDIF
+
+;-------------------------------------------------
+;더러움의 처리
+;-------------------------------------------------
+CALL COM_STAIN
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+;게이경험라든지 가산
+CALL COM_EXP(4)
+
+;의존도 벡터
+TFLAG:33 = 1
+
+;의존도 보정치(주인 또한연모, 친애로 2. 복종, 예속로 3)
+IF (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF (TALENT:복종 ||TALENT:예속) && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+A = 0
+;새드소유는가학쾌락경험도 넣는다
+IF TALENT:새드
+	A += 2
+	;신발 신고 있다면 한층 더 들어갈 수 있다
+	SIF TEQUIP:신발
+		A += 3
+	;그것이 핀 힐이라면 한층 더 들어갈 수 있다
+	SIF TEQUIP:신발 == 4
+		A += 1
+	PRINTFORML %EXPNAME:32%+{A}
+	EXP:가학쾌락경험 += A
+ENDIF
+
+RETURN 1
+

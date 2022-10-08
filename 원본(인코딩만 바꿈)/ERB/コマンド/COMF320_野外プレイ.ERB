@@ -1,0 +1,787 @@
+﻿;-------------------------------------------------
+;野外プレイ
+;シチュエーション別コマンド
+;-------------------------------------------------
+@COM320
+
+PRINTL 野外プレイ
+STR:0 = 野外プレイ
+CALL KOJO_MESSAGE_COM
+
+;着脱の処理　終了時はソース、経験の加算は行わない
+;移動時に便存在をクリア
+IF TEQUIP:野外プレイ == 1
+	TEQUIP:野外プレイ = 0
+	
+	;ギャラリーと状況をリセット
+	TFLAG:500 = 0
+	TFLAG:151 = 0
+	
+	RETURN 1
+ELSE
+	TEQUIP:野外プレイ = 1
+ENDIF
+
+;移動時に尿・便存在をクリア
+TFLAG:66 = 0
+TFLAG:57 = 0
+
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 10
+LOSEBASE:気力 += 100
+
+SOURCE:恐れ += 800
+SOURCE:露出 += 1300
+SOURCE:逸脱 += 300
+SOURCE:反発 += 600
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 100
+
+;苦痛を伴わないマゾっ気及びマゾの処理は先にしておく
+;マゾっ気を見る
+IF ABL:マゾっ気 == 0
+	TIMES SOURCE:露出 , 0.80
+	SOURCE:液体 += 0
+	SOURCE:欲情 += 0
+ELSEIF ABL:マゾっ気 == 1
+	TIMES SOURCE:露出 , 1.00
+	SOURCE:液体 += 20
+	SOURCE:欲情 += 30
+ELSEIF ABL:マゾっ気 == 2
+	TIMES SOURCE:露出 , 1.20
+	SOURCE:液体 += 40
+	SOURCE:欲情 += 70
+ELSEIF ABL:マゾっ気 == 3
+	TIMES SOURCE:露出 , 1.40
+	SOURCE:液体 += 70
+	SOURCE:欲情 += 120
+ELSEIF ABL:マゾっ気 == 4
+	TIMES SOURCE:露出 , 1.50
+	SOURCE:液体 += 110
+	SOURCE:欲情 += 180
+ELSEIF ABL:マゾっ気 == 5
+	TIMES SOURCE:露出 , 1.70
+	SOURCE:液体 += 150
+	SOURCE:欲情 += 250
+ELSEIF ABL:マゾっ気 == 6
+	TIMES SOURCE:露出 , 1.90
+	SOURCE:液体 += 200
+	SOURCE:欲情 += 300
+ELSEIF ABL:マゾっ気 == 7
+	TIMES SOURCE:露出 , 2.10
+	SOURCE:液体 += 250
+	SOURCE:欲情 += 350
+ELSEIF ABL:マゾっ気 == 8
+	TIMES SOURCE:露出 , 2.30
+	SOURCE:液体 += 300
+	SOURCE:欲情 += 400
+ELSEIF ABL:マゾっ気 == 9
+	TIMES SOURCE:露出 , 2.50
+	SOURCE:液体 += 350
+	SOURCE:欲情 += 450
+ELSEIF ABL:マゾっ気 >= 10
+	TIMES SOURCE:露出 , 3.00
+	SOURCE:液体 += 500
+	SOURCE:欲情 += 500
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;依存度ベクトル
+TFLAG:33 = 3
+
+
+RETURN 1
+
+
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM320
+;野外プレイ
+
+PRINTL ＜野外プレイ中＞
+SIF TEQUIP:野外プレイ
+	CALL OUTDOOR_SITUATION_CHANGE
+
+LOSEBASE:体力 += 0
+LOSEBASE:気力 += 50
+
+SOURCE:恐れ += 1000
+SOURCE:逸脱 += 1000
+SOURCE:反発 += 1000
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 50
+
+;苦痛を伴わないマゾっ気及びマゾの処理は先にしておく
+;マゾっ気を見る
+A = 2000
+IF ABL:マゾっ気 == 0
+	TIMES A , 0.80
+	SOURCE:液体 += 0
+	SOURCE:欲情 += 0
+ELSEIF ABL:マゾっ気 == 1
+	TIMES A , 1.00
+	SOURCE:液体 += 20
+	SOURCE:欲情 += 30
+ELSEIF ABL:マゾっ気 == 2
+	TIMES A , 1.20
+	SOURCE:液体 += 40
+	SOURCE:欲情 += 70
+ELSEIF ABL:マゾっ気 == 3
+	TIMES A , 1.40
+	SOURCE:液体 += 70
+	SOURCE:欲情 += 120
+ELSEIF ABL:マゾっ気 == 4
+	TIMES A , 1.50
+	SOURCE:液体 += 110
+	SOURCE:欲情 += 180
+ELSEIF ABL:マゾっ気 == 5
+	TIMES A , 1.70
+	SOURCE:液体 += 150
+	SOURCE:欲情 += 250
+ELSEIF ABL:マゾっ気 == 6
+	TIMES A , 1.90
+	SOURCE:液体 += 200
+	SOURCE:欲情 += 300
+ELSEIF ABL:マゾっ気 == 7
+	TIMES A , 2.10
+	SOURCE:液体 += 250
+	SOURCE:欲情 += 350
+ELSEIF ABL:マゾっ気 == 8
+	TIMES A , 2.30
+	SOURCE:液体 += 300
+	SOURCE:欲情 += 400
+ELSEIF ABL:マゾっ気 == 9
+	TIMES A , 2.50
+	SOURCE:液体 += 350
+	SOURCE:欲情 += 450
+ELSEIF ABL:マゾっ気 >= 10
+	TIMES A , 3.00
+	SOURCE:液体 += 500
+	SOURCE:欲情 += 500
+ENDIF
+SOURCE:露出 += A
+
+;依存度ベクトルを強制的に変更
+SIF TFLAG:33 == 1 || TFLAG:33 == 2
+	TFLAG:33 = 3
+
+;依存度補正値(服従で1、隷属で2　強制変更なのでリセット）
+IF TALENT:服従 && ASSIPLAY == 0
+	TFLAG:30 = 1
+ELSEIF TALENT:隷属 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ENDIF
+
+
+RETURN 1
+
+;-------------------------------------------------
+;野外イベント
+;eratohoYMより移植
+;現在の状況　TFLAG:151 = 1:誰もいない　4:集団視姦モード　5:輪姦ＯＫ
+;-------------------------------------------------
+@OUTDOOR_SITUATION_CHANGE
+
+;近くにいる人間を検索
+SIF TFLAG:500 == 0
+	CALL OUTDOOR_GALLERY_CHECK
+
+;確率の調整だけ先にしちゃう。
+A = 0
+
+SIF ABL:露出癖
+	A += ABL:露出癖
+SIF TIME != 0
+	A += 5
+
+;犬
+IF TFLAG:500 == 1
+	A += 1
+;子供（昼）
+ELSEIF TFLAG:500 == 2
+	A += 1
+;酔っ払い（夜）
+ELSEIF TFLAG:500 == 3
+	A += 5
+;カップル
+ELSEIF TFLAG:500 == 4
+	A += 3
+;にぎやかな人
+ELSEIF TFLAG:500 == 5
+	A += 5
+;普通の人
+ELSEIF TFLAG:500 == 6
+	A += 3
+ENDIF
+
+SIF A < 1
+	A = 1
+
+;野外調教本日１回目、もしくは状況リセット後
+;誰もいない。「人を呼ぶ」か、ランダムで誰かが近づいてくる。
+IF TFLAG:151 == 0
+	K:1 = RAND:11
+	;輪姦直後は表示しない
+	IF SELECTCOM == 322
+	;状況悪化
+	ELSEIF (SELECTCOM == 321 || K:1 < RAND:A) && SELECTCOM != 320
+		;犬
+		IF TFLAG:500 == 1
+			PRINTFORML 何かの気配に、%CALLNAME:PLAYER%は足を止めた
+		ELSE
+			PRINTFORML 人の気配に、%CALLNAME:PLAYER%は足を止めた
+		ENDIF
+		
+		PRINTFORM %CALLNAME%
+		IF ABL:露出癖 >= 6
+			PRINTFORMW は期待に満ちた視線を、音のする方へ向けている
+		ELSEIF ABL:露出癖 >= 4
+			PRINTFORMW の瞳は、期待と恥ずかしさで潤んでいる
+		ELSE
+			PRINTFORMW は恐怖と恥ずかしさのあまり、思わず体を硬直させた
+		ENDIF
+		
+		;犬
+		IF TFLAG:500 == 1
+			PRINTFORML ……周囲の犬がこちらを見ているような気がする…
+		;子供（昼）
+		ELSEIF TFLAG:500 == 2
+			PRINTFORML 子供のはしゃぎ声と、軽やかな足音が聞こえてくる…
+		;酔っ払い（夜）
+		ELSEIF TFLAG:500 == 3
+			PRINTFORML 酒の入った人間の何か言う声と、足音が聞こえてくる…
+		;カップル
+		ELSEIF TFLAG:500 == 4
+			PRINTFORML カップルが愛を囁き合う甘い声と、足音が聞こえてくる…
+		;にぎやかな人
+		ELSEIF TFLAG:500 == 5
+			PRINTFORML にぎやかな笑い声と、足音が聞こえてくる…
+		;普通の人
+		ELSEIF TFLAG:500 == 6
+			PRINTFORML 誰かの話し声と、足音が聞こえてくる…
+		ENDIF
+		TFLAG:151 = 1
+	ELSE
+		PRINTFORML 今のところ、周囲に人の気配は無い
+		PRINTFORM %CALLNAME%は
+		IF ABL:露出癖 >= 3
+			PRINTFORMW なんだか少しつまらなさそうだ…
+		ELSE
+			PRINTFORMW いつ誰に見つかるか、気が気でなさそうにしている…
+		ENDIF
+	ENDIF
+;誰かが近くにいる状態。「人を呼ぶ」かランダムで、発見される、もしくは状況が戻る。
+ELSEIF TFLAG:151 == 1
+	K:1 = RAND:11
+	;状況悪化
+	IF SELECTCOM == 321 || K:1 <= RAND:A
+		;犬
+		IF TFLAG:500 == 1
+			PRINTFORM ふと気づけば、周囲の犬達は明確に
+		ELSE
+			PRINTFORM ふと気づけば、誰かが
+		ENDIF
+		PRINTFORMW %CALLNAME%の事を見つめている
+		PRINTFORM %CALLNAME%は
+		IF ABL:露出癖 >= 6
+			PRINTFORML 挑発的な視線をそちらに送った…
+		ELSEIF ABL:露出癖 >= 4
+			PRINTFORML 思わず、期待に満ちた視線をそちらへ送った…
+		ELSE
+			PRINTFORML 思わず視線をそらした…
+		ENDIF
+		TFLAG:151 = 2
+	;状況回復
+	ELSEIF K:1 >= 7
+		PRINTFORMW しばらくすると、周囲はまた静かになった
+		PRINTFORM %CALLNAME%は
+		IF ABL:露出癖 >= 6
+			PRINTFORML 期待が外れてがっかりしている…
+		ELSEIF ABL:露出癖 >= 4
+			PRINTFORML 少し残念そうだ…
+		ELSE
+			PRINTFORML 少し落ち着いたものの、まだ緊張は解けていないようだ…
+		ENDIF
+		TFLAG:151 = 0
+		;ギャラリーをリセット
+		TFLAG:500 = 0
+	;現状維持
+	ELSE
+		;犬
+		IF TFLAG:500 == 1
+			PRINTFORMW 相変わらず、周囲には犬がうろついている
+			PRINTFORML ……心なしか数が増えているような……？
+		ELSE
+			PRINTFORMW 話し声と足音は、徐々に近づいて来ているようだ
+		ENDIF
+		
+		IF TFLAG:500 == 1
+		ELSE
+			PRINTFORM %CALLNAME%
+			IF ABL:露出癖 >= 6
+				IF PENIS(TARGET)
+					;射精ゲージ8000以上
+					IF BASE:射精 >= 8000
+						PRINTFORM はすでにペニスをガチガチに勃起させ、
+					;射精ゲージ2000以上8000未満
+					ELSEIF BASE:射精 >= 2000
+						PRINTFORM すでにペニスを硬くして
+					;射精ゲージ2000未満
+					ELSE
+						PRINTFORM は緩くペニスを勃ちあがらせ、
+					ENDIF
+					PRINTFORML 気配が近づいてくるのを待っている…
+				ELSE
+					IF PALAM:潤滑 >= PALAMLV:4
+						PRINTFORML は、興奮に股間からだらだらと愛液を滴らせている…
+					ELSEIF PALAM:潤滑 >= PALAMLV:2
+						PRINTFORML は期待に女陰を湿らせている…
+					ELSE
+						PRINTFORML の瞳は、期待と恥ずかしさで潤んでいる…
+					ENDIF
+				ENDIF
+			ELSEIF ABL:露出癖 >= 4
+				PRINTFORML の瞳は、期待と恥ずかしさで潤んでいる…
+			ELSE
+				PRINTFORML の顔は、恥ずかしさのあまり真っ赤になっている…
+			ENDIF
+		ENDIF
+		TFLAG:151 = 1
+	ENDIF
+;発見される。ランダムで視姦モードor発見者が逃亡する。
+ELSEIF TFLAG:151 == 2
+	K:1 = RAND:11
+	;状況悪化
+	IF SELECTCOM == 321 || K:1 <= RAND:A
+		IF TFLAG:500 == 1
+			PRINTFORMW どうやら、周囲の%OUTDOOR_GALLERY_NAME()%は%CALLNAME%に興味を惹かれたようだ
+			PRINTFORMW 遠巻きにだが、%CALLNAME%の痴態を食い入るように見つめる視線を感じる
+		ELSE
+			PRINTFORMW %CALLNAME%を発見したのは、%OUTDOOR_GALLERY_NAME()%のようだ
+			PRINTFORMW 姿こそ見えないが、%CALLNAME%の痴態を食い入るように見つめる視線を感じる
+		ENDIF
+		
+		PRINTFORM %CALLNAME%は
+		IF ABL:露出癖 >= 6
+			PRINTFORML とても嬉しそうに笑った…
+		ELSEIF ABL:露出癖 >= 4
+			PRINTFORML 期待に頬を緩ませている…
+		ELSE
+			PRINTFORML 今にも泣き出しそうだ…
+		ENDIF
+		TFLAG:151 = 3
+	;現状維持
+	ELSE
+		IF TFLAG:500 == 1
+			PRINTFORML 周囲の犬達はこちらの視線に気づくと、
+			PRINTFORMW 興味なさげな欠伸を返して、何処かへと去って行ってしまった…
+		ELSE
+			PRINTFORML 発見した人間は、%CALLNAME%達の姿と行為を見ると、
+			PRINTFORMW 素っ頓狂な声を上げて逃げ出してしまった…
+		ENDIF
+		;ギャラリーをリセット
+		TFLAG:500 = 0
+		TFLAG:151 = 0
+	ENDIF
+;集団視姦モード。ここでは状況は変わらない
+ELSEIF TFLAG:151 == 3
+	;犬
+	IF TFLAG:500 == 1
+		PRINTFORM %STR:81%はこちらに近寄ってきて、
+	ELSE
+		PRINTFORM ようやく姿を見せた%STR:81%は
+	ENDIF
+	;犬
+	IF TFLAG:500 == 1
+		PRINTFORMW 荒い息を吐きながら、%CALLNAME%を食い入るように見つめている…
+	;子供
+	ELSEIF TFLAG:500 == 2
+		SELECTCASE RAND:6
+			CASE 0
+				PRINTFORMW %CALLNAME%を熱っぽい目で視姦している…
+			CASE 1
+				PRINTFORMW 両手で顔を覆って、指の隙間から%CALLNAME%の痴態を見つめている…
+			CASE 2
+				PRINTFORMW %CALLNAME%の痴態を携帯で撮りまくっている…
+				EXP:被写経験 += 2
+			CASE 3
+				PRINTFORMW %CALLNAME%を指差し、心ない言葉を飛ばしている…
+			CASE 4
+				PRINTFORMW こちらを指差し、%CALLNAME%の羞恥を煽るような言葉を囁き交わしている…
+			CASE 5
+				PRINTFORMW 食い入るように%CALLNAME%の痴態を見つめている…
+		ENDSELECT
+	;女がいればこっち
+	ELSEIF TFLAG:500 & 8
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORMW 食い入るように%CALLNAME%の痴態を見つめている…
+			CASE 1
+				PRINTFORMW 両手で顔を覆って、指の隙間から%CALLNAME%の痴態を見つめている…
+			CASE 2
+				PRINTFORMW %CALLNAME%を指差し、心ない言葉を飛ばしている…
+			CASE 3
+				PRINTFORMW %CALLNAME%の痴態を携帯で撮りまくっている…
+				EXP:被写経験 += 2
+			CASE 4
+				PRINTFORMW こちらを指差し、%CALLNAME%の羞恥を煽るような言葉を囁き交わしている…
+		ENDSELECT
+	;男
+	ELSEIF TFLAG:500 & 4
+		SELECTCASE RAND:6
+			CASE 0
+				PRINTFORMW 食い入るように%CALLNAME%の痴態を見つめている…
+			CASE 1
+				PRINTFORMW 羨ましそうに%CALLNAME:PLAYER%を見つめている…
+			CASE 2
+				PRINTFORMW %CALLNAME%を指差し、心ない言葉を飛ばしている…
+			CASE 3
+				PRINTFORMW %CALLNAME%を熱っぽい目で視姦している…
+			CASE 4
+				PRINTFORMW こちらを指差し、%CALLNAME%の羞恥を煽るような言葉を囁き交わしている…
+			CASE 5
+				PRINTFORMW 自分の股間を扱きながら、%CALLNAME%の痴態を見つめている…
+		ENDSELECT
+	;オカマ
+	ELSEIF TFLAG:500 & 16
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORMW 食い入るように%CALLNAME%の痴態を見つめている…
+			CASE 1
+				PRINTFORMW 羨ましそうに%CALLNAME:PLAYER%を見つめている…
+			CASE 2
+				PRINTFORMW こちらを指差し、%CALLNAME%の羞恥を煽るような言葉を囁き交わしている…
+			CASE 3
+				PRINTFORMW %CALLNAME%を熱っぽい目で視姦している…
+		ENDSELECT
+	ENDIF
+	
+	PRINTFORM %CALLNAME%
+	IF ABL:露出癖 >= 6
+		IF PALAM:欲情 >= PALAMLV:8
+			PRINTFORML はあまりにも感じすぎて、まともに現状を把握できないようだ…
+		ELSE
+			PRINTFORML は見られるのが嬉しいのか、それに手を振って応えている…
+		ENDIF
+	ELSEIF ABL:露出癖 >= 4
+		IF RAND:2 == 0
+			PRINTFORML が恥じらいの表情を見せると、周囲はさらに色めきたった…
+		ELSE
+			PRINTFORML は見られて感じているのか、さらに顔を紅潮させた…
+		ENDIF
+	ELSE
+		PRINTFORML は必死に恥ずかしさを堪え、顔を背けている…
+	ENDIF
+	TFLAG:151 = 4
+;集団視姦モード。コマンドが「人を呼ぶ」、もしくはランダム1/3で輪姦可能になる。
+;TFLAG:500　1獣　2子供　4男　8女　16オカマ
+ELSEIF TFLAG:151 == 4
+	;状況が変化
+	IF SELECTCOM == 321 || !RAND:3
+		PRINTFORMW 
+		PRINTL 
+		PRINTFORMW 興奮した%STR:81%は、今にも%CALLNAME%に襲い掛かりそうだ…
+		TFLAG:151 = 5
+	;上を抜けてきたとき、ランダムで視姦モード終了。
+	ELSEIF !RAND:5
+		PRINTFORMW 
+		PRINTL 
+		PRINTFORMW しばらくすると、満足したのか飽きたのか、%STR:81%は去っていった…
+		;状況とギャラリーをリセット
+		TFLAG:151 = 0
+		TFLAG:500 = 0
+	ELSE
+		PRINTFORM 集まった%STR:81%は
+		;犬
+		IF TFLAG:500 == 1
+			PRINTFORMW 荒い息を吐きながら、%CALLNAME%を食い入るように見つめている…
+		;子供
+		ELSEIF TFLAG:500 == 2
+			SELECTCASE RAND:6
+				CASE 0
+					PRINTFORMW %CALLNAME%を熱っぽい目で視姦している…
+				CASE 1
+					PRINTFORMW 両手で顔を覆って、指の隙間から%CALLNAME%の痴態を見つめている…
+				CASE 2
+					PRINTFORMW %CALLNAME%の痴態を携帯で撮りまくっている…
+					EXP:被写経験 += 2
+				CASE 3
+					PRINTFORMW %CALLNAME%を指差し、心ない言葉を飛ばしている…
+				CASE 4
+					PRINTFORMW こちらを指差し、%CALLNAME%の羞恥を煽るような言葉を囁き交わしている…
+				CASE 5
+					PRINTFORMW 食い入るように%CALLNAME%の痴態を見つめている…
+			ENDSELECT
+		;女がいればこっち
+		ELSEIF TFLAG:500 & 8
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 食い入るように%CALLNAME%の痴態を見つめている…
+				CASE 1
+					PRINTFORMW 両手で顔を覆って、指の隙間から%CALLNAME%の痴態を見つめている…
+				CASE 2
+					PRINTFORMW %CALLNAME%を指差し、心ない言葉を飛ばしている…
+				CASE 3
+					PRINTFORMW %CALLNAME%の痴態を携帯で撮りまくっている…
+					EXP:被写経験 += 2
+				CASE 4
+					PRINTFORMW こちらを指差し、%CALLNAME%の羞恥を煽るような言葉を囁き交わしている…
+			ENDSELECT
+		;男
+		ELSEIF TFLAG:500 & 4
+			SELECTCASE RAND:6
+				CASE 0
+					PRINTFORMW 食い入るように%CALLNAME%の痴態を見つめている…
+				CASE 1
+					PRINTFORMW 羨ましそうに%CALLNAME:PLAYER%を見つめている…
+				CASE 2
+					PRINTFORMW %CALLNAME%を指差し、心ない言葉を飛ばしている…
+				CASE 3
+					PRINTFORMW %CALLNAME%を熱っぽい目で視姦している…
+				CASE 4
+					PRINTFORMW こちらを指差し、%CALLNAME%の羞恥を煽るような言葉を囁き交わしている…
+				CASE 5
+					PRINTFORMW 自分の股間を扱きながら、%CALLNAME%の痴態を見つめている…
+			ENDSELECT
+		;オカマ
+		ELSEIF TFLAG:500 & 16
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW 食い入るように%CALLNAME%の痴態を見つめている…
+				CASE 1
+					PRINTFORMW 羨ましそうに%CALLNAME:PLAYER%を見つめている…
+				CASE 2
+					PRINTFORMW こちらを指差し、%CALLNAME%の羞恥を煽るような言葉を囁き交わしている…
+				CASE 3
+					PRINTFORMW %CALLNAME%を熱っぽい目で視姦している…
+			ENDSELECT
+		ENDIF
+	ENDIF
+;輪姦可能
+ELSEIF TFLAG:151 >= 5
+	PRINTFORMW 興奮した%STR:81%は、今にも%CALLNAME%に襲い掛かりそうだ…
+ENDIF
+RETURN 0
+
+
+;-------------------------------------------------
+;近くにいる人間を検索
+;時間×ランダムでギャラリー決定
+;一度決定した後はTFLAG:500で一時的に管理
+;-------------------------------------------------
+@OUTDOOR_GALLERY_CHECK
+;犬
+IF RAND:5 == 0
+	TFLAG:500 = 1
+;子供（昼）or酔っ払い（夜）
+ELSEIF RAND:4 == 0
+	IF TIME == 0
+		TFLAG:500 = 2
+	ELSE
+		TFLAG:500 = 3
+	ENDIF
+;カップル
+ELSEIF RAND:3 == 0
+	TFLAG:500 = 4
+;にぎやかな人
+ELSEIF RAND:2 == 0
+	TFLAG:500 = 5
+;普通の人
+ELSE
+	TFLAG:500 = 6
+ENDIF
+
+
+;-------------------------------------------------
+;ギャラリーの名前を決定。性別も一緒に判定。
+;形容詞も欲しいときはこれを使い、いらないときは&STR:81&で呼びだす。
+;-------------------------------------------------
+@OUTDOOR_GALLERY_NAME(ARG)
+#FUNCTIONS
+
+LOCALS = 
+;TFLAG:500　1獣　2子供　4男　8女　16オカマ
+
+;犬
+IF TFLAG:500 == 1
+	LOCALS = 犬達
+	STR:81 = 犬達
+	TFLAG:500 = 1
+;子供（昼）
+ELSEIF TFLAG:500 == 2
+	LOCALS = 子供達
+	STR:81 = 子供達
+	TFLAG:500 = 2
+;カップル
+ELSEIF TFLAG:500 == 4
+	TFLAG:500 = 0
+	SIF RAND:3 == 0
+		LOCALS = 年若い
+	LOCALS = %LOCALS%カップル
+	STR:81 = %LOCALS%
+	TFLAG:500 |= 4
+	TFLAG:500 |= 8
+;酔っ払い
+ELSEIF TFLAG:500 == 3
+	TFLAG:500 = 0
+	SELECTCASE RAND:5
+		;男女
+		CASE 0
+			LOCALS = 酔っ払った男女の集団
+			STR:81 = 若者達
+			TFLAG:500 |= 4
+			TFLAG:500 |= 8
+		;女性
+		CASE 1
+			LOCALS = 酔っ払った女性の集団
+			STR:81 = 女性達
+			TFLAG:500 |= 8
+		;男
+		CASEELSE
+		;オジサン
+		IF RAND:2 == 0
+			LOCALS = 酔っ払ったオジサン達
+		;男
+		ELSE
+			LOCALS = 酔っ払った男達
+		ENDIF
+		STR:81 = 酔っ払い達
+		TFLAG:500 |= 4
+	ENDSELECT
+;にぎやかな人
+ELSEIF TFLAG:500 == 5
+	TFLAG:500 = 0
+	SELECTCASE RAND:3
+		;女性
+		CASE 0
+			IF RAND:3 == 0
+				LOCALS = 派手な格好の女性達
+			ELSEIF RAND:2 == 0
+				LOCALS = 綺麗に化粧をした女性のグループ
+			ELSE
+				LOCALS = 年若い女性の集団
+			ENDIF
+			STR:81 = 女性達
+			TFLAG:500 |= 8
+		;オカマ
+		CASE 1
+			IF RAND:3 == 0
+				LOCALS = 派手な格好をした
+			ELSEIF RAND:2 == 0
+				LOCALS = 綺麗に化粧をした
+			ENDIF
+			IF RAND:3 == 0
+				LOCALS = %LOCALS%ゴツイ
+			ELSEIF RAND:2 == 0
+				LOCALS = %LOCALS%体格のいい
+			ENDIF
+			LOCALS = %LOCALS%…女性(？)の集団
+			STR:81 = 女性(？)達
+			TFLAG:500 |= 16
+		;男
+		CASE 2
+			SIF RAND:3 == 0
+				LOCALS = 派手な格好をした
+			SIF RAND:3 == 0
+				LOCALS = %LOCALS%若い
+			LOCALS = %LOCALS%男達の集団
+			STR:81 = 若者達
+			TFLAG:500 |= 4
+	ENDSELECT
+;普通の人（男限定）
+ELSEIF TFLAG:500 == 6
+	TFLAG:500 = 0
+	TFLAG:500 |= 4
+	
+	SELECTCASE RAND:11
+		CASE 0
+			LOCALS = 太った
+			IF RAND:2 == 0
+				LOCALS = %LOCALS%オジサン達
+				STR:81 = オジサン達
+			ELSE
+				LOCALS = %LOCALS%男達
+				STR:81 = 男達
+			ENDIF
+		CASE 2
+			LOCALS = 体格のいい
+			IF RAND:3 == 0
+				LOCALS = %LOCALS%オジサン達
+				STR:81 = オジサン達
+			ELSEIF RAND:2 == 0
+				LOCALS = %LOCALS%若者達
+				STR:81 = 若者達
+			ELSE
+				LOCALS = %LOCALS%男達
+				STR:81 = 男達
+			ENDIF
+		CASE 3
+			LOCALS = ゴツイ男達
+			STR:81 = 男達
+		CASE 4
+			LOCALS = 強面の
+			IF RAND:3 == 0
+				LOCALS = %LOCALS%オジサン達
+				STR:81 = オジサン達
+			ELSEIF RAND:2 == 0
+				LOCALS = %LOCALS%若者達
+				STR:81 = 若者達
+			ELSE
+				LOCALS = %LOCALS%男達
+				STR:81 = 男達
+			ENDIF
+		CASE 5
+			LOCALS = 浮浪者達
+			STR:81 = 浮浪者達
+		CASE 6
+			LOCALS = 疲れた感じの
+			IF RAND:3 == 0
+				LOCALS = %LOCALS%オジサン達
+				STR:81 = オジサン達
+			ELSEIF RAND:2 == 0
+				LOCALS = %LOCALS%若者達
+				STR:81 = 若者達
+			ELSE
+				LOCALS = %LOCALS%男達
+				STR:81 = 男達
+			ENDIF
+		CASE 7
+			LOCALS = 好色そうな男達
+			STR:81 = 男達
+		CASE 8
+			LOCALS = ハゲ頭のオジサン達
+			STR:81 = オジサン達
+		CASEELSE
+			IF RAND:2 == 0
+				LOCALS = 若い男達
+				STR:81 = 男達
+			ELSE
+				LOCALS = オジサン達
+				STR:81 = オジサン達
+			ENDIF
+	ENDSELECT
+ENDIF
+RETURNF LOCALS
+

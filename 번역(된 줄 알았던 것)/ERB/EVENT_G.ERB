@@ -1,0 +1,111 @@
+﻿;=============================================================================
+;체력·기력의 최대치 상승 처리
+;=============================================================================
+;조교 종료후 각각 2/5의 확률로체력·기력의 최대치가 상승. 이상경험의 값으로 상승하는 수치가 증가합니다
+;다만 증가하는 값은 각각＋40이 한도 한편, 성별(및처녀성)에 의해
+;체력, 기력 각각 있는 값을 넘으면 그 이상은 성장하지 않는 한계치 라는 것이 설정되어 있습니다.
+;또, 체력·기력를 너무 줄였을 경우는 상승하지 않게 조건을 바꾸었습니다.
+@EVENT_GROWTH
+A = MAXBASE:체력-BASE:체력
+B = MAXBASE:기력-BASE:기력
+C = RAND:4
+D = 1
+G = EXP:이상경험
+SIF G > 10
+	G = 10
+H = G*2
+
+;조교 대상의 성별, 처녀성에 의해 성장 한계가 변화(남자는 한계치가 꽤 높게 설정되어 있다)
+IF TALENT:남자
+	I = 9000
+	J = 5000
+ELSE
+	I = 5000
+	IF TALENT:처녀 && EXP:V경험 == 0 && ABL:V감각 == 0
+		J = 4000
+	ELSEIF TALENT:처녀 && EXP:V경험 == 0
+		J = 3500
+	ELSE
+		J = 3000
+	ENDIF
+ENDIF
+
+;체력가 큰 경우는기력가, 기력가 큰 경우는체력가 성장하는 확률이 상승
+IF C == 1 && MAXBASE:체력 > MAXBASE:기력 && RAND:3 == 0
+	C = 2
+ELSEIF C == 2 && MAXBASE:기력 > MAXBASE:체력 && RAND:3 == 0
+	C = 1
+ENDIF
+
+IF C <= 1 && A != 0 && BASE:체력 >= 300 && MAXBASE:체력 < I
+	SIF A > 0 && A <= 500
+		D = 250
+	SIF A > 500 && A <= 1000
+		D = 300
+	SIF A > 1000 && A <= 1500
+		D = 350
+	SIF A > 1500 && A <= 2000
+		D = 400
+	SIF A > 2000 && A <= 2500
+		D = 450
+	SIF A > 2500
+		D = 500
+	SIF BASE:체력 < 500
+		D = 750
+	IF MAXBASE:체력 < 1300
+		TIMES D , 0.40
+	ELSEIF MAXBASE:체력 < 1500
+		TIMES D , 0.60
+	ELSEIF MAXBASE:체력 < 2000
+		TIMES D , 0.80
+	ENDIF
+	E = (A/D)
+	SIF E > 20
+		E = 20
+	SIF !TALENT:연모 && !TALENT:친애 && !TALENT:예속
+		E /= 2
+	IF (E+H) > 0
+		MAXBASE:체력 += E+H
+		PRINTFORML 격렬한 조교에 의해%CALLNAME%는 참는 것의 쾌감을 알았다.
+		PRINTFORMW %CALLNAME%의체력의 최대치가{E+H}올랐습니다.
+	ENDIF
+ELSEIF C <= 1 && A != 0 && BASE:체력 >= 300 && MAXBASE:체력 >= I
+	C = 0
+ENDIF
+
+IF (C == 0 || C == 2) && B != 0 && BASE:기력 >= 100 && MAXBASE:기력 < J
+	SIF B > 0 && B <= 300
+		D = 200
+	SIF B > 300 && B <= 500
+		D = 250
+		SIF B > 500 && B <= 1000
+			D = 300
+	SIF B > 1000 && B <= 1500
+		D = 350
+	SIF B > 1500 && B <= 2000
+		D = 400
+	SIF B > 2000 && B <= 2500
+		D = 450
+	SIF B > 2500
+		D = 500
+	SIF BASE:기력 < 500
+		D = 750
+	IF MAXBASE:기력 < 800
+		TIMES D , 0.40
+	ELSEIF MAXBASE:기력 < 1000
+		TIMES D , 0.60
+	ELSEIF MAXBASE:기력 < 1200
+		TIMES D , 0.80
+	ENDIF
+	F = (B/D)
+	SIF F > 20
+		F = 20
+	SIF !TALENT:연모 && !TALENT:친애 && !TALENT:예속
+		F /= 2
+	IF (F+H) > 0
+		MAXBASE:기력 += F+H
+		PRINTFORML 격렬한 조교에 의해%CALLNAME%의 의지는 강해졌다.
+		PRINTFORMW %CALLNAME%의기력의 최대치가{F+H}올랐습니다.
+	ENDIF
+ENDIF
+

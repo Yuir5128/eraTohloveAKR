@@ -1,0 +1,651 @@
+﻿;----------------------------------------------------------------------
+;00범용 허덕여
+;----------------------------------------------------------------------
+;입가 막히고 있다(볼개그·촉수입학중 이외)
+;----------------------------------------------------------------------
+@PANT_VOICE_A_KX1
+;개별 범용천를 사용할 때는 아래의 행을 삭제해 주세요
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;고통가 있다
+	IF (D & 12582912) != 0
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	;임의 봉사계
+	ELSEIF (D & 16777216) != 0
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	;그 외
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+P = RAND:3
+	IF P == 0
+		PRINT 
+	ELSEIF P == 1
+		PRINT 
+	ELSE
+		PRINT 
+	ENDIF
+PRINTW」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;고통LV2
+;----------------------------------------------------------------------
+@PANT_VOICE_B_KX1
+;개별 범용천를 사용할 때는 아래의 행을 삭제해 주세요
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그나촉수입학중
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	;마조소유용
+	ELSEIF TALENT:84
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	;보통 인용
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+;합계
+P = RAND:3
+	;볼개그나촉수입학중
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ENDIF
+PRINTW」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;고통LV1
+;----------------------------------------------------------------------
+@PANT_VOICE_C_KX1
+;개별 범용천를 사용할 때는 아래의 행을 삭제해 주세요
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그나촉수입학중
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	;마조소유나마조기분 3이상 있어
+	ELSEIF TALENT:84 || ABL:9 > 2
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	;보통 사람
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+;합계
+P = RAND:3
+	;볼개그나촉수입학중
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	;마조소유나마조기분 있어
+	ELSEIF TALENT:84 || ABL:9 > 2
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	;보통 사람
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ENDIF
+PRINTW」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;쾌감 LV4
+;----------------------------------------------------------------------
+@PANT_VOICE_D_KX1
+;개별 범용천를 사용할 때는 아래의 행을 삭제해 주세요
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그나촉수입학중
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+;합계
+P = RAND:3
+	;볼개그나촉수입학중
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ENDIF
+PRINTW」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;쾌감 LV3
+;----------------------------------------------------------------------
+@PANT_VOICE_E_KX1
+;개별 범용천를 사용할 때는 아래의 행을 삭제해 주세요
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그나촉수입학중
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+;합계
+P = RAND:3
+	;볼개그나촉수입학중
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ENDIF
+PRINTW」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;쾌감 LV2
+;----------------------------------------------------------------------
+@PANT_VOICE_F_KX1
+;개별 범용천를 사용할 때는 아래의 행을 삭제해 주세요
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그나촉수입학중
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+;합계
+P = RAND:3
+	IF P == 0
+		PRINT 
+	ELSEIF P == 1
+		PRINT 
+	ELSEIF P == 2
+		PRINT 
+	ENDIF
+PRINTW」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;약쾌감
+;----------------------------------------------------------------------
+@PANT_VOICE_G_KX1
+;개별 범용천를 사용할 때는 아래의 행을 삭제해 주세요
+RETURN 0
+;B =반복 회수
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	IF P == 0
+		PRINT 
+	ELSEIF P == 1
+		PRINT 
+	ELSEIF P == 2
+		PRINT 
+	ELSEIF P == 3
+		PRINT 
+	ELSEIF P == 4
+		PRINT 
+	ELSEIF P == 5
+		PRINT 
+	ELSEIF P == 6
+		PRINT 
+	ELSEIF P == 7
+		PRINT 
+	ELSEIF P == 8
+		PRINT 
+	ELSEIF P == 9
+		PRINT 
+	ENDIF
+	P:1 = P
+REND
+;합계
+P = RAND:3
+	IF P == 0
+		PRINT 
+	ELSEIF P == 1
+		PRINT 
+	ELSEIF P == 2
+		PRINT 
+	ENDIF
+PRINTW」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+

@@ -1,0 +1,134 @@
+﻿;욕망의 가부
+@ISABLUP1
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:욕망 >= 10
+	RETURN 0
+ELSEIF ABL:욕망 >= 5 && TALENT:연모  == 0 && TALENT:친애 == 0 && TALENT:음란  == 0 && TALENT:창부  == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP1
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+;욕망
+@ABLUP1
+DRAWLINE
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:욕망 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:욕망 >= 5 && TALENT:연모  == 0 && TALENT:친애 == 0 && TALENT:음란  == 0 && TALENT:창부  == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP1
+
+;LV4로부터 5에 올릴 때는이상경험필요(소질:[쾌감에솔직][음란][창부]라면 무시할 수 있다)
+IF ABL:욕망 == 4 && !TALENT:쾌감에솔직 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+PRINTFORML %EXPNAME:50%있어, 한편
+;LV7로부터 8에 올릴 때는이상경험 3 이상 필요(소질:[쾌감에솔직][음란][창부]라면 무시할 수 있다)
+ELSEIF ABL:욕망 == 7 && TALENT:쾌감에솔직 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+PRINTFORML %EXPNAME:50%3이상, 한편
+ENDIF
+
+PRINTFORM [0] - %PALAMNAME:6%의 구슬×{A}……
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:욕망 += 1
+
+IF RESULT == 0
+	JUEL:욕정 -= A
+ENDIF
+
+PRINTFORMW %ABLNAME:1%의 레벨이{ABL:욕망}가 되었습니다
+
+CALL YOKUBO_UP_CHECK
+
+;욕망LvUP 판정
+@DECIDE_ABLUP1
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:욕망 == 0
+	A = 1
+ELSEIF ABL:욕망 == 1
+	A = 20
+ELSEIF ABL:욕망 == 2
+	A = 1000
+ELSEIF ABL:욕망 == 3
+	A = 8000
+ELSEIF ABL:욕망 == 4
+	A = 24000
+ELSEIF ABL:욕망 == 5
+	A = 30000
+ELSEIF ABL:욕망 == 6
+	A = 36000
+ELSEIF ABL:욕망 == 7
+	A = 45000
+ELSEIF ABL:욕망 == 8
+	A = 55000
+ELSEIF ABL:욕망 == 9
+	A = 70000
+ENDIF
+
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+ENDIF
+
+;LV4로부터 5에 올릴 때는이상경험필요(소질:[쾌감에솔직][음란][창부]라면 무시할 수 있다)
+IF ABL:욕망 == 4 && TALENT:쾌감에솔직 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	IF EXP:이상경험 == 0
+		;이상경험가 없다
+		I |= 2
+	ENDIF
+;LV7로부터 8에 올릴 때는이상경험 3 이상 필요(소질:[쾌감에솔직][음란][창부]라면 무시할 수 있다)
+ELSEIF ABL:욕망 == 7 && TALENT:쾌감에솔직 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	IF EXP:이상경험 < 3
+		;이상경험가 3 미만
+		I |= 2
+	ENDIF
+ENDIF
+
+;0(이)가 되었을 경우는 1으로 한다
+SIF A == 0
+	A = 1
+
+;욕정의 구슬로 올린다
+SIF JUEL:욕정 < A
+	I |= 1
+
+IF I == 0
+	Z = 1
+ENDIF
+RETURN 1
+

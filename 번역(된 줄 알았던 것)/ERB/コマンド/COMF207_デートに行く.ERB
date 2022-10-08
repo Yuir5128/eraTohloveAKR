@@ -1,0 +1,83 @@
+﻿;-------------------------------------------------
+;데이트간다
+;커뮤니케이션계 커맨드
+;-------------------------------------------------
+@COM207
+
+PRINTL 데이트간다
+STR:0 = 데이트간다
+
+;보통 데이트
+TFLAG:17 = 1
+
+;노출데이트는 2. 입위쪽으로 세울 수가 있다.
+;TFLAG:17 = 2
+
+CALL KOJO_MESSAGE_COM
+
+;가지 않았던 경우는 돌아온다
+SIF TFLAG:17 == 99
+	RETURN 0
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 200
+LOSEBASE:기력 += 50
+
+IF TFLAG:17 == 2
+	SOURCE:애정 += 200
+	SOURCE:성취감 += 300
+	SOURCE:순종 += 300
+	SOURCE:노출 += 600
+
+	;노출 낮으면 반대로 증가
+	SIF ABL:노출벽 < 2
+		CFLAG:TARGET:10 += 3
+ELSE
+	SOURCE:애정 += 200
+	SOURCE:성취감 += 300
+	SOURCE:순종 += 300
+	;스트레스 감소 처리
+	CFLAG:TARGET:10 -= 3
+	;연모계라면 한층 더 감소
+	SIF TALENT:연모 || TALENT:친애
+		CFLAG:TARGET:10 -= 5
+ENDIF
+
+SIF TALENT:친애 || TALENT:연모
+	TIMES SOURCE:애정, 1.50
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+IF TFLAG:17 == 2 && ABL:노출벽 >= 3
+	PRINTFORML %EXPNAME:23%＋3
+	EXP:애정경험 += 3
+ELSE
+	PRINTFORML %EXPNAME:23%＋3
+	EXP:애정경험 += 3
+ENDIF
+
+;이동시에 오줌·변존재를 클리어
+TFLAG:66 = 0
+TFLAG:57 = 0
+
+CALL COM_STAIN
+
+
+;의존도 벡터
+TFLAG:33 = 4
+
+;의존도 보정치(연모로 3, 친애로 5)
+IF TALENT:연모 && ASSIPLAY == 0
+	TFLAG:30 += 3
+ELSEIF TALENT:친애 && ASSIPLAY == 0
+	TFLAG:30 += 5
+ENDIF
+
+RETURN 1
+
+
+

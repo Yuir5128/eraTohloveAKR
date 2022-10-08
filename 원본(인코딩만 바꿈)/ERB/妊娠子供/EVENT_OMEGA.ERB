@@ -1,0 +1,45 @@
+﻿;オメガ関連のイベント（発情期　男体妊娠）
+;---------------------------------------------------------
+;使用フラグ
+;---------------------------------------------------------
+;CFLAG
+;700→発情期カウント
+		;1-15を繰り返し　0にはならない
+		;カウントが9以上のときランダムで発情期に入る
+		;カウントが12以上のときランダムで発情期が終わる
+		;カウントが15以上のとき確定で発情期が終わる
+
+;発情期と通常期（？）の日数をカウントする
+;１日が終わった…　ときにカウントを進める
+;ARG キャラ登録番号
+@ESTRUS_PERIOD_COUNT
+;現在の調教対象を退避
+LOCAL = TARGET
+REPEAT CHARANUM
+	;オメガを持っていないなら終了
+	SIF TALENT:COUNT:オメガ == 0
+		CONTINUE
+
+	CFLAG:COUNT:700 += 1
+	
+	;発情期終了
+	IF (CFLAG:COUNT:700 >= 12 && TALENT:COUNT:発情期 && RAND:2 == 0) || (CFLAG:COUNT:700 >= 15 && TALENT:COUNT:発情期)
+		TALENT:COUNT:発情期 = 0
+		CFLAG:COUNT:700 = 1
+		TARGET = COUNT
+		TFLAG:13 = 79
+		CALL KOJO_MESSAGE_EVENT
+	ENDIF
+	
+	;発情期開始
+	IF (CFLAG:COUNT:700 >= 9 && TALENT:COUNT:発情期 == 0) && RAND:2 == 0
+		TALENT:COUNT:発情期 = 1
+		TARGET = COUNT
+		TFLAG:13 = 79
+		CALL KOJO_MESSAGE_EVENT
+	ENDIF
+	
+REND
+
+TARGET = LOCAL
+

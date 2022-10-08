@@ -1,0 +1,245 @@
+﻿;처녀동정모드
+@VIRGIN_MODE(ARG)
+SIF !FLAG:155
+	RETURN 0
+SIF VAGINA(ARG)
+	TALENT:ARG:처녀 = 1
+TALENT:ARG:재생처녀 = 0
+SIF PENIS(ARG)
+	TALENT:ARG:동정 = 1
+TALENT:ARG:백버진 = 1
+
+ABL:ARG:V감각 = 0
+ABL:ARG:A감각 = 0
+EXP:ARG:V경험 = 0
+EXP:ARG:A경험 = 0
+EXP:ARG:성교경험 = 0
+EXP:ARG:질내사정경험 = 0
+EXP:ARG:V사정경험 = 0
+EXP:ARG:A사정경험 = 0
+EXP:ARG:V확장경험 = 0
+EXP:ARG:A확장경험 = 0
+EXP:ARG:출산경험 = 0
+
+
+;캐릭터 구입의 전제 조건
+;반환값이 1이라면 ARG의 캐릭터가 구입 가능
+@CHARA_BUY_PRE(ARG)
+#FUNCTION
+LOCAL = 1
+;극남사는 비표시
+;히게키리·히자마루의극
+SIF ARG == 111 || ARG == 115
+	LOCAL = 0
+
+;장 소네까지
+IF ARG >= 1 && ARG <= 106
+	;캐릭터 고유 번호가 짝수라면극
+	SIF ARG % 2 == 0
+		LOCAL = 0
+;오오쿠리카라로부터
+ELSEIF ARG >= 116
+	;캐릭터 고유 번호가 홀수라면극
+	SIF ARG % 2 == 1
+		LOCAL = 0
+ENDIF
+
+SIF FLAG:41
+	LOCAL = 1
+
+RETURNF LOCAL
+
+;＜~가 구입 가능하게 되었습니다＞
+@CHARA_BUY_PRE2(ARG)
+LOCALS = 
+LOCAL = 0
+
+IF EXISTCSV(ARG + 1, 0)
+	;히게키리 특
+	IF ARG == 107
+		IF CHARA_BUY_PRE(111)
+			;LOCALS = %CSVNAME(111, 0)%
+			LOCAL = 1
+		ENDIF
+	;히자마루 특
+	ELSEIF ARG == 112
+		IF CHARA_BUY_PRE(115)
+			;LOCALS = %CSVNAME(115, 0)%
+			LOCAL = 1
+		ENDIF
+	;장 소네까지 ARG가 홀수라면 특
+	ELSEIF ( ARG >= 1 && ARG <= 106) && ( ARG % 2 == 1)
+		IF CHARA_BUY_PRE(ARG + 1)
+			LOCALS = %CSVNAME(ARG + 1, 0)%
+			LOCAL = 1
+		ENDIF
+	;오오쿠리카라로부터 ARG가 짝수라면 특
+	ELSEIF ( ARG >= 116) && ( ARG % 2 == 0)
+		IF CHARA_BUY_PRE(ARG + 1)
+			LOCALS = %CSVNAME(ARG + 1, 0)%
+			LOCAL = 1
+		ENDIF
+	ENDIF
+	
+	SIF STRLENS(LOCALS)
+		PRINTFORMW ＜%LOCALS%가 구입 가능하게 되었습니다＞
+ENDIF
+
+@CHARA_SELLING_PRICE(ARG)
+#FUNCTIONS
+LOCAL:1 = 100
+FOR LOCAL, 0, 210
+	CSVTALENT ARG, LOCAL, 0
+	IF RESULT
+		SELECTCASE LOCAL
+			;처녀, 예속
+			CASE 0, 8
+				LOCAL:1 += 100
+			;창부
+			CASE 7
+				LOCAL:1 += 60
+			;복종, 매력, 수수께끼의매력
+			CASE 5, 92, 94
+				LOCAL:1 += 50
+			;꿋꿋함, 마조
+			CASE 12, 84
+				LOCAL:1 += 40
+			;음란, 일선을넘지않음, 헌신적, 쾌감을부정, 음란구멍, 음란가슴, 섹스광, 새드
+			;맹신, C민감, V민감, A민감, B민감, 폭유, 불사신, 절륜
+			CASE 4, 27, 47, 63, 71, 75, 77, 78, 83, 86, 102, 104, 106, 108, 112, 147
+				LOCAL:1 += 30
+			;재생처녀, 반항적, 프라이드높음, 건방짐, 츤데레, 자제심, 정조관념, 고통에약함
+			;악취민감, 자위광, 항문광, 소악마, 요호, 인기, 거유, 함몰유두, 회복빠름, 모유체질
+			CASE 1, 11, 15, 16, 18, 20, 30, 41, 62, 74, 76, 87, 91, 111, 120, 130, 145, 149
+				LOCAL:1 += 20
+			;호기심, 보수적, 눈에띄고싶음, 혀놀림, 해방, 부끄럼쟁이, 젖기쉬움, 습득빠름, 실금버릇
+			;자위하기쉬움, 즉각함락, 도착적, 골드핑거, 소인체형, 말자지, 극, 달마
+			CASE 23, 24, 28, 33, 35, 42, 50, 52, 57, 58, 60, 73, 80, 117, 142, 180, 204
+				LOCAL:1 += 10
+			;반음반양, 후타나리, 동물귀, 컨트보이, 쉬메일, 신기
+			CASE 137, 139, 143, 172, 173, 181
+				LOCAL:1 += 5
+			;수치심없음, 젖기어려움, 습득느림, 남자혐오, 여자혐오, 절벽, 한다리결손
+			CASE 35, 43, 51, 82, 88, 110, 202
+				LOCAL:1 -= 10
+			;겁쟁이, 솔직함, 얌전함, 프라이드낮음, 멘헤라, 무관심, 감정부족, 정조무관심, 고통에강함
+			;독약내성, 악취둔감, 더러움무시, 빈유, 회복느림
+			CASE 10, 13, 14, 17, 21, 22, 31, 38, 40, 56, 61, 64, 109, 131
+				LOCAL:1 -= 20
+			;쾌감에솔직, C둔감, V둔감, A둔감, B둔감, 유아／유아퇴행, 한팔결손, 양다리결손
+			CASE 70, 101, 103, 105, 107, 150, 200, 203
+				LOCAL:1 -= 30
+			;연모, 양팔결손
+			CASE 3, 201
+				LOCAL:1 -= 50
+			;친애
+			CASE 6
+				LOCAL:1 -= 80
+		ENDSELECT
+	ENDIF
+NEXT
+
+IF LOCAL:1 >= 210
+	LOCALS = A
+ELSEIF LOCAL:1 >= 170
+	LOCALS = B
+ELSEIF LOCAL:1 >= 120
+	LOCALS = C
+ELSEIF LOCAL:1 >= 70
+	LOCALS = D
+ELSE
+	LOCALS = E
+ENDIF
+RETURNF LOCALS
+
+@CHARA_DIFFICULTY(ARG)
+#FUNCTIONS
+LOCAL:1 = 0
+FOR LOCAL, 0, 200
+	CSVTALENT ARG, LOCAL, 0
+	IF RESULT
+		SELECTCASE LOCAL
+			;억압, 저항
+			CASE 32, 34
+				LOCAL:1 += 15
+			;프라이드높음, 남자혐오, 여자혐오, 쾌감을부정, 소인체형
+			CASE 15, 71, 82, 88, 142
+				LOCAL:1 += 14
+			;반항적, 남자
+			CASE 11, 140
+				LOCAL:1 += 4
+			;건방짐, 감정부족
+			CASE 16, 22
+				LOCAL:1 += 3
+			;처녀, 꿋꿋함, 자제심, 일선을넘지않음, 정조관념, C둔감, B둔감
+			CASE 0, 12, 20, 27, 30, 101, 107
+				LOCAL:1 += 2
+			;무관심, 보수적, 부끄럼쟁이, 젖기어려움, 독약내성, 습득느림, 고양이혀, 악취민감
+			;회복느림
+			CASE 21, 24, 35, 43, 54, 56, 62, 131
+				LOCAL:1 += 1
+			;얌전함, 위압, 낙관적, 눈에띄고싶음, 정조무관심, 수치심없음, 약점잡힘, 젖기쉬움, 습득빠름
+			;자위하기쉬움, 악취둔감, 더러움무시, 도착적, 회복빠름, A민감, V민감
+			CASE 14, 19, 25, 28, 31, 36, 37, 42, 50, 60, 61, 64, 80, 103, 106, 130
+				LOCAL:1 -= 1
+			;프라이드낮음, 멘헤라, 호기심, 헌신적, 쾌감에솔직, C민감, B민감
+			CASE 17, 23, 38, 63, 70, 102, 108
+				LOCAL:1 -= 2
+			;해방
+			CASE 34
+				LOCAL:1 -= 5
+			;솔직함
+			CASE 13
+				LOCAL:1 -= 6
+		ENDSELECT
+	ENDIF
+NEXT
+;체력
+LOCAL:2 = CSVBASE(ARG, 0, 0)
+IF LOCAL:2 < 600
+	LOCAL:1 += 25
+ELSEIF LOCAL:2 < 800
+	LOCAL:1 += 14
+ELSEIF LOCAL:2 < 1100
+	LOCAL:1 += 1
+ELSEIF LOCAL:2 < 2000
+ELSEIF LOCAL:2 < 2500
+	LOCAL:1 -= 1
+ELSE
+	LOCAL:1 -= 2
+ENDIF
+;기력
+LOCAL:2 = CSVBASE(ARG, 1, 0)
+IF LOCAL:2 < 600
+	LOCAL:1 += 14
+ELSEIF LOCAL:2 < 800
+	LOCAL:1 += 1
+ELSEIF LOCAL:2 < 1800
+ELSE
+	LOCAL:1 -= 1
+ENDIF
+;순종Lv
+LOCAL:1 -= 8 * CSVABL(ARG, 0, 0)
+;욕망Lv
+LOCAL:1 -= 4 * CSVABL(ARG, 1, 0)
+;기교Lv
+LOCAL:1 -= CSVABL(ARG, 2, 0)
+;봉사정신Lv
+LOCAL:1 -= 3 * CSVABL(ARG, 7, 0)
+;이상경험 있어
+SIF CSVEXP(ARG, 50, 0)
+	LOCAL:1 -= 2
+
+IF LOCAL:1 >= 30
+	LOCALS = A
+ELSEIF LOCAL:1 >= 20
+	LOCALS = B
+ELSEIF LOCAL:1 >= 10
+	LOCALS = C
+ELSEIF LOCAL:1 >= 0
+	LOCALS = D
+ELSE
+	LOCALS = E
+ENDIF
+RETURNF LOCALS
+

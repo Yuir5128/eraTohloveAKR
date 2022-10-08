@@ -1,0 +1,340 @@
+﻿;정액중독의 가부
+@ISABLUP16
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:정액중독 >= 10
+	RETURN 0
+ELSEIF ABL:정액중독 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	RETURN 0
+ELSEIF EXP:정액경험  == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP16
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;정액중독
+@ABLUP16
+DRAWLINE
+;연모, 친애, 음란, 창부는 MAXLV10
+IF ABL:정액중독 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:정액중독 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP16
+
+;LV2로부터 3에 올릴 때는이상경험필요(소질:[악취둔감][더러움무시][중독되기쉬움]라면 무시할 수 있다)
+IF ABL:정액중독 == 2 && TALENT:악취둔감 == 0 && TALENT:더러움무시 == 0 && TALENT:중독되기쉬움 == 0
+	PRINTFORML %EXPNAME:50%있어, 한편
+;LV3로부터 4에 올릴 때는이상경험 2 이상 필요(소질:[악취둔감][더러움무시][중독되기쉬움]라면 무시할 수 있다)
+ELSEIF ABL:정액중독 == 3 && TALENT:악취둔감 == 0 && TALENT:더러움무시 == 0 && TALENT:중독되기쉬움 == 0
+	PRINTFORML %EXPNAME:50%2이상, 한편
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[악취둔감][더러움무시][중독되기쉬움]라면 무시할 수 있다)
+ELSEIF ABL:정액중독 == 4 && TALENT:악취둔감 == 0 && TALENT:더러움무시 == 0 && TALENT:중독되기쉬움 == 0
+	PRINTFORML %EXPNAME:50%3이상, 한편
+;LV8로부터 9에 올릴 때는이상경험 7 이상 필요(소질:[악취둔감][더러움무시][중독되기쉬움]라면 무시할 수 있다)
+ELSEIF ABL:정액중독 == 8 && TALENT:악취둔감 == 0 && TALENT:더러움무시 == 0 && TALENT:중독되기쉬움 == 0
+	PRINTFORML %EXPNAME:50%7이상, 한편
+ENDIF
+
+;음란함락
+IF TALENT:음란 || TALENT:창부
+	;욕망가 필요
+	PRINTFORML %ABLNAME:1%{ABL:정액중독 + 1}LV이상, 한편
+ELSE
+	;봉사정신가 필요
+	PRINTFORML %ABLNAME:7%{ABL:정액중독 + 1}LV이상, 한편
+ENDIF
+
+
+PRINTFORM [0] - %PALAMNAME:6%의 구슬×{A}, %PALAMNAME:7%의 구슬×{B}, %EXPNAME:20%{C}이상……
+
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+	SIF I & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+PRINTFORM [1] - %PALAMNAME:6%의 구슬×{A*3}, %PALAMNAME:7%의 구슬×{B*3}, %EXPNAME:20%{C/2}이상……
+
+IF J == 0
+	PRINT OK
+ELSE
+	SIF J & 1
+		PRINT 주불발 
+	SIF J & 2
+		PRINT 경험불발 
+	SIF J & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+;정음절정경험로 LV를 올린다
+IF EXP:정음절정경험 >= 1
+	PRINTFORM [2] - %PALAMNAME:6%의 구슬×{D}, %PALAMNAME:7%의 구슬×{E}, %EXPNAME:20%{C}, %EXPNAME:24%{G}이상……
+	IF K == 0
+		PRINT OK
+	ELSE
+		SIF K & 1
+			PRINT 주불발
+		SIF K & 2
+			PRINT 경험불발
+		SIF K & 4
+			PRINT 능력불발
+	ENDIF
+	PRINTL 
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+INPUT
+IF (RESULT < 0 || RESULT > 2) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF K != 0 && RESULT == 2
+	PRINTL 조건을 채우고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:정액중독 += 1
+
+IF RESULT == 0
+	JUEL:욕정 -= A
+	JUEL:굴복 -= B
+ELSEIF RESULT == 1
+	JUEL:욕정 -= A*3
+	JUEL:굴복 -= B*3
+ELSEIF RESULT == 2
+	JUEL:욕정 -= D
+	JUEL:굴복 -= E
+ENDIF
+
+
+PRINTFORMW %ABLNAME:16%의 레벨이{ABL:정액중독}가 되었습니다
+
+;정액중독LVUP 판정
+@DECIDE_ABLUP16
+;조건별로 OK인가 안 되는가를 기록한다
+;정음절정경험의 처리용으로 K를 추가
+I = 0
+J = 0
+K = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+;정음절정경험를 이용한 레벨 업에 필요한 카운트를 이하로 설정
+	;D = 욕정의 구슬
+	;E = 굴복의 구슬
+	;정액경험는 종래대로의 C를 참조
+	;G = 정음절정경험의 회수
+
+IF ABL:정액중독 == 0
+	A = 3000
+	B = 10000
+	C = 10
+ELSEIF ABL:정액중독 == 1
+	A = 8000
+	B = 25000
+	C = 25
+ELSEIF ABL:정액중독 == 2
+	A = 15000
+	B = 50000
+	C = 40
+ELSEIF ABL:정액중독 == 3
+	A = 30000
+	B = 100000
+	C = 80
+	D = 10000
+	E = 25000
+	G = 50
+ELSEIF ABL:정액중독 == 4
+	A = 55000
+	B = 300000
+	C = 200
+	D = 30000
+	E = 75000
+	G = 100
+ELSEIF ABL:정액중독 == 5
+	A = 60000
+	B = 350000
+	C = 250
+	D = 35000
+	E = 85000
+	G = 120
+ELSEIF ABL:정액중독 == 6
+	A = 65000
+	B = 400000
+	C = 300
+	D = 40000
+	E = 100000
+	G = 150
+ELSEIF ABL:정액중독 == 7
+	A = 70000
+	B = 450000
+	C = 350
+	D = 45000
+	E = 120000
+	G = 180
+ELSEIF ABL:정액중독 == 8
+	A = 75000
+	B = 500000
+	C = 400
+	D = 50000
+	E = 120000
+	G = 200
+ELSEIF ABL:정액중독 == 9
+	A = 90000
+	B = 650000
+	C = 500
+	D = 65000
+	E = 150000
+	G = 250
+ENDIF
+
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+	TIMES B , 2.00
+	TIMES C , 2.00
+ENDIF
+;요리치
+IF TALENT:요리치
+	TIMES A , 0.90
+	TIMES B , 0.90
+ENDIF
+;요리고수
+IF TALENT:요리고수
+	TIMES A , 1.10
+	TIMES B , 1.10
+ENDIF
+;중독되기쉬움
+IF TALENT:중독되기쉬움
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+ENDIF
+
+;LV2로부터 3에 올릴 때는이상경험필요(소질:[악취둔감][더러움무시][중독되기쉬움]라면 무시할 수 있다)
+IF ABL:정액중독 == 2 && TALENT:악취둔감 == 0 && TALENT:더러움무시 == 0 && TALENT:중독되기쉬움 == 0
+	IF EXP:이상경험 == 0
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+		K |= 2
+	ENDIF
+;LV3로부터 4에 올릴 때는이상경험 2 이상 필요(소질:[악취둔감][더러움무시][중독되기쉬움]라면 무시할 수 있다)
+ELSEIF ABL:정액중독 == 3 && TALENT:악취둔감 == 0 && TALENT:더러움무시 == 0 && TALENT:중독되기쉬움 == 0
+	IF EXP:이상경험 < 2
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+		K |= 2
+	ENDIF
+;LV4로부터 5에 올릴 때는이상경험 3 이상 필요(소질:[악취둔감][더러움무시][중독되기쉬움]라면 무시할 수 있다)
+ELSEIF ABL:정액중독 == 4 && TALENT:악취둔감 == 0 && TALENT:더러움무시 == 0 && TALENT:중독되기쉬움 == 0
+	IF EXP:이상경험 < 3
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+		K |= 2
+	ENDIF
+;LV8로부터 9에 올릴 때는이상경험 7 이상 필요(소질:[악취둔감][더러움무시][중독되기쉬움]라면 무시할 수 있다)
+ELSEIF ABL:정액중독 == 8 && TALENT:악취둔감 == 0 && TALENT:더러움무시 == 0 && TALENT:중독되기쉬움 == 0
+	IF EXP:이상경험 < 7
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+		K |= 2
+	ENDIF
+ENDIF
+
+;음란함락
+IF TALENT:음란 || TALENT:창부
+	;욕망가 필요
+	IF ABL:욕망 < ABL:정액중독 + 1
+		I |= 4
+		J |= 4
+	ENDIF
+ELSE
+	;봉사정신가 필요
+	IF ABL:봉사정신 < ABL:정액중독 + 1
+		I |= 4
+		J |= 4
+		K |= 4
+	ENDIF
+ENDIF
+
+;욕정의 구슬로 올린다
+SIF JUEL:욕정 < A
+	I |= 1
+;굴복의 구슬로 올린다
+SIF JUEL:굴복 < B
+	I |= 1
+;정액경험가 필요
+SIF EXP:정액경험 < C
+	I |= 2
+
+IF I == 0
+	Z = 1
+ENDIF
+
+
+;욕정의 구슬로 올린다
+SIF JUEL:욕정 < A*3
+	J |= 1
+;굴복의 구슬로 올린다
+SIF JUEL:굴복 < B*3
+	J |= 1
+;정액경험가 필요
+SIF EXP:정액경험 < C/2
+	J |= 2
+
+IF J == 0
+	Z = 1
+ENDIF
+
+;정음절정경험로 LV를 올리는 경우
+;욕정의 구슬로 올린다
+SIF JUEL:욕정 < D
+	K |= 1
+;굴복의 구슬로 올린다
+SIF JUEL:굴복 < E
+	K |= 1
+;정액경험가 필요
+SIF EXP:정액경험 < C
+	K |= 2
+;정음절정경험가 필요
+SIF EXP:정음절정경험 < G
+	K |= 2
+SIF EXP:정음절정경험 == 0
+	K |= 2
+
+IF K == 0
+	Z = 1
+ENDIF
+
+
+

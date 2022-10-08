@@ -1,0 +1,488 @@
+﻿;==================================================
+;성교시의처녀와백버진상실시의 전입상
+;목조르기섹스/목조르기애널는 일단 보류
+;==================================================
+@VIRGIN_174_LOST_SEX_BEFORE
+#DIM DYNAMIC FIRST_VIRGIN = 0
+#DIM DYNAMIC KIJOI = 0
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	;전이나후인가로 첫간통
+	SIF (EXP:성교경험 - EXP:삽입경험) == 0
+		FIRST_VIRGIN = 1
+	
+	;;기승위,기승위애널
+	SIF SELECTCOM == 106 || SELECTCOM == 116
+		KIJOI = 1
+
+	;안녕 엔드기독 혹은반발 3+기승위
+	IF (CFLAG:5001 & 64) || (MARK:반발각인 >= 3 && KIJOI)
+		PRINTFORML 「…… 철면피가」
+		PRINTFORMW %CALLNAME%는 차갑고 그렇게 단언했다
+		PRINTL 
+	;반발 3
+	ELSEIF MARK:반발각인 >= 3
+		PRINTFORML 「그만두어라!어이,(듣)묻고 있는 것인가!이야기해라!」
+		PRINTFORMW %CALLNAME%는 필사적으로 발버둥 쳐저항 하고 있다
+		PRINTFORM 그것을 억지로 억눌러,
+	;미함락 굴복 3 기승위
+	ELSEIF !KANRAKU(TARGET) && MARK:굴복각인 >= 3 && KIJOI
+		PRINTFORML 「스스로,넣는지? …… 아아,청마가 말한다면」
+		PRINTL 
+		;진우루트
+		SIF (CFLAG:5001 & 2)
+			PRINTFORM 어딘가 공허한 눈의
+	;미함락 굴복 3
+	ELSEIF !KANRAKU(TARGET) && MARK:굴복각인 >= 3
+		PRINTFORML 「청마 정말로,하는지……?」
+		PRINTFORMW %CALLNAME%는 불안한 듯한 얼굴을 하고 있다
+		PRINTL 
+	;미함락 기승위
+	ELSEIF !KANRAKU(TARGET) && KIJOI
+		PRINTFORML 「읏,싫… 다…… 이런 일 하고 싶지 않다……」
+		PRINTFORML 「있고 싫다 싫다 싫다……!」
+		PRINTFORM 고개를 저어 거부하는%CALLNAME%를 억지로 억눌러,
+	;미함락
+	ELSEIF !KANRAKU(TARGET)
+		PRINTFORML 「청마 이런 바보 같은 흉내는 그만두어라」
+		PRINTFORML 「어이,(듣)묻고 있는지 조금,(들)물어요……!」
+		PRINTFORMW %CALLNAME%는 안면 창백해지고 있다
+		PRINTFORM 그것을 무시해
+	ELSEIF TALENT:연모 || TALENT:친애
+		;하트풀 기승위
+		IF (CFLAG:5001 & 1) && KIJOI
+			PRINTFORMW 「스,스스로!?」
+			PRINTFORMW %CALLNAME%는 당연하다는 듯이 거부하지만,%CALLNAME:MASTER%가 간절히 부탁하면 마지못해 승낙했다
+			PRINTFORMW 「청마가 아무래도라고 말하기 때문에,특별하다」
+			PRINTFORMW 「…… 가겠어」
+			PRINTL 
+			PRINTFORM 수치에 얼굴을 붉게 했다
+		;하트풀 연모
+		ELSEIF (CFLAG:5001 & 1) && TALENT:연모
+			PRINTFORMW %CALLNAME:MASTER%가 안에 넣고 싶다고 하면,%CALLNAME%는 얼굴을 붉게 했다
+			PRINTFORMW 「청마가 아무래도라고 말한다면,좋겠지만……」
+			PRINTFORMW 「에? 벼,별로 싫다고는 말하지 않을 것이다!」
+			PRINTFORMW 「그러니까,빨리 넣어 줘」
+			PRINTL 
+		;하트풀 친애
+		ELSEIF (CFLAG:5001 & 1) && TALENT:친애
+			PRINTFORML 「청마키스,해도 좋은가?」
+			PRINTFORML %CALLNAME:MASTER%가 응해 얼굴을 대어 주면,%CALLNAME%는 살그머니 입술을 거듭했다
+			PRINTFORM 그대로
+		;진우루트 연모 기승위
+		ELSEIF (CFLAG:5001 & 2) && TALENT:연모 && KIJOI
+			PRINTFORMW 「아아,청마가 말한다면」
+			PRINTFORMW %CALLNAME%는 단단한 표정으로 수긍했다
+			PRINTFORMW 그 모습에 %CALLNAME:MASTER%가 무리를 할 필요는 없으면 구조선을 낸다
+			;망집연모
+			IF (CFLAG:5001 & 8)
+				PRINTFORMW 「괘,괜찮아 문제 없는…… 가겠어」
+			ELSE
+				PRINTFORMW 「괘,괜찮아 분명하게 너의 일,수 멈추어 보이는…… 가겠어」
+			ENDIF
+			PRINTFORML %CALLNAME%벗겨 여기 없게 웃어 보이지만,얼굴에는 숨기지 못할 불안이 배이고 있었다
+			PRINTL 
+		;진우루트 연모
+		ELSEIF (CFLAG:5001 & 2) && TALENT:연모
+			;망집연모
+			IF (CFLAG:5001 & 8)
+				PRINTFORML 「힛……」
+				PRINTFORMW %CALLNAME%의\@ SEXPLAY(TARGET) == 1? 비부[秘部]#애널\@에 음경을 주면,%CALLNAME%는 작게 비명을 올렸다
+			ELSE
+				PRINTFORML 「읏……」
+				PRINTFORMW %CALLNAME%의\@ SEXPLAY(TARGET) == 1? 비부[秘部]#애널\@에 음경을 주면,%CALLNAME%는 몸을 굳어지게 했다
+			ENDIF
+			PRINTFORMW 그 반응에 %CALLNAME:MASTER%가 주저함을 보이면,%CALLNAME%는 당황해 손질한다
+			PRINTFORMW 「괘,괜찮다 조금 놀란 것 뿐……」
+			PRINTFORMW %CALLNAME%는 웃어 보이지만,얼굴에는 숨기지 못할 불안이 배이고 있었다
+			;망집연모
+			IF (CFLAG:5001 & 8)
+				PRINTFORMW 「나는 괜찮다 이봐요,와 청마」
+			;반발 3 취득이 끝난 상태는 아니다
+			ELSEIF (CFLAG:5002 & 8) == 0
+				PRINTFORMW 「괜찮아쨩과 너의 일,수 멈추어 보인다」
+				PRINTFORMW 「와 청마」
+			ENDIF
+			PRINTL 
+		;진우루트 친애 기승위
+		ELSEIF (CFLAG:5001 & 2) && TALENT:친애 && KIJOI
+			PRINTFORMW 「스스로? 아아,알았다」
+			PRINTFORMW 너무나 주저함이 없는 모습에,%CALLNAME:MASTER%는 조금 당황한다
+			PRINTFORMW 「? 청마와 제일 깊고로 연결될 수가 있다 무엇을 주저할 필요가 있어?」
+			PRINTFORMW 「…… 물론,부끄럽지 않다고 말하면 거짓말이 되지만」
+			PRINTFORMW 그렇게 말해 웃는%CALLNAME%의 뺨은 조금 붉다
+			;망집친애
+			IF (CFLAG:5001 & 8)
+				PRINTFORMW 「…… 나의 전부,청마에 준다」
+				PRINTFORMW 「그러니까,쭉 함께 있었으면 좋겠다」
+			;첫간통 반발 3 취득이 끝난 상태가 아니다
+			ELSEIF FIRST_VIRGIN && (CFLAG:5002 & 8) == 0
+				PRINTFORMW 「그렇지만,너의 전부를수 멈출 각오는 되어지고 있다」
+				PRINTFORMW 「…… 가겠어 청마」
+			ENDIF
+			PRINTFORMW 
+		;망집친애
+		ELSEIF (CFLAG:5001 & 8) && TALENT:친애
+			PRINTFORML 「청마 껴안아 주지 않는가?」
+			PRINTFORMW %CALLNAME:MASTER%는 응해 껴안아 주면,%CALLNAME%는 기쁜듯이 부끄러워했다
+			;첫간통
+			IF FIRST_VIRGIN
+				PRINTFORMW 「나의 전부,청마에 준다」
+				PRINTFORMW 「그러니까,쭉 함께 있었으면 좋겠다」
+			ENDIF
+			PRINTL 
+		;진우루트 친애
+		ELSEIF (CFLAG:5001 & 2) && TALENT:친애
+			PRINTFORML 「청마키스,해도 좋은가?」
+			PRINTFORML %CALLNAME:MASTER%가 응해 얼굴을 대어 주면,%CALLNAME%는 살그머니 입술을 거듭했다
+			;첫간통 반발 3 취득이 끝난 상태가 아니다
+			IF FIRST_VIRGIN && (CFLAG:5002 & 8) == 0
+				PRINTFORMW 「…… 너의 전부,수 멈출 각오는 되어지고 있다」
+				PRINTFORMW 「그러니까,와라 청마」
+			ENDIF
+			PRINTW 
+		ENDIF
+	ELSEIF TALENT:음란 || TALENT:창부
+		;하트풀 음란
+		IF (CFLAG:5001 & 1) && TALENT:음란
+			PRINTFORML %CALLNAME:MASTER%가 안에\@ KIJOI ? 넣었으면 좋은#넣고 싶은\@이라고 말하면,%CALLNAME%는 얼굴을 붉게 했다
+			PRINTFORMW 「아무래도라고 말한다면,좋겠지만……」
+			PRINTFORMW 「에? 벼,별로 싫다고는 말하지 않을 것이다!」
+			IF KIJOI
+				PRINTFORML 「…… 가겠어」
+			ELSE
+				PRINTFORML 「좋으니까,빨리 와라」
+			ENDIF
+			PRINTW 
+		;그 이외
+		ELSE
+			PRINTFORML 「읏……」
+			PRINTFORML %CALLNAME%는 군침을 삼켜,대기수쾌감에 몸부림 하고 있다
+			PRINTW 
+		ENDIF
+	ELSEIF TALENT:복종 || TALENT:예속
+		;진우루트 복종
+		IF (CFLAG:5001 & 2) && TALENT:복종
+			PRINTFORML 「힛……」
+			IF KIJOI
+				PRINTFORMW %CALLNAME:MASTER%의 음경을%CALLNAME%는 자신의\@ SEXPLAY(TARGET) == 1? 비부[秘部]#애널\@에 주면,작게 비명을 올렸다
+				PRINTFORMW 그 반응에 %CALLNAME:MASTER%가 이상할 것 같은 얼굴을 하면,%CALLNAME%는 당황해 손질한다
+			ELSE
+				PRINTFORMW %CALLNAME%의\@ SEXPLAY(TARGET) == 1? 비부[秘部]#애널\@에 음경을 주면,%CALLNAME%는 작게 비명을 올렸다
+				PRINTFORMW 그 반응에 %CALLNAME:MASTER%가 움직임을 멈추면,%CALLNAME%는 당황해 손질한다
+			ENDIF
+			PRINTFORMW 그러나,%CALLNAME%의 얼굴에는 숨기지 못할 불안이 배이고 있었다
+			PRINTFORMW 「아,괘,괜찮아 조금 놀란 것 뿐……」
+			PRINTFORMW 「나,청마를 분명하게 만발 시켜 보이기 때문에……」
+			PRINTL 
+		;그 이외
+		ELSE
+			PRINTFORML 「읏……」
+			PRINTFORMW %CALLNAME%는 군침을 삼켜,대기수쾌감에 몸부림 하고 있다
+			PRINTL 
+		ENDIF
+	ENDIF
+ENDIF
+RETURN LOCAL
+
+;==================================================
+;성교시의처녀와백버진상실시의후입상
+;==================================================
+@VIRGIN_174_LOST_SEX_AFTER
+#DIM DYNAMIC FIRST_VIRGIN = 0
+#DIM DYNAMIC SEX_COM = 0
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	;전이나후인가로 첫간통
+	SIF (EXP:성교경험 - EXP:삽입경험) == 1
+		FIRST_VIRGIN = 1
+	
+	;섹스로 상실(목조르기섹스/목조르기애널/스팽킹섹스/스팽킹애널 포함한다)
+		;이하 커맨드는 포함하지 않는다
+		;3 P계,바이브(처녀만),윤간,촉수삽입,촉수확장,수간,육변기(백버진),뱀장어탕(처녀만)
+	SIF (SELECTCOM >= 100 && SELECTCOM <= 119) || (SELECTCOM >= 511 && SELECTCOM <= 514)
+		SEX_COM = 1
+
+	;음란창부함락 복종예속함락 PLAYER를 불문하고
+	IF KANRAKU2(TARGET) == 2 || KANRAKU2(TARGET) == 3
+		PRINTFORML 「아,처음……,응,아…,읏……」
+		PRINTFORML %CALLNAME%는 황홀로 한 모습으로,쾌감에 몸을 맡기고 있다
+	;미함락 혹은연모친애함락으로 사모 대상 이외 혹은연모친애함락으로 섹스 이외로 상실
+	ELSEIF !KANRAKU(TARGET) || KANRAKU(TARGET) == 4 || (KANRAKU(TARGET) == 1 && SEX_COM == 0)
+		PRINTFORML 「하,하하…… 이런 것 거짓말이다… 거짓말로 정해져…… 거짓말…,……」
+		PRINTFORML %CALLNAME%는 어안이 벙벙히 한 표정을 하고 있다…
+		CFLAG:10 += 1
+		
+		SIF NO:PLAYER == 176 && (CFLAG:5001 & 2)
+			CFLAG:5004 |= 1
+	;함락이 끝난반발 3
+	ELSEIF MARK:반발각인 >= 3
+		;리액션 없음
+		PRINTL
+	ELSEIF (TALENT:연모 || TALENT:친애) && SEX_COM
+		;목조르기섹스/목조르기애널
+		IF SELECTCOM == 513 || SELECTCOM == 514
+			;지문과 어긋납니다만,강제적으로 스트레스치 추가
+			CFLAG:10 += 1
+			;나카타씨
+			IF TFLAG:2 > 0
+				PRINTFORM \@SELECTCOM == 513? 혈액과 애액#장액\@과 정액을
+			ELSE
+				PRINTFORM \@SELECTCOM == 513? 혈액과 애액#장액\@을
+			ENDIF
+			PRINTFORM \@SELECTCOM == 513? 가랑이#애널\@로부터 흘려 보내면서,
+			PRINTFORML %CALLNAME%는 어안이 벙벙히 한 표정을 하고 있다
+			SIF TALENT:PLAYER:새드
+				PRINTFORML 또,그 목에는 %CALLNAME:PLAYER%의 손바닥의 자취가 역력하게 남아 있다
+			;강제적으로 두려움 온
+			CFLAG:5005 |= 64
+		;진우루트 연모 첫간통
+		ELSEIF (CFLAG:5001 & 2) && TALENT:연모 && FIRST_VIRGIN
+			;지문과 어긋납니다만,강제적으로 스트레스치 추가
+			CFLAG:10 += 1
+			PRINTFORML 「아하,…… 나의,처음,……,이제(벌써)……」
+			PRINTFORML %CALLNAME%는 어안이 벙벙히 한 표정을 하고 있다…
+			;강제적으로 두려움 온
+			CFLAG:5005 |= 64
+		;그 이외의연모
+		ELSEIF TALENT:연모
+			PRINTFORML 「아,아…… 핫,아아… 앗…」
+			PRINTFORML %CALLNAME%는 많이 있고의 모습으로,쾌감에 쳐 떨고 있다…
+		;망집친애
+		ELSEIF (CFLAG:5001 & 8) && TALENT:친애
+			PRINTFORML 「아하,…… 처음,읏,응… 받아,읏……」
+			PRINTFORML %CALLNAME%는 도취해 버린 얼굴을 하고 있다…
+		;그 이외의친애
+		ELSEIF TALENT:친애
+			PRINTFORML 「핫,아…… 무엇인가,가슴가 가득하다……」
+			PRINTFORML %CALLNAME%는 힘겹게 되면서도,얼굴을 벌어지게 하고 있었다
+			PRINTFORML 그 눈동자에는 눈물이 물기를 띠고 있다…
+		ENDIF
+	ENDIF
+	PRINTW 
+ENDIF
+RETURN LOCAL
+
+;==================================================
+;성교시의 허덕여입상
+;일본어 말할 때와 말하지 않을 때의 차이가 격렬하다
+;==================================================
+@SEX_COM_174_PANT
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	;두려움
+	IF (CFLAG:5005 & 64)
+		SELECTCASE RAND:4
+			CASE 3
+				PRINTFORML 「,읏,히… 이……,도…,그만두고……,에… 구……」
+			CASE 2
+				PRINTFORML 「구……,얏… 아,응,읏…… 히,… 그만두고……」
+			CASE 1
+				PRINTFORML 「힛…,아,구……,아,아…,시,… 싫다………」
+			CASE 0
+				PRINTFORML 「아…,앗,아,이…… 그만두고…,아,응… 얏……」
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;반발 녹고 기승위
+	IF (CFLAG:5005 & 128) && (SELECTCOM == 106 || SELECTCOM == 116)
+		SELECTCASE RAND:3
+			CASE 2
+				PRINTFORML 「그,그만두고……,이,이런,일… 응,아………」
+			CASE 1
+				PRINTFORML 「구,… 읏… 응응…,그만두고…,읏,아……」
+			CASE 0
+				PRINTFORML 「아………,도,해…,읏,응,아…… 이런,… 앗…」
+		ENDSELECT
+		PRINTFORML %CALLNAME%는 쾌락과 굴욕의 서로 섞인 얼굴로 %CALLNAME:PLAYER%를 노려보고 있다
+		RETURN LOCAL
+	ENDIF
+	
+	;반발 기승위
+	IF (CFLAG:5005 & 32) && (SELECTCOM == 106 || SELECTCOM == 116)
+		SELECTCASE RAND:3
+			CASE 3
+				PRINTFORML 「감색,응… 인…,일…,……」
+			CASE 2
+				PRINTFORML 「이……,왕바보……,응…」
+			CASE 1
+				PRINTFORML 「응…,구…,읏,어째서,이런 일……」
+			CASE 0
+				PRINTFORML 「우……,읏… 철면피… 가……,아……」
+		ENDSELECT
+		PRINTFORML %CALLNAME%는 굴욕 투성이가 된 얼굴로 %CALLNAME:PLAYER%를 노려보고 있다
+		RETURN LOCAL
+	ENDIF
+	
+	;반발 반발 녹고
+	IF (CFLAG:5005 & 128) || (CFLAG:5005 & 32)
+		SELECTCASE RAND:4
+			CASE 3
+				PRINTFORML 「그만두어로…… 얏…,아,아앗,구,… 우,응…… 아,아」
+			CASE 2
+				PRINTFORML 「는,키……,그만두고,읏히,… 빠져에………」
+			CASE 1
+				PRINTFORML 「구,… 읏… 응응…,그만두고…,읏,기……」
+			CASE 0
+				PRINTFORML 「어이… 읏……,그만두고… 로,라고,아…… 말해,… 읏…」
+		ENDSELECT
+		SIF (CFLAG:5005 & 128)
+			PRINT 쾌감에 신체를 진동시키면서도,
+		PRINTFORML %CALLNAME%는 필사적으로 발버둥 쳐저항 하고 있다
+		RETURN LOCAL
+	ENDIF
+	
+	;녹고 강
+	IF (CFLAG:5005 & 16)
+		SELECTCASE RAND:8
+			CASE 7
+				PRINTFORML 「이… 아……,아아… 동글동글…,야,째…………」
+			CASE 6
+				;배면좌위/배면좌위애널:103/113
+				IF SELECTCOM == 103 | SELECTCOM == 113
+					PRINTFORML 「아,두는… 아………,아…,야,아…」
+				;후배위/후배위애널:101/111 배면입위/배면입위애널:105/115
+				ELSEIF SELECTCOM % 2 == 1
+					PRINTFORML 「읏,히… 아…… 감색,짐승같은…,아,아앗…」
+				ELSE
+					PRINTFORML 「아,싫다… 보고,인………,아…,야,아…」
+					PRINTFORML %CALLNAME%는 수치로부터인가 얼굴을 필사적으로 돌리고 있다
+				ENDIF
+			CASE 5
+				PRINTFORML 「읏… 아,아…… 거기…,얏,앗…… 야…,에……,응,이…」
+			CASE 4
+				PRINTFORML 「아아,청마의,… 읏,아하…… 들어가,에……」
+				IF TALENT:달마 || TALENT:양팔결손 || TEQUIP:밧줄
+					PRINTFORML %CALLNAME%는 황홀로 한 모습으로,쾌감에 몸을 맡기고 있다
+				ELSE
+					PRINTFORML %CALLNAME%는 황홀로 한 모습으로,하복부에손를 맞히고 있다
+				ENDIF
+			CASE 3
+				PRINTFORML 「야…,(안)중…,두는,읏,아아… 이……,읏」
+			CASE 2
+				PRINTFORML 「청마……,아,앗,하… 아,아아아…… 응,기분,이…」
+			CASE 1
+				PRINTFORML 「아…,우… 아앗… 얏아…… 아,읏,이……」
+			CASE 0
+				PRINTFORML 「읏,청마……… 꽉,해,읏이,아아……!」
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;해당하는 것이 없으면 범용천에
+	CALL PANT_VOICE_EX
+	
+ENDIF
+RETURN LOCAL
+
+;==================================================
+;성교시의 나카타씨입상
+;==================================================
+@SEX_EVENT_174_PALAMCNG_A_K174_17_18
+#DIM DYNAMIC PREGNANCY_ABLE = 0
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL 
+	;임신 가능한 경우
+	;여자,후타나리의 경우에 V나카타씨 남자,반음반양,컨트보이 한편오메가의 경우에 A나카타씨
+	SIF (MALE(TARGET) == 0 && VAGINA(TARGET) && SEXPLAY(TARGET) == 1) || (MALE(TARGET) == 1 && TALENT:오메가 && SEXPLAY(TARGET) == 2)
+		PREGNANCY_ABLE = 1
+	
+	;망집 임신가능
+	IF (CFLAG:5005 & 4) && PREGNANCY_ABLE
+		SELECTCASE RAND:3
+			CASE 2
+				PRINTFORML 「아,군요,에…… 두는… 이고라고……,오,쿠… 웃…,응,응응………」
+			CASE 1
+				PRINTFORML 「(안)중…,화원 해…,이… 응,아,앗아아아앗… 아… 아………」
+			CASE 0
+				PRINTFORML 「줘,없었던 풀응이,다,해……… 읏,이,아아아…!」
+		ENDSELECT
+		;정상위 대면좌위 대면입위 역에서 파는 도시락 또한 양발 모두 있다
+		SIF (SELECTCOM == 100 || SELECTCOM == 102 || SELECTCOM == 104 || SELECTCOM == 510) && (TALENT:양다리결손 == 0 && TALENT:한다리결손 == 0)
+			PRINTFORML %CALLNAME%는 %CALLNAME:PLAYER%에발를 관련되어,매달리고 있다
+		RETURN LOCAL
+	ENDIF
+	
+	;무서워하고 임신가능
+	IF (CFLAG:5005 & 64) && PREGNANCY_ABLE
+		SELECTCASE RAND:2
+			CASE 1
+				PRINTFORML 「읏,야,아… 기다려 (안)중은…,히…,구…,아……」
+			CASE 0
+				PRINTFORML 「아…,그만두고…… 그만두어나다 두는… 로라고,우………」
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;두려움
+	IF (CFLAG:5005 & 64)
+		SELECTCASE RAND:2
+			CASE 1
+				PRINTFORML 「아,읏,우… 아……,(안)중…… 아…… 응,응응… 우……」
+			CASE 0
+				PRINTFORML 「응…,아…… 앗,히… 아,우… 읏구……」
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;반발 임신가능
+	IF (CFLAG:5005 & 32) && PREGNANCY_ABLE
+		SELECTCASE RAND:2
+			CASE 1
+				PRINTFORML 「기다려…,기다려,!아,(안)중,하… 앗… 그만두고……,아」
+			CASE 0
+				PRINTFORML 「아……,그만두고 (안)중은…,시,싫다………」
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;반발
+	IF (CFLAG:5005 & 32)
+		SELECTCASE RAND:2
+			CASE 1
+				PRINTFORML 「읏,구… 아…… 아… 그만두고… 응응,우………(안)중에………」
+			CASE 0
+				PRINTFORML 「쿳…,응,응구…(안)중…… 야… 째…… 우,아…」
+		ENDSELECT
+	ENDIF
+	
+	;녹고 강
+	IF (CFLAG:5005 & 16)
+		SELECTCASE RAND:2
+			CASE 1
+				PRINTFORML 「앗,응…… 두는,오… 쿨렁쿨렁 나와… 아,응응… 아,에……」
+			CASE 0
+				IF TALENT:임신
+					PRINTFORML 「읏,아,아…(안)중,읏…… 어린이,있는데… 아…,우,응……」
+				ELSEIF PREGNANCY_ABLE
+					PRINTFORML 「읏,아,아…(안)중,읏…… 어린이,할 수 있습니다… 아…,우,응……」
+				ELSE
+					PRINTFORML 「읏,아,아…(안)중,읏…… 두는,에 나와… 에…,아… 우……,응……」
+				ENDIF
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;그 이외
+	SELECTCASE RAND:2
+		CASE 1
+			PRINTFORML 「하…,아…… 아,아아…,(안)중… 아,나와………」
+		CASE 0
+			PRINTFORML 「읏…,우앗앗,아아아… 둔다…… 응,아……」
+	ENDSELECT
+
+ENDIF
+

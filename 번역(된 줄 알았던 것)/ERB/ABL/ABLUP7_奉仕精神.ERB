@@ -1,0 +1,311 @@
+﻿;봉사정신의 가부
+@ISABLUP7
+;연모, 친애, 복종, 예속는 MAXLV10
+IF ABL:봉사정신 >= 10
+	RETURN 0
+ELSEIF ABL:봉사정신 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP7
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;봉사정신
+@ABLUP7
+DRAWLINE
+;연모, 친애, 복종, 예속는 MAXLV10
+IF ABL:봉사정신 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ELSEIF ABL:봉사정신 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP7
+
+;LV4로부터 5에 올릴 때는이상경험이상 필요(소질:[연모][친애]라면 무시할 수 있다)
+IF ABL:봉사정신 == 4 && TALENT:연모 == 0 && TALENT:친애 == 0
+	PRINTFORML %EXPNAME:50%있어, 한편
+;LV8로부터 9에 올릴 때는이상경험 5 이상 필요(소질:[연모][친애]라면 무시할 수 있다)
+ELSEIF ABL:봉사정신 == 8 && TALENT:연모 == 0 && TALENT:친애 == 0
+	PRINTFORML %EXPNAME:50%5이상, 한편
+ENDIF
+
+;순종가 필요
+PRINTFORML %ABLNAME:0%{ABL:봉사정신 + 1}LV이상, 한편
+
+PRINTFORM [0] - %PALAMNAME:7%의 구슬×{A}
+SIF E > 0
+	PRINTFORM , %EXPNAME:2%{E}이상, %EXPNAME:20%{E}이상
+PRINT ……
+
+IF I == 0
+	PRINT OK
+ELSE
+	SIF I & 1
+		PRINT 주불발 
+	SIF I & 2
+		PRINT 경험불발 
+	SIF I & 4
+		PRINT 능력불발 
+ENDIF
+PRINTL 
+
+IF B > 0
+	;순종의 구슬로 올린다
+	SIF JUEL:순종 < B
+		J |= 1
+	;이 경우봉사쾌락경험가 필요한 일이 있어
+	SIF EXP:봉사쾌락경험 < D
+		J |= 2
+
+	PRINTFORM [1] - %PALAMNAME:5%의 구슬×{B}
+	SIF D > 0
+		PRINTFORM , %EXPNAME:21%{D}이상
+	PRINT ……
+	
+	IF J == 0
+		PRINT OK
+	ELSE
+		SIF J & 1
+			PRINT 주불발 
+		SIF J & 2
+			PRINT 경험불발 
+		SIF J & 4
+			PRINT 능력불발 
+	ENDIF
+	PRINTL 
+ELSE
+	J = 256
+ENDIF
+
+IF C > 0
+	;습득의 구슬로 올린다
+	SIF JUEL:습득 < C
+		K |= 1
+	;이 경우절정경험가 1이상 필요
+	SIF EXP:절정경험 < 1
+		K |= 2
+
+	PRINTFORM [2] - %PALAMNAME:8%의 구슬×{C}, %EXPNAME:2%1이상……
+	
+	IF K == 0
+		PRINT OK
+	ELSE
+		SIF K & 1
+			PRINT 주불발 
+		SIF K & 2
+			PRINT 경험불발 
+		SIF K & 4
+			PRINT 능력불발 
+	ENDIF
+	PRINTL 
+ELSE
+	K = 256
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+$INPUT_LOOP
+INPUT
+IF (RESULT < 0 || RESULT > 2) && RESULT != 100
+	GOTO INPUT_LOOP
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 채우고 있지 않습니다 재입력해 주세요
+	GOTO INPUT_LOOP
+ELSEIF J == 256 && RESULT == 1
+	GOTO INPUT_LOOP
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 채우고 있지 않습니다 재입력해 주세요
+	GOTO INPUT_LOOP
+ELSEIF K == 256 && RESULT == 2
+	GOTO INPUT_LOOP
+ELSEIF K != 0 && RESULT == 2
+	PRINTL 조건을 채우고 있지 않습니다 재입력해 주세요
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:봉사정신 += 1
+
+IF RESULT == 0
+	JUEL:굴복 -= A
+ELSEIF RESULT == 1
+	JUEL:순종 -= B
+ELSEIF RESULT == 2
+	JUEL:습득 -= C
+ENDIF
+
+PRINTFORMW %ABLNAME:7%의 레벨이{ABL:봉사정신}가 되었습니다
+
+;봉사정신LvUP 판정
+@DECIDE_ABLUP7
+;조건별로 OK인가 안 되는가를 기록한다
+I = 0
+J = 0
+K = 0
+;능력 업 가능하면 1으로 한다
+Z = 0
+
+IF ABL:봉사정신 == 0
+	A = 100
+	B = 20
+	C = 100
+	D = 5
+	E = 5
+ELSEIF ABL:봉사정신 == 1
+	A = 1200
+	B = 100
+	C = 0
+	D = 5
+	E = 10
+ELSEIF ABL:봉사정신 == 2
+	A = 5000
+	B = 600
+	C = 0
+	D = 20
+	E = 20
+ELSEIF ABL:봉사정신 == 3
+	A = 10000
+	B = 2000
+	C = 0
+	D = 50
+	E = 20
+ELSEIF ABL:봉사정신 == 4
+	A = 30000
+	B = 8000
+	C = 0
+	D = 100
+	E = 30
+ELSEIF ABL:봉사정신 == 5
+	A = 35000
+	B = 8500
+	C = 0
+	D = 150
+	E = 40
+ELSEIF ABL:봉사정신 == 6
+	A = 40000
+	B = 10000
+	C = 0
+	D = 200
+	E = 100
+ELSEIF ABL:봉사정신 == 7
+	A = 45000
+	B = 15000
+	C = 0
+	D = 250
+	E = 150
+ELSEIF ABL:봉사정신 == 8
+	A = 50000
+	B = 20000
+	C = 0
+	D = 300
+	E = 200
+ELSEIF ABL:봉사정신 == 9
+	A = 60000
+	B = 30000
+	C = 0
+	D = 400
+	E = 300
+ENDIF
+
+;연모
+SIF TALENT:연모
+	TIMES B , 0.80
+;친애
+SIF TALENT:친애
+	TIMES B , 0.60
+;복종
+SIF TALENT:복종
+	TIMES A , 0.70
+;예속
+SIF TALENT:예속
+	TIMES A , 0.40
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+	TIMES B , 2.00
+	TIMES C , 2.00
+	TIMES D , 2.00
+	TIMES E , 2.00
+ENDIF
+
+;순종가봉사정신＋1 레벨이 아니면 안 된다
+IF ABL:순종 < ABL:봉사정신+1
+	;순종가 불발
+	I |= 4
+	J |= 4
+	K |= 4
+ENDIF
+
+;LV4로부터 5에 올릴 때는이상경험이상 필요(소질:[연모][친애]라면 무시할 수 있다)
+IF ABL:봉사정신 == 4 && TALENT:연모 == 0 && TALENT:친애 == 0
+	IF EXP:이상경험 == 0
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+		K |= 2
+	ENDIF
+;LV8로부터 9에 올릴 때는이상경험 5 이상 필요(소질:[연모][친애]라면 무시할 수 있다)
+ELSEIF ABL:봉사정신 == 8 && TALENT:연모 == 0 && TALENT:친애 == 0
+	IF EXP:이상경험 < 5
+		;이상경험가 불발
+		I |= 2
+		J |= 2
+		K |= 2
+	ENDIF
+ENDIF
+
+;굴복의 구슬로 올린다
+SIF JUEL:굴복 < A
+	I |= 1
+;절정경험가 필요한 경우
+SIF EXP:절정경험 < E
+	I |= 2
+;정액경험가 필요한 경우
+SIF EXP:정액경험 < E
+	I |= 2
+
+IF I == 0
+	Z = 1
+ENDIF
+
+IF B > 0
+	;순종의 구슬로 올린다
+	SIF JUEL:순종 < B
+		J |= 1
+	;이 경우봉사쾌락경험가 필요한 일이 있어
+	SIF EXP:봉사쾌락경험 < D
+		J |= 2
+	
+	IF J == 0
+		Z = 1
+	ENDIF
+ELSE
+	J = 256
+ENDIF
+
+IF C > 0
+	;습득의 구슬로 올린다
+	SIF JUEL:습득 < C
+		K |= 1
+	;이 경우절정경험가 1이상 필요
+	SIF EXP:절정경험 < 1
+		K |= 2
+
+	IF K == 0
+		Z = 1
+	ENDIF
+ELSE
+	K = 256
+ENDIF
+RETURN 1
+

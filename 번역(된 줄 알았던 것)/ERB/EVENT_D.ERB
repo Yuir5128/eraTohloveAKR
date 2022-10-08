@@ -1,0 +1,300 @@
+﻿;-------------------------------------------------
+;EVENT_D.ERB, EVENT_DEPENDENCE, 의존도 시스템의 처리
+;의존도는 플러스에 크면 주인에 대해서 그리워하는 형태로 의존해,
+;마이너스에 크면 주인을 공포 하는 형태로 의존해 나간다
+;의존도 벡터는 각 조교 커맨드마다로 지시받고 있어 증가와 감소로 처리는 차이가 난다
+;-------------------------------------------------
+@MASTER_DEPENDENCE_CHECK
+
+;의존도의 벡터 처리
+;0는 함수 종료, 붕괴도 의존도는 변화하지 않는다
+IF TFLAG:33 == 0 || TALENT:붕괴 == 1
+	PRINTL <의존도 변화 없음>
+	RETURN 0
+;1는 의존도가 0이상으로 증가, 0 미만으로 감소
+ELSEIF TFLAG:33 == 1
+	SIF CFLAG:2 >= 0
+		CALL MASTER_DEPENDENCE_PLUS
+	SIF CFLAG:2 < 0
+		CALL MASTER_DEPENDENCE_MINUS
+;2는 증가, 다만복종, 예속소유는 감소
+ELSEIF TFLAG:33 == 2
+	IF TALENT:복종 || TALENT:예속
+		CALL MASTER_DEPENDENCE_MINUS
+	ELSE
+		CALL MASTER_DEPENDENCE_PLUS
+	ENDIF
+;3는 감소, 다만연모, 친애소유는 증가
+ELSEIF TFLAG:33 == 3
+	IF TALENT:연모 || TALENT:친애
+		CALL MASTER_DEPENDENCE_PLUS
+	ELSE
+		CALL MASTER_DEPENDENCE_MINUS
+	ENDIF
+;4는 강제 증가
+ELSEIF TFLAG:33 == 4
+	CALL MASTER_DEPENDENCE_PLUS
+;5는 강제 감소
+ELSEIF TFLAG:33 == 5
+	CALL MASTER_DEPENDENCE_MINUS
+ENDIF
+
+RETURN 0
+
+
+;의존도 증가 처리
+@MASTER_DEPENDENCE_PLUS
+
+R = 0
+
+;ABL:순종를 본다
+R += ABL:순종*2
+
+;ABL:봉사정신를 본다
+R += ABL:봉사정신
+
+;난이도를 본다
+;EASY
+IF FLAG:4 == 1
+	R += 1
+;NORMAL
+ELSEIF FLAG:4 == 2
+	R += 0
+;HARD
+ELSEIF FLAG:4 == 3
+	R -= 1
+ENDIF
+
+;소질에 의한 증감
+;함락 소질
+;연모
+SIF TALENT:연모
+	R += 5
+;친애
+SIF TALENT:친애
+	R += 7
+;음란
+M = NO:MASTER
+SIF TALENT:음란 && RELATION:M > 100
+	R += 3
+;창부
+SIF TALENT:창부 && RELATION:M > 100
+	R += 5
+;복종
+SIF TALENT:복종
+	R += 10
+;예속
+SIF TALENT:예속
+	R += 20
+
+;그 외 소질
+;자위광
+SIF TALENT:자위광
+	R += 1
+;음란구멍
+SIF TALENT:음란구멍
+	R += 1
+;항문광
+SIF TALENT:항문광
+	R += 1
+;음란가슴
+SIF TALENT:음란가슴
+	R += 1
+;섹스광
+SIF TALENT:섹스광 && (SEXPLAY(TARGET) || SELECTCOM == 122 || SELECTCOM == 225 || SELECTCOM == 226)
+	R += 2
+;맹신
+SIF TALENT:맹신
+	R += 2
+;츤데레
+SIF (TALENT:연모 || TALENT:친애 || TALENT:복종 || TALENT:예속) && TALENT:츤데레
+	R += 1
+
+;주인의매력
+SIF TALENT:MASTER:매력
+	R += 2
+;주인의매혹
+SIF TALENT:MASTER:매혹
+	R += 3
+;주인의수수께끼의매력
+SIF TALENT:MASTER:수수께끼의매력
+	R += 5
+;주인의치료
+SIF TALENT:MASTER:치료
+	R += 2
+;주인의고무적
+SIF TALENT:MASTER:고무적
+	R += 2
+;주인의인기
+SIF TALENT:MASTER:인기
+	R += 3
+
+;함락전과 함락후로 효과가 바뀌는 소질
+IF !TALENT:연모 && !TALENT:친애 && !TALENT:복종 && !TALENT:예속
+	;일선을넘지않음
+	SIF TALENT:일선을넘지않음
+		R -= 2
+	;무관심로 반
+	SIF TALENT:무관심
+		R /= 2
+ENDIF
+;의존도 보정을 가산
+R += TFLAG:30
+
+;실의로 반이 된다
+SIF TALENT:실의
+	R /= 2
+;멘헤라
+SIF TALENT:멘헤라
+	R += R/3
+
+;결과가 0 미만의 경우는 0으로 한다
+SIF R < 0
+	R = 0
+
+CFLAG:2 += R
+
+IF R > 0
+	PRINTL <의존도 증가>
+ELSE
+	PRINTL <의존도 변화 없음>
+ENDIF
+
+R = 0
+TFLAG:30 = 0
+
+
+RETURN 0
+
+
+
+;의존도 감소 처리
+@MASTER_DEPENDENCE_MINUS
+
+R = 0
+
+;ABL:순종를 본다
+R += ABL:순종*2
+
+;ABL:마조끼를 본다
+R += ABL:마조끼
+
+;난이도를 본다
+;EASY
+IF FLAG:4 == 1
+	R += 1
+;NORMAL
+ELSEIF FLAG:4 == 2
+	R += 0
+;HARD
+ELSEIF FLAG:4 == 3
+	R -= 1
+ENDIF
+
+;소질에 의한 증감
+;함락 소질
+;연모
+SIF TALENT:연모
+	R += 10
+;친애
+SIF TALENT:친애
+	R += 20
+;음란
+M = NO:MASTER
+SIF TALENT:음란 && RELATION:M > 100
+	R += 3
+;창부
+SIF TALENT:창부 && RELATION:M > 100
+	R += 5
+;복종
+SIF TALENT:복종
+	R += 5
+;예속
+SIF TALENT:예속
+	R += 7
+
+;그 외 소질
+;자위광
+SIF TALENT:자위광
+	R += 1
+;음란구멍
+SIF TALENT:음란구멍
+	R += 1
+;항문광
+SIF TALENT:항문광
+	R += 1
+;음란가슴
+SIF TALENT:음란가슴
+	R += 1
+;섹스광
+SIF TALENT:섹스광 && (SEXPLAY(TARGET) || SELECTCOM == 122 || SELECTCOM == 225 || SELECTCOM == 226)
+	R += 2
+;새드
+SIF TALENT:새드
+	R -= 1
+;마조
+SIF TALENT:마조
+	R += 1
+;맹신
+SIF TALENT:맹신
+	R += 2
+;츤데레
+SIF (TALENT:연모 || TALENT:친애 || TALENT:복종 || TALENT:예속) && TALENT:츤데레
+	R += 1
+
+;주인의매력
+SIF TALENT:MASTER:매력
+	R += 2
+;주인의매혹
+SIF TALENT:MASTER:매혹
+	R += 3
+;주인의수수께끼의매력
+SIF TALENT:MASTER:수수께끼의매력
+	R += 5
+;주인의치료
+SIF TALENT:MASTER:치료
+	R += 2
+;주인의고무적
+SIF TALENT:MASTER:고무적
+	R += 2
+;주인의인기
+SIF TALENT:MASTER:인기
+	R += 3
+;함락전과 함락후로 효과가 바뀌는 소질
+IF !TALENT:연모 && !TALENT:친애 && !TALENT:복종 && !TALENT:예속
+	;일선을넘지않음
+	SIF TALENT:일선을넘지않음
+		R -= 2
+	;무관심로 반
+	SIF TALENT:무관심
+		R /= 2
+ENDIF
+
+;의존도 보정을 가산
+R += TFLAG:30
+
+;실의로 반이 된다
+SIF TALENT:실의
+	R /= 2
+;멘헤라
+SIF TALENT:멘헤라
+	R += R/3
+
+;결과가 0 미만의 경우는 0으로 한다
+SIF R < 0
+	R = 0
+
+CFLAG:2 -= R
+
+IF R > 0
+	PRINTL <의존도 감소>
+ELSE
+	PRINTL <의존도 변화 없음>
+ENDIF
+
+R = 0
+TFLAG:30 = 0
+
+
+RETURN 0
+

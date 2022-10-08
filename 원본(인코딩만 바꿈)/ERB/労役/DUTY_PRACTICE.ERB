@@ -1,0 +1,259 @@
+﻿;====================================================================
+;DUTY_PRACTICE.ERB　内番-手合わせ
+;どうしても内番させたくて作った。
+;１日１組しか出せず、内番に出したキャラはその日１日拘束されるものの、ストレス解消の手段になります。
+@DUTY_PRACTICE
+;====================================================================
+;使用する一時変数の初期化
+A = 0
+B = 0
+LOCAL:3 = 0
+LOCAL:4 = 0
+
+C = 0
+V = 0
+
+DRAWLINE
+PRINTL 【 内番-手合わせ 】
+PRINTL 
+PRINTL 奴隷に２人１組でペアを組ませ、内番「手合わせ」を行わせる。
+PRINTL 特に得るものはないが、ストレス解消にはもってこい？
+PRINTL 
+PRINTL ■ 当番内容
+PRINTL 　：[手合わせ]
+PRINTL 
+PRINTL ■ 選択されている追加オプション
+PRINTL 　：＜利用可能なオプションはありません＞
+DRAWLINE
+PRINTL 
+
+;--------------------------------------------------------
+;内番させる奴隷を選択
+;--------------------------------------------------------
+PRINTL 内番で手合わせさせる奴隷を２人、選択してください
+WHILE V < 10
+	C = COUNT
+	CALL SET_DUTY_PRACTICE2
+	;REPEAT CHARANUM
+	;	SIF COUNT == MASTER
+	;		CONTINUE
+	;	SIF CFLAG:COUNT:1 < 2
+	;		CONTINUE
+	;	SIF CFLAG:COUNT:12 > 0
+	;		CONTINUE
+	;	C = COUNT
+	;	CALL CHECK_CHILD_CARE
+	;	SIF RESULT == 1
+	;		CONTINUE
+	;	SIF (CFLAG:COUNT:151 & 64) && BASE:COUNT:体力 >= 1000 && CFLAG:COUNT:18 > 0
+	;		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%を外す
+	;	SIF (CFLAG:COUNT:151 & 64) && BASE:COUNT:体力 >= 1000 && CFLAG:COUNT:18 == 0 && V < 2
+	;		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%を選択
+	;REND
+	COUNT = C
+	SIF A > 0 && B > 0
+		PRINTL [800] - 現在の２人で確定
+	PRINTL [999] - 戻る
+	$INPUT_LOOP
+	INPUT
+	IF RESULT == 999
+		SIF CFLAG:A:18
+			CFLAG:A:18 = 0
+		SIF CFLAG:B:18
+			CFLAG:B:18 = 0
+		RETURN 0
+	ELSEIF RESULT == 800
+		BREAK
+	ELSEIF RESULT < 0 || RESULT >= CHARANUM
+		GOTO INPUT_LOOP
+	ELSEIF RESULT == MASTER
+		GOTO INPUT_LOOP
+	ELSEIF CFLAG:RESULT:12 > 0
+		GOTO INPUT_LOOP
+	ELSEIF ((CFLAG:RESULT:151 & 64) == 0) || BASE:RESULT:体力 < 1000
+		GOTO INPUT_LOOP
+	ELSE
+		IF CFLAG:RESULT:18 == 0 && V < 2
+			CFLAG:RESULT:18 = 1
+			IF A == 0
+				A = RESULT
+			ELSE
+				B = RESULT
+			ENDIF
+			V += 1
+		;すでに選択されてるキャラを再選択した場合
+		ELSE
+			IF RESULT == A
+				;すでに２人目がいるのに１人目を外した場合、繰り上がる
+				IF B > 0
+					A = B
+					CFLAG:A:18 = 1
+					CFLAG:B:18 = 0
+					B = 0
+				ELSE
+					CFLAG:A:18 = 0
+					A = 0
+				ENDIF
+			ELSE
+				CFLAG:RESULT:18 = 0
+				B = 0
+			ENDIF
+			V -= 1
+			SIF V < 0
+				V = 0
+		ENDIF
+	ENDIF
+WEND
+
+SIF A == 0 && B == 0
+	RETURN 0
+
+;登録番号が小さい方をAにする
+IF A > B
+	LOCAL = A
+	A = B
+	B = LOCAL
+ENDIF
+
+;--------------------------------------------------------
+;手合わせを実行する
+;--------------------------------------------------------
+;PRINTFORML %CALLNAME:A%と%CALLNAME:B%が、手合わせを開始しました
+
+;労役フラグを手合わせに設定
+CFLAG:A:12 = 3
+CFLAG:B:12 = 3
+
+;2回KOJO_MESSAGE_EVENTすることで無理やり口上表示させる
+
+;地の文、口上呼び出しのために一時的に現在の調教対象を退避
+LOCAL = TARGET
+
+TFLAG:13 = 74
+
+UCHIBAN_A = A
+UCHIBAN_B = B
+
+TARGET = A
+;イベント口上（内番開始時）;地の文とAの口上
+CALL KOJO_MESSAGE_EVENT
+
+TARGET = B
+;イベント口上（内番開始時）;Bの口上
+CALL KOJO_MESSAGE_EVENT
+
+TARGET = LOCAL
+
+PRINTL 
+
+;AやBに保存されていたのがターゲットだった場合、内番に出て行くので消す。
+SIF UCHIBAN_A == TARGET || UCHIBAN_B == TARGET
+	TARGET = -1
+SIF UCHIBAN_A == ASSI || UCHIBAN_B == ASSI
+	ASSI = -1
+
+;内番に出ているキャラがいるフラグ（手合わせ=1）を立てる
+FLAG:161 |= 1
+
+
+
+
+;====================================================================
+;帰ってきたときの処理
+;====================================================================
+@END_DUTY_PRACTICE
+A = -1
+B = -1
+
+REPEAT CHARANUM
+	IF CFLAG:COUNT:12 == 3
+		IF A == -1
+			A = COUNT
+		ELSE
+			B = COUNT
+		ENDIF
+	ENDIF
+REND
+
+
+DRAWLINE
+PRINTFORMW %CALLNAME:A%と%CALLNAME:B%の手合わせが終了しました
+
+;2回KOJO_MESSAGE_EVENTすることで無理やり口上表示させる
+;地の文、口上呼び出しのために一時的に現在の調教対象を退避
+LOCAL = TARGET
+TFLAG:13 = 75
+
+UCHIBAN_A = A
+UCHIBAN_B = B
+
+TARGET = A
+;イベント口上（内番終了時）;地の文とAの口上
+CALL KOJO_MESSAGE_EVENT
+
+TARGET = B
+;イベント口上（内番終了時）;Bの口上
+CALL KOJO_MESSAGE_EVENT
+TARGET = LOCAL
+
+PRINTL 
+
+
+;--------------------------------------------------------
+;習得の珠
+;--------------------------------------------------------
+JUEL:A:習得 += 200
+JUEL:B:習得 += 200
+PRINTFORML %CALLNAME:A%と%CALLNAME:B%に習得の珠＋{200}
+
+
+
+;--------------------------------------------------------
+;体力の減少とストレス減少
+;--------------------------------------------------------
+;体力の減少
+BASE:A:体力 -= 500
+BASE:B:体力 -= 500
+
+;ストレス解消
+CFLAG:A:10 -= 10
+CFLAG:B:10 -= 10
+
+SIF CFLAG:A:10 < 0
+	CFLAG:A:10 = 0
+SIF CFLAG:B:10 < 0
+	CFLAG:B:10 = 0
+
+;使ったフラグは片付けましょう
+CFLAG:A:12 = 0
+CFLAG:A:18 = 0
+CFLAG:B:12 = 0
+CFLAG:B:18 = 0
+
+;内番に出ているキャラがいるフラグ（手合わせ=1）を落とす
+SIF FLAG:161 & 1
+	FLAG:161 -= 1
+
+DRAWLINE
+
+;====================================================================
+;内番させる奴隷を選択２
+;====================================================================
+@SET_DUTY_PRACTICE2
+REPEAT CHARANUM
+	SIF COUNT == MASTER
+		CONTINUE
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+	C = COUNT
+		CALL CHECK_CHILD_CARE
+		SIF RESULT == 1
+			CONTINUE
+	SIF (CFLAG:COUNT:151 & 64) && BASE:COUNT:体力 >= 1000 && CFLAG:COUNT:18 > 0
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%を外す
+	SIF (CFLAG:COUNT:151 & 64) && BASE:COUNT:体力 >= 1000 && CFLAG:COUNT:18 == 0 && V < 2
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%を選択
+REND
+
+
+

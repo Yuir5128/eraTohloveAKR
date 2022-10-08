@@ -1,0 +1,4964 @@
+﻿
+;==================================================
+;@KOJO_MESSAGE_COM 관계(X를 캐릭터 번호에 치환)
+;커맨드 실행시에 출력됩니다
+;==================================================
+@KOJO_MESSAGE_COM_K73
+;조수가 조교했을 때에입상을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0
+;볼개그착용시에는 지문을 표시해입상을 스킵 한다
+IF TEQUIP:볼개그 &&  SELECTCOM != 107
+	CALL TRAIN_MESSAGE
+	RETURN 0
+ENDIF
+
+;--------------------------------------------------
+;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL MESSAGE_COM_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL MESSAGE_COM_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;==================================================
+;특정의 조건을 채우고 있는 경우,커맨드를 실행할 때에 소스가 추가
+;노출벽라든지마조끼라든지 취미에 맞은 커맨드나 상태로체력·기력회복하는 사양에.
+;마조끼똥 높은데 곧기절 하는 것 어떻게든 하고 싶었던 것으로 테스트.
+;==================================================
+;봉사계의 커맨드 실행시에체력/uA력회복.
+IF ABL:봉사정신 >= 3
+	SELECTCASE SELECTCOM
+		;수몸봉사는체력회복
+		CASE 70,71,73 TO 80,85 TO 87,317,420,421,422
+			BASE:0 += ABL:봉사정신*2
+		;공봉사는기력회복
+		CASE 220 TO 225,260,261,263,264,318
+			BASE:1 += ABL:봉사정신*2
+		;체력기력양쪽 모두 회복한다
+		CASE 243 TO 245,319,503,504
+			BASE:0 += ABL:봉사정신*2
+			BASE:1 += ABL:봉사정신*2
+	ENDSELECT
+ENDIF
+
+;옷을 입지 않았다고기력회복,노출플레이중은체력회복.
+IF ABL:노출벽 >= 3
+	;전라 루트
+	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래） && !TEQUIP:특수 2 && !TEQUIP:특수 1
+		BASE:1 += ABL:노출벽*2
+	;반나체 루트
+	ELSEIF (TEQUIP:전신상의 || (TEQUIP:상의 && TEQUIP:하의)) && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래）
+		BASE:1 += ABL:노출벽*2
+	ENDIF
+	SIF TEQUIP:비디오카메라 || TEQUIP:야외플레이 || TEQUIP:수치플레이 || SELECTCOM == 3
+		BASE:0 += ABL:노출벽*2
+ENDIF
+
+;구속되고 있으면기력회복.
+;고통커맨드 실행시에체력회복.
+IF ABL:마조끼 >= 3
+	SIF TEQUIP:밧줄 || TEQUIP:아이마스크 || TEQUIP:볼개그 || TEQUIP:정조대 || TEQUIP:사정관리 || TEQUIP:전신상의 == 9
+		BASE:1 += ABL:마조끼*2
+	SELECTCASE SELECTCOM
+		CASE 16,25,44,56,62,140 TO 155
+			BASE:0 += ABL:마조끼*2
+	ENDSELECT
+ENDIF
+
+;노예공커맨드 실행시에체력/uA력회복.
+IF ABL:새드끼 >= 3
+	SIF TEQUIP:신발 > 0 && SELECTCOM == 80
+		BASE:0 += ABL:새드끼*2
+	SIF ABL:PLAYER:마조끼 >= 3 && (SELECTCOM == 226 || SELECTCOM == 227)
+		BASE:0 += ABL:새드끼*2
+		BASE:1 += ABL:새드끼*2
+	SIF SELECTCOM >= 226 && SELECTCOM <= 227
+		BASE:1 += ABL:새드끼*2
+ENDIF
+
+;자위를 하면체력·기력회복.
+IF ABL:자위중독 >= 3
+	SELECTCASE SELECTCOM
+		CASE 4,5,6,7
+			BASE:1 += ABL:자위중독*2
+	ENDSELECT
+ENDIF
+
+;정액 마셔체력회복.
+;정액을 받을 수 있을 것 같은 커맨드 실행시는기력회복.
+IF ABL:정액중독 >= 3
+	SIF TFLAG:0 == 0 && TFLAG:43 == 13
+		BASE:0 += ABL:정액중독*2
+	SELECTCASE SELECTCOM
+		CASE 70 TO 75,226,227,407,420,421,516
+			BASE:1 += ABL:정액중독*2
+		CASE 410,412
+			BASE:0 += ABL:정액중독*2
+	ENDSELECT
+ENDIF
+
+;섹스 하면체력·기력회복. 음란√라면 특수 섹스에서도 회복.
+IF ABL:섹스중독 >= 3
+	IF TALENT:음란 || TALENT:창부
+		SELECTCASE SELECTCOM
+			CASE 322,381,405,406,430,431,511 TO 515,517 TO 525
+				BASE:0 += ABL:섹스중독*2
+				BASE:1 += ABL:섹스중독*2
+		ENDSELECT
+	ENDIF
+	SELECTCASE SELECTCOM
+		CASE 100 TO 116,260 TO 265,507 TO 510,526
+			BASE:0 += ABL:섹스중독*2
+			BASE:1 += ABL:섹스중독*2
+	ENDSELECT
+ENDIF
+
+;스카계 커맨드 실행으로체력회복.
+;변의/mA의가 있을 때기력회복.
+IF ABL:스캇중독 >= 3
+	SIF BASE:4 >= 60 || BASE:6 >= 60
+		BASE:1 += ABL:스캇중독*2
+	SELECTCASE SELECTCOM
+		CASE 182 TO 185,285,286,302,304
+			BASE:0 += ABL:스캇중독*2
+	ENDSELECT
+	;움직이는지 모르지만 일단 들어갈 수 있어 본다
+	SIF TFLAG:58 == 1 || TFLAG:68 == 1
+		BASE:0 += ABL:스캇중독*2
+ENDIF
+
+
+;==================================================
+;랜덤소입상
+;==================================================
+;절정 회수
+IF (EX:0 + EX:1 + EX:2 + EX:3 >= 20)
+	PRINTFORMW 20회 이상의 절정을 거쳐,%CALLNAME%는 머리의 나사가 날아가 버린 것 같다
+	PRINTFORMW 야무지지 못하게 얼굴을 느슨해지게 해 말씨가 돌지 않는입조로 멋없는 허덕임을 누설하고 있다
+ELSEIF (EX:0 + EX:1 + EX:2 + EX:3 >= 10) && (EX:0 + EX:1 + EX:2 + EX:3 < 20)  && MARK:반발각인!= 3
+	PRINTFORMW 절정을 몇번이나 맛보여져%CALLNAME%는 숨도 끊어질듯 끊어질듯이 허덕이고 있다
+ENDIF
+
+
+;-------------------------------------------------
+;커맨드 실행시의 대사 CFLAG 300~500
+;실행 조건은 자료 폴더내,커맨드 실행 조건 파일을 참조
+;-------------------------------------------------
+
+;=================================================
+;기본계 커맨드
+;=================================================
+;-------------------------------------------------
+;0,애무 CFLAG:300
+;-------------------------------------------------
+;모든 착의 플레이 가능
+;지하실,촉수중은 할 수 없다
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;처음
+	IF CFLAG:300 == 0
+		PRINTFORMW 「읏… 너… 이런 일 해,무엇 생각하고 있다…!」
+		;오오쿠리카라
+		IF NO:MASTER == 116
+			PRINTFORMW 『입다물어라… 너는 입다물는 느끼고 있으면 된다』
+			PRINTFORML 「읏… 어째서……」
+			PRINTFORMW %CALLNAME%는 슬픈 듯이 눈을 숙였다
+		;사다쨩
+		ELSEIF NO:MASTER == 69
+			PRINTFORMW 『얌전하게 하고 있어 주어라,밋쨩. 괜찮아,기분 좋게 해 줄테니까…』
+			PRINTFORMW 「사다쨩…!」
+			PRINTFORMW %CALLNAME%는 괴로운 듯이 눈을 피했다
+		;하세베
+		ELSEIF NO:MASTER == 118
+			PRINTFORMW 『시끄러운입다. 좀 더 조용하게 할 수 없는 것인지』
+			PRINTFORML 「… 상당히 승손인 말이구나」
+			PRINTFORMW %CALLNAME%는 힘든 시선으로 %CALLNAME:PLAYER%를 노려봤다
+		;제약 기구
+		ELSEIF NO:MASTER == 49
+			PRINTFORMW 『뭐,남편과 이이코트를 하고 싶다고 생각해서 말이야』
+			PRINTFORMW 『여기를 이렇게 해 주면… 기분 좋지 않을까?』
+			PRINTFORML 「…… 후,쿠……!」
+			PRINTFORMW %CALLNAME%는꿋꿋함인 시선으로 %CALLNAME:PLAYER%를 노려보지만,신체는 열을 가지기 시작하고 있는 것 같다
+		;츠루마루
+		ELSEIF NO:MASTER == 130
+			PRINTFORMW 『군과 기분 좋은 일을 하고 싶다고 생각해서 말이야…』
+			PRINTFORMW 『… 반드시 너도 마음에 들 것이다야』
+			PRINTFORMW %CALLNAME:PLAYER%의애무에%CALLNAME%는 느끼면서도,어딘가 무서워한 눈을 %CALLNAME:PLAYER%에 향했다
+		ELSE
+			PRINTFORMW %CALLNAME%는 힘든 시선으로 %CALLNAME:PLAYER%를 노려봤다
+		ENDIF
+		CFLAG:300 = 1
+	;2회째 이후
+	ELSE
+		IF TEQUIP:20 || TEQUIP:21 || TEQUIP:23 || TEQUIP:25 || TEQUIP:26 || TEQUIP:29 || TEQUIP:30 || TEQUIP:31 || TEQUIP:34 || TEQUIP:35 || TEQUIP:36 || TEQUIP:37 || TEQUIP:40 || TEQUIP:41 || TEQUIP:42 || TEQUIP:43 || TEQUIP:46 || TEQUIP:47 || TEQUIP:50 || TEQUIP:56 || TEQUIP:60 || TEQUIP:61 || TEQUIP:62 || TEQUIP:63
+			CALL PANT_VOICE_EX
+			PRINTFORMW %CALLNAME%는 금빛의 눈동자를 녹일 수 있어 허덕이고 있다
+		ELSE
+			;연모,친애
+			;캐릭터별 반응은스킨십에 이동
+			IF TALENT:연모 || TALENT:친애
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「응응…… 후훗…… 기분 좋아」
+						PRINTFORMW %CALLNAME%는 기쁜듯이 미소짓고 있다
+					CASE 1
+						PRINTFORML 「응… 나도 너에게 손대고 싶구나」
+						PRINTFORMW %CALLNAME%는 열정적인 눈동자로 응시해 왔다
+					CASEELSE
+						PRINTFORML 「응,후후…… 낯간지러워」
+						PRINTFORMW %CALLNAME%는 낄낄 웃고 있지만,그 벌꿀색의 눈동자의 안쪽에는 음미로운 열이 켜지고 있다
+				ENDSELECT
+			;음란,창부
+			ELSEIF TALENT:음란 || TALENT:창부
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「응%UNICODE(0x2661)% 후후…… 엣치한 기분이 되어 와 버리네요」
+						PRINTFORMW %CALLNAME%는 음미롭게 미소짓고 있다
+					CASE 1
+						PRINTFORML 「후아…… 후후… 입흡 있고는 해 주지 않는거야?」
+						PRINTFORMW %CALLNAME%의 붉은 혀가,아랫 입술을 언뜻 빨았다
+					CASEELSE
+						PRINTFORML 「팥고물%UNICODE(0x2661)% (이)나,거기,좋은,기분 있고…%UNICODE(0x2661)%」
+						PRINTFORMW 녹은 눈동자로%CALLNAME%는 달콤한 소리를 지르고 있다
+				ENDSELECT
+			;복종,예속
+			ELSEIF TALENT:복종 || TALENT:예속
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「응응…… 너에게 손대어 받는 것은 기분이 좋지만… 할 수 있으면 내가 손대고 싶구나」
+						PRINTFORMW %CALLNAME%는 손대어지는 것 만으로는 것발리나 이상하다
+					CASE 1
+						PRINTFORML 「훗… 응…… 나에게 봉사시켜 주지 않는거야…?」
+						PRINTFORMW %CALLNAME%는 손대어지는 것 만으로는 것발리나 이상하다
+					CASEELSE
+						PRINTFORML 「햐웃…!? 이,이제(벌써)… 이상한 소리가 나와 버렸지 않은가…」
+						PRINTFORMW %CALLNAME%는 부끄러운 듯이 하고 있다
+				ENDSELECT
+			;붕괴
+			ELSEIF TALENT:붕괴
+				SELECTCASE RAND:3
+					CASE 0
+						IF NO:MASTER == 118
+							PRINTFORML 「앗… 응…… 쿠니시게님…」
+						ELSEIF NO:MASTER == 49
+							PRINTFORML 「앗… 응…… 제약 기구님…」
+						ELSE
+							PRINTFORML 「앗… 응……」
+						ENDIF
+						PRINTFORMW %CALLNAME%는 당황하면서도,%CALLNAME:PLAYER%로부터 주어지는 쾌감에 신체를 진동시키고 있다
+					CASE 1
+						PRINTFORML 「히웃…!아,안돼,안돼엣……」
+						SIF NO:MASTER == 118
+							PRINTFORML 『… 안되지 않을 것이다? 이렇게 신체를 기쁘게 하고 있는 주제에』
+						SIF NO:MASTER == 49
+							PRINTFORML 『… 이렇게 신체를 기쁘게 하고 있어 아,설득력이 없어,남편』
+						PRINTFORMW %CALLNAME%는 쾌감에 무서워하면서도,%CALLNAME:PLAYER%로 되는 대로다
+					CASEELSE
+						IF NO:MASTER == 118
+							PRINTFORML 「쿠,쿠니시게님…… 아웃… 조,좀 더,좀 더 해 주세요…」
+						ELSEIF NO:MASTER == 49
+							PRINTFORML 「제,제약 기구님…… 아웃… 조,좀 더,좀 더 해 주세요…」
+						ELSE
+							PRINTFORML 「아웃… 조,좀 더,좀 더 해 주세요…」
+						ENDIF
+						PRINTFORMW %CALLNAME%는 쾌감에 녹은 눈으로애무를 공갈했다
+				ENDSELECT
+			;통상시,굴복각인 3
+			ELSEIF MARK:2 == 3
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「읏… 이상한 곳을 손대지 않아 줄까나…… 이상한 기분이 된다…」
+					CASE 1
+						PRINTFORMW 「응읏…… 조금,기다려,거기는…!」
+					CASEELSE
+						PRINTFORMW 「히웃!? 어디 손대고 있는 거야…!」
+				ENDSELECT
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						IF NO:MASTER == 69 || NO:MASTER == 116
+							PRINTFORMW 「읏…!이상한 곳을,손대지 않아 줄까나…」
+						ELSE
+							PRINTFORMW 「읏…!손대지 않아 줄까나…」
+						ENDIF
+					CASE 1
+						PRINTFORMW 「그만두어 줘…」
+					CASEELSE
+						IF NO:MASTER == 69 || NO:MASTER == 116
+							PRINTFORMW 「읏… 장난치지 말아줘…!」
+						ELSE
+							PRINTFORMW 「읏… 장난치고 있는지…?」
+						ENDIF
+				ENDSELECT
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;1,키스한다 CFLAG:301
+;-------------------------------------------------
+IF SELECTCOM == 1
+	IF TEQUIP:20 || TEQUIP:21 || TEQUIP:23 || TEQUIP:25 || TEQUIP:26 || TEQUIP:29 || TEQUIP:30 || TEQUIP:31 || TEQUIP:34 || TEQUIP:35 || TEQUIP:36 || TEQUIP:37 || TEQUIP:40 || TEQUIP:41 || TEQUIP:42 || TEQUIP:43 || TEQUIP:46 || TEQUIP:47 || TEQUIP:50 || TEQUIP:56 || TEQUIP:60 || TEQUIP:61 || TEQUIP:62 || TEQUIP:63
+		CALL PANT_VOICE_EX
+		CALL TRAIN_MESSAGE
+	ELSE
+		CALL TRAIN_MESSAGE
+		;연모,친애
+		IF TALENT:연모 || TALENT:친애
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「응,츄…… 후아…… 이것,기분 좋다…」
+					PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+				CASE 1
+					PRINTFORML 「후웃… 응…… 너에게입 들이마셔 되는 것 좋아한다… 현대로는 키스라고 말하는 건가?」
+					PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+				CASEELSE
+					PRINTFORML 「응응우…… 츄…… 하후……」
+					PRINTFORMW 눈동자를 탕이나 키,%CALLNAME%는 %CALLNAME:PLAYER%의 목에 팔을 돌렸다
+			ENDSELECT
+		;음란,창부
+		ELSEIF TALENT:음란 || TALENT:창부
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「응츄…… 츄… 후후… 기분 좋다…%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 음미롭게 미소짓고 있다
+				CASEELSE
+					PRINTFORML 「응후후…… 다음은 좀 더 추잡한 키스를 하고 싶구나…%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 음미롭게 미소짓고 있다
+			ENDSELECT
+		;복종,예속
+		ELSEIF TALENT:복종 || TALENT:예속
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「응츄…… 츄… 아후…」
+					PRINTFORMW %CALLNAME%는 열심히 혀를 얽히게 되어지고 있다.
+				CASEELSE
+					PRINTFORML 「응응…… 츄…… 하앗… 기분 좋았어?」
+					PRINTFORMW %CALLNAME%는 음미롭게 미소짓고 있다
+			ENDSELECT
+
+		ELSEIF MARK:2 == 3
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「읏…… 후,아……」
+				CASE 1
+					PRINTFORMW 「츄… 후웃…… 응……」
+				CASEELSE
+					PRINTFORMW 「응… 아후……」
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「응응읏!」
+				CASE 1
+					PRINTFORMW 「응구…!째…… 읏…!」
+				CASEELSE
+					PRINTFORMW 「우에…… 응읏…!」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;2,아무것도안한다 CFLAG:302
+;-------------------------------------------------
+IF SELECTCOM == 2
+	IF TEQUIP:역조교
+		PRINTFORML 「… 손대었으면 좋은 것인지? 그렇지만 안돼…… 너는 조금,보류를 기억하자」
+		CALL TRAIN_MESSAGE
+	ELSE
+		IF PALAM:6 < PALAMLV:2
+			IF KANRAKU(TARGET)
+				PRINTFORML 「… 접해 주지 않는 것인지?」
+				PRINTFORMW %CALLNAME%는 불만인 것처럼 말했다
+			ELSE
+			ENDIF
+		ELSE
+			PRINTFORMW %CALLNAME%는 난폭한 숨을 내쉬면서,갖고 싶어하는 듯이 %CALLNAME:PLAYER%를 응시하고 있다…
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;3,비패개장 CFLAG:303
+;-------------------------------------------------
+IF SELECTCOM == 3
+	CALL TRAIN_MESSAGE
+;역조교모드
+	IF TEQUIP:역조교
+	IF ABL:노출벽 >= 3 && (TALENT:음란 || TALENT:창부)
+		IF TFLAG:38 > 0
+			PRINTFORMW 「저기,보렴… 네가 조금 전 낸 것,넘쳐 오고 있다…」
+			PRINTFORMW 「자지,쓱쓱 되어… 후훗,기분 좋았던 거네요?」
+			SIF TALENT:작은체구 && TALENT:PLAYER:작은체구 == 0 
+				PRINTFORMW 「그렇지 않으면… 이런 작은 아이에게 발기해 버리는 변태씨는,아직발리나 있고 걸까나? %UNICODE(0x2661)%」
+		ELSE
+			PRINTFORMW 「응후후… 그렇게 콧김 난폭하게 해…… 알고 있다. 너의 것을,여기에 들어가지고 싶겠지요?」
+			PRINTFORMW 「큐우큐우 단단히 조일 수 있어… 자지,쓱쓱 하고 싶네요…?」
+			PRINTFORML 「그렇지만 안돼%UNICODE(0x2661)% 너는 조금 인내를 기억하지 않으면… 후훗」
+		ENDIF
+			PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+	ELSE
+		IF KANRAKU(TARGET)
+			IF TFLAG:38 > 0
+				PRINTFORML 「저기… 보렴… 네가 조금 전 낸 것,넘쳐 오고 있다…」
+			ELSE
+				PRINTFORML 「그,그다지 보지 않으면 좋구나…」
+			ENDIF
+		PRINTFORMW %CALLNAME%는 부끄러운 듯이 뺨을 물들이고 있다
+		ELSE
+		ENDIF
+	ENDIF
+;통상 모드
+	ELSE
+	IF ABL:노출벽 >= 1 && KANRAKU(TARGET)
+		;연모,친애
+		IF TALENT:연모 || TALENT:친애
+			IF TFLAG:38 > 0
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORML 「응… 네가 조금 전 낸 것,넘쳐 오고 있네요…」
+					CASEELSE
+						PRINTFORML 「가득 냈군요… 이렇게 넘쳐 오고 있는…%UNICODE(0x2661)%」
+				ENDSELECT
+				PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+			ELSE
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORML 「응…… 이것,부끄럽다…」
+						PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+					CASEELSE
+						PRINTFORML 「후후… 이 안쪽에 자궁이 있는거야」
+						PRINTFORMW %CALLNAME%휘어짐과 뺨을 물들여 미소짓고 있다
+				ENDSELECT
+			ENDIF
+		;음란,창부
+		ELSEIF TALENT:음란 || TALENT:창부
+			IF TFLAG:38 > 0
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORML 「응,후후… 정액이 흘러넘쳐 버리고 있네요…%UNICODE(0x2661)%」
+					CASEELSE
+						PRINTFORML 「자신이 낸 정액을 확인하고 싶었어? 후후… 엣치하다」
+				ENDSELECT
+					PRINTFORMW %CALLNAME%는 음미롭게 미소짓고 있다
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「후훗… 변태씨인 것이니까%UNICODE(0x2661)%」
+					CASE 1
+						PRINTFORML 「후후… 이 (안)중에,아기의 방이 있어%UNICODE(0x2661)%」
+					CASEELSE
+						PRINTFORML 「응… 기대하고 있는 것 너에게 발각되어 버리네요…%UNICODE(0x2661)%」
+				ENDSELECT
+					PRINTFORMW %CALLNAME%는 음미롭게 미소짓고 있다
+			ENDIF
+		;복종,예속
+		ELSEIF TALENT:복종 || TALENT:예속
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「응… 이런 일 시켜 즐거운 것인지? 아니,너가 만발 해 준다면 그것으로 좋지만…」
+					PRINTFORMW %CALLNAME%는 조금 곤혹한 모습이다
+				CASEELSE
+					PRINTFORML 「이것,상당히 부끄러워…?」
+					PRINTFORMW 그렇게 말하면서도,%CALLNAME%는 음미롭게 미소짓고 있다
+			ENDSELECT
+		ELSE
+			CALL PANT_VOICE_EX
+		ENDIF
+	ELSE
+	;붕괴
+		IF TALENT:붕괴
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「이,이런…… 후,웃……」
+				CASE 1
+					PRINTFORML 「아아…… 우우… 보기 흉한…」
+				CASEELSE
+					PRINTFORML 「우,후우…」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%는 수치에 견디지 못했다 같게 울고 있다
+		;통상시,굴복각인 3
+		ELSEIF MARK:2 == 3
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORMW 「이것,부끄럽지만…」
+				CASEELSE
+					PRINTFORMW 「읏… 이런 일 시켜 즐거운 것인지…?」
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「읏… 이런 일 시켜 즐거운 것인지?」
+				CASEELSE
+					PRINTFORMW 「… 너,변태구나」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+ENDIF
+
+;-------------------------------------------------
+;4,자위 CFLAG:304
+;-------------------------------------------------
+IF SELECTCOM == 4
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「아,하……… 손대어… 읏,가지고 싶구나…?」
+				PRINTFORMW 자신을 위로하면서,%CALLNAME%는 청하는 것처럼 %CALLNAME:PLAYER%를 응시하고 있다
+			CASE 1
+				PRINTFORML 「응읏…… 하하… 너,보고 있는 것만으로 좋은 것인지…?」
+				PRINTFORMW %CALLNAME%는 녹은 눈동자로 %CALLNAME:PLAYER%를 응시하고 있다
+			CASEELSE
+				PRINTFORML 「앗,하,후우……」
+				PRINTFORMW 눈동자를 탕이나 키,%CALLNAME%는 자신을 위로하고 있다
+		ENDSELECT
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;5,가슴자위 CFLAG:305
+;-------------------------------------------------
+IF SELECTCOM == 5
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「아,하……… 손대어… 읏,가지고 싶구나…?」
+				PRINTFORMW 내민가슴를 위로하면서,%CALLNAME%는 청하는 것처럼 %CALLNAME:PLAYER%를 응시하고 있다
+			CASE 1
+				PRINTFORML 「응읏…… 하하… 너,보고 있는 것만으로 좋은 것인지…?」
+				PRINTFORMW %CALLNAME%는 녹은 눈동자로 %CALLNAME:PLAYER%를 응시하고 있다
+			CASEELSE
+				PRINTFORML 「앗,하,후우……」
+				PRINTFORMW 눈동자를 탕이나 키,%CALLNAME%는 과시하는 것처럼 내민가슴를 위로하고 있다
+		ENDSELECT
+	;외
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「하앗… 응… 이런 일 시켜 무엇이 즐거운 것인지…」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;6,자위 CFLAG:306
+;나카타씨 한후에 커맨드 실행으로 흘러넘치는 것처럼 하고 싶다
+;ONCE 함수 사용할까? 우선 보류
+;-------------------------------------------------
+IF SELECTCOM == 6
+	CALL TRAIN_MESSAGE
+	IF TALENT:복종 || TALENT:예속
+		IF ABL:A감각 > 2
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「응읏…… 하후…… 이런 곳 만져… 기분이 좋다니…」
+					PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+				CASE 1
+					PRINTFORML 「읏… 푸,풀리고 있기 때문에……,빠르게…… 후,아우…」
+					PRINTFORMW %CALLNAME%는 격렬하게 자신의후 구멍을 위로하고 있다
+				CASEELSE
+					PRINTFORML 「하후… 우…… 응,나,너취향의 신체에… 앗,되었는지…?」
+					PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「구…… 하앗…… 응,괜찮아」
+					PRINTFORMW %CALLNAME%는 괴로운 듯이 미소짓고 있다
+				CASEELSE
+					PRINTFORML 「응읏…… 하,하,아……」
+					PRINTFORMW %CALLNAME%는 괴로운 듯이 참고 있다
+			ENDSELECT
+		ENDIF
+	ELSEIF KANRAKU(TARGET)
+		IF ABL:A감각 > 2
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「응읏…… 하후…… 나,이런 곳 만져,아읏… 기분 좋아져 버리고 있는…%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+				CASE 1
+					PRINTFORML 「아읏…\@ TALENT:남자? 나,남자인데 # 응\@엉덩이 기분이 좋아…%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 격렬하게 자신의후 구멍을 위로하고 있다
+				CASEELSE
+					PRINTFORML 「하후… 너…… 너의 탓으로 나,엉덩이로 느끼는 변태가 되어 버린…%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「구…… 하앗…… 응,괜찮아」
+					PRINTFORMW %CALLNAME%는 괴로운 듯이 미소짓고 있다
+				CASEELSE
+					PRINTFORML 「응읏…… 하,하,아……」
+					PRINTFORMW %CALLNAME%는 괴로운 듯이 참고 있다
+			ENDSELECT
+		ENDIF
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;7,항문자위 CFLAG:307
+;-------------------------------------------------
+IF SELECTCOM == 7
+	CALL TRAIN_MESSAGE
+	IF TALENT:복종 || TALENT:예속
+		IF ABL:A감각 > 2
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「응읏…… 하후…… 이런 곳 만져… 기분이 좋다니…」
+					PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+				CASE 1
+					PRINTFORML 「읏… 푸,풀리고 있기 때문에……,빠르게…… 후,아우…」
+					PRINTFORMW %CALLNAME%는 격렬하게 자신의후 구멍을 위로하고 있다
+				CASEELSE
+					PRINTFORML 「하후… 우…… 응,나,너취향의 신체에… 앗,되었는지…?」
+					PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「구…… 하앗…… 응,괜찮아」
+					PRINTFORMW %CALLNAME%는 괴로운 듯이 미소짓고 있다
+				CASEELSE
+					PRINTFORML 「응읏…… 하,하,아……」
+					PRINTFORMW %CALLNAME%는 괴로운 듯이 참고 있다
+			ENDSELECT
+		ENDIF
+	ELSEIF KANRAKU(TARGET)
+		IF ABL:A감각 > 2
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「응읏…… 하후…… 어느 쪽도 기분 있고…%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+				CASE 1
+					PRINTFORML 「아읏… 나,엉덩이도 기분이 좋아…%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 격렬하게 자신의후 구멍을 위로하고 있다
+				CASEELSE
+					PRINTFORML 「하후… 너…… 너의 탓으로 나,엉덩이에서도 느끼는 변태가 되어 버린…%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 눈동자를 녹일 수 있어,뜨거운 숨을 내쉬었다
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「구…… 하앗…… 응,괜찮아」
+					PRINTFORMW %CALLNAME%는 괴로운 듯이 미소짓고 있다
+				CASEELSE
+					PRINTFORML 「응읏…… 하,하,아……」
+					PRINTFORMW %CALLNAME%는 괴로운 듯이 참고 있다
+			ENDSELECT
+		ENDIF
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+
+
+
+;=================================================
+;B계 커맨드
+;=================================================
+;-------------------------------------------------
+;10,가슴애무 CFLAG:308
+;-------------------------------------------------
+IF SELECTCOM == 10
+	CALL TRAIN_MESSAGE
+;가슴관련은 열중하고 싶은 곳인 것으로,이번에 고쳐 쓴다
+	IF KANRAKU(TARGET)
+		;착의
+		IF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORMW 「읏… 직접적으로 손대었으면 좋구나…」
+				CASEELSE
+;					IF TALENT:작은체구 && TALENT:빈유
+;						PRINTFORMW 
+;					ELSE
+						PRINTFORMW 「훗…… 벗게 해 주지 않는거야?」
+;					ENDIF
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					IF PALAM:6 >= PALAMLV:3 && TEQUIP:착유기 == 0 && TEQUIP:니틀캡 == 0
+						PRINTFORMW 「앗… 응읏,집으면 싫어…」
+					ELSE
+						PRINTFORMW 「후,응응… 좀 더 강하게 해도 괜찮아…?」
+					ENDIF
+				CASEELSE
+					CALL PANT_VOICE_EX
+			ENDSELECT
+		ENDIF
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;11,가슴주무르기 CFLAG:309
+;-------------------------------------------------
+IF SELECTCOM == 11
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		;착의
+		IF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORMW 「힛… 응… 직접적으로 손대었으면 좋구나…」
+				CASEELSE
+;					IF TALENT:작은체구 && TALENT:빈유
+;						PRINTFORMW 
+;					ELSE
+						PRINTFORMW 「훗…… 벗게 해 주지 않는거야…?」
+;					ENDIF
+			ENDSELECT
+		ELSE
+			IF TALENT:빈유
+				PRINTFORMW 「응응… 군요,비비면 커진다고,사… 사실,일까?」
+			ELSEIF TALENT:거유 || TALENT:폭유
+				PRINTFORMW 「…… 군요,부드러워서,응응… 기분 좋을 것입니다…?」
+			ELSE
+				CALL PANT_VOICE_EX
+			ENDIF
+		ENDIF
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;12,유두로터 CFLAG:310
+;-------------------------------------------------
+IF SELECTCOM == 12
+	CALL TRAIN_MESSAGE
+	;연모,친애
+;	IF TALENT:연모 || TALENT:친애
+;		IF !RAND:3
+;			PRINTFORML 「응읏,
+;		ELSEIF !RAND:2
+;			PRINTFORML 표시 2
+;		ELSE
+;			PRINTFORML 표시 3
+;		ENDIF
+
+	;음란,창부
+;	ELSEIF TALENT:음란 || TALENT:창부
+	;복종,예속
+;	ELSEIF TALENT:복종 || TALENT:예속
+	;붕괴
+;	ELSEIF TALENT:붕괴
+	;통상시,굴복각인 3
+;	ELSEIF MARK:2 == 3
+;	ELSE
+;	ENDIF
+	CALL PANT_VOICE_EX
+
+ENDIF
+
+;-------------------------------------------------
+;13,니틀캡 CFLAG:311
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 13 && TEQUIP:니틀캡 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 13 && TEQUIP:니틀캡
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;14,유두고문 CFLAG:312
+;-------------------------------------------------
+IF SELECTCOM == 14
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;15,유두클립 CFLAG:313
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 15 && TEQUIP:유두클립 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 15 && TEQUIP:유두클립
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;16,유방전극 CFLAG:314
+;-------------------------------------------------
+IF SELECTCOM == 16
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;17,착유기 CFLAG:315
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 17 && TEQUIP:착유기 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 17 && TEQUIP:착유기
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;18,모유마시기 CFLAG:316
+;-------------------------------------------------
+IF SELECTCOM == 18
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;C계 커맨드
+;=================================================
+;-------------------------------------------------
+;20,로터 CFLAG:317
+;-------------------------------------------------
+IF SELECTCOM == 20
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;21,진동마사지기 CFLAG:318
+;-------------------------------------------------
+IF SELECTCOM == 21
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;22,클리캡 CFLAG:319
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 22 && TEQUIP:클리캡 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 22 && TEQUIP:클리캡
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;23,클리고문 CFLAG:320
+;-------------------------------------------------
+IF SELECTCOM == 23
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;24,음핵클립 CFLAG:321
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 24 && TEQUIP:음핵클립 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 24 && TEQUIP:음핵클립
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;25,음핵전극 CFLAG:322
+;-------------------------------------------------
+IF SELECTCOM == 25
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;P계 커맨드
+;=================================================
+;-------------------------------------------------
+;30,수음한다 CFLAG:323
+;-------------------------------------------------
+IF SELECTCOM == 30
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;31,펠라한다 CFLAG:324
+;-------------------------------------------------
+IF SELECTCOM == 31
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;32,전동오나홀 CFLAG:325
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 32 && TEQUIP:전동오나홀 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 32 && TEQUIP:전동오나홀
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;33,귀두고문 CFLAG:326
+;-------------------------------------------------
+IF SELECTCOM == 33
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;34,구슬애무 CFLAG:327
+;-------------------------------------------------
+IF SELECTCOM == 34
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;35,구슬고문 CFLAG:328
+;-------------------------------------------------
+IF SELECTCOM == 35
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;36,벗겨낸다 CFLAG:329
+;-------------------------------------------------
+IF SELECTCOM == 36
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;V계 커맨드
+;=================================================
+;-------------------------------------------------
+;40,커닐링구스 CFLAG:330
+;-------------------------------------------------
+IF SELECTCOM == 40
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;41,손가락삽입 CFLAG:331
+;-------------------------------------------------
+IF SELECTCOM == 41
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;42,로터삽입 CFLAG:332
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 42 && TEQUIP:로터삽입 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 42 && TEQUIP:로터삽입
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;43,바이브 CFLAG:333
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 43 && TEQUIP:바이브 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 43 && TEQUIP:바이브
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;44,바기나전극 CFLAG:334
+;-------------------------------------------------
+IF SELECTCOM == 44
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;A계 커맨드
+;=================================================
+;-------------------------------------------------
+;50,애널자극 CFLAG:335
+;-------------------------------------------------
+IF SELECTCOM == 50
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+	;연모,친애
+;	IF TALENT:연모 || TALENT:친애
+	;음란,창부
+;	ELSEIF TALENT:음란 || TALENT:창부
+	;복종,예속
+;	ELSEIF TALENT:복종 || TALENT:예속
+	;붕괴
+;	ELSEIF TALENT:붕괴
+	;통상시,굴복각인 3
+;	ELSEIF MARK:2 == 3
+;	ELSE
+;	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;51,애널애무 CFLAG:336
+;-------------------------------------------------
+IF SELECTCOM == 51
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;	IF TEQUIP:애널바이브
+;		PRINTFORM 조금씩 떨리는애널바이브를 전후에 빼고 꽂기 했다…
+;	ELSEIF TEQUIP:애널비즈
+;		PRINTFORM 비즈의 끈을 잡아당겨 가볍게 출납해 주었다…
+;	ELSEIF TEQUIP:로터A삽입
+	;연모,친애
+;		IF TALENT:연모 || TALENT:친애
+	;음란,창부
+;		ELSEIF TALENT:음란 || TALENT:창부
+;			PRINTFORML 「아웃,싫다,빠져 버린다…」
+;			PRINTFORMW %CALLNAME%는로터를 뽑아지지 않으려고,애널를 꽉 잡았다
+	;복종,예속
+;		ELSEIF TALENT:복종 || TALENT:예속
+	;붕괴
+;		ELSEIF TALENT:붕괴
+	;통상시,굴복각인 3
+;		ELSEIF MARK:2 == 3
+;		ELSE
+;		ENDIF
+;	ELSEIF TEQUIP:확장벌룬
+;		PRINTFORM 애널를 한계까지 넓히고 있는 벌룬을 전후에 움직여 주었다…
+;	ELSE
+;	ENDIF
+
+	;연모,친애
+;	IF TALENT:연모 || TALENT:친애
+	;음란,창부
+;	ELSEIF TALENT:음란 || TALENT:창부
+	;복종,예속
+;	ELSEIF TALENT:복종 || TALENT:예속
+	;붕괴
+;	ELSEIF TALENT:붕괴
+	;통상시,굴복각인 3
+;	ELSE
+;		IF PALAM:6 >= PALAMLV:3 && ABL:A감각 >= 3
+;		ELSE
+;		ENDIF
+;	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;52,로터A삽입 CFLAG:337
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 52 && TEQUIP:로터A삽입 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 52 && TEQUIP:로터A삽입
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;53,애널비즈 CFLAG:338
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 53 && TEQUIP:애널비즈 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 53 && TEQUIP:애널비즈
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;54,애널바이브 CFLAG:339
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 54 && TEQUIP:애널바이브 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 54 && TEQUIP:애널바이브
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;55,확장벌룬 CFLAG:340
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 55 && TEQUIP:확장벌룬 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 55 && TEQUIP:확장벌룬
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;56,애널전극 CFLAG:341
+;-------------------------------------------------
+IF SELECTCOM == 56
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;U계 커맨드
+;=================================================
+;-------------------------------------------------
+;60,카테터 CFLAG:342
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 60 && TEQUIP:카테터 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 60 && TEQUIP:카테터
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;61,요도벌룬 CFLAG:343
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 61 && TEQUIP:요도벌룬 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 61 && TEQUIP:요도벌룬
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;62,전극카테터 CFLAG:344
+;-------------------------------------------------
+IF SELECTCOM == 62
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;봉사계 커맨드
+;=================================================
+;-------------------------------------------------
+;70,수음 CFLAG:345
+;-------------------------------------------------
+IF SELECTCOM == 70
+	CALL TRAIN_MESSAGE
+	;이번장갑,오나홀 분기도 추가한다
+	IF KANRAKU(TARGET)
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「후훗,움찔움찔 하고 있구나%UNICODE(0x2661)%」
+			CASE 1
+				PRINTFORMW 「어떨까,기분이 좋아?」
+			CASEELSE
+				PRINTFORMW 「여기… 이렇게 해 되는 것,기분 좋지 않을까?」
+		ENDSELECT
+	;통상시,굴복각인 3
+	ELSEIF MARK:2 == 3
+		PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%의 안색을 물으면서,봉사를 계속하고 있다
+	ELSE
+		PRINTFORMW %CALLNAME%는 참는 것처럼,입다물어손를 움직이고 있다
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;71,펠라치오 CFLAG:346
+;-------------------------------------------------
+IF SELECTCOM == 71
+	CALL TRAIN_MESSAGE
+	;연모,친애
+	IF TALENT:연모 || TALENT:친애
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「쥬…… 츄룻……」
+			CASEELSE
+				PRINTFORML 「쥬룻…… 응… 후에,끈히 좋아?」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%를 기쁨구 하려고 열심히 봉사를 계속하고 있다
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「쥿… 츄…… 후후%UNICODE(0x2661)% 움찔움찔 하고 있는%UNICODE(0x2661)%」
+			CASE 1
+				PRINTFORML 「쥿… 츄룻…… 후후%UNICODE(0x2661)% 두고 해%UNICODE(0x2661)%」
+			CASEELSE
+				PRINTFORML 「츄룻… 쥬웃…… 푸앗. 응,후후… 이것,나중에 아래의 입에도 주네요? %UNICODE(0x2661)%」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 기쁜듯이 %CALLNAME:PLAYER%의페니스를 가득 넣었다
+	;복종,예속
+	ELSEIF TALENT:복종 || TALENT:예속
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「쥿… 츄룻…… 응,기분이 좋은가?」
+			CASEELSE
+				PRINTFORML 「아므…… 쥬룻…… 이봐요,우대신?」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 열심히 %CALLNAME:PLAYER%의페니스에 봉사하고 있다
+	;붕괴
+	ELSEIF TALENT:붕괴
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML %CALLNAME%는 %CALLNAME:PLAYER%의페니스의 첨단을입에 포함해,귀두를 구사리,들이마시고 있다
+				PRINTFORML 「쥬룻… 응구… 히 가져 좋습니까…?」
+				PRINTFORMW %CALLNAME%는 무서워한 눈으로 %CALLNAME:PLAYER%의 안색을 듣고 있다
+			CASEELSE
+				PRINTFORML 「쥬룻… 츄… 응,후아……」
+				PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%의페니스를입에 포함해,열심히 빨고 있다
+		ENDSELECT
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「쥬룻… 응응…」
+			CASEELSE
+				PRINTFORMW 「응구… 후……」
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;72,이라마치오 CFLAG:347
+;-------------------------------------------------
+IF SELECTCOM == 72
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;73,파이즈리 CFLAG:348
+;-------------------------------------------------
+IF SELECTCOM == 73
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;74,세로파이즈리 CFLAG:349
+;-------------------------------------------------
+IF SELECTCOM == 74
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;75,파이즈리펠라 CFLAG:350
+;-------------------------------------------------
+IF SELECTCOM == 75
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;76,스마타 CFLAG:351
+;-------------------------------------------------
+IF SELECTCOM == 76
+	CALL TRAIN_MESSAGE
+	;연모,친애
+	IF TALENT:연모 || TALENT:친애
+		SELECTCASE RAND:2
+			CASE 0
+				CALL PANT_VOICE_EX
+			CASEELSE
+				PRINTFORMW 「응응…… 군요,기분 좋아…?」
+				PRINTFORMW %CALLNAME%는 음탕하게 미소지으면서 봉사를 계속하고 있다
+		ENDSELECT
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「응응%UNICODE(0x2661)% 후후… 움찔움찔 하고 있는%UNICODE(0x2661)% 저기,나의 허벅지 기분 좋아?」
+				PRINTFORMW %CALLNAME%는 음탕하게 미소지으면서 봉사를 계속하고 있다
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	;복종,예속
+	ELSEIF TALENT:복종 || TALENT:예속
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「응읏… 응,기분 좋은가…?」
+				PRINTFORMW %CALLNAME%는 허덕이면서 봉사를 계속하고 있다
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	;통상시,굴복각인 3
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;77,손가락츄파 CFLAG:352
+;-------------------------------------------------
+IF SELECTCOM == 77
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;80,풋잡 CFLAG:353
+;-------------------------------------------------
+IF SELECTCOM == 80
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		IF TALENT:작은체구 && ABL:새드끼 >= 2
+			PRINTFORMW 「후훗… 작은 아이에게 강요해지는 것을 좋아하는가,변태씨%UNICODE(0x2661)%」
+		ELSEIF ABL:새드끼 >= 5
+			IF TEQUIP:신발 > 0
+				PRINTFORMW 「자지 짓밟아 부숴 버릴 것 같다%UNICODE(0x2661)% …… 후훗,농담이야」
+			ELSEIF TEQUIP:특수 2 > 0
+				PRINTFORM 「아아,너… 나의
+				A = 1
+				CALL CLOTHES_NAME
+				PRINTFORMW 가 더러워져 버렸지 않은가… 후후,어떻게 책임 취해 줄까나?」
+			ELSE
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORMW 「너는 짓밟을 수 있는 (분)편을 좋아하네요? %UNICODE(0x2661)%」
+					CASEELSE
+						PRINTFORMW 「이봐요,발로 보기 흉하게 가 좋은%UNICODE(0x2661)%」
+				ENDSELECT
+			ENDIF
+		ELSE
+			IF TEQUIP:신발 > 0
+				PRINTFORMW 「아,아프지 않은 것인지…?」
+			ELSEIF TEQUIP:특수 2 > 0
+				PRINTFORM 「후후…
+				A = 1
+				CALL CLOTHES_NAME
+				PRINTFORMW 로 비비어지는 것 기분이 좋은거야? %UNICODE(0x2661)%」
+			ELSE
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORMW 「발로 비비어지는 것이 좋다니 변태씨구나%UNICODE(0x2661)%」
+					CASEELSE
+						PRINTFORMW 「후후,발로 가 버리는지?」
+				ENDSELECT
+			ENDIF
+		ENDIF
+	ELSEIF TALENT:붕괴
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「아,발로는… 이,이런 일을 시키지 않아 주지 않겠습니까…」
+			CASEELSE
+				PRINTFORMW 「아,발로 비비는 것,기분이 좋습니까…?」
+		ENDSELECT
+	ELSE
+		IF ABL:새드끼 >= 5
+			IF TEQUIP:신발 > 0
+				PRINTFORMW 「짓밟을 수 있어 흥분하다니 어쩔 수 없는 변태구나」
+			ELSEIF TEQUIP:특수 2 > 0
+				PRINTFORM 「… 나의
+				A = 1
+				CALL CLOTHES_NAME
+				PRINTFORMW 가 더러워졌지만」
+			ELSE
+				PRINTFORMW 「발로 비비어져 흥분하다니 어쩔 수 없는 변태구나」
+			ENDIF
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORMW 「… 빨리 달해 줄까」
+				CASEELSE
+					PRINTFORMW 「읏… 너의 앞달리기로발가 젖어,기분 나쁘지만」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;81,헤어잡 CFLAG:354
+;-------------------------------------------------
+IF SELECTCOM == 81
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「후후… 나의머리카락,기분이 좋은거야?」
+			CASE 1
+				PRINTFORMW 「응…… 이제(벌써),세트 했는데,너의 앞달리기로 젖어 버렸지 않을까%UNICODE(0x2661)%」
+			CASEELSE
+				PRINTFORMW %CALLNAME%는 흥분한 모습으로 %CALLNAME:PLAYER%의페니스를 응시하고 있다
+		ENDSELECT
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「우,우… 이런,보기 흉한…」
+				PRINTFORMW %CALLNAME%는 떨리면서 굴욕에 참고 있다
+			CASEELSE
+				PRINTFORMW %CALLNAME%는 눈을 감아 굴욕에 참고 있다
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;82,겨드랑이 코키 CFLAG:355
+;-------------------------------------------------
+IF SELECTCOM == 82
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;83,엉덩이더듬기 CFLAG:356
+;-------------------------------------------------
+IF SELECTCOM == 83
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;84,니플퍽 CFLAG:357
+;-------------------------------------------------
+IF SELECTCOM == 84
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;85,발핥기강제 CFLAG:358
+;-------------------------------------------------
+IF SELECTCOM == 85
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;86,구슬비비기강제 CFLAG:359
+;-------------------------------------------------
+IF SELECTCOM == 86
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;87,구슬핥기강제 CFLAG:360
+;-------------------------------------------------
+IF SELECTCOM == 87
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;섹스계 커맨드
+;=================================================
+;-------------------------------------------------
+;100,정상위 CFLAG:361
+;-------------------------------------------------
+IF SELECTCOM == 100
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		IF TEQUIP:바이브
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+				CASE 1
+					PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+				CASEELSE
+					PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%의 비밀의 틈[秘裂]은 힘껏에 퍼져 버리고 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ELSE
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ENDIF
+				CASEELSE
+					PRINTFORML 「팥고물… 군요,썩고 들이마셔,해… 응%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 녹은 얼굴로 키스를 공갈해 왔다
+			ENDSELECT
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+
+ENDIF
+
+;-------------------------------------------------
+;101,후배위 CFLAG:362
+;-------------------------------------------------
+IF SELECTCOM == 101
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		IF TEQUIP:바이브
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+				CASE 1
+					PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+				CASEELSE
+					PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%의 비밀의 틈[秘裂]은 힘껏에 퍼져 버리고 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ELSE
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ENDIF
+				CASEELSE
+					IF TALENT:연모 || TALENT:친애
+						PRINTFORMW 「팥고물… 군요,얼굴 보고 싶구나… 응응%UNICODE(0x2661)%」
+					ELSE
+						PRINTFORMW 「아읏… 후훗… 이 체제,짐승같다…%UNICODE(0x2661)%,아웃…」
+					ENDIF
+			ENDSELECT
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;102,대면좌위 CFLAG:363
+;-------------------------------------------------
+IF SELECTCOM == 102
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		;넣은 채로
+		IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 100 && PREVCOM <= 106
+			;전회의 커맨드가 이번과 같음
+			IF PREVCOM == 102
+				CALL PANT_VOICE_EX
+				IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+					PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+				ELSE
+					PRINTFORMW %CALLNAME%는페니스를 근원까지수 넣어 버려 교성을 올렸다
+				ENDIF
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「히웃!? 안돼,안돼엣… 두는,가서는…!」
+					CASE 1
+						PRINTFORMW 「아앗!야앗… 안돼,에…!」
+					CASEELSE
+						CALL PANT_VOICE_EX
+				ENDSELECT
+				PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+			ENDIF
+		ELSE
+			IF TEQUIP:바이브
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+					CASE 1
+						PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+					CASEELSE
+						PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+				ENDSELECT
+				PRINTFORMW %CALLNAME%의 비밀의 틈[秘裂]은 힘껏에 퍼져 버리고 있다
+			ELSE
+				SELECTCASE RAND:2
+					CASE 0
+						IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+							CALL PANT_VOICE_EX
+							PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+						ELSE
+							CALL PANT_VOICE_EX
+							PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+						ENDIF
+					CASEELSE
+						PRINTFORML 「팥고물… 군요,썩고 들이마셔,해… 응%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%는 녹은 얼굴로 키스를 공갈해 왔다
+				ENDSELECT
+			ENDIF
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+
+ENDIF
+
+;-------------------------------------------------
+;103,배면좌위 CFLAG:364
+;-------------------------------------------------
+IF SELECTCOM == 103
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		;넣은 채로
+		IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 100 && PREVCOM <= 106
+			;전회의 커맨드가 이번과 같음
+			IF PREVCOM == 100
+				CALL PANT_VOICE_EX
+				IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+					PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+				ELSE
+					PRINTFORMW %CALLNAME%는페니스를 근원까지수 넣어 버려 교성을 올렸다
+				ENDIF
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「히웃!? 안돼,안돼엣… 두는,가서는…!」
+					CASE 1
+						PRINTFORMW 「아앗!야앗… 안돼,에…!」
+					CASEELSE
+						CALL PANT_VOICE_EX
+				ENDSELECT
+				PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+			ENDIF
+		ELSE
+			IF TEQUIP:바이브
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+					CASE 1
+						PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+					CASEELSE
+						PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+				ENDSELECT
+				PRINTFORMW %CALLNAME%의 비밀의 틈[秘裂]은 힘껏에 퍼져 버리고 있다
+			ELSE
+				SELECTCASE RAND:2
+					CASE 0
+						IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+							CALL PANT_VOICE_EX
+							PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+						ELSE
+							CALL PANT_VOICE_EX
+							PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+						ENDIF
+					CASEELSE
+						IF TALENT:연모 || TALENT:친애
+							PRINTFORMW 「팥고물… 군요,얼굴 보고 싶구나… 응응%UNICODE(0x2661)%」
+						ELSE
+							PRINTFORMW 「아읏… 후훗… 이 체제,깊으면 와까지,닿아 버리네요…%UNICODE(0x2661)%」
+						ENDIF
+				ENDSELECT
+			ENDIF
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+
+ENDIF
+
+;-------------------------------------------------
+;104,대면입위 CFLAG:365
+;-------------------------------------------------
+IF SELECTCOM == 104
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		IF TEQUIP:바이브
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+				CASE 1
+					PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+				CASEELSE
+					PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%의 비밀의 틈[秘裂]은 힘껏에 퍼져 버리고 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ELSE
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ENDIF
+				CASEELSE
+					PRINTFORML 「팥고물… 군요,썩고 들이마셔,해… 응%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 녹은 얼굴로 키스를 공갈해 왔다
+			ENDSELECT
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+
+ENDIF
+
+;-------------------------------------------------
+;105,배면입위 CFLAG:366
+;-------------------------------------------------
+IF SELECTCOM == 105
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		IF TEQUIP:바이브
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+				CASE 1
+					PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+				CASEELSE
+					PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%의 비밀의 틈[秘裂]은 힘껏에 퍼져 버리고 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ELSE
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ENDIF
+				CASEELSE
+					IF TALENT:연모 || TALENT:친애
+						PRINTFORMW 「팥고물… 군요,얼굴 보고 싶구나… 응응%UNICODE(0x2661)%」
+					ELSE
+						PRINTFORMW 「아읏… 후훗… 이 체제,깊으면 와까지,닿아 버리네요…%UNICODE(0x2661)%」
+					ENDIF
+			ENDSELECT
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+
+ENDIF
+
+;-------------------------------------------------
+;106,기승위 CFLAG:367
+;-------------------------------------------------
+IF SELECTCOM == 106
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		;넣은 채로
+		IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 100 && PREVCOM <= 106
+			;전회의 커맨드가 이번과 같음
+			IF PREVCOM == 106
+				CALL PANT_VOICE_EX
+				IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+					PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+				ELSE
+					PRINTFORMW %CALLNAME%는페니스를 근원까지수 넣어 버려 교성을 올렸다
+				ENDIF
+			ELSEIF TEQUIP:역조교
+				PRINTFORM 「응,군요,너도,기분이 좋은?」
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「히웃!? 안돼,안돼엣… 두는,가서는…!」
+					CASE 1
+						PRINTFORMW 「아앗!야앗… 안돼,에…!」
+					CASEELSE
+						CALL PANT_VOICE_EX
+				ENDSELECT
+				IF TALENT:PLAYER:작은체구 && TALENT:작은체구 == 0
+					PRINTFORML %CALLNAME%는 %CALLNAME:PLAYER%를 찌부러뜨려 버리지 않도록 열심히발에 힘을 집중하지만
+					PRINTFORMW 계속 참지 못하고 넋을 잃어,%CALLNAME:PLAYER%의페니스를 근원까지수 넣어 버려 교성을 올렸다
+				ELSE
+					PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+				ENDIF
+			ENDIF
+		ELSE
+			IF TEQUIP:바이브
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+					CASE 1
+						PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+					CASEELSE
+						PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+				ENDSELECT
+				PRINTFORMW %CALLNAME%의 비밀의 틈[秘裂]은 힘껏에 퍼져 버리고 있다
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						IF TALENT:PLAYER:작은체구 && TALENT:작은체구 == 0
+							PRINTFORML 「앗,응응…… 너의 일,잡아 버릴 것 같고 무섭다…」
+							PRINTFORMW %CALLNAME%는 흠칫흠칫 허리를 흔들고 있다
+						ELSEIF TALENT:작은체구
+							CALL PANT_VOICE_EX
+							PRINTFORMW %CALLNAME%는 작은 신체로 열심히 허리를 흔들고 있다
+						ELSE
+							PRINTFORML 「앗,응응…… 응… 나,무겁지 않앗? 히웃…!」
+							PRINTFORML 흠칫흠칫 허리를 흔들고 있는%CALLNAME%에 초조해 해,
+							PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%를 아래로부터 밀어올렸다
+						ENDIF
+					CASE 1
+						CALL PANT_VOICE_EX
+					CASEELSE
+						PRINTFORML 「읏… 이 체위는,나의 페이스로 할 수 있기 때문에,후훗,좋다…%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%는 여유를 보이면서 허리를 흔들고 있다
+				ENDSELECT
+			ENDIF
+		ENDIF
+	;미함락
+	ELSEIF TALENT:붕괴
+		CALL PANT_VOICE_EX
+		PRINTFORMW %CALLNAME%는 열심히 허리를 흔들고 있다
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;애널섹스계 커맨드
+;=================================================
+;-------------------------------------------------
+;110,정상위애널 CFLAG:368
+;-------------------------------------------------
+IF SELECTCOM == 110
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		IF TEQUIP:애널바이브
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+				CASE 1
+					PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+				CASEELSE
+					PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%의 아누스는 힘껏에 퍼져 버리고 있다
+		ELSE
+			SELECTCASE RAND:3
+				CASE 0
+					IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ELSE
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ENDIF
+				CASE 1
+					CALL PANT_VOICE_EX
+				CASEELSE
+					PRINTFORML 「팥고물… 군요,썩고 들이마셔,해… 응%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 녹은 얼굴로 키스를 공갈해 왔다
+			ENDSELECT
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;111,후배위애널 CFLAG:369
+;-------------------------------------------------
+IF SELECTCOM == 111
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		IF TEQUIP:애널바이브
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+				CASE 1
+					PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+				CASEELSE
+					PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%의 아누스는 힘껏에 퍼져 버리고 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ELSE
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ENDIF
+				CASEELSE
+					IF TALENT:연모 || TALENT:친애
+						PRINTFORMW 「팥고물… 군요,얼굴 보고 싶구나… 응응%UNICODE(0x2661)%」
+					ELSE
+						PRINTFORMW 「아읏… 후훗… 이 체제,짐승같다…%UNICODE(0x2661)%,아웃…」
+					ENDIF
+			ENDSELECT
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+
+ENDIF
+
+;-------------------------------------------------
+;112,대면좌위애널 CFLAG:370
+;-------------------------------------------------
+IF SELECTCOM == 112
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		;넣은 채로
+		IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 110 && PREVCOM <= 116
+			;전회의 커맨드가 이번과 같음
+			IF PREVCOM == 112
+				CALL PANT_VOICE_EX
+				IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+					PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+				ELSE
+					PRINTFORMW %CALLNAME%는페니스를 근원까지수 넣어 버려 교성을 올렸다
+				ENDIF
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「히웃!? 안돼,안돼엣… 두는,가서는…!」
+					CASE 1
+						PRINTFORMW 「아앗!야앗… 안돼,에…!」
+					CASEELSE
+						CALL PANT_VOICE_EX
+				ENDSELECT
+				PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+			ENDIF
+		ELSE
+			IF TEQUIP:애널바이브
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+					CASE 1
+						PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+					CASEELSE
+						PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+				ENDSELECT
+				PRINTFORMW %CALLNAME%의 아누스는 힘껏에 퍼져 버리고 있다
+			ELSE
+				SELECTCASE RAND:2
+					CASE 0
+						IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+							CALL PANT_VOICE_EX
+							PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+						ELSE
+							CALL PANT_VOICE_EX
+							PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+						ENDIF
+					CASEELSE
+						PRINTFORML 「팥고물… 군요,썩고 들이마셔,해… 응%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%는 녹은 얼굴로 키스를 공갈해 왔다
+				ENDSELECT
+			ENDIF
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+
+ENDIF
+
+;-------------------------------------------------
+;113,배면좌위애널 CFLAG:371
+;-------------------------------------------------
+IF SELECTCOM == 113
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		;넣은 채로
+		IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 110 && PREVCOM <= 116
+			;전회의 커맨드가 이번과 같음
+			IF PREVCOM == 113
+				CALL PANT_VOICE_EX
+				IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+					PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+				ELSE
+					PRINTFORMW %CALLNAME%는페니스를 근원까지수 넣어 버려 교성을 올렸다
+				ENDIF
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「히웃!? 안돼,안돼엣… 두는,가서는…!」
+					CASE 1
+						PRINTFORMW 「아앗!야앗… 안돼,에…!」
+					CASEELSE
+						CALL PANT_VOICE_EX
+				ENDSELECT
+				PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+			ENDIF
+		ELSE
+			IF TEQUIP:애널바이브
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+					CASE 1
+						PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+					CASEELSE
+						PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+				ENDSELECT
+				PRINTFORMW %CALLNAME%의 아누스는 힘껏에 퍼져 버리고 있다
+			ELSE
+				SELECTCASE RAND:2
+					CASE 0
+						IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+							CALL PANT_VOICE_EX
+							PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+						ELSE
+							CALL PANT_VOICE_EX
+							PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+						ENDIF
+					CASEELSE
+						IF TALENT:연모 || TALENT:친애
+							PRINTFORMW 「팥고물… 군요,얼굴 보고 싶구나… 응응%UNICODE(0x2661)%」
+						ELSE
+							PRINTFORMW 「아읏… 후훗… 이 체제,깊으면 와까지,닿아 버리네요…%UNICODE(0x2661)%」
+						ENDIF
+				ENDSELECT
+			ENDIF
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;114,대면입위애널 CFLAG:372
+;-------------------------------------------------
+IF SELECTCOM == 114
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		IF TEQUIP:애널바이브
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+				CASE 1
+					PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+				CASEELSE
+					PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%의 아누스는 힘껏에 퍼져 버리고 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ELSE
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ENDIF
+				CASEELSE
+					PRINTFORML 「팥고물… 군요,썩고 들이마셔,해… 응%UNICODE(0x2661)%」
+					PRINTFORMW %CALLNAME%는 녹은 얼굴로 키스를 공갈해 왔다
+			ENDSELECT
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;115,배면입위애널 CFLAG:373
+;-------------------------------------------------
+IF SELECTCOM == 115
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		IF TEQUIP:애널바이브
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+				CASE 1
+					PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+				CASEELSE
+					PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%의 아누스는 힘껏에 퍼져 버리고 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는 작은%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ELSE
+						CALL PANT_VOICE_EX
+						PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 신체를 생각하는 대로 관철했다
+					ENDIF
+				CASEELSE
+					IF TALENT:연모 || TALENT:친애
+						PRINTFORMW 「팥고물… 군요,얼굴 보고 싶구나… 응응%UNICODE(0x2661)%」
+					ELSE
+						PRINTFORMW 「아읏… 후훗… 이 체제,깊으면 와까지,닿아 버리네요…%UNICODE(0x2661)%」
+					ENDIF
+			ENDSELECT
+		ENDIF
+	;미함락
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+
+ENDIF
+
+;-------------------------------------------------
+;116,기승위애널 CFLAG:374
+;-------------------------------------------------
+IF SELECTCOM == 116
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		;넣은 채로
+		IF TFLAG:60 && ((ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)) && PREVCOM >= 110 && PREVCOM <= 116
+			;전회의 커맨드가 이번과 같음
+			IF PREVCOM == 116
+				CALL PANT_VOICE_EX
+				IF TALENT:PLAYER:작은체구 == 0 && TALENT:작은체구
+					PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+				ELSE
+					PRINTFORMW %CALLNAME%는페니스를 근원까지수 넣어 버려 교성을 올렸다
+				ENDIF
+			ELSEIF TEQUIP:역조교
+				PRINTFORM 「응,군요,너도,기분이 좋은?」
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「히웃!? 안돼,안돼엣… 두는,가서는…!」
+					CASE 1
+						PRINTFORMW 「아앗!야앗… 안돼,에…!」
+					CASEELSE
+						CALL PANT_VOICE_EX
+				ENDSELECT
+				IF TALENT:PLAYER:작은체구 && TALENT:작은체구 == 0
+					PRINTFORML %CALLNAME%는 %CALLNAME:PLAYER%를 찌부러뜨려 버리지 않도록 열심히발에 힘을 집중하지만
+					PRINTFORMW 계속 참지 못하고 넋을 잃어,%CALLNAME:PLAYER%의페니스를 근원까지수 넣어 버려 교성을 올렸다
+				ELSE
+					PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%가 좋아하게 흔들어져 교성을 올리고 있다
+				ENDIF
+			ENDIF
+		ELSE
+			IF TEQUIP:애널바이브
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「아웃… 안돼,아직 들어간 채로…… 히웃…!」
+					CASE 1
+						PRINTFORMW 「아웃…… 아직,바이브 들어가 있는데 %UNICODE(0x2661)%… 퍼져 버리는…%UNICODE(0x2661)%」
+					CASEELSE
+						PRINTFORMW 「아우,흔들어서는 안돼엣…%UNICODE(0x2661)%」
+				ENDSELECT
+				PRINTFORMW %CALLNAME%의 아누스는 힘껏에 퍼져 버리고 있다
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						IF TALENT:PLAYER:작은체구 && TALENT:작은체구 == 0
+							PRINTFORML 「앗,응응…… 너의 일,잡아 버릴 것 같고 무섭다…」
+							PRINTFORMW %CALLNAME%는 흠칫흠칫 허리를 흔들고 있다
+						ELSEIF TALENT:작은체구
+							CALL PANT_VOICE_EX
+							PRINTFORMW %CALLNAME%는 작은 신체로 열심히 허리를 흔들고 있다
+						ELSE
+							PRINTFORML 「앗,응응…… 응… 나,무겁지 않앗? 히웃…!」
+							PRINTFORML 흠칫흠칫 허리를 흔들고 있는%CALLNAME%에 초조해 해,
+							PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%를 아래로부터 밀어올렸다
+						ENDIF
+					CASE 1
+						CALL PANT_VOICE_EX
+					CASEELSE
+						PRINTFORML 「읏… 이 체위는,나의 페이스로 할 수 있기 때문에,후훗,좋다…%UNICODE(0x2661)%」
+						PRINTFORMW %CALLNAME%는 여유를 보이면서 허리를 흔들고 있다
+				ENDSELECT
+			ENDIF
+		ENDIF
+	;미함락
+	ELSE
+		IF TALENT:붕괴
+			CALL PANT_VOICE_EX
+			PRINTFORMW %CALLNAME%는 열심히 허리를 흔들고 있다
+		ELSE
+			CALL PANT_VOICE_EX
+		ENDIF
+	ENDIF
+
+ENDIF
+
+
+
+;=================================================
+;구속계 커맨드
+;=================================================
+;-------------------------------------------------
+;130,밧줄 CFLAG:375
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 130 && TEQUIP:밧줄 == 0
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		PRINTFORM 「응… 후후… 신체를 묶어,나에게 무엇을 할 생각인가?
+		SIF TALENT:음란 || TALENT:창부
+			PRINTFORM %UNICODE(0x2661)%
+		PRINTFORMW」
+	ELSEIF TALENT:붕괴
+		PRINTFORMW %CALLNAME%는 되는 대로다
+ 	ELSE
+ 		PRINTFORMW 「…… 신체를 묶어,나에게 무엇을 할 생각인가」
+	ENDIF
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 130 && TEQUIP:밧줄
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;131,아이마스크 CFLAG:376
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 131 && TEQUIP:아이마스크 == 0
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		PRINTFORM 「응… 후후… 눈가리개는 붙이게 해,나에게 무엇을 할 생각인가?
+		SIF TALENT:음란 || TALENT:창부
+			PRINTFORM %UNICODE(0x2661)%
+		PRINTFORMW」
+	ELSEIF TALENT:붕괴
+		PRINTFORMW %CALLNAME%는 되는 대로다
+	ELSE
+		PRINTFORMW 「…… 눈가리개 같은거 해,나에게 무엇을 할 생각인가」
+	ENDIF
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 131 && TEQUIP:아이마스크
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;132,볼개그 CFLAG:377
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 132 && TEQUIP:볼개그 == 0
+	CALL TRAIN_MESSAGE
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 132 && TEQUIP:볼개그
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;133,정조대 CFLAG:378
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 133 && TEQUIP:정조대 == 0
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		PRINTFORMW 「아웃…… 이것,싫어…!」
+	ELSEIF  TALENT:붕괴
+		PRINTFORMW 「힛!? 아우,우…」
+	ELSE
+		PRINTFORMW 「읏… 젠장…!」
+	ENDIF
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 133 && TEQUIP:정조대
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;134,사정관리 CFLAG:379
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 134 && TEQUIP:사정관리 == 0
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		PRINTFORMW 「아웃…… 이것,싫어…!」
+	ELSEIF  TALENT:붕괴
+		PRINTFORMW 「힛!? 아우,우…」
+	ELSE
+		PRINTFORMW 「읏… 젠장…!」
+	ENDIF
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 134 && TEQUIP:사정관리
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;SM계 커맨드
+;=================================================
+;-------------------------------------------------
+;140,스팽킹 CFLAG:380
+;-------------------------------------------------
+IF SELECTCOM == 140
+	CALL TRAIN_MESSAGE
+	IF TALENT:복종 || TALENT:예속 || ABL:마조끼 >= 4
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「앗!…… 아핫… 하… 좀 더,좀 더 쳐 줘…」
+			CASEELSE
+				PRINTFORML 「앗…!… 하,읏…… 후후… 이런 보기 흉한 모습으로… 실수를 한 어린이같이 맞는 것,흥분해 버린다…」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는통증에 참으면서,황홀로 한 표정을 띄우고 있다
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				CALL PANT_VOICE_EX
+			CASEELSE
+				PRINTFORML 「읏…!읏하,하,우긋…!이,이런,보기 흉한 모습으로… 아앗!」
+				PRINTFORMW %CALLNAME%는통증에 참으면서,힘든 시선으로 노려봐 왔다
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;141,젖스팽킹 CFLAG:381
+;-------------------------------------------------
+IF SELECTCOM == 141
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;142,채찍 CFLAG:382
+;-------------------------------------------------
+IF SELECTCOM == 142
+	CALL TRAIN_MESSAGE
+	IF TALENT:복종 || TALENT:예속 || ABL:마조끼 >= 4
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「앗!…… 아핫… 하… 좀 더,좀 더 쳐 줘…」
+			CASEELSE
+				PRINTFORML 「앗…!… 하,읏…… 후후… 너에게 맞는 것,오슬오슬 하네요…」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는통증에 참으면서,황홀로 한 표정을 띄우고 있다
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				CALL PANT_VOICE_EX
+			CASEELSE
+				PRINTFORML 「읏…!읏하,하,우긋…!」
+				PRINTFORMW %CALLNAME%는통증에 참으면서,힘든 시선으로 노려봐 왔다
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;143,바늘 CFLAG:383
+;-------------------------------------------------
+IF SELECTCOM == 143
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;144,촛불 CFLAG:374
+;-------------------------------------------------
+IF SELECTCOM == 144
+	CALL TRAIN_MESSAGE
+	IF TALENT:복종 || TALENT:예속 || ABL:마조끼 >= 5
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「아… 아핫…… 아개… 읏…」
+			CASEELSE
+				PRINTFORML 「앗…!… 하,읏…… 후,아프지만,기분 좋다…」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 뜨거운 납에 괴로워하면서도,황홀로 한 표정을 띄우고 있다
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「아뜻…!? 아니,질투나는… 열… 오고,괴롭닷…!」
+				PRINTFORMW %CALLNAME%는 뜨거운 납에 괴로워하면서 비명을 지르고 있다
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;145,삼각목마 CFLAG:375
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 145 && TEQUIP:삼각목마 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 145 && TEQUIP:삼각목마
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;폭력계 커맨드
+;=================================================
+;-------------------------------------------------
+;150,가구로한다 CFLAG:386
+;-------------------------------------------------
+IF SELECTCOM == 150
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;151,고문 CFLAG:387
+;-------------------------------------------------
+IF SELECTCOM == 151
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;152,매도한다 CFLAG:388
+;-------------------------------------------------
+IF SELECTCOM == 152
+	CALL TRAIN_MESSAGE
+	IF TALENT:복종 || TALENT:예속 || ABL:마조끼 >= 3
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「아…… 아,하…… 좀 더,좀 더 괴롭혀…」
+			CASEELSE
+				PRINTFORML 「아하…… 나,너에게 말로 희롱해지는 것,흥분해 버린다…」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 황홀로 한 표정을 띄우고 있다
+	ELSEIF TALENT:붕괴
+		PRINTFORMW %CALLNAME%는 입다물어 %CALLNAME:PLAYER%의 매도에 참고 있다
+	ELSEIF ABL:새드끼 >= 3
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「헤에. 너,나의 일 그런 식으로 생각하고 있던 것이구나. 슬프구나」
+			CASE 1
+				PRINTFORML 「하아… 그렇게,보기 흉하게 아우성치지 않아 줄까나. 귀에 거슬림이다」
+			CASEELSE
+				PRINTFORML 「너는,나를 화나게 하고 싶은 것인지」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 식은 눈을 향하여 왔다
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「…… 너,나를 화나게 하고 싶은 것인지…?」
+			CASEELSE
+				PRINTFORML 「…… 심한 말로굴복 시키자는. 너,추해」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 힘든 시선으로 노려봐 왔다
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;153,발로 밟는다 CFLAG:389
+;-------------------------------------------------
+IF SELECTCOM == 153
+	CALL TRAIN_MESSAGE
+	IF TALENT:복종 || TALENT:예속 || ABL:마조끼 >= 5
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「우그…!…… 쿨럭!하앗… 응… 좀 더 강하게 해도 좋으니까…」
+			CASEELSE
+				PRINTFORML 「읏……!휴,……… 하,응응…… 후,후,야 서문,부… 이니까. 좀 더…」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 괴로운 듯이 기침을 하면서도,황홀로 한 표정을 띄우고 있다
+	ELSEIF TALENT:붕괴
+		PRINTFORMW %CALLNAME%는 괴로운 듯이 허덕이면서도,입다물어 %CALLNAME:PLAYER%의 폭력에 참고 있다
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「읏……!휴,…… 쿨럭…… 뭐… 하는,노,…」
+				PRINTFORMW %CALLNAME%는 괴로운 듯이 허덕이면서도,꿋꿋함에 노려봐 왔다
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;154,배빵 CFLAG:390
+;-------------------------------------------------
+IF SELECTCOM == 154
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;155,목조르기 CFLAG:391
+;-------------------------------------------------
+IF SELECTCOM == 155
+	CALL TRAIN_MESSAGE
+	IF TALENT:복종 || TALENT:예속 || ABL:마조끼 >= 5
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「우그………… 쿨럭!하앗… 응… 좀 더 강하게 매어 주지 않겠는가…」
+			CASEELSE
+				PRINTFORML 「읏……!휴,……… 하,응응…… 후,후,야 서문,부… 이니까. 좀 더…」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 괴로운 듯이 기침을 하면서도,황홀로 한 표정을 띄우고 있다
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;156,낙인 CFLAG:392
+;지문에 세세한 설정이 있으므로,첫회/2회째 이후를 나누지 않는다.
+;대사를 넣고 싶은 경우는 지문 호출을 컷 해,지문을 코피페 한다.
+;-------------------------------------------------
+IF SELECTCOM == 156
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;157,물고문 CFLAG:532
+;-------------------------------------------------
+IF SELECTCOM == 157
+	CALL TRAIN_MESSAGE
+	IF TALENT:복종 || TALENT:예속 || ABL:마조끼 >= 5
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「우풋……… 쿨럭!쿨럭!하앗… 응… 콜록」
+			CASEELSE
+				PRINTFORML 「우풋……… 쿨럭!쿨럭!저기… 좀 더 해도,괜찮아… 콜록」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 괴로운 듯이 기침을 하면서도,황홀로 한 표정을 띄우고 있다
+	ELSEIF TALENT:붕괴
+		PRINTFORMW %CALLNAME%는 괴로운 듯이 허덕이면서도,입다물어 %CALLNAME:PLAYER%의 폭력에 참고 있다
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「우풋……… 쿨럭!쿨럭!그만두어읏푸…… 는…… 뭐… 하는,노,…」
+				PRINTFORMW %CALLNAME%는 괴로운 듯이 허덕이면서도,꿋꿋함에 노려봐 왔다
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;158,간지럼고문 CFLAG:533
+;-------------------------------------------------
+IF SELECTCOM == 158
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;피스트계 커맨드
+;=================================================
+;-------------------------------------------------
+;160,피스트퍽 CFLAG:393
+;-------------------------------------------------
+IF SELECTCOM == 160
+	CALL TRAIN_MESSAGE
+	IF EXP:V확장경험 >= EXPLV:4
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「아웃!퍼지고 있는…!」
+			CASEELSE
+				PRINTFORML 「아 안됏… 보지 출렁출렁이 되어 버린닷…%UNICODE(0x2661)%」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 황홀로 한 표정을 띄우고 있다
+	ELSE
+		IF KANRAKU(TARGET)
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「핫,구우…… 괘,괜찮아… 견딜 수 없을 정도가 아니야…」
+				CASEELSE
+					PRINTFORML 「읏… 하앗,하앗…!괜찮아… 곧 익숙해진다…」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%는 강한척 하지만,이마에는 비지땀이 떠 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「…!우,구우…!찢어져루…」
+				CASEELSE
+					PRINTFORML 「아가!? 하,젠장…!」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%는고통로부터 이마에 비지땀을 띄우고 있다
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;161,애널피스트 CFLAG:394
+;-------------------------------------------------
+IF SELECTCOM == 161
+	CALL TRAIN_MESSAGE
+	IF EXP:A확장경험 >= EXPLV:4
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「아웃!퍼지고 있는…!」
+			CASEELSE
+				PRINTFORML 「아 안됏… 엉덩이 출렁출렁이 되어 버린닷…%UNICODE(0x2661)%」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 황홀로 한 표정을 띄우고 있다
+	ELSE
+		IF KANRAKU(TARGET)
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「핫,구우…… 괘,괜찮아… 견딜 수 없을 정도가 아니야…」
+				CASEELSE
+					PRINTFORML 「읏… 하앗,하앗…!괜찮아… 곧 익숙해진다…」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%는 강한척 하지만,이마에는 비지땀이 떠 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「…!우,구우…!찢어져루…」
+				CASEELSE
+					PRINTFORML 「아가!? 하,젠장…!」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%는고통로부터 이마에 비지땀을 띄우고 있다
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;162,양구멍피스트 CFLAG:395
+;-------------------------------------------------
+IF SELECTCOM == 162
+	CALL TRAIN_MESSAGE
+	IF EXP:A확장경험 >= EXPLV:4 && EXP:V확장경험 >= EXPLV:4
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「아웃!퍼지고 있는…!」
+			CASEELSE
+				PRINTFORML 「아 안됏… 출렁출렁이 되어 버린닷…%UNICODE(0x2661)%」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 황홀로 한 표정을 띄우고 있다
+	ELSE
+		IF KANRAKU(TARGET)
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「핫,구우…… 괘,괜찮아… 견딜 수 없을 정도가 아니야…」
+				CASEELSE
+					PRINTFORML 「읏… 하앗,하앗…!괜찮아… 곧 익숙해진다…」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%는 강한척 하지만,이마에는 비지땀이 떠 있다
+		ELSE
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「…!우,구우…!찢어져루…」
+				CASEELSE
+					PRINTFORML 「아가!? 하,젠장…!」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%는고통로부터 이마에 비지땀을 띄우고 있다
+		ENDIF
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;스카계 커맨드
+;=================================================
+;-------------------------------------------------
+;180,관장 CFLAG:396
+;-------------------------------------------------
+IF SELECTCOM == 180
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+	CFLAG:396 += 1
+ENDIF
+
+;-------------------------------------------------
+;181,육변기 CFLAG:397
+;-------------------------------------------------
+IF SELECTCOM == 181
+	CALL TRAIN_MESSAGE
+	IF TALENT:붕괴
+		CALL PANT_VOICE_EX
+	ELSEIF ABL:마조끼 <= 1
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「힉!? 읏…… 사람의 뱃속에 방뇨하다니 너,도대체 무엇을 생각하고 있는거야…」
+			CASE 1
+				PRINTFORMW 「젠장…… 이런,보기 흉한……」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「히,아우웃……(안)중으로,방뇨되고 있닷…… 어떻게 하지,나,변기로 되어 버리고 있는…%UNICODE(0x2661)%」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;182,방뇨 CFLAG:398
+;-------------------------------------------------
+IF SELECTCOM == 182
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;183,배변 CFLAG:399
+;-------------------------------------------------
+IF SELECTCOM == 183
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;184,음뇨시킨다 CFLAG:400
+;-------------------------------------------------
+IF SELECTCOM == 184
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;185,식분시킨다 CFLAG:401
+;-------------------------------------------------
+IF SELECTCOM == 185
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;커뮤니케이션계 커맨드
+;=================================================
+;-------------------------------------------------
+;200,회화 CFLAG:402
+;-------------------------------------------------
+IF SELECTCOM == 200
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+;		PRINTFORMW 
+	ELSEIF TALENT:붕괴
+		PRINTFORMW %CALLNAME%는 멍하니하고 있다
+	ELSE
+		PRINTFORMW 「… 군과 이야기하고 싶은 것은 없어」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;201,선물 CFLAG:403
+;무엇을 주고 있을까? 하,커맨드 폴더내선물의 항목에 들어가 있습니다.
+;스스로 주는 것을 결정하고 싶은 경우,CALL TRAIN_MESSAGE를 지워,스스로 쓴다.
+;-------------------------------------------------
+IF SELECTCOM == 201
+;장소 잡으므로,해설은 거의 지우고 있다. 확인할 때는↓참조
+;선물의 지문은 5708~5877행
+	;역조교모드
+	SIF TEQUIP:역조교
+		PRINTFORM %CALLNAME%는 %CALLNAME:PLAYER%에선물를 졸라 왔다…
+
+	PRINTFORML 무엇을 줍니까?
+	PRINTFORML [0] 웃는 얼굴(공짜)
+	SIF MONEY >= 1000
+		PRINTFORML [1] 음식($1000)
+	SIF MONEY >= 2500
+		PRINTFORML [2] 일용품($2500)
+	SIF MONEY >= 10000
+		PRINTFORML [3] 악세사리($10000)
+	SIF MONEY >= 25000
+		PRINTFORML [4] 옷($25000)
+	SIF MONEY >= 150000
+		PRINTFORML [5] 고가의 물건($150000)
+
+	;----------------------------------
+	;특별한선물(eraheta로부터 인용)
+	;----------------------------------
+	;----------------------------------
+	;프로미스 링
+	;----------------------------------
+	;주인(공범자)이 아니면 안돼,벌써 누군가에게 건네주고 있으면 안돼,대상의 노예에게 집착을 안지 않았다고 안돼,10만엔 없으면 안돼
+	SIF CFLAG:MASTER:1 == 3 && !CFLAG:MASTER:140 && CFLAG:MASTER:41 == NO:TARGET && MONEY > 100000
+		PRINTFORML [50] 프로미스 링
+	;----------------------------------
+	;엔딩용 아이템
+	;----------------------------------
+	;주인(공범자)이 아니면 안돼,벌써 누군가에게 건네주고 있으면 안돼,함락 끝난 노예가 없으면 안돼,
+	;엔드리스 모드가 아니면 안돼,벌써 클리어가 끝난 상태라면 안돼,100만엔 없으면 안돼
+;	IF CFLAG:MASTER:1 == 3 && !CFLAG:MASTER:139 && KANRAKU(TARGET) && FLAG:5 == 9 && FLAG:40 == 0 && MONEY > 1000000
+;		;친애루트는 인게이지 링
+;		IF TALENT:연모 || TALENT:친애 || TALENT:상사상애
+;			PRINTFORML [90] 인게이지 링
+;		;창부루트는 오더 메이드바이브
+;		ELSEIF TALENT:음란 || TALENT:창부
+;			PRINTFORML [91] 오더 메이드바이브
+;		;예속루트는 오더 메이드 목걸이
+;		ELSEIF TALENT:복종 || TALENT:예속
+;			PRINTFORML [92] 오더 메이드 목걸이
+;		ENDIF
+;	ENDIF
+	;역조교모드
+	IF TEQUIP:역조교
+		PRINTFORML [99] 줄 수 있는 것은 없다
+	ELSE
+		PRINTFORML [99] 역시 그만둔다
+	ENDIF
+
+	INPUT
+	;----------------------------------
+	IF RESULT == 0
+		;웃는 얼굴을선물
+		TFLAG:17 = 1
+	ELSEIF RESULT == 1 && MONEY > 1000
+		;음식을선물
+		TFLAG:17 = 2
+		MONEY -= 1000
+	ELSEIF RESULT == 2 && MONEY > 2500
+		;일용품을선물
+		TFLAG:17 = 3
+		MONEY -= 2500
+	ELSEIF RESULT == 3 && MONEY > 10000
+		;악세사리를선물
+		TFLAG:17 = 4
+		MONEY -= 10000
+	ELSEIF RESULT == 4 && MONEY > 25000
+		;옷을선물
+		TFLAG:17 = 5
+		MONEY -= 25000
+	ELSEIF RESULT == 5 && MONEY > 150000
+		;고가의 물건을선물
+		TFLAG:17 = 6
+		MONEY -= 150000
+	;----------------------------------
+	;특별한 물건을선물
+	;----------------------------------
+	ELSEIF RESULT == 50 && CFLAG:MASTER:1 == 3 && !CFLAG:MASTER:140 && CFLAG:MASTER:41 == NO:TARGET && MONEY > 100000
+		;프로미스 링
+		TFLAG:17 = 50
+;	ELSEIF RESULT == 90
+;		TFLAG:17 = 7
+;		CFLAG:MASTER:139 = 1
+;	ELSEIF RESULT == 91
+;		TFLAG:17 = 7
+;		CFLAG:MASTER:139 = 1
+;	ELSEIF RESULT == 92
+;		TFLAG:17 = 7
+;		CFLAG:MASTER:139 = 1
+	ELSEIF RESULT == 99
+		PRINTFORMW 선물를 건네주는 것을 멈추었습니다
+		TFLAG:17 = 99
+	ELSE
+		RESTART
+	ENDIF
+
+	IF TFLAG:17 == 99
+	ELSEIF TFLAG:17 == 50
+		PRINTFORML 
+		PRINTFORMW 
+		;수 취해 받을 수 있다
+		IF TALENT:상사상애 || TALENT:친애
+			PRINTFORMW 「…… 이것은 반지구나. 2개 있지만… 갖춤으로 몸에 걸치자고 말할까나?」
+			IF TALENT:양팔결손
+				PRINTFORML 「유감이지만,나의 양팔은 없어져 버리고 있기 때문에… 반지는 끼는 것이 할 수 없다」
+				PRINTFORMW %CALLNAME%는 조금 슬픈 듯이 말한다
+				PRINTFORML %CALLNAME:PLAYER%는 반지를 준비해 있던 체인을 통해\@ TALENT:남자? 그 # 그녀 \@의 목에 걸쳤다
+				PRINTFORMW 그리고 %CALLNAME:PLAYER%가 『프로미스 링이다』라고 말하면,%CALLNAME%는 의미를 알고 있던 것 같다
+				PRINTFORMW 당황한 모습으로,어떤 생각인가라고 (들)물어 왔다
+			ELSE
+				PRINTFORML 낄낄 웃는%CALLNAME%의 왼쪽손를 살그머니 취해,
+				PRINTFORMW %CALLNAME:PLAYER%는\@ TALENT:남자? 그 # 그녀 \@의 약지에 상냥하게 반지를 꼈다
+				PRINTFORM 「엣… 저기요,너,
+				IF NO:MASTER == 0
+					PRINTFORML 나도 이런이든지를 하고 있다. 거기에 반지를 끼는 의미는 알고 있어?
+					PRINTFORMW …… 어떤 생각이야? 나를,조롱하고 있는지?」
+					PRINTFORMW %CALLNAME%는 얼굴을 찡그렸다
+				ELSE
+					PRINTFORML 왼쪽손의 약지에 반지를 끼는 의미를 모르는거야?
+					PRINTFORMW 그렇지 않으면,알고 있어 주고 있는지?」
+;					IF NO:MASTER == 116
+;					ELSE
+						PRINTFORM %CALLNAME:PLAYER%가 『알고 있다』라고 대답하면,
+;					ENDIF
+					PRINTFORML %CALLNAME%는 얼굴을 찡그렸다
+					PRINTFORMW 「…… 어떤 생각이야? 나를,조롱하고 있는지?」
+				ENDIF
+			ENDIF
+			PRINTFORML %CALLNAME:PLAYER%의 행동을 믿을 수 없는 것 같다
+			PRINTFORMW 금빛의 눈동자가 물기를 띠어,%CALLNAME%는 당장 울기 시작해 버릴 것 같게 보인다
+;			IF NO:MASTER == 116
+;			ELSE
+				PRINTFORML %CALLNAME:PLAYER%가 %CALLNAME%\@ TALENT:PLAYER:작은체구? 에 껴안아 # 를 껴안아\@『진심이다』라고 고하면,
+;			ENDIF
+			PRINTFORML %CALLNAME%는 글썽 외곬눈물을 흘려,당황해 숙였다
+			PRINTFORMW 「앗,가,이것은…… 그,기쁘다. 너에 그렇게 생각해 받을 수 있어…」
+			PRINTFORML 「지금,나의 얼굴 뭉글뭉글해 추하기 때문에… 보지 말아줘…」
+			PRINTFORMW 그렇게 숙인 채로 말한%CALLNAME%의 귀는 새빨갛다
+			;새드끼 있으면 여기.
+			IF TALENT:MASTER:새드 || ABL:MASTER:새드끼 > 2
+				PRINTFORML %CALLNAME%의 그런 모습에 장난끼를 간지러워진 %CALLNAME:PLAYER%는,\@ TALENT:남자? 그 # 그녀 \@의 턱을 꾸욱 올려 얼굴을 들여다 봄
+				PRINTFORMW 너덜너덜울고 있던%CALLNAME%를 『심한 얼굴이다』라고 조롱했다
+				PRINTFORML 「너…… 뭇」
+				PRINTFORMW %CALLNAME%는,불끈 해 뭔가를 이야기를 시작했지만,%CALLNAME:PLAYER%는 차단하도록(듯이) 그 입술에 물었다
+				PRINTFORML 
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW %CALLNAME%의 그런 모습에 사랑스러움이 격해진 %CALLNAME:PLAYER%는,%CALLNAME%\@ TALENT:PLAYER:작은체구? 에 껴안는 # 을 껴안는\@힘을 강하게 한다
+				PRINTFORML %CALLNAME:PLAYER%가 『좋아』라고 생각을 고하면,%CALLNAME%는 흠칫 어깨를 진동시켜
+				PRINTFORMW 가냘프지만,기쁨을 숨길 수 있지 않은 소리로 공갈했다
+				PRINTFORMW 「…… 좀 더,말하면 좋겠다…」
+				PRINTFORMW 다테남이 면목없음이라고 생각했지만,%CALLNAME%를 그렇게 한 것은 자신이라고 생각하면,나쁜 기분은 되지 않았다
+				PRINTFORML 
+				PRINTFORMW 
+			ENDIF
+			CFLAG:MASTER:140 = 1
+			CFLAG:TARGET:140 = 1
+			MONEY -= 150000
+		;수 취해 받을 수 없다
+		ELSE
+			PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%에 프로미스 링을 건네주었다
+			PRINTFORML …… 이지만,%CALLNAME%는 목을 옆에 흔들고 있다
+			PRINTFORMW 수 집어 줄 생각은 없는 것 같다……
+			TFLAG:17 = 99
+		ENDIF
+	ELSE
+		PRINTFORM %CALLNAME:PLAYER%는%CALLNAME%에
+		IF TFLAG:17 == 1
+			PRINTFORM 상쾌한 웃는 얼굴
+		ELSEIF TFLAG:17 == 2
+			PRINTFORM 맛있는 술
+		ELSEIF TFLAG:17 == 3
+			PRINTFORM 가볍고 가까운 일용품
+		ELSEIF TFLAG:17 == 4
+			PRINTFORM 예쁜악세사리
+		ELSEIF TFLAG:17 == 5
+			IF RAND:4 == 0
+				PRINTFORM 사랑스러운 옷
+			ELSEIF RAND:3 == 0
+				PRINTFORM 눈부신 옷
+			ELSEIF RAND:2 == 0
+				PRINTFORM 근사한 옷
+			ELSE
+				PRINTFORM 착용감이 좋은 옷
+			ENDIF
+		ELSEIF TFLAG:17 == 6
+			PRINTFORM 기념년의 귀중한 술
+		ELSEIF TFLAG:17 == 7
+			IF CFLAG:5100 == 1
+				PRINTFORM 인게이지 링
+			ELSEIF CFLAG:5101 == 1
+				PRINTFORM 오더 메이드바이브
+			ELSEIF CFLAG:5102 == 1
+				PRINTFORM 오더 메이드 목걸이
+			ENDIF
+		ENDIF
+		PRINTFORM 를선물 했다…
+	ENDIF
+
+;반응 쓸 때는 여기가 안전한가
+	;웃는 얼굴
+	IF TFLAG:17 == 1
+	;음식
+	ELSEIF TFLAG:17 == 2
+	;일용품
+	ELSEIF TFLAG:17 == 3
+	;악세사리
+	ELSEIF TFLAG:17 == 4
+	;복
+	ELSEIF TFLAG:17 == 5
+	;고가의 물건
+	ELSEIF TFLAG:17 == 6
+	;특별한선물(Extra 모드 엔딩용)
+	ELSEIF TFLAG:17 == 7
+		;인게이지 링
+		IF CFLAG:5100 == 1
+		;오더 메이드바이브
+		ELSEIF CFLAG:5101 == 1
+		;오더 메이드 목걸이
+		ELSEIF CFLAG:5102 == 1
+		ENDIF
+	;프로미스 링
+;	ELSEIF TFLAG:17 == 50
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;202,스킨십 CFLAG:404
+;-------------------------------------------------
+IF SELECTCOM == 202
+	CALL TRAIN_MESSAGE
+	IF TALENT:연모 || TALENT:친애
+		;오오쿠리카라
+		IF NO:MASTER == 116
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 『… 머리카락에 접해도 괜찮은가』
+					PRINTFORML 「좋아. … 응… 후후,어루만져지는 것이라는 기분 좋다」
+					PRINTFORMW %CALLNAME%는 기분 좋은 것 같이 웃음을 띄웠다
+				CASE 1
+					PRINTFORM 「저기,
+								CALL PNAME_73_116
+					PRINTFORML ,키스 하자?」
+					PRINTFORMW %CALLNAME%는 물기를 띤 눈으로 %CALLNAME:PLAYER%에 키스를 공갈했다
+				CASEELSE
+					PRINTFORML 「후후… 나도 너에게 손대고 싶구나…」
+					PRINTFORML 『미쓰타다…』
+					PRINTFORMW 그렇게 말해%CALLNAME%는 추잡하게 아랫 입술을 빨았다
+			ENDSELECT
+		;하세베
+		ELSEIF NO:MASTER == 118
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「응…… 하세베군,거기,좀 더 손대었으면 좋구나…」
+					PRINTFORML 『욕정 했는지. 완전히… 추잡한 칼이다』
+					PRINTFORML 「후후,나를 이런 식으로 한 것은 너지요」
+					PRINTFORMW %CALLNAME%는 녹은 눈동자로 힘이 빠졌다
+				CASE 1
+					PRINTFORML 「후후… 응,하세베군. 키스 하자?」
+					PRINTFORMW %CALLNAME%는 물기를 띤 눈으로 %CALLNAME:PLAYER%에 키스를 공갈했다
+				CASEELSE
+					PRINTFORML 「응. 후후… 나도 손대어 준다」
+					PRINTFORML 『읏…!어이,못된 장난하지마』
+					PRINTFORMW %CALLNAME%는 낄낄 웃으면서,발칙한손 돌출하고 접해 왔다
+			ENDSELECT
+		;제약 기구
+		ELSEIF NO:MASTER == 49
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「응…… 너 같은 겉모습의 아이와 이런 일 하는 것,양심이 찔리네요」
+					PRINTFORML 『상당히 여유다,남편. 그 모습은,이제(벌써) 조금 몹시 해도 괜찮은 것 같다』
+					PRINTFORML 「햐웃!? 아,미안,미안은 정말,제약 기구군」
+					PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%의 여유를 무너뜨려 주려고,못된 장난의손를 강하게 했다
+				CASE 1
+					PRINTFORML 「응… 후후…」
+					PRINTFORML 『어떻게 한,촛대절의 남편?』
+					PRINTFORML 「너에게 키스해 주었으면 한다는,후후… 생각하고 있었다」
+					PRINTFORMW %CALLNAME%가 녹은 시선이 따라져,%CALLNAME:PLAYER%는 철렁했다
+				CASEELSE
+					PRINTFORML 「후후,나도 너에게 손대고 싶어져 와 버렸군…」
+					PRINTFORML 『그렇게 말하지 않고,지금은 나에 남편을 찬미하게 해 주어라』
+					PRINTFORMW %CALLNAME:PLAYER%가 그렇게 말하면,%CALLNAME%는 「그렇게 근사한 일 말해져 아 어쩔 수 없다」라고 웃었다
+			ENDSELECT
+		;츠루마루
+		ELSEIF NO:MASTER == 130
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORM 「응응……
+								CALL PNAME_73_130
+					PRINTFORML . 그렇게 손대는 방법을 되어서는,추잡한 기분이 된다…」
+					PRINTFORML 『응? 추잡한 기분이 되어 받으려고 손대고 있지만. … 아직 여유가 있는 것 같다』
+					PRINTFORM 「히웃!? 기,기다려…
+								CALL PNAME_73_130
+					PRINTFORML …!」
+					PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%를 꾸짖는손를 강하게 했다
+				CASE 1
+					PRINTFORM 「응… 응,
+								CALL PNAME_73_130
+					PRINTFORML …」
+					PRINTFORML 『뭐야,광방?』
+					PRINTFORML 「입맞춤해,해 주었으면 하는데…」
+					PRINTFORMW %CALLNAME%는 젖은 눈동자로 키스를 공갈했다
+				CASEELSE
+					PRINTFORM 「저기…… 나도
+								CALL PNAME_73_130
+					PRINTFORML 에 손대고 싶구나?」
+					PRINTFORML 『… 추잡한 선반』
+					PRINTFORML 「아… 그렇게 한 것은 너지요…?」
+					PRINTFORMW %CALLNAME%는 낄낄 음미롭게 미소짓고 있다
+			ENDSELECT
+		ELSE
+			PRINTFORMW 「후후… 응,나도 너에게 손대어도 좋은가?」
+		ENDIF
+	ELSE
+	ENDIF
+	
+ENDIF
+
+;-------------------------------------------------
+;203,느긋하게한다 CFLAG:405
+;-------------------------------------------------
+IF SELECTCOM == 203
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;204,가사 CFLAG:406
+;-------------------------------------------------
+IF SELECTCOM == 204
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;205,노래연습 CFLAG:407
+;-------------------------------------------------
+IF SELECTCOM == 205
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;206,선물시킨다 CFLAG:408
+;-------------------------------------------------
+IF SELECTCOM == 206
+	PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%에,선물를 주도록(듯이) 말해 보았다
+	;연모,친애
+	IF TALENT:연모 || TALENT:친애
+		PRINTFORML %CALLNAME%는 놀란 모습이다
+		PRINTFORM 무려,%CALLNAME:PLAYER%를 위해서(때문에)
+		K:1 = RAND:3
+			IF K:1 == 0
+				PRINTFORML 맛좋은 음식을 만들어 준 것 같다
+			ELSEIF K:1 == 1
+				PRINTFORML 새로운 옷을 준비해 주고 있던 것 같다
+			ELSEIF K:1 == 2
+				PRINTFORML 자신을선물 하고 싶다고 생각하고 있던 것 같다
+			ENDIF
+		PRINTFORML 즐거운 시간을 보냈다…
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		PRINTFORM %CALLNAME%는,
+		;마조나새드소유로,채찍를 가지고 있다
+		IF (TALENT:새드 || TALENT:마조) && ITEM:13 == 1 && NOITEM == 0
+			PRINTFORML 새로운채찍를선물 해 주었다
+			SIF TALENT:새드
+				PRINTFORML 「이것으로 너의 일,좀 더 쳐 주네요… 후훗」
+			SIF TALENT:마조 && TALENT:새드 == 0
+				PRINTFORML 「이것으로 나의 일,좀 더 쳤으면 좋구나… 후훗」
+		;A감각 3이상으로,남자나 A감각＞V감각으로,애널바이브를 가지고 있다
+		ELSEIF ABL:A감각 >= 3 && (TALENT:남자 || ABL:A감각 > ABL:V감각) && ITEM:5 == 1
+			PRINTFORML 새로운애널바이브를선물 해 주었다
+			PRINTFORML 「이것으로 좀 더 기분이 좋은 일 하자?」
+		;V감각 3이상으로,처녀가 아니고,바이브를 가지고 있다
+		ELSEIF ABL:V감각 >= 3 && !TALENT:처녀 && ITEM:4 == 1
+			PRINTFORML 새로운바이브를선물 해 주었다
+			PRINTFORML 「이것으로 좀 더 기분이 좋은 일 하자?」
+		;B감각 3이상으로,니틀캡를 가지고 있다
+		ELSEIF ABL:B감각 >= 3 && ITEM:10 == 1
+			PRINTFORML 새로운니틀캡를선물 해 주었다
+			PRINTFORML 「이것으로 좀 더 기분이 좋은 일 하자?」
+		;로터를 가지고 있다
+		ELSEIF ITEM:0 == 1
+			PRINTFORML 새로운로터를선물 해 주었다
+			PRINTFORML 「이것으로 좀 더 기분이 좋은 일 하자?」
+		ELSE
+			PRINTFORML 선물는 스스로 부디이라고 말해,기대고 걸려 왔다
+			PRINTFORML 「너의 일,기분 좋게 해 준다…」
+		ENDIF
+		PRINTFORML 무엇인가,%CALLNAME%편이 기뻐하고 있는 것 같은 생각이 든다…
+	;복종,예속
+	ELSEIF TALENT:복종 || TALENT:예속
+		PRINTFORML 「너에게,선물…… 저,그렇지만,나는 너의 소유물이니까… 그…」
+		PRINTFORMW %CALLNAME%는 자신에게선물 할 수 있는 것은 주인에게로의 봉사만이라고,당황한 모습으로 말했다
+	ELSEIF TALENT:붕괴
+		PRINTFORML %CALLNAME%는 당황한 모습이다
+	;반발각인Lv3
+	ELSEIF MARK:반발각인 >= 3
+		PRINTFORML 「… 장난친 것을 말하네요」
+		PRINTFORMW %CALLNAME:PLAYER%는 사살할듯한 시선을 받았다…
+	;그 이외
+	ELSE
+		PRINTFORML 「… 그것,진심으로 말하고 있는 것인가」
+		PRINTFORMW %CALLNAME%는,무슨 말을 하고 있다 이 녀석은,이라고 말하고 싶은 듯한 얼굴로 이쪽을 보고 있다…
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;207,데이트간다 CFLAG:409
+;-------------------------------------------------
+IF SELECTCOM == 207
+	CALL TRAIN_MESSAGE
+	;노출데이트
+	IF TFLAG:17 == 2
+		IF ABL:노출벽 >= 3
+			PRINTFORML 「응%UNICODE(0x2661)% 속옷을 붙이지 않고 외출하게 하다는… 엣치%UNICODE(0x2661)% 발각되면 어떻게 하지? %UNICODE(0x2661)%」
+			PRINTFORMW %CALLNAME%는 흥분하고 있는 것 같다
+		ELSE
+			PRINTFORML 「읏… 속옷을 붙이지 않고 외출하게 한다고… 발각되면 어떻게 하는 거야…」
+			PRINTFORMW %CALLNAME%는 곤혹하고 있는 것 같다
+		ENDIF
+	;보통 데이트
+	ELSE
+		PRINTFORML 「후훗. 너와의 데이트,즐거움이다」
+		PRINTFORMW %CALLNAME%는 기쁜듯이,손가락을 얽히게 할 수 있도록(듯이)손를 연결해 왔다
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;애무시킨다계 커맨드
+;=================================================
+;-------------------------------------------------
+;220,애무시킨다 CFLAG:410
+;-------------------------------------------------
+IF SELECTCOM == 220
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;221,가슴을주무르게한다 CFLAG:411
+;-------------------------------------------------
+IF SELECTCOM == 221
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;222,커닐링구스강제 CFLAG:412
+;-------------------------------------------------
+IF SELECTCOM == 222
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;223,손가락삽입시킨다 CFLAG:413
+;-------------------------------------------------
+IF SELECTCOM == 223
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;224,애널핥기강제 CFLAG:414
+;-------------------------------------------------
+IF SELECTCOM == 224
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;225,애널애무시킨다 CFLAG:415
+;-------------------------------------------------
+IF SELECTCOM == 225
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;226,자위과시한다 CFLAG:416
+;-------------------------------------------------
+IF SELECTCOM == 226
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;227,자위과시한다 CFLAG:417
+;-------------------------------------------------
+IF SELECTCOM == 226
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;역봉사·레즈비언 플레이계 커맨드
+;=================================================
+;-------------------------------------------------
+;240,파이즈리한다 CFLAG:418
+;-------------------------------------------------
+IF SELECTCOM == 240
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;241,파이즈리펠라한다 CFLAG:419
+;-------------------------------------------------
+IF SELECTCOM == 241
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;242,풋잡한다 CFLAG:420
+;-------------------------------------------------
+IF SELECTCOM == 242
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;243,가슴을비빈다 CFLAG:421
+;-------------------------------------------------
+IF SELECTCOM == 243
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;244,조개비비기 CFLAG:422
+;-------------------------------------------------
+IF SELECTCOM == 244
+	CALL TRAIN_MESSAGE
+	IF KANRAKU2(TARGET)
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「아,읏,이것,기분 좋다…」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;245,장대비비기 CFLAG:423
+;-------------------------------------------------
+IF SELECTCOM == 245
+	CALL TRAIN_MESSAGE
+	IF KANRAKU2(TARGET)
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「아,읏,이것,기분 좋다…」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;노예×주인 섹스계 커맨드
+;=================================================
+;-------------------------------------------------
+;260,정상위시킨다 CFLAG:424
+;-------------------------------------------------
+IF SELECTCOM == 260
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;261,후배위시킨다 CFLAG:425
+;-------------------------------------------------
+IF SELECTCOM == 261
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;262,기승위한다 CFLAG:426
+;-------------------------------------------------
+IF SELECTCOM == 262
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;263,정상위애널시킨다 CFLAG:427
+;-------------------------------------------------
+IF SELECTCOM == 263
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;264,후배위애널시킨다 CFLAG:428
+;-------------------------------------------------
+IF SELECTCOM == 264
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;265,기승위애널한다 CFLAG:429
+;-------------------------------------------------
+IF SELECTCOM == 265
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;조수×주인 섹스계 커맨드
+;=================================================
+;-------------------------------------------------
+;270,촉수에범하게시킨다 CFLAG:430
+;-------------------------------------------------
+IF SELECTCOM == 270
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;271,촉수에A를범하게시킨다 CFLAG:431
+;-------------------------------------------------
+IF SELECTCOM == 271
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;주인마조계 커맨드
+;=================================================
+;-------------------------------------------------
+;280,이라마치오시킨다 CFLAG:432
+;-------------------------------------------------
+IF SELECTCOM == 280
+	CALL TRAIN_MESSAGE
+	IF ABL:새드끼 >= 5
+		PRINTFORM 「하핫… 이런 일 시켜 기분이 좋다? 이 변태
+		SIF KANRAKU(TARGET)
+			PRINTFORM %UNICODE(0x2661)%
+		PRINTFORMW」
+	ELSE
+		PRINTFORMW 「응읏… 괴,괴롭지 않은 것인지…?」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;281,매도당한다 CFLAG:433
+;-------------------------------------------------
+IF SELECTCOM == 281
+	CALL TRAIN_MESSAGE
+	IF ABL:새드끼 >= 5
+		PRINTFORM 「매… 매도해져 흥분하고 있는지? 이,변태
+		SIF KANRAKU(TARGET)
+			PRINTFORM %UNICODE(0x2661)%
+		PRINTFORMW」
+	ELSE
+		PRINTFORMW 「… 부탁하기 때문에 이런 일 말하게 하지 말아줘…」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;282,발을핥는다 CFLAG:434
+;-------------------------------------------------
+IF SELECTCOM == 282
+	CALL TRAIN_MESSAGE
+	IF ABL:새드끼 >= 5
+		PRINTFORM 「그렇게발를 좋아하면,밟아 줄까?
+		SIF KANRAKU(TARGET)
+			PRINTFORM %UNICODE(0x2661)%
+		PRINTFORMW」
+	ELSE
+		PRINTFORMW 「오,침착하지 않기 때문에 그만두어 주지 않을까…」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;283,얻어맞는다 CFLAG:435
+;-------------------------------------------------
+IF SELECTCOM == 283
+	CALL TRAIN_MESSAGE
+	IF ABL:새드끼 >= 5
+		PRINTFORM 「자신으로부터 맞고 싶어하다니… 너,변태구나
+		SIF KANRAKU(TARGET)
+			PRINTFORM %UNICODE(0x2661)%
+		PRINTFORMW」
+	ELSE
+		PRINTFORMW 「아,아프지 않은 것인지…?」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;284,채찍으로맞는다 CFLAG:436
+;-------------------------------------------------
+IF SELECTCOM == 284
+	CALL TRAIN_MESSAGE
+	IF ABL:새드끼 >= 5
+		PRINTFORM 「자신으로부터 맞고 싶어하다니… 너,변태구나
+		SIF KANRAKU(TARGET)
+			PRINTFORM %UNICODE(0x2661)%
+		PRINTFORMW」
+	ELSE
+		PRINTFORMW 「아,아프지 않은 것인지…?」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;285,음뇨한다 CFLAG:437
+;-------------------------------------------------
+IF SELECTCOM == 285
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;286,식분한다 CFLAG:438
+;-------------------------------------------------
+IF SELECTCOM == 286
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;약품계 커맨드
+;=================================================
+;-------------------------------------------------
+;300,로션 CFLAG:439
+;-------------------------------------------------
+IF SELECTCOM == 300
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;301,미약 CFLAG:440
+;-------------------------------------------------
+IF SELECTCOM == 301
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;302,이뇨제 CFLAG:441
+;-------------------------------------------------
+IF SELECTCOM == 302
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;303,강정신약 CFLAG:442
+;-------------------------------------------------
+IF SELECTCOM == 303
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;304,구토제 CFLAG:443
+;-------------------------------------------------
+IF SELECTCOM == 304
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;305,가려움증약 CFLAG:538
+;-------------------------------------------------
+IF SELECTCOM == 305
+	CALL TRAIN_MESSAGE
+	PRINTFORMW 「읏,싫닷,이것,가렵다…!」
+ENDIF
+
+
+
+;=================================================
+;시추에이션별 커맨드
+;=================================================
+;-------------------------------------------------
+;310,비디오촬영 CFLAG:444
+;-------------------------------------------------
+;촬영 개시시
+IF SELECTCOM == 310 && TEQUIP:비디오카메라 == 0
+	CALL TRAIN_MESSAGE
+	;처음
+	IF CFLAG:444 == 0
+		IF KANRAKU(TARGET)
+			PRINTFORMW 「뭐야,그것? …… 헤에,『로 여자탈등』이라고 하는 것이군」
+		ELSE
+			PRINTFORMW 「뭐야 그것. ……『로 여자탈등』? 하아… 또 이상한 것을…」
+		ENDIF
+		CALL TRAIN_MESSAGE
+		CFLAG:444 = 1
+	;2회째 이후
+	ELSE
+		CALL TRAIN_MESSAGE
+		CFLAG:444 = 2
+	ENDIF
+;촬영 멈추었을 때의 반응
+ELSEIF SELECTCOM == 310 && TEQUIP:비디오카메라
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;311,비디오감상 CFLAG:445
+;-------------------------------------------------
+IF SELECTCOM == 311
+	CALL TRAIN_MESSAGE
+	IF TALENT:연모 || TALENT:친애 || TALENT:복종 || TALENT:예속
+		PRINTFORMW 「나,나,너에게 이런 추태를 노출하고 있었어? … 우우…… 추하다……」
+	ELSEIF TALENT:음란 || TALENT:창부
+		PRINTFORMW 「후후… 나,너에게 이런 추태를 노출하고 있던 것이구나. 추한데,어떻게 하지… 흥분해 버리는…%UNICODE(0x2661)%」
+	ELSE
+		PRINTFORMW 「… 이런 것을 보여 무엇을 하고 싶은 거야」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;312,사진촬영 CFLAG:446
+;-------------------------------------------------
+IF SELECTCOM == 312
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;313,수치플레이 CFLAG:447
+;-------------------------------------------------
+;이동시
+IF SELECTCOM == 313 && TEQUIP:수치플레이 == 0
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		PRINTFORML 「… 엣치」
+		SIF TALENT:연모 || TALENT:친애 || TALENT:복종 || TALENT:예속
+			PRINTFORMW %CALLNAME%는 부끄러운 듯이 시선을 날뛰게 했다
+		SIF TALENT:음란 || TALENT:창부
+			PRINTFORMW %CALLNAME%휘어짐과 웃음을 띄워 말했다
+	ELSE
+	ENDIF
+;돌아왔을 때의 반응
+ELSEIF SELECTCOM == 313 && TEQUIP:수치플레이
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;314,제모 CFLAG:448
+;-------------------------------------------------
+IF SELECTCOM == 314
+	CALL TRAIN_MESSAGE
+	IF TALENT:작은체구
+		PRINTFORMW 「나를 이런 모습으로 한 다음털까지 깎다니… 너는 그러한 취미야?」
+		SIF KANRAKU(TARGET)
+			PRINTFORMW 「응… 지금부터는 너의 일,『\@ TALENT:PLAYER:남자? 오빠 # 누나 \@%UNICODE(0x2661)%』라고 불러 주는 편이 좋은 걸까나? 후후,농담이야」
+	ELSE
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;315,목욕탕플레이 CFLAG:449
+;-------------------------------------------------
+;이동시
+IF SELECTCOM == 315 && TEQUIP:목욕탕 == 0
+	CALL TRAIN_MESSAGE
+	IF KANRAKU(TARGET)
+		PRINTFORMW 「후후,등에서도 씻어 줄까?」
+	ELSE
+	ENDIF
+;돌아왔을 때의 반응
+ELSEIF SELECTCOM == 315 && TEQUIP:목욕탕
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;316,샤워 CFLAG:450
+;-------------------------------------------------
+;이동시
+IF SELECTCOM == 316 && TEQUIP:샤워 == 0
+	CALL TRAIN_MESSAGE
+;돌아왔을 때의 반응
+ELSEIF SELECTCOM == 316 && TEQUIP:샤워
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;317,거품비비기 CFLAG:451
+;-------------------------------------------------
+IF SELECTCOM == 317
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;318,거품비비기한다 CFLAG:452
+;-------------------------------------------------
+IF SELECTCOM == 318
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;319,신혼부부플레이 CFLAG:453
+;-------------------------------------------------
+;이동시
+IF SELECTCOM == 319 && TEQUIP:에이프런 == 0
+	CALL TRAIN_MESSAGE
+	;알몸에이프런
+	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래）
+		PRINTFORMW 「알몸에이프런는,엣치하다 %UNICODE(0x2661)%」
+	ELSEIF P > PALAMLV:2
+		PRINTFORMW 「후후,새댁인가……,나와 아이 만들어 해? 하하,농담이야」
+	ELSE
+		PRINTFORM 「이것은…\@ KIMONO(TARGET) ? 앞치마 # 에이프런 \@?　
+		PRINTFORMW 배가 고픈의라면,\@ TIME == 0? 간식개 # 밥 \@만들까?」
+	ENDIF
+;돌아왔을 때의 반응
+ELSEIF SELECTCOM == 319 && TEQUIP:에이프런
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;320,야외플레이 CFLAG:454
+;-------------------------------------------------
+;이동시
+IF SELECTCOM == 320 && TEQUIP:야외플레이 == 0
+	CALL TRAIN_MESSAGE
+;돌아왔을 때의 반응
+ELSEIF SELECTCOM == 320 && TEQUIP:야외플레이
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;321,사람을부른다 CFLAG:455
+;-------------------------------------------------
+IF SELECTCOM == 321
+	CALL TRAIN_MESSAGE
+	IF TFLAG:151 >= 3
+	ELSE
+		IF TALENT:음란 || TALENT:창부
+			PRINTFORMW 「읏!? 누,누군가에게 이런 모습의 나를 보일 생각…?」
+			IF ABL:노출벽 >= 3
+				PRINTFORMW %CALLNAME%는 흥분하고 있는 것 같다
+			ELSE
+				PRINTFORMW %CALLNAME%는 조금 흥분하고 있는 것 같다
+			ENDIF
+		ELSE
+			PRINTFORMW 「힛!? 뭐,뭐 생각해……!?」
+			PRINTFORMW %CALLNAME%는 신체를 진동시켜 무서워하고 있다
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;322,윤간 CFLAG:456
+;-------------------------------------------------
+IF SELECTCOM == 322
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;323,지하실 CFLAG:457
+;-------------------------------------------------
+;이동시
+IF SELECTCOM == 323 && TEQUIP:지하실 == 0
+	PRINTFORMW 「… 나를,어디에 데리고 갈 생각이다…?」
+	CALL TRAIN_MESSAGE
+;돌아왔을 때의 반응
+ELSEIF SELECTCOM == 323 && TEQUIP:지하실
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;촉수계 커맨드
+;=================================================
+;-------------------------------------------------
+;340,촉수소환 CFLAG:458
+;-------------------------------------------------
+;소환시
+IF SELECTCOM == 340 && TEQUIP:촉수 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;돌아갔을 때의 반응
+ELSEIF SELECTCOM == 340 && TEQUIP:촉수
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;341,촉수유두고문 CFLAG:459
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 341 && TEQUIP:니틀캡 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 341 && TEQUIP:니틀캡
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;342,촉수클리고문 CFLAG:460
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 342 && TEQUIP:클리캡 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 342 && TEQUIP:클리캡
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;343,촉수페니스고문 CFLAG:461
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 343 && TEQUIP:전동오나홀 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 343 && TEQUIP:전동오나홀
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;344,촉수삽입 CFLAG:462
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 344 && TEQUIP:바이브 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 344 && TEQUIP:바이브
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;345,촉수애널 CFLAG:463
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 345 && TEQUIP:애널바이브 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 345 && TEQUIP:애널바이브
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;350,촉수구욕 CFLAG:464
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 350 && TEQUIP:촉수구욕 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 350 && TEQUIP:촉수구욕
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;351,촉수구속 CFLAG:465
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 351 && TEQUIP:밧줄 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 351 && TEQUIP:밧줄
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;352,촉수관장 CFLAG:466
+;-------------------------------------------------
+;관장시
+IF SELECTCOM == 352
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;하드한촉수계 커맨드
+;=================================================
+;-------------------------------------------------
+;360,촉수착유 CFLAG:467
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 360 && TEQUIP:착유기 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 360 && TEQUIP:착유기
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;361,촉수유선고문 CFLAG:468
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 361 && TEQUIP:촉수유선삽입 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 361 && TEQUIP:촉수유선삽입
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;362,촉수G스팟고문 CFLAG:469
+;-------------------------------------------------
+IF SELECTCOM == 362
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;363,촉수자궁고문 CFLAG:470
+;-------------------------------------------------
+IF SELECTCOM == 362
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;364,촉수전립선자극 CFLAG:471
+;-------------------------------------------------
+IF SELECTCOM == 364
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;365,촉수요도삽입 CFLAG:472
+;-------------------------------------------------
+;장착시
+IF SELECTCOM == 365 && TEQUIP:카테터 == 0
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+;제외했을 때의 반응
+ELSEIF SELECTCOM == 365 && TEQUIP:카테터
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;366,촉수바기나확장 CFLAG:473
+;-------------------------------------------------
+IF SELECTCOM == 366
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;367,촉수애널확장 CFLAG:474
+;-------------------------------------------------
+IF SELECTCOM == 367
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;368,촉수양구멍확장 CFLAG:475
+;-------------------------------------------------
+IF SELECTCOM == 368
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;369,촉수산란 CFLAG:476
+;-------------------------------------------------
+IF SELECTCOM == 369
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+	;전부 뽑았을 때
+	IF TFLAG:56 == 0
+	;다른 한쪽만 뽑았을 때
+	ELSEIF TFLAG:56 == 1
+	;최초로 들어갈 수 있었을 때
+	ELSEIF TFLAG:56 == 2
+	;한층 더 추가했을 때
+	ELSE
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;370,촉수애널산란 CFLAG:477
+;-------------------------------------------------
+IF SELECTCOM == 370
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+	;전부 뽑았을 때
+	IF TFLAG:56 == 0
+	;다른 한쪽만 뽑았을 때
+	ELSEIF TFLAG:56 == 1
+	;최초로 들어갈 수 있었을 때
+	ELSEIF TFLAG:56 == 2
+	;한층 더 추가했을 때
+	ELSE
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;371,촉수관통 CFLAG:534
+;-------------------------------------------------
+IF SELECTCOM == 371
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;372,전기촉수 CFLAG:535
+;-------------------------------------------------
+IF SELECTCOM == 372
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;373,촉수뇌간 CFLAG:536
+;-------------------------------------------------
+IF SELECTCOM == 373
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;374,최면촉수 CFLAG:539
+;-------------------------------------------------
+IF SELECTCOM == 374
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;이종간계 커맨드
+;=================================================
+;-------------------------------------------------
+;380,버터견 CFLAG:478
+;-------------------------------------------------
+IF SELECTCOM == 380
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;381,수간 CFLAG:479
+;-------------------------------------------------
+IF SELECTCOM == 381
+	CALL TRAIN_MESSAGE
+	IF TALENT:음란 || TALENT:창부
+		IF TALENT:동물귀 && TEQUIP:애널바이브
+			PRINTFORML 「아,아%UNICODE(0x2661)% 나,이 아이의 메스로 되어 버리고 있는…%UNICODE(0x2661)%」
+			PRINTFORMW %CALLNAME%는 동물의 귀와 꼬리를 흔들어,야무지지 못하게 허덕이고 있다
+		ELSE
+			CALL PANT_VOICE_EX
+		ENDIF
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;382,뱀장어탕 CFLAG:480
+;-------------------------------------------------
+IF SELECTCOM == 382
+	PRINTFORMW 「뭐,뭐…… 너,무엇 생각해……」
+	CALL TRAIN_MESSAGE
+;양쪽 모두에 침입할 수 있다
+	IF F && R
+		IF TALENT:처녀
+			PRINTFORMW 「거짓말… 아니,싫다,싫어엇……!아,아아아……」
+		ELSE
+			PRINTFORMW 「거짓말,싫다아……!」
+		ENDIF
+;A에 도구를 삽입하고 있지 않다
+	ELSEIF R
+		PRINTFORMW 「거짓말,싫다아……!」
+	ELSEIF F
+	;처녀
+		IF TALENT:처녀
+			PRINTFORMW 「거짓말… 아니,싫다,싫어엇……!아,아아아……」
+		ELSE
+			PRINTFORMW 「거짓말,싫다아……!」
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;383,곤충탕 CFLAG:481
+;-------------------------------------------------
+IF SELECTCOM == 383
+	CALL TRAIN_MESSAGE
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「힛!? 아니,싫닷!!그만두어라…!!」
+			CASE 1
+				PRINTFORMW 「힛!? 너,너,무엇 생각해…!아… 거짓말,야… 싫다앗……!」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+ENDIF
+
+
+
+;=================================================
+;광기계 커맨드
+;=================================================
+;-------------------------------------------------
+;390,한쪽팔절단 CFLAG:482
+;-------------------------------------------------
+IF SELECTCOM == 390
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;391,한쪽다리절단 CFLAG:483
+;-------------------------------------------------
+IF SELECTCOM == 391
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;392,모두발치 CFLAG:484
+;-------------------------------------------------
+IF SELECTCOM == 392
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;조수명령계 커맨드
+;=================================================
+;-------------------------------------------------
+;400,클리토리스애무명령 CFLAG:485
+;-------------------------------------------------
+;명령 실행시
+IF SELECTCOM == 400
+	CALL TRAIN_MESSAGE
+;멈추게 했을 때의 반응
+ELSEIF SELECTCOM == 400
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;401,페니스애무명령 CFLAG:486
+;-------------------------------------------------
+;명령 실행시
+IF SELECTCOM == 401
+	CALL TRAIN_MESSAGE
+;멈추게 했을 때의 반응
+ELSEIF SELECTCOM == 401
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;402,가슴애무명령 CFLAG:487
+;-------------------------------------------------
+;명령 실행시
+IF SELECTCOM == 402
+	CALL TRAIN_MESSAGE
+;멈추게 했을 때의 반응
+ELSEIF SELECTCOM == 402
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;403,손가락삽입명령 CFLAG:488
+;-------------------------------------------------
+;명령 실행시
+IF SELECTCOM == 403
+	CALL TRAIN_MESSAGE
+;멈추게 했을 때의 반응
+ELSEIF SELECTCOM == 403
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;404,애널애무명령 CFLAG:489
+;-------------------------------------------------
+;명령 실행시
+IF SELECTCOM == 404
+	CALL TRAIN_MESSAGE
+;멈추게 했을 때의 반응
+ELSEIF SELECTCOM == 404
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;405,삽입명령 CFLAG:490
+;-------------------------------------------------
+;명령 실행시
+IF SELECTCOM == 405
+	CALL TRAIN_MESSAGE
+;멈추게 했을 때의 반응
+ELSEIF SELECTCOM == 405
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;406,애널삽입명령 CFLAG:491
+;-------------------------------------------------
+;명령 실행시
+IF SELECTCOM == 406
+	CALL TRAIN_MESSAGE
+;멈추게 했을 때의 반응
+ELSEIF SELECTCOM == 406
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;407,구욕명령 CFLAG:492
+;-------------------------------------------------
+;명령 실행시
+IF SELECTCOM == 407
+	CALL TRAIN_MESSAGE
+;멈추게 했을 때의 반응
+ELSEIF SELECTCOM == 407
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;정음계 커맨드
+;=================================================
+;-------------------------------------------------
+;410,콘돔정음(노예) CFLAG:493
+;-------------------------------------------------
+IF SELECTCOM == 410
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;411,콘돔정음(조수) CFLAG:494
+;-------------------------------------------------
+IF SELECTCOM == 411
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;412,정액키스 CFLAG:495
+;-------------------------------------------------
+IF SELECTCOM == 412
+	CALL TRAIN_MESSAGE
+	IF TALENT:붕괴
+		PRINTFORMW 「츄… 후웃…… 야,아…」
+	;정액중독 3 이상
+	ELSEIF ABL:정액중독 >= 3
+		PRINTFORMW 「츄… 쥿…… 푸하. 잘 먹었어요…%UNICODE(0x2661)%」
+	;정액중독 1 이상
+	ELSEIF ABL:정액중독 >= 1
+		PRINTFORMW 「우구… 츄… 푸하. 너… 는 것 먹이는 거야」
+	;정액중독없음
+	ELSE
+		PRINTFORMW 「우엣… 우구…!응응…!……… 젠장…」
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;더블 봉사계 커맨드
+;=================================================
+;-------------------------------------------------
+;420,더블펠라 CFLAG:496
+;-------------------------------------------------
+IF SELECTCOM == 420
+	CALL TRAIN_MESSAGE
+	;연모,친애
+	IF TALENT:연모 || TALENT:친애
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「쥬…… 츄룻……… 응,내 쪽이 상대지요?」
+			CASEELSE
+				PRINTFORMW 「쥬룻…… 응… 엣또,기분 좋아?」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 %CALLNAME:ASSI%를 신경쓰면서 봉사를 계속하고 있다
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「츄룻… 쥬웃…… 푸앗. 응,후후… 이것,나중에 아래의 입에도 주네요? %UNICODE(0x2661)%」
+				PRINTFORMW %CALLNAME%는 음탕하게 미소지으면서 봉사를 계속하고 있다
+			CASEELSE
+				PRINTFORMW 「쥿… 츄룻…… 후후%UNICODE(0x2661)% 그런데,혀 내… 그렇게,좋은 와%UNICODE(0x2661)% 응,츄…」
+				PRINTFORMW %CALLNAME%는 %CALLNAME:ASSI%과 혀를 얽히게 되어지면서,%CALLNAME:PLAYER%의페니스에 봉사를 계속하고 있다
+		ENDSELECT
+	;복종,예속
+	ELSEIF TALENT:복종 || TALENT:예속
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「아므…… 쥬룻…… 이봐요,우대신?」
+		PRINTFORMW %CALLNAME%는 %CALLNAME:ASSI%과 경쟁하는 것처럼 %CALLNAME:PLAYER%의페니스에 봉사하고 있다
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	;통상시,굴복각인 3
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;421,더블파이즈리 CFLAG:497
+;-------------------------------------------------
+IF SELECTCOM == 421
+	CALL TRAIN_MESSAGE
+	;연모,친애
+	IF TALENT:연모 || TALENT:친애 || TALENT:복종 || TALENT:예속
+		SELECTCASE RAND:2
+			CASE 0
+				CALL PANT_VOICE_EX
+			CASEELSE
+				PRINTFORMW 「응…… 기분 좋아…?」
+				PRINTFORMW %CALLNAME%는 %CALLNAME:ASSI%를 신경쓰면서 봉사를 계속하고 있다
+		ENDSELECT
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「응%UNICODE(0x2661)% 후후… 너는 나의 젖가슴이 기분이 좋지요?」
+				PRINTFORMW %CALLNAME%는 음탕하게 미소지으면서 봉사를 계속하고 있다
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	;통상시,굴복각인 3
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;422,더블스마타 CFLAG:498
+;-------------------------------------------------
+IF SELECTCOM == 422
+	CALL TRAIN_MESSAGE
+	;연모,친애
+	IF TALENT:연모 || TALENT:친애
+		SELECTCASE RAND:2
+			CASE 0
+				CALL PANT_VOICE_EX
+			CASEELSE
+				PRINTFORMW 「응읏…… 기,기분 좋아…?」
+				PRINTFORMW %CALLNAME%는 %CALLNAME:ASSI%를 신경쓰면서 봉사를 계속하고 있다
+		ENDSELECT
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「응응%UNICODE(0x2661)% 후후… 두 사람 모두 움찔움찔 하고 있는%UNICODE(0x2661)% 저기,나의 허벅지 기분 좋아?」
+				PRINTFORMW %CALLNAME%는 음탕하게 미소지으면서 봉사를 계속하고 있다
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	;복종,예속
+	ELSEIF TALENT:복종 || TALENT:예속
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「응읏… 응,기분 좋은가…?」
+				PRINTFORMW %CALLNAME%는 허덕이면서 봉사를 계속하고 있다
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	;통상시,굴복각인 3
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;노예×조수계 커맨드
+;=================================================
+;-------------------------------------------------
+;430,조수를범하게시킨다 CFLAG:499
+;-------------------------------------------------
+IF SELECTCOM == 430
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;431,조수의A를범하게시킨다 CFLAG:502
+;-------------------------------------------------
+IF SELECTCOM == 431
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+
+;=================================================
+;주인×조수계 커맨드
+;=================================================
+;-------------------------------------------------
+;440,조수를범한다 CFLAG:503
+;-------------------------------------------------
+IF SELECTCOM == 440
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;441,조수의A를범한다 CFLAG:504
+;-------------------------------------------------
+IF SELECTCOM == 441
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;파생 커맨드
+;=================================================
+;-------------------------------------------------
+;500,G스팟 자극 CFLAG:505
+;-------------------------------------------------
+IF SELECTCOM == 500
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;501,전립선 자극 CFLAG:506
+;-------------------------------------------------
+IF SELECTCOM == 501
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;502,착유 CFLAG:507
+;-------------------------------------------------
+IF SELECTCOM == 502
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;503,식스나인 CFLAG:508
+;-------------------------------------------------
+IF SELECTCOM == 503
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;504,69파이즈리 CFLAG:509
+;-------------------------------------------------
+IF SELECTCOM == 504
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;507,삽입 G스포 고문 CFLAG:512
+;-------------------------------------------------
+IF SELECTCOM == 507
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;508,삽입 자궁입고문 CFLAG:513
+;-------------------------------------------------
+IF SELECTCOM == 508
+	CALL TRAIN_MESSAGE
+	;연모,친애
+	IF TALENT:연모 || TALENT:친애
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「앗,안돼%UNICODE(0x2661)% 거기,아기의 방이야…%UNICODE(0x2661)%
+			CASE 1
+				PRINTFORMW 「아웃… 응응…%UNICODE(0x2661)% 후후… 거기에 내서는 안되니까? 갓난 아기 가능하게 되기 때문에 아%UNICODE(0x2661)%」
+			CASEELSE
+				PRINTFORMW 「앗,응응%UNICODE(0x2661)% 내를 배게 하고 싶은 것인지…?」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 음탕하게 미소짓고 있다
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「거기%UNICODE(0x2661)% 동글동글 되는 것 기분 좋아 %UNICODE(0x2661)%」
+			CASEELSE
+				PRINTFORMW 「%UNICODE(0x2661)% 팥고물%UNICODE(0x2661)% 응후후… 해 갑자기 내고 싶은거야?」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 음탕하게 미소짓고 있다
+	;복종,예속
+	ELSEIF TALENT:복종 || TALENT:예속
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「아웃!? 그것… 동글동글은 안돼…!」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	;붕괴
+	ELSEIF TALENT:붕괴
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「히잇!? …… 거기,하,안돼…」
+			CASE 1
+				PRINTFORMW 「거기… 동글동글 하면 …」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	;통상시,굴복각인 3
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;509,기승위유방자위 CFLAG:514
+;-------------------------------------------------
+IF SELECTCOM == 509
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;510,역에서 파는 도시락 CFLAG:515
+;-------------------------------------------------
+IF SELECTCOM == 510
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;511,스팽킹섹스 CFLAG:516
+;-------------------------------------------------
+IF SELECTCOM == 511
+	CALL TRAIN_MESSAGE
+	IF TALENT:마조 == 1
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「아앗,아읏,나 이런,보기 흉한 외모로,범해지고 있는…%UNICODE(0x2661)%」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「아웃,우웃… 이런,보기 흉한…!」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;512,스팽킹애널 CFLAG:517
+;-------------------------------------------------
+IF SELECTCOM == 512
+	CALL TRAIN_MESSAGE
+	IF TALENT:마조 == 1
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「아앗,아읏,나 이런,보기 흉한 외모로,범해지고 있는…%UNICODE(0x2661)%」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「아웃,우웃… 이런,보기 흉한…!」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;513,목조르기섹스 CFLAG:518
+;-------------------------------------------------
+IF SELECTCOM == 513
+	CALL TRAIN_MESSAGE
+	IF TALENT:마조 == 1
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「휴,… 아구……,응,후아…」
+			CASEELSE
+				PRINTFORML 「읏하,아…… 좀 더,아,매어……」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 목을 졸려지는 만큼,%CALLNAME:PLAYER%를 힘들게 단단히 조여 왔다…
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;514,목조르기애널 CFLAG:519
+;-------------------------------------------------
+IF SELECTCOM == 514
+	CALL TRAIN_MESSAGE
+	IF TALENT:마조 == 1
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「휴,… 아구……,응,후아…」
+			CASEELSE
+				PRINTFORML 「읏하,아…… 좀 더,아,매어……」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 목을 졸려지는 만큼,아누스를 단단히 조여 왔다…
+	ELSE
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;515,샌드위치 CFLAG:520
+;-------------------------------------------------
+IF SELECTCOM == 515
+	CALL TRAIN_MESSAGE
+	;연모,친애
+	IF TALENT:연모 || TALENT:친애
+		IF TFLAG:41 == 1
+			PRINTFORML 「웃…… 후웃… 싫다…… 그만두어 줘…!」
+			PRINTFORMW %CALLNAME%는 %CALLNAME:ASSI%가 절정 하는 조짐을 보일 때에 무서워하고 있다
+		ELSEIF TFLAG:41 == 2
+			PRINTFORML 「웃…… 후웃… 이것,싫어…… 네가 좋닷」
+			PRINTFORMW %CALLNAME%는 %CALLNAME:PLAYER%에 매달리도록(듯이) 울고 있다
+		ELSE
+			CALL PANT_VOICE_EX
+			PRINTFORMW %CALLNAME%는 허덕이면서도 %CALLNAME:ASSI%가 신경이 쓰이는 것 같다
+		ENDIF
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「응읏,든지 %UNICODE(0x2661)% 이것,기분이야 지나…%UNICODE(0x2661)%」
+			CASE 1
+				CALL PANT_VOICE_EX
+			CASEELSE
+				PRINTFORML 「아%UNICODE(0x2661)% 응응…%UNICODE(0x2661)% 끼일 수 있는 것 기분 좋다…%UNICODE(0x2661)%」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 음탕한 미소를 띄워 행복한 것 같다
+	;복종,예속
+	ELSEIF TALENT:복종 || TALENT:예속
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「앗,응읏…… 후아…… 저,저기,나의 몸,기분 좋아…?」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ELSE
+	;외
+		CALL PANT_VOICE_EX
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;516,2 개 페라 CFLAG:521
+;-------------------------------------------------
+IF SELECTCOM == 516
+	CALL TRAIN_MESSAGE
+	;연모,친애
+	IF TALENT:연모 || TALENT:친애
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「쥬…… 츄룻……」
+			CASEELSE
+				PRINTFORML 「쥬룻…… 응… 엣또,기분 좋아?」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 %CALLNAME:ASSI%를 신경쓰면서 봉사를 계속하고 있다
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「쥿… 츄…… 후후%UNICODE(0x2661)% 입 가득 받을 수 있어 기쁘다%UNICODE(0x2661)%」
+			CASE 1
+				PRINTFORML 「쥿… 츄룻…… 후후%UNICODE(0x2661)% 맛있어%UNICODE(0x2661)%」
+			CASEELSE
+				PRINTFORML 「츄룻… 쥬웃…… 푸앗. 응,후후… 이것,나중에 아래의 입에도 주네요? %UNICODE(0x2661)%」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 기쁜듯이 2 개의페니스를 물고 있다
+	;복종,예속
+	ELSEIF TALENT:복종 || TALENT:예속
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「쥿… 츄룻…… 응,기분이 좋은가?」
+			CASEELSE
+				PRINTFORML 「아므…… 쥬룻…… 이봐요,우대신?」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 열심히 2 개의페니스에 봉사하고 있다
+	;붕괴
+	ELSEIF TALENT:붕괴
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML %CALLNAME%는 두 명의페니스의 첨단을입에 포함해,귀두를 구사리,들이마시고 있다
+				PRINTFORML 「쥬룻… 응구… 히 가져 좋습니까…?」
+				PRINTFORMW %CALLNAME%는 무서워한 눈으로 두 명의 안색을 듣고 있다
+			CASEELSE
+				PRINTFORML 「쥬룻… 츄… 응,후아……」
+				PRINTFORMW %CALLNAME%는 두 명의페니스를입에 포함해,열심히 빨고 있다
+		ENDSELECT
+	;통상시,굴복각인 3
+	ELSE
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORMW 「쥬룻… 응응…」
+			CASEELSE
+				PRINTFORMW 「응구… 후……」
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;517,이륜 꽂아 CFLAG:522
+;-------------------------------------------------
+IF SELECTCOM == 517
+	CALL TRAIN_MESSAGE
+	;연모,친애
+	IF TALENT:연모 || TALENT:친애 || TALENT:복종 || TALENT:예속
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「아웃… 일본도……… 안돼…!」
+			CASE 1
+				PRINTFORML 「히웃… 아,앗… 안돼,에……!」
+			CASEELSE
+				PRINTFORML 「아웃… 싫다,싫다아… 내지 마아……!」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 %CALLNAME:ASSI%의 노장[怒張]에 무서워하면서도,녹은 얼굴로 허덕이고 있다
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「응%UNICODE(0x2661)% 이렇게 펼쳐져 버리고 있는…%UNICODE(0x2661)%」
+			CASE 1
+				PRINTFORML 「힛…%UNICODE(0x2661)% 만나는 %UNICODE(0x2661)% 도,배 가득해…%UNICODE(0x2661)%」
+			CASEELSE
+				PRINTFORML 「아는%UNICODE(0x2661)% 2 개도… 나,엣치한 신체로 되어 버렸다아…%UNICODE(0x2661)%
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 녹은 얼굴로 허덕이고 있다
+	;붕괴
+	ELSEIF TALENT:붕괴
+		;하세베 주인,제약 기구조수
+		IF NO:MASTER == 118 && NO:ASSI == 49 || NO:MASTER == 49 && NO:ASSI == 118
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「아앗…… 우,후우…… 우웃… 나라 끊임없음 아무튼… 이나 조짐님… 그만두어 주세요…」
+					PRINTFORMW %CALLNAME%는 무서워한 것처럼 울고 있다
+				CASE 1
+					CALL PANT_VOICE_EX
+				CASEELSE
+					PRINTFORML 「히잇!? 안돼…… 우,후웃……」
+					PRINTFORMW %CALLNAME%는 무서워한 것처럼 울고 있다
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「아앗…… 우,후우…… 우웃… 그만두어 주세요…」
+					PRINTFORMW %CALLNAME%는 무서워한 것처럼 울고 있다
+				CASE 1
+					PRINTFORML 「히잇!? 안돼…… 우,후웃……」
+					PRINTFORMW %CALLNAME%는 무서워한 것처럼 울고 있다
+				CASEELSE
+					CALL PANT_VOICE_EX
+			ENDSELECT
+		ENDIF
+	;
+	ELSE
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「히기잇…!찢어진닷… 찢어지기 때문에…!」
+			CASE 1
+				PRINTFORMW 「히구웃…!뭐…2 개도 들어가…!?」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;518,이륜 꽂아애널 CFLAG:523
+;-------------------------------------------------
+IF SELECTCOM == 518
+	CALL TRAIN_MESSAGE
+	;연모,친애,복종,예속
+	IF TALENT:연모 || TALENT:친애 || TALENT:복종 || TALENT:예속
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「아웃… 일본도……… 안돼…!」
+			CASE 1
+				PRINTFORML 「히웃… 아,앗… 안돼,에……!」
+			CASEELSE
+				PRINTFORML 「아웃… 싫다,싫다아…!」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 %CALLNAME:ASSI%에도 범해지는 일에 싫어하면서도,쾌락에 녹은 얼굴로 허덕이고 있다
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:2
+			CASE 0
+				PRINTFORML 「응%UNICODE(0x2661)% 이렇게 펼쳐져 버리고 있는…%UNICODE(0x2661)%」
+			CASE 1
+				PRINTFORML 「힛…%UNICODE(0x2661)% 만나는 %UNICODE(0x2661)% 도,배 가득해…%UNICODE(0x2661)%」
+			CASEELSE
+				PRINTFORML 「아는%UNICODE(0x2661)% 2 개도… 나,엣치한 신체로 되어 버렸다아…%UNICODE(0x2661)%
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 녹은 얼굴로 허덕이고 있다
+	;붕괴
+	ELSEIF TALENT:붕괴
+		;하세베와 제약 기구
+		IF NO:MASTER == 118 && NO:ASSI == 49 || NO:MASTER == 49 && NO:ASSI == 118
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「아앗…… 우,후우…… 우웃… 나라 끊임없음 아무튼… 이나 조짐님… 그만두어 주세요…」
+				CASE 1
+					CALL PANT_VOICE_EX
+				CASEELSE
+					PRINTFORMW 「히잇!? 안돼…… 우,후웃……」
+			ENDSELECT
+			PRINTFORMW %CALLNAME%는 무서워한 것처럼 울고 있다
+		ELSE
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 「아앗…… 우,후우…… 우웃… 그만두어 주세요…」
+				CASE 1
+					PRINTFORMW 「히잇!? 안돼…… 우,후웃……」
+				CASEELSE
+					CALL PANT_VOICE_EX
+			ENDSELECT
+			PRINTFORMW %CALLNAME%는 무서워한 것처럼 울고 있다
+		ENDIF
+	;
+	ELSE
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「히기잇…!찢어진닷… 찢어지기 때문에…!」
+			CASE 1
+				PRINTFORMW 「히구웃…!뭐…2 개도 들어가…!?」
+			CASEELSE
+				CALL PANT_VOICE_EX
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;519,연결 CFLAG:524
+;-------------------------------------------------
+IF SELECTCOM == 519
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+
+;-------------------------------------------------
+;520,샌드위치 시키는 CFLAG:525
+;-------------------------------------------------
+IF SELECTCOM == 520
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;521,조수를 샌드위치 CFLAG:526
+;-------------------------------------------------
+IF SELECTCOM == 521
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;522,이륜 꽂아 시키는 CFLAG:527
+;-------------------------------------------------
+IF SELECTCOM == 522
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;523,이륜 꽂아애널 시키는 CFLAG:528
+;-------------------------------------------------
+IF SELECTCOM == 523
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;524,조수를 이륜 꽂아 CFLAG:529
+;-------------------------------------------------
+IF SELECTCOM == 524
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;525,조수를 이륜 꽂아애널 CFLAG:530
+;-------------------------------------------------
+IF SELECTCOM == 525
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+;-------------------------------------------------
+;526,삽입 전립선 자극 CFLAG:531
+;-------------------------------------------------
+IF SELECTCOM == 526
+	CALL TRAIN_MESSAGE
+
+	;연모,친애,복종,예속
+	IF TALENT:연모 || TALENT:친애
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「힉――!아,아아… 앙돼,휘어짐,놈들등은 정말……!」
+			CASE 1
+				PRINTFORML 「앗앗… 휘어짐,기분이야 지나……!」
+			CASEELSE
+				PRINTFORML 「안돼…… 안돼…… 거치지 않아… 에,된다앗……!」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 너무 강한 쾌감에,머리카락가 흐트러지는 것 상관하지 않고 싫어싫어하고 고개를 젓고 있다
+
+	ELSEIF TALENT:복종 || TALENT:예속
+		PRINTDATAW
+			DATAFORM 「힉――!아,아아… 앙돼,휘어짐,놈들등은 정말……!」
+			DATAFORM 「앗앗… 휘어짐,기분이야 지나……!」
+			DATAFORM 「안돼…… 안돼…… 거치지 않아… 에,된닷……!」
+		ENDDATA
+		PRINTFORMW %CALLNAME%는 너무 강한 쾌감에,머리카락가 흐트러지는 것 상관하지 않고 싫어싫어하고 고개를 젓고 있다
+
+
+	;음란,창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「아%UNICODE(0x2661)% 휘어짐는 안돼등이야…%UNICODE(0x2661)%」
+			CASE 1
+				PRINTFORML 「나,딱딱한인데,이런 건,어리석게 되어…%UNICODE(0x2661)%」
+			CASEELSE
+				PRINTFORML 「휘어짐든지… 이상하게 야 %UNICODE(0x2661)%」
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 너무 강한 쾌감에 야무지지 못하게 교성을 주고 있다
+
+	;붕괴
+	ELSEIF TALENT:붕괴
+		SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「히긋…… 흐흑… 아웃…」
+		CASE 1
+			PRINTFORML 「후구우…… 우우…… 후웃… 그만두고… 그만두어 주세요…」
+		CASEELSE
+			PRINTFORML CALL PANT_VOICE_EX
+		ENDSELECT
+		PRINTFORMW %CALLNAME%는 너무 강한 쾌감에 울고 있다
+	;통상시,굴복각인 3
+	ELSE
+		PRINTDATAW
+			DATAFORM 「히잇…!아,아,아웃…!」
+			DATAFORM 「뭐이것…!째…… 이상해진닷…!」
+			DATAFORM CALL PANT_VOICE_EX
+		ENDDATA
+
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;527,셀프 연결 튜브 CFLAG:540
+;-------------------------------------------------
+IF SELECTCOM == 527
+	CALL TRAIN_MESSAGE
+	CALL PANT_VOICE_EX
+ENDIF
+
+

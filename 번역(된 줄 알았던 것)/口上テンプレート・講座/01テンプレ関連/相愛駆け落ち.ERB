@@ -1,0 +1,63 @@
+﻿;-------------------------------------------------
+;53,상사상애
+;-------------------------------------------------
+@KOJO_MESSAGE_EVENT_KX1_53
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	IF (사랑의 도피 판정)
+		;공범자가 있을까 검색
+		FOR LOCAL:2,0,CHARANUM
+			SIF CFLAG:(LOCAL:2):1 == 3 && LOCAL:2!= MASTER
+				LOCAL:3 = LOCAL:2
+		NEXT
+		
+		PRINTFORMW 
+		PRINTFORMW 
+		
+		;주인 외에 공범자가 없으면 엔딩
+		IF !LOCAL:3
+			;PRINTFORMW 
+			;PRINTFORMW 
+			;PRINTFORMW 　　　　　　　　―― Ending
+			;주회 클리어 취급으로 엔드
+			;CALL GAME_CONTINUE
+			
+			;그대로 게임 종료
+			QUIT
+			
+		;공범자가 있으면 주인을 옮겨 원래의 주인과 조교 대상을 삭제
+		ELSE
+			;새롭게 주인이 되는 공범자는 LOCAL:3에 들어가 있다
+			;%CALLNAME:(LOCAL:3)%로 이름
+			;PRINTFORMW 
+			;PRINTFORMW 
+			
+			LOCAL:4 = MASTER
+			LOCAL:5 = TARGET
+			LOCAL:6 = ASSI
+			DELCHARA MASTER
+			SIF LOCAL:4 < LOCAL:3
+				LOCAL:3--
+			SIF LOCAL:4 < LOCAL:5
+				LOCAL:5--
+			SIF LOCAL:4 < LOCAL:6
+				LOCAL:6--
+			MASTER = LOCAL:3
+			DELCHARA LOCAL:5
+			SIF LOCAL:5 < LOCAL:6
+				LOCAL:6--
+			ASSI = LOCAL:6
+			SIF MASTER == LOCAL:6
+				ASSI = -1
+			TARGET = -1
+		ENDIF
+	;사랑의 도피가 일어나지 않았던 경우
+	ELSE
+		PRINTFORMW 
+		PRINTFORMW 
+	ENDIF
+	RETURN LOCAL
+ENDIF

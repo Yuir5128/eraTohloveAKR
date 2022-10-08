@@ -1,0 +1,344 @@
+﻿;==================================================
+;エンディング
+;長くなったため、エンディング部分だけファイル分割しました
+;
+;エンディングは、そもそも「あなた」か共犯者の場合しか見れない
+;==================================================
+@EVENTTURNEND
+#LATER
+SIF TARGET < 0
+	RETURN 0
+SIF NO:TARGET != 174
+	RETURN 0
+;主人が清麿でない場合は以下スキップ
+SIF NO:MASTER != 176
+	RETURN 0
+
+;特殊ハーレムエンド用条件判定構文サンプル
+;XX内に条件とするキャラのキャラ番号を入れると、好きな組み合わせのハーレムエンドを設定できる
+;ハーレムエンドの条件を満たしたとき、ここの特殊ハーレムエンドの条件も満たしている場合、ハーレムエンドから派生する
+;A = 0
+;B = 0
+;REPEAT CHARANUM
+;	IF NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX
+;		SIF TALENT:COUNT:親愛 || TALENT:COUNT:娼婦 || TALENT:COUNT:服従
+;			A += 1
+;		SIF TALENT:COUNT:恋慕 || TALENT:COUNT:淫乱 || TALENT:COUNT:服従 || TALENT:COUNT:親愛 || TALENT:COUNT:娼婦 || TALENT:COUNT:服従
+;			B += 1
+;	ENDIF
+;REND
+;SIF A && A+B >= XXX
+;	CFLAG:21 = 2
+
+;単体エンド用分岐フラグ、単体エンドのある上位陥落素質のみコメントアウトを解除する
+SIF TALENT:親愛
+	CFLAG:21 = 1
+;SIF TALENT:娼婦
+;	CFLAG:21 = 1
+;SIF TALENT:隷属
+	;CFLAG:21 = 1
+
+;--------------------------------------------------
+;親愛単体エンド
+;エンディングで「%CALLNAME:B%への指輪を買う（恋慕エンド）」を選択した場合
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1
+DRAWLINE
+;-------------------------------------------------
+;記入チェック（=0, 非表示、1, 表示）
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	CFLAG:5002 |= 32
+	DRAWLINE
+	PRINTFORML …………
+	PRINTFORML ………
+	PRINTFORML ……
+	PRINTFORML 
+	PRINTFORMW %CALLNAME:MASTER%が納金を済ませて屋敷に戻ると、%CALLNAME%が出迎えてくれた
+	PRINTFORML 「清麿、おかえり　納金は終わったか？」
+	PRINTFORML 『うん　無事終わったよ』
+	PRINTFORMW 「そうか　よかった」
+	PRINTFORML %CALLNAME%は顔を綻ばせる
+	PRINTFORMW その様子に%CALLNAME:MASTER%もつられて顔を緩ませる
+	PRINTFORMW 
+	PRINTFORML 『水心子　ちょっといいかな』
+		IF TALENT:達磨 || TALENT:両腕欠損
+			PRINTFORMW %CALLNAME:MASTER%は%CALLNAME%の近くに寄ると、首元にチェーンを付けた指輪を掛けてやった
+		ELSE
+			PRINTFORMW %CALLNAME:MASTER%は%CALLNAME%の手をとると、薬指に指輪を嵌めてやった
+		ENDIF
+	PRINTFORML 「清麿　これは……？」
+	PRINTFORMW %CALLNAME%は目をぱちくりさせて、指輪と%CALLNAME:MASTER%を交互に見る
+	;ハートフル
+	IF (CFLAG:5001 & 1)
+		CALL KOJO_MESSAGE_ENDING_K174_1_A
+	ELSEIF (CFLAG:5001 & 2)
+		;反発3取得済み　かつ　妄執恋慕√
+		IF (CFLAG:5002 & 8) && (CFLAG:5001 & 8)
+			CALL KOJO_MESSAGE_ENDING_K174_1_B
+		;反発3取得済み
+		ELSEIF (CFLAG:5002 & 8)
+			CALL KOJO_MESSAGE_ENDING_K174_1_C
+		;妄執恋慕√
+		ELSEIF (CFLAG:5001 & 8)
+			CALL KOJO_MESSAGE_ENDING_K174_1_D
+		ELSE
+			CALL KOJO_MESSAGE_ENDING_K174_1_E
+		ENDIF
+	ENDIF
+	PRINTL 
+	RETURN LOCAL
+ENDIF
+
+;--------------------------------------------------
+;娼婦単体エンド
+
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_2
+DRAWLINE
+;-------------------------------------------------
+;記入チェック（=0, 非表示、1, 表示）
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+
+	DRAWLINE
+	PRINTFORML …………
+	PRINTFORML ………
+	PRINTFORML ……
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 　　　　　　　　―― Ending No.1X2B (○○エンド)
+	RETURN LOCAL
+ENDIF
+
+;--------------------------------------------------
+;隷属単体エンド
+;エンディングで「%CALLNAME:D%への首輪を買う（服従エンド）」を選択した場合
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_3
+DRAWLINE
+;-------------------------------------------------
+;記入チェック（=0, 非表示、1, 表示）
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+
+	DRAWLINE
+	PRINTFORML …………
+	PRINTFORML ………
+	PRINTFORML ……
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 　　　　　　　　―― Ending No.1X2C (○○エンド)
+	RETURN LOCAL
+ENDIF
+
+;--------------------------------------------------
+;特殊ハーレムエンド
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_4
+DRAWLINE
+;-------------------------------------------------
+;記入チェック（=0, 非表示、1, 表示）
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	DRAWLINE
+	PRINTFORML …………
+	PRINTFORML ………
+	PRINTFORML ……
+	PRINTFORML 
+
+	PRINTFORML 
+	PRINTFORML 　　　　　　　　―― Ending No.1X2A (○○エンド)
+	RETURN LOCAL
+ENDIF
+
+;--------------------------------------------------
+;エンド本文
+;長くなりすぎたため分割
+;各種エンドのタイトルが良いの思いつかない…
+;--------------------------------------------------
+;--------------------------------------------------
+;親愛エンド
+;--------------------------------------------------
+;--------------------------------------------------
+;ハートフル
+;親愛初回とやってることがあまり変わらない気がする
+;現状、清磨の思慕対象分岐はないです
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1_A
+PRINTFORMW やがてその意味を理解すると、ぱぁっと顔を輝かせた
+PRINTFORMW 『水心子　これからも僕と一緒にいてくれるかな？』
+PRINTFORML 「清磨……！」
+PRINTFORMW %CALLNAME%は喜びのあまり、%CALLNAME:MASTER%に抱きついてきた
+PRINTFORMW それに応えて抱きしめ返してやると、%CALLNAME%はさらにきつく抱きしめてくる
+PRINTFORMW 「ああ　もちろんだ……！　これからも一緒にいよう」
+PRINTFORML 「清麿　これからもよろしく頼む」
+PRINTFORMW 『うん　よろしくね』
+PRINTFORMW %CALLNAME%と%CALLNAME:MASTER%は抱きしめ合ったまま、笑い合った
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 　　　　　　　　―― Ending No.174-1-A 「これからもよろしく」
+PRINTFORML 
+
+;--------------------------------------------------
+;真友ルート　反発3取得済み　妄執恋慕√
+;募った恨みと依存心で大事故を起こしたパターン　どうしてこうなった
+;エクストラモード移行で妄信取得
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1_B
+CFLAG:5001 |= 32
+PRINTFORMW 『水心子　これからも僕と一緒にいてくれるかな？』
+PRINTFORML 「………。」
+PRINTFORMW %CALLNAME%は何も答えない
+PRINTFORMW 『水心子？』
+PRINTFORMW 「……ああ　もちろんだ」
+PRINTFORMW %CALLNAME%はぎこちなく笑顔を作って見せるが、心から喜んでいるわけではないのは明白だった
+PRINTFORML 『水心子　嫌なら、無理に応えなくていいんだよ』
+PRINTFORML %CALLNAME:MASTER%の言葉に、%CALLNAME%の眉がピクリと動く
+PRINTFORML 「嫌なら無理に応えなくても、か……」
+PRINTFORMW 『水心子？』
+PRINTFORML 
+PRINTFORMW 「……清麿　僕は清麿の親友だよね？」
+PRINTFORML 『もちろんだよ』
+PRINTFORMW 「うん　そう、だよね」
+PRINTFORMW 
+PRINTFORMW 「なら、どうして僕を踏みにじったんだ？」
+PRINTFORMW 
+PRINTFORML 『水心子？　何を言って、』
+PRINTFORML 「清麿には自覚がないんだ　僕の全部を目茶苦茶にしたくせに」
+PRINTFORML 
+;屈服3初回イベントが起こっている
+IF (CFLAG:5002 & 2)
+	PRINTFORML 「……僕は清麿に何度も言ったはずなんだ」
+	PRINTFORMW 「新々刀の価値を知らしめるために顕現した、と」
+	PRINTFORML 「だが、清麿は耳を貸そうとしなかった」
+ELSE
+	PRINTFORML 「……清麿は知っていたはずなんだ」
+	PRINTFORMW 「僕が何より刀剣男士の誇りを大事にしていたことを」
+	PRINTFORML 「だが、清麿はそれを踏みにじり続けた」
+ENDIF
+PRINTFORMW 「清麿にとって『親友』はその程度なんだな」
+PRINTFORMW 
+PRINTFORMW 「……もうそれでもいいよ」
+PRINTFORML 「刀剣男士の誇りも　理想も」
+PRINTFORMW 「全て捨ててしまった僕は、もう清麿以外　何も望めないから」
+PRINTFORMW 
+PRINTFORML 『すい、しんし……？』
+PRINTFORML 「これありがとう　大切にするよ」
+PRINTFORMW 茫然とする%CALLNAME:MASTER%にかまわず、%CALLNAME%は指輪に触れながら力なく笑う
+PRINTFORML 
+PRINTFORMW 「清麿　僕とこれからも一緒にいて欲しい」
+PRINTFORMW 「いつまでも　このまま、ずっと」
+PRINTFORMW 仄暗い光を放つ%CALLNAME%の双眸が、こちらをじっと見つめていた
+PRINTFORMW 有無を言わさない圧に、%CALLNAME:MASTER%はこう答えるしかなかった
+PRINTFORML 
+PRINTFORMW 『……水心子がそう望むなら』
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 　　　　　　　　―― Ending No.174-1-B 「君が望むなら」
+PRINTFORML 
+
+
+;--------------------------------------------------
+;真友ルート　反発3取得済み
+;募った恨みが消えなかったパターン　エンディングがこれでいいんだろうか
+;エクストラモード移行で清麿がいると常時反発3状態、かつ相性が20まで下がる、イベント全キャンセル
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1_C
+CFLAG:5001 |= 64
+PRINTFORMW 『水心子　これからも僕と一緒にいてくれるかな？』
+PRINTFORML 「………。」
+PRINTFORMW %CALLNAME%は何も答えない
+PRINTFORMW 『水心子？』
+PRINTFORMW 「……これは受け取れない」
+PRINTFORML 
+PRINTFORML 『そんな　なんで、』
+PRINTFORML %CALLNAME:MASTER%の言葉に、%CALLNAME%の眉がピクリと動く
+PRINTFORMW 「なんで？　自分には拒否される心当たりがないと？」
+PRINTFORMW 「……今まで散々、私を踏みにじっておいて、よくそんなことが言えたな」
+PRINTFORML 
+;屈服3初回イベントが起こっている
+IF (CFLAG:5002 & 2)
+	PRINTFORML 「私は清麿に何度も言ったはずだ」
+	PRINTFORMW 「新々刀の真価を知らしめるために顕現した、と」
+	PRINTFORML 「だが、清麿は決して耳を貸そうとしなかった」
+	PRINTFORMW 「それどころか、自分のことばかり通そうとしている。現に今もそうだ」
+ELSE
+	PRINTFORML 「清麿は知っていたはずだ」
+	PRINTFORMW 「私が何より刀剣男士の誇りを大事にしていることを」
+	PRINTFORML 「だが、清麿はそれを踏みにじり続けた」
+	PRINTFORMW 「それどころか、自分のことばかり通そうとしている。現に今もそうだ」
+ENDIF
+PRINTFORML 
+PRINTFORMW %CALLNAME%の頬には一筋の涙が流れている
+PRINTFORMW 「清麿　私たちは親友ではなかったのか？」
+PRINTFORMW 「親友とは、互いに尊重し合うものではなかったのか？」
+PRINTFORMW 「清麿が何を考えているのか　私にはもう、分からない……」
+PRINTFORML 
+	IF TALENT:達磨 || TALENT:両腕欠損
+		PRINTFORMW %CALLNAME%は器用に身体を丸め、指輪のついた首元のチェーンを外す
+	ELSE
+		PRINTFORML %CALLNAME%は震える手で薬指の指輪を外す
+	ENDIF
+PRINTFORMW そして、%CALLNAME:MASTER%にぎこちなく微笑んだ
+PRINTFORMW 「さよならだ　清麿」
+PRINTFORMW 
+PRINTFORML 声をかける間もなく%CALLNAME%はその場を去る
+PRINTFORMW %CALLNAME:MASTER%の贈った指輪だけが、そこに残されていた…
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 　　　　　　　　―― Ending No.174-1-C 「さよなら」
+PRINTFORML 
+
+
+;--------------------------------------------------
+;真友ルート　妄執恋慕√
+;清麿の思慕対象は問わない
+;ハピエンのようでハピエンとは言い難いような…
+;清麿にズブズブ依存したままなので、エクストラモード移行でも口上内容に変化なし
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1_D
+PRINTFORMW やがてその意味を理解すると、ぱあっと顔を輝かせた
+PRINTFORMW 『水心子　これからも僕と一緒にいてくれるかな？』
+PRINTFORML 「ああ　もちろん……！」
+PRINTFORMW %CALLNAME%は喜びのあまり、%CALLNAME:MASTER%に抱きつく
+PRINTFORMW あまりのはしゃぎように戸惑いつつも、それに応えて抱きしめ返してやると、%CALLNAME%は満足げに笑みを浮かべた
+PRINTFORML 「清麿　これからも一緒にいて欲しい」
+PRINTFORMW 「いつまでも　このまま、ずっと」
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 　　　　　　　　―― Ending No.174-1-D 「いつまでも、このまま」
+PRINTFORML 
+
+
+;--------------------------------------------------
+;真友ルート　妄執なし恋慕√
+;清麿の思慕対象は問わない
+;真友ルートの場合は多分これが一番ハッピーエンド
+;%CALLNAME%と%CALLNAME:MASTER%ミスってないか？となりますが、ミスってないです
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1_E
+PRINTFORML 
+PRINTFORMW 『僕を理解したい』
+PRINTFORMW 『以前　水心子がそんな風に言ってくれたよね』
+PRINTFORMW 『僕　水心子がそう言ってくれたのが嬉しかったんだ』
+PRINTFORML 『だから、もしも君の気持ちが今も変わっていないならば』
+PRINTFORMW 『水心子　これからも僕と一緒にいてくれるかな？』
+PRINTFORML %CALLNAME%は一瞬硬直し、しかしすぐ満面の笑みを浮かべた
+PRINTFORMW 「ああ　もちろんだ！」
+PRINTFORML %CALLNAME%の返答に%CALLNAME:MASTER%は、ぱあっと顔を輝かせた
+PRINTFORMW 喜びのあまり%CALLNAME:MASTER%が抱きつくと、%CALLNAME%もそれに応えて抱きしめ返した
+PRINTFORML 『水心子！　僕ね、今すごく幸せ！』
+PRINTFORMW 「僕もだ　清磨！　君と同じ気持ちでいられることが、こんなに嬉しい！」
+PRINTFORML 「これからも僕たち　ずっとこれからも、ずっと一緒だ」
+PRINTFORMW 『うん　いつまでも　ずっと！』
+PRINTFORMW %CALLNAME%と%CALLNAME:MASTER%は抱きしめ合ったまま、笑い合った
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 　　　　　　　　―― Ending No.174-1-E 「ずっと」
+PRINTFORML 
+

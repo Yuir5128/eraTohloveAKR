@@ -1,0 +1,186 @@
+﻿;-------------------------------------------------
+;애널비즈
+;A계 조교 커맨드
+;-------------------------------------------------
+@COM53
+
+PRINTL 애널비즈
+STR:0 = 애널비즈
+CALL KOJO_MESSAGE_COM
+
+;스타킹 찌릿찌릿 플래그
+IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;착탈의 처리
+IF TEQUIP:애널비즈 == 0
+	TEQUIP:애널비즈 = 1
+ELSE
+	TEQUIP:애널비즈 = 0
+ENDIF
+
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+;소비체력, 기력
+LOSEBASE:체력 += 20
+LOSEBASE:기력 += 80
+
+SOURCE:쾌A += 200
+
+;장착시는 쾌A는 내린다
+IF TEQUIP:애널비즈
+	TIMES SOURCE:쾌A , 0.80
+ELSEIF TEQUIP:애널비즈 == 0
+	TIMES SOURCE:쾌A , 2.00
+ENDIF
+
+SOURCE:통증 += 200
+
+SOURCE:노출 += 50
+SOURCE:굴복 += 50
+SOURCE:일탈 += 60
+SOURCE:반발 += 80
+
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 70
+
+;A에의고통는 먼저 처리해 둔다
+;EXP:A경험를 본다
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:통증, 3.00
+	TIMES SOURCE:반발, 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:통증, 1.20
+	TIMES SOURCE:반발, 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:통증, 0.80
+	TIMES SOURCE:반발, 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:통증, 0.60
+	TIMES SOURCE:반발, 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:통증, 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:통증, 0.20
+ENDIF
+
+;PALAM:윤활를 본다
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증, 1.20
+	TIMES SOURCE:반발, 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증, 1.00
+	TIMES SOURCE:반발, 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증, 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증, 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증, 0.20
+ENDIF
+
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+IF TEQUIP:밧줄 == 0
+	EXP:A경험 += 1
+	PRINTL A경험＋1
+ELSEIF TEQUIP:밧줄 == 1
+	EXP:A경험 += 2
+	PRINTL A경험＋2
+ENDIF
+
+;게이경험라든지 가산
+CALL COM_EXP(1)
+
+;의존도 벡터
+TFLAG:33 = 3
+
+
+RETURN 1
+
+
+
+;-------------------------------------------------
+;장착 계속의 처리
+;-------------------------------------------------
+@EQUIP_COM53
+;애널비즈삽입중
+
+PRINTL ＜애널비즈삽입중＞
+
+;-------------------------------------------------
+;소스 추가 처리
+;-------------------------------------------------
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 30
+
+SOURCE:쾌A += 75
+SOURCE:노출 += 25
+SOURCE:굴복 += 25
+SOURCE:일탈 += 25
+
+;-------------------------------------------------
+;특수 소스 처리
+;-------------------------------------------------
+;억압, 저항소유에는, 억울소스 추가
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 35
+
+;A에의고통는 먼저 처리해 둔다
+;EXP:A경험를 본다
+A = 100
+B = 25
+IF EXP:A경험 < EXPLV:1
+	TIMES A , 3.00
+	TIMES B , 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES A , 1.20
+	TIMES B , 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES A , 0.80
+	TIMES B , 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES A , 0.60
+	TIMES B , 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES A , 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES A , 0.20
+ENDIF
+
+;PALAM:윤활를 본다
+IF PALAM:윤활 < PALAMLV:1
+	TIMES A , 1.20
+	TIMES B , 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES A , 1.00
+	TIMES B , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES A , 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES A , 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES A , 0.20
+ENDIF
+SOURCE:통증 += A
+SOURCE:반발 += B
+
+;-------------------------------------------------
+;경험의 처리
+;-------------------------------------------------
+EXP:A경험 += 1
+PRINTL A경험＋1
+
+
+RETURN 1
+

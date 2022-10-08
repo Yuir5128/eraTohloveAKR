@@ -1,0 +1,10 @@
+sav/
+debug/
+exports/
+resources/
+dat/
+emuera.log
+cache.dat
+*.lnk
+
+ez.json

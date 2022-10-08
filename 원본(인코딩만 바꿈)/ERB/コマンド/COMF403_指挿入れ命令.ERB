@@ -1,0 +1,107 @@
+﻿;-------------------------------------------------
+;指挿入れ命令
+;助手命令系コマンド
+;-------------------------------------------------
+@COM403
+
+PRINTL 指挿入れ命令
+STR:0 = 指挿入れ命令
+CALL KOJO_MESSAGE_COM
+
+;ストッキングびりびりフラグ
+IF TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6
+	TFLAG:55 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 10
+LOSEBASE:気力 += 50
+
+SOURCE:快Ｖ += 80
+SIF ABL:ASSI:技巧
+	SOURCE:快Ｖ += 10*ABL:ASSI:技巧
+
+SOURCE:痛み += 50
+SOURCE:露出 += 20
+SOURCE:逸脱 += 40
+SOURCE:反発 += 40
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 40
+;助手の技巧により快Ｖソース追加、下手すぎると痛みのソース追加
+IF ABL:ASSI:2 == 0
+	SOURCE:痛み += 100
+ELSEIF ABL:ASSI:2 == 1
+	SOURCE:痛み += 50
+ENDIF
+;助手が小人体型で、調教対象が小人体型でなく倒錯的でもないと逸脱のソース追加
+SIF TALENT:小人体型 == 0 && TALENT:ASSI:小人体型 && TALENT:倒錯的
+	SOURCE:逸脱 += 50	
+;Vへの苦痛は先に処理しておく
+;EXP:Ｖ経験をみる
+IF EXP:Ｖ経験 < EXPLV:1
+	TIMES SOURCE:痛み , 2.50
+ELSEIF EXP:Ｖ経験 < EXPLV:2
+	TIMES SOURCE:痛み , 0.80
+	TIMES SOURCE:反発 , 1.20
+ELSEIF EXP:Ｖ経験 < EXPLV:3
+	TIMES SOURCE:痛み , 0.40
+ELSEIF EXP:Ｖ経験 < EXPLV:4
+	TIMES SOURCE:痛み , 0.10
+ELSEIF EXP:Ｖ経験 < EXPLV:5
+	TIMES SOURCE:痛み , 0.00
+ELSEIF EXP:Ｖ経験 >= EXPLV:5
+	TIMES SOURCE:痛み , 0.00
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:潤滑 < PALAMLV:1
+	TIMES SOURCE:痛み , 1.20
+	TIMES SOURCE:反発 , 1.50
+ELSEIF PALAM:潤滑 < PALAMLV:2
+	TIMES SOURCE:痛み , 0.70
+	TIMES SOURCE:反発 , 1.20
+ELSEIF PALAM:潤滑 < PALAMLV:3
+	TIMES SOURCE:痛み , 0.40
+ELSEIF PALAM:潤滑 < PALAMLV:4
+	TIMES SOURCE:痛み , 0.10
+ELSEIF PALAM:潤滑 >= PALAMLV:4
+	TIMES SOURCE:痛み , 0.10
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;奴隷のＶ⇔助手の手の汚れが移動
+STAIN:ヴァギナ |= STAIN:ASSI:手
+STAIN:ASSI:手 |= STAIN:ヴァギナ
+STAIN:膣内 |= STAIN:ASSI:手
+STAIN:ASSI:手 |= STAIN:膣内
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;V経験
+EXP:Ｖ経験 += 1
+PRINTL Ｖ経験＋１
+
+;ゲイ経験とか加算
+CALL COM_EXP(3)
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+
+RETURN 1
+
+

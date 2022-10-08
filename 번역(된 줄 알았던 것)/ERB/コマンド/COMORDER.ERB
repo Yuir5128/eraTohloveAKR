@@ -1,0 +1,1184 @@
+﻿;====================================================================
+@COM_ORDER
+;====================================================================
+A = 0
+S = 0
+T = 0
+Y = 0
+
+;--------------------------------------------------------
+;순종도 XX
+;(순종, 순종, 굴복각인, 고통각인, 공포, 솔직함, 프라이드낮음, 약점잡힘, 맹신, 즉각함락, 츤데레)
+L = 0
+;--------------------------------------------------------
+;ABL:순종
+SIF ABL:순종
+	L += ABL:순종 * 4
+
+;PALAM:순종
+IF PALAM:순종 >= PALAMLV:5
+	L += 15
+ELSEIF PALAM:순종 >= PALAMLV:4
+	L += 12
+ELSEIF PALAM:순종 >= PALAMLV:3
+	L += 9
+ELSEIF PALAM:순종 >= PALAMLV:2
+	L += 6
+ELSEIF PALAM:순종 >= PALAMLV:1
+	L += 3
+ENDIF
+
+;MARK:굴복각인
+IF TALENT:프라이드높음
+	T = 1
+ELSEIF TALENT:프라이드낮음
+	T = 4
+ELSE
+	T = 2
+ENDIF
+SIF MARK:굴복각인
+	L += MARK:굴복각인 * 3 * T
+
+;MARK:고통각인
+SIF MARK:고통각인
+	L += MARK:고통각인 * 5
+
+;PALAM:공포
+IF PALAM:공포 >= PALAMLV:5
+	T = 5
+ELSEIF PALAM:공포 >= PALAMLV:4
+	T = 4
+ELSEIF PALAM:공포 >= PALAMLV:3
+	T = 3
+ELSEIF PALAM:공포 >= PALAMLV:2
+	T = 2
+ELSEIF PALAM:공포 >= PALAMLV:1
+	T = 1
+ELSE
+	T = 0
+ENDIF
+SIF T && TALENT:꿋꿋함
+	T -= 1
+SIF TALENT:겁쟁이
+	T += 1
+SIF T
+	L += T * 3
+
+T = 0
+;TALENT:솔직함
+SIF TALENT:솔직함
+	L += 5
+;TALENT:프라이드낮음
+SIF TALENT:프라이드낮음
+	L += 5
+;TALENT:약점잡힘
+SIF TALENT:약점잡힘
+	L += 12
+;TALENT:맹신
+SIF TALENT:맹신
+	L += 10
+;TALENT:즉각함락
+SIF TALENT:즉각함락
+	L += 20
+;TALENT:츤데레
+SIF TALENT:츤데레 && KANRAKU(TARGET)
+	L += 10
+
+A += L
+PRINTFORM 순종도({L})
+
+
+;--------------------------------------------------------
+;반발심 XX
+;(반발각인, 반감, 반항적, 프라이드높음, 저항, 꿋꿋함, 츤데레)
+;--------------------------------------------------------
+L = 0
+
+;반발각인
+IF TALENT:프라이드높음
+	T = 4
+ELSEIF TALENT:프라이드낮음
+	T = 1
+ELSE
+	T = 2
+ENDIF
+SIF MARK:반발각인
+	L += MARK:반발각인 * 2 * T
+
+;PALAM:반감
+IF PALAM:반감 >= PALAMLV:5
+	T = 5
+ELSEIF PALAM:반감 >= PALAMLV:4
+	T = 4
+ELSEIF PALAM:반감 >= PALAMLV:3
+	T = 3
+ELSE
+	T = 0
+ENDIF
+IF T
+	SIF TALENT:반항적
+		T += 1
+	SIF TALENT:건방짐
+		T += 1
+	SIF TALENT:프라이드높음
+		T += 1
+	L += T * 3
+ENDIF
+
+T = 0
+;반항적
+SIF TALENT:반항적
+	L += 5
+;프라이드높음
+SIF TALENT:프라이드높음
+	L += 15
+;저항
+SIF TALENT:저항
+	L += 10
+;꿋꿋함
+SIF TALENT:꿋꿋함
+	L += 5
+;츤데레
+SIF TALENT:츤데레 && !KANRAKU(TARGET)
+	L += 10
+
+IF L
+	;커맨드 「매도당한다」마셔, 이 값이 플러스로 작용한다.
+	IF SELECTCOM == 281
+		PRINTFORM  + 
+		A += L*2
+		PRINTFORM 반발심({L*2})
+	ELSE
+		PRINTFORM  - 
+		A -= L
+		PRINTFORM 반발심({L})
+	ENDIF
+ENDIF
+
+
+;--------------------------------------------------------
+;봉사정신XX
+;--------------------------------------------------------
+L = 0
+
+SELECTCASE SELECTCOM
+	CASE 3 TO 8, 100 TO 105, 110 TO 115, 145, 182 TO 185, 405, 406
+		S = 1
+	CASE 74, 76, 81, 83, 84, 160, 161, 162, 262, 265, 280 TO 284, 422
+		S = 2
+	CASEELSE
+		S = 4
+ENDSELECT
+SIF ABL:봉사정신
+	L += ABL:봉사정신 * S
+
+IF TALENT:헌신적 && S == 4
+	L += 6
+ELSEIF TALENT:헌신적 && S == 2
+	L += 3
+ELSEIF TALENT:헌신적 && S == 1
+	L += 1
+ENDIF
+
+IF L
+	PRINTFORM  + 
+	A += L
+	PRINTFORM 봉사정신({L})
+ENDIF
+
+
+;--------------------------------------------------------
+;마조끼XX
+;--------------------------------------------------------
+L = 0
+
+;마조끼
+SIF ABL:마조끼
+	L += ABL:마조끼 * 2
+
+;마조
+IF TALENT:마조 == 2
+	L += 10
+ELSEIF TALENT:마조 == 1
+	L += 5
+ENDIF
+
+IF L
+	PRINTFORM  + 
+	A += L
+	PRINTFORM 마조끼({L})
+ENDIF
+
+
+;--------------------------------------------------------
+;새드끼XX
+;--------------------------------------------------------
+L = 0
+
+;소악마
+SELECTCASE SELECTCOM
+	CASE 80, 281, 283, 284, 420, 421, 422
+		S = 4
+	CASE 77, 223, 225, 243, 244, 245
+		S = 2
+	CASEELSE
+ENDSELECT
+SIF S && TALENT:소악마
+	L += S
+
+;새드
+SELECTCASE SELECTCOM
+	CASE 80, 280 TO 284,
+		SIF TALENT:새드
+			L += 10
+		SIF ABL:새드끼
+			L += ABL:새드끼 * 2
+	CASE 220 TO 225, 260 TO 265, 430, 431
+		SIF TALENT:새드
+			L += 5
+		SIF ABL:새드끼
+			L += ABL:새드끼
+ENDSELECT
+
+IF L
+	PRINTFORM  + 
+	A += L
+	PRINTFORM 새드끼({L})
+ENDIF
+
+
+;--------------------------------------------------------
+;쾌락 긍정치(XX)
+;--------------------------------------------------------
+L = 0
+
+SELECTCASE SELECTCOM
+	CASE 3 TO 8, 100 TO 106, 110 TO 116, 160 TO 162, 181, 260 TO 265, 405, 406, 430, 431
+		S = 3
+	CASE 76, 182, 183, 243 TO 245, 280, 317, 422
+		S = 2
+	CASEELSE
+		S = 1
+ENDSELECT
+SIF ABL:욕망
+	L += ABL:욕망 * S
+
+;PALAM:욕정
+IF PALAM:욕정 >= PALAMLV:5
+	T = 5
+ELSEIF PALAM:욕정 >= PALAMLV:4
+	T = 4
+ELSEIF PALAM:욕정 >= PALAMLV:3
+	T = 3
+ELSEIF PALAM:욕정 >= PALAMLV:2
+	T = 2
+ELSEIF PALAM:욕정 >= PALAMLV:1
+	T = 1
+ELSE
+	T = 0
+ENDIF
+SIF T
+	L += T * S
+
+SIF MARK:쾌락각인
+	L += MARK:쾌락각인 * S
+
+IF TEQUIP:미약
+	IF TALENT:독약내성
+		L += 4
+	ELSE
+		L += 8
+	ENDIF
+ENDIF
+
+IF ZUIKI(TARGET)
+	IF TALENT:독약내성
+		L += 4
+	ELSE
+		L += 8
+	ENDIF
+ENDIF
+
+;쾌감에솔직
+SELECTCASE SELECTCOM
+	CASE 3 TO 8, 76, 100 TO 106, 110 TO 116, 160 TO 162, 181, 243 TO 245, 260 TO 265, 317, 405, 406, 422, 430, 431
+		SIF TALENT:쾌감에솔직
+			L += 3
+ENDSELECT
+
+;섹스중독
+SELECTCASE SELECTCOM
+	CASE 100 TO 106, 110 TO 116, 181, 260 TO 265, 405, 406, 430, 431
+		SIF ABL:섹스중독
+			L += ABL:섹스중독
+ENDSELECT
+
+;자위하기쉬움, 자위중독, 노출벽
+SELECTCASE SELECTCOM
+	CASE 3 TO 8
+		SIF TALENT:자위하기쉬움
+			L += 5
+		SIF ABL:자위중독
+			L += ABL:자위중독 * 3
+		SIF ABL:노출벽
+			L += ABL:노출벽 * 4
+ENDSELECT
+
+;수치심없음
+SELECTCASE SELECTCOM
+	CASE 182, 183
+		S = 5
+	CASE 3 TO 8, 106, 116, 243 TO 245, 280, 281, 317, 422
+		S = 3
+	CASE 76, 101, 111, 420, 421
+		S = 1
+	CASEELSE
+		S = 0
+ENDSELECT
+SIF S && TALENT:수치심없음
+	L += S
+
+;정액중독
+SELECTCASE SELECTCOM
+	CASE 70, 71, 73, 74, 75, 80, 81, 84, 86, 87, 407, 420, 421, 528
+		S = 3
+	CASE 76, 82, 83, 100 TO 106, 110 TO 116, 181, 220 TO 225, 244, 245, 317, 405, 406, 422
+		S = 1
+	CASEELSE
+		S = 0
+ENDSELECT
+SIF S && ABL:정액중독
+	L += ABL:정액중독 * S
+
+;도착적
+SELECTCASE SELECTCOM
+	CASE 80 TO 82, 85, 145, 150, 160 TO 162, 181 TO 185, 280 TO 284
+		S = 4
+	CASE 3 TO 8, 83, 84, 86, 87, 420 TO 422
+		S = 2
+	CASEELSE
+		S = 0
+ENDSELECT
+SIF S && TALENT:도착적
+	L += S
+
+;눈에띄고싶음
+SIF TALENT:눈에띄고싶음
+	L += 2
+
+;각 성감대 감도
+SELECTCASE SELECTCOM
+	CASE 5, 73, 74, 75, 84, 243, 421, 528
+		S = ABL:B감각
+	CASE 3, 76, 244, 245, 260 TO 265, 280, 422, 430, 431
+		S = ABL:C감각
+	CASE 100 TO 106, 160, 405
+		S = ABL:V감각
+	CASE 6, 8, 110 TO 116, 161, 181, 406
+		S = ABL:A감각
+	CASE 4
+		IF TFLAG:56 == 1
+			S = ABL:V감각
+		ELSE
+			S = ABL:C감각
+		ENDIF
+	CASE 7, 162
+		S = ABL:V감각+ABL:A감각
+	CASE 317
+		S = ABL:B감각+ABL:C감각
+	CASEELSE
+		S = 0
+ENDSELECT
+SIF S
+	L += S * 2
+
+;스킨십선호
+SELECTCASE SELECTCOM
+	CASE 70, 71, 73 TO 77, 80, 85 TO 87, 100 TO 106, 110 TO 116, 220 TO 225, 243 TO 245, 260 TO 265, 317, 420, 421, 422, 528
+		SIF TALENT:스킨십선호
+			L += 2
+	CASE 3 TO 8
+		SIF TALENT:스킨십불편
+			L += 2
+ENDSELECT
+
+;발정기
+SIF TALENT:발정기
+	L += 8
+
+IF L
+	PRINTFORM  + 
+	A += L
+	PRINTFORM 욕망({L})
+ENDIF
+
+
+;--------------------------------------------------------
+;쾌락부정치 XX
+;--------------------------------------------------------
+L = 0
+
+;억압
+SIF TALENT:억압
+	L += 10
+;실의
+SIF TALENT:실의
+	L += TALENT:실의
+
+;쾌감을부정
+SELECTCASE SELECTCOM
+	CASE 3 TO 8, 76, 100 TO 106, 110 TO 116, 160 TO 162, 181, 243 TO 245, 260 TO 265, 317, 405, 406, 422, 430, 431
+		SIF TALENT:쾌감을부정
+			L += 5
+ENDSELECT
+
+;스킨십선호
+SELECTCASE SELECTCOM
+	CASE 70, 71, 73 TO 77, 80, 85 TO 87, 100 TO 106, 110 TO 116, 220 TO 225, 243 TO 245, 260 TO 265, 317, 420, 421, 422, 528
+		SIF TALENT:스킨십불편
+			L += 2
+	CASE 3 TO 8
+		SIF TALENT:스킨십선호
+			L += 2
+ENDSELECT
+
+;자제심
+SELECTCASE SELECTCOM
+	CASE 3 TO 8
+		SIF TALENT:자제심
+			L += 5
+ENDSELECT
+
+;부끄럼쟁이
+SELECTCASE SELECTCOM
+	CASE 182, 183
+		S = 5
+	CASE 3 TO 8, 106, 116, 243 TO 245, 280, 281, 317, 422
+		S = 3
+	CASE 76, 101, 111, 420, 421
+		S = 1
+	CASEELSE
+		S = 0
+ENDSELECT
+SIF S && TALENT:부끄럼쟁이
+	L += S
+
+IF L
+	PRINTFORM  - 
+	A -= L
+	PRINTFORM 쾌락의부정({L})
+ENDIF
+
+
+;--------------------------------------------------------
+;처녀, 백버진, 윤활, 섹스중독XX
+;--------------------------------------------------------
+L = 0
+
+S = 0
+;처녀, 재생처녀
+SELECTCASE SELECTCOM
+	CASE 3, 4, 7, 100 TO 106, 160, 162, 405
+		IF TALENT:처녀 || TALENT:재생처녀
+			IF TALENT:처녀
+				S += 40
+			ELSEIF TALENT:재생처녀
+				S += 15
+			ENDIF
+			
+			IF TALENT:정조관념 && !TALENT:연모 && !TALENT:친애
+				S += 10
+			ELSEIF TALENT:정조관념 && (TALENT:연모 || TALENT:친애)
+				S -= 20
+			ELSEIF TALENT:정조무관심 || TALENT:음란 || TALENT:창부
+				S -= 10
+			ENDIF
+			SIF S < 0
+				S = 0
+			
+			IF S
+				PRINTFORM  - 
+				A -= S
+				IF TALENT:처녀
+					PRINTFORM 처녀({S})
+				ELSEIF TALENT:재생처녀
+					PRINTFORM 재생처녀({S})
+				ENDIF
+			ENDIF
+		ELSEIF EXP:V경험 < EXPLV:2 && VAGINA(TARGET)
+			PRINTFORM  - 
+			A -= 15
+			PRINTFORM V경험불발(15)
+		ENDIF
+ENDSELECT
+
+S = 0
+;백버진
+SELECTCASE SELECTCOM
+	CASE 6, 7, 8, 110 TO 116, 161, 162, 181, 406
+		IF TALENT:백버진
+			S += 20
+			SIF (TALENT:정조관념 && TALENT:처녀) || TALENT:연모 || TALENT:친애 || TALENT:음란 || TALENT:창부
+				S -= 10
+			
+			PRINTFORM  - 
+			A -= S
+			SIF TALENT:백버진
+				PRINTFORM 백버진({S})
+		ELSEIF EXP:A경험 < EXPLV:2
+			PRINTFORM  - 
+			A -= 30
+			PRINTFORM A경험불발(30)
+		ENDIF
+ENDSELECT
+
+;윤활불발
+SELECTCASE SELECTCOM
+	CASE 3, 4, 6, 7, 8, 76, 100 TO 106, 110 TO 116, 160 TO 162, 405, 406, 422
+		IF PALAM:윤활 < PALAMLV:3
+			PRINTFORM  - 
+			A -= 5
+			PRINTFORM 윤활불발(5)
+		ENDIF
+ENDSELECT
+
+
+;--------------------------------------------------------
+;스캇중독/스캇경험XX
+;--------------------------------------------------------
+L = 0
+
+SELECTCASE SELECTCOM
+	;육변기
+	CASE 181
+		S = 1
+	;방뇨, 배변
+	CASE 182, 183
+		S = 2
+	;음뇨, 식분
+	CASE 184, 185
+		S = 3
+	CASEELSE
+		S = 0
+ENDSELECT
+
+IF S && ABL:스캇중독
+	L += ABL:스캇중독 * 2
+	PRINTFORM  + 
+	A += L
+	PRINTFORM 스캇중독({L})
+ELSEIF S && EXP:스캇경험 < 5
+	L += S * 5
+	PRINTFORM  - 
+	A += L
+	PRINTFORM 스캇경험불발({L})
+ENDIF
+
+IF S == 2
+	IF TALENT:실금버릇
+		PRINTFORM  + 
+		A += 12
+		PRINTFORM 실금버릇(12)
+	ENDIF
+	
+	S = 0
+	;방뇨
+	IF SELECTCOM == 182
+		IF BASE:뇨의 >= 100
+			L = 5
+		ELSEIF BASE:뇨의 >= 80
+			L = 3
+		ELSEIF BASE:뇨의 >= 60
+			L = 2
+		ELSE
+			L = 0
+		ENDIF
+		IF TALENT:고통에약함
+			L -= 1
+		ELSEIF TALENT:고통에강함
+			L += L
+		ENDIF
+		IF L > 0
+			PRINTFORM  + 
+			A += L * 2
+			PRINTFORM 뇨의 있어({L*2})
+		ELSE
+			PRINTFORM  - 
+			A -= 5
+			PRINTFORM 뇨의없음({5})
+		ENDIF
+	;배변
+	ELSEIF SELECTCOM == 183
+		IF BASE:변의 >= 100
+			L = 5
+		ELSEIF BASE:변의 >= 80
+			L = 2
+		ELSEIF BASE:변의 >= 60
+			L = 1
+		ELSE
+			L = 0
+		ENDIF
+		IF TALENT:고통에약함
+			L -= 1
+		ELSEIF TALENT:고통에강함
+			L += L
+		ENDIF
+		IF L > 0
+			PRINTFORM  + 
+			A += L
+			PRINTFORM 변의 있어({L*2})
+		ELSE
+			PRINTFORM  - 
+			A -= 5
+			PRINTFORM 변의없음({5})
+		ENDIF
+	ENDIF
+ENDIF
+
+
+;--------------------------------------------------------
+;더러움/악취 감도 XX
+;--------------------------------------------------------
+L = 0
+
+SELECTCASE SELECTCOM
+	;주인의 B
+	CASE 221, 243
+		S = STAIN:PLAYER:가슴
+	;주인의 P
+	CASE 70, 71, 73 TO 76, 80 TO 84, 86, 87, 100 TO 106, 110 TO 116, 181, 245, 420 TO 422, 528
+		S = STAIN:PLAYER:페니스
+	;주인의 V를 손댄다
+	CASE 222, 223, 244, 260, 261, 262
+		S = STAIN:PLAYER:바기나
+	;주인의 A를 빤다
+	CASE 224, 225, 263, 264, 265
+		S = STAIN:PLAYER:애널
+	;주인의입를 손댄다
+	CASE 280
+		S = STAIN:PLAYER:입
+	;주인의손를 빤다
+	CASE 77, 160, 161, 162
+		S = STAIN:PLAYER:손
+	;주인의발을핥는다
+	CASE 85
+		S = STAIN:PLAYER:발
+	;조수의 P를 손댄다
+	CASE 405, 406, 407
+		S = STAIN:ASSI:페니스
+	;조수의 V에 넣는다
+	CASE 430
+		S = STAIN:ASSI:바기나
+	;조수의 A에 넣는다
+	CASE 431
+		S = STAIN:ASSI:애널
+	;오물
+	CASE 184
+		SIF TFLAG:66 == 0
+			S = STAIN:PLAYER:페니스
+	CASEELSE
+		S = 0
+ENDSELECT
+
+IF S
+	Y = 0
+	;애액
+	SIF S & 1
+		Y += 1
+	;페니스
+	SIF S & 2
+		Y += 2
+	;정액
+	SIF S & 4
+		Y += 5
+	;애널
+	SIF S & 8
+		Y += 8
+	;모유
+	SIF S & 16
+		Y += 1
+	;점액
+	SIF S & 32
+		Y += 15
+	;혈
+	SIF S & 64
+		Y += 5
+	;오줌
+	SIF S & 128
+		Y += 12
+	;변
+	SIF S & 512
+		Y += 20
+	;토사물
+	SIF S & 2048
+		Y += 20
+ENDIF
+
+IF TALENT:악취둔감 || TALENT:더러움무시
+	PRINTFORM  + 
+ELSE
+	PRINTFORM  - 
+ENDIF
+
+;더러움
+IF Y
+	PRINTFORM 더러워지고 있어
+ELSE
+	PRINTFORM 더러운 없음
+ENDIF
+
+SIF Y && (TALENT:악취둔감 || TALENT:악취민감 || TALENT:더러움무시)
+	PRINTFORM ,
+
+SELECTCASE SELECTCOM
+	CASE 182, 184
+		S = 3
+	CASE 183, 185
+		S = 5
+	CASE 220, 317
+		S = 1
+ENDSELECT
+
+SELECTCASE SELECTCOM
+	CASE 70, 73, 74, 76, 80 TO 84, 86, 100 TO 106, 110 TO 116, 160, 162, 181, 221, 225, 243 TO 245, 260 TO 265, 405, 406, 421, 422, 430, 431, 528
+		SIF Y
+			Y /= 3
+ENDSELECT
+
+IF Y == 0 && S
+	IF TALENT:악취둔감
+		Y -= S
+	ELSEIF TALENT:악취민감
+		Y += S * 3
+	ELSEIF TALENT:더러움무시
+		Y = 0
+	ELSE
+		Y += S
+	ENDIF
+ELSEIF Y
+	SIF TALENT:악취둔감
+		Y /= 3
+	SIF TALENT:악취민감
+		Y *= 2
+	SIF TALENT:더러움무시
+		Y = 0
+ENDIF
+
+SIF Y < 0
+	Y = 0
+
+IF Y
+	A -= Y
+	IF TALENT:악취둔감
+		PRINTFORM 악취둔감
+	ELSEIF TALENT:악취민감
+		PRINTFORM 악취민감
+	ENDIF
+	PRINTFORM ({Y})
+ENDIF
+
+
+;--------------------------------------------------------
+;함락
+;--------------------------------------------------------
+L = 0
+
+IF TALENT:실의
+	PRINTFORM  - 
+	A -= TALENT:실의
+	PRINTFORM 실의({TALENT:실의})
+ELSEIF TALENT:연모 || TALENT:친애
+	PRINTFORM  + 
+	IF TALENT:연모
+		A += 8
+		PRINTFORM 연모(8)
+	ELSE
+		A += 15
+		PRINTFORM 친애(15)
+	ENDIF
+ELSEIF TALENT:음란 || TALENT:창부
+	PRINTFORM  + 
+	IF TALENT:음란
+		A += 5
+		PRINTFORM 음란(5)
+	ELSE
+		A += 10
+		PRINTFORM 창부(10)
+	ENDIF
+ELSEIF TALENT:복종 || TALENT:예속
+	PRINTFORM  + 
+	IF TALENT:복종
+		A += 10
+		PRINTFORM 복종(10)
+	ELSE
+		A += 20
+		PRINTFORM 예속(20)
+	ENDIF
+ENDIF
+
+
+
+;--------------------------------------------------------
+;조교자의새드끼XX
+;--------------------------------------------------------
+L = 0
+
+;ABL:새드끼
+SIF ABL:PLAYER:새드끼
+	L += ABL:PLAYER:새드끼 * 2
+
+;새드
+IF TALENT:PLAYER:새드 == 2
+	L += 6
+ELSEIF TALENT:PLAYER:새드 == 1
+	L += 3
+ENDIF
+
+IF L
+	PRINTFORM  + 
+	A += L
+	PRINTFORM 조교자의새드끼({L})
+ENDIF
+
+
+;--------------------------------------------------------
+;조교자의매력XX
+;--------------------------------------------------------
+L = 0
+
+;조교자의 능력, 소질
+;매혹
+SIF TALENT:PLAYER:매혹
+	L += 6
+;수수께끼의매력
+SIF TALENT:PLAYER:수수께끼의매력
+	L += 8
+
+IF L
+	PRINTFORM  + 
+	A += L
+	PRINTFORM 조교자의매력({L})
+ENDIF
+
+
+;--------------------------------------------------------
+;조교자의 사이즈 XX
+;--------------------------------------------------------
+SELECTCASE SELECTCOM
+	CASE 100 TO 106, 110 TO 116, 181
+		L = 1
+	CASEELSE
+		L = 0
+ENDSELECT
+
+IF L
+	;조교자가아이사이즈
+	IF TALENT:PLAYER:아이사이즈
+		A += 2
+		PRINTFORM  + 
+		PRINTFORM %CALLNAME:PLAYER%가아이사이즈(2)
+	ENDIF
+	
+	;조교자가단소
+	IF TALENT:PLAYER:단소
+		A += 1
+		PRINTFORM  + 
+		PRINTFORM %CALLNAME:PLAYER%가단소(1)
+	ENDIF
+	
+	;조교자가거근
+	IF TALENT:PLAYER:거근
+		A -= 2
+		PRINTFORM  - 
+		PRINTFORM %CALLNAME:PLAYER%가거근(2)
+	ENDIF
+	
+	;조교자가말자지
+	IF TALENT:PLAYER:말자지
+		A -= 4
+		PRINTFORM  - 
+		PRINTFORM %CALLNAME:PLAYER%가말자지(4)
+	ENDIF
+ENDIF
+
+;--------------------------------------------------------
+;조교자의 체형 XX
+;--------------------------------------------------------
+L = 0
+
+IF TALENT:PLAYER:작은체구
+	L = 3
+ELSEIF TALENT:PLAYER:소인체형
+	L = 5
+ENDIF
+
+IF SELECTCOM == 150 && L
+	A += L
+	PRINTFORM  + 
+	PRINTFORM %CALLNAME:PLAYER%가
+	IF TALENT:PLAYER:작은체구
+		PRINTFORM 작은체구
+	ELSEIF TALENT:PLAYER:소인체형
+		PRINTFORM 소인체형
+	ENDIF
+	PRINTFORM (L)
+ENDIF
+
+
+;--------------------------------------------------------
+;조교자가처녀XX
+;--------------------------------------------------------
+L = 0
+
+SELECTCASE SELECTCOM
+	CASE 260, 261, 262
+		IF TALENT:PLAYER:처녀
+			PRINTFORM  - 
+			A -= 15
+			PRINTFORM %CALLNAME:PLAYER%가처녀(15)
+		ELSEIF TALENT:PLAYER:재생처녀
+			PRINTFORM  - 
+			A -= 5
+			PRINTFORM %CALLNAME:PLAYER%가재생처녀(5)
+		ENDIF
+	CASE 263, 264, 265
+		IF TALENT:PLAYER:백버진
+			PRINTFORM  - 
+			A -= 8
+			PRINTFORM %CALLNAME:PLAYER%가백버진(15)
+		ENDIF
+ENDSELECT
+
+
+
+
+
+;--------------------------------------------------------
+;조수의 소질
+;--------------------------------------------------------
+IF ASSI > -1
+	IF TALENT:ASSI:고무적 && ASSIPLAY == 0
+		L = 1
+		A += 1
+		
+		PRINTFORM  + 
+		PRINTFORM 조수가고무적({1})
+	ENDIF
+ENDIF
+
+
+;--------------------------------------------------------
+;조수의 사이즈 XX
+;--------------------------------------------------------
+SELECTCASE SELECTCOM
+	CASE 405, 406, 407
+		L = 1
+	CASEELSE
+		L = 0
+ENDSELECT
+
+IF L
+	;조수가아이사이즈
+	IF TALENT:ASSI:아이사이즈
+		A += 2
+		PRINTFORM  + 
+		PRINTFORM %CALLNAME:ASSI%가아이사이즈(2)
+	ENDIF
+	
+	;조수가단소
+	IF TALENT:ASSI:단소
+		A += 1
+		PRINTFORM  + 
+		PRINTFORM %CALLNAME:ASSI%가단소(1)
+	ENDIF
+	
+	;조수가거근
+	IF TALENT:ASSI:거근
+		A -= 2
+		PRINTFORM  - 
+		PRINTFORM %CALLNAME:ASSI%가거근(2)
+	ENDIF
+	
+	;조수가말자지
+	IF TALENT:ASSI:말자지
+		A -= 4
+		PRINTFORM  - 
+		PRINTFORM %CALLNAME:ASSI%가말자지(4)
+	ENDIF
+ENDIF
+
+
+;--------------------------------------------------------
+;조수가처녀XX
+;--------------------------------------------------------
+L = 0
+
+SELECTCASE SELECTCOM
+	CASE 430
+		IF TALENT:ASSI:처녀
+			PRINTFORM  - 
+			A -= 15
+			PRINTFORM %CALLNAME:ASSI%가처녀(15)
+		ELSEIF TALENT:ASSI:재생처녀
+			PRINTFORM  - 
+			A -= 5
+			PRINTFORM %CALLNAME:ASSI%가재생처녀(5)
+		ENDIF
+	CASE 431
+		IF TALENT:ASSI:백버진
+			PRINTFORM  - 
+			A -= 8
+			PRINTFORM %CALLNAME:ASSI%가백버진(15)
+		ENDIF
+ENDSELECT
+
+
+;--------------------------------------------------------
+;레즈비언 호모 조교 XX
+;--------------------------------------------------------
+L = 0
+S = 0
+
+;레즈비언 조교
+IF (!MALE(PLAYER) && !MALE(TARGET)) || (MALE(PLAYER) && MALE(TARGET))
+	IF !MALE(PLAYER) && !MALE(TARGET)
+		;ABL:레즈끼
+		IF ABL:레즈끼 > 3
+			L += ABL:레즈끼
+		ELSEIF ABL:레즈끼 < 3
+			S += ABL:레즈끼
+		ENDIF
+		;ABL:레즈중독
+		SIF ABL:레즈중독
+			L += ABL:레즈중독 * 3
+	ELSE
+		;ABL:게이끼
+		IF ABL:게이끼 > 3
+			L += ABL:게이끼
+		ELSEIF ABL:게이끼 < 3
+			S += ABL:게이끼
+		ENDIF
+		;ABL:게이중독
+		SIF ABL:게이중독
+			L += ABL:게이중독*3
+	ENDIF
+	
+	;TALENT:바이
+	SIF TALENT:바이
+		L += 10
+	;호기심
+	SIF TALENT:호기심
+		L += 7
+	;보수적
+	SIF TALENT:보수적
+		S += 13
+	
+	IF L
+		PRINTFORM  + 
+		A += L
+		IF !MALE(PLAYER) && !MALE(TARGET)
+			PRINTFORM 레즈끼 있어({L})
+		ELSE
+			PRINTFORM 게이끼 있어({L})
+		ENDIF
+	ELSEIF S
+		PRINTFORM  - 
+		A -= S
+		IF !MALE(PLAYER) && !MALE(TARGET)
+			PRINTFORM 레즈끼없음({S})
+		ELSE
+			PRINTFORM 게이끼없음({S})
+		ENDIF
+	ENDIF
+ELSE
+	SIF ABL:레즈중독
+		S += ABL:레즈중독*2
+	SIF ABL:게이중독
+		S += ABL:게이중독*2
+	
+	;호기심
+	SIF TALENT:호기심
+		L += 5
+	;보수적
+	SIF TALENT:보수적
+		S += 10
+	
+	IF L
+		A += L
+		PRINTFORM  + 
+		PRINTFORM 호기심({L})
+	ELSEIF S
+		A -= S
+		PRINTFORM  - 
+		IF ABL:레즈중독
+			PRINTFORM 레즈중독({S})
+		ELSEIF ABL:게이중독
+			PRINTFORM 게이중독({S})
+		ELSEIF TALENT:보수적
+			PRINTFORM 보수적({S})
+		ENDIF
+	ENDIF
+ENDIF
+
+
+;--------------------------------------------------------
+;레즈비언 호모 조교 XX
+;--------------------------------------------------------
+L = 0
+;궁합 체크
+R = NO:PLAYER
+;여자좋아, 남자좋아, 아이좋아
+IF (TALENT:여자좋아 && MALE(PLAYER) == 0  && !TALENT:PLAYER:소인체형) || (TALENT:남자좋아 && MALE(PLAYER) && !TALENT:PLAYER:소인체형) || (TALENT:아이좋아 && TALENT:PLAYER:소인체형)
+	IF RELATION:R == 0
+		C = 150
+	ELSE
+		C = RELATION:R + 50
+		SIF C > 200
+			C = 200
+	ENDIF
+;남자혐오, 여자혐오(연모함락으로 무효)
+ELSEIF !TALENT:연모 && !TALENT:친애 && ((TALENT:남자혐오 && MALE(PLAYER)) || (TALENT:여자혐오 && MALE(PLAYER) == 0))
+	IF RELATION:R == 0
+		C = 50
+	ELSE
+		C = RELATION:R - 50
+		SIF C <= 0
+		C = 0
+	ENDIF
+ELSE
+	IF RELATION:R < 30
+		C = 100
+	ELSE
+		C = RELATION:R
+	ENDIF
+ENDIF
+IF C >= 170
+	PRINTFORM  + 
+	A += 10
+	PRINTFORM 궁합 최고(10)
+ELSEIF C >= 130
+	PRINTFORM  + 
+	A += 6
+	PRINTFORM 궁합 좋다(6)
+ELSEIF C > 100
+	PRINTFORM  + 
+	A += 3
+	PRINTFORM 궁합 약간 좋다(3)
+ELSEIF C == 100
+	PRINTFORM  + 
+	PRINTFORM 궁합 보통(0)
+ELSEIF C >= 70
+	PRINTFORM  - 
+	A -= 3
+	PRINTFORM 궁합 좀 더(3)
+ELSEIF C >= 30
+	PRINTFORM  - 
+	A -= 6
+	PRINTFORM 궁합 나쁘다(6)
+ELSE
+	PRINTFORM  - 
+	A -= 10
+	PRINTFORM 궁합 최악(10)
+ENDIF
+
+

@@ -1,0 +1,2143 @@
+﻿;----------------------------------------------------------------------
+;범용 허덕여 딴사람판 ERB
+;ver0. 02(10/11/28)
+
+;>>118씨판 또는 딴사람판 0.01 ver에서는 「PANT_E |= 2로 한다고 보고 벚꽃어가 표시되지 않게 된다」라고 설명하고 있었습니다만,실제로는 PANT_E |= 2로 한다고 보고 벚꽃어가 표시되게 되어 있었습니다
+;이전의 버젼을 사용하고 있는 (분)편으로 보고 벚꽃어를 금지하고 싶은 (분)편은 PANT_E |= 2를 지워 주세요.
+;절규계천풍부해 벚꽃어를 금지하고 있었던 (분)편은 PANT_E |= 3을 PANT_E |= 1으로 해 주세요.
+;----------------------------------------------------------------------
+;【사용법】
+;우선 캐릭터입상 ERB의 어디엔가 이하의 문장을 넣는다.
+;변수에 넣는 숫자에 대해서는 아래와 같이 참조.
+;------------여기로부터-------------
+;@PANT_VOICE_KX1
+;	PANT_A = (1~5의 숫자)
+;	PANT_E = (0~7의 숫자/특별히 붙이고 싶은 옵션이 없으면 0으로 좋다)
+;CALL PANT_VOICE
+;RETURN 0
+;------------여기까지-------------
+;X1에는 캐릭터 번호를 넣는다.
+;그리고는 허덕이게 하고 싶은 장소에서
+;------------여기로부터-------------
+;CALL PANT_VOICE_KX1
+;------------여기까지-------------
+;라고 쓰면 허덕입니다.
+;회수 또는 허덕여 패턴을 지정하고 싶은 경우는
+;------------여기로부터-------------
+;PANT_F = (1~10의 숫자)
+;PANT_G = (1~7의 숫자)
+;CALL PANT_VOICE_KX1
+;------------여기까지-------------
+;라고 쓰면,지정한 허덕여 패턴으로 PANT_F회천를 반복합니다.
+;하나 하나 PANT_F=등이라든지 쓰는 것 귀찮다고 하는 (분)편은
+;------------여기로부터-------------
+;@PANTVOICE_1_KX1
+;	PANT_A = (1~5의 숫자)
+;	PANT_E = (0~7의 숫자/특별히 붙이고 싶은 옵션이 없으면 0으로 좋다)
+;	PANT_F = (1~10의 숫자)
+;	PANT_G = (1~7의 숫자)
+;CALL PANT_VOICE
+;RETURN 0
+;------------여기까지-------------
+;라고 써 CALL PANTVOICE_1_KX1라든지 하면 좋다고 생각합니다.
+;기술예는 readme 딴사람판에 써 있으므로 그 쪽도 참조해 주세요.
+
+;----------------------------------------------------------------------
+;변수 사용 상황
+;PANT_A =캐릭터입조(현재 5종)
+;PANT_B =허덕여 회수가 많음
+;PANT_C =감도
+;PANT_D =분기용 비트
+;PANT_E =옵션 추가
+;PANT_F =허덕여 회수 지정용
+;PANT_G =허덕임의 종류 지정용
+;PANT_P =랜덤용
+
+;----------------------------------------------------------------------
+;변수 초기화
+;----------------------------------------------------------------------
+@PANT_VOICE
+PANT_B = 0
+PANT_C = 0
+PANT_D = 0
+PANT_P:1 = (-1)
+PANT_B_CALC = 0
+PANT_C_CALC = 0
+
+;----------------------------------------------------------------------
+;변수와 대응 숫자 일람
+;----------------------------------------------------------------------
+;PANT_A에 넣는 것
+;난폭=1
+;표준=2
+;부드러운=3
+;경어=4
+;칸사이 사투리=5
+
+;PANT_B에 들어가 있는 것
+;PANT_F=0 때의 허덕여 반복 회수
+
+;PANT_C에 들어가 있는 것
+;PANT_G=0 때의 허덕여 패턴을 결정하는 수치
+
+;PANT_D에 들어가 있는 것
+;붕괴=1=0
+;반발 1=2=1
+;반발 2=4=2
+;반발 3=8=3
+;굴복 1=16=4
+;굴복 2=32=5
+;굴복 3=64=6
+;연모=128=7
+;음란=256=8
+;복종=512=9
+;친애=1024=10
+;창부=2048=11
+;예속=4096=12
+;입=8192=13
+;B=16384=14
+;C=32768=15
+;A=65536=16
+;V=131072=17
+;그 외=262144=18
+;실전=524288=19
+;촉수=1048576=20
+;도구=2097152=21
+;고통 1=4194304=22
+;고통 2=8388608=23
+;봉사계=16777216=24
+;노예 성별남=33554432=25
+;길들이지 않고 적시지 않고 돌입한==26
+
+;PANT_E에 넣는 것
+;절규계 허덕여 금지=1
+;(↑를 넣으면고통LV2가 되는 상황에서도고통LV1가 허덕임이,쾌락 LV4가 되는 상황에서도 쾌락 LV3가 허덕임이 나오게 된다)
+;보고 벚꽃어로 허덕인다(현상등째정도 밖에 대사가 증가하지 않는다)=2
+;음어로 허덕인다(자지국물출우우라든지)=4
+;음어로 허덕이는 모드는 하나 하나의 대사가 길쭉한 것으로,PANT_F = 4 이하 정도로 허덕여 회수를 지정해 두는 편이 좋을지도 모릅니다.
+;PANT_E = 0 :옵션 없음
+;PANT_E = 1 :절규계 허덕여 금지
+;PANT_E = 2 :보고 벚꽃어 모드
+;PANT_E = 3 :절규계 허덕여 금지＋보고 벚꽃어 모드
+;PANT_E = 4 :음어 모드
+;PANT_E = 5 :절규계 허덕여 금지＋음어 모드
+;PANT_E = 6 :보고 벚꽃어 모드＋음어 모드
+;PANT_E = 7 :절규계 허덕여 금지＋보고 벚꽃어 모드＋음어 모드
+
+;PANT_F에 넣는 것
+;1~10까지의 숫자
+;넣은 숫자의 분만큼 허덕임을 반복하게 된다
+;0또는 부의 수를 넣으면 PANT_F에 아무것도 넣지 않았을 때와 같은 움직임을 해,
+;10보다 큰 숫자를 넣으면 허덕여 반복 회수는 10회가 된다
+
+;PANT_G에 넣는 것
+;1~7까지의 숫자
+;넣은 숫자에 대응하는 허덕여 패턴으로 허덕이게 된다
+;1~ 7이외의 숫자를 넣으면 아무것도 넣지 않았던 것과 같은 움직임을 한다
+;약쾌감=1
+;쾌감 LV2=2
+;쾌감 LV3=3
+;쾌감 LV4=4
+;고통LV1=5
+;고통LV2=6
+;입가 막히고 있다(볼개그·촉수입학중 이외)=7
+
+;----------------------------------------------------------------------
+;소질에 의해 B 허덕이는 회수와 C감도에 플러스마이너스.
+;오르내림은 자신의 상상입니다.
+;감도나고통에 관련되는 소질은 최후에.
+;----------------------------------------------------------------------
+;남자이다
+SIF TALENT:남자 == 1
+	PANT_D |= 33554432
+;반항적
+IF TALENT:반항적 == 1
+	PANT_B -= 1
+	PANT_C -= 1
+ENDIF
+;꿋꿋함
+SIF TALENT:꿋꿋함 == 1
+	PANT_B -= 1
+;솔직함
+SIF TALENT:솔직함 == 1
+	PANT_B += 1
+;프라이드높음
+IF TALENT:프라이드높음 == 1
+	PANT_B -= 2
+	PANT_C -= 1
+ENDIF
+;프라이드낮음
+SIF TALENT:프라이드낮음 == 1
+	PANT_B += 1
+;츤데레는순종 4 이상이라면 PANT_B＋이하라면 PANT_B－
+SIF TALENT:츤데레 == 1 && ABL:순종 >= 4
+	PANT_B += 1
+SIF TALENT:츤데레 == 1 && ABL:순종 < 4
+	PANT_B -= 1
+;자제심
+IF TALENT:자제심 == 1
+	PANT_B -= 1
+	PANT_C -= 2
+ENDIF
+;무관심
+IF TALENT:무관심 == 1
+	PANT_B -= 2
+	PANT_C -= 2
+ENDIF
+;감정부족
+IF TALENT:감정부족 == 1
+	PANT_B -= 3
+	PANT_C -= 1
+ENDIF
+;보수적
+SIF TALENT:보수적 == 1
+	PANT_B -= 1
+;일선을넘지않음는 함락전이라면 PANT_B PANT_C-
+IF TALENT:일선을넘지않음 == 1 && (TALENT:연모 == 1 || TALENT:음란 == 1 || TALENT:복종 == 1 || TALENT:친애 == 1 || TALENT:창부 == 1 || TALENT:예속 == 1)
+	PANT_B -= 1
+	PANT_C -= 2
+ENDIF
+;정조관념
+IF TALENT:정조관념 == 1
+	PANT_B -= 1
+	PANT_C -= 2
+ENDIF
+;억압
+SIF TALENT:억압 == 1
+	PANT_C -= 1
+;해방
+IF TALENT:해방 == 1
+	PANT_B += 2
+	PANT_C += 1
+ENDIF
+;저항
+SIF TALENT:저항 == 1
+	PANT_C -= 1
+;부끄럼쟁이
+SIF TALENT:부끄럼쟁이 == 1
+	PANT_B -= 1
+;수치심없음
+SIF TALENT:수치심없음 == 1
+	PANT_B += 1
+;자위하기쉬움 또는자위광는자위계 COM로
+SIF (TALENT:자위하기쉬움 == 1 || TALENT:자위광 == 1) && (SELECTCOM == 4 || SELECTCOM == 5 || SELECTCOM == 6 || SELECTCOM == 7 || SELECTCOM == 509)
+	PANT_C += 1
+;쾌감에솔직
+IF TALENT:쾌감에솔직 == 1
+	PANT_B += 2
+	PANT_C += 2
+ENDIF
+;쾌감을부정
+IF TALENT:쾌감을부정 == 1
+	PANT_B -= 2
+	PANT_C -= 2
+ENDIF
+;발정기
+SIF TALENT:발정기 == 1
+	PANT_B += 1
+
+;한 번 BC의 회수 이상 저지
+;성실해얌전함성격이라면 감도 올라도 어쩔 수 없기 때문에.
+SIF PANT_B < 1
+	PANT_B = 1
+SIF PANT_C < -2
+	PANT_C = -2
+;쾌감이 들어가 있지 않아도 허덕이기 시작하므로 소질 보정은 2까지
+SIF PANT_C > 2
+	PANT_C = 2
+
+;----------------------------------------------------------------------
+;행위 개소＋감도 계산
+;----------------------------------------------------------------------
+;감각이 높으면 PANT_B PANT_C에 플러스.
+;또 이 시점에서 어디를 사용한 행위나 PANT_D에 붙인다
+;거품비비기는 무엇일까….
+;----------------------------------------------------------------------
+;B
+SELECTCASE SELECTCOM
+	CASE 0,5,10 TO 18,73 TO 75,84,141,163,243,317,318,322,341,360,361,373,374,382,402,421,502,504,509,528
+		SETBIT PANT_D,14
+		;감각 낮은~높고 C0~3
+		IF ABL:B감각 >= 7
+			PANT_B_CALC += 2
+			PANT_C_CALC += 3
+		ELSEIF ABL:B감각 >= 5
+			PANT_B_CALC += 1
+			PANT_C_CALC += 2
+		ELSEIF ABL:B감각 >= 3
+			PANT_C_CALC += 1
+		ELSE
+			PANT_B_CALC -= 1
+		ENDIF
+		;조교자의기교에 의해
+		IF ABL:PLAYER:기교 == 0
+			PANT_C_CALC += 2
+		ELSEIF ABL:PLAYER:기교 >= 5
+			PANT_C_CALC += 1
+		ELSEIF ABL:PLAYER:기교 < 3
+			PANT_C_CALC -= 1
+		ENDIF
+ENDSELECT
+;아이템이 붙어 있을 때는 최대+1
+IF BCHECK(TARGET)
+	SETBIT PANT_D,14
+	SIF ABL:B감각 >= 5
+		PANT_B_CALC += 1
+	SIF ABL:B감각 >= 3
+		PANT_C_CALC += 1
+ENDIF
+;C
+SELECTCASE SELECTCOM
+	CASE 0,3,4,20 TO 40,60 TO 62,76,145,163,182,240 TO 242,244 TO 246,260 TO 265,280,285,317,318,322,342,343,365,373,374,380 TO 382,400,401,422,430,431,503,504,505,515,519 TO 525
+		;애무 때,정조대가 있으면 C는 기분 좋지 않다
+		IF SELECTCOM == 0 && TEQUIP:정조대
+		;윤간 때,역섹스가 없으면 C는 기분 좋지 않다
+		ELSEIF SELECTCOM == 322 && (TFLAG:705 & 4) == 0
+		;수간 때,V나 A어느 쪽인가에 돌진해지고 있으면,C는 기분 좋지 않다
+		ELSEIF (SELECTCOM == 322 || SELECTCOM == 381) && TFLAG:705!= 4
+		;음뇨한다 때,그 자리의 오줌을 마신다고 C는 기분 좋지 않다
+		ELSEIF SELECTCOM == 285 && BASE:뇨의 < 60
+		;샌드위치 때,C애무되어 있지 않으면 C는 기분 좋지 않다
+		ELSEIF SELECTCOM == 515 && TFLAG:40!= 3 && TFLAG:40!= 4 && TFLAG:40!= 5
+		;샌드위치 시키는 것이라고 해애무 하는 측이라면 C는 기분 좋지 않다
+		ELSEIF SELECTCOM == 520 && (TFLAG:49 == 8 || TFLAG:49 == 9 || TFLAG:49 == 10)
+		;연결 때,수라면 C는 기분 좋지 않다
+		ELSEIF SELECTCOM == 519 && TFLAG:49!= 6 && TFLAG:49!= 7 && TFLAG:49!= 11 && TFLAG:49!= 12
+		ELSE
+			SETBIT PANT_D,15
+			;감각 낮은~높고 C0~3
+			IF ABL:C감각 >= 7
+				PANT_B_CALC += 2
+				PANT_C_CALC += 3
+			ELSEIF ABL:C감각 >= 5
+				PANT_B_CALC += 1
+				PANT_C_CALC += 2
+			ELSEIF ABL:C감각 >= 3
+				PANT_C_CALC += 1
+			ELSE
+				PANT_B_CALC += 1
+			ENDIF
+			;조교자의기교에 의해
+			IF ABL:PLAYER:기교 == 0
+				PANT_C_CALC += 2
+			ELSEIF ABL:PLAYER:기교 >= 5
+				PANT_C_CALC += 1
+			ELSEIF ABL:PLAYER:기교 < 3
+				PANT_C_CALC -= 1
+			ENDIF
+		ENDIF
+ENDSELECT
+;아이템이 붙어 있을 때는 최대+1
+IF CCHECK(TARGET)
+	SETBIT PANT_D,15
+	SIF ABL:C감각 >= 5
+		PANT_B_CALC += 1
+	SIF ABL:C감각 >= 3
+		PANT_C_CALC += 1
+ENDIF
+;A
+SELECTCASE SELECTCOM
+	CASE 6,7,8,50  TO 56,110 TO 116,161,162,163,180,181,183,286,322,345,352,364,367,368,370,371,373,374,381,382,404,406,501,509,510,512,514,515,518,519,526
+		;애널자극 때,애널자극로부터의 파생이 아니면 A는 기분 좋지 않다
+		IF SELECTCOM == 286 && TFLAG:56!= 1
+		;윤간 때,A에 삽입되어 있지 않으면 A는 기분 좋지 않다
+		ELSEIF SELECTCOM == 322 && (TFLAG:705 & 1) == 0
+		;수간 때,A에 삽입되어 있지 않으면 A는 기분 좋지 않다
+		;바이브도정조대도 없으면 V에 삽입해 A는 사용하지 않는다
+		ELSEIF SELECTCOM == 381 && !TEQUIP:바이브 && !TEQUIP:정조대
+		;기승위유방자위,역에서 파는 도시락 때,A에 삽입되어 있지 않으면 A는 기분 좋지 않다
+		ELSEIF (SELECTCOM == 509 || SELECTCOM == 510) && TFLAG:705!= 1
+		;샌드위치,연결 때,A에 삽입되어 있지 않으면 A는 기분 좋지 않다
+		ELSEIF (SELECTCOM == 515 || SELECTCOM == 519) && TFLAG:40!= 2 && TFLAG:41!= 2
+		ELSE
+			SETBIT PANT_D,16
+			;감각 낮은~높고 C0~3
+			IF ABL:A감각 >= 7
+				PANT_B_CALC += 2
+				PANT_C_CALC += 3
+			ELSEIF ABL:A감각 >= 5
+				PANT_B_CALC += 1
+				PANT_C_CALC += 2
+			ELSEIF ABL:A감각 >= 3
+				PANT_C_CALC += 1
+			;익숙해지지 않았으면 아프다고 생각하므로고통＋
+			ELSEIF SELECTCOM != 50
+				PANT_B_CALC -= 1
+				;애널애무,자위,애널바이브,애널비즈
+				IF SELECTCOM == 6 || SELECTCOM == 7 || SELECTCOM == 51 || SELECTCOM == 53 || SELECTCOM == 54
+					IF PALAM:윤활 < PALAMLV:2
+						SETBIT PANT_D,22
+						SETBIT PANT_D,26
+					ENDIF
+				ELSE
+					;윤활에 의해고통 1or고통 2
+					IF PALAM:윤활 < PALAMLV:2
+						SETBIT PANT_D,23
+					ELSE
+						SETBIT PANT_D,22
+					ENDIF
+					SETBIT PANT_D,26
+				ENDIF
+			ENDIF
+			;조교자의기교에 의해
+			IF ABL:PLAYER:기교 == 0
+				PANT_C_CALC += 2
+			ELSEIF ABL:PLAYER:기교 >= 5
+				PANT_C_CALC += 1
+			ELSEIF ABL:PLAYER:기교 < 3
+				PANT_C_CALC -= 1
+			ENDIF
+		ENDIF
+ENDSELECT
+;아이템이 붙어 있을 때는 최대+1
+IF ACHECK(TARGET)
+	SETBIT PANT_D,16
+	SIF ABL:A감각 >= 5
+		PANT_B_CALC += 1
+	IF ABL:A감각 >= 3
+		PANT_C_CALC += 1
+	;익숙해지지 않은＆젖지 않았다고 아프다
+	ELSE
+		IF PALAM:윤활 < PALAMLV:2
+			SETBIT PANT_D,22
+			SETBIT PANT_D,26
+		ENDIF
+	ENDIF
+ENDIF
+;V
+IF !GETBIT(PANT_D,25)
+	SELECTCASE SELECTCOM
+		CASE 4,7,41  TO 44,100 TO 106,160,162,163,246,322,344,362,363,366,368,369,373,374,381,382,403,405,500,506 TO 511,513,515,517,519
+			;자위 때,V를 사용하지 않으면 V는 기분 좋지 않다
+			IF SELECTCOM == 4 && TFLAG:56!= 1
+			;윤간 때,V에 삽입되어 있지 않으면 A는 기분 좋지 않다
+			ELSEIF SELECTCOM == 322 && (TFLAG:705 & 2) == 0
+			;수간 때,V에 삽입되어 있지 않으면 V는 기분 좋지 않다
+			;정조대나남자라면 안돼
+			ELSEIF SELECTCOM == 381 && (TEQUIP:정조대 || !VAGINA(TARGET))
+			;기승위유방자위,역에서 파는 도시락 때,V에 삽입되어 있지 않으면 V는 기분 좋지 않다
+			ELSEIF (SELECTCOM == 509 || SELECTCOM == 510) && TFLAG:705!= 0
+			;샌드위치,연결 때,V에 삽입되어 있지 않으면 A는 기분 좋지 않다
+			ELSEIF (SELECTCOM == 515 || SELECTCOM == 519) && TFLAG:40!= 1 && TFLAG:41!= 1
+			;전기안마 때,속옷이나하의를 착용하고 있으면 V는 기분 좋지 않다
+			ELSEIF SELECTCOM == 246 && (TEQUIP:속옷（아래） || TEQUIP:하의)
+			ELSE
+				SETBIT PANT_D,17
+				;감각 낮은~높고 C0~3
+				IF ABL:V감각 >= 7
+					PANT_B_CALC += 2
+					PANT_C_CALC += 3
+				ELSEIF ABL:V감각 >= 5
+					PANT_B_CALC += 1
+					PANT_C_CALC += 2
+				ELSEIF ABL:V감각 >= 3
+					PANT_C_CALC += 1
+				ELSE
+					;익숙해지지 않은＆젖지 않았으면고통
+					PANT_B_CALC -= 1
+					IF PALAM:윤활 < PALAMLV:2
+						SETBIT PANT_D,22
+						SETBIT PANT_D,26
+					ENDIF
+				ENDIF
+				;조교자의기교에 의해
+				IF ABL:PLAYER:기교 == 0
+					PANT_C_CALC += 2
+				ELSEIF ABL:PLAYER:기교 >= 5
+					PANT_C_CALC += 1
+				ELSEIF ABL:PLAYER:기교 < 3
+					PANT_C_CALC -= 1
+				ENDIF
+			ENDIF
+	ENDSELECT
+ENDIF
+IF VCHECK(TARGET)
+	SETBIT PANT_D,17
+	SIF ABL:V감각 >= 5
+		PANT_B_CALC += 1
+	IF ABL:V감각 >= 3
+		PANT_C_CALC += 1
+	;익숙해지지 않은＆젖지 않았다고 아프다
+	ELSE
+		IF PALAM:윤활 < PALAMLV:2
+			SETBIT PANT_D,22
+			SETBIT PANT_D,26
+		ENDIF
+	ENDIF
+ENDIF
+
+;2개소 이상 꾸짖는 커맨드는,행위 개소에 의한 감도를 반으로 한다
+SELECTCASE SELECTCOM
+	CASE 0,7,162,163,317,318,322,368,373,374,381,382,504,509,515,519
+		;애무 때,정조대가 붙어 있으면 B 밖에 손대지 않는다
+		IF SELECTCOM == 0 && TEQUIP:정조대
+		ELSE
+			PANT_B_CALC = PANT_B_CALC / 2
+			PANT_C_CALC = PANT_C_CALC / 2
+		ENDIF
+ENDSELECT
+PANT_B += PANT_B_CALC
+PANT_C += PANT_C_CALC
+
+;입
+SELECTCASE SELECTCOM
+	CASE 1,71,72,75,77,85,87,184,185,222,224,322,407,410,412,420,515,516,520,521,527
+		;윤간 때,입는 사용하지 않는다
+		IF SELECTCOM == 322 && (TFLAG:705 & 8) == 0
+		;샌드위치,샌드위치 시키는,조수를 샌드위치 때,입는 사용하지 않는다
+		ELSEIF (SELECTCOM == 515 || SELECTCOM == 520 || SELECTCOM == 521) && TFLAG:49!= 8 && TFLAG:49!= 9 && TFLAG:49!= 10
+		ELSE
+			SETBIT PANT_D,13
+		ENDIF
+ENDSELECT
+
+;계속 아이템에 의한고통
+;중증
+IF TEQUIP:확장벌룬 || TEQUIP:요도벌룬 || BASE:뇨의 >= 90 || BASE:변의 >= 90 || TEQUIP:삼각목마
+	SETBIT PANT_D,23
+;경도
+ELSEIF TEQUIP:밧줄 || TEQUIP:카테터 || TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란 || TEQUIP:촉수유선삽입 || BASE:뇨의 >= 60 || BASE:변의 >= 60 || BASE:구역질 >= 60
+	SETBIT PANT_D,22
+ENDIF
+;----------------------------------------------------------------------
+;함락 자질
+;----------------------------------------------------------------------
+;연모
+IF TALENT:연모 == 1
+	PANT_B += 1
+	PANT_D |= 128
+ENDIF
+;친애
+IF TALENT:친애 == 1
+	PANT_B += 1
+	PANT_D |= 1024
+ENDIF
+;음란
+IF TALENT:음란 == 1
+	PANT_B += 2
+	PANT_C += 1
+	PANT_D |= 256
+ENDIF
+;창부
+IF TALENT:창부 == 1
+	PANT_B += 2
+	PANT_C += 2
+	PANT_D |= 2048
+ENDIF
+;복종
+IF TALENT:복종 == 1
+	PANT_B -= 1
+	PANT_D |= 512
+ENDIF
+;예속
+IF TALENT:예속== 1
+	PANT_B -= 1
+	PANT_D |= 4096
+ENDIF
+;반발
+IF MARK:반발각인 > 0
+	;인정하고 싶지 않다는 것으로 PANT_C - 
+	PANT_B -= 2
+	PANT_C -= 2
+	;반발Lv1
+	IF MARK:반발각인 == 1
+		PANT_D |= 2
+	;반발Lv2
+	ELSEIF MARK:반발각인 == 2
+		PANT_D |= 4
+	;반발Lv3
+	ELSEIF MARK:반발각인 == 3
+		PANT_D |= 8
+	ENDIF
+ENDIF
+;굴복
+IF MARK:굴복각인 > 0
+	;굴복Lv1
+	IF MARK:굴복각인 == 1
+		PANT_D |= 16
+	;굴복Lv2
+	ELSEIF MARK:굴복각인 == 2
+		PANT_D |= 32
+	;굴복Lv3
+	ELSEIF MARK:굴복각인 == 3
+		PANT_D |= 64
+	ENDIF
+ENDIF
+;붕괴
+IF TALENT:붕괴 == 1
+	PANT_D |= 1
+ENDIF
+;----------------------------------------------------------------------
+;소질 그 2
+;----------------------------------------------------------------------
+;음란구멍
+IF TALENT:음란구멍 == 1 && (PANT_D & 131072) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+;항문광
+IF TALENT:항문광 == 1 && (PANT_D & 655369) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+;음란가슴
+IF TALENT:음란가슴 == 1 && (PANT_D & 16384) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+;섹스광
+IF TALENT:섹스광 ==1 && (PANT_D & 524288) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+;CVAB 둔해 BC-
+IF TALENT:C둔감 && (PANT_D & 32768) != 0
+	PANT_B -= 1
+	PANT_C -= 1
+ENDIF
+IF TALENT:V둔감 && (PANT_D & 131072) != 0
+	PANT_B -= 1
+	PANT_C -= 1
+ENDIF
+IF TALENT:A둔감 && (PANT_D & 655369) != 0
+	PANT_B -= 1
+	PANT_C -= 1
+ENDIF
+IF TALENT:B둔감 &&(PANT_D & 16384) != 0
+	PANT_B -= 1
+	PANT_C -= 1
+ENDIF
+;CVAB 민감해 BC+
+IF TALENT:C민감 && (PANT_D & 32768) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+IF TALENT:V민감 && (PANT_D & 131072) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+IF TALENT:A민감 && (PANT_D & 655369) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+IF TALENT:B민감 && (PANT_D & 16384) != 0
+	PANT_B += 1
+	PANT_C += 1
+ENDIF
+;빈유나절벽라면 PANT_D = 1 때에 PANT_F + 
+SIF TALENT:빈유 == 1 && (PANT_D & 16384) != 0
+	PANT_C += 1
+SIF TALENT:절벽 == 1 && (PANT_D & 16384) != 0
+	PANT_C += 2
+;거유나폭유라면 PANT_D = 1 때에 PANT_F - 
+SIF TALENT:거유 == 1 && (PANT_D & 16384) != 0
+	PANT_C -= 1
+SIF TALENT:폭유 == 1 && (PANT_D & 16384) != 0
+	PANT_C -= 2
+;모유체질라면 PANT_D = 1 때에 PANT_F + 
+SIF TALENT:모유체질 == 1 && (PANT_D & 16384) != 0
+	PANT_C += 1
+
+;----------------------------------------------------------------------
+;행위 경도＋고통계산
+;행위가 격렬하면 PANT_B PANT_F에 플러스
+;----------------------------------------------------------------------
+;니플퍽,거품비비기는 어디일까…….
+;봉사계는 노예측이 할 뿐(만큼)의 것은 들어가 있지 않습니다.
+
+;가볍다
+SELECTCASE SELECTCOM
+	CASE 0,1,3 TO 6,8,10,11,18,30,31,34,36,40,50,73 TO 75,87,222,224,240,241,243 TO 245,317,318,400 TO 402,502 TO 505,528
+ENDSELECT
+
+;보통
+SELECTCASE SELECTCOM
+	CASE 12 TO 15,20 TO 23,32,41,42,50,51,76,80,84,85,130,140,141,242,246,380,403,404,422,500,501
+		PANT_B += 1
+		PANT_C += 1
+		;고통라면
+		SIF ((SELECTCOM == 14 || SELECTCOM == 23) && (TEQUIP:지하실 || TALENT:PLAYER:새드 || ABL:PLAYER:새드끼 >= 3)) || SELECTCOM == 15 || SELECTCOM == 24 || SELECTCOM == 130 || SELECTCOM == 140 || SELECTCOM == 141
+			PANT_D |= 4194304
+ENDSELECT
+
+;무거운＋실전
+SELECTCASE SELECTCOM
+	CASE 7,17,33,43,53,54,60,72,100 TO 116,142 TO 145,155,157,158,322,341 TO 345,360 TO 365,405,406,506 TO 512,515,519 TO 521,526
+		PANT_B += 2
+		PANT_C += 2
+		;고통라면
+		SIF SELECTCOM == 33 || SELECTCOM == 60 || SELECTCOM == 72 || SELECTCOM == 158 || SELECTCOM == 361 || SELECTCOM == 365 || SELECTCOM == 511 || SELECTCOM == 512
+			PANT_D |= 4194304
+		;고통LV2
+		SIF SELECTCOM == 142 || SELECTCOM == 143 || SELECTCOM == 144 || SELECTCOM == 145 || SELECTCOM == 157
+			PANT_D |= 8388608
+		;실전이라면 PANT_B + 1
+		SELECTCASE SELECTCOM
+			CASE 100 TO 116,405,406,506 TO 512,515,519 TO 521,526
+				PANT_B += 1
+				PANT_D |= 524288
+		ENDSELECT
+ENDSELECT
+
+;통상은 하지 않는거야
+SELECTCASE SELECTCOM
+	CASE 16,25,35,44,55,56,61,62,153,154,156,160 TO 163,180,181,352,366 TO 374,381 TO 383,390 TO 392,513,514,517,518,522 TO 525,527
+		PANT_B += 3
+		PANT_D |= 8388608
+		;실전이라면 PANT_B + 1
+		IF SELECTCOM == 181 || SELECTCOM == 513 || SELECTCOM == 514 || SELECTCOM == 517 || SELECTCOM == 518 || SELECTCOM == 522 || SELECTCOM == 523 || SELECTCOM == 524 || SELECTCOM == 525
+			PANT_B = PANT_B + 1
+			PANT_D |= 524288
+		ENDIF
+ENDSELECT
+
+;봉사계(이라마치오와 같은 강제계는 포함하지 않는다)
+SELECTCASE SELECTCOM
+	CASE 70 TO 87,220 TO 225,243,317,420 TO 422,503,504,528
+		PANT_D |= 16777216
+	;실전 있어
+	CASE 260 TO 265
+		SETBIT PANT_D,19
+		SETBIT PANT_D,24
+ENDSELECT
+
+;촉수계
+SELECTCASE SELECTCOM
+	CASE 340 TO 374
+		PANT_D |= 1048576
+ENDSELECT
+
+;도구계
+SELECTCASE SELECTCOM
+	CASE 12,13,15 TO 17,20 TO 22,24,25,32,42 TO 44,52 TO 56,60 TO 62,130 TO 134,142 TO 145,180,300 TO 305
+		PANT_D |= 2097152
+ENDSELECT
+;----------------------------------------------------------------------
+;소질 그 3
+;----------------------------------------------------------------------
+;겁쟁이는고통가 있을 때 PANT_B + 1(꺄아꺄아 아우성치는 이미지)
+SIF TALENT:겁쟁이 == 1 && (PANT_D & 12582912) != 0
+	PANT_B += 1
+;고통에강함
+IF TALENT:고통에강함 == 1 && (PANT_D & 12582912) != 0
+	PANT_B += 1
+	PANT_C -= 1
+ENDIF
+;고통에약함
+IF TALENT:고통에약함 == 1 && (PANT_D & 12582912) != 0
+	PANT_B -= 1
+	IF (PANT_D & 8388608) == 8388608
+		PANT_D -= 8388608
+		PANT_D |= 4194304
+	ENDIF
+ENDIF
+;새드
+SIF TALENT:새드 && (PANT_D & 12582912) != 0
+	PANT_C -= 1
+;마조
+IF TALENT:마조 && (PANT_D & 12582912) != 0
+	PANT_C += 1
+	SIF TALENT:마조 == 2
+		PANT_C++
+	SIF GETBIT(PANT_D,23)
+		PANT_C++
+	PANT_B += 1
+ENDIF
+
+;----------------------------------------------------------------------
+;허덕인다!
+;----------------------------------------------------------------------
+;허덕이기 전에 회수에 이상하지 않는가 체크
+;현상 10회 이상은 반복하지 않는다.
+IF PANT_B > 10
+	PANT_B = 10
+ELSEIF PANT_B < 1
+	PANT_B = 1
+ENDIF
+;C도 이상 방지
+SIF PANT_C < 0
+	PANT_C = 0
+;F의 숫자 이상 방지
+;없다고는 생각하지만 변수가 초기화되지 말고 부의 값을 가지고 있거나 하면 곤란하므로 일단 처리
+IF PANT_F < 1
+	PANT_F = 0
+ELSEIF PANT_F > 8
+	PANT_F = 8
+ENDIF
+;PANT_G의 숫자 이상 방지
+IF PANT_G < 1
+	PANT_G = 0
+ELSEIF PANT_G > 7
+	PANT_G = 0
+ENDIF
+
+
+;고통LV2와 쾌감 LV3,4가 너무 아우성치므로-처리
+SIF PANT_C >= 4 || (PANT_D & 8388608) != 0
+	PANT_B -= 4
+
+;F가 1이상이라면 허덕여 회수는 B의 값에 한정하지 않고 F회에
+SIF PANT_F >= 1
+	PANT_B = PANT_F
+;PANT_G가 1~7이라면 C의 값에 의하지 않고 지정한 허덕임에
+IF PANT_G == 1
+	LOCALS = G
+ELSEIF PANT_G == 2
+	LOCALS = F
+ELSEIF PANT_G == 3
+	LOCALS = E
+ELSEIF PANT_G == 4
+	LOCALS = D
+ELSEIF PANT_G == 5
+	LOCALS = C
+ELSEIF PANT_G == 6
+	LOCALS = B
+ELSEIF PANT_G == 7
+	LOCALS = A
+;붕괴라면 문답 무용으로 쾌감 LV1에
+ELSEIF (PANT_D & 1) != 0
+	PANT_C = 0
+	LOCALS = G
+;입가 막히고 있는(볼개그·촉수입학중 이외)라면 난다
+ELSEIF (PANT_D & 8192) != 0
+	LOCALS = A
+;고통LV2
+ELSEIF (PANT_D & 8388608) != 0
+	;고통LV2 금지로 LV1에
+	IF (PANT_E & 1) != 0
+		LOCALS = C
+	ELSE
+		;절규계는 6회까지
+		SIF PANT_B > 6
+			PANT_B = 6
+		LOCALS = B
+	ENDIF
+;고통LV1
+ELSEIF (PANT_D & 4194304) != 0
+	LOCALS = C
+;쾌감은 LV1~LV4로 나눈다
+;쾌감 LV4
+ELSEIF PANT_C >= 8
+	;쾌감 LV4 금지로 LV3에
+	IF (PANT_E & 1) != 0
+		LOCALS = E
+	ELSE
+		;절규계는 6회까지
+		SIF PANT_B > 6
+			PANT_B = 6
+		LOCALS = D
+	ENDIF
+;쾌감 LV3
+ELSEIF PANT_C >= 5
+	LOCALS = E
+;쾌감 LV2
+ELSEIF PANT_C >= 3
+	LOCALS = F
+;쾌감 LV1
+;만약을 위해 그 외도 여기에
+ELSE
+	LOCALS = G
+ENDIF
+
+;개별 범용천희화 있으면 그 쪽을 표시
+RESULT = 0
+RESULTS = 
+RESULTS:1 = 
+TRYCALLFORM SELECTER_K{NO:TARGET}(TARGET,1)
+IF RESULT && FLAG:7 > 0
+	RESULT = 0
+	TRYCCALLFORM PANT_VOICE%RESULTS:1%%RESULTS%_%LOCALS%_K{NO:TARGET}
+	CATCH
+		TRYCCALLFORM KOJO%RESULTS:1%%RESULTS%_EXCLUSION_K{NO:TARGET}
+		CATCH
+			RESULT = 0
+		ENDCATCH
+	ENDCATCH
+	IF !RESULT
+		TRYCCALLFORM PANT_VOICE%RESULTS:1%_%LOCALS%_K{NO:TARGET}
+		CATCH
+			TRYCCALLFORM KOJO%RESULTS:1%_EXCLUSION_K{NO:TARGET}
+			CATCH
+				RESULT = 0
+			ENDCATCH
+		ENDCATCH
+	ENDIF
+	IF !RESULT
+		TRYCCALLFORM PANT_VOICE%RESULTS%_%LOCALS%_K{NO:TARGET}
+		CATCH
+			TRYCCALLFORM KOJO%RESULTS%_EXCLUSION_K{NO:TARGET}
+			CATCH
+				RESULT = 0
+			ENDCATCH
+		ENDCATCH
+	ENDIF
+	IF !RESULT
+		TRYCCALLFORM PANT_VOICE_%LOCALS%_K{NO:TARGET}
+		CATCH
+			RESULT = 0
+		ENDCATCH
+	ENDIF
+ENDIF
+SIF !RESULT || FLAG:7 <= 0
+	CALLFORM PANT_VOICE_%LOCALS%
+PANT_A = 0
+PANT_B = 0
+PANT_C = 0
+PANT_D = 0
+PANT_E = 0
+PANT_F = 0
+PANT_G = 0
+;연속 금지용 처리
+@VOICE_RENZOKU
+$RETRY
+PANT_P = RAND:(PANT_P:2)
+SIF PANT_P:1 >= 0 && PANT_P == PANT_P:1
+	GOTO RETRY
+
+;----------------------------------------------------------------------
+;입가 막히고 있다(볼개그·촉수입학중 이외)
+;----------------------------------------------------------------------
+@PANT_VOICE_A
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;고통가 있다
+	IF (PANT_D & 12582912) != 0
+		IF PANT_P == 0
+			PRINT ……
+		ELSEIF PANT_P == 1
+			PRINT 응응,
+		ELSEIF PANT_P == 2
+			PRINT 응,
+		ELSEIF PANT_P == 3
+			PRINT … 응우,
+		ELSEIF PANT_P == 4
+			PRINT 응,뭇…
+		ELSEIF PANT_P == 5
+			PRINT …
+		ELSEIF PANT_P == 6
+			PRINT!
+		ELSEIF PANT_P == 7
+			PRINT 응″-…,
+		ELSEIF PANT_P == 8
+			PRINT 응응―!
+		ELSEIF PANT_P == 9
+			PRINT …
+		ENDIF
+	;임의 봉사계
+	ELSEIF (PANT_D & 16777216) != 0
+		IF PANT_P == 0
+			PRINT ……
+		ELSEIF PANT_P == 1
+			PRINT 응응,
+		ELSEIF PANT_P == 2
+			PRINT 응,
+		ELSEIF PANT_P == 3
+			PRINT … 응우,
+		ELSEIF PANT_P == 4
+			PRINT 응,뭇…
+		ELSEIF PANT_P == 5
+			PRINT …
+		ELSEIF PANT_P == 6
+			PRINT 응구…,
+		ELSEIF PANT_P == 7
+			PRINT 짠다…
+		ELSEIF PANT_P == 8
+			PRINT … 츄,
+		ELSEIF PANT_P == 9
+			;음란나창부
+			IF (PANT_D & 2304) != 0
+				PRINT 두고 히…,
+			ELSE
+				PRINT 는…,
+			ENDIF
+		ENDIF
+	;그 외
+	ELSE
+		IF PANT_P == 0
+			PRINT ……
+		ELSEIF PANT_P == 1
+			PRINT 응응,
+		ELSEIF PANT_P == 2
+			PRINT 응,
+		ELSEIF PANT_P == 3
+			PRINT … 응우,
+		ELSEIF PANT_P == 4
+			PRINT 응,뭇…
+		ELSEIF PANT_P == 5
+			PRINT …
+		ELSEIF PANT_P == 6
+			PRINT 응구…,
+		ELSEIF PANT_P == 7
+			PRINT 짠다…
+		ELSEIF PANT_P == 8
+			PRINT … 츄,
+		ELSEIF PANT_P == 9
+			PRINT 는…,
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+PANT_P = RAND:3
+	IF PANT_P == 0
+		PRINT 응응
+	ELSEIF PANT_P == 1
+		PRINT … 푸핫
+	;반발 3 또는고통유 나오고 구
+	ELSEIF PANT_P == 2 && (PANT_D & 12582920) != 0
+		PRINT …… 우,구에…
+	ELSE
+		PRINT … 하아…
+	ENDIF
+PRINTW」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;고통LV2
+;----------------------------------------------------------------------
+@PANT_VOICE_B
+;PANT_A = 입조(1=잡,2=표준,3=유,4=경어,5=칸사이)
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그나촉수입학중
+	IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+		IF PANT_P == 0
+			PRINT!
+		ELSEIF PANT_P == 1
+			PRINT 아우우…!
+		ELSEIF PANT_P == 2
+			PRINT 응――――!
+		ELSEIF PANT_P == 3
+			PRINT ″…
+		ELSEIF PANT_P == 4
+			PRINT ,
+		ELSEIF PANT_P == 5
+			PRINT―――!
+		ELSEIF PANT_P == 6
+			PRINT 아…,
+		ELSEIF PANT_P == 7
+			PRINT 응응응,
+		ELSEIF PANT_P == 8
+			PRINT
+		ELSEIF PANT_P  ==  9
+			PRINT …!
+		ENDIF
+	;마조 가져,LV3 이상의 쾌감 있어
+	ELSEIF TALENT:마조 || PANT_C >= 5
+		IF PANT_P == 0
+			PRINT 있어 아 아 아!
+		ELSEIF PANT_P == 1
+			PRINT 히 좋은 있고…!
+		ELSEIF PANT_P == 2
+			PRINT 히,―――,
+		ELSEIF PANT_P == 3
+			PRINT 히…!
+		ELSEIF PANT_P == 4
+			PRINT ,
+		ELSEIF PANT_P == 5
+			PRINT――!
+		ELSEIF PANT_P == 6
+			PRINT 아″――…,
+		ELSEIF PANT_P == 7
+			PRINT 히,
+		ELSEIF PANT_P == 8
+			SIF PANT_A == 1 || PANT_A == 6 || PANT_A == 8
+				PRINT 기분,있고″…
+			SIF PANT_A == 3 && ACTIVECOM(SELECTCOM) < 4
+				PRINT 좀 더 해엣!
+			SIF PANT_A == 2 || PANT_A == 4 || (PANT_A == 3 && ACTIVECOM(SELECTCOM) >= 4)
+				PRINT 나닷… 싫다,기분야,
+			SIF PANT_A == 5
+				PRINT 언덕 사람들 되는 와,안돼나…
+			SIF PANT_A == 7
+				PRINT 광…!
+			SIF PANT_A == 8
+				PRINT 네 너머…
+		ELSEIF PANT_P  ==  9
+			SIF PANT_A == 1 || PANT_A == 2
+				PRINT 아,앗,
+			SIF PANT_A == 3 || PANT_A == 6
+				PRINT 기분,이…
+			SIF PANT_A == 4
+				PRINT … 헨,이 되어 지금…,
+			SIF PANT_A == 5
+				PRINT 네 있고,영화야…
+			SIF PANT_A == 7
+				PRINT 열리지 않아,라고…
+			SIF PANT_A == 8
+				PRINT 기분이야인가…
+		ENDIF
+	;보통 인용
+	ELSE
+		IF PANT_P == 0
+			PRINT――,
+		ELSEIF PANT_P == 1
+			PRINT 있어 아 아 아!
+		ELSEIF PANT_P == 2
+			PRINT 히 좋은 있고…!
+		ELSEIF PANT_P == 3
+			PRINT 히,―――,
+		ELSEIF PANT_P == 4
+			PRINT ,
+		ELSEIF PANT_P == 5
+			PRINT 죽는,웃
+		ELSEIF PANT_P == 6
+			PRINT 후~…… 하앗,핫,
+		ELSEIF PANT_P == 7
+			PRINT 아…!
+		ELSEIF PANT_P == 8 && ACTIVECOM(SELECTCOM) < 4
+			;프라이드높음or건방짐or꿋꿋함or저항or반항적or고통에약함or복종or반발
+			IF TALENT:반항적 == 1 || TALENT:꿋꿋함 == 1 || TALENT:프라이드높음 == 1 || TALENT:건방짐 == 1 || TALENT:저항 == 1 || TALENT:고통에강함 == 1 || TALENT:복종 == 1 || TALENT:예속 == 1 || MARK:반발각인>0
+				PRINT 히…,
+			ELSE
+				SIF PANT_A == 1 || PANT_A == 2 || PANT_A == 8
+					PRINT 그만두고…,
+				SIF PANT_A == 3
+					PRINT 그만두어…,
+				SIF PANT_A == 4
+					PRINT 원… 이기 때문에…!
+				SIF PANT_A == 5
+					PRINT 도,그만두고와 키…
+				SIF PANT_A == 6
+					PRINT ,…… 다앗
+				SIF PANT_A == 7
+					PRINT 도,인내해… 야앗
+			ENDIF
+		ELSEIF PANT_P == 9 && ACTIVECOM(SELECTCOM) < 4
+			;프라이드높음or건방짐or꿋꿋함or저항or반항적or고통에약함or복종or반발
+			IF TALENT:반항적 == 1 || TALENT:꿋꿋함 == 1 || TALENT:프라이드높음 == 1 || TALENT:건방짐 == 1 || TALENT:저항 == 1 || TALENT:고통에강함 == 1 || TALENT:복종 == 1 || TALENT:예속 == 1 || MARK:반발각인>0
+				PRINT …,
+			ELSE
+				SIF PANT_A == 1 || PANT_A == 2 || PANT_A == 6
+					PRINT 그만두어라,
+				SIF PANT_A == 3
+					PRINT 그만두어…!
+				SIF PANT_A == 4
+					PRINT 허락해 관…
+				SIF PANT_A == 5
+					PRINT 허가와 키,
+				SIF PANT_A == 7
+					PRINT 아니 야!
+				SIF PANT_A == 8
+					PRINT 도,선에서,
+			ENDIF
+		ELSE
+			PRINT――,
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;합계
+PANT_P = RAND:3
+	;볼개그나촉수입학중
+	IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+		IF PANT_P == 0
+			PRINT 우우우우!
+		ELSEIF PANT_P == 1
+			PRINT 파랑…!
+		ELSEIF PANT_P == 2
+			PRINT … 훗…
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			PRINT 아!!!
+		ELSEIF PANT_P == 1
+			PRINT 히―――!!!
+		ELSEIF PANT_P == 2
+			PRINT 후~응…,하아…
+		ENDIF
+	ENDIF
+PRINTW」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;고통LV1
+;----------------------------------------------------------------------
+@PANT_VOICE_C
+;PANT_A = 입조(1=잡,2=표준,3=유,4=경어,5=칸사이)
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그나촉수입학중
+	IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+		IF PANT_P == 0
+			PRINT 응!
+		ELSEIF PANT_P == 1
+			PRINT … 쿠우…
+		ELSEIF PANT_P == 2
+			PRINT 응…
+		ELSEIF PANT_P == 3
+			PRINT 만난다…
+		ELSEIF PANT_P == 4
+			PRINT …
+		ELSEIF PANT_P == 5
+			PRINT ……!
+		ELSEIF PANT_P == 6
+			PRINT 아…,
+		ELSEIF PANT_P == 7
+			PRINT 응구…,
+		ELSEIF PANT_P == 8
+			PRINT …
+		ELSEIF PANT_P  ==  9
+			PRINT …!
+		ENDIF
+	;마조소유나마조기분 3이상 있는 곳,LV3 이상의 쾌감 있어
+	ELSEIF TALENT:마조 || ABL:마조끼 > 2 || PANT_C >= 5
+		IF PANT_P == 0
+			PRINT 아!
+		ELSEIF PANT_P == 1
+			PRINT 히 있고,
+		ELSEIF PANT_P == 2
+			PRINT 있고…,
+		ELSEIF PANT_P == 3
+			PRINT 응…!
+		ELSEIF PANT_P == 4 && ACTIVECOM(SELECTCOM) < 4
+			PRINT 그만두고,
+		ELSEIF PANT_P == 5
+			PRINT 아…
+		ELSEIF PANT_P == 6
+			PRINT 히,
+		ELSEIF PANT_P == 7
+			PRINT 응아…,
+		ELSEIF PANT_P == 8
+			PRINT 아… 아아…,
+		ELSEIF PANT_P == 9
+			;함락전
+			IF (PANT_A == 1 || PANT_A == 2 || PANT_A == 3 || PANT_A == 4 || PANT_A == 6) && (!TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속)
+				PRINT 이니까,느낌…,
+			ELSEIF PANT_A == 5 && (!TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속)
+				PRINT 이니까,네 좋은이…
+			ELSEIF PANT_A == 7 && (!TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속)
+				PRINT 이니까 좋은거야…?
+			ELSEIF PANT_A == 8 && (!TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속)
+				PRINT 이루어관…
+			ELSE
+				PRINT 구… 앗…,
+			ENDIF
+		ELSE
+			PRINT 아!
+		ENDIF
+	;보통 사람
+	ELSE
+		IF PANT_P == 0
+			PRINT 아!
+		ELSEIF PANT_P == 1
+			PRINT 히 있고,
+		ELSEIF PANT_P == 2
+			PRINT 있고…,
+		ELSEIF PANT_P == 3
+			PRINT 나…!
+		ELSEIF PANT_P == 4 && ACTIVECOM(SELECTCOM) < 4
+			PRINT 그만두고,
+		ELSEIF PANT_P == 5
+			PRINT …
+		ELSEIF PANT_P == 6
+			PRINT …,
+		ELSEIF PANT_P == 7
+			PRINT 구……
+		ELSEIF PANT_P == 8 && ACTIVECOM(SELECTCOM) < 4
+			SIF PANT_A == 1 || PANT_A == 2
+				PRINT 그만두고…!
+			SIF PANT_A == 3 || PANT_A == 4
+				PRINT 아니…
+			SIF PANT_A == 5
+				PRINT 도…,그만두고…,
+			SIF PANT_A == 6
+				PRINT 똥…,
+			SIF PANT_A == 7
+				PRINT 도…,선에서…,
+			SIF PANT_A == 8
+				PRINT 해 취해 줘…
+		ELSEIF PANT_P == 9 && ACTIVECOM(SELECTCOM) < 4
+			SIF PANT_A == 1 || PANT_A == 6
+				PRINT …… 후………,
+			SIF PANT_A == 2 || PANT_A == 3 || PANT_A == 4
+				PRINT 안돼…,
+			SIF PANT_A == 5
+				PRINT 안돼…
+			SIF PANT_A == 7
+				PRINT 혐이나,
+			SIF PANT_A == 8
+				PRINT 혐있고
+		ELSE
+			PRINT 아!
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;합계
+PANT_P = RAND:3
+	;볼개그나촉수입학중
+	IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+		IF PANT_P == 0
+			PRINT … 응읏!
+		ELSEIF PANT_P == 1
+			PRINT … 우…
+		ELSEIF PANT_P == 2
+			PRINT … 응… 아우…
+		ENDIF
+	;마조소유나마조기분 있어,LV3 이상의 쾌감 있어
+	ELSEIF TALENT:마조 || ABL:마조끼 > 2 || PANT_C >= 5
+		IF PANT_P == 0
+			PRINT 야 아응
+		ELSEIF PANT_P == 1
+			PRINT … 우우,아…
+		ELSEIF PANT_P == 2
+			PRINT 응,아우…
+		ENDIF
+	;보통 사람
+	ELSE
+		IF PANT_P == 0
+			PRINT … 우우,아…
+		ELSEIF PANT_P == 1
+			PRINT 아…… 아………
+		ELSEIF PANT_P == 2
+			PRINT 히 좋다!
+		ENDIF
+	ENDIF
+PRINTW」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;쾌감 LV4
+;----------------------------------------------------------------------
+@PANT_VOICE_D
+;PANT_A = 입조(1=잡,2=표준,3=유,4=경어,5=칸사이)
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그나촉수입학중
+	IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+		IF PANT_P == 0
+			PRINT 응응――――!
+		ELSEIF PANT_P == 1
+			PRINT―――!
+		ELSEIF PANT_P == 2
+			PRINT 만나는…,
+		ELSEIF PANT_P == 3
+			PRINT 응우우!
+		ELSEIF PANT_P == 4
+			PRINT 식,
+		ELSEIF PANT_P == 5
+			PRINT 응,
+		ELSEIF PANT_P == 6
+			PRINT 아…!
+		ELSEIF PANT_P == 7
+			PRINT 응구…,
+		ELSEIF PANT_P == 8
+			PRINT 응응응,
+		ELSEIF PANT_P  ==  9
+			PRINT 아우우!
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			PRINT 히아 아,
+		ELSEIF PANT_P == 1
+			PRINT 아 아!
+		ELSEIF PANT_P == 2
+			PRINT 응… 아앗,
+		ELSEIF PANT_P == 3
+			PRINT 이… 쿠웃,
+		ELSEIF PANT_P == 4
+			PRINT 간닷,간다――…!!
+		ELSEIF PANT_P == 5
+			IF PANT_A == 1 || PANT_A == 6
+				PRINT 사… 누우…
+			ELSEIF PANT_A == 5
+				PRINT 사 칠한다…
+			ELSEIF PANT_A == 7
+				PRINT 사 응…
+			ELSEIF PANT_A == 8
+				PRINT 사…
+			ELSE
+				PRINT 죽으면…,
+			ENDIF
+		ELSEIF PANT_P == 6 && ACTIVECOM(SELECTCOM) < 4
+			;음어 모드
+			IF PANT_E & 4
+				SELECTCASE RAND:8
+				CASE 0
+					PRINTFORM 기분이 좋다,기분이 좋다의 %UNICODE(0x2661)%
+				CASE 1
+					PRINTFORM 질척질척으로 되어
+				CASE 2
+					PRINTFORM 기분이 좋은 일 가득해
+				CASE 3
+					PRINTFORM 여기저기 괴롭힐 수 있어
+				CASE 4
+					PRINTFORM 전부 기분 좋다 %UNICODE(0x2661)%
+				CASE 5
+					PRINTFORM 전부,전부 좋은 %UNICODE(0x2661)% 전부 좋은 것 %UNICODE(0x2661)%
+				CASE 6
+					PRINTFORM 너무 기분 좋아 바보가 되어 버린다%UNICODE(0x2661)%
+				CASEELSE
+					PRINTFORM 전부 좋은 %UNICODE(0x2661)% 전신 기분 좋은 %UNICODE(0x2661)%
+					ENDSELECT
+				;가슴 만지작거려지고 있다
+				IF PANT_D & 16384
+					SELECTCASE RAND:18
+					CASE 0
+						PRINTFORM 젖꼭지 만져져
+					CASE 1
+						PRINTFORM 젖가슴 만져져
+					CASE 2
+						PRINTFORM 젖꼭지 괴롭힐 수 있어
+					CASE 3
+						PRINTFORM 젖가슴 괴롭힐 수 있어
+					CASE 4
+						PRINTFORM 젖꼭지 기분%UNICODE(0x2661)%
+					CASE 5
+						PRINTFORM 젖가슴 기분이 좋다%UNICODE(0x2661)%
+					CASE 6
+						PRINTFORM 젖꼭지 기분이 좋다의놈들%UNICODE(0x2661)%
+					CASE 7
+						PRINTFORM 젖가슴 이제(벌써)놈들%UNICODE(0x2661)%
+					CASE 8
+						PRINTFORM 젖가슴 기분이 좋다의놈들%UNICODE(0x2661)%
+					CASE 9
+						PRINTFORM 젖꼭지 이제(벌써)놈들%UNICODE(0x2661)%
+					CASE 10
+						PRINTFORM 젖가슴 괴롭히는 것놈들%UNICODE(0x2661)%
+					CASE 11
+						PRINTFORM 젖꼭지 괴롭히는 것놈들%UNICODE(0x2661)%
+					CASE 12
+						PRINTFORM 젖꼭지로 가는 %UNICODE(0x2661)%말해 버린다%UNICODE(0x2661)%
+					CASE 13
+						PRINTFORM 젖꼭지가 이상해지는 %UNICODE(0x2661)%
+					CASE 14
+						PRINTFORM 젖가슴 이상해지는 %UNICODE(0x2661)%
+					CASE 15
+						PRINTFORM 젖가슴으로 가는 %UNICODE(0x2661)%말해 버린다%UNICODE(0x2661)%
+					CASE 16
+						PRINTFORM 젖꼭지 너무 느끼는 것 %UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM 젖가슴 너무 느끼는 것 %UNICODE(0x2661)%
+					ENDSELECT
+				;A를 만지작거려지고 있다
+				ELSEIF PANT_D & 65536
+					SELECTCASE RAND:25
+					CASE 0
+						PRINTFORM 결정 보지 만져져
+					CASE 1
+						PRINTFORM 엉덩이 만져져
+					CASE 2
+						PRINTFORM 엉덩이 부비부비 되어
+					CASE 3
+						PRINTFORM 결정 보지 질척질척 되어
+					CASE 4
+						PRINTFORM 결정 보지 괴롭힐 수 있어
+					CASE 5
+						PRINTFORM 오스 보지 괴롭힐 수 있어
+					CASE 6
+						PRINTFORM 엉덩이인데 느낀다%UNICODE(0x2661)%
+					CASE 7
+						PRINTFORM 결정 보지 기분이 좋다%UNICODE(0x2661)%
+					CASE 8
+						PRINTFORM 엉덩이 질척질척이야 %UNICODE(0x2661)%
+					CASE 9
+						PRINTFORM 결정 보지 가득 해%UNICODE(0x2661)%
+					CASE 10
+						PRINTFORM 엉덩이가 보지가 되어 버린다%UNICODE(0x2661)%
+					CASE 11
+						PRINTFORM 엉덩이,엉덩이 이제(벌써),만 와의 %UNICODE(0x2661)%
+					CASE 12
+						PRINTFORM 엉덩이 질척질척 굉장한 것 %UNICODE(0x2661)%
+					CASE 13
+						PRINTFORM 결정 보지 너무 느끼는 것 %UNICODE(0x2661)%
+					CASE 14
+						PRINTFORM 엉덩이%UNICODE(0x2661)%엉덩이 쭈웁쭈웁은%UNICODE(0x2661)%
+					CASE 15
+						PRINTFORM 결정 보지 쭈웁쭈웁 좋은 %UNICODE(0x2661)%
+					CASE 16
+						PRINTFORM 결정 보지%UNICODE(0x2661)%보지%UNICODE(0x2661)% 보지인 것 %UNICODE(0x2661)%
+					CASE 17
+						PRINTFORM 엉덩이 쭈웁쭈웁 굉장한 있고 %UNICODE(0x2661)%
+					CASE 18
+						PRINTFORM 엉덩이의 안쪽까지 들어가있는 %UNICODE(0x2661)%
+					CASE 19
+						PRINTFORM 결정 보지 망가져 버린다%UNICODE(0x2661)%
+					CASE 20
+						PRINTFORM 결정 보지의 안쪽까지 오고 있는 %UNICODE(0x2661)%
+					CASE 21
+						PRINTFORM 엉덩이가 %UNICODE(0x2661)%엉덩이가 망가져 버리는 %UNICODE(0x2661)%
+					CASE 22
+						PRINTFORM 엉덩이가 %UNICODE(0x2661)%엉덩이가%UNICODE(0x2661)%
+					CASE 23
+						PRINTFORM 엉덩이%UNICODE(0x2661)%여자 아이로 되고 있는 %UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM 보지%UNICODE(0x2661)%여자 아이로 되고 있는 %UNICODE(0x2661)%
+					ENDSELECT
+				ENDIF
+				;페니스 있어
+				IF PENIS(TARGET) && (PANT_D & 32768)
+					SELECTCASE RAND:6
+					CASE 0
+						PRINT 자지
+					CASE 1
+						PRINT 클리 자지
+					CASE 2
+						PRINT 상스러운 자지
+					CASE 3
+						PRINT 추잡한 자지
+					CASE 4
+						PRINT 메스 자지
+					CASEELSE
+						PRINT 쓸모없음의 자지
+					ENDSELECT
+					;질도 있다
+					IF TALENT:반음반양 || TALENT:후타나리
+					SELECTCASE RAND:6
+					CASE 0
+						PRINTFORM 와 보지로부터 엣치한 국물 나오는 우우%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 1
+						PRINTFORM 와 보지로부터 국물 나와버리는 %UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 2
+						PRINTFORM 와 보지가 조수 닦아 버린다%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM 와 보지로부터 국물 빠져 버린다%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM 와 보지%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM 로부터 보는 구 나와버리는 %UNICODE(0x2661)%%UNICODE(0x2661)%보지도 가 버린다%UNICODE(0x2661)%%UNICODE(0x2661)%
+					ENDSELECT
+					ELSE
+					SELECTCASE RAND:6
+					CASE 0
+						PRINTFORM 로부터 엣치한 국물 나오는 우우%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 1
+						PRINTFORM 로부터 국물 나와버리는 %UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 2
+						PRINTFORM 가 조수 닦아 버린다%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM 국물 빠져 버린다%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM %UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM 로부터 보는 구 나와버리는 %UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					ENDSELECT
+					ENDIF
+				;페니스없음
+				ELSE
+					SELECTCASE RAND:2
+					CASE 0
+						PRINTFORM 보지로부터 국물 나와버리는 우우!
+					CASEELSE
+						PRINTFORM 조수 나와버리는 %UNICODE(0x2661)%%UNICODE(0x2661)%
+					ENDSELECT
+				ENDIF
+			;보고 벚꽃어 모드
+			ELSEIF (PANT_E & 2) != 0
+				SELECTCASE RAND:20
+					CASE 0
+						PRINTFORM 등 째,
+					CASE 1
+						PRINTFORM … 응아아아아!
+					CASE 2
+						PRINTFORM 응%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM 히응!!
+					CASE 4
+						PRINTFORM 든지%UNICODE(0x2661)%
+					CASE 5
+						PRINTFORM %UNICODE(0x2661)%
+					CASE 6
+						PRINTFORM 좋다″%UNICODE(0x2661)%
+					CASE 7
+						PRINTFORM 아!!
+					CASE 8
+						PRINTFORM 아에 %UNICODE(0x2661)%
+					CASE 9
+						PRINTFORM 좋은 좋은 있고 %UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 10
+						PRINTFORM 안돼%UNICODE(0x2661)%안돼네에 예네%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 11
+						PRINTFORM 등 째%UNICODE(0x2661)%등 째%UNICODE(0x2661)%등 째네%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 12
+						PRINTFORM 도 %UNICODE(0x2661)%
+					CASE 13
+						PRINTFORM ,%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 14
+						PRINTFORM 비쳐 %UNICODE(0x2661)%도%UNICODE(0x2661)%
+					CASE 15
+						PRINTFORM 절정%UNICODE(0x2661)%%UNICODE(0x2661)%절정%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 16
+						PRINTFORM 가는 %UNICODE(0x2661)%이크이크이크이크이크%UNICODE(0x2661)%UNICODE(0x2661)%UNICODE(0x2661)%
+					CASE 17
+						PRINTFORM 도 가는 %UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 18
+						PRINTFORM %UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM!!
+					ENDSELECT
+			ELSE
+				PRINT … 응아아아아!
+			ENDIF
+		ELSEIF PANT_P == 7
+			PRINT 히,
+		ELSEIF PANT_P == 8 && ACTIVECOM(SELECTCOM) < 4
+			;함락전
+			IF (PANT_A == 1 || PANT_A == 2 || PANT_A == 3 || PANT_A == 4 || PANT_A == 6) && (!TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속)
+				PRINT 싫다아아앗!
+			ELSEIF (PANT_A == 5) && (!TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속)
+				PRINT 싫지 아!
+			ELSEIF (PANT_A == 7) && (!TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속)
+				PRINT 혐 야 아!
+			ELSEIF (PANT_A == 8) && (!TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속)
+				PRINT 싫어 한 있고!
+			;음어 모드
+			ELSEIF PANT_E & 4
+				;가슴 만지작거려지고 있다
+				IF PANT_D & 16384
+					SELECTCASE RAND:8
+					CASE 0
+						PRINTFORM 젖꼭지에 가 된다아!!
+					CASE 1
+						PRINTFORM 젖가슴에 가 된다아!!
+					CASE 2
+						PRINTFORM 젖꼭지 좋은 것 %UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM 젖가슴 좋은 것 %UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM 젖가슴으로 말해 버린다%UNICODE(0x2661)%
+					CASE 5
+						PRINTFORM 젖꼭지로 말해 버린다%UNICODE(0x2661)%
+					CASE 6
+						PRINTFORM 젖꼭지 굉장해 %UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM 젖가슴 굉장해 %UNICODE(0x2661)%
+					ENDSELECT
+				;페니스소유로 C를 만지작거려지고 있다
+				ELSEIF PENIS(TARGET) && (PANT_D & 32768)
+					SELECTCASE RAND:8
+					CASE 0
+						PRINTFORM 자지로부터 정액 나온다앗!
+					CASE 1
+						PRINTFORM 누락는 해 버린닷!!
+					CASE 2
+						PRINTFORM 자지 보는 구 나와버리는 %UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM 자지로부터 국물 빠져 버린다%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM 절의 부엌 자지 망가지는 %UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 5
+						PRINTFORM 자지 망가지는 %UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 6
+						PRINTFORM 자지 굉장해 %UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM 조수 나와버리는 %UNICODE(0x2661)%
+					ENDSELECT
+				;페니스없이 C를 만지작거려지고 있다
+				ELSEIF PANT_D & 32768
+					SELECTCASE RAND:7
+					CASE 0
+						PRINTFORM 클리 너무 느끼면… 응아아!
+					CASE 1
+						PRINTFORM 엣치한 콩 만져져 간다%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 2
+						PRINTFORM 클리 만지면이나%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM 엣치한 콩하지 않고 %UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM 클리토리스 망가지는 %UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 5
+						PRINTFORM 엣치한 콩씨 좋은 것 %UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM 클리 만져지면 조수 나와버리는 %UNICODE(0x2661)%
+					ENDSELECT
+				;A를 만지작거려지고 있다
+				ELSEIF PANT_D & 65536
+					IF ABL:A감각 > 4
+						SELECTCASE RAND:8
+						CASE 0
+							PRINTFORM 결정 보지 질척질척으로 되어 간다아!
+						CASE 1
+							PRINTFORM 결정 보지 느낌로부터%UNICODE(0x2661)%%UNICODE(0x2661)%
+						CASE 2
+							PRINTFORM 결정 보지 굉장한거야!!!
+						CASE 3
+							PRINTFORM 결정 보지,좋앗!좋아 %UNICODE(0x2661)%%UNICODE(0x2661)%
+						CASE 4
+							PRINTFORM 엉덩이 망가진다%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+						CASE 5
+							PRINTFORM 엉덩이 보지 망가진다%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+						CASE 6
+							PRINTFORM 엉덩이 질척질척인 것 %UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+						CASEELSE
+							PRINTFORM 결정 보지 질척질척이 된다%UNICODE(0x2661)%
+						ENDSELECT
+					ENDIF
+				;V를 만지작거려지고 있다
+				ELSEIF PANT_D & 131072
+					SELECTCASE RAND:6
+					CASE 0
+						PRINTFORM 보지 좋은 좋다!
+					CASE 1
+						PRINTFORM 보지%UNICODE(0x2661)%보지%UNICODE(0x2661)%%UNICODE(0x2661)%기분이야!!!
+					CASE 2
+						PRINTFORM 보지,망가지는 %UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 3
+						PRINTFORM 보지가%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASE 4
+						PRINTFORM 너무 기분 좋고 %UNICODE(0x2661)%보지 망가진다%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%
+					CASEELSE
+						PRINTFORM 보지 질척질척인 것 %UNICODE(0x2661)%
+					ENDSELECT
+				;일단 보험
+				ELSE
+					PRINT 아 아…,
+				ENDIF
+			ELSE
+				PRINT 아 아…,
+			ENDIF
+		ELSEIF PANT_P == 9
+			SIF PANT_A == 1 || PANT_A == 2
+				PRINT 머리가… 이상하게 된닷…
+			SIF PANT_A == 3 || PANT_A == 4
+				PRINT 망가져서는… 읏,
+			SIF PANT_A == 5
+				PRINT 짚 온다…
+			SIF PANT_A == 6
+				PRINT 이런… 거짓말일 것이다…
+			SIF PANT_A == 7
+				PRINT 열리지 않는…,열리지 않아라고…
+			SIF PANT_A == 8
+				PRINT 혐있고,그림―…
+		ELSE
+			PRINT 히아 아,
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;합계
+PANT_P = RAND:3
+	;볼개그나촉수입학중
+	IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+		IF PANT_P == 0
+			PRINT――――!
+		ELSEIF PANT_P == 1
+			PRINT 응아아 아!
+		ELSEIF PANT_P == 2
+			PRINT 아――――!
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			IF (E & 2) != 0
+				PRINT 등 째예!!
+			ELSE
+				PRINT …!!!
+			ENDIF
+		ELSEIF PANT_P == 1
+			PRINT 히―――!!!
+		ELSEIF PANT_P == 2
+			PRINT 아 아!!!
+		ENDIF
+	ENDIF
+PRINTW」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;쾌감 LV3
+;----------------------------------------------------------------------
+@PANT_VOICE_E
+;PANT_A = 입조(1=잡,2=표준,3=유,4=경어,5=칸사이)
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그나촉수입학중
+	IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+		IF PANT_P == 0
+			PRINT 응―!
+		ELSEIF PANT_P == 1
+			PRINT …!
+		ELSEIF PANT_P == 2
+			PRINT 응…
+		ELSEIF PANT_P == 3
+			PRINT …
+		ELSEIF PANT_P == 4
+			PRINT 구,
+		ELSEIF PANT_P == 5
+			PRINT 응응!
+		ELSEIF PANT_P == 6
+			PRINT 만나는…,
+		ELSEIF PANT_P == 7
+			PRINT 응구…,
+		ELSEIF PANT_P == 8
+			PRINT … 앗,
+		ELSEIF PANT_P  ==  9
+			PRINT 만난다!
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			PRINT 나…,
+		ELSEIF PANT_P == 1
+			PRINT 아,앗,
+		ELSEIF PANT_P == 2
+			PRINT 아,히…,
+		ELSEIF PANT_P == 3
+			PRINT 아히,잇,
+		ELSEIF PANT_P == 4
+			PRINT 히…
+		ELSEIF PANT_P == 5
+			PRINT 도…
+		ELSEIF PANT_P == 6
+			PRINT 야 아…!
+		ELSEIF PANT_P == 7
+			PRINT 아!
+		ELSEIF PANT_P == 8
+				PRINT 응,읏…
+		ELSEIF PANT_P == 9 && ACTIVECOM(SELECTCOM) < 4
+			;반발각인 1 이상
+			IF (PANT_D & 14) != 0
+				IF PANT_A == 1
+					PRINT 싫다앗,
+				ELSEIF PANT_A == 2 || PANT_A == 3
+					PRINT 안됏,안돼에…,
+				ELSEIF PANT_A == 4
+					PRINT 이제 무리입니닷,
+				ELSEIF PANT_A == 5
+					PRINT 도,무리나 나무…
+				ELSEIF PANT_A == 6
+					PRINT 그만두어라,
+				ELSEIF PANT_A == 7
+					PRINT 열리지 않아,
+				ELSEIF PANT_A == 8
+					PRINT 이제(벌써),안돼 싶닷
+				ENDIF
+			;음어 모드
+			ELSEIF PANT_E & 4
+				;가슴 만지작거려지고 있다
+				IF PANT_D & 16384
+					SELECTCASE RAND:6
+					CASE 0
+						PRINT 젖가슴 안돼에……
+					CASE 1
+						PRINT 젖가슴 괴롭힐 수 있다아
+					CASE 2
+						PRINT 젖가슴 좋은 것
+					CASE 3
+						PRINT 젖꼭지 좋은 것
+					CASE 4
+						PRINT 젖꼭지 느껴 버린닷
+					CASEELSE
+						PRINT 젖꼭지 오돌오돌 좋은,
+					ENDSELECT
+				;페니스소유로 C를 만지작거려지고 있다
+				ELSEIF PENIS(TARGET) && (PANT_D & 32768)
+					SIF PANT_A == 2 || PANT_A == 3 || PANT_A == 4 || PANT_A ==5
+						PRINT
+					PRINT 자지국물 나온다앗,
+				;페니스없이 C를 만지작거려지고 있다
+				ELSEIF PANT_D & 32768
+					PRINT 클리 기분 좋은,
+				;A를 만지작거려지고 있다
+				ELSEIF PANT_D & 65536
+					SELECTCASE RAND:6
+					CASE 0
+						PRINT 결정 보지가…
+					CASE 1
+						PRINT 엉덩이가……
+					CASE 2
+						PRINT 엉덩이나……
+					CASE 3
+						PRINT 결정 보지나……
+					CASE 4
+						PRINT 결정 보지 좋다의,
+					CASEELSE
+						PRINT 엉덩이 만져지고 있다아……
+					ENDSELECT
+				;V를 만지작거려지고 있다
+				ELSEIF PANT_D & 131072
+					SELECTCASE RAND:6
+					CASE 0
+						PRINT 보지 좋다
+					CASE 1
+						PRINT 보지가……
+					CASE 2
+						PRINT 보지 좋은 것
+					CASE 3
+						PRINT 보지 만져져……
+					CASE 4
+						PRINT 나,보지 느껴 버린닷
+					CASEELSE
+						PRINT 남인데,보지,좋앗
+					ENDSELECT
+				;일단 보험
+				ELSE
+					PRINT 히,
+				ENDIF
+			ELSE
+				PRINT 히 있고,
+			ENDIF
+		ELSE
+			PRINT 나…,
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;합계
+PANT_P = RAND:3
+	;볼개그나촉수입학중
+	IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+		IF PANT_P == 0
+			PRINT 응아――!
+		ELSEIF PANT_P == 1
+			PRINT――!
+		ELSEIF PANT_P == 2
+			PRINT 아――!
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			PRINT 아 아!
+		ELSEIF PANT_P == 1
+			PRINT … 구――!!
+		ELSEIF PANT_P == 2
+			PRINT 아
+		ENDIF
+	ENDIF
+PRINTW」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;쾌감 LV2
+;----------------------------------------------------------------------
+@PANT_VOICE_F
+;PANT_A = 입조(1=잡,2=표준,3=유,4=경어,5=칸사이)
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그나촉수입학중
+	IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+		IF PANT_P == 0
+			PRINT 응응…
+		ELSEIF PANT_P == 1
+			PRINT …
+		ELSEIF PANT_P == 2
+			PRINT …,
+		ELSEIF PANT_P == 3
+			PRINT 아…
+		ELSEIF PANT_P == 4
+			PRINT … 우,
+		ELSEIF PANT_P == 5
+			PRINT 응,
+		ELSEIF PANT_P == 6
+			PRINT 아…,
+		ELSEIF PANT_P == 7
+			PRINT 구…
+		ELSEIF PANT_P == 8
+			PRINT … 앗,
+		ELSEIF PANT_P  ==  9
+			PRINT …
+		ENDIF
+	ELSE
+		IF PANT_P == 0
+			PRINT …
+		ELSEIF PANT_P == 1
+			PRINT 응아,
+		ELSEIF PANT_P == 2
+			PRINT 응응…
+		ELSEIF PANT_P == 3
+			;음어 모드
+			IF (PANT_E & 4) && ACTIVECOM(SELECTCOM) < 4
+				;가슴 만지작거려지고 있다
+				IF PANT_D & 16384
+					PRINT 가슴 좋다…
+				;페니스소유로 C를 만지작거려지고 있다
+				ELSEIF PENIS(TARGET) && (PANT_D & 32768)
+					PRINT 자지 쿨렁쿨렁 한다…
+				;페니스없이 C를 만지작거려지고 있다
+				ELSEIF PANT_D & 32768
+					PRINT 좀 더 거기 동글동글 해
+					SIF PANT_A == 1 || PANT_A == 6
+						PRINT 줘…,
+					SIF PANT_A == 2 || PANT_A == 3 || PANT_A ==5
+						PRINT …
+					SIF PANT_A == 4
+						PRINT 관…,
+				;A를 만지작거려지고 있다
+				ELSEIF PANT_D & 65536
+					PRINT 결정 보지 좋다…
+				;V를 만지작거려지고 있다
+				ELSEIF PANT_D & 131072
+					PRINT 보지국물출
+					SIF PANT_A == 1
+						PRINT …,
+					SIF PANT_A == 2 || PANT_A == 3 || PANT_A ==5
+						PRINT 야…
+					SIF PANT_A == 4
+						PRINT 있습니다…,
+					SIF PANT_A == 6
+						PRINT 라고 끝내는…,
+				;일단 보험
+				ELSE
+					PRINT 아,아…,
+				ENDIF
+			ELSE
+				PRINT 아,아…,
+			ENDIF
+		ELSEIF PANT_P == 4
+			PRINT 후~… 읏…
+		ELSEIF PANT_P == 5
+			PRINT … 아앗,
+		ELSEIF PANT_P == 6
+			PRINT 응…
+		ELSEIF PANT_P == 7
+			PRINT … 응,우,
+		ELSEIF PANT_P == 8
+			;함락전에 A로 느끼는 또는 남자로 B로 느낀다
+			IF ((PANT_D & 65536) != 0 || (PANT_D & 33570816) != 0) && (!TALENT:연모 && !TALENT:음란 && !TALENT:복종 && !TALENT:친애 && !TALENT:창부 && !TALENT:예속)
+				SIF PANT_A == 1
+					PRINT 거짓말이다…,
+				SIF PANT_A == 2 || PANT_A == 3 || PANT_A == 8
+					PRINT ,그리고…?
+				SIF PANT_A == 4 || PANT_A == 6
+					PRINT … 거짓말……,
+				SIF PANT_A == 5
+					PRINT ,하지만…
+				SIF PANT_A == 7
+					PRINT 거짓말이나,응…
+				SIF PANT_A == 8
+					PRINT 이루어,응뼈
+			ELSE
+				PRINT 있고…
+			ENDIF
+		;음란계 함락
+		ELSEIF PANT_P == 9 && (PANT_D & 2304) != 0
+			SIF PANT_A == 1 || PANT_A == 2 || PANT_A == 3 || PANT_A == 4 || PANT_A == 6
+				PRINT 좋은,읏…
+			SIF PANT_A == 5
+				PRINT 네 있고,여어…,
+			SIF PANT_A == 7
+				PRINT 예…,
+			SIF PANT_A == 8
+				PRINT 기분이야인가…,
+		;반발각인가 1이상 있다
+		ELSEIF PANT_P == 9 && (PANT_D & 14) != 0 && ACTIVECOM(SELECTCOM) < 4
+			SIF PANT_A == 1
+				PRINT 똥…,
+			SIF PANT_A == 2
+				PRINT 싫닷…
+			SIF PANT_A == 3
+				PRINT 안돼,엣…,
+			SIF PANT_A == 4
+				PRINT 그만두고… 라고 관…,
+			SIF PANT_A == 5
+				PRINT 나가…,
+			SIF PANT_A == 6
+				PRINT 떼어 놓아라…,
+			SIF PANT_A == 7
+				PRINT 혐이나…,
+			SIF PANT_A == 8
+				PRINT 그만두고…,
+		ELSEIF PANT_P == 9
+			PRINT 아…!
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;합계
+PANT_P = RAND:3
+	IF PANT_P == 0
+		PRINT 응
+	ELSEIF PANT_P == 1
+		PRINT 아…!
+	ELSEIF PANT_P == 2
+		PRINT 아,응
+	ENDIF
+PRINTW」
+
+RETURN 0
+
+;----------------------------------------------------------------------
+;약쾌감
+;----------------------------------------------------------------------
+@PANT_VOICE_G
+;PANT_A = 입조(1=잡,2=표준,3=유,4=경어,5=칸사이)
+PRINT 「
+REPEAT PANT_B
+	PANT_P:2 = 10
+	CALL VOICE_RENZOKU
+	IF PANT_P == 0
+		PRINT ……
+	ELSEIF PANT_P == 1
+		PRINT … 응,
+	ELSEIF PANT_P == 2
+		PRINT 아…
+	ELSEIF PANT_P == 3
+		PRINT 응,
+	ELSEIF PANT_P == 4
+		PRINT …… 후아,
+	ELSEIF PANT_P == 5
+		PRINT 응응…,
+	ELSEIF PANT_P == 6
+		PRINT 응…,
+	ELSEIF PANT_P == 7
+		PRINT ………
+	ELSEIF PANT_P == 8
+		PRINT …… 아…,
+	ELSEIF PANT_P == 9
+		;볼개그나촉수입학중
+		IF TEQUIP:볼개그 || TEQUIP:촉수구욕
+			PRINT 응…
+		;반발각인 1 이상
+		ELSEIF (PANT_D & 14) != 0 && ACTIVECOM(SELECTCOM) < 4
+			SIF PANT_A == 1
+				PRINT 그만두어라!
+			SIF PANT_A == 2
+				PRINT 그만두고…,
+			SIF PANT_A == 3
+				PRINT 싫다…,
+			SIF PANT_A == 4
+				PRINT 손대지 말아 주세요…
+			SIF PANT_A == 5
+				PRINT 리 해와 키…
+			SIF PANT_A == 6
+				PRINT 떼어 놓아라!
+			SIF PANT_A == 7
+				PRINT 손대지 마…
+			SIF PANT_A == 8
+				PRINT 그만두어 주지 않아!
+		;음란나창부
+		ELSEIF (PANT_D & 2304) != 0 && ACTIVECOM(SELECTCOM) < 4
+			SIF PANT_A == 1 || PANT_A == 2
+				PRINT 거기…,가 아니고…,
+			SIF PANT_A == 3 || PANT_A == 4
+				PRINT 좀 더… 아,
+			SIF PANT_A == 5
+				PRINT … 거기나,없는 나무에……,
+			SIF PANT_A == 6
+				PRINT …… 다른…,
+			SIF PANT_A == 7
+				PRINT 서고나,없어서…
+			SIF PANT_A == 8
+				PRINT 실마리 뼈호 취한다…
+		ELSE
+			PRINT … 하……,
+		ENDIF
+	ENDIF
+	PANT_P:1 = PANT_P
+REND
+;합계
+PANT_P = RAND:3
+	IF PANT_P == 0
+		PRINT …
+	ELSEIF PANT_P == 1
+		PRINT 응
+	ELSEIF PANT_P == 2
+		PRINT … 아
+	ENDIF
+PRINTW」
+
+RETURN 0
+

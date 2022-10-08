@@ -1,0 +1,344 @@
+﻿;==================================================
+;엔딩
+;길어졌기 때문에,엔딩 부분만큼 파일 분할했습니다
+;
+;엔딩은,원래 「당신」인가 공범자의 경우 밖에 볼 수 없다
+;==================================================
+@EVENTTURNEND
+#LATER
+SIF TARGET < 0
+	RETURN 0
+SIF NO:TARGET != 174
+	RETURN 0
+;주인이 청마가 아닌 경우는 이하 스킵
+SIF NO:MASTER != 176
+	RETURN 0
+
+;특수 하렘 엔드용 조건 판정 구문 샘플
+;XX내에 조건으로 하는 캐릭터의 캐릭터 번호를 넣으면,좋아하는 편성의 하렘 엔드를 설정할 수 있다
+;하렘 엔드의 조건을 채웠을 때,여기의 특수 하렘 엔드의 조건도 채우고 있는 경우,하렘 엔드로부터 파생한다
+;A = 0
+;B = 0
+;REPEAT CHARANUM
+;	IF NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX || NO:COUNT == XX
+;		SIF TALENT:COUNT:친애 || TALENT:COUNT:창부 || TALENT:COUNT:복종
+;			A += 1
+;		SIF TALENT:COUNT:연모 || TALENT:COUNT:음란 || TALENT:COUNT:복종 || TALENT:COUNT:친애 || TALENT:COUNT:창부 || TALENT:COUNT:복종
+;			B += 1
+;	ENDIF
+;REND
+;SIF A && A+B >= XXX
+;	CFLAG:21 = 2
+
+;단체[單体] 엔드용 분기 플래그,단체[單体] 엔드가 있는 상위 함락 소질만 comment out를 해제한다
+SIF TALENT:친애
+	CFLAG:21 = 1
+;SIF TALENT:창부
+;	CFLAG:21 = 1
+;SIF TALENT:예속
+	;CFLAG:21 = 1
+
+;--------------------------------------------------
+;친애단체[單体] 엔드
+;엔딩으로 「%CALLNAME:B%에의 반지를 산다(연모엔드)」를 선택했을 경우
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1
+DRAWLINE
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	CFLAG:5002 |= 32
+	DRAWLINE
+	PRINTFORML …………
+	PRINTFORML ………
+	PRINTFORML ……
+	PRINTFORML 
+	PRINTFORMW %CALLNAME:MASTER%가 납금을 끝마쳐 저택으로 돌아가면,%CALLNAME%가 마중해 주었다
+	PRINTFORML 「청마,어서 오세요 납금은 끝났는지?」
+	PRINTFORML 『응 무사히 끝났어』
+	PRINTFORMW 「그런가 좋았다」
+	PRINTFORML %CALLNAME%는 얼굴을 벌어지게 한다
+	PRINTFORMW 그 모습에 %CALLNAME:MASTER%도 끌려 얼굴을 느슨해지게 한다
+	PRINTFORMW 
+	PRINTFORML 『수심자 조금 괜찮을까』
+		IF TALENT:달마 || TALENT:양팔결손
+			PRINTFORMW %CALLNAME:MASTER%는%CALLNAME%의 근처에 들르면,목 언저리에 체인을 붙인 반지를 걸어 주었다
+		ELSE
+			PRINTFORMW %CALLNAME:MASTER%는%CALLNAME%의손를 취하면,약지에 반지를 끼워 주었다
+		ENDIF
+	PRINTFORML 「청마이것은……?」
+	PRINTFORMW %CALLNAME%는 눈을 끔뻑 시켜,반지와 %CALLNAME:MASTER%를 교대로 본다
+	;하트풀
+	IF (CFLAG:5001 & 1)
+		CALL KOJO_MESSAGE_ENDING_K174_1_A
+	ELSEIF (CFLAG:5001 & 2)
+		;반발 3 취득이 끝난 상태 또한 망집연모√
+		IF (CFLAG:5002 & 8) && (CFLAG:5001 & 8)
+			CALL KOJO_MESSAGE_ENDING_K174_1_B
+		;반발 3 취득이 끝난 상태
+		ELSEIF (CFLAG:5002 & 8)
+			CALL KOJO_MESSAGE_ENDING_K174_1_C
+		;망집연모√
+		ELSEIF (CFLAG:5001 & 8)
+			CALL KOJO_MESSAGE_ENDING_K174_1_D
+		ELSE
+			CALL KOJO_MESSAGE_ENDING_K174_1_E
+		ENDIF
+	ENDIF
+	PRINTL 
+	RETURN LOCAL
+ENDIF
+
+;--------------------------------------------------
+;창부단체[單体] 엔드
+
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_2
+DRAWLINE
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+
+	DRAWLINE
+	PRINTFORML …………
+	PRINTFORML ………
+	PRINTFORML ……
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 　　　　　　　　―― Ending No. 1X2B (00엔드)
+	RETURN LOCAL
+ENDIF
+
+;--------------------------------------------------
+;예속단체[單体] 엔드
+;엔딩으로 「%CALLNAME:D%에의 목걸이를 산다(복종엔드)」를 선택했을 경우
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_3
+DRAWLINE
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+
+	DRAWLINE
+	PRINTFORML …………
+	PRINTFORML ………
+	PRINTFORML ……
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 　　　　　　　　―― Ending No. 1X2C (00엔드)
+	RETURN LOCAL
+ENDIF
+
+;--------------------------------------------------
+;특수 하렘 엔드
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_4
+DRAWLINE
+;-------------------------------------------------
+;기입 체크(=0,비표시,1,표시)
+LOCAL = 0
+;-------------------------------------------------
+IF LOCAL
+	DRAWLINE
+	PRINTFORML …………
+	PRINTFORML ………
+	PRINTFORML ……
+	PRINTFORML 
+
+	PRINTFORML 
+	PRINTFORML 　　　　　　　　―― Ending No. 1X2A (00엔드)
+	RETURN LOCAL
+ENDIF
+
+;--------------------------------------------------
+;엔드 본문
+;너무 길어 졌기 때문에 분할
+;각종 엔드의 타이틀이 좋은 것 생각해내지 못하다…
+;--------------------------------------------------
+;--------------------------------------------------
+;친애엔드
+;--------------------------------------------------
+;--------------------------------------------------
+;하트풀
+;친애첫회와 하고 있는 것이 그다지 변함없는 생각이 든다
+;현상,청마의 사모 대상 분기는 없습니다
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1_A
+PRINTFORMW 이윽고 그 의미를 이해하면,파앗 얼굴을 빛냈다
+PRINTFORMW 『수심자 앞으로도 나와 함께 있어 줄까나?』
+PRINTFORML 「청마……!」
+PRINTFORMW %CALLNAME%는 기쁜 나머지,%CALLNAME:MASTER%에 껴안아 왔다
+PRINTFORMW 거기에 응해 껴안고 돌려주면,%CALLNAME%는 한층 더 힘들게 껴안아 온다
+PRINTFORMW 「아 물론이다……!앞으로도 함께 있자」
+PRINTFORML 「청마 앞으로도 아무쪼록 부탁한다」
+PRINTFORMW 『응 잘 부탁해』
+PRINTFORMW %CALLNAME%과 %CALLNAME:MASTER%는 서로 껴안은 채로,서로 웃었다
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 　　　　　　　　―― Ending No. 174-1-A 「앞으로도 잘 부탁드립니다」
+PRINTFORML 
+
+;--------------------------------------------------
+;진우루트 반발 3 취득이 끝난 망집연모√
+;모집한 원한과 의존심으로 대사고를 일으킨 패턴 어째서 이렇게 되었다
+;엑스트라 모드 이행으로맹신취득
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1_B
+CFLAG:5001 |= 32
+PRINTFORMW 『수심자 앞으로도 나와 함께 있어 줄까나?』
+PRINTFORML 「……….」
+PRINTFORMW %CALLNAME%는 아무것도 대답하지 않는다
+PRINTFORMW 『수심자?』
+PRINTFORMW 「…… 아 물론이다」
+PRINTFORMW %CALLNAME%벗겨 여기 없게 억지 웃음을 지어 보이지만,진심으로 기뻐하고 있는 것은 아닌 것은 명백했다
+PRINTFORML 『수심자 싫으면,무리하게 응하지 않아도 괜찮아』
+PRINTFORML %CALLNAME:MASTER%의 말에,%CALLNAME%의 눈썹이 흠칫 움직인다
+PRINTFORML 「싫으면 무리하게 응하지 않아도,인가……」
+PRINTFORMW 『수심자?』
+PRINTFORML 
+PRINTFORMW 「…… 청마 나는 청마의 친구지요?」
+PRINTFORML 『물론이야』
+PRINTFORMW 「응 그렇,네요」
+PRINTFORMW 
+PRINTFORMW 「그러면,어째서 나를 짓밟은 것이야?」
+PRINTFORMW 
+PRINTFORML 『수심자? 무슨 말을 해,』
+PRINTFORML 「청마에는 자각이 없다 나의 전부를 터무니없게 한 주제에」
+PRINTFORML 
+;굴복 3 첫회 이벤트가 일어나고 있다
+IF (CFLAG:5002 & 2)
+	PRINTFORML 「…… 나는 청마에 몇번이나 말했을 것이야」
+	PRINTFORMW 「신들칼의 가치를 알리게 하기 위해서(때문에) 현현했다,라고」
+	PRINTFORML 「하지만,청마는 귀를 기울이려고 하지 않았다」
+ELSE
+	PRINTFORML 「…… 청마는 알고 있었을 것이야」
+	PRINTFORMW 「내가 무엇보다 도검남사의 자랑을 소중히 하고 있던 것을」
+	PRINTFORML 「하지만,청마는 그것을 계속 짓밟았다」
+ENDIF
+PRINTFORMW 「청마에 있어 『친구』는 그 정도인 것이구나」
+PRINTFORMW 
+PRINTFORMW 「…… 이제(벌써) 그런데도 좋아」
+PRINTFORML 「도검남사의 자랑도 이상도」
+PRINTFORMW 「모두 버리게 된 나는,이제(벌써) 청마 이외 아무것도 바랄 수 없으니까」
+PRINTFORMW 
+PRINTFORML 『들이마셔,신사……?』
+PRINTFORML 「이것 고마워요 소중히 한다」
+PRINTFORMW 망연히 하는 %CALLNAME:MASTER%에 상관하지 않고,%CALLNAME%는 반지에 접하면서 힘 없게 웃는다
+PRINTFORML 
+PRINTFORMW 「청마 나와 앞으로도 함께 있었으면 좋겠다」
+PRINTFORMW 「언제까지나 이대로,쭉」
+PRINTFORMW 측 어두운 빛을 발하는%CALLNAME%의 두 눈동자가,이쪽을 가만히 응시하고 있었다
+PRINTFORMW 유무를 말하게 하지 않는 압에,%CALLNAME:MASTER%입자 대답할 수 밖에 없었다
+PRINTFORML 
+PRINTFORMW 『…… 수심자가 그렇게 바란다면』
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 　　　　　　　　―― Ending No. 174-1-B 「네가 바란다면」
+PRINTFORML 
+
+
+;--------------------------------------------------
+;진우루트 반발 3 취득이 끝난 상태
+;모집한 원한이 사라지지 않았던 패턴 엔딩이 이것으로 좋을까
+;엑스트라 모드 이행으로 청마가 있으면 상시반발 3 상태,한편 궁합이 20까지 내리는,이벤트전캔슬
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1_C
+CFLAG:5001 |= 64
+PRINTFORMW 『수심자 앞으로도 나와 함께 있어 줄까나?』
+PRINTFORML 「……….」
+PRINTFORMW %CALLNAME%는 아무것도 대답하지 않는다
+PRINTFORMW 『수심자?』
+PRINTFORMW 「…… 이것은수 잡히지 않는다」
+PRINTFORML 
+PRINTFORML 『그런이니까,』
+PRINTFORML %CALLNAME:MASTER%의 말에,%CALLNAME%의 눈썹이 흠칫 움직인다
+PRINTFORMW 「어째서? 자신에게는 거부되는 짚이는 곳이 없으면?」
+PRINTFORMW 「…… 지금까지 심하게,나를 짓밟아 둬,자주(잘) 그런 일을 말할 수 있었군」
+PRINTFORML 
+;굴복 3 첫회 이벤트가 일어나고 있다
+IF (CFLAG:5002 & 2)
+	PRINTFORML 「나는 청마에 몇번이나 말했을 것이다」
+	PRINTFORMW 「신들칼의 진가를 알리게 하기 위해서(때문에) 현현했다,라고」
+	PRINTFORML 「하지만,청마는 결코 귀를 기울이려고 하지 않았다」
+	PRINTFORMW 「그 뿐만 아니라,자신의 일만 통하려고 하고 있다. 실제로 지금도 그렇다」
+ELSE
+	PRINTFORML 「청마는 알고 있었을 것이다」
+	PRINTFORMW 「내가 무엇보다 도검남사의 자랑을 소중히 하고 있는 것을」
+	PRINTFORML 「하지만,청마는 그것을 계속 짓밟았다」
+	PRINTFORMW 「그 뿐만 아니라,자신의 일만 통하려고 하고 있다. 실제로 지금도 그렇다」
+ENDIF
+PRINTFORML 
+PRINTFORMW %CALLNAME%의 뺨에는 한 줄기 눈물이 흐르고 있다
+PRINTFORMW 「청마 우리는 친구는 아니었던 것일까?」
+PRINTFORMW 「친구란,서로 서로 하는거 아니었던 것일까?」
+PRINTFORMW 「청마가 무엇을 생각하고 있는지 나에게는 이제(벌써),모른다……」
+PRINTFORML 
+	IF TALENT:달마 || TALENT:양팔결손
+		PRINTFORMW %CALLNAME%는 요령 있게 신체를 말아,반지가 붙은 목 언저리의 체인을 제외한다
+	ELSE
+		PRINTFORML %CALLNAME%는 떨리는손로 약지의 반지를 벗는다
+	ENDIF
+PRINTFORMW 그리고,%CALLNAME:MASTER%에 어색하게 미소지었다
+PRINTFORMW 「안녕이다 청마」
+PRINTFORMW 
+PRINTFORML 말을 거는 사이도 없고%CALLNAME%는 그 자리를 떠난다
+PRINTFORMW %CALLNAME:MASTER%가 준 반지만이,거기에 남아 있었다…
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 　　　　　　　　―― Ending No. 174-1-C 「안녕」
+PRINTFORML 
+
+
+;--------------------------------------------------
+;진우루트 망집연모√
+;청마의 사모 대상은 묻지 않는다
+;하피엔인 것 같아 하피엔이라고는 말하기 어려운 것 같은…
+;청마에 푸욱푸욱 의존한 채로인 것으로,엑스트라 모드 이행에서도입우에우치용에 변화 없음
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1_D
+PRINTFORMW 이윽고 그 의미를 이해하면,파앗 얼굴을 빛냈다
+PRINTFORMW 『수심자 앞으로도 나와 함께 있어 줄까나?』
+PRINTFORML 「아 물론……!」
+PRINTFORMW %CALLNAME%는 기쁜 나머지,%CALLNAME:MASTER%에 껴안는다
+PRINTFORMW 지나친 은 사례품이야 게 당황하면서도,거기에 응해 껴안고 돌려주면,%CALLNAME%는 만발에 미소를 띄웠다
+PRINTFORML 「청마 앞으로도 함께 있었으면 좋겠다」
+PRINTFORMW 「언제까지나 이대로,쭉」
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 　　　　　　　　―― Ending No. 174-1-D 「언제까지나,이대로」
+PRINTFORML 
+
+
+;--------------------------------------------------
+;진우루트 망집 없음연모√
+;청마의 사모 대상은 묻지 않는다
+;진우루트의 경우는 아마 이것이 제일 해피엔드
+;%CALLNAME%과 %CALLNAME:MASTER%미스는 없는가? 됩니다만,미스는 없습니다
+;--------------------------------------------------
+@KOJO_MESSAGE_ENDING_K174_1_E
+PRINTFORML 
+PRINTFORMW 『나를 이해하고 싶다』
+PRINTFORMW 『이전 수심자가 그런 식으로 말해 주었네요』
+PRINTFORMW 『나수심자가 그렇게 말해 주었던 것이 기뻤던 것이다』
+PRINTFORML 『그러니까,만약 너의 기분이 지금도 변함없다면』
+PRINTFORMW 『수심자 앞으로도 나와 함께 있어 줄까나?』
+PRINTFORML %CALLNAME%는 일순간 경직되어,그러나 바로 만면의 미소를 띄웠다
+PRINTFORMW 「아 물론이다!」
+PRINTFORML %CALLNAME%의 대답에 %CALLNAME:MASTER%는,파앗 얼굴을 빛냈다
+PRINTFORMW 기쁜 나머지 %CALLNAME:MASTER%가 껴안으면,%CALLNAME%도 거기에 응해 껴안고 돌려주었다
+PRINTFORML 『수심자!나,지금 굉장히 행복!』
+PRINTFORMW 「나도다 청마!너와 같은 기분으로 있을 수 있는 것이,이렇게 기쁘다!」
+PRINTFORML 「앞으로도 우리 쭉 앞으로도,쭉 함께다」
+PRINTFORMW 『응 언제까지나 쭉!』
+PRINTFORMW %CALLNAME%과 %CALLNAME:MASTER%는 서로 껴안은 채로,서로 웃었다
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 　　　　　　　　―― Ending No. 174-1-E 「쭉」
+PRINTFORML 
+

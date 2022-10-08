@@ -1,0 +1,1346 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title></title>
+<meta content="text/html; charset=shift_jis" http-equiv="Content-Type">
+<style type="text/css">TD {
+	LINE-HEIGHT: 200%; FONT-FAMILY: Verdana; COLOR: #555555
+}
+BODY {
+	Z-INDEX: 0; LINE-HEIGHT: 140%; FONT-FAMILY: Verdana; COLOR: #555555; MARGIN-LEFT: 50px; MARGIN-RIGHT: 50px; ffffff: 
+}
+RT {
+	FONT-SIZE: 6pt
+}
+A:link {
+	COLOR: #555555
+}
+A:visited {
+	COLOR: #5bb421
+}
+A:active {
+	COLOR: #ff0000
+}
+A:hover {
+	POSITION: relative; COLOR: #fa0e6c
+}
+</style>
+
+<meta name="GENERATOR" content="MSHTML 8.00.6001.18812"></head>
+<body>
+<p><br>
+<font size="2"><strong>【IF構文読解講座】</strong></font></p>
+<p><font size="2">※構文をつけ足していくタイプの講座はあったけど削っていくタイプは無い気がしたので作ってみました。<br>
+　あくまで私見による適当講座ですので、間違いなどにお気づきの方は適切に直していただければ幸いです。<br>
+<strong>※このテキストはそのままERBにコピーして使うことができません</strong>（インデントではなくスペースを使っているため）<br>
+　検証に利用できそうな箇所は、あらかじめテキストエリアをつけておいたのでそちらからコピーして下さい。<br>
+</font></p>
+<p><font size="2">===================================================</font></p>
+<p><font size="2"><font color="#555555">菊 … 何故かeraに詳しい二次元マスターなじいさんです</font><br>
+<font color="#5254ad">アルフレッド … eraのことなんてさっぱりのAKYな若造です</font></font></p>
+<p><font size="2">===================================================<br>
+【目次】<br>
+１．<a href="#1">はじめに</a><br>
+２．<a href="#2">基本のテンプレ構造</a><br>
+３．<a href="#3">変数による表示制限</a><br>
+４．<a href="#4">IF-ENDIFの対応読解</a><br>
+５．<a href="#5">IF構文の組み立て法</a><br>
+６．<a href="#6">エラーが出る時には</a><br>
+７．<a href="#7">おわりに</a></font><font size="2"><br>
+<a href="#omake"><font size="2">おまけ</font></a><br>
+</font><br>
+<br>
+</p>
+<hr align="left" size="1" width="640">
+<font size="2"><font color="#555555"><a name="1"><font size="2"><font color="#555555"><strong>【１．はじめに】</strong><br>
+</font></font></a><br>
+「改めまして今晩は、本田菊と申します」</font><br>
+<font color="#5254ad">『アシスタントはこの俺、世界のヒーローアルフレッドでお送りするよ！』</font></font> 
+<p><font size="2">　　　　</font></p>
+<p><font size="2"><font color="#5254ad">『早速だけど菊、構文って意味分かんないんだぞ！　アルファベットいっぱいだけど英語じゃないしさ！』</font><br>
+<font color="#555555">「確かに使用されているのはアルファベットですが、これは文章だと思ってはいけません。道路標識だと思うのが適切かと」</font><br>
+<font color="#5254ad">『道路標識？』</font><br>
+<font color="#555555">「ええ、例えば……<br>
+</font><textarea rows="3" cols="80">	IF A == 0
+		Aが0です
+	ENDIF</textarea><br>
+<font size="2">　<font color="#555555">という<font color="#fa0e6c"><strong>『IF』～『ENDIF』構文</strong></font>と、『ここから片側一車線』～『ここまで』という標識は似てませんか？」</font></font><br>
+<font color="#5254ad">『ん～……よく分かんないな！』</font><br>
+<font color="#555555">「……<strong>『IF』</strong>が<strong><font color="#fa0e6c">『もし～ならば』</font></strong>という意味があることは分かりますよね？」</font><br>
+<font color="#5254ad">『当たり前だよ！　君が使ってるのも俺のうちの英語だろ！』</font><br>
+<font color="#555555">「ですから、<strong>『IF』</strong>から始まるのは<strong>『もしも～なら』通るべきルート</strong>で、そのルートは必ず<font color="#fa0e6c"><strong>『ENDIF』</strong></font>で終わります」<br>
+</font><font color="#5254ad">『具体的に何か見せてくれよ』</font><br>
+<font color="#555555">「………………では、コマンド0<font color="#555555">「愛撫」</font>を例にしましょうか」<br>
+<br>
+</p>
+<hr align="left" size="1" width="640">
+</font></font><font size="2"><a name="2"><font size="2"><strong>【２．基本のテンプレ構造】</strong></font></a><br>
+;-------------------------------------------------<br>
+;0,愛撫<br>
+;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;初めて<br>
+　　　　<font color="#ff8811">IF CFLAG:300 == 
+0<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　CFLAG:300 = 
+1<br>
+　　　　;二回目以降<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;陥落済み<br>
+　　　　　　　　<font color="#5bb421">IF 
+(TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) 
+&amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　;恋慕、親愛<br>
+　　　　　　　　　　　　<font color="#24a6b5">IF TALENT:3 
+|| TALENT:6<br>
+</font>　　　　　　　　　　　　　　　　PRINTFORMW 
+<br>
+　　　　　　　　　　　　;淫乱、娼婦<br>
+　　　　　　　　　　　　<font color="#24a6b5">ELSEIF TALENT:4 || 
+TALENT:7<br>
+</font>　　　　　　　　　　　　　　　　PRINTFORMW 
+<br>
+　　　　　　　　　　　　;服従、隷属<br>
+　　　　　　　　　　　　<font color="#24a6b5">ELSEIF TALENT:5 || 
+TALENT:8<br>
+</font>　　　　　　　　　　　　　　　　PRINTFORMW <br>
+　　　　　　　　　　　　<font color="#24a6b5">ENDIF<br>
+</font>　　　　　　　　　　　　CFLAG:300 = 
+4<br>
+　　　　　　　　;屈服刻印Lv3<br>
+　　　　　　　<font color="#5bb421">　ELSEIF MARK:2 == 3 
+&amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)</font><br>
+　　　　　　　　　　　　PRINTFORMW 
+<br>
+　　　　　　　　　　　　CFLAG:300 = 3<br>
+　　　　　　　　;それ以外<br>
+　　　　　　　　<font color="#5bb421">ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 
+2<br>
+</font>　　　　　　　　　　　　PRINTFORMW <br>
+　　　　　　　　　　　　CFLAG:300 = 
+2<br>
+　　　　　　　　<font color="#5bb421">ENDIF</font><br>
+　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c">ENDIF<br>
+</font>;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+;0,愛撫
+;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:300 == 0
+		PRINTFORMW 
+		CFLAG:300 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				PRINTFORMW 
+			;淫乱、娼婦
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+			;服従、隷属
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+			ENDIF
+			CFLAG:300 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:300 = 3
+		;それ以外
+		ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea><br>
+<font size="2"><font color="#555555">「このとき、一番上の<font color="#fa0e6c"><strong>“IF SELECTCOM 
+== 0”</strong></font>が最初の条件文です」</font><br>
+<font color="#5254ad">『これは英単語が少し入ってるから分かるよ！<br>
+　SELECTが選ぶ、COMがコマンドの略だから、<font color="#2972c2"><strong>「もしも選んだコマンドが0なら」</strong></font>っていうことだね』</font><br>
+<font color="#555555">「おや、流石アルフレッドさんですね。では、<font color="#fa0e6c"><strong>このIFと対応するENDIF</strong></font>がどれか分かりますか？」</font><br>
+<font color="#5254ad">『えーと…………な、なんか下の方に三つくらいあるんだけど』</font><br>
+<font color="#555555">「ここが曲者ですね。<strong>口上のIF構文の多くは、こうやって入れ子方式になってるんですよ」</strong></font><br>
+<font color="#5254ad">『イレコ………？』</font><br>
+<font color="#555555">「アルフレッドさん、貰ったことありませんか？　プレゼントの箱を開けたらまた箱があって……っていう、イタズラ」</font><br>
+<font color="#5254ad">『ああ、あるんだぞ。あれってイライラするよね！　これがそうなのかい？』</font><br>
+<font color="#555555">「正確には違いますが、<strong>IFで出来た一つの箱の中に、更にIFの箱があるという概念</strong>は把握しやすくなるかと。<br>
+　イヴァンさんのところのマトリョーシカを想像するのも近いかもしれません」</font><br>
+<font color="#5254ad">『い、嫌な名前を出さないでくれよ……彼が来ちゃうじゃないか』</font><br>
+<font color="#555555">「まあ、それは置いておいて……<br>
+　とにかく、プレゼントの箱やマトリョーシカのように、一番大きな箱が外側を覆っています。<br>
+　ですから、<strong><font color="#fa0e6c">一番上のIFに対応するはずなのは一番下のENDIF</font></strong>ですね」</font><br>
+<font color="#5254ad">『あ、よく見たら、始まる段落も一緒じゃないか！』</font><br>
+<font color="#555555">「そうですね。他のENDIFは文の頭に大きな空白があります。<br>
+　これは<strong>“インデント”</strong>といって、構文を見やすくするために職人さんが入れてくれているものです。<br>
+　お使いのキーボードで入れるときは、おそらく左手の方にあるTabキーを用いればよいかと。<br>
+　したがって、基本的には<font color="#555555"><strong>『縦一直線に並んでいるIF-ENDIFが対になっている』</strong></font>というわけです」</font></font> 
+
+<p><font size="2"><font color="#5254ad">『んん？　じゃあ他のENDIFもどれかに対応するのかい？』</font><br>
+<font color="#555555">「では、上から見ていきましょう。<br>
+　各関連wikiなどで推奨されているサクラエディタなどをお持ちなら、フラグ部分が分かりやすいはずですが……」</font></font></p>
+<p><font size="2"><br>
+</p>
+<hr align="left" size="1" width="640">
+<a name="3"><strong><font size="2">【３．変数による表示制限】</font></strong><br>
+</a>;-------------------------------------------------<br>
+;0,愛撫<br>
+;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 
+0　　　　　　　　←もしもコマンド0「愛撫」が選択されたとき、という条件のIF</font><br>
+　　　　CALL 
+TRAIN_MESSAGE　　　　←全キャラに共通する既存の地の文を呼びだすCALL<br>
+　　　　;初めて　　　　　　　　　　　　←;によってコメントアウトされている説明文<br>
+　　　　<font color="#ff8811">IF CFLAG:300 == 0　　　　←もしもCFLAG:300が 0 
+なら、という条件のIF<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 1　　　　←CFLAG:300 を 1 にする</font><br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+;0,愛撫
+;-------------------------------------------------
+IF SELECTCOM == 0		←もしもコマンド0&lt;font color="#8000ff"&gt;「愛撫」&lt;/font&gt;が選択されたとき、という条件のIF
+	CALL TRAIN_MESSAGE	←全キャラに共通する既存の地の文を呼びだすCALL
+	;初めて			←;によってコメントアウトされている説明文
+	IF CFLAG:300 == 0	←もしもCFLAG:300が 0 なら、という条件のIF
+		PRINTFORMW 
+		CFLAG:300 = 1	←CFLAG:300 を 1 にする</textarea> 
+<p><font size="2"><font color="#5254ad">『ちょ、ちょっと待ってくれよ！　そもそも<font color="#8000ff"><strong>“CFLAG:300”</strong></font>って何だい？』</font><br>
+<font color="#555555">「はあ、そうですね……変数、くらいは分かりますか？<br>
+　もし分からないのでしたら、eratohowikiをさっと読んで下さると嬉しいところです」</font></font></p>
+<p><font size="2">　　　　～～アルフレッドお勉強中～～</font></p>
+<p><font size="2"><font color="#5254ad">『――つまり、変数っていうのは<strong>「操作できる（＝変えられる）数字」</strong>ってことだね。<br>
+　で、よく言う<strong>「フラグが立った」</strong>っていうのの<strong>「フラグ」</strong>もこの<strong>「変数」</strong>に含まれるわけだ』</font><br>
+<font color="#555555">「そういうことです。<strong>フラグは、こちらの操作でオンにしたりオフにしたりが可能</strong>ですからね。<br>
+　そして<strong><font color="#ff0000">CFLAG</font></strong>とは、<font color="#ff0000">そのキャラクター＝調教対象だけに有効なフラグ</font>ということです」</font><br>
+<font color="#5254ad">『な、なんだか菊が調教とか言うとちょっとどきどきするんだぞ……』</font><br>
+<font color="#555555">「二次元ならまかせて下さい。……ではなく、<strong>このとき<font color="#555555">「FLAG」</font>と間違えないようご注意を。</strong><br>
+　Cが無い方は、キャラ関係なしのシステムを支えているフラグです」</font><br>
+<br>
+<font color="#5254ad">『それじゃあ、結局<strong>CFLAG:300</strong>っていうのは……』</font><br>
+<font color="#555555">「<font color="#8000ff">調教中のキャラ特有のフラグの300番</font>、ということです。<br>
+　それが<strong>0のときだけ、PRINTFORMW 
+の続きに書かれる文章が表示される</strong>仕組みです。<br>
+　PRINTFORMWのすぐ下で、CFLAG:300に1が代入されてますよね？<br>
+　これにより、<strong><font color="#ff8811">「IF CFLAG:300 == 
+0」</font>で始まる文章はもう二度と表示されない……</strong><br>
+　つまり、<strong><font color="#555555">「;初めて」</font>の調教で<font color="#555555">「一度だけ」</font>表示される口上となるわけです</strong>」</font><br>
+<font color="#5254ad">『なんで300番なんだい？』</font><br>
+<font color="#555555">「さあ、たまたま丁度良かったのでは？　この300番は、今のところ愛撫専用のフラグです。<br>
+　301番、302番……と、<strong>それぞれの調教に特有のフラグがあります</strong>ので、<br>
+　むやみにテンプレをコピーすると面倒なことになりますよ」</font><br>
+<font color="#5254ad">『ほ、ホントに面倒くさいなこれ……』</font><br>
+<font color="#555555">「これを書いている中の人はあまりに面倒くさがりだったので、このあたりをある程度コピー可能に改造してます」</font><br>
+<font color="#5254ad">『ええ！？　そんなこと出来るのかい！？』</font><br>
+<font color="#555555">「とてつもなく力ずくで正直処理が遅くなりそうなんですが、便利さに勝てなくて……<br>
+　興味のある方は、このファイルの一番下か、アルフレッド口上を参照して下さい」</font><br>
+<font color="#5254ad">『！？　ちょ……っああああ！　見ちゃだめなんだぞ！　あれは俺じゃないからね！！』</font></font></p>
+<p><font size="2">　　　　～～アルフレッド取り乱し中～～</font></p>
+<p><font size="2"><font color="#5254ad">『はあ、………くそう……』</font><br>
+<font color="#555555">「落ち着かれましたか？　では、次に移りましょうか。<font color="#555555">「;二回目以降」</font>の下をご覧ください」</font></font></p>
+<p><br>
+<font size="2">;-------------------------------------------------<br>
+;0,愛撫<br>
+;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;初めて<br>
+　　　　<font color="#ff8811">IF CFLAG:300 == 
+0<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1　　　　←CFLAG:300 を 1 にする<br>
+</font>　　　　;二回目以降<br>
+　　　　<font color="#ff8811">ELSE　　　　　　　　　　　　←それ以外のとき、というELSE<br>
+</font>　　　　　　　　;陥落済み<br>
+　　　　　　　　<font color="#5bb421">IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || 
+TALENT:8) &amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　;恋慕、親愛<br>
+　　　　　　　　　　　　<font color="#24a6b5">IF TALENT:3 
+|| TALENT:6<br>
+</font>　　　　　　　　　　　　　　　　PRINTFORMW <br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+;0,愛撫
+;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:300 == 0
+		PRINTFORMW 
+		CFLAG:300 = 1	←CFLAG:300 を 1 にする
+	;二回目以降
+	ELSE			←それ以外のとき、というELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				PRINTFORMW </textarea></p>
+<p><font size="2"><font color="#5254ad">『<strong><font color="#ff8811">ELSE</font></strong>っていうのは……<strong><font color="#ff8811">「他に」</font></strong>って意味だよね。<strong>ELSEIF</strong>とは違うのかい？』</font><br>
+<font color="#555555">「<strong>ELSEIF</strong>は文字通り、<font color="#555555"><strong>「他に、もし～ならば」</strong></font>という意味ですね。<br>
+　ですが<strong>ELSE</strong>は、<strong>ELSEより前に出てきた条件以外だったら全て</strong>、という指示です。<br>
+　この場合、<strong>CFLAG:300が0でないとき</strong>……つまり、一度<font color="#555555">「初めて」</font>の口上を表示しているとき以外全て、<br>
+　という意味になるわけです」</font><br>
+<font color="#5254ad">『そのELSEの下にまたIFが……あれ？　二つもあるよ』</font><br>
+<font color="#555555">「これも<strong>入れ子</strong>ですね。陥落済み、つまり<strong><font color="#5bb421">恋慕、淫乱、服従、親愛、娼婦、隷属</font></strong>のいずれかを持っていれば<br>
+　「;陥落済み」のすぐ下のルートに入り、その中でも特に<font color="#2cb5cd"><strong>恋慕、親愛</strong></font>だったときに更にルートに入る、と」</font><br>
+<font color="#5254ad">『あ、頭こんがらがってくるんだぞ……』</font><br>
+<font color="#555555">「きちんと段落を分けていれば大丈夫ですよ。そのためのインデントです。<br>
+　<strong>構造が分かり辛いときは、内側の箱から取り除いていけばいいんですよ</strong>」<br>
+</font></font><font size="2"><br>
+</p>
+<hr align="left" size="1" width="640">
+<a name="4"><font size="2"><strong>【４．IF-ENDIFの対応読解】</strong></font></a><br>
+;-------------------------------------------------<br>
+;0,愛撫<br>
+;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;初めて<br>
+　　　　<font color="#ff8811">IF CFLAG:300 == 
+0<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　;二回目以降<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;陥落済み<br>
+　　　　　　　　<font color="#24a6b5">IF 
+(TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) 
+&amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 2)<br>
+</font></font><br>
+<font size="2">　　　　　　　　　　　　PRINTFORMW 【らめえ】<br>
+</font><br>
+<font size="2">　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 4<br>
+</font>　　　　　　　　;屈服刻印Lv3<br>
+　　　　　　　　<font color="#24a6b5">ELSEIF MARK:2 == 3 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　PRINTFORMW <br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 3<br>
+</font>　　　　　　　　;それ以外<br>
+　　　　　　　　<font color="#24a6b5">ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 
+2<br>
+</font>　　　　　　　　　　　　PRINTFORMW <br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 
+= 2<br>
+</font>　　　　　　　　<font color="#24a6b5">ENDIF</font><br>
+　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF<br>
+</font>;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+;0,愛撫
+;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:300 == 0
+		PRINTFORMW 
+		CFLAG:300 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 4 || FLAG:7 == 2)
+
+
+			PRINTFORMW 【らめえ】
+
+
+			CFLAG:300 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:300 = 3
+		;それ以外
+		ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea> 
+<p><font size="2"><font color="#555555">「一番最初の形と比べて、どこが変わったか分かりますか？」</font><br>
+<font color="#5254ad">『んー…あ、陥落済みの下の<font color="#5bb421"><strong>「恋慕、親愛」</strong></font>とかの分岐だね！』</font><br>
+<font color="#555555">「そうです。<font color="#5bb421"><strong>“IF TALENT:3 || TALENT:6”<font color="#555555">から下にたどっていって、一番近い行の</font>“ENDIF”</strong></font>までを取り除きました。<br>
+　この構文だと、陥落済の場合は一括で同じ口上が表示されるようになります。【らめえ】って」</font><br>
+<font color="#5254ad">『菊……正直それは……ないと思う』</font><br>
+<font color="#555555">「わ、分かりやすかったらいいんですよ！　次行きます、次！」</font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;初めて<br>
+　　　　<font color="#ff8811">IF CFLAG:300 == 
+0<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　;二回目以降<br>
+　　　　<font color="#ff8811">ELSEIF CFLAG:300 &lt; 2 || 
+FLAG:7 == 2<br>
+</font></font><br>
+<font size="2">　　　　　　　　PRINTFORMW 
+【らめえ】<br>
+</font><br>
+<font size="2">　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+2</font><br>
+　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:300 == 0
+		PRINTFORMW 
+		CFLAG:300 = 1
+	;二回目以降
+	ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+
+
+		PRINTFORMW 【らめえ】
+
+
+		CFLAG:300 = 2
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea></p>
+<p><font size="2"><font color="#5254ad">『ワオ、だいぶすっきりしたね！』</font><br>
+<font color="#555555">「今度は陥落、屈服、それ以外で分岐していた<font color="#24a6b5"><strong>“IF (TALENT:3 || 
+TALENT:4 ～以下略”<font color="#555555">から、一番近い</font>“ENDIF”</strong></font>までを取り除きました。<br>
+　こうするともう、二回目の愛撫以降は何しようが【らめえ】しか表示されません」</font><br>
+<font color="#5254ad">『そんなのつまんないんね』</font><br>
+<font color="#555555">「ええ。ですから、面白くするために、職人さんたちはたくさん分岐を作って下さっているということです」</font><br>
+<font color="#5254ad">『分岐たくさん作ってる人は尊敬するんだぞ！　これ作ってる奴なんか、システムいじりが楽しすぎて口上進まないらしいし……』</font><br>
+<font color="#555555">「しかたありません。era楽しすぎます。……ところで、もう一つ違いに気が付きますか？」</font><br>
+<font color="#5254ad">『う～ん……あ！　<font color="#2972c2"><strong>「;二回目以降」の下の<font color="#ff8811">「ELSE」<font color="#2972c2">が</font>「ELSEIF CFLAG:300 &lt; 2 || 
+FLAG:7 == 2」</font>になってるよ！</strong></font><br>
+<font color="#555555">「はい。つまり、<font color="#ff8811"><strong>“CFLAG:300が1以下、またはFLAG:7が2のとき”</strong></font>という条件文ですね。<br>
+　これはオプションの<font color="#555555">「口上は最初の一度だけ表示」</font>機能のためのフラグです。<br>
+　面倒かもしれませんが、考慮する必要のある個所ですからむやみに削らないよう注意しましょう」</font><br>
+<font color="#5254ad">『ELSEIFで出てきたCFLAG:300 &lt; 
+2の<strong>2の部分</strong>は、そこで表示される口上内で<font color="#8000ff">「CFLAG:300 = 
+2」</font>として加算されてるしね』</font><br>
+<font color="#555555">「上出来ですよ、アルフレッドさん。それでは、更にシンプルな形にしてみましょう」</font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+</font><br>
+<font size="2">　　　　PRINTFORMW 
+【らめえ】<br>
+</font><br>
+<font size="2"><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+
+
+	PRINTFORMW 【らめえ】
+
+
+ENDIF
+;-------------------------------------------------
+</textarea></p>
+<p><font size="2"><font color="#555555">「こうなるともう、最初の調教でも100回愛撫してもみんな【らめえ】です」</font><br>
+<font color="#5254ad">『シンプルイズベストっていうけど、ここまでは……』</font><br>
+<font color="#555555">「しかし、一種類の口上でも意外といけるってときもありますからね。何事も臨機応変です」<br>
+<br>
+<br>
+</p>
+<hr align="left" size="1" width="640">
+<a name="5"><strong>【５．IF構文の組み立て法】</strong><br>
+</a><br>
+</font></font>
+<p><font size="2"><font color="#555555">「……さて、今度は付け加えていってみましょうか。<br>
+　せっかくすっきりさせたので、自分が分かりやすい形に追加してみましょう。<br>
+　どんな条件だったら、書き加える口上に違いが出ると思いますか？」</font><br>
+<font color="#5254ad">『やっぱり、陥落してるときとしてないときはすっごく違うと思うんだ』</font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;陥落済み<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 2 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 【らめえ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　;それ以外<br>
+　　　　<font color="#ff8811">ELSEIF CFLAG:300 &lt; 1 || FLAG:7 == 
+2<br>
+</font>　　　　　　　　PRINTFORMW 【たすけてえええ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 1<br>
+</font>　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;陥落済み
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 2 || FLAG:7 == 2)
+		PRINTFORMW 【らめえ】
+		CFLAG:300 = 2
+	;それ以外
+	ELSEIF CFLAG:300 &lt; 1 || FLAG:7 == 2
+		PRINTFORMW 【たすけてえええ】
+		CFLAG:300 = 1
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea></p>
+<p><font size="2"><font color="#555555">「では、まず上に陥落している場合の分岐を作りましょう」</font><br>
+<font color="#5254ad">『陥落してない分岐を上に作ることはできないのかい？』</font><br>
+<font color="#555555">「できますが……<br>
+　“TALENT:3 == 0 &amp;&amp; TALENT:4 == 0 &amp;&amp; 
+TALENT:5 == 0 &amp;&amp; TALENT:6 == 0 &amp;&amp; TALENT:7 == 0 &amp;&amp; 
+TALENT:8 == 0”<br>
+　と、全てに == 0 がつくので<strong>面倒なんですよね」<br>
+</strong></font><font color="#5254ad">『その条件を書かないとどうなるの？』<br>
+</font><font color="#555555">「<font color="#ff8811">IF CFLAG:300 &lt; 2 || FLAG:7 == 
+2　</font>という条件を最初に持ってきて、<br>
+　</font><font color="#ff8811">ELSEIF (TALENT:3 || 
+TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 
+&lt;&nbsp;1 || FLAG:7 == 2)</font><font color="#555555"><br>
+</font>　という条件を下に書くということですか？　それはいけません。<br>
+　構文は上から読み込まれるので、最初の<font color="#ff8811">IF CFLAG:300 &lt; 2 || FLAG:7 == 
+2</font>を読み込んだ時点でその口上が表示されてしまい、<br>
+　<font color="#ff8811">ELSEIF (TALENT:3 || 
+TALENT:4 || 
+…</font>という条件が表示されなくなってしまいます。<br>
+　ゆえに、<strong>IF構文では条件の難しい分岐程上に書くことが推奨されています</strong>」<br>
+<font color="#5254ad">『じゃあ、どうして上の<font color="#8000ff">「CFLAG:300 = 
+」は「2」で、下が「1」</font>なんだい？』</font><br>
+<font color="#555555">「陥落以外の口上が表示される方が陥落口上より早いはずなので、<br>
+　そっちを小さい数字にしないとこのフラグは上手く作動せず……<br>
+　って、この文章の作者はこういうこと考えるのが面倒で改造したんですよ。<br>
+　詳しくは米口上を<font color="#5254ad"><strong>『うわああああああ！！』</strong></font></font></p>
+<p><font size="2"><font color="#5254ad">『あああもう、あんまり言うと流石の俺でも怒るからね！』</font><br>
+<font color="#555555">「おや、そうですか？　では、<font color="#5bb421">陥落してないルートに反発刻印Lv3の条件を足してみましょうか</font>。<br>
+　……ふふ、抵抗されるのも乙なものですよね……」</font><br>
+<font color="#5254ad">『き、菊……？』</font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;陥落済み<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 【らめえ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 3<br>
+</font>　　　　;それ以外<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;未陥落で反発刻印Lv3<br>
+　　　　　　　　<font color="#5bb421">IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　PRINTFORMW 【触るなゲス野郎！】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　　　　　;結果として、反発刻印Lv2以下で未陥落の場合は全てここ<br>
+　　　　　　　　<font color="#5bb421">ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 
+2<br>
+</font>　　　　　　　　　　　　PRINTFORMW 【たすけてえええ】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　　　　　<font color="#5bb421">ENDIF</font><br>
+　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF<br>
+</font>;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;陥落済み
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【らめえ】
+		CFLAG:300 = 3
+	;それ以外
+	ELSE
+		;未陥落で反発刻印Lv3
+		IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+			PRINTFORMW 【触るなゲス野郎！】
+			CFLAG:300 = 1
+		;結果として、反発刻印Lv2以下で未陥落の場合は全てここ
+		ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+			PRINTFORMW 【たすけてえええ】
+			CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea></p>
+<p><font size="2"><font color="#5254ad">『キャラ崩壊ってレベルじゃないよ！』</font><br>
+<font color="#555555">「分かりやすさが命ですから。これで、反発してるキャラに罵られることが可能です」</font><br>
+<font color="#5254ad">『あれ？　<font color="#ff8811">「;それ以外」の下の「ELSEIF」が「ELSE」</font>になってるけど……』</font><br>
+<font color="#555555">「はい。<font color="#5bb421">それ以外、の部分の条件が二種類になった</font>ので、条件を消しました。<br>
+　この辺は慣れてきたら勝手がわかると思うのですが……<br>
+　ちなみに、上の構文は</font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;陥落済み<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 【らめえ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 3</font><br>
+　　　　;未陥落で反発刻印Lv3<br>
+　　　　<font color="#ff8811">ELSEIF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 
+2)</font><br>
+　　　　　　　　PRINTFORMW 【触るなゲス野郎！】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1</font><br>
+　　　　;結果として、反発刻印Lv2以下で未陥落の場合は全てここ<br>
+　　　　<font color="#ff8811">ELSEIF 
+CFLAG:300 &lt; 2 || FLAG:7 == 2</font><br>
+　　　　　　　　PRINTFORMW 
+【たすけてえええ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 2</font><br>
+　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;陥落済み
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【らめえ】
+		CFLAG:300 = 3
+	;未陥落で反発刻印Lv3
+	ELSEIF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+		PRINTFORMW 【触るなゲス野郎！】
+		CFLAG:300 = 1
+	;結果として、反発刻印Lv2以下で未陥落の場合は全てここ
+	ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+		PRINTFORMW 【たすけてえええ】
+		CFLAG:300 = 2
+	ENDIF
+ENDIF
+;-------------------------------------------------
+
+</textarea></p>
+<p><font size="2">　<font color="#555555">……というのと<strong>ほぼ同じ意味になります。</strong>この辺りもまあ、慣れですね」</font></font><br>
+<font color="#5254ad">『ふんふん……次は、陥落ルートごとに分けてみるんだぞ！』</font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;陥落済み<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 【らめえ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 3<br>
+</font>　　　　;恋慕、親愛<br>
+　　　　<font color="#ff8811">ELSEIF TALENT:3 || TALENT:6</font><br>
+　　　　　　　　PRINTFORMW 
+【大好き！】<br>
+　　　　;淫乱、娼婦<br>
+　　　　<font color="#ff8811">ELSEIF TALENT:4 || 
+TALENT:7</font><br>
+　　　　　　　　PRINTFORMW 【もっと！】<br>
+　　　　;服従、隷属<br>
+　　　　<font color="#ff8811">ELSEIF TALENT:5 || TALENT:8</font><br>
+　　　　　　　　PRINTFORMW 
+【言うこと聞くからあああ】<br>
+　　　　;未陥落で反発刻印Lv3<br>
+　　　　<font color="#ff8811">ELSEIF MARK:3 == 3 
+&amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)</font><br>
+　　　　　　　　PRINTFORMW 
+【触るなゲス野郎！】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1</font><br>
+　　　　;結果として、反発刻印Lv2以下で未陥落の場合は全てここ<br>
+　　　　<font color="#ff8811">ELSEIF 
+CFLAG:300 &lt; 2 || FLAG:7 == 2</font><br>
+　　　　　　　　PRINTFORMW 
+【たすけてえええ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 2</font><br>
+　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;陥落済み
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【らめえ】
+		CFLAG:300 = 3
+	;恋慕、親愛
+	ELSEIF TALENT:3 || TALENT:6
+		PRINTFORMW 【大好き！】
+	;淫乱、娼婦
+	ELSEIF TALENT:4 || TALENT:7
+		PRINTFORMW 【もっと！】
+	;服従、隷属
+	ELSEIF TALENT:5 || TALENT:8
+		PRINTFORMW 【言うこと聞くからあああ】
+	;未陥落で反発刻印Lv3
+	ELSEIF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+		PRINTFORMW 【触るなゲス野郎！】
+		CFLAG:300 = 1
+	;結果として、反発刻印Lv2以下で未陥落の場合は全てここ
+	ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+		PRINTFORMW 【たすけてえええ】
+		CFLAG:300 = 2
+	ENDIF
+ENDIF
+;-------------------------------------------------
+</textarea></p>
+<p><font size="2"><font color="#5254ad">『こんな感じかい？』</font><br>
+<strong><font color="#555555">「　大　外　れ　で　す　」</font><br>
+</strong><font color="#5254ad">『ええええ、何でだい？』</font><br>
+<font color="#555555">「<strong>陥落済み一行目で、全てのルートが網羅されてるから</strong>ですよ。<br>
+　これでは、<strong>恋慕も淫乱も服従も【らめえ】が表示されて終了です。</strong>ルートに分けたいなら……</font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;陥落済み<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　;恋慕、親愛<br>
+　　　　　　　　<font color="#5bb421">IF TALENT:3 
+|| TALENT:6</font><br>
+　　　　　　　　　　　　PRINTFORMW 
+【大好き！】<br>
+　　　　　　　　;淫乱、娼婦<br>
+　　　　　　　　<font color="#5bb421">ELSEIF TALENT:4 || 
+TALENT:7<br>
+</font>　　　　　　　　　　　　PRINTFORMW 
+【もっと！】<br>
+　　　　　　　　;服従、隷属<br>
+　　　　　　　　<font color="#5bb421">ELSEIF TALENT:5 || 
+TALENT:8</font><br>
+　　　　　　　　　　　　PRINTFORMW 【言うこと聞くからあああ】<br>
+　　　　　　　　<font color="#5bb421">ENDIF<br>
+</font>　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+3<br>
+</font>　　　　;未陥落で反発刻印Lv3<br>
+　　　　<font color="#ff8811">ELSEIF MARK:3 == 3 
+&amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 
+【触るなゲス野郎！】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1</font><br>
+　　　　;結果として、反発刻印Lv2以下で未陥落の場合は全てここ<br>
+　　　　<font color="#ff8811">ELSEIF 
+CFLAG:300 &lt; 2 || FLAG:7 == 2<br>
+</font>　　　　　　　　PRINTFORMW 
+【たすけてえええ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;陥落済み
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		;恋慕、親愛
+		IF TALENT:3 || TALENT:6
+			PRINTFORMW 【大好き！】
+		;淫乱、娼婦
+		ELSEIF TALENT:4 || TALENT:7
+			PRINTFORMW 【もっと！】
+		;服従、隷属
+		ELSEIF TALENT:5 || TALENT:8
+			PRINTFORMW 【言うこと聞くからあああ】
+		ENDIF
+		CFLAG:300 = 3
+	;未陥落で反発刻印Lv3
+	ELSEIF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+		PRINTFORMW 【触るなゲス野郎！】
+		CFLAG:300 = 1
+	;結果として、反発刻印Lv2以下で未陥落の場合は全てここ
+	ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+		PRINTFORMW 【たすけてえええ】
+		CFLAG:300 = 2
+	ENDIF
+ENDIF
+;-------------------------------------------------
+</textarea></p>
+<p><font color="#555555" size="2">　といった形で、入れ子にしないといけません」</font><br>
+<font color="#5254ad">『んー、これ、最初の方に見た形と似てるよね！』</font><br>
+<font color="#555555">「覚えていらっしゃるじゃないですか……あ、ちなみにこれも入れ子にしないことは可能です。</font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;陥落済み<br>
+　　　　;恋慕、親愛<br>
+　　　　<font color="#ff8811">IF TALENT:3 
+|| TALENT:6 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　PRINTFORMW 【大好き！】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 
+= 3</font><br>
+　　　　;淫乱、娼婦<br>
+　　　　<font color="#ff8811">ELSEIF TALENT:4 || TALENT:7 
+&amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 
+【もっと！】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+3</font><br>
+　　　　;服従、隷属<br>
+　　　　<font color="#ff8811">ELSEIF TALENT:5 || TALENT:8 
+&amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 
+【言うこと聞くからあああ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 3</font></font></p>
+<p><font size="2">　　　　;未陥落で反発刻印Lv3<br>
+　　　　<font color="#ff8811">ELSEIF MARK:3 == 3 
+&amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 
+【触るなゲス野郎！】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　;結果として、反発刻印Lv2以下で未陥落の場合は全てここ<br>
+　　　　<font color="#ff8811">ELSEIF 
+CFLAG:300 &lt; 2 || FLAG:7 == 2<br>
+</font>　　　　　　　　PRINTFORMW 
+【たすけてえええ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;陥落済み
+	;恋慕、親愛
+	IF TALENT:3 || TALENT:6 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【大好き！】
+		CFLAG:300 = 3
+	;淫乱、娼婦
+	ELSEIF TALENT:4 || TALENT:7 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【もっと！】
+		CFLAG:300 = 3
+	;服従、隷属
+	ELSEIF TALENT:5 || TALENT:8 &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【言うこと聞くからあああ】
+		CFLAG:300 = 3
+
+	;未陥落で反発刻印Lv3
+	ELSEIF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+		PRINTFORMW 【触るなゲス野郎！】
+		CFLAG:300 = 1
+	;結果として、反発刻印Lv2以下で未陥落の場合は全てここ
+	ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+		PRINTFORMW 【たすけてえええ】
+		CFLAG:300 = 2
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea></p>
+<p><font size="2">　<font color="#555555">この記述だと陥落ルートをひとまとめにしないで、個別に判定していることになります」</font></font><br>
+<font color="#5254ad">『<font color="#ff8811">(CFLAG:300 &lt; 3 || FLAG:7 == 
+2)</font>と<font color="#8000ff">CFLAG:300 = 
+3</font>が三つもあるけどいいのかい？』</font><br>
+<font color="#555555">「はい。通常の場合、恋慕と淫乱と服従それぞれの口上が個別に表示されることはありませんから、<br>
+　同じフラグの値を使って何の問題もありません。……ですが、まあ……見辛いですよね」</font><br>
+<font color="#5254ad"><strong>『分かりやすいように整理するんだぞ！』</strong></font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;陥落済み<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　;恋慕、親愛<br>
+　　　　　　　　<font color="#5bb421">IF TALENT:3 
+|| TALENT:6<br>
+</font>　　　　　　　　　　　　PRINTFORMW 
+【大好き！】<br>
+　　　　　　　　;淫乱、娼婦<br>
+　　　　　　　　<font color="#5bb421">ELSEIF TALENT:4 || 
+TALENT:7</font><br>
+　　　　　　　　　　　　PRINTFORMW 
+【もっと！】<br>
+　　　　　　　　;服従、隷属<br>
+　　　　　　　　<font color="#5bb421">ELSEIF TALENT:5 || 
+TALENT:8<br>
+</font>　　　　　　　　　　　　PRINTFORMW 【言うこと聞くからあああ】<br>
+　　　　　　　　<font color="#5bb421">ENDIF<br>
+</font>　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+3<br>
+</font>　　　　;それ以外<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;未陥落で反発刻印Lv3<br>
+　　　　　　　　<font color="#24a6b5">IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 
+2)</font><br>
+　　　　　　　　　　　　PRINTFORMW 【触るなゲス野郎！】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　　　　　;結果として、反発刻印Lv2以下で未陥落の場合は全てここ<br>
+　　　　　　　　<font color="#24a6b5">ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 
+2</font><br>
+　　　　　　　　　　　　PRINTFORMW 【たすけてえええ】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　　　　　<font color="#24a6b5">ENDIF<br>
+</font>　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;陥落済み
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		;恋慕、親愛
+		IF TALENT:3 || TALENT:6
+			PRINTFORMW 【大好き！】
+		;淫乱、娼婦
+		ELSEIF TALENT:4 || TALENT:7
+			PRINTFORMW 【もっと！】
+		;服従、隷属
+		ELSEIF TALENT:5 || TALENT:8
+			PRINTFORMW 【言うこと聞くからあああ】
+		ENDIF
+		CFLAG:300 = 3
+	;それ以外
+	ELSE
+		;未陥落で反発刻印Lv3
+		IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+			PRINTFORMW 【触るなゲス野郎！】
+			CFLAG:300 = 1
+		;結果として、反発刻印Lv2以下で未陥落の場合は全てここ
+		ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+			PRINTFORMW 【たすけてえええ】
+			CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea></p>
+<p><font size="2"><font color="#5254ad">『こんな感じでどうだい？』</font><br>
+<font color="#555555">「これならインデントもしっかりされていて、まとまりが分かりやすいですね。<br>
+　好みの問題になってしまいますが、私はこの形が結構好きですよ。<br>
+　<strong>真ん中のELSEなどは正直ただの飾りです</strong>が、あると後々口上全体を把握しやすくなる利点もあります。<br>
+　ただ、インデントが多いと構文が横に長くなって把握しづらいということもありますので、このあたりは好みですね」</font></font></p>
+<hr align="left" size="1" width="640">
+<a name="6"><strong>【６．エラーが出る時には】</strong></a><br>
+<br>
+<font size="2"><font color="#555555">「さて、オリジナルの口上の形を作ってみましたが、テンプレと比べてどうでしょうか？」</font><br>
+<font color="#5254ad">『こっちは、最初と二回目を分けてないね。それから反発刻印Lv3もこっちにしかないよ』</font><br>
+<font color="#555555">「そういうことです。このようにして、必要だと思う変数をつけ足したりさし引いたりして分岐させていきます。</font> 
+<p><font color="#555555" size="2">　<strong>対応していないIF、ENDIFがある</strong>というエラーや、<br>
+　<strong>～IF～ENDIFの外でELSEIF文が使われました</strong>、といったエラーが出た場合は、<br>
+　上記のように<strong>入れ子になっているはずのIF～ENDIF文を内側から削っていく</strong>のも状況を把握する一つの手です。<br>
+　それによって、一個だけ余った<strong>IFやENDIF</strong>、IF～ENDIFにきちんとはさまれてない<strong>ELSEIFやELSE</strong>が見つけられます。</font></p>
+<p><font color="#555555" size="2">　例えば、テンプレやお手本口上などの加筆ミスで以下のようになっていた場合……</font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;陥落済み<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW 【らめえ】<br>
+　　　　　　　　<font color="#8000ff">CFLAG:300 = 3</font></font></p>
+<p><font size="2">　　　　　　　　<strong><font color="#5bb421">ENDIF　　　　　　　　　　　　　　　　←!?</font></strong><br>
+　　　　;それ以外<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;未陥落で反発刻印Lv3<br>
+　　　　　　　　<font color="#24a6b5">IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　PRINTFORMW 【触るなゲス野郎！】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 
+1<br>
+</font>　　　　　　　　;結果として、反発刻印Lv2以下で未陥落の場合は全てここ<br>
+　　　　　　　　<font color="#24a6b5">ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 
+2<br>
+</font>　　　　　　　　　　　　PRINTFORMW 【たすけてえええ】<br>
+　　　　　　　　　　　　<font color="#8000ff">CFLAG:300 = 2<br>
+</font>　　　　　　　　<font color="#24a6b5">ENDIF<br>
+</font>　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c"><strong>ENDIF　　　　　　　　　　　　　　　　　　　　　　　　←？</strong></font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;陥落済み
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:300 &lt; 3 || FLAG:7 == 2)
+		PRINTFORMW 【らめえ】
+		CFLAG:300 = 3
+
+		ENDIF				←!?
+	;それ以外
+	ELSE
+		;未陥落で反発刻印Lv3
+		IF MARK:3 == 3 &amp;&amp; (CFLAG:300 &lt; 1 || FLAG:7 == 2)
+			PRINTFORMW 【触るなゲス野郎！】
+			CFLAG:300 = 1
+		;結果として、反発刻印Lv2以下で未陥落の場合は全てここ
+		ELSEIF CFLAG:300 &lt; 2 || FLAG:7 == 2
+			PRINTFORMW 【たすけてえええ】
+			CFLAG:300 = 2
+		ENDIF
+	ENDIF
+ENDIF						←？
+;-------------------------------------------------</textarea></p>
+<p><font size="2">　<font color="#5bb421"><strong>←!?</strong></font><font color="#555555">の箇所のENDIFを削り損ねたばかりに、一番下の<font color="#fa0e6c"><strong>←？のENDIF</strong></font>がエラー扱いになってしまったりします。<br>
+　どうしてそうなるのかは、<strong>IF～ENDIFを内側から削っていけば分かっていただけるはずです」</strong></font></font></font></p>
+<p><font size="2">;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == 0<br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;陥落済み</font></p>
+<p><font size="2">　　　　　　　　<strong>※陥落済みの部分の<font color="#ff8811">IF</font>-<font color="#5bb421">ENDIF</font>を消してみる（システム的にはここがひとまとめと認識されます）</strong></font></p>
+<p><font size="2">　　　　;それ以外<br>
+　　　　<font color="#ff8811">ELSE<br>
+</font>　　　　　　　　;未陥落で反発刻印Lv3</font></p>
+<p><font size="2">　　　　　　　　<strong>※未陥落の部分の<font color="#24a6b5">IF-ENDIF</font>を消してみる</strong></font></p>
+<p><font size="2">　　　　<font color="#ff8811">ENDIF</font><br>
+<font color="#fa0e6c">ENDIF　　　　　　　　　　　　　　　　　　　　　　　　←？<br>
+</font>;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;陥落済み
+
+		※陥落済みの部分のIF-ENDIFを消してみる
+
+	;それ以外
+	ELSE
+		;未陥落で反発刻印Lv3
+
+		※未陥落の部分のIF-ENDIFを消してみる
+
+	ENDIF
+ENDIF						←？
+;-------------------------------------------------</textarea></p>
+<p><br>
+<font size="2">　<font color="#555555">↓　さらに<strong><font color="#fa0e6c">一番上のIF</font>と、それに最も近い下方の行の<font color="#ff8811">ENDIF</font></strong>を消すと……</font></font></p>
+<p><br>
+<font size="2">;-------------------------------------------------</font></p>
+<p><br>
+<font size="2"><font color="#fa0e6c"><strong>ENDIF　　　　　　　　　　　　　　　　　　　　　　　　←？<br>
+</strong></font>;-------------------------------------------------</font></p>
+<p><font size="2"><font color="#555555">「というわけで、<font color="#fa0e6c"><strong>最後に残るENDIF</strong></font>があるわけですね。<br>
+　本来の口上では更に大きなIFに囲まれているのでより複雑ですが、<br>
+　自分の手で一つずつ確認すると原因がはっきりすることがあります。<br>
+　原因を把握すれば、同じエラーが何度も出る事態を防ぐこともできますよ。<br>
+　<strong>最期まで削りきる前に、インデントによる縦のラインが揃っていないIF-ENDIF文にぶち当たったら大体それがエラーの原因です」</strong></font></font></p>
+<p><strong>
+<hr align="left" size="1" width="640">
+</strong><a name="7"><strong>【７．おわりに】</strong></a><br>
+<br>
+<font size="2"><font color="#555555">「分かっていただけましたか、アルフレッドさん……アルフレッドさん？」</font><br>
+<font color="#5254ad">『あ、頭がパンクしそうなんだぞ……ねえ、これ全部覚えなきゃいけないのかい？　変数、とか……』</font><br>
+<font color="#555555">「何を言ってらっしゃるんですか。無理に決まってます」</font><br>
+<font color="#5254ad">『ええええええ』</font><br>
+<font color="#555555">「正直、これを書いている中の人も基本的にはフィーリングで何とかしてるだけです。文系ですし。<br>
+　eraとか初めて触ったのにノリで新機能を作ってはバグだらけで落ち込む日々らしいですよ。もう涙目。<br>
+　……ただ、必要なのは<font color="#555555">『分からないときに、どう調べれば分かるのか』</font>を知ることかな、と。<br>
+　このテキストはIF構文の構造分解を理解する手助けとなれば、と思い作成したものですが、<br>
+　肝心のIF構文の記述方法などにはほとんど触れていませんから、それは別途調べていただく必要があります」</font><br>
+<font color="#5254ad">『菊は教えてくれないのかい？』</font><br>
+<font color="#555555">「他にたくさん素晴らしい講座があります。erahetaの元となった<a href="http://www7.atwiki.jp/eratoho/" target="_blank"><strong>eratohoさんのwiki</strong></a>の充実ぶりは量り知れませんし、<br>
+　このテキストのお手本になっている<strong>erajogioさんに同梱された講座</strong>もお勧めです」</font><br>
+<font color="#5254ad">『それは心強いね！　で、どこに行けばそれが見つかるんだい？』</font><br>
+<font color="#555555">「……アルフレッドさんには、いささかerahetaは早すぎるようですね……」</font><br>
+<font color="#5254ad">『ま、待ってよ菊、見捨てないで！』<br>
+<br>
+</font><br>
+<font color="#555555">「まったく、お若い方の勢いに憧れる部分はありますが……<br>
+　一度立ち止まって考えることは、行き詰まりではありませんよ。<br>
+　ここまで読んでいただいて、それでちょっと考えていただいて……それでも分からない時は、いつでもお待ちしてますから」<br>
+<font color="#5254ad">『……あ、ところで今更なんだけど、こうやってフラグで色分けしてあるのって便利だろ？<br>
+　推奨されてるサクラエディタはこういう風にテキストに色をつけて表示できるんだ！<br>
+　もし口上を書いてくつもりなら、導入できると便利だと思うんだぞ』</font><br>
+</font></font>
+<p></p>
+<p><font size="2">　　　　</font></p>
+<p><font size="2"><font color="#555555">「それでは、長々とお付き合いいただき、申し訳あありませんでした」</font><br>
+<font color="#5254ad">『じゃあ、またどこかでね！』</font></font></p>
+<p>
+<p><font size="2"></font></p><font size="2"><br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+==============================================<br>
+あとがき</font> 
+
+<p></p>
+<p><font size="2">　小芝居にお付き合いいただき、ありがとうございました。<br>
+　初心者向けIF構文読解講座、のつもりで作成したテキストですが、過不足や間違いもあることと思います。<br>
+　お気づきの点がありましたら、加筆修正、ぜひぜひお願いします。<br>
+　あまり役に立つかどうか分からない講座でしたが、何らかのお役にたてれば幸いです。</font></p>
+<p><br>
+<font size="2">2009/10/16</font></p>
+<p><font size="2">　　　　</font></p>
+<p><font size="2">　　　　</font></p>
+<p><font size="2">　　　　</font></p><font size="2">
+<hr align="left" size="1" width="640">
+<a name="omake"><font size="2"><strong>【おまけ】</strong></font></a><br>
+<br>
+多分、大体のコマンドは最低限陥落済みとそれ以外の台詞埋めたらそれっぽくなる気がするんだ……<br>
+何から埋めたらいいのか、って人は手始めにどうだろうか<br>
+;-------------------------------------------------<br>
+;■,××<br>
+;-------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == ■</font><br>
+　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;陥落済み<br>
+　　　　<font color="#ff8811">IF (TALENT:3 || TALENT:4 
+|| TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:● &lt; 2 || 
+FLAG:7 == 2)<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:● = 2<br>
+</font>　　　　;それ以外<br>
+　　　　<font color="#ff8811">ELSEIF 
+CFLAG:● &lt; 1 || FLAG:7 == 2<br>
+</font>　　　　　　　　PRINTFORMW <br>
+　　　　　　　　<font color="#8000ff">CFLAG:● = 1<br>
+</font>　　　　<font color="#ff8811">ENDIF<br>
+</font><font color="#fa0e6c">ENDIF</font><br>
+;-------------------------------------------------<br>
+</font><textarea rows="3" cols="80">;-------------------------------------------------
+;■,××
+;-------------------------------------------------
+IF SELECTCOM == ■
+	CALL TRAIN_MESSAGE
+	;陥落済み
+	IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (CFLAG:● &lt; 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:● = 2
+	;それ以外
+	ELSEIF CFLAG:● &lt; 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:● = 1
+	ENDIF
+ENDIF
+;-------------------------------------------------</textarea><br>
+<br>
+ついでに、米口上で用いた「一度見た口上非表示機能用関数」とそれを適用したテンプレの簡易ver<br>
+<font color="#ff0000">●</font>はCFRAGの数字です。愛撫なら<font color="#ff0000">●＝300</font>なので<strong>O = <font color="#ff0000">300</font></strong>。（ここだけ各調教でいじればでIF 
+SELECTCOM～ENDIF内にコピペ可能）<br>
+X1はキャラナンバーで置換（米なら10）。<strong>対応するL:▲とN = 
+▲は同じ数字が入ります。（０～９）</strong><br>
+10桁の数字の各桁を使って、10項目までのフラグのオンオフを制御しています。<br>
+ゆえに11項目以上のフラグを制御することはできないのですが……<br>
+また、応用すれば「どのプレイでどの口上を表示したことがあるか」というフラグにもなるかと。<br>
+これなら被らないだろうと高をくくって一文字変数L~Oを使用していますが、他の機能の邪魔になる時は適当に移動推奨。<br>
+;------------------------------------------------------<br>
+<font color="#fa0e6c">IF SELECTCOM == </font><font color="#ff0000">■<br>
+</font>　　　　<strong>O = <font color="#ff0000">●</font><br>
+</strong>　　　　<font color="#8000ff">CALL ONCE_S_K<font color="#ff0000">X1</font><br>
+</font>　　　　CALL 
+TRAIN_MESSAGE<br>
+　　　　;初めて<br>
+　　　　<font color="#ff8811">IF L:0 == 
+0<br>
+</font>　　　　　　　　PRINTFORMW<br>
+　　　　　　　　<font color="#8000ff">N = 
+0<br>
+</font>　　　　;二回目以降<br>
+　　　　<font color="#ff8811">ELSE<br>
+<font color="#555555">　　　　　　　　;陥落済み</font><br>
+<font color="#555555">　　　　　　　　</font><font color="#5bb421">IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || 
+TALENT:8) &amp;&amp; (L:1 == 0 || FLAG:7 == 2)<br>
+</font><font color="#555555">　　　　　　　　　　　　;恋慕、親愛<br>
+　　　　　　　　　　　　</font><font color="#2cb5cd">IF 
+TALENT:3 || TALENT:6</font><br>
+<font color="#555555">　　　　　　　　　　　　　　　　PRINTFORMW<br>
+　　　　　　　　　　　　;淫乱、娼婦<br>
+　　　　　　　　　　　　</font><font color="#2cb5cd">ELSEIF TALENT:4 || TALENT:7<br>
+</font><font color="#555555">　　　　　　　　　　　　　　　　PRINTFORMW<br>
+　　　　　　　　　　　　;服従、隷属<br>
+　　　　　　　　　　　　</font><font color="#2cb5cd">ELSEIF TALENT:5 || TALENT:8<br>
+</font><font color="#555555">　　　　　　　　　　　　　　　　PRINTFORMW<br>
+　　　　　　　　　　　　</font><font color="#2cb5cd">ENDIF</font><br>
+<font color="#555555">　　　　　　　　　　　　</font><font color="#8000ff">N = 1</font><br>
+</font>　　　　　　　　;屈服刻印Lv3<br>
+　　　　　　　　<font color="#5bb421">ELSEIF MARK:2 == 3 &amp;&amp; (L:2 == 0 || FLAG:7 == 
+2)<br>
+</font>　　　　　　　　　　　　PRINTFORMW<br>
+　　　　　　　　　　　　<font color="#8000ff">N = 
+2<br>
+</font>　　　　　　　　;それ以外<br>
+　　　　　　　　<font color="#5bb421">ELSEIF L:3 == 0 || 
+FLAG:7 == 2<br>
+</font>　　　　　　　　　　　　PRINTFORMW<br>
+　　　　　　　　　　　　<font color="#8000ff">N = 3<br>
+</font>　　　　　　　　<font color="#5bb421">ENDIF<br>
+</font>　　　　<font color="#ff8811">ENDIF</font><br>
+　　　　<font color="#8000ff">CALL ONCE_E_K</font><font color="#ff0000">X1</font><br>
+<font color="#fa0e6c">ENDIF</font><br>
+;------------------------------------------------------<br>
+<textarea rows="3" cols="80">IF SELECTCOM == ■
+	O = ●
+	CALL ONCE_S_KX1
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF L:0 == 0
+		PRINTFORMW
+		N = 0
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) &amp;&amp; (L:1 == 0 || FLAG:7 == 2)
+			;恋慕、親愛
+			IF TALENT:3 || TALENT:6
+				PRINTFORMW
+			;淫乱、娼婦
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW
+			;服従、隷属
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW
+			ENDIF
+			N = 1
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 &amp;&amp; (L:2 == 0 || FLAG:7 == 2)
+			PRINTFORMW
+			N = 2
+		;それ以外
+		ELSEIF L:3 == 0 || FLAG:7 == 2
+			PRINTFORMW
+			N = 3
+		ENDIF
+	ENDIF
+	CALL ONCE_E_KX1
+ENDIF</textarea><br>
+<br>
+;------------------------------------------------------<br>
+；以下の@で始まる関数二つを口上ファイルの一番下にでもつけ足せば動くはず。<br>
+;------------------------------------------------------<br>
+<font color="#8000ff">@ONCE_S_K</font><font color="#ff0000">X1</font><br>
+REPEAT 
+10<br>
+　　　　L:COUNT = 0<br>
+REND<br>
+M = CFLAG:O<br>
+IF M &gt;= 1000000000<br>
+　　　　L:9 
+= 1<br>
+　　　　M -= 1000000000<br>
+ENDIF<br>
+IF M &gt;= 100000000<br>
+　　　　L:8 = 
+1<br>
+　　　　M -= 100000000<br>
+ENDIF<br>
+IF M &gt;= 10000000<br>
+　　　　L:7 = 1<br>
+　　　　M 
+-= 10000000<br>
+ENDIF<br>
+IF M &gt;= 1000000<br>
+　　　　L:6 = 1<br>
+　　　　M -= 
+1000000<br>
+ENDIF<br>
+IF M &gt;= 100000<br>
+　　　　L:5 = 1<br>
+　　　　M -= 
+100000<br>
+ENDIF<br>
+IF M &gt;= 10000<br>
+　　　　L:4 = 1<br>
+　　　　M -= 
+10000<br>
+ENDIF<br>
+IF M &gt;= 1000<br>
+　　　　L:3 = 1<br>
+　　　　M -= 1000<br>
+ENDIF<br>
+IF 
+M &gt;= 100<br>
+　　　　L:2 = 1<br>
+　　　　M -= 100<br>
+ENDIF<br>
+IF M &gt;= 10<br>
+　　　　L:1 
+= 1<br>
+　　　　M -= 10<br>
+ENDIF<br>
+IF M &gt;= 1<br>
+　　　　L:0 = 1<br>
+ENDIF<br>
+M = 0 
+<p><font color="#8000ff">@ONCE_E_K</font><font color="#ff0000">X1</font><br>
+;お終いの処理<br>
+IF N == 0 &amp;&amp; L:0 == 
+0<br>
+　　　　CFLAG:O += 1<br>
+ELSEIF N != 0 &amp;&amp; L:N == 0<br>
+　　　　M = 
+1<br>
+　　　　REPEAT N<br>
+　　　　　　　　M = M * 10<br>
+　　　　REND<br>
+　　　　CFLAG:O += 
+M<br>
+ENDIF<br>
+<textarea rows="3" cols="80">@ONCE_S_KX1
+REPEAT 10
+	L:COUNT = 0
+REND
+M = CFLAG:O
+IF M &gt;= 1000000000
+	L:9 = 1
+	M -= 1000000000
+ENDIF
+IF M &gt;= 100000000
+	L:8 = 1
+	M -= 100000000
+ENDIF
+IF M &gt;= 10000000
+	L:7 = 1
+	M -= 10000000
+ENDIF
+IF M &gt;= 1000000
+	L:6 = 1
+	M -= 1000000
+ENDIF
+IF M &gt;= 100000
+	L:5 = 1
+	M -= 100000
+ENDIF
+IF M &gt;= 10000
+	L:4 = 1
+	M -= 10000
+ENDIF
+IF M &gt;= 1000
+	L:3 = 1
+	M -= 1000
+ENDIF
+IF M &gt;= 100
+	L:2 = 1
+	M -= 100
+ENDIF
+IF M &gt;= 10
+	L:1 = 1
+	M -= 10
+ENDIF
+IF M &gt;= 1
+	L:0 = 1
+ENDIF
+M = 0
+
+
+
+@ONCE_E_KX1
+;お終いの処理
+IF N == 0 &amp;&amp; L:0 == 0
+	CFLAG:O += 1
+ELSEIF N != 0 &amp;&amp; L:N == 0
+	M = 1
+	REPEAT N
+		M = M * 10
+	REND
+	CFLAG:O += M
+ENDIF</textarea><br>
+</p></font></font></body></html>

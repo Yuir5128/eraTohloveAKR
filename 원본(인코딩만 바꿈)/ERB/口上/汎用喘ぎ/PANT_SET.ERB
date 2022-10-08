@@ -1,0 +1,652 @@
+﻿
+;汎用喘ぎ呼び出し
+@PANT_VOICE_EX
+;選択したコマンドが喘ぎ表示にふさわしいか判定
+;歌わせてるのに喘ぎ出したりしないように
+CALL COMMON_KOJO_EX
+SELECTCASE RESULT
+	;薬、主人マゾ系、スカ系、場所移動
+	CASE 0, 13, 14, 15, 18, 19
+		RETURN 0
+ENDSELECT
+
+
+;喘ぎ系統のオプション/無し
+;PANT_E	= 0 :オプションなし
+;		= 1 :絶叫系喘ぎ禁止
+;		= 2 :みさくら語モード
+;		= 3 :絶叫系喘ぎ禁止＋みさくら語モード
+;		= 4 :淫語モード
+;		= 5 :絶叫系喘ぎ禁止＋淫語モード
+;		= 6 :みさくら語モード＋淫語モード
+;		= 7 :絶叫系喘ぎ禁止＋みさくら語モード＋淫語モード
+PANT_E = 0
+
+;その他変数を初期化
+;喘ぎ回数指定/無し
+PANT_F = 0
+;喘ぎパターン指定/無し
+PANT_G = 0
+
+PANT_A = 0
+
+;共通のもの、特定の調教者の場合のもの、どちらも設定されていない
+IF CFLAG:TARGET:632 == 0 && CFLAG:TARGET:634 == 0
+	CALL PANT_VOICE_REFERENCE
+	PANT_A = RESULT
+	PANT_E = RESULT:1
+	PANT_F = RESULT:2
+	PANT_G = RESULT:3
+ELSE
+	;特定の調教者の場合の汎用喘ぎが設定されている
+	IF CFLAG:TARGET:634 % 10 >0
+		;LOCAL:1に特定の調教者の種類を格納（1.審神者|2.思慕・畏怖対象|3.その他特定キャラ）
+		;LOCAL:2にキャラの固有番号を格納
+		LOCAL:1 = CFLAG:634 % 10
+		LOCAL:2 = CFLAG:634 / 10
+		
+		;調教者が審神者か思慕・畏怖対象か特定のキャラ　かつ　その場合の汎用喘ぎ設定が設定されているなら、それを使用
+		IF (LOCAL:1 == 1 && NO:PLAYER == 0) || (LOCAL:1 == 2 && NO:PLAYER == CFLAG:41) || (LOCAL:1 == 3 && NO:PLAYER == LOCAL:2)
+			LOCAL = CFLAG:633
+		;そうじゃないなら共通の汎用喘ぎ設定を使用
+		ELSE
+			;共通の汎用喘ぎ設定が設定されていない
+			IF CFLAG:632 == 0
+				CALL PANT_VOICE_REFERENCE
+				PANT_A = RESULT
+				PANT_E = RESULT:1
+				PANT_F = RESULT:2
+				PANT_G = RESULT:3
+				LOCAL = PANT_A + PANT_E *10 + PANT_F *100 + PANT_G * 10000
+			ELSE
+				LOCAL = CFLAG:632
+			ENDIF
+		ENDIF
+	;共通の汎用喘ぎ設定のみが設定されている
+	ELSE
+		LOCAL = CFLAG:632
+	ENDIF
+	
+	;使用する設定に則って　一の位にPANT_A、十の位にPANT_E、百千の位にPANT_F、万の位にPANT_Gを代入していく
+	PANT_G = LOCAL / 10000
+	LOCAL = LOCAL - (PANT_G * 10000)
+	PANT_F = LOCAL / 100
+	LOCAL = LOCAL - (PANT_F * 100)
+	PANT_E = LOCAL / 10
+	LOCAL = LOCAL - (PANT_E * 10)
+	PANT_A = LOCAL
+ENDIF
+
+SIF !PANT_A
+	RETURN 0
+
+;汎用喘ぎ呼び出し
+CALL PANT_VOICE
+
+;-------------------------------------------------
+;汎用喘ぎが設定されていない場合に参照する関数
+;分割したついでにAだけでなくE、F、Gについても戻り値で参照できるように
+;ただし、主人が調教者の場合の設定かどうかは戻り値では判断できない
+@PANT_VOICE_REFERENCE
+PANT_A = 0
+PANT_E = 0
+PANT_F = 0
+PANT_G = 0
+SELECTCASE NO:TARGET
+	;乱暴
+	;三日月、小狐、岩融、岩融極、大典太、ソハヤ、鬼丸、一期一振、厚、厚極、後藤、薬研、大包平、鶯、愛染、安定、安定極、不動、獅子王、獅子王極、鶴丸、鶴丸極、日本号、日本号極、南泉、南泉極、肥前、則宗、姫鶴
+	CASE 3,5,9,10,13,15,21,25,33,34,35,49,53,55,61,87,88,120,122,123,130,131,136,137,154,155,168,198,202
+		PANT_A = 1
+		;小狐、一期一振：主人相手だけ敬語
+		SIF (NO:TARGET == 5 || NO:TARGET == 25) && NO:PLAYER == 0
+			PANT_A = 4
+	;標準
+	;にっかり、にっかり極、鳴狐、鳴狐、鯰尾、鯰尾極、蛍丸、蛍丸極、加州、加州極、堀川、堀川極、浦島、浦島極、膝丸、膝丸極、謙信、日向、豊前、南海、松井、地蔵、太閤、村雲
+	CASE 19,20,23,24,27,28,59,60,85,86,99,100,103,104,112,115,146,150,160,166,178,184,190,200
+		PANT_A = 2
+		;鯰尾、堀川、堀川極：主人相手だけ敬語
+		SIF (NO:TARGET == 27 || NO:TARGET == 99 || NO:TARGET == 100) && NO:PLAYER == 0
+			PANT_A = 4
+	;柔らかめ
+	;信濃、乱、包丁、包丁極、物吉、物吉極、亀甲、亀甲極、髭切、髭切極、次郎、小豆、千代金丸、千代金丸極、北谷菜切、桑名、清麿、治金丸
+	CASE 37,45,51,52,67,68,71,72,107,111,134,148,156,157,170,172,176,186
+		PANT_A = 3
+	;敬語
+	;今剣、今剣極、数珠丸、平野、前田、秋田、秋田極、五虎退、五虎退極、村正、村正極、蜻蛉切、蜻蛉切極、江雪、江雪極、宗三、宗三極、毛利、篭手切、白山、古今、五月雨
+	CASE 11,12,17,31,39,41,42,47,48,63,64,65,66,79,80,81,82,142,144,164,182,192
+		PANT_A = 4
+	;武士
+	;石切丸、石切丸極、骨喰、骨喰極、太鼓鐘、燭台切、大般若、小竜、小夜、小夜極、歌仙、兼さん、兼さん極、山姥切、山伏、山伏極、蜂須賀、蜂須賀極、長曽祢、長曽祢極、大倶利伽羅、へし切、不動極、小鳥丸、同田貫、太郎、御手杵、御手杵極、巴形、静形、長義、祢々切丸、水心子、山鳥毛、日光、千鳥、泛塵、福島、七星剣、稲葉
+	CASE 7,8,29,30,69,73,75,77,83,84,89,91,92,95,97,98,101,102,105,106,116,118,121,124,128,132,138,139,140,152,158,162,174,180,188,194,196,204,206,210
+		PANT_A = 6
+		;へし切：主人だけ敬語
+		SIF NO:TARGET == 118 && NO:PLAYER == 0
+			PANT_A = 4
+		;日光：山鳥毛と則宗と姫鶴には敬語
+		SIF NO:TARGET == 188 && (NO:PLAYER == 180 || NO:PLAYER == 198 || NO:PLAYER == 202)
+			PANT_A = 4
+	;土佐弁
+	;陸奥守
+	CASE 93
+		PANT_A = 5
+	;関西弁
+	;国行
+	CASE 57
+		PANT_A = 7
+	;博多弁
+	;博多、博多極
+	CASE 43,44
+		PANT_A = 8
+	CASEELSE
+		IF MALE(TARGET)
+			IF TALENT:反抗的 || TALENT:生意気
+				PANT_A = 1
+			ELSEIF TALENT:素直 || TALENT:大人しい
+				PANT_A = 3
+			ELSEIF TALENT:恥じらい
+				PANT_A = 4
+			ELSEIF TALENT:威圧
+				PANT_A = 6
+			ELSE
+				PANT_A = 2
+			ENDIF
+		ELSE
+			IF TALENT:恥じらい
+				PANT_A = 4
+			ELSEIF TALENT:威圧
+				PANT_A = 2
+			ELSE
+				PANT_A = 3
+			ENDIF
+		ENDIF
+ENDSELECT
+
+RETURN PANT_A, PANT_E, PANT_F, PANT_G
+
+;-------------------------------------------------
+;汎用喘ぎ設定を手動で設定するための関数群
+;@PANT_VOICE_SETTING
+;メインの関数　現在の設定を表示したりCFLAGに格納したりする
+;@PANT_VOICE_SET_A　@PANT_VOICE_SET_E　@PANT_VOICE_SET_F　@PANT_VOICE_SET_G　@PANT_VOICE_SET_CHARA
+;A　E　F　G　および　特定の相手などの設定をするための関数
+;@PANT_VOICE_SET_LIST(ARG)
+;上２つの関数内で参照するための文字列を返す文中関数
+
+;CFLAG:632　普通の設定				（一の位にA、十の位にE、百千の位にF、万の位にGの設定を格納）
+;CFLAG:633　特定相手の場合の設定	（一の位にA、十の位にE、百千の位にF、万の位にGの設定を格納）
+;CFLAG:634　特定相手が誰かを格納する（一の位に特定の調教者の種類、十百千の位はそのキャラの固有番号）
+
+;LOCALは一時的な入れ物代わり
+;PVS_Aでキャラの口調、PVS_Eでオプション、PVS_Fで反復回数、PVS_Gでパターン
+;PVS_Cに調教者を限定した喘ぎ設定、の相手の種類(1.審神者　2.思慕・畏怖対象　3.その他特定キャラ）
+;PVS_C_NUMにPVS_Cで限定した調教者のキャラ固有番号
+;-------------------------------------------------
+@PANT_VOICE_SETTING
+
+;PANT_VOICE_SETの略　CFLAGに入れるまで設定を保持する
+#DIM DYNAMIC PVS_A
+#DIM DYNAMIC PVS_E
+#DIM DYNAMIC PVS_F
+#DIM DYNAMIC PVS_G
+
+;PANT_VOICE_SET_CHARAの略　上が相手の種類　下が固有番号
+#DIM DYNAMIC PVS_C
+#DIM DYNAMIC PVS_C_NUM
+
+;PANT_VOICE_SET_○○_LISTの略　文字列格納するやつ
+#DIMS DYNAMIC PVS_AL
+#DIMS DYNAMIC PVS_EL
+#DIMS DYNAMIC PVS_FL
+#DIMS DYNAMIC PVS_GL
+#DIMS DYNAMIC PVS_CL
+
+;設定しているのが共通か特定の相手の場合かを保持する
+#DIM DYNAMIC PVS
+
+$INPUT_PANT_SET
+
+;変数の初期化
+PVS_A = 0
+PVS_E = 0
+PVS_F = 0
+PVS_G = 0
+
+PVS_C = 0
+PVS_C_NUM = 0
+
+PRINTFORML 汎用喘ぎの設定ができます
+IF CFLAG:632 == 0
+PRINTFORML [0]汎用喘ぎを設定する
+ELSE
+	PRINTFORML [1]汎用喘ぎを確認・削除する
+ENDIF
+IF CFLAG:633 == 0
+	PRINTFORML [2]特定の調教者の場合の汎用喘ぎ設定を設定する
+ELSE
+	PRINTFORML [3]特定の調教者の場合の汎用喘ぎ設定を確認・削除する
+ENDIF
+PRINTFORML [100]戻る
+INPUT
+;設定を確認する
+IF (RESULT == 1 && CFLAG:632 > 0) || ( RESULT == 3 && CFLAG:633 > 0)
+	;共通の設定を確認する
+	IF RESULT == 1
+		PVS = 1
+		LOCAL = CFLAG:632
+		PVS_C = 0
+	;特定の相手のを確認する
+	ELSEIF RESULT == 3
+		PVS = 3
+		LOCAL = CFLAG:633
+		PVS_C = CFLAG:634 % 10
+		PVS_C_NUM = CFLAG:634 / 10
+	ENDIF
+	
+	;CFLAG分解して現在の設定を割り出す
+	PVS_G = LOCAL / 10000
+	LOCAL = LOCAL - (PVS_G * 10000)
+	PVS_F = LOCAL / 100
+	LOCAL = LOCAL - (PVS_F * 100)
+	PVS_E = LOCAL / 10
+	LOCAL = LOCAL - (PVS_E * 10)
+	PVS_A = LOCAL
+	
+	$INPUT_PANT_SET_MAIN_MENU
+	;設定から文字を呼ぶ
+	LOCAL = PVS_A
+		PVS_AL = %PANT_VOICE_SET_LIST(LOCAL)%
+	LOCAL = PVS_E + 20
+		PVS_EL = %PANT_VOICE_SET_LIST(LOCAL)%
+	LOCAL = PVS_G + 40
+		PVS_GL = %PANT_VOICE_SET_LIST(LOCAL)%
+	
+	;Fの設定は下の文中関数で参照しないので後で処理
+	LOCALS = {PVS_F}
+		PVS_FL = %LOCALS%
+	
+	;特定の相手の場合
+	IF PVS >= 2
+		IF PVS_C == 1
+			PVS_CL = 審神者
+		ELSEIF PVS_C == 2
+			PVS_CL = %CSVNAME(PVS_C_NUM,0)%　（思慕・畏怖対象）
+		ELSEIF PVS_C == 3
+			PVS_CL = %CSVNAME(PVS_C_NUM,0)%
+		ELSE
+			PVS_CL = 指定なし
+		ENDIF
+	ENDIF
+	
+	;メニュー画面
+	PRINTL 
+	PRINTFORML 現在の汎用喘ぎの設定はこうなっています
+		PRINTFORML 口調　　　　　%PVS_AL%
+		PRINTFORML オプション　　%PVS_EL%
+		PRINTFORML 反復回数　　　%PVS_FL%　回
+		PRINTFORML 喘ぎパターン　%PVS_GL%
+	SIF PVS_C > 0 || PVS >= 2
+		PRINTFORML 調教者　　　　%PVS_CL%
+	PRINTFORML 変更しますか？
+	PRINTFORML
+	PRINTFORML [0]設定せず戻る
+	PRINTFORML [1]口調を変更する
+	PRINTFORML [2]オプションを変更する
+	PRINTFORML [3]繰り返し回数を変更する
+	PRINTFORML [4]喘ぎパターンを変更する
+	SIF PVS_C > 0 || PVS >= 2
+		PRINTFORML [5]調教者を変更する
+	SIF CFLAG:632 > 0 || CFLAG:633 > 0
+		PRINTFORML [99]設定を削除する
+	PRINTFORML [100]これでいい
+	INPUT
+	SELECTCASE RESULT
+		CASE 0 
+			RETURN 0
+		CASE 1
+			CALL PANT_VOICE_SET_A
+			PVS_A = RESULT
+			;設定したら、現在の設定を表示する箇所に飛ぶ　以下同様
+			GOTO INPUT_PANT_SET_MAIN_MENU
+		CASE 2
+			CALL PANT_VOICE_SET_E
+			PVS_E = RESULT
+			GOTO INPUT_PANT_SET_MAIN_MENU
+		CASE 3
+			CALL PANT_VOICE_SET_F
+			PVS_F = RESULT
+			GOTO INPUT_PANT_SET_MAIN_MENU
+		CASE 4
+			CALL PANT_VOICE_SET_G
+			PVS_G = RESULT
+			GOTO INPUT_PANT_SET_MAIN_MENU
+		CASE 5
+			CALL PANT_VOICE_SET_CHARA
+			PVS_C = RESULT
+			PVS_C_NUM = RESULT:1
+			GOTO INPUT_PANT_SET_MAIN_MENU
+		CASE 99
+			PRINTFORML 設定を削除します
+			PRINTFORML 本当によろしいですか？
+			PRINTFORML [0]削除する 
+			PRINTFORML [1]やめておく
+			$INPUT_PANT_SET_DELETE
+			INPUT
+			IF RESULT == 0
+				;現在確認している設定が特定の相手のだった場合
+				IF PVS_C > 0
+					CFLAG:633 = 0
+					CFLAG:634 = 0
+				ELSE
+					CFLAG:632 = 0
+				ENDIF
+				PRINTFORML 設定を削除しました
+				GOTO INPUT_PANT_SET
+			ELSEIF RESULT == 1
+				GOTO INPUT_PANT_SET_MAIN_MENU
+			ELSE
+				GOTO INPUT_PANT_SET_DELETE
+			ENDIF
+		CASE 100
+			
+			;特定の相手の場合のを設定していたのに、調教者が指定なしになっている
+			IF PVS >= 2 && PVS_C == 0
+				PRINTFORML 調教者が「指定なし」になっています
+				PRINTFORML 現在の設定を調教者に問わない、共通のものとして設定しますか？
+				SIF CFLAG:633 > 0
+					PRINTFORML （特定の相手の設定は以前の状態が維持されます）
+				PRINTL [0]共通のものとして設定する
+				PRINTL [1]選び直す
+				$INPUT_PANT_SET_CHECK
+				INPUT
+				IF RESULT == 0
+					PVS = 1
+					PRINTFORM 共通のものとして
+				ELSEIF RESULT == 1
+					GOTO INPUT_PANT_SET_MAIN_MENU
+				ELSE
+					GOTO INPUT_PANT_SET_CHECK
+				ENDIF
+			ENDIF
+			
+			PRINTFORML 汎用喘ぎを設定しました
+			PRINTL 
+			;ここで初めてCFLAGに設定を格納していく
+			
+			;共通のものを設定した
+			IF PVS <= 1
+				SIF CFLAG:632 > 0
+					CFLAG:632 = 0
+				;一の位にA、十の位にE、百千の位にF、万の位にGを格納
+				CFLAG:632 = PVS_A + (PVS_E * 10) + (PVS_F * 100) + (PVS_G * 10000)
+			
+			;特定の相手のものを設定した
+			ELSE
+				SIF CFLAG:633 > 0
+					CFLAG:633 = 0
+				SIF CFLAG:634 > 0
+					CFLAG:634 = 0
+				
+				;一の位にA、十の位にE、百千の位にF、万の位にGを格納
+				CFLAG:633 = PVS_A + (PVS_E * 10) + (PVS_F * 100) + (PVS_G * 10000)
+				
+				;一の位に特定の調教者の種類、十百千の位はそのキャラの固有番号
+				CFLAG:634 = PVS_C + (PVS_C_NUM * 10)
+			ENDIF
+			
+			;特定の相手の場合のを設定していて、共通のものの設定がされていない場合
+			IF PVS >= 2 && CFLAG:632 == 0
+				PRINTFORML 調教者を問わない、共通のものの設定がありません
+				PRINTFORML 現在の設定を共通のものとして流用しますか？
+				PRINTL [0]共通のものにも流用する
+				PRINTL [1]しない
+				$INPUT_PANT_SET_CHECK2
+				INPUT
+				IF RESULT == 0
+					PRINTL 共通のものとして汎用喘ぎを設定しました
+					CFLAG:632 = CFLAG:633
+				ELSEIF RESULT == 1
+					PRINTL 
+				ELSE
+					GOTO INPUT_PANT_SET_CHECK2
+				ENDIF
+			ENDIF
+			
+			GOTO INPUT_PANT_SET
+		CASEELSE
+			GOTO INPUT_PANT_SET_MAIN_MENU
+	ENDSELECT
+
+;一から設定する場合は必ずAの口調から設定
+ELSEIF (RESULT == 0 && CFLAG:632 ==0) || (RESULT == 2 && CFLAG:633 == 0)
+	
+	IF RESULT == 0
+		PVS = 0
+	ELSE
+		PVS = 2
+	ENDIF
+	PRINTFORML 汎用喘ぎの設定をします
+		CALL PANT_VOICE_SET_A
+		PVS_A = RESULT
+		GOTO INPUT_PANT_SET_MAIN_MENU
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_PANT_SET
+ENDIF
+
+;Aの設定
+@PANT_VOICE_SET_A
+$INPUT_PANT_SET_A
+PRINTFORML キャラの口調はどうしますか？（1-8）
+
+CALL PANT_VOICE_REFERENCE
+	LOCALS = %PANT_VOICE_SET_LIST(RESULT)%
+PRINTFORML デフォルトの設定　%LOCALS%
+
+	;文字を呼んで繰り返しで表示する
+	FOR LOCAL, 1, 9
+		LOCALS = %PANT_VOICE_SET_LIST(LOCAL)%
+		PRINTFORML [{LOCAL}] %LOCALS%
+	NEXT
+	INPUT
+	SELECTCASE RESULT
+		CASE 1 TO 8
+			LOCAL = RESULT
+		CASEELSE
+			GOTO INPUT_PANT_SET_A
+	ENDSELECT
+	LOCALS = %PANT_VOICE_SET_LIST(LOCAL)%
+	PRINTFORMW 口調を%LOCALS%に設定しました
+	RETURN RESULT
+
+;Eの設定
+@PANT_VOICE_SET_E
+$INPUT_PANT_SET_E
+PRINTFORML オプションを追加しますか？（0-7）
+
+CALL PANT_VOICE_REFERENCE
+	RESULT:1 += 20
+	LOCALS = %PANT_VOICE_SET_LIST(RESULT:1)%
+PRINTFORML デフォルトの設定　%LOCALS%
+
+	;文字を呼んで繰り返しで表示する
+	FOR LOCAL, 0, 8
+		LOCAL:1 = LOCAL + 20
+		LOCALS = %PANT_VOICE_SET_LIST(LOCAL:1)%
+		PRINTFORML [{LOCAL}] %LOCALS%
+	NEXT
+	INPUT
+	SELECTCASE RESULT
+		CASE 0 TO 7
+			LOCAL:1 = RESULT + 20
+		CASEELSE
+			GOTO INPUT_PANT_SET_E
+	ENDSELECT
+	LOCALS = %PANT_VOICE_SET_LIST(LOCAL:1)%
+	PRINTFORMW オプションを%LOCALS%に設定しました
+	RETURN RESULT
+
+;Fの設定
+@PANT_VOICE_SET_F
+$INPUT_PANT_SET_F
+PRINTFORML 反復回数はどうしますか？（0-10）
+
+CALL PANT_VOICE_REFERENCE
+	LOCALS = {RESULT:2}
+PRINTFORML デフォルトの設定　%LOCALS%回
+
+	INPUT
+	SELECTCASE RESULT
+		CASE 0 TO 10
+			LOCAL = RESULT
+		CASEELSE
+			GOTO INPUT_PANT_SET_F
+	ENDSELECT
+	LOCALS = {LOCAL}
+	PRINTFORMW 反復回数を%LOCALS%回に設定しました
+	RETURN RESULT
+
+;Gの設定
+@PANT_VOICE_SET_G
+$INPUT_PANT_SET_G
+	PRINTFORML 喘ぎパターンはどうしますか？（0-7）
+	PRINTFORML 喘ぎパターンを設定すると、感度や素質に関わらず設定したパターンで喘ぐようになります
+	
+	CALL PANT_VOICE_REFERENCE
+	RESULT:3 += 40
+	LOCALS = %PANT_VOICE_SET_LIST(RESULT:3)%
+	PRINTFORML デフォルトの設定　%LOCALS%
+
+	;文字を呼んで繰り返しで表示する
+	FOR LOCAL, 0, 8
+		LOCAL:1 = LOCAL + 40
+		LOCALS = %PANT_VOICE_SET_LIST(LOCAL:1)%
+		PRINTFORML [{LOCAL}] %LOCALS%
+	NEXT
+	INPUT
+	SELECTCASE RESULT
+		CASE 0 TO 7
+			LOCAL:1 = RESULT + 40
+		CASEELSE
+			GOTO INPUT_PANT_SET_G
+	ENDSELECT
+	LOCALS = %PANT_VOICE_SET_LIST(LOCAL:1)%
+	PRINTFORMW 喘ぎパターンを%LOCALS%に設定しました
+	RETURN RESULT
+
+;特定の調教者の設定
+@PANT_VOICE_SET_CHARA
+$INPUT_PANT_SET_C
+PRINTFORML 特定の調教者の場合のみの喘ぎ設定にしますか？
+PRINTFORML [0]指定しない
+PRINTFORML [1]調教者が審神者
+;思慕畏怖対象がいる場合
+SIF CFLAG:40 > 0
+	PRINTFORML [2]調教者が思慕・畏怖対象
+PRINTFORML [3]調教者が特定の男士（1人のみ）
+INPUT
+	SELECTCASE RESULT
+		;指定しない
+		CASE 0
+			LOCAL = 0
+			LOCAL:1 = 0
+		;審神者
+		CASE 1
+			LOCAL = 1
+			LOCAL:1 = 0
+			PRINTFORML 審神者が調教者の場合に設定しました
+		;思慕・畏怖対象
+		CASE 2
+			LOCAL = 2
+			LOCAL:1 = CFLAG:41
+			PRINTFORML %CSVNAME(LOCAL:1,0)%（思慕・畏怖対象）が調教者の場合に設定しました
+		;特定の男士　（審神者や子供も設定できる）
+		CASE 3
+			LOCAL = 3
+			PRINTFORML 調教者が特定の男士の場合の汎用喘ぎ設定を作成します
+			;手元にいるキャラを登録番号順に表示する
+			FOR LOCAL:3 ,0, CHARANUM
+				PRINTFORML [{LOCAL:3}]%CALLNAME:(LOCAL:3)%
+			NEXT
+			PRINTFORML [1000]戻る
+			$INPUT_PANT_SET_C_NUM
+			INPUT
+			IF RESULT == 1000
+				GOTO INPUT_PANT_SET_C
+			;いないキャラだと駄目
+			ELSEIF RESULT > LOCAL:3
+				GOTO INPUT_PANT_SET_C_NUM
+			;審神者（あなた、は常に登録番号が0番）
+			ELSEIF RESULT == 0
+				LOCAL = 1
+				LOCAL:1 = 0
+				PRINTFORML 審神者が調教者の場合に設定しました
+			ELSE
+				LOCAL:1 = NO:(RESULT)
+				PRINTFORML %CSVNAME(LOCAL:1,0)%が調教者の場合に設定しました
+			ENDIF
+		CASEELSE
+			GOTO INPUT_PANT_SET_C
+	ENDSELECT
+	RETURN LOCAL, LOCAL:1
+
+;上で使う文字列返すだけの文中関数
+@PANT_VOICE_SET_LIST(ARG)
+#FUNCTIONS
+SELECTCASE ARG
+	;ここからPVS_AL　Aの設定で参照する
+	CASE 1
+		LOCALS = 乱暴
+	CASE 2
+		LOCALS = 標準
+	CASE 3
+		LOCALS = 柔らかめ
+	CASE 4
+		LOCALS = 敬語
+	CASE 5
+		LOCALS = 土佐弁
+	CASE 6
+		LOCALS = 武士
+	CASE 7
+		LOCALS = 関西弁
+	CASE 8
+		LOCALS = 博多弁
+	;ここからPVS_EL　Eの設定で参照する
+	CASE 20
+		LOCALS = なし
+	CASE 21
+		LOCALS = 絶叫系喘ぎ禁止
+	CASE 22
+		LOCALS = みさくら語モード
+	CASE 23
+		LOCALS = 絶叫系喘ぎ禁止＋みさくら語モード
+	CASE 24
+		LOCALS = 淫語モード
+	CASE 25
+		LOCALS = 絶叫系喘ぎ禁止＋淫語モード
+	CASE 26
+		LOCALS = みさくら語モード＋淫語モード
+	CASE 27
+		LOCALS = 絶叫系喘ぎ禁止＋みさくら語モード＋淫語モード
+	;ここからPVS_GL　Gの設定で参照する
+	CASE 40
+		LOCALS = なし
+	CASE 41
+		LOCALS = 弱快感
+	CASE 42
+		LOCALS = 快感LV2
+	CASE 43
+		LOCALS = 快感LV3
+	CASE 44
+		LOCALS = 快感LV4
+	CASE 45
+		LOCALS = 苦痛LV1
+	CASE 46
+		LOCALS = 苦痛LV2
+	CASE 47
+		LOCALS = 口が塞がってる(ボールギャグ・触手口虐中以外)
+	CASEELSE
+		LOCALS = 指定なし
+ENDSELECT
+	RETURNF LOCALS
+

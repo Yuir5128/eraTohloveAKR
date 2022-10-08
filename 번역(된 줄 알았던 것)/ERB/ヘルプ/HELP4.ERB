@@ -1,0 +1,61 @@
+﻿;--------------------------------------------------
+;이 파일내에서는 캐릭터에 대한 기술이 있습니다.
+;--------------------------------------------------
+;=============================================================================
+;용어 사전――캐릭터
+;=============================================================================
+;--------------------------------------------------
+;캐릭터 해설 메인 페이지
+;--------------------------------------------------
+@DICTIONARY_CHARA_MAIN
+P = 0
+FLAG:45 = 0
+$CHARA_HELP
+DRAWLINE
+
+PRINTFORML 설명을 알고 싶은 캐릭터의 번호를 입력해 주세요. ＜page. {P+1}/＞
+DRAWLINE
+
+LOCAL = 0
+FOR LOCAL, 1, FLAG:44, 1
+	;CSV가 존재하지 않는 캐릭터는 제외
+	SIF !EXISTCSV(LOCAL, 0)
+		CONTINUE
+	;아이는 제외
+	SIF GROUPMATCH(CSVNAME(LOCAL, 0), "아이 1", "아이 2", "아이 3", "아이 4", "아이 5", "아이 6", "아이 7", "아이 8", "아이 9", "아이 10")
+		CONTINUE
+	
+	PRINTFORMLC [{LOCAL}] %CSVNAME(LOCAL, 0), 20, LEFT%
+		CALL CHECK_NEWLINE
+	
+NEXT
+PRINTL 
+DRAWLINE
+;PRINTFORMLC \@(P <= 0) ? %" " * 18% # [1001]전의 페이지\@
+PRINTLC [1000]돌아온다
+;PRINTFORMLC \@(P >= P:1) ? %" " * 18% # [1009]후의 페이지\@
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+;ELSEIF RESULT == 1001 && P > 0
+;	P -= 1
+;	GOTO CHARA_HELP
+;ELSEIF RESULT == 1009 && P < P:1
+;	P += 1
+;	GOTO CHARA_HELP
+ELSEIF RESULT < 0 || RESULT > FLAG:44 || !EXISTCSV(RESULT, 0)
+	GOTO CHARA_HELP
+ELSE
+	IF FLAG:43
+		LOCALS = %NAME_NATION(RESULT)%
+	ELSE
+		CSVNAME RESULT, 0
+		LOCALS = %RESULTS%
+	ENDIF
+	CALL CHARA_MANUAL(RESULT, 1)
+	PRINTW
+ENDIF
+GOTO CHARA_HELP
+

@@ -1,0 +1,144 @@
+﻿;-------------------------------------------------
+;フェラする
+;Ｐ系調教コマンド
+;-------------------------------------------------
+@COM31
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;すでに挿入命令中は「サンドイッチ」
+	IF PREVCOM == 405 || PREVCOM == 406
+		CALL COM_ABLE515
+		IF RESULT == 1
+			TFLAG:40 = 3
+			IF PREVCOM == 405
+				TFLAG:41 = 1
+			ELSE
+				TFLAG:41 = 2
+			ENDIF
+			TFLAG:49 = 0
+			JUMP COM515
+		ENDIF
+	;前回コマンドが助手に犯させるとき、「サンドイッチさせる」
+	ELSEIF PREVCOM == 270 || PREVCOM == 271
+		CALL COM_ABLE520
+		IF RESULT == 1
+			TFLAG:40 = 3
+			IF PREVCOM == 270
+				TFLAG:41 = 6
+			ELSE
+				TFLAG:41 = 7
+			ENDIF
+			TFLAG:49 = 0
+			JUMP COM520
+		ENDIF
+	;前回の調教がフェラチオ、クンニ強制、シックスナインだとシックスナインに派生
+	ELSEIF PREVCOM == 71 || PREVCOM == 222 || PREVCOM == 503
+		CALL COM_ABLE503
+		SIF RESULT == 1
+			JUMP COM503
+	;前回がサンドイッチか、サンドイッチさせる
+	ELSEIF PREVCOM == 515 || PREVCOM == 520
+		;助手が奴隷に挿入してれば再び「サンドイッチ」に
+		IF TFLAG:41 == 1 || TFLAG:41 == 2
+			CALL COM_ABLE515
+			IF RESULT == 1
+				TFLAG:40 = 3
+				TFLAG:49 = 0
+				JUMP COM515
+			ENDIF
+		;助手が主人に挿入してると「サンドイッチさせる」に
+		ELSEIF TFLAG:41 == 6 || TFLAG:41 == 7
+			CALL COM_ABLE520
+			IF RESULT == 1
+				TFLAG:40 = 3
+				TFLAG:49 = 0
+				JUMP COM520
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;尿意が高い、もしくは尿意があってカテーテル装着中は飲尿するに派生
+IF BASE:尿意 >= 90 || (BASE:尿意 >= 60 && TEQUIP:カテーテル)
+	CALL COM_ABLE285
+	SIF RESULT == 1
+		JUMP COM285
+ENDIF
+
+;何も読まずにこっちに来たときはフラグ解除
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL フェラする
+STR:0 = フェラする
+
+CALL KOJO_MESSAGE_COM
+
+;ストッキングびりびりフラグ
+IF TEQUIP:特殊２ == 5 || TEQUIP:特殊２ == 6
+	TFLAG:55 = 1
+ENDIF
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費体力、気力
+LOSEBASE:体力 += 10
+LOSEBASE:気力 += 50
+
+SOURCE:快Ｃ += 150
+
+;調教者のTALENT:舌使いをみる
+IF TALENT:PLAYER:舌使い
+	TIMES SOURCE:快Ｃ , 1.50
+ELSEIF TALENT:PLAYER:猫舌
+	TIMES SOURCE:快Ｃ , 0.75
+ENDIF
+
+SOURCE:露出 += 20
+SOURCE:逸脱 += 20
+SOURCE:反発 += 20
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;抑圧、抵抗持ちには、抑鬱ソース追加
+SIF TALENT:抑圧 || TALENT:抵抗
+	SOURCE:鬱屈 += 20
+
+;スキンシップ好きだと情愛のソース追加
+SIF TALENT:スキンシップ好き
+	SOURCE:情愛 += 50
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+CALL COM_STAIN
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;ゲイ経験とか加算
+CALL COM_EXP(5)
+
+;調教者が猫舌持ちの場合は、調教者に嗜虐快楽経験を追加
+IF TALENT:PLAYER:猫舌
+	EXP:PLAYER:嗜虐快楽経験 += 1
+	PRINTFORML %CALLNAME:PLAYER%の嗜虐快楽経験＋１
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+
+RETURN 1
+
+
+

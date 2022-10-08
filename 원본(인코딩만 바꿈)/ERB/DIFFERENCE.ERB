@@ -1,0 +1,1071 @@
+﻿;-------------------------------------------------
+;個体差関連の関数
+;-------------------------------------------------
+;-------------------------------------------------
+;仕様メモ
+;※CSVの素質優先のビットがオンのとき
+;【小人体型/小柄体型/大柄体型/上戸/下戸/子供サイズ/短小/包茎/メシマズ/料理上手】がCSVで設定されている場合はそちらが優先され
+;相反する素質がつくことはない
+;
+;引　数:ARG…キャラ登録番号
+;
+;FLAG:3 = ▲個体差設定フラグ
+;1:CSVの素質優先 |2:性転換 |4:半陰半陽　ふたなり |8:オメガ |16:ショタ化 |32:大型化 |64:濡れやすさ |128:酒の弱さ
+;|256:鈍感　敏感 |512:ペニスの大きさ |1024:ペニスの特徴 |2048:胸の大きさ |4096:その他
+;
+;CFLAG:4   = ▲個体差記録フラグ
+;1桁目	個体差フラグオンオフ（0,個体差なし　1,CSVの素質優先　2,個体差優先）
+;2		性別（0,オトコ　1,（オンナ）　2,半陰半陽　3,ふたなり　4,カントボーイ　5,シーメール）
+;3		性別　オメガバース（0,なし　1,オメガ）
+;4		体格（0,なし　1,小人体型　2,小柄体型　3,普通体型　4,大柄体型）
+;5		濡れやすさ（0,なし　1,濡れやすい　3,普通　3,濡れにくい）
+;6		酒の弱さ（0,なし　1,上戸　3,普通　3,下戸）
+;7		Ｃ鈍感敏感(0,なし　1,Ｃ鈍感,　2,Ｃ敏感)
+;8		Ｖ鈍感敏感(0,なし　1,Ｖ鈍感,　2,Ｖ敏感)
+;9		Ａ鈍感敏感(0,なし　1,Ａ鈍感,　2,Ａ敏感)
+;10		Ｂ鈍感敏感(0,なし　1,Ｂ鈍感,　2,Ｂ敏感　3，陥没乳首)
+;11		ペニスの大きさ（0,なし　1,子供サイズ　2,短小　3,普通　4,巨根　5,馬並み）
+;12		ペニスの特徴（0,なし　1,早漏　2,遅漏　3,絶倫　4,包茎）
+;13		胸の大きさ（0,なし　1,絶壁　2,貧乳　3,（並乳）　4,巨乳　5,爆乳）
+;14		その他（0,なし　1,パイパン　2,メシマズ　3,薬毒耐性　4,母乳体質）
+;
+;※あくまで個体差の処理をする際についたもののみを記録し、もともとCSVで設定されているものは記録しない
+;　ただし重複して記録される場合もある（例：CSVで包茎のキャラが個体差によって包茎を得た場合）
+;-------------------------------------------------
+@DIFF_MAIN(ARG)
+;念のため初期化
+CFLAG:ARG:4 = 0
+
+;性別関連
+IF (FLAG:3 & 2) || (FLAG:3 & 4)
+	CALL DIFF_SEX(ARG)
+	CFLAG:ARG:4 += (POWER(10,1) * RESULT)
+ENDIF
+
+IF (FLAG:3 & 8) && MALE(ARG)
+	CALL DIFF_SEX_OMEGA(ARG)
+	CFLAG:ARG:4 += (POWER(10,2) * RESULT)
+ENDIF
+
+;体格関連
+IF (FLAG:3 & 16) || (FLAG:3 & 32)
+	CALL DIFF_BODY(ARG)
+	CFLAG:ARG:4 += (POWER(10,3) * RESULT)
+ENDIF
+
+;濡れやすさ
+IF (FLAG:3 & 64)
+	CALL DIFF_WET(ARG)
+	CFLAG:ARG:4 += (POWER(10,4) * RESULT)
+ENDIF
+
+;酒の弱さ
+IF (FLAG:3 & 128)
+	CALL DIFF_DRINK(ARG)
+	CFLAG:ARG:4 += (POWER(10,5) * RESULT)
+ENDIF
+
+;敏感鈍感
+;部位ごとに三分の一の確率で付与
+IF (FLAG:3 & 256)
+	;Ｃ
+	IF RAND:3 == 0
+		CALL DIFF_WEAK_C(ARG)
+		CFLAG:ARG:4 += (POWER(10,6) * RESULT)
+	ENDIF
+	;Ｖ
+	IF VAGINA(ARG) && RAND:3 == 0
+		CALL DIFF_WEAK_V(ARG)
+		CFLAG:ARG:4 += (POWER(10,7) * RESULT)
+	ENDIF
+	
+	;Ａ
+	IF RAND:3 == 0
+		CALL DIFF_WEAK_A(ARG)
+		CFLAG:ARG:4 += (POWER(10,8) * RESULT)
+	ENDIF
+	
+	;Ｂ
+	IF RAND:3 == 0
+		CALL DIFF_WEAK_B(ARG)
+		CFLAG:ARG:4 += (POWER(10,9) * RESULT)
+	ENDIF
+
+ENDIF
+
+;ペニスの大きさ
+IF (FLAG:3 & 512) && PENIS(ARG)
+	CALL DIFF_PENIS_SIZE(ARG)
+	CFLAG:ARG:4 += (POWER(10,10) * RESULT)
+ENDIF
+
+;ペニスの特徴
+IF (FLAG:3 & 1024) && PENIS(ARG)
+	CALL DIFF_PENIS_CHARA(ARG)
+	CFLAG:ARG:4 += (POWER(10,11) * RESULT)
+ENDIF
+
+;胸の大きさ
+IF (FLAG:3 & 2048) && MALE(ARG) == 0
+	CALL DIFF_BREAST_SIZE(ARG)
+	CFLAG:ARG:4 += (POWER(10,12) * RESULT)
+ENDIF
+
+
+;その他
+IF (FLAG:3 & 4096)
+	CALL DIFF_ANOTHER(ARG)
+	CFLAG:ARG:4 += (POWER(10,13) * RESULT)
+ENDIF
+
+;何らかの個体差を得た場合
+IF CFLAG:ARG:4 > 0
+	
+	;個体差フラグオンオフ
+	;CSVの素質優先
+	IF (FLAG:3 & 1)
+		CFLAG:ARG:4 += (POWER(10,0) * 1)
+	;個体差優先
+	ELSE
+		CFLAG:ARG:4 += (POWER(10,0) * 2)
+	ENDIF
+
+	PRINTL 
+	PRINTL 
+	PRINTL ……！
+	PRINTFORML 迎え入れた%CALLNAME:ARG%は、どうやら通常とは少し異なる個体のようだ
+	PRINTFORM 得た素質：
+				CALL DIFF_TALENT_NAME(ARG)
+	PRINTL
+	PRINTL 
+	
+ENDIF
+
+
+;-------------------------------------------------
+;以下、個体差を得る処理
+;-------------------------------------------------
+;性別（オトコ　（オンナ）　半陰半陽　ふたなり　カントボーイ　シーメール）
+@DIFF_SEX(ARG)
+TALENT:ARG:オトコ = 0
+TALENT:ARG:半陰半陽 = 0
+TALENT:ARG:ふたなり = 0
+TALENT:ARG:カントボーイ = 0
+TALENT:ARG:シーメール = 0
+
+TALENT:ARG:処女 = 0
+TALENT:ARG:童貞 = 0
+
+;半陰半陽とふたなりとカントボーイとシーメール
+IF (FLAG:3 & 4) && RAND:10 == 0
+	IF RAND:4 == 0
+		TALENT:ARG:半陰半陽 = 1
+		TALENT:ARG:処女 = 1
+		TALENT:ARG:童貞 = 1
+		RETURN 2
+	ELSEIF RAND:3 == 0
+		TALENT:ARG:ふたなり = 1
+		TALENT:ARG:処女 = 1
+		TALENT:ARG:童貞 = 1
+		RETURN 3
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:カントボーイ = 1
+		TALENT:ARG:処女 = 1
+		RETURN 4
+	ELSE
+		TALENT:ARG:シーメール = 1
+		TALENT:ARG:童貞 = 1
+		RETURN 5
+	ENDIF
+;オンナ
+ELSEIF (FLAG:3 & 2) && RAND:5 == 0
+	TALENT:ARG:処女 = 1
+	RETURN 1
+;オトコ
+ELSE
+	TALENT:ARG:オトコ = 1
+	TALENT:ARG:童貞 = 1
+	RETURN 0
+ENDIF
+
+;矛盾する素質を削除
+SIF VAGINA(ARG) == 0
+	CALL CLEAR_TALENT_VAGINA(ARG)
+SIF PENIS(ARG) == 0
+	CALL CLEAR_TALENT_PENIS(ARG,3)
+SIF MALE(ARG) == 1
+	CALL CLEAR_TALENT_BREAST(ARG)
+
+
+;オメガ性　※オトコか半陰半陽かカントボーイのときのみ
+@DIFF_SEX_OMEGA(ARG)
+IF RAND:10 == 0
+	TALENT:ARG:オメガ = 1
+	;発情期のカウント　0-6でランダムで初期値を付与
+	CFLAG:ARG:700 = RAND:7
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+;体格（小人体型　小柄体型　大柄体型）
+@DIFF_BODY(ARG)
+IF RAND:10 == 0
+	;大柄体型/小柄体型/小人体型を持っている
+	IF CSVTALENT(NO:ARG, 113 ,0) || CSVTALENT(NO:ARG, 100 ,0) || CSVTALENT(NO:ARG, 142 ,0)
+		;CSVの素質優先ビットオン
+		SIF (FLAG:3 & 1)
+			RETURN 0
+		
+		TALENT:ARG:小人体型 = 0
+		TALENT:ARG:小柄体型 = 0
+		TALENT:ARG:大柄体型 = 0
+		
+		;普通体型になる
+		SIF RAND:4 == 0
+			RETURN 3
+	ENDIF
+	
+	IF (FLAG:3 & 32) && RAND:3 == 0
+		TALENT:ARG:大柄体型 = 1
+		RETURN 4
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:小柄体型 = 1
+		RETURN 2
+	ELSE
+		TALENT:ARG:小人体型 = 1
+		RETURN 1
+	ENDIF
+ELSE
+	;そのまま
+	RETURN 0
+ENDIF
+
+;濡れやすさ（濡れやすい　濡れにくい）
+@DIFF_WET(ARG)
+IF RAND:10 == 0
+	;濡れやすい/濡れにくいを持っている
+	;※現状初期値で持っているキャラはいない
+	IF CSVTALENT(NO:ARG, 42 ,0) || CSVTALENT(NO:ARG, 43 ,0)
+		;CSVの素質優先ビットオン
+		SIF (FLAG:3 & 1)
+			RETURN 0
+		
+		TALENT:ARG:濡れにくい = 0
+		TALENT:ARG:濡れやすい = 0
+		
+		;普通になる
+		SIF RAND:3 == 0
+			RETURN 2
+	ENDIF
+	
+	IF RAND:2 == 0
+		TALENT:ARG:濡れやすい = 1
+		RETURN 1
+	ELSE
+		TALENT:ARG:濡れにくい = 1
+		RETURN 3
+	ENDIF
+ELSE
+	;つかない
+	RETURN 0
+ENDIF
+
+;酒の弱さ（上戸　下戸）
+@DIFF_DRINK(ARG)
+IF RAND:10 == 0
+	;上戸/下戸を持っている
+	IF CSVTALENT(NO:ARG, 48 ,0) || CSVTALENT(NO:ARG, 49 ,0)
+		;CSVの素質優先ビットオン
+		SIF (FLAG:3 & 1)
+			RETURN 0
+		
+		TALENT:ARG:上戸 = 0
+		TALENT:ARG:下戸 = 0
+		
+		;普通になる
+		SIF RAND:3 == 0
+			RETURN 2
+	ENDIF
+	
+	IF RAND:2 == 0
+		TALENT:ARG:上戸 = 1
+		RETURN 1
+	ELSE
+		TALENT:ARG:下戸 = 1
+		RETURN 3
+	ENDIF
+ELSE
+	;つかない
+	RETURN 0
+ENDIF
+
+;Ｃ鈍感敏感
+@DIFF_WEAK_C(ARG)
+IF RAND:2 == 0
+	SIF TALENT:ARG:Ｃ敏感
+		TALENT:ARG:Ｃ敏感 = 0
+	
+	TALENT:ARG:Ｃ鈍感 = 1
+	RETURN 1
+ELSE
+	SIF TALENT:ARG:Ｃ鈍感
+		TALENT:ARG:Ｃ鈍感 = 0
+	
+	TALENT:ARG:Ｃ敏感 = 1
+	RETURN 2
+ENDIF
+
+;Ｖ鈍感敏感
+@DIFF_WEAK_V(ARG)
+IF RAND:2 == 0
+	SIF TALENT:ARG:Ｖ敏感
+		TALENT:ARG:Ｖ敏感 = 0
+	
+	TALENT:ARG:Ｖ鈍感 = 1
+	RETURN 1
+ELSE
+	SIF TALENT:ARG:Ｖ鈍感
+		TALENT:ARG:Ｖ鈍感 = 0
+	
+	TALENT:ARG:Ｖ敏感 = 1
+	RETURN 2
+ENDIF
+
+;Ａ鈍感敏感
+@DIFF_WEAK_A(ARG)
+IF RAND:2 == 0
+	SIF TALENT:ARG:Ａ敏感
+		TALENT:ARG:Ａ敏感 = 0
+	
+	TALENT:ARG:Ａ鈍感 = 1
+	RETURN 1
+ELSE
+	SIF TALENT:ARG:Ａ鈍感
+		TALENT:ARG:Ａ鈍感 = 0
+	
+	TALENT:ARG:Ａ敏感 = 1
+	RETURN 2
+ENDIF
+
+;Ｂ鈍感敏感
+@DIFF_WEAK_B(ARG)
+IF RAND:3 == 0
+	SIF TALENT:ARG:Ｂ敏感
+		TALENT:ARG:Ｂ敏感 = 0
+	
+	TALENT:ARG:Ｂ鈍感 = 1
+	RETURN 1
+ELSEIF RAND:2 == 0
+	SIF TALENT:ARG:Ｂ鈍感
+		TALENT:ARG:Ｂ鈍感 = 0
+	
+	TALENT:ARG:Ｂ敏感 = 1
+	RETURN 2
+ELSE
+	TALENT:ARG:陥没乳首 = 1
+	RETURN 3
+ENDIF
+
+
+;ペニスの大きさ（子供サイズ　短小　巨根　馬並み）
+@DIFF_PENIS_SIZE(ARG)
+IF RAND:3 == 0
+	;子供サイズ/短小/巨根/馬並みを持っている
+	IF CSVTALENT(NO:ARG, 114 ,0) || CSVTALENT(NO:ARG, 115 ,0) || CSVTALENT(NO:ARG, 116 ,0) || CSVTALENT(NO:ARG, 117 ,0)
+		;CSVの素質優先ビットオン
+		SIF (FLAG:3 & 1)
+			RETURN 0
+		
+		;ペニスの大きさ関連の素質削除
+		CALL CLEAR_TALENT_PENIS(ARG,1)
+		
+		;普通になる
+		SIF RAND:5 == 0
+			RETURN 3
+	ENDIF
+
+	IF RAND:4 == 0
+		TALENT:ARG:子供サイズ = 1
+		RETURN 1
+	ELSEIF RAND:3 == 0
+		TALENT:ARG:短小 = 1
+		RETURN 2
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:巨根 = 1
+		RETURN 4
+	ELSE
+		TALENT:ARG:馬並み = 1
+		RETURN 5
+	ENDIF
+ELSE
+	;そのまま
+	RETURN 0
+ENDIF
+
+;ペニスの特徴（早漏　遅漏　絶倫　包茎）
+@DIFF_PENIS_CHARA(ARG)
+IF RAND:5 == 0
+	IF RAND:4 == 0
+		SIF TALENT:ARG:遅漏
+			TALENT:ARG:遅漏 = 0
+		
+		TALENT:ARG:早漏 = 1
+		RETURN 1
+	ELSEIF RAND:3 == 0
+		SIF TALENT:ARG:早漏
+			TALENT:ARG:早漏 = 0
+		
+		TALENT:ARG:遅漏 = 1
+		RETURN 2
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:絶倫 = 1
+		RETURN 3
+	ELSE
+		;CSVの素質優先ビットオン　包茎を持っている
+		SIF (FLAG:3 & 1) && CSVTALENT(NO:ARG, 119 ,0)
+			RETURN 0
+		
+		TALENT:ARG:包茎 = 1
+		RETURN 4
+	ENDIF
+ELSE
+	RETURN 0
+ENDIF
+
+;胸の大きさ（絶壁　貧乳　巨乳　爆乳）
+@DIFF_BREAST_SIZE(ARG)
+IF RAND:3 == 0
+	;胸の大きさ関連の素質削除
+	CALL CLEAR_TALENT_BREAST(ARG)
+	
+	IF RAND:4 == 0
+		TALENT:ARG:絶壁 = 1
+		RETURN 1
+	ELSEIF RAND:3 == 0
+		TALENT:ARG:貧乳 = 1
+		RETURN 2
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:巨乳 = 1
+		RETURN 4
+	ELSE
+		TALENT:ARG:爆乳 = 1
+		RETURN 5
+	ENDIF
+ELSE
+	;並乳
+	RETURN 3
+ENDIF
+
+;その他（パイパン　メシマズ　薬毒耐性　母乳体質）
+@DIFF_ANOTHER(ARG)
+IF RAND:10 == 0
+	IF RAND:4 == 0
+		TALENT:ARG:パイパン = 1
+		RETURN 1
+	ELSEIF RAND:3 == 0
+		;CSVの素質優先ビットオン　料理上手を持っている
+		SIF (FLAG:3 & 1) && CSVTALENT(NO:ARG, 59 ,0)
+			RETURN 0
+		
+		SIF TALENT:ARG:料理上手
+			TALENT:ARG:料理上手 = 0
+		
+		TALENT:ARG:メシマズ = 1
+		RETURN 2
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:薬毒耐性 = 1
+		RETURN 3
+	ELSE
+		;オトコ母乳取得コンフィグオフ
+		SIF (FLAG:2 & 256) == 0
+			RETURN 0
+			
+		TALENT:ARG:母乳体質 = 1
+		RETURN 4
+	ENDIF
+ELSE
+	;つかない
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;関数名:@DIFF_GET_TALENT(ARG:0, ARG:1)
+;概　要:;購入時に取得した素質を求める関数
+;引　数:ARG:0…キャラ登録番号
+;　　　:ARG:1…CFLAG:4の何桁目か（1-14）
+;戻り値:CFLAG:4において、下のように素質に割り当てられている数字
+;備　考:文中関数
+;
+
+;CFLAG:4   = ▲個体差記録フラグ
+;1桁目	個体差フラグオンオフ（0,個体差なし　1,CSVの素質優先　2,個体差優先）
+;2		性別（0,オトコ　1,（オンナ）　2,半陰半陽　3,ふたなり　4,カントボーイ　5,シーメール）
+;3		性別　オメガバース（0,なし　1,オメガ）
+;4		体格（0,なし　1,小人体型　2,小柄体型　3,普通体型　4,大柄体型）
+;5		濡れやすさ（0,なし　1,濡れやすい　3,普通　3,濡れにくい）
+;6		酒の弱さ（0,なし　1,上戸　3,普通　3,下戸）
+;7		Ｃ鈍感敏感(0,なし　1,Ｃ鈍感,　2,Ｃ敏感)
+;8		Ｖ鈍感敏感(0,なし　1,Ｖ鈍感,　2,Ｖ敏感)
+;9		Ａ鈍感敏感(0,なし　1,Ａ鈍感,　2,Ａ敏感)
+;10		Ｂ鈍感敏感(0,なし　1,Ｂ鈍感,　2,Ｂ敏感　3，陥没乳首)
+;11		ペニスの大きさ（0,なし　1,子供サイズ　2,短小　3,普通　4,巨根　5,馬並み）
+;12		ペニスの特徴（0,なし　1,早漏　2,遅漏　3,絶倫　4,包茎）
+;13		胸の大きさ（0,なし　1,絶壁　2,貧乳　3,（並乳）　4,巨乳　5,爆乳）
+;14		その他（0,なし　1,パイパン　2,メシマズ　3,薬毒耐性　4,母乳体質）
+;
+;-------------------------------------------------
+@DIFF_GET_TALENT(ARG:0, ARG:1)
+#FUNCTION
+
+;明らかにおかしいのは弾く
+SIF ARG:1 <= 0 || ARG:1 > 14
+	RETURNF 100
+
+LOCAL:1 = ARG:1
+
+LOCAL = INTTU(CFLAG:(ARG:0):4, ARG:1)
+
+;明らかにおかしいのは弾く
+SIF LOCAL > 5
+	RETURNF 50
+
+;元々CSVで持ってるものは +10したものを返す　（個体差で得た素質と、元々CSVで持っている素質が被ったという状況）
+IF LOCAL > 0
+	;体型
+	IF ARG:1 == 4
+		;小人体型　小柄体型　大柄体型
+		SIF (CSVTALENT(NO:(ARG:0), 142 ,0) && LOCAL == 1) || (CSVTALENT(NO:(ARG:0), 100 ,0) && LOCAL == 2) || (CSVTALENT(NO:(ARG:0), 113 ,0) && LOCAL == 4)
+			LOCAL += 10
+	;酒の弱さ
+	ELSEIF ARG:1 == 6
+		;上戸　下戸
+		SIF (CSVTALENT(NO:(ARG:0), 48 ,0) && LOCAL == 1) || (CSVTALENT(NO:(ARG:0), 49 ,0) && LOCAL == 3)
+			LOCAL += 10
+	;ペニスの大きさ
+	ELSEIF ARG:1 == 11
+		;子供サイズ　短小
+		SIF (CSVTALENT(NO:(ARG:0), 114 ,0) && LOCAL == 1 )|| (CSVTALENT(NO:(ARG:0), 115 ,0) && LOCAL == 2)
+			LOCAL += 10
+	;ペニスの特徴
+	ELSEIF ARG:1 == 12
+		;包茎
+		SIF CSVTALENT(NO:(ARG:0), 119 ,0) && LOCAL == 4
+			LOCAL += 10
+	;パイパン　薬毒耐性
+	ELSEIF ARG:1 == 14
+		SIF (CSVTALENT(NO:(ARG:0), 118 ,0) && LOCAL ==1) || (CSVTALENT(NO:(ARG:0), 56 ,0) && LOCAL ==3)
+			LOCAL += 10
+	;いったん保留
+	;性別（元からオトコの場合も+10されて返る）
+	;ELSEIF ARG:1 == 2
+	;	SIF (CSVTALENT(NO:(ARG:0), 140 ,0) && LOCAL == 0) || (CSVTALENT(NO:(ARG:0), 137 ,0) && LOCAL == 2) || (CSVTALENT(NO:(ARG:0), 139 ,0) && LOCAL == 3)
+	;		LOCAL += 10
+
+	ENDIF
+ENDIF
+
+RETURNF LOCAL
+
+;-------------------------------------------------
+;関数名 @DIFF_GET_BUY(ARG)
+;概　要:;購入時に取得した素質を付け直す関数
+;引　数:ARG…キャラ登録番号
+;備　考:巻き戻しの薬用の処理
+;-------------------------------------------------
+@DIFF_GET_BUY(ARG)
+
+;個体差ナシなら早々に弾く
+SIF DIFF_GET_TALENT(ARG,1) == 0
+	RETURN 0
+
+LOCAL = DIFF_GET_TALENT(ARG, 2)
+;性別
+IF LOCAL > 0 && LOCAL < 10 
+	TALENT:ARG:オトコ = 0
+	TALENT:ARG:半陰半陽 = 0
+	TALENT:ARG:ふたなり = 0
+	TALENT:ARG:カントボーイ = 0
+	TALENT:ARG:シーメール = 0
+	
+	TALENT:ARG:処女 = 0
+	TALENT:ARG:童貞 = 0
+	
+	SELECTCASE LOCAL
+		;オトコ
+		CASE 0
+			TALENT:ARG:オトコ = 1
+			TALENT:ARG:童貞 = 1
+		;オンナ
+		CASE 1
+			TALENT:処女 = 1
+		;半陰半陽
+		CASE 2
+			TALENT:ARG:半陰半陽 = 1
+			TALENT:ARG:処女 = 1
+			TALENT:ARG:童貞 = 1
+		;ふたなり
+		CASE 3
+			TALENT:ARG:ふたなり = 1
+			TALENT:ARG:処女 = 1
+			TALENT:ARG:童貞 = 1
+		;カントボーイ
+		CASE 4
+			TALENT:ARG:カントボーイ = 1
+			TALENT:ARG:処女 = 1
+		;シーメール
+		CASE 5
+			TALENT:ARG:シーメール = 1
+			TALENT:ARG:童貞 = 1
+	ENDSELECT
+
+	;矛盾する素質を削除
+	SIF PENIS(ARG) == 0
+		CALL CLEAR_TALENT_PENIS(ARG,3)
+	SIF MALE(ARG) == 1
+		CALL CLEAR_TALENT_BREAST(ARG)
+ENDIF
+
+;オメガ
+SIF DIFF_GET_TALENT(ARG,3) > 0
+	TALENT:ARG:オメガ = 1
+
+
+LOCAL = DIFF_GET_TALENT(ARG,4)
+;体格
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:小人体型 = 0
+	TALENT:ARG:小柄体型 = 0
+	TALENT:ARG:大柄体型 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:小人体型 = 1
+		CASE 2
+			TALENT:ARG:小柄体型 = 1
+		CASE 3
+			;普通体型
+		CASE 4
+			TALENT:ARG:大柄体型 = 1
+	ENDSELECT
+	
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,5)
+;濡れやすさ
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:濡れやすい = 0
+	TALENT:ARG:濡れにくい = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:濡れやすい = 1
+		CASE 2
+			;普通の濡れやすさ
+		CASE 3
+			TALENT:ARG:濡れにくい = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,6)
+;酒の弱さ
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:上戸 = 0
+	TALENT:ARG:下戸 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:上戸 = 1
+		CASE 2
+			;普通の酒の弱さ
+		CASE 3
+			TALENT:ARG:下戸 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,7)
+;鈍感敏感　Ｃ
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:Ｃ鈍感 = 0
+	TALENT:ARG:Ｃ敏感 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			SIF TALENT:ARG:Ｃ敏感
+				TALENT:ARG:Ｃ敏感 = 0
+			
+			TALENT:ARG:Ｃ鈍感 = 1
+		CASE 2
+			SIF TALENT:ARG:Ｃ鈍感
+				TALENT:ARG:Ｃ鈍感 = 0
+				
+			TALENT:ARG:Ｃ敏感 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,8)
+;鈍感敏感　Ｖ
+IF (LOCAL > 0 && LOCAL < 10) && VAGINA(ARG)
+	TALENT:ARG:Ｖ鈍感 = 0
+	TALENT:ARG:Ｖ敏感 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			SIF TALENT:ARG:Ｖ敏感
+				TALENT:ARG:Ｖ敏感 = 0
+			
+			TALENT:ARG:Ｖ鈍感 = 1
+		CASE 2
+			SIF TALENT:ARG:Ｖ鈍感
+				TALENT:ARG:Ｖ鈍感 = 0
+			
+			TALENT:ARG:Ｖ敏感 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,9)
+;鈍感敏感　Ａ
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:Ａ鈍感 = 0
+	TALENT:ARG:Ａ敏感 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			SIF TALENT:ARG:Ａ敏感
+				TALENT:ARG:Ａ敏感 = 0
+			
+			TALENT:ARG:Ａ鈍感 = 1
+		CASE 2
+			SIF TALENT:ARG:Ａ鈍感
+				TALENT:ARG:Ａ鈍感 = 0
+			
+			TALENT:ARG:Ａ敏感 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,10)
+;鈍感敏感　Ｂ
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:Ｂ鈍感 = 0
+	TALENT:ARG:Ｂ敏感 = 0
+	TALENT:ARG:陥没乳首 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			SIF TALENT:ARG:Ｂ敏感
+				TALENT:ARG:Ｂ敏感 = 0
+			
+			TALENT:ARG:Ｂ鈍感 = 1
+		CASE 2
+			SIF TALENT:ARG:Ｂ鈍感
+				TALENT:ARG:Ｂ鈍感 = 0
+			
+			TALENT:ARG:Ｂ敏感 = 1
+		CASE 3
+			TALENT:ARG:陥没乳首 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,11)
+;ペニスの大きさ
+IF (LOCAL > 0 && LOCAL < 10) && PENIS(ARG)
+	;ペニスの大きさ関連の素質削除
+	CALL CLEAR_TALENT_PENIS(ARG,1)
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:子供サイズ = 1
+		CASE 2
+			TALENT:ARG:短小 = 1
+		CASE 3
+			;普通の大きさ
+		CASE 4
+			TALENT:ARG:巨根 = 1
+		CASE 5
+			TALENT:ARG:馬並み = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,12)
+;ペニスの特徴
+IF (LOCAL > 0 && LOCAL < 10) && PENIS(ARG)
+	SELECTCASE LOCAL
+		CASE 1
+			SIF TALENT:ARG:遅漏
+				TALENT:ARG:遅漏 = 0
+			
+			TALENT:ARG:早漏 = 1
+		CASE 2
+			SIF TALENT:ARG:早漏
+				TALENT:ARG:早漏 = 0
+			
+			TALENT:ARG:遅漏 = 1
+		CASE 3
+			TALENT:ARG:絶倫 = 1
+		CASE 4
+			TALENT:ARG:包茎 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,13)
+;胸の大きさ
+IF (LOCAL > 0 && LOCAL < 10) && MALE(ARG) == 0
+	;胸の大きさ関連の素質削除
+	CALL CLEAR_TALENT_BREAST(ARG)
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:絶壁 = 1
+		CASE 2
+			TALENT:ARG:貧乳 = 1
+		CASE 3
+			;並乳
+		CASE 4
+			TALENT:ARG:巨乳 = 1
+		CASE 5
+			TALENT:ARG:爆乳 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,14)
+;その他
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:パイパン = 0
+	TALENT:ARG:メシマズ = 0
+	TALENT:ARG:薬毒耐性 = 0
+	TALENT:ARG:母乳体質 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:パイパン = 1
+		CASE 2
+			SIF TALENT:ARG:料理上手
+				TALENT:ARG:料理上手 = 0
+			
+			TALENT:ARG:メシマズ = 1
+		CASE 3
+			TALENT:ARG:薬毒耐性 = 1
+		CASE 4
+			;オトコ母乳取得コンフィグオンのときのみ　
+			SIF (FLAG:2 & 256)
+				TALENT:ARG:母乳体質 = 1
+	ENDSELECT
+ENDIF
+
+
+;-------------------------------------------------
+;関数名:@DIFF_TALENT_NAME(ARG)
+;概　要:個体差で取得した素質を表示するやつ []で区切って表示
+;引　数:ARG…キャラ登録番号
+;戻り値:なし
+;備　考:
+;-------------------------------------------------
+@DIFF_TALENT_NAME(ARG)
+#DIM DYNAMIC GET_TALENT = 0
+#DIMS DYNAMIC GET_TALENT_NAME = ""
+
+
+FOR COUNT, 2, 15
+	GET_TALENT = DIFF_GET_TALENT(ARG, COUNT)
+	
+	SIF !GET_TALENT
+		CONTINUE
+	
+	;性別
+	IF COUNT == 2 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = オンナ
+			CASE 2 
+				LOCALS = 半陰半陽
+			CASE 3
+				LOCALS = ふたなり
+			CASE 4
+				LOCALS = カントボーイ
+			CASE 5
+				LOCALS = シーメール
+		ENDSELECT
+	;オメガ
+	ELSEIF COUNT == 3 && GET_TALENT
+		LOCALS = オメガ
+	;体格
+	ELSEIF COUNT == 4 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1,11
+				LOCALS = 小人体型
+			CASE 2,12
+				LOCALS = 小柄体型
+			CASE 3
+				LOCALS = 普通体型
+			CASE 4,14
+				LOCALS = 大柄体型
+		ENDSELECT
+	;濡れやすさ
+	ELSEIF COUNT == 5 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = 濡れやすい
+			CASE 2
+				LOCALS = 普通程度の濡れやすさ
+			CASE 3 
+				LOCALS = 濡れにくい
+		ENDSELECT
+	;酒の弱さ
+	ELSEIF COUNT == 6 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1,11
+				LOCALS = 上戸
+			CASE 2
+				LOCALS = 普通程度の酒の強さ
+			CASE 3,13 
+				LOCALS = 下戸
+		ENDSELECT
+	;Ｃ鈍感敏感
+	ELSEIF COUNT == 7 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = Ｃ鈍感
+			CASE 2
+				LOCALS = Ｃ敏感
+		ENDSELECT
+	;Ｖ鈍感敏感
+	ELSEIF COUNT == 8 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = Ｖ鈍感
+			CASE 2
+				LOCALS = Ｖ敏感
+		ENDSELECT
+	;Ａ鈍感敏感
+	ELSEIF COUNT == 9 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = Ａ鈍感
+			CASE 2
+				LOCALS = Ａ敏感
+		ENDSELECT
+	;Ｂ鈍感敏感
+	ELSEIF COUNT == 10 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = Ｂ鈍感
+			CASE 2
+				LOCALS = Ｂ敏感
+			CASE 3
+				LOCALS = 陥没乳首
+		ENDSELECT
+	;ペニスの大きさ
+	ELSEIF COUNT == 11 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1,11
+				LOCALS = 子供サイズ
+			CASE 2,12
+				LOCALS = 短小
+			CASE 3
+				LOCALS = 普通程度のペニスの大きさ
+			CASE 4,14
+				LOCALS = 巨根
+			CASE 5,15
+				LOCALS = 馬並み
+		ENDSELECT
+	;ペニスの特徴
+	ELSEIF COUNT == 12 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = 早漏
+			CASE 2 
+				LOCALS = 遅漏
+			CASE 3 
+				LOCALS = 絶倫
+			CASE 4,14
+				LOCALS = 包茎
+		ENDSELECT
+	;胸の大きさ
+	ELSEIF COUNT == 13 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = 絶壁
+			CASE 2 
+				LOCALS = 貧乳
+			CASE 3 
+				LOCALS = 並乳
+			CASE 4 
+				LOCALS = 巨乳
+			CASE 5
+				LOCALS = 爆乳
+		ENDSELECT
+	;その他
+	ELSEIF COUNT == 14 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1,10
+				LOCALS = パイパン
+			CASE 2 
+				LOCALS = メシマズ
+			CASE 3,10
+				LOCALS = 薬毒耐性
+			CASE 4 
+				LOCALS = 母乳体質
+		ENDSELECT
+	ENDIF
+	SIF STRLENS(LOCALS)
+		GET_TALENT_NAME = %GET_TALENT_NAME%[%LOCALS%]
+	LOCALS =
+NEXT
+
+PRINTFORM %GET_TALENT_NAME%
+
+;-------------------------------------------------
+;関数名:@CLEAR_TALENT_VAGINA(ARG)
+;概　要:ヴァギナ関連の素質の削除
+;引　数:ARG…キャラ登録番号
+;戻り値:なし
+;備　考:
+;-------------------------------------------------
+@CLEAR_TALENT_VAGINA(ARG)
+TALENT:ARG: 処女 = 0
+
+TALENT:ARG:Ｖ敏感 = 0
+TALENT:ARG:Ｖ鈍感 = 0
+
+;-------------------------------------------------
+;関数名:@CLEAR_TALENT_PENIS(ARG)
+;概　要:ペニス関連素質の削除
+;引　数:
+;ARG:0…キャラ登録番号
+;ARG:1…1=大きさ　2=特徴　3=特徴/大きさ　(ビット演算)
+;戻り値:なし
+;備　考:
+;-------------------------------------------------
+@CLEAR_TALENT_PENIS(ARG:0, ARG:1)
+SIF ARG:1 < 1 && ARG:1 > 3
+	RETURN
+
+IF (ARG:1 & 1)
+	TALENT:(ARG:0):子供サイズ = 0
+	TALENT:(ARG:0):短小 = 0
+	TALENT:(ARG:0):巨根 = 0
+	TALENT:(ARG:0):馬並み = 0
+ENDIF
+
+IF (ARG:1 & 2)
+	TALENT:(ARG:0):遅漏 = 0
+	TALENT:(ARG:0):早漏 = 0
+	TALENT:(ARG:0):絶倫 = 0
+	TALENT:(ARG:0):包茎 = 0
+ENDIF
+
+;-------------------------------------------------
+;関数名:@CLEAR_TALENT_BREAST(ARG)
+;概　要:胸の大きさ関連素質の削除
+;引　数:ARG…キャラ登録番号
+;戻り値:なし
+;備　考:
+;-------------------------------------------------
+@CLEAR_TALENT_BREAST(ARG)
+TALENT:ARG:絶壁 = 0
+TALENT:ARG:貧乳 = 0
+TALENT:ARG:巨乳 = 0
+TALENT:ARG:爆乳 = 0
+
+
+
