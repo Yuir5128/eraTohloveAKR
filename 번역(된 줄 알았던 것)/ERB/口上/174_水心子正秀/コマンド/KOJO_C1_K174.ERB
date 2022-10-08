@@ -1548,7 +1548,7 @@ IF LOCAL
 					PRINTFORML 「이것으로통증보다 쾌락이 우수한다는 것이,이상하다」
 					PRINTFORML 「…… 아니,아프기 때문에 더욱 좋은 것인지?」
 				;신발하라든지스타킹
-				ELSEIF TEQUIP:특수 2 > 0
+				ELSEIF TEQUIP:특수2 > 0
 					PRINTFORML 「우왓 안까지 스며들어……!」
 				ELSE
 					PRINTFORML 「맥박치는 감각을 알 수 있다는 것도 소발가 아니라면,인가」
@@ -1562,7 +1562,7 @@ IF LOCAL
 	IF TEQUIP:신발
 		A = 9
 		CALL CLOTHES_NAME
-	ELSEIF TEQUIP:특수 2
+	ELSEIF TEQUIP:특수2
 		A = 2
 		CALL CLOTHES_NAME
 	ENDIF
@@ -1571,23 +1571,23 @@ IF LOCAL
 	IF (CFLAG:5005 & 512) && PREVCOM == 80 && RAND:2
 		SELECTCASE RAND:2
 			CASE 1
-				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수 2? 를 신은발로#발로\@음경을 찼다
+				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수2? 를 신은발로#발로\@음경을 찼다
 			CASE 0
-				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수 2? 를 신은발로#발로\@음경을 짓밟아 부쉈다
+				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수2? 를 신은발로#발로\@음경을 짓밟아 부쉈다
 		ENDSELECT
 	;외
 	ELSE
 		SELECTCASE RAND:5
 			CASE 4
-				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수 2? 를 신은발로#발로\@음경을 동글동글 밟고 있다
+				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수2? 를 신은발로#발로\@음경을 동글동글 밟고 있다
 			CASE 3
-				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수 2? 의 발뒤꿈치에#발뒤꿈치에\@힘을 집중하고 짓밟았다
+				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수2? 의 발뒤꿈치에#발뒤꿈치에\@힘을 집중하고 짓밟았다
 			CASE 2
-				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수 2? 의 발끝으로#발끝으로\@음경을 어루만졌다
+				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수2? 의 발끝으로#발끝으로\@음경을 어루만졌다
 			CASE 1
-				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수 2? 의발뒤에서#발뒤에서\@음경을 가볍게 차대었다
+				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수2? 의발뒤에서#발뒤에서\@음경을 가볍게 차대었다
 			CASE 0
-				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수 2? 를 신은발로#발로\@끼워 넣도록(듯이) 음경을 자극했다
+				PRINTFORMW \@ TEQUIP:신발 || TEQUIP:특수2? 를 신은발로#발로\@끼워 넣도록(듯이) 음경을 자극했다
 		ENDSELECT
 	ENDIF
 	

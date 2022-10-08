@@ -51,7 +51,7 @@ ENDIF
 ;옷을 입지 않았다고기력회복,노출플레이중은체력회복.
 IF ABL:노출벽 >= 3
 	;전라 루트
-	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래） && !TEQUIP:특수 2 && !TEQUIP:특수 1
+	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래） && !TEQUIP:특수2 && !TEQUIP:특수1
 		BASE:1 += ABL:노출벽*2
 	;반나체 루트
 	ELSEIF (TEQUIP:전신상의 || (TEQUIP:상의 && TEQUIP:하의)) && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래）
@@ -104,7 +104,7 @@ IF ABL:정액중독 >= 3
 	ENDSELECT
 ENDIF
 
-;섹스 하면체력·기력회복. 음란√라면 특수 섹스에서도 회복.
+;섹스 하면체력·기력회복. 음란√라면 특수섹스에서도 회복.
 IF ABL:섹스중독 >= 3
 	IF TALENT:음란 || TALENT:창부
 		SELECTCASE SELECTCOM
@@ -1362,7 +1362,7 @@ IF SELECTCOM == 80
 		ELSEIF ABL:새드끼 >= 5
 			IF TEQUIP:신발 > 0
 				PRINTFORMW 「자지 짓밟아 부숴 버릴 것 같다%UNICODE(0x2661)% …… 후훗,농담이야」
-			ELSEIF TEQUIP:특수 2 > 0
+			ELSEIF TEQUIP:특수2 > 0
 				PRINTFORM 「아아,너… 나의
 				A = 1
 				CALL CLOTHES_NAME
@@ -1378,7 +1378,7 @@ IF SELECTCOM == 80
 		ELSE
 			IF TEQUIP:신발 > 0
 				PRINTFORMW 「아,아프지 않은 것인지…?」
-			ELSEIF TEQUIP:특수 2 > 0
+			ELSEIF TEQUIP:특수2 > 0
 				PRINTFORM 「후후…
 				A = 1
 				CALL CLOTHES_NAME
@@ -1403,7 +1403,7 @@ IF SELECTCOM == 80
 		IF ABL:새드끼 >= 5
 			IF TEQUIP:신발 > 0
 				PRINTFORMW 「짓밟을 수 있어 흥분하다니 어쩔 수 없는 변태구나」
-			ELSEIF TEQUIP:특수 2 > 0
+			ELSEIF TEQUIP:특수2 > 0
 				PRINTFORM 「… 나의
 				A = 1
 				CALL CLOTHES_NAME
@@ -2239,7 +2239,7 @@ IF SELECTCOM == 130 && TEQUIP:밧줄 == 0
 		PRINTFORM 「응… 후후… 신체를 묶어,나에게 무엇을 할 생각인가?
 		SIF TALENT:음란 || TALENT:창부
 			PRINTFORM %UNICODE(0x2661)%
-		PRINTFORMW」
+		PRINTFORMW 」
 	ELSEIF TALENT:붕괴
 		PRINTFORMW %CALLNAME%는 되는 대로다
  	ELSE
@@ -2260,7 +2260,7 @@ IF SELECTCOM == 131 && TEQUIP:아이마스크 == 0
 		PRINTFORM 「응… 후후… 눈가리개는 붙이게 해,나에게 무엇을 할 생각인가?
 		SIF TALENT:음란 || TALENT:창부
 			PRINTFORM %UNICODE(0x2661)%
-		PRINTFORMW」
+		PRINTFORMW 」
 	ELSEIF TALENT:붕괴
 		PRINTFORMW %CALLNAME%는 되는 대로다
 	ELSE
@@ -3426,7 +3426,7 @@ IF SELECTCOM == 280
 		PRINTFORM 「하핫… 이런 일 시켜 기분이 좋다? 이 변태
 		SIF KANRAKU(TARGET)
 			PRINTFORM %UNICODE(0x2661)%
-		PRINTFORMW」
+		PRINTFORMW 」
 	ELSE
 		PRINTFORMW 「응읏… 괴,괴롭지 않은 것인지…?」
 	ENDIF
@@ -3441,7 +3441,7 @@ IF SELECTCOM == 281
 		PRINTFORM 「매… 매도해져 흥분하고 있는지? 이,변태
 		SIF KANRAKU(TARGET)
 			PRINTFORM %UNICODE(0x2661)%
-		PRINTFORMW」
+		PRINTFORMW 」
 	ELSE
 		PRINTFORMW 「… 부탁하기 때문에 이런 일 말하게 하지 말아줘…」
 	ENDIF
@@ -3456,7 +3456,7 @@ IF SELECTCOM == 282
 		PRINTFORM 「그렇게발를 좋아하면,밟아 줄까?
 		SIF KANRAKU(TARGET)
 			PRINTFORM %UNICODE(0x2661)%
-		PRINTFORMW」
+		PRINTFORMW 」
 	ELSE
 		PRINTFORMW 「오,침착하지 않기 때문에 그만두어 주지 않을까…」
 	ENDIF
@@ -3471,7 +3471,7 @@ IF SELECTCOM == 283
 		PRINTFORM 「자신으로부터 맞고 싶어하다니… 너,변태구나
 		SIF KANRAKU(TARGET)
 			PRINTFORM %UNICODE(0x2661)%
-		PRINTFORMW」
+		PRINTFORMW 」
 	ELSE
 		PRINTFORMW 「아,아프지 않은 것인지…?」
 	ENDIF
@@ -3486,7 +3486,7 @@ IF SELECTCOM == 284
 		PRINTFORM 「자신으로부터 맞고 싶어하다니… 너,변태구나
 		SIF KANRAKU(TARGET)
 			PRINTFORM %UNICODE(0x2661)%
-		PRINTFORMW」
+		PRINTFORMW 」
 	ELSE
 		PRINTFORMW 「아,아프지 않은 것인지…?」
 	ENDIF

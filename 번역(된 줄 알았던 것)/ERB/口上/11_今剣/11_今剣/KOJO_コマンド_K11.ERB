@@ -51,7 +51,7 @@ ENDIF
 ;옷을 입지 않았다고기력회복, 노출플레이중은체력회복.
 IF ABL:노출벽 >= 3
 	;전라 루트
-	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래） && !TEQUIP:특수 2 && !TEQUIP:특수 1
+	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래） && !TEQUIP:특수2 && !TEQUIP:특수1
 		BASE:1 += ABL:노출벽*2
 	;반나체 루트
 	ELSEIF (TEQUIP:전신상의 || (TEQUIP:상의 && TEQUIP:하의)) && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래）
@@ -104,7 +104,7 @@ IF ABL:정액중독 >= 3
 	ENDSELECT
 ENDIF
 
-;섹스 하면체력·기력회복. 음란√라면 특수 섹스에서도 회복.
+;섹스 하면체력·기력회복. 음란√라면 특수섹스에서도 회복.
 IF ABL:섹스중독 >= 3
 	IF TALENT:음란 || TALENT:창부
 		SELECTCASE SELECTCOM

@@ -515,7 +515,7 @@ SIF V < 0
 S *= V
 S /= 100
 
-;붕괴, 광기는 이윤을 꽤 낮게 한다(순종에 의해,80%까지 회복)
+;붕괴, 광기는 이윤을 꽤 낮게 한다(순종에 의해,80％까지 회복)
 IF TALENT:A:붕괴 || TALENT:A:광기
 PRINTL 
 	IF TALENT:A:붕괴
@@ -537,14 +537,14 @@ ENDIF
 ;난이도 처리
 ;EASY
 IF FLAG:4 == 1
-	PRINTFORML 난이도:EASY ×120%
+	PRINTFORML 난이도:EASY ×120％
 	TIMES S , 1.20
 ;NORMAL
 ELSEIF FLAG:4 == 2
 	TIMES S , 1.00
 ;HARD
 ELSEIF FLAG:4 == 3
-	PRINTFORML 난이도:HARD ×80%
+	PRINTFORML 난이도:HARD ×80％
 	TIMES S , 0.80
 ENDIF
 

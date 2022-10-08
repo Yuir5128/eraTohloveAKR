@@ -31,7 +31,7 @@ IF CFLAG:106
 		;순종 3 이상
 		IF ABL:순종 >= 3
 			PRINTFORM %CALLNAME%는 눈을 감아,
-			IF TEQUIP:특수 3
+			IF TEQUIP:특수3
 				A = 8
 				CALL CLOTHES_NAME
 			ELSE
@@ -40,7 +40,7 @@ IF CFLAG:106
 			PRINTFORML 에 정액을수라고 있다…
 		ELSE
 			PRINTFORML 혐오감을 노출에 날뛰는%CALLNAME%의 머리를 잡아,
-			IF TEQUIP:특수 3
+			IF TEQUIP:특수3
 				A = 8
 				CALL CLOTHES_NAME
 			ELSE
@@ -224,7 +224,7 @@ IF CFLAG:106
 			A = 9
 			CALL CLOTHES_NAME
 		;신발속옷용
-		ELSEIF TEQUIP:특수 2
+		ELSEIF TEQUIP:특수2
 			A = 2
 			CALL CLOTHES_NAME
 		;알몸발
@@ -315,7 +315,7 @@ ELSEIF TFLAG:1 == 2
 	SIF ABL:정액중독 > 2
 		PRINTFORM 황홀의 표정을 띄운다
 	PRINTFORM %CALLNAME%의 얼굴과손
-	SIF TEQUIP:특수 1 == 1
+	SIF TEQUIP:특수1 == 1
 		PRINT 봉투
 	PRINTFORML 가 대량의 정액 투성이가 되어 갔다…
 ENDIF
@@ -421,7 +421,7 @@ IF TFLAG:16 == 1
 		A = 9
 		CALL CLOTHES_NAME
 	;신발속옷용
-	ELSEIF TEQUIP:특수 2
+	ELSEIF TEQUIP:특수2
 		A = 2
 		CALL CLOTHES_NAME
 	;알몸발
@@ -441,7 +441,7 @@ ELSEIF TFLAG:16 == 2
 		A = 9
 		CALL CLOTHES_NAME
 	;신발속옷용
-	ELSEIF TEQUIP:특수 2
+	ELSEIF TEQUIP:특수2
 		A = 2
 		CALL CLOTHES_NAME
 	;알몸발

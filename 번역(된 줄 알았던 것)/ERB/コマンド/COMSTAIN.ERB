@@ -40,7 +40,7 @@ SELECTCASE SELECTCOM
 					A = 15
 				ELSEIF TEQUIP:속옷（아래） && !TEQUIP:정조대
 					A = 17
-				ELSEIF (TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6) && TFLAG:55 == 0
+				ELSEIF (TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6) && TFLAG:55 == 0
 					A = 18
 				ELSE
 					IF SELECTCOM == 140
@@ -74,7 +74,7 @@ SELECTCASE SELECTCOM
 					A = 15
 				ELSEIF TEQUIP:속옷（아래） && !TEQUIP:정조대
 					A = 17
-				ELSEIF (TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6) && TFLAG:55 == 0
+				ELSEIF (TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6) && TFLAG:55 == 0
 					A = 18
 				ELSE
 					IF SELECTCOM == 140
@@ -111,7 +111,7 @@ SELECTCASE SELECTCOM
 			IF TEQUIP:신발
 				A = 19
 			;신발하를 붙이고 있을 때
-			ELSEIF TEQUIP:특수 2
+			ELSEIF TEQUIP:특수2
 				A = 18
 			ELSE
 				A = 9
@@ -119,7 +119,7 @@ SELECTCASE SELECTCOM
 		ELSEIF SELECTCOM == 50
 			IF BOTTOMS(TARGET) >= 4
 				A = 15
-			ELSEIF (TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6) && TFLAG:55 == 0
+			ELSEIF (TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6) && TFLAG:55 == 0
 				A = 18
 			ELSEIF TEQUIP:속옷（아래）
 				A = 17
@@ -129,7 +129,7 @@ SELECTCASE SELECTCOM
 		ELSE
 			IF BOTTOMS(TARGET) >= 4
 				A = 15
-			ELSEIF (TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6) && TFLAG:55 == 0
+			ELSEIF (TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6) && TFLAG:55 == 0
 				A = 18
 			ELSEIF TEQUIP:속옷（아래）
 				A = 17
@@ -161,7 +161,7 @@ SELECTCASE SELECTCOM
 			STAIN:PLAYER:입 |= STAIN:입
 		;가슴을비빈다
 		ELSEIF SELECTCOM == 243
-			IF TEQUIP:특수 1 == 1
+			IF TEQUIP:특수1 == 1
 				X = 12
 			ELSE
 				X = 2
@@ -197,7 +197,7 @@ SELECTCASE SELECTCOM
 				STAIN:PLAYER:손 |= STAIN:페니스
 			;조교자에게손가 없고, 노예에게손가 있으면 노예의손를 사용한다
 			ELSEIF !TALENT:양팔결손 && !TALENT:달마
-				IF TEQUIP:특수 1 == 1
+				IF TEQUIP:특수1 == 1
 					X = 12
 				ELSE
 					X = 2
@@ -322,7 +322,7 @@ SELECTCASE SELECTCOM
 	;-------------------------------------------------
 	CASE 3, 4, 5, 6, 7, 8
 		;장갑를 하고 있다
-		IF TEQUIP:특수 1 == 1
+		IF TEQUIP:특수1 == 1
 			X = 12
 		ELSE
 			X = 2
@@ -401,7 +401,7 @@ SELECTCASE SELECTCOM
 			IF TEQUIP:신발
 				A = 19
 			;신발하를 붙이고 있을 때
-			ELSEIF TEQUIP:특수 2
+			ELSEIF TEQUIP:특수2
 				A = 18
 			ELSE
 				A = 9
@@ -411,14 +411,14 @@ SELECTCASE SELECTCOM
 			A = 0
 		;고
 		ELSEIF SELECTCOM == 83
-			IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+			IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 				A = 18
 			ELSE
 				A = 17
 			ENDIF
 		ELSE
 			;장갑를 하고 있다
-			IF TEQUIP:특수 1 == 1
+			IF TEQUIP:특수1 == 1
 				A = 12
 			ELSE
 				A = 2
@@ -474,7 +474,7 @@ SELECTCASE SELECTCOM
 			;반대로스캇중독 2 이하/aA조끼 2 이하라고 흘려, 옷에 뇨더러움이 붙는다
 			ELSE
 				;장식품
-				SIF TEQUIP:특수 1 == 1
+				SIF TEQUIP:특수1 == 1
 					STAIN:장갑 |= 128
 				
 				;상하의류
@@ -559,12 +559,12 @@ SELECTCASE SELECTCOM
 			STAIN:A |= 32
 		REND
 		
-		IF TEQUIP:특수 1 || TEQUIP:특수 2 || TEQUIP:속옷（아래） || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의 || TEQUIP:머리장식 || TEQUIP:특수 3 || TEQUIP:신발
+		IF TEQUIP:특수1 || TEQUIP:특수2 || TEQUIP:속옷（아래） || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의 || TEQUIP:머리장식 || TEQUIP:특수3 || TEQUIP:신발
 			REPEAT 10
 				A = COUNT + 10
 				IF A == 12
 					;장갑, 에이프런 이외는 더러운 판정 없음
-					SIF TEQUIP:특수 1!= 1 && TEQUIP:특수 1!= 2
+					SIF TEQUIP:특수1!= 1 && TEQUIP:특수1!= 2
 						CONTINUE
 				ENDIF
 				STAIN:A |= 32
@@ -583,12 +583,12 @@ SELECTCASE SELECTCOM
 		REND
 		
 		IF SELECTCOM != 207 && SELECTCOM != 315
-			IF TEQUIP:특수 1 || TEQUIP:특수 2 || TEQUIP:속옷（아래） || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의 || TEQUIP:머리장식 || TEQUIP:특수 3 || TEQUIP:신발
+			IF TEQUIP:특수1 || TEQUIP:특수2 || TEQUIP:속옷（아래） || TEQUIP:속옷（위） || TEQUIP:하의 || TEQUIP:상의 || TEQUIP:전신상의 || TEQUIP:머리장식 || TEQUIP:특수3 || TEQUIP:신발
 				REPEAT 10
 					A = COUNT + 10
 					IF A == 12
 						;장갑, 에이프런 이외는 더러운 판정 없음
-						SIF TEQUIP:특수 1!= 1 && TEQUIP:특수 1!= 2
+						SIF TEQUIP:특수1!= 1 && TEQUIP:특수1!= 2
 							CONTINUE
 					ENDIF
 					STAIN:A |= 256

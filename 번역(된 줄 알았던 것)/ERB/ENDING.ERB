@@ -194,7 +194,7 @@ SIF (B >= 0 || C >= 0 || D >= 0) && A >= 5
 	PRINTFORML [4] - 저택의 권리서를 산다(하렘 엔드)
 
 
-;특수 하렘 판정
+;특수하렘 판정
 CALL ENDING_JUDGE
 
 PRINTL [100] 그만둔다
@@ -232,7 +232,7 @@ ELSEIF RESULT == 4 && (B >= 0 || C >= 0 || D >= 0) && A >= 5
 	CALL ENDING_5
 
 
-;특수 하렘 처리
+;특수하렘 처리
 
 ;왕을 자칭한다
 ELSEIF RESULT == 10 && (E:500 & 1)
@@ -454,11 +454,11 @@ RETURN 1
 REPEAT CHARANUM
 	SIF COUNT == MASTER
 		CONTINUE
-	;특수 하렘 엔드 판정
+	;특수하렘 엔드 판정
 	
 REND
 
-;특수 하렘 엔드 판정
+;특수하렘 엔드 판정
 
 
 

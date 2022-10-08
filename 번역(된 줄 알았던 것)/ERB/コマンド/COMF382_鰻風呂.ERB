@@ -24,7 +24,7 @@ SIF F && (TALENT:처녀 || TALENT:재생처녀)
 	TFLAG:19 |= 1
 
 ;스타킹 찌릿찌릿 플래그
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
 	TFLAG:55 = 1
 ENDIF
 
@@ -58,7 +58,7 @@ IF R
 ENDIF
 
 ;-------------------------------------------------
-;특수 소스 처리
+;특수소스 처리
 ;-------------------------------------------------
 ;V에 도구를 삽입하고 있지 않는 경우만 본다
 IF F
@@ -168,7 +168,7 @@ IF TEQUIP:머리장식
 	STAIN:머리장식 = 32
 	STAIN:머리장식 = 128
 ENDIF
-IF TEQUIP:특수 3
+IF TEQUIP:특수3
 	STAIN:눈장식 = 32
 	STAIN:눈장식 = 128
 ENDIF
@@ -177,7 +177,7 @@ STAIN:머리카락 = 32
 STAIN:머리카락 = 128
 STAIN:입 = 32
 
-IF TEQUIP:특수 1 == 1
+IF TEQUIP:특수1 == 1
 	STAIN:장갑 = 32
 	STAIN:장갑 = 128
 ELSE
@@ -198,7 +198,7 @@ STAIN:애널 = 32
 SIF R
 	STAIN:장내 = 32
 STAIN:발 = 32
-IF TEQUIP:특수 2
+IF TEQUIP:특수2
 	STAIN:발장식 = 32
 	STAIN:발장식 = 128
 ENDIF

@@ -23,13 +23,13 @@ IF BOTTOMS(TARGET) >= 3
 		TEQUIP:상의 = 0
 	TEQUIP:하의 = 0
 ENDIF
-IF TEQUIP:특수 2 == 5 || TEQUIP:특수 2 == 6
-	TEQUIP:특수 2 = 0
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TEQUIP:특수2 = 0
 	TEQUIP:신발 = 0
 	IF TFLAG:55 == 0
-		SIF TEQUIP:특수 2 == 5
+		SIF TEQUIP:특수2 == 5
 			ITEM:36 += 1
-		SIF TEQUIP:특수 2 == 6
+		SIF TEQUIP:특수2 == 6
 			ITEM:37 += 1
 	ENDIF
 ENDIF

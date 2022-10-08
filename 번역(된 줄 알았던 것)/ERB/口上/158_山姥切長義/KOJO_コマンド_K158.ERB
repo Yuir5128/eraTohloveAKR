@@ -75,7 +75,7 @@ ENDIF
 ;옷을 입지 않았다고기력회복, 노출플레이중은체력회복.
 IF ABL:노출벽 >= 3
 	;전라 루트
-	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래） && !TEQUIP:특수 2 && !TEQUIP:특수 1
+	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래） && !TEQUIP:특수2 && !TEQUIP:특수1
 		BASE:1 += ABL:노출벽*2
 	;반나체 루트
 	ELSEIF (TEQUIP:전신상의 || (TEQUIP:상의 && TEQUIP:하의)) && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래）
@@ -128,7 +128,7 @@ IF ABL:정액중독 >= 3
 	ENDSELECT
 ENDIF
 
-;섹스 하면체력·기력회복. 음란√라면 특수 섹스에서도 회복.
+;섹스 하면체력·기력회복. 음란√라면 특수섹스에서도 회복.
 IF ABL:섹스중독 >= 3
 	IF TALENT:음란 || TALENT:창부
 		SELECTCASE SELECTCOM
@@ -1330,7 +1330,7 @@ IF SELECTCOM == 80
 		IF !KANRAKU(TARGET)
 			CALL TRAIN_MESSAGE
 			;신발를 신고 있을 때
-			IF TEQUIP:신발 > 0 || TEQUIP:특수 2 > 0
+			IF TEQUIP:신발 > 0 || TEQUIP:특수2 > 0
 				PRINTFORMW 「우와아……」
 			ELSE
 				PRINTFORMW 「감촉이… 직접적으로……」
@@ -1389,7 +1389,7 @@ IF SELECTCOM == 80
 					IF TEQUIP:신발 > 0
 						PRINTFORML 「의외로 신발 너머에서도 감촉은 아는 것이구나」
 					;신발하라든지스타킹
-					ELSEIF TEQUIP:특수 2 > 0
+					ELSEIF TEQUIP:특수2 > 0
 						PRINTFORML 「의외로 옷감 너머에서도 감촉은 아는 것이구나」
 					ELSE
 						PRINTFORML 「직접적으로 열을 느껴지고 이것은 이것대로…」
@@ -1402,7 +1402,7 @@ IF SELECTCOM == 80
 				IF TEQUIP:신발
 					A = 9
 					CALL CLOTHES_NAME
-				ELSEIF TEQUIP:특수 2
+				ELSEIF TEQUIP:특수2
 					A = 2
 					CALL CLOTHES_NAME
 				ENDIF
@@ -1410,34 +1410,34 @@ IF SELECTCOM == 80
 				;새드끼 5 이상의 연속 실행풋잡
 				IF RAND:2 == 0 && ABL:새드끼 >= 5 && PREVCOM == 80
 					;신발를 신고 있을 때
-					SIF TEQUIP:신발 || TEQUIP:특수 2
+					SIF TEQUIP:신발 || TEQUIP:특수2
 						PRINTFORM 를 신었다
 					PRINTFORMW 발로 음경을 찼다
 				ELSEIF ABL:새드끼 >= 5 && PREVCOM ==80
 					;신발를 신고 있을 때
-					SIF TEQUIP:신발 || TEQUIP:특수 2
+					SIF TEQUIP:신발 || TEQUIP:특수2
 						PRINTFORM 를 신었다
 					PRINTFORMW 발로 음경을 짓밟아 부쉈다
 				
 				;통상 실행
 				ELSEIF RAND:4 == 0
 					;신발를 신고 있을 때
-					SIF TEQUIP:신발 || TEQUIP:특수 2
+					SIF TEQUIP:신발 || TEQUIP:특수2
 						PRINTFORM 의
 					PRINTFORMW 발뒤꿈치에 힘을 집중하고 짓밟았다
 				ELSEIF RAND:3 == 0
 					;신발를 신고 있을 때
-					SIF TEQUIP:신발 || TEQUIP:특수 2
+					SIF TEQUIP:신발 || TEQUIP:특수2
 						PRINTFORM 의
 					PRINTFORMW 발끝으로 음경을 어루만졌다
 				ELSEIF RAND:2 == 0
 					;신발를 신고 있을 때
-					SIF TEQUIP:신발 || TEQUIP:특수 2
+					SIF TEQUIP:신발 || TEQUIP:특수2
 						PRINTFORM 의
 					PRINTFORMW 발뒤에서 음경을 가볍게 차대었다
 				ELSE
 					;신발를 신고 있을 때
-					SIF TEQUIP:신발 || TEQUIP:특수 2
+					SIF TEQUIP:신발 || TEQUIP:특수2
 						PRINTFORM 를 신었다
 					PRINTFORMW 발로 끼워 넣도록(듯이) 음경을 자극했다
 				ENDIF
@@ -1984,7 +1984,7 @@ IF SELECTCOM == 154
 						STAIN:속옷（아래） |= 2048
 					SIF TEQUIP:신발 > 0
 						STAIN:신발 |= 2048
-					SIF TEQUIP:특수 2 > 0
+					SIF TEQUIP:특수2 > 0
 						STAIN:발장식 |= 2048
 					STAIN:발 |= 2048
 				ENDIF
@@ -2412,7 +2412,7 @@ IF SELECTCOM == 202
 			IF RAND:3 == 0 && (!TALENT:양팔결손 || !TALENT:달마)
 				PRINTFORMW %CALLNAME:PLAYER%는%CALLNAME%를손를 이어 보았다
 				;장갑
-				IF TEQUIP:특수 1 == 1
+				IF TEQUIP:특수1 == 1
 					STAIN:장갑 |= STAIN:PLAYER:손
 				ELSE
 					STAIN:손 |= STAIN:PLAYER:손
@@ -2519,7 +2519,7 @@ IF SELECTCOM == 204
 			;PLAYER가 사모·공포 대상
 			SIF KANRAKU(TARGET) == 1 || KANRAKU(TARGET) == 3
 				PRINTFORM 　고·슈·지··사·마?
-			PRINTFORMW」
+			PRINTFORMW 」
 		ENDIF
 	;요리
 	ELSEIF CFLAG:406 == 3
@@ -4138,7 +4138,7 @@ CASE 106, 116
 				ELSE
 					PRINTFORMW 「… 조금 무서우니까 손, 잡고 있어 받아도 좋을까?」
 					;장갑
-					IF TEQUIP:특수 1 == 1
+					IF TEQUIP:특수1 == 1
 						STAIN:장갑 |= STAIN:PLAYER:손
 					ELSE
 						STAIN:손 |= STAIN:PLAYER:손
@@ -4190,7 +4190,7 @@ CASEELSE
 				ELSE
 					PRINTFORMW 「… 조금 무서우니까 손, 잡고 있어 받아도 좋을까?」
 					;장갑
-					IF TEQUIP:특수 1 == 1
+					IF TEQUIP:특수1 == 1
 						STAIN:장갑 |= STAIN:PLAYER:손
 					ELSE
 						STAIN:손 |= STAIN:PLAYER:손

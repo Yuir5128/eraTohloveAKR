@@ -602,13 +602,13 @@ REPEAT CHARANUM
 	SIF RELATION:COUNT:R != 0
 		E = (E*RELATION:COUNT:R)/100
 
-	;얼마나 높아져도, 그 사람이 행동을 일으킬 가능성은 80%
+	;얼마나 높아져도, 그 사람이 행동을 일으킬 가능성은 80％
 	SIF E > 80
 		E = 80
 
 	;이 처리가 있으면, 어느 캐릭터가 어느 정도의 확률인 것인가 볼 수가 있습니다
 	SIF TALENT:MASTER:천리안
-		PRINTFORML %CALLNAME:COUNT%가 행동을 일으키는 확률:{E}%
+		PRINTFORML %CALLNAME:COUNT%가 행동을 일으키는 확률:{E}％
 
 	;실행 판정
 	R = RAND:100
