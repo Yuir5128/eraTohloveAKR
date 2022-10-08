@@ -1,0 +1,137 @@
+﻿;SELECTCOMに応じたテキスト関数をCALLする
+@TRAIN_MESSAGE
+TRYCALLFORM MESSAGE_COM{SELECTCOM}
+
+;情景テキストの改行はここで行う
+PRINTW 
+
+
+;TFLAG:13に応じたテキスト関数をCALLする
+@EVENT_MESSAGE
+TRYCALLFORM EVENT_MESSAGE_{TFLAG:13}
+
+;コマンド입上の道具着脱分岐
+@MESSAGE_VARIATION
+SELECTCASE SELECTCOM
+	;클리캡、촉수클리고문
+	CASE 42, 163
+		SIF TEQUIP:클리캡
+			TFLAG:54 = 1
+	;음핵클립
+	CASE 24
+		SIF TEQUIP:음핵클립
+			TFLAG:54 = 1
+	;オナホール、촉수페니스고문
+	CASE 43, 169
+		SIF TEQUIP:전동오나홀
+			TFLAG:54 = 1
+	;로터삽입
+	CASE 42
+		SIF TEQUIP:로터삽입
+			TFLAG:54 = 1
+	;바이브、촉수삽입
+	CASE 44, 161
+		SIF TEQUIP:바이브
+			TFLAG:54 = 1
+	;로터A삽입
+	CASE 52
+		SIF TEQUIP:로터A삽입
+			TFLAG:54 = 1
+	;애널바이브、애널촉수
+	CASE 45, 162
+		SIF TEQUIP:애널바이브
+			TFLAG:54 = 1
+	;애널비즈
+	CASE 46
+		SIF TEQUIP:애널비즈
+			TFLAG:54 = 1
+	;니틀캡、촉수유두고문
+	CASE 47, 164
+		SIF TEQUIP:니틀캡
+			TFLAG:54 = 1
+	;유두클립
+	CASE 15
+		SIF TEQUIP:유두클립
+			TFLAG:54 = 1
+	;착유기、촉수착유
+	CASE 49, 165
+		SIF TEQUIP:착유기
+			TFLAG:54 = 1
+	;아이마스크
+	CASE 105
+		SIF TEQUIP:아이마스크
+			TFLAG:54 = 1
+	;밧줄、촉수구속
+	CASE 106, 166
+		SIF TEQUIP:밧줄
+			TFLAG:54 = 1
+	;볼개그
+	CASE 107
+		SIF TEQUIP:볼개그
+			TFLAG:54 = 1
+	;삼각목마
+	CASE 145
+		SIF TEQUIP:삼각목마
+			TFLAG:54 = 1
+	;확장벌룬
+	CASE 148
+		SIF TEQUIP:확장벌룬
+			TFLAG:54 = 1
+	;촉수소환
+	CASE 160
+		SIF TEQUIP:촉수
+			TFLAG:54 = 1
+	;비디오카메라
+	CASE 183
+		SIF TEQUIP:비디오카메라
+			TFLAG:54 = 1
+	;야외플레이
+	CASE 184
+		SIF TEQUIP:야외플레이
+			TFLAG:54 = 1
+	;수치플레이
+	CASE 186
+		SIF TEQUIP:수치플레이
+			TFLAG:54 = 1
+	;목욕탕플레이
+	CASE 187
+		SIF TEQUIP:목욕탕
+			TFLAG:54 = 1
+	;샤워
+	CASE 188
+		SIF TEQUIP:샤워
+			TFLAG:54 = 1
+	;신혼부부플레이
+	CASE 189
+		SIF TEQUIP:에이프런
+			TFLAG:54 = 1
+	;촉수구욕
+	CASE 168
+		SIF TEQUIP:촉수구욕
+			TFLAG:54 = 1
+	;사정관리
+	CASE 109
+		SIF TEQUIP:사정관리
+			TFLAG:54 = 1
+	;정조대
+	CASE 133
+		SIF TEQUIP:정조대
+			TFLAG:54 = 1
+	;카테터、촉수尿道삽입
+	CASE 50, 170
+		SIF TEQUIP:카테터
+			TFLAG:54 = 1
+	;요도벌룬
+	CASE 153
+		SIF TEQUIP:요도벌룬
+			TFLAG:54 = 1
+	;촉수유선고문
+	CASE 300
+		SIF TEQUIP:촉수유선삽입
+			TFLAG:54 = 1
+	;지하실へ行く
+	CASE 199
+		SIF TEQUIP:지하실
+			TFLAG:54 = 1
+ENDSELECT
+

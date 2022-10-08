@@ -1,0 +1,204 @@
+﻿;게이중독の可否
+@ISABLUP21
+;연모、친애、음란、창부はMAXLV10
+IF ABL:게이중독 >= 10
+	RETURN 0
+ELSEIF ABL:게이중독 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	RETURN 0
+ELSEIF MALE(TARGET)  == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP21
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+;게이중독
+@ABLUP21
+DRAWLINE
+;연모、친애、음란、창부はMAXLV10
+IF ABL:게이중독 >= 10
+	PRINTW 既にMAXです
+	RETURN 0
+ELSEIF ABL:게이중독 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	PRINTW 既にMAXです
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP21
+
+;ＬＶ２から３に上げるときは이상경험必要（素質：[바이][중독되기쉬움]なら無視できる）
+IF ABL:게이중독 == 2 && TALENT:바이 == 0 && TALENT:중독되기쉬움 == 0
+	PRINTFORML %EXPNAME:50%あり、かつ
+;ＬＶ３から４に上げるときは이상경험2以上必要（素質：[바이][중독되기쉬움]なら無視できる）
+ELSEIF ABL:게이중독 == 3 && TALENT:바이 == 0 && TALENT:중독되기쉬움 == 0
+	PRINTFORML %EXPNAME:50%2以上、かつ
+;ＬＶ４から５に上げるときは이상경험3以上必要（素質：[바이][중독되기쉬움]なら無視できる）
+ELSEIF ABL:게이중독 == 4 && TALENT:바이 == 0 && TALENT:중독되기쉬움 == 0
+	PRINTFORML %EXPNAME:50%3以上、かつ
+;ＬＶ８から９に上げるときは이상경험7以上必要（素質：[바이][중독되기쉬움]なら無視できる）
+ELSEIF ABL:게이중독 == 8 && TALENT:바이 == 0 && TALENT:중독되기쉬움 == 0
+	PRINTFORML %EXPNAME:50%7以上、かつ
+ENDIF
+
+;게이끼が必要
+PRINTFORML %ABLNAME:20%{ABL:게이중독 + 1}LV以上、かつ
+
+PRINTFORM [0] - %PALAMNAME:0%の珠×{B}、%PALAMNAME:6%の珠×{A}、%PALAMNAME:7%の珠×{A}、%EXPNAME:41%{C}以上……
+
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 珠不발 
+	SIF I & 2
+		PRINT 経験不발 
+	SIF I & 4
+		PRINT 能力不발 
+ENDIF
+PRINTL 
+
+
+PRINTL [100] - やめる
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 条件を満たしていません
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:게이중독 += 1
+
+IF RESULT == 0
+	JUEL:쾌C -= B
+	JUEL:욕정 -= A
+	JUEL:굴복 -= A
+ENDIF
+
+PRINTFORMW %ABLNAME:21%のレベルが{ABL:게이중독}になりました
+
+;게이중독LVUP判定
+@DECIDE_ABLUP21
+;条件別にＯＫかダメかを記録する
+I = 0
+;能力アップ可能なら1にする
+Z = 0
+
+IF ABL:게이중독 == 0
+	A = 3000
+	B = 10000
+	C = 1000
+ELSEIF ABL:게이중독 == 1
+	A = 8000
+	B = 25000
+	C = 1500
+ELSEIF ABL:게이중독 == 2
+	A = 15000
+	B = 50000
+	C = 2000
+ELSEIF ABL:게이중독 == 3
+	A = 30000
+	B = 100000
+	C = 4500
+ELSEIF ABL:게이중독 == 4
+	A = 55000
+	B = 300000
+	C = 6000
+ELSEIF ABL:게이중독 == 5
+	A = 60000
+	B = 350000
+	C = 6500
+ELSEIF ABL:게이중독 == 6
+	A = 65000
+	B = 400000
+	C = 7000
+ELSEIF ABL:게이중독 == 7
+	A = 70000
+	B = 450000
+	C = 7500
+ELSEIF ABL:게이중독 == 8
+	A = 75000
+	B = 500000
+	C = 8000
+ELSEIF ABL:게이중독 == 9
+	A = 80000
+	B = 550000
+	C = 9000
+ENDIF
+
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+	TIMES B , 2.00
+	TIMES C , 2.00
+ENDIF
+;중독되기쉬움
+IF TALENT:중독되기쉬움
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+ENDIF
+
+;ＬＶ２から３に上げるときは이상경험必要（素質：[바이][중독되기쉬움]なら無視できる）
+IF ABL:게이중독 == 2 && TALENT:바이 == 0 && TALENT:중독되기쉬움 == 0
+	IF EXP:이상경험 == 0
+		;이상경험が不발
+		I |= 2
+		J |= 2
+	ENDIF
+;ＬＶ３から４に上げるときは이상경험2以上必要（素質：[바이][중독되기쉬움]なら無視できる）
+ELSEIF ABL:게이중독 == 3 && TALENT:바이 == 0 && TALENT:중독되기쉬움 == 0
+	IF EXP:이상경험 < 2
+		;이상경험が不발
+		I |= 2
+		J |= 2
+	ENDIF
+;ＬＶ４から５に上げるときは이상경험3以上必要（素質：[바이][중독되기쉬움]なら無視できる）
+ELSEIF ABL:게이중독 == 4 && TALENT:바이 == 0 && TALENT:중독되기쉬움 == 0
+	IF EXP:이상경험 < 3
+		;이상경험が不발
+		I |= 2
+		J |= 2
+	ENDIF
+;ＬＶ８から９に上げるときは이상경험7以上必要（素質：[바이][중독되기쉬움]なら無視できる）
+ELSEIF ABL:게이중독 == 8 && TALENT:바이 == 0 && TALENT:중독되기쉬움 == 0
+	IF EXP:이상경험 < 7
+		;이상경험が不발
+		I |= 2
+		J |= 2
+	ENDIF
+ENDIF
+
+;게이끼が必要
+IF ABL:게이끼 < ABL:게이중독 + 1
+	I |= 4
+	J |= 4
+ENDIF
+
+;快Cの珠で上げる
+SIF JUEL:쾌C < B
+	I |= 1
+;욕정の珠で上げる
+SIF JUEL:욕정 < A
+	I |= 1
+;굴복の珠で上げる
+SIF JUEL:굴복 < A
+	I |= 1
+;게이경험が必要
+SIF EXP:게이경험 < C
+	I |= 2
+
+IF I == 0
+	Z = 1
+ENDIF
+
+

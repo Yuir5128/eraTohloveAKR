@@ -1,0 +1,66 @@
+﻿;-------------------------------------------------
+;스킨십
+;コミュニケーション系コマンド
+;-------------------------------------------------
+@COM202
+
+PRINTL 스킨십
+STR:0 = 스킨십
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 10
+
+IF TALENT:친애 || TALENT:창부 || TALENT:예속
+	SOURCE:순종 += 1000
+ELSEIF TALENT:연모 || TALENT:음란 || TALENT:복종
+	SOURCE:순종 += 500
+ELSE
+	SOURCE:순종 += 200
+ENDIF
+
+SOURCE:애정 += 500
+SOURCE:성행동 += 500
+SOURCE:일탈 += 100
+
+;스킨십선호か幼児持ちだと애정ソース追加
+IF TALENT:스킨십선호 || TALENT:유아／유아퇴행 || TALENT:유치
+	TIMES SOURCE:애정 , 1.50
+;스킨십불편だと애정のソース減少、울굴のソース追加
+ELSEIF TALENT:스킨십불편
+	TIMES SOURCE:애정 , 0.75
+	SOURCE:울굴 += 200
+ENDIF
+
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;애정경험
+IF (TALENT:연모 == 1 || TALENT:친애 == 1) && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +1
+	EXP:애정경험 += 1
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 4
+
+;依存度補正値(연모で1、친애で2）
+IF TALENT:연모 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:친애 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+

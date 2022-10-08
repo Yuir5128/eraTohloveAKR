@@ -1,0 +1,134 @@
+﻿;욕망の可否
+@ISABLUP1
+;연모、친애、음란、창부はMAXLV10
+IF ABL:욕망 >= 10
+	RETURN 0
+ELSEIF ABL:욕망 >= 5 && TALENT:연모  == 0 && TALENT:친애 == 0 && TALENT:음란  == 0 && TALENT:창부  == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP1
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+;욕망
+@ABLUP1
+DRAWLINE
+;연모、친애、음란、창부はMAXLV10
+IF ABL:욕망 >= 10
+	PRINTW 既にMAXです
+	RETURN 0
+ELSEIF ABL:욕망 >= 5 && TALENT:연모  == 0 && TALENT:친애 == 0 && TALENT:음란  == 0 && TALENT:창부  == 0
+	PRINTW 既にMAXです
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP1
+
+;ＬＶ４から５に上げるときは이상경험必要（素質：[쾌감에솔직][음란][창부]なら無視できる）
+IF ABL:욕망 == 4 && !TALENT:쾌감에솔직 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+PRINTFORML %EXPNAME:50%あり、かつ
+;ＬＶ７から８に上げるときは이상경험3以上必要（素質：[쾌감에솔직][음란][창부]なら無視できる）
+ELSEIF ABL:욕망 == 7 && TALENT:쾌감에솔직 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+PRINTFORML %EXPNAME:50%3以上、かつ
+ENDIF
+
+PRINTFORM [0] - %PALAMNAME:6%の珠×{A}……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 珠不발 
+	SIF I & 2
+		PRINT 経験不발 
+ENDIF
+PRINTL 
+
+PRINTL [100] - やめる
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 条件を満たしていません
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:욕망 += 1
+
+IF RESULT == 0
+	JUEL:욕정 -= A
+ENDIF
+
+PRINTFORMW %ABLNAME:1%のレベルが{ABL:욕망}になりました
+
+CALL YOKUBO_UP_CHECK
+
+;욕망LvUP判定
+@DECIDE_ABLUP1
+;条件別にＯＫかダメかを記録する
+I = 0
+;能力アップ可能なら1にする
+Z = 0
+
+IF ABL:욕망 == 0
+	A = 1
+ELSEIF ABL:욕망 == 1
+	A = 20
+ELSEIF ABL:욕망 == 2
+	A = 1000
+ELSEIF ABL:욕망 == 3
+	A = 8000
+ELSEIF ABL:욕망 == 4
+	A = 24000
+ELSEIF ABL:욕망 == 5
+	A = 30000
+ELSEIF ABL:욕망 == 6
+	A = 36000
+ELSEIF ABL:욕망 == 7
+	A = 45000
+ELSEIF ABL:욕망 == 8
+	A = 55000
+ELSEIF ABL:욕망 == 9
+	A = 70000
+ENDIF
+
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+ENDIF
+
+;ＬＶ４から５に上げるときは이상경험必要（素質：[쾌감에솔직][음란][창부]なら無視できる）
+IF ABL:욕망 == 4 && TALENT:쾌감에솔직 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	IF EXP:이상경험 == 0
+		;이상경험がない
+		I |= 2
+	ENDIF
+;ＬＶ７から８に上げるときは이상경험3以上必要（素質：[쾌감에솔직][음란][창부]なら無視できる）
+ELSEIF ABL:욕망 == 7 && TALENT:쾌감에솔직 == 0 && TALENT:음란 == 0 && TALENT:창부 == 0
+	IF EXP:이상경험 < 3
+		;이상경험が3未満
+		I |= 2
+	ENDIF
+ENDIF
+
+;0になった場合は1にする
+SIF A == 0
+	A = 1
+
+;욕정の珠で上げる
+SIF JUEL:욕정 < A
+	I |= 1
+
+IF I == 0
+	Z = 1
+ENDIF
+RETURN 1
+

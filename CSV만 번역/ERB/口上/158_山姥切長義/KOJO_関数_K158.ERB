@@ -1,0 +1,253 @@
+﻿;=================================================
+;長義입上用の関数など
+;加筆改変、流用ご自由にどうぞ
+;バグってたらごめんなさい
+;=================================================
+;-------------------------------------------------
+;関数名:SHIBO_IHU
+;概　要:TARGETとARGの思慕・畏怖対象が被っているかどうかを判定する
+;引　数:ARG…キャラの登録番号　ASSIなど
+;戻り値:0.思慕・畏怖対象がいない、または無効 |1.TARGET→LOCAL:1 かつ ARG→LOCAL:1|
+;2.TARGET→ARG かつ ARG→TARGET |3.TARGET→ARG(→別キャラ) |4.ARG→TARGET→LOCAL:1|
+;5.TARGET→LOCAL:1 かつ ARG→別キャラ
+;備　考:式中関数
+;TARGETに思慕・畏怖対象LOCAL:1がいる前提
+;思慕か畏怖かの判定はしてない　思慕・畏怖対象が誰かは返さない
+;-------------------------------------------------
+@SHIBO_IHU(TARGET, ARG)
+#FUNCTION
+
+;TARGETに思慕・畏怖対象がいないなら無効　未陥落・음란창부・실의・붕괴
+SIF !CFLAG:40
+	RETURNF 0
+
+;TARGETの思慕・畏怖対象のキャラ固有番号ををLOCAL:1に代入
+;CFLAG:41 = LOCAL:1
+
+LOCAL = 0
+
+;TARGET→ARG
+SIF CFLAG:41 == NO:ARG
+	LOCAL |= 1
+
+;ARG→TARGET
+SIF CFLAG:ARG:41 == NO:TARGET
+	LOCAL |= 2
+
+;ARGが未陥落もしくは음란ルートなら分岐
+IF !KANRAKU(ARG) || KANRAKU(ARG) == 2
+	;TARGET→ARG
+	IF LOCAL == 1
+		RETURNF 3 
+	ELSE
+		RETURNF 0
+	ENDIF
+ENDIF
+
+;思慕・畏怖対象が被っている
+IF CFLAG:41 == CFLAG:ARG:41
+	RETURNF 1
+ELSE
+	;TARGET→ARG かつ ARG→TARGET
+	;思慕同士なのか　思慕と畏怖なのか　などは判定してない
+	;でも思慕同士しか満たせない？　多分
+	IF LOCAL == 3
+		RETURNF 2
+	;TARGET→ARG→別キャラ
+	ELSEIF LOCAL == 1
+		RETURNF 3
+	;ARG→TARGET→LOCAL:1
+	ELSEIF LOCAL == 2
+		RETURNF 4
+	;TARGET→LOCAL:1 かつ ARG→別キャラ
+	;どちらも思慕・畏怖対象自体は居る
+	ELSE
+		RETURNF 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;関数名:NAME_CALL_158_51(ARG)
+;概　要:呼び方判定関数
+;引　数:キャラ登録番号
+;備　考:CSTR:51にPLAYERの呼び方を格納する　CSTR:50は思慕・畏怖対象の呼び方
+;-------------------------------------------------
+@NAME_CALL_158_51(ARG)
+
+;음란・창부　붕괴　未陥落
+IF CFLAG:40 == 0 && !TALENT:실의
+	CSTR:51 = %NAME_CALL_158(ARG)%
+ELSE
+	;キャラの呼び名固定フラグが立っていない
+	SIF CFLAG:640 == 0
+		CSTR:51 = %NAME_CALL_158_50(ARG)%
+
+	;調教者が思慕・畏怖対象以外
+	IF KANRAKU(ARG) == 4 || KANRAKU(ARG) == 5
+		CSTR:51 = %NAME_CALL_158(ARG)%
+	ELSE
+		CSTR:51 = %CSTR:50%
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;関数名:NAME_CALL_158(ARG)
+;概　要:呼び方設定関数
+;引　数:キャラ登録番号
+;戻り値:呼び方を返す
+;備　考:文中関数
+;음란・창부　붕괴　未陥落　思慕畏怖対象以外が調教者の場合の呼び方を設定する
+;-------------------------------------------------
+@NAME_CALL_158(ARG)
+#FUNCTIONS
+
+IF NO:PLAYER == 95
+	LOCALS = 偽物くん
+	
+ELSEIF NO:PLAYER == 154
+	LOCALS = 猫殺しくん
+ELSE
+	LOCALS = %CALLNAME:PLAYER%
+ENDIF
+RETURNF LOCALS
+
+;-------------------------------------------------
+;関数名:NAME_CALL_158_50(ARG)
+;概　要:思慕・畏怖対象の呼び方設定関数
+;引　数:キャラ登録番号
+;戻り値:呼び方を返す
+;備　考:文中関数　CSTR:50に思慕・畏怖対象の呼び方を格納する
+;NAME_CALL_158_SET(ARG)で改めて呼び方を決めるまではこれに則って呼ばれる
+;-------------------------------------------------
+@NAME_CALL_158_50(ARG)
+#FUNCTIONS
+
+IF CFLAG:41 == 95 || CFLAG:38 == 95
+	LOCALS = 偽物くん
+ELSEIF CFLAG:41 == 154 || CFLAG:38 == 154
+	LOCALS = 猫殺しくん
+ELSE
+	;売却済みだった
+	IF CFLAG:38 > 0
+		LOCAL = CFLAG:38
+		LOCALS = %CSVNAME(LOCAL ,0)%
+	ELSE
+		;キャラ固有番号から登録番号を抽出
+		LOCAL:41 = LOCAL
+		LOCAL:1 = GETCHARA(LOCAL)
+		LOCALS = %CALLNAME:(LOCAL:1)%
+	ENDIF
+ENDIF
+CSTR:50 = %LOCALS%
+RETURNF LOCALS
+
+;-------------------------------------------------
+;関数名:NAME_CALL_158_SET
+;概　要:思慕・畏怖対象の呼び方設定関数
+;引　数:キャラ登録番号
+;戻り値:呼び方を返す
+;備　考:CSTR:50に思慕・畏怖対象の呼び方を格納する
+;입上内で呼ぶので台詞つき
+;CFLAG:640 = 呼び名固定フラグ
+;-------------------------------------------------
+@NAME_CALL_158_SET
+
+;すでに呼び名固定フラグが立っている場合に、記録しておく
+IF CFLAG:640
+	LOCAL = CFLAG:640
+ELSE
+	LOCAL = 0
+ENDIF
+
+$INPUT_NAME_158_1
+PRINTFORML %CALLNAME:PLAYER%の呼び方を決めます
+PRINTFORML [0] %CALLNAME:PLAYER%
+PRINTFORML [1] %CALLNAME:PLAYER%様
+;思慕畏怖対象が｢あなた｣
+IF CFLAG:41 == 0
+	PRINTFORML [2] 主
+	PRINTFORML [3] 審神者くん
+;思慕畏怖対象が야만바기리 쿠니히로
+ELSEIF CFLAG:41 == 95
+	PRINTFORML [2] 偽物くん
+	PRINTFORML [3] 国広
+;思慕畏怖対象が난센 이치몬지
+ELSEIF CFLAG:41 == 154
+	PRINTFORML [2] 猫殺しくん
+	PRINTFORML [3] 南泉
+ELSE
+	PRINTFORML [2] %CALLNAME:PLAYER%くん
+	PRINTFORML [3] %CALLNAME:PLAYER%さん
+ENDIF
+PRINTFORML [4] ご主人様
+PRINTFORML [9] 自分で決める
+PRINTFORML [100] やっぱりやめる
+INPUT
+IF RESULT == 0
+	LOCALS = %CALLNAME:PLAYER%
+	CFLAG:640 = 10
+ELSEIF RESULT == 1
+	LOCALS = %CALLNAME:PLAYER%様
+	CFLAG:640 = 11
+ELSEIF RESULT == 2
+	;「あなた」
+	IF CFLAG:41 == 0
+		LOCALS = 主
+	;야만바기리 쿠니히로
+	ELSEIF CFLAG:41 == 95
+		LOCALS = 偽物くん
+	;난센 이치몬지
+	ELSEIF CFLAG:41 == 154
+		LOCALS = 猫殺しくん
+	ELSE
+		LOCALS = %CALLNAME:PLAYER%くん
+	ENDIF
+	CFLAG:640 = 12
+ELSEIF RESULT == 3
+	;「あなた」
+	IF CFLAG:41 == 0
+		LOCALS = 審神者くん
+	;야만바기리 쿠니히로
+	ELSEIF CFLAG:41 == 95
+		LOCALS = 国広
+	;난센 이치몬지
+	ELSEIF CFLAG:41 == 154
+		LOCALS = 南泉
+	ELSE
+		LOCALS = %CALLNAME:PLAYER%さん
+	ENDIF
+	CFLAG:640 = 13
+ELSEIF RESULT == 4
+	LOCALS = ご主人様
+	CFLAG:640 = 14
+ELSEIF RESULT == 9
+	PRINTFORML 「自分で決めたい？　仕方ないな」
+	PRINTFORML %CALLNAME:PLAYER%への呼び方を入力してください
+	INPUTS
+	LOCALS = %RESULTS%
+	CFLAG:640 = 19
+ELSEIF RESULT == 100
+	PRINTFORML 「なんだ　やめるのか　随分と気まぐれだな」
+	PRINTW 
+	CFLAG:640 = LOCAL
+	RETURN 0
+ELSE
+	GOTO INPUT_NAME_158_1
+ENDIF
+
+PRINTFORML 「『%LOCALS%』でいいのかな？」
+PRINTFORML [0] これでいい
+PRINTFORML [1] やっぱり変える
+$INPUT_NAME_158_2
+INPUT
+IF RESULT == 0
+	CSTR:50 = %LOCALS%
+	PRINTFORML 「%CSTR:50%…　なるほど、わかったよ」
+	PRINTFORMW 「じゃあ　改めてよろしく　%CSTR:50%」
+ELSEIF RESULT == 1
+	GOTO INPUT_NAME_158_1
+ELSE
+	GOTO INPUT_NAME_158_2
+ENDIF
+
+

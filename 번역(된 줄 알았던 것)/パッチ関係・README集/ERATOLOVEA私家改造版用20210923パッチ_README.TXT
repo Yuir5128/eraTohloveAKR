@@ -42,7 +42,7 @@ CSV\CHARA\Chara180_산쵸모.csv
 CSV\CHARA\Chara188_닛코 이치몬지.csv
 CSV\CHARA\Chara198_이치몬지 노리무네.csv
 CSV\ITEM.csv
-ERB\입상\범용 허덕여 \PANT_SET.ERB
+ERB\대사\범용 허덕여 \PANT_SET.ERB
 
 ────
 

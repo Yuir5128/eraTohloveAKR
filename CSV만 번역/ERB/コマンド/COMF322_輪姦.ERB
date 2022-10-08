@@ -1,0 +1,496 @@
+﻿;-------------------------------------------------
+;윤간
+;シチュエーション別コマンド
+;-------------------------------------------------
+@COM322
+#LOCALSIZE 17
+
+PRINTL 윤간
+STR:0 = 윤간
+
+CALL KOJO_MESSAGE_COM
+
+;プレイ内容を判定
+CALL OUTDOOR_PLAY_CHECK
+
+;V経験を伴うコマンドのフラグ(처녀膜再生対応)
+SIF E && (TALENT:처녀 || TALENT:재생처녀)
+	TFLAG:19 |= 1
+
+;調教対象が백버진だった場合の喪失フラグ
+SIF F && TALENT:백버진
+	TFLAG:161 |= 1
+
+;調教対象が동정だった場合の喪失フラグ
+SIF G && TALENT:동정
+	TFLAG:160 |= 1
+
+;ついてた玩具は（物によってはランダムで）外す
+SIF TEQUIP:니틀캡 && !RAND:5
+	TEQUIP:니틀캡 = 0
+SIF TEQUIP:유두클립 && !RAND:5
+	TEQUIP:유두클립 = 0
+SIF TEQUIP:착유기 && !RAND:5
+	TEQUIP:착유기 = 0
+SIF TEQUIP:클리캡 && !RAND:5
+	TEQUIP:클리캡 = 0
+SIF TEQUIP:음핵클립 && !RAND:5
+	TEQUIP:음핵클립 = 0
+SIF TEQUIP:전동오나홀 && (G || !RAND:5)
+	TEQUIP:전동오나홀 = 0
+SIF TEQUIP:카테터 && (G || !RAND:5)
+	TEQUIP:카테터 = 0
+SIF TEQUIP:요도벌룬 && (G || !RAND:5)
+	TEQUIP:요도벌룬 = 0
+SIF TEQUIP:로터삽입
+	TEQUIP:로터삽입 = 0
+SIF TEQUIP:바이브
+	TEQUIP:바이브 = 0
+SIF TEQUIP:로터A삽입
+	TEQUIP:로터A삽입 = 0
+SIF TEQUIP:애널비즈
+	TEQUIP:애널비즈 = 0
+SIF TEQUIP:애널바이브
+	TEQUIP:애널바이브 = 0
+SIF TEQUIP:확장벌룬
+	TEQUIP:확장벌룬 = 0
+
+;스타킹びりびりフラグ
+SIF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 500
+LOSEBASE:기력 += 500
+
+;Ｖ
+IF E
+	SOURCE:쾌V += 300 * E
+	SOURCE:통증 += 500
+ENDIF
+;Ａ
+IF F
+	SOURCE:쾌A += 300 * F
+	SOURCE:통증 += 700
+ENDIF
+;逆セックス
+IF G
+	SOURCE:쾌C += 300 * G
+ELSEIF C
+	SOURCE:쾌C += 300 * C
+ELSEIF V
+	SOURCE:쾌C += 300 * V
+ENDIF
+
+;쾌B、굴복、액체、욕정、성행동、노출、통증、두려움、일탈、반감のソース
+SOURCE:쾌B += 300
+
+SOURCE:성행동 += 30 * (E+F+G)
+SOURCE:두려움 += 2000 / (EXP:윤간경험+1)
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、울굴ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 1000
+
+;Ｖ
+IF E
+	;처녀、재생처녀だった場合
+	IF TALENT:처녀 || TALENT:재생처녀
+		TIMES SOURCE:쾌V , 2.00
+		SOURCE:통증 += 2000
+	ENDIF
+
+	;Vへの고통は先に処理しておく
+	;EXP:V경험をみる（처녀の반감は別途処理済みなので省略）
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증 , 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증 , 0.80
+		TIMES SOURCE:쾌V , 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증 , 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증 , 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증 , 0.00
+	ENDIF
+
+	;PALAM:윤활をみる
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:쾌V , 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증 , 0.70
+		TIMES SOURCE:쾌V , 1.20
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증 , 0.10
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증 , 0.10
+	ENDIF
+ENDIF
+
+;Ａ
+IF F
+	;백버진だった場合
+	IF TALENT:백버진
+		TIMES SOURCE:쾌A , 2.00
+		SOURCE:통증 += 2000
+	ENDIF
+
+	;Aへの고통は先に処理しておく
+	;EXP:A경험をみる
+	IF EXP:A경험 < EXPLV:1
+		TIMES SOURCE:통증 , 3.00
+		TIMES SOURCE:쾌A , 3.00
+	ELSEIF EXP:A경험 < EXPLV:2
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:쾌A , 2.00
+	ELSEIF EXP:A경험 < EXPLV:3
+		TIMES SOURCE:통증 , 0.80
+		TIMES SOURCE:쾌A , 1.50
+	ELSEIF EXP:A경험 < EXPLV:4
+		TIMES SOURCE:통증 , 0.60
+		TIMES SOURCE:쾌A , 1.20
+	ELSEIF EXP:A경험 < EXPLV:5
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF EXP:A경험 >= EXPLV:5
+		TIMES SOURCE:통증 , 0.20
+	ENDIF
+
+	;PALAM:윤활をみる
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:쾌V , 2.00
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증 , 1.00
+		TIMES SOURCE:쾌V , 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증 , 0.60
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증 , 0.30
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증 , 0.20
+	ENDIF
+ENDIF
+
+;逆レイプ
+IF G
+	;동정だった場合
+	IF TALENT:동정
+		;사정ゲージにボーナス
+		BASE:사정 += 8000
+		TIMES SOURCE:쾌C , 1.20
+	ENDIF
+ENDIF
+
+;特にハードなコマンドでは、이상경험に応じて効果を減らす
+IF EXP:이상경험 < EXPLV:1
+	TIMES SOURCE:두려움 , 1.20
+ELSEIF EXP:이상경험 < EXPLV:2
+	TIMES SOURCE:두려움 , 0.90
+ELSEIF EXP:이상경험 < EXPLV:3
+	TIMES SOURCE:두려움 , 0.80
+ELSEIF EXP:이상경험 < EXPLV:4
+	TIMES SOURCE:두려움 , 0.70
+ELSEIF EXP:이상경험 < EXPLV:5
+	TIMES SOURCE:두려움 , 0.60
+ELSE
+	TIMES SOURCE:두려움 , 0.50
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF !EXP:윤간경험
+	EXP:이상경험 += 1
+	PRINTL 윤간初経験で이상경험＋１
+ENDIF
+EXP:윤간경험 += 1
+
+;수간の場合
+IF TFLAG:500 == 1
+	IF EXP:수간경험 == 0
+		EXP:이상경험 += 1
+		PRINTL 수간初経験で이상경험＋１
+	ENDIF
+	EXP:수간경험 += 1
+ENDIF
+
+;フェラ
+IF C
+	;펠라경험
+	EXP:펠라경험 += C
+	PRINTFORML 펠라경험+{C}
+	;정액경험
+	EXP:정액경험 += C
+	PRINTFORML 정액경험+{C}
+ENDIF
+
+;Ｖ
+IF E
+	;V경험加算
+	EXP:V경험 += E
+	PRINTFORML V경험+{E}
+	D = E/2
+	SIF D < 1
+		D = 1
+	;질내사정경험加算
+	EXP:질내사정경험 += D
+	PRINTFORML 질내사정경험+{D}
+	;娼館などの客と奴隷間の中田氏カウント用
+	CFLAG:105 += D
+ENDIF
+
+;Ａ
+IF F
+	;A경험
+	EXP:A경험 += F
+	PRINTFORML A경험+{F}
+	H = F/2
+	SIF H < 1
+		H = 1
+	;장내사정경험加算
+	EXP:장내사정경험 += H
+	PRINTFORML 장내사정경험+{F}
+	;娼館などの客と奴隷間の中田氏カウント用
+	CFLAG:705 += F
+ENDIF
+
+;성교경험
+EXP:성교경험 += E+F+G
+PRINTFORML 성교경험+{E+F+G}
+
+;변의や뇨의があれば排出
+SIF BASE:변의 >= 60
+	CALL DEFECATION_CHECK2
+SIF BASE:뇨의 >= 60
+	CALL DEFECATION_CHECK3
+
+;収益を資金に加算
+MONEY += TFLAG:71
+
+;状況とギャラリーをリセット
+TFLAG:151 = 0
+TFLAG:500 = 0
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;-------------------------------------------------
+;汚れの処理
+;経験を見て汚れを追加するのでこっちに持ってくる
+;-------------------------------------------------
+
+CALL COM_STAIN
+
+;奴隷の全身（衣類）に汚れを追加
+;Ｖ
+IF E
+	STAIN:바기나 |= 2
+	STAIN:질내 |= 2
+	STAIN:바기나 |= 4
+	STAIN:질내 |= 4
+	
+	;수간の場合、粘液も追加
+	IF TFLAG:500 == 1
+		STAIN:바기나 |= 32
+		STAIN:질내 |= 32
+	ENDIF
+	
+	;가려움증약使ってる場合は効果が切れる
+	SIF STAIN:바기나 & 1024
+		STAIN:바기나 -= 1024
+	SIF STAIN:질내 & 1024
+		STAIN:질내 -= 1024
+ENDIF
+
+;Ａ
+IF F
+	STAIN:애널 |= 2
+	STAIN:장내 |= 2
+	STAIN:애널 |= 4
+	STAIN:장내 |= 4
+	;수간の場合、粘液も追加
+	IF TFLAG:500 == 1
+		STAIN:애널 |= 32
+		STAIN:장내 |= 32
+	ENDIF
+	
+	;가려움증약使ってる場合は効果が切れる
+	SIF STAIN:애널 & 1024
+		STAIN:애널 -= 1024
+	SIF STAIN:장내 & 1024
+		STAIN:장내 -= 1024
+ENDIF
+
+;フェラ
+IF C
+	STAIN:머리카락 |= 4
+	SIF TEQUIP:머리장식
+		STAIN:머리장식 |= 4
+	SIF TEQUIP:특수3
+		STAIN:눈장식 |= 4
+	
+	IF TEQUIP:특수1 == 1
+		STAIN:장갑 |= 2
+		STAIN:장갑 |= 4
+	ELSE
+		STAIN:손 |= 2
+		STAIN:손 |= 4
+	ENDIF
+	
+	STAIN:입 |= 2
+	STAIN:입 |= 4
+	
+	STAIN:가슴 |= 4
+	
+	SIF TEQUIP:특수2
+		STAIN:발장식 |= 4
+	STAIN:발 |= 4
+	
+	;수간の場合、粘液も追加
+	IF TFLAG:500 == 1
+		STAIN:입 |= 32
+		STAIN:가슴 |= 32
+	ENDIF
+ENDIF
+
+;커닐링구스
+IF V
+	STAIN:손 |= 1
+	STAIN:입 |= 1
+ENDIF
+
+;逆レイプ
+IF G
+	IF TFLAG:500 & 8
+		STAIN:손 |= 1
+		STAIN:페니스 |= 1
+	ELSEIF TFLAG:500 & 16
+		STAIN:손 |= 8
+		STAIN:페니스 |= 8
+	ENDIF
+	
+	;가려움증약使ってる場合は効果が切れる
+	SIF STAIN:페니스 & 1024
+		STAIN:페니스 -= 1024
+ENDIF
+
+;가려움증약使ってる場合は効果が切れる
+SIF STAIN:가슴 & 1024
+	STAIN:가슴 -= 1024
+
+RETURN 1
+
+
+
+;-------------------------------------------------
+;プレイ内容チェック
+;-------------------------------------------------
+@OUTDOOR_PLAY_CHECK
+
+;性交系　E:Ｖ　F:Ａ　G:逆レイプ　D:膣射数　H:腸射数
+E = 0
+F = 0
+G = 0
+D = 0
+H = 0
+
+;性的奉仕　C:フェラ系　V:커닐링구스系
+C = 0
+V = 0
+
+;奴隷が공ではなく、ギャラリーに[獣][아이][男][オカマ]どれかがいる
+;IF !TALENT:공 && (TFLAG:500 & 1 || TFLAG:500 & 2 || TFLAG:500 & 4 || TFLAG:500 & 16)
+IF !TALENT:공 && (TFLAG:500 == 1 || TFLAG:500 == 2 || TFLAG:500 & 4 || TFLAG:500 & 16)
+	;VとAのプレイ差
+	;남자、정조대はAのみ
+	IF TALENT:남자 || TEQUIP:정조대
+		E = 0
+		F = (ABL:A감각+ABL:욕망+1)/3
+		SIF F < 1
+			F = 1
+	ELSE
+		E = (ABL:V감각+ABL:욕망+1)/3
+		F = (ABL:A감각+ABL:욕망+1)/3
+		SIF E < 1
+			E = 1
+		SIF F < 1
+			F = 1
+	ENDIF
+	
+ENDIF
+
+;奴隷が수でも오메가ではなく、정조대がなく、페니스があって、[女]か[オカマ]がいる
+IF !TALENT:수 && !TALENT:오메가 && TEQUIP:속옷（아래） != 5 && PENIS(TARGET) && (TFLAG:500 & 8 || TFLAG:500 & 16)
+	G = (ABL:C감각+ABL:욕망+1)/3
+	
+	SIF G < 1
+		G = 1
+ENDIF
+
+;ギャラリーに[獣][아이][男][オカマ]どれかがいる
+SIF (TFLAG:500 & 1 || TFLAG:500 & 2 || TFLAG:500 & 4 || TFLAG:500 & 16)
+	C = (ABL:봉사정신+ABL:기교+ABL:정액중독)/3
+
+;ギャラリーに[女]がいる
+SIF TFLAG:500 & 8
+	V = (ABL:봉사정신+ABL:기교+ABL:순종)/3
+
+;犯す場所を記録
+TFLAG:705 = 0
+SIF E
+	TFLAG:705 |= 2
+SIF F
+	TFLAG:705 |= 1
+SIF G
+	TFLAG:705 |= 4
+SIF C
+	TFLAG:705 |= 8
+
+
+;先に収益を算出してTFLAG:71に入れておく（地の文で表示するため）
+TFLAG:71 = 0
+
+;行為回数によって金額加算
+SIF E
+	TFLAG:71 += E*1000
+SIF F
+	TFLAG:71 += F*1000
+SIF G
+	TFLAG:71 += G*1000
+SIF C
+	TFLAG:71 += C*500
+SIF V
+	TFLAG:71 += V*500
+
+;처녀／재생처녀を破ってたら補正 
+SIF E && (TALENT:처녀 || TALENT:재생처녀)
+	TFLAG:71 += 10000
+;백버진を奪ってたら補正
+SIF F && TALENT:백버진
+	TFLAG:71 += 10000
+;동정を奪ってたら補正
+SIF G && TALENT:동정
+	TFLAG:71 += 5000
+
+;犬はお金をくれない
+IF TFLAG:500 == 1
+	TFLAG:71 = 0
+;아이は金額がかなり減る
+ELSEIF TFLAG:500 == 2
+	TFLAG:71 /= 3
+ENDIF
+
+

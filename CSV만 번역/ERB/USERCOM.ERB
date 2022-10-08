@@ -1,0 +1,810 @@
+﻿@SHOW_USERCOM
+A = 0
+FLAG:45 = 0
+PRINTL 
+IF TFLAG:406 <= 0
+	PRINTC 履歴表示[800]
+	CALL CHECK_NEWLINE
+
+	PRINTC 汚れ表示[801]
+	CALL CHECK_NEWLINE
+
+	PRINTC 所持品を確認[802]
+	CALL CHECK_NEWLINE
+
+	PRINTC 能力表示(奴隷)[803]
+	CALL CHECK_NEWLINE
+
+	IF ASSIPLAY
+		PRINTC 能力表示(助손)[804]
+		CALL CHECK_NEWLINE
+	ELSE
+		PRINTC 能力表示(主人)[804]
+		CALL CHECK_NEWLINE
+	ENDIF
+
+	D = 0
+	;緊縛中、촉수プレイ中、목욕탕、野外、삼각목마中、一部の玩具、助손命令中は着替えられない
+	SIF TEQUIP:밧줄 || TEQUIP:촉수
+		D = 1
+	SIF TEQUIP:목욕탕 || TEQUIP:야외플레이 || TEQUIP:삼각목마
+		D = 1
+	SIF TEQUIP:착유기 || TEQUIP:전동오나홀 || TEQUIP:카테터 || TEQUIP:요도벌룬
+		D = 1
+	IF D == 0
+		PRINTC 着替えさせる[806]
+		CALL CHECK_NEWLINE
+	ENDIF
+
+	IF PENIS(PLAYER) || PENIS(TARGET)
+		IF ITEM:45
+			PRINTC 콘돔設定[807]
+			CALL CHECK_NEWLINE
+		ENDIF
+		PRINTC 自動사정先変更[808]
+		CALL CHECK_NEWLINE
+	ENDIF
+	
+	PRINTC 汎用喘ぎ設定[809]
+	CALL CHECK_NEWLINE
+
+	IF ASSI >= 0
+		IF ASSIPLAY && !TEQUIP:촉수
+			PRINTC マスターと交代[900]
+			CALL CHECK_NEWLINE
+			;PRINTC 助손に任せる[901]
+			;CALL CHECK_NEWLINE
+		ELSEIF !TEQUIP:촉수
+			PRINTC 助손と交代[900]
+			CALL CHECK_NEWLINE
+		ENDIF
+	ENDIF
+
+	PRINTC コマンドフィルタ[990]
+	CALL CHECK_NEWLINE
+
+	PRINTC 調教メニュー登録[991]
+	CALL CHECK_NEWLINE
+	IF FLAG:200
+		PRINTC 調教メニュー表示[992]
+		CALL CHECK_NEWLINE
+		PRINTC 調教メニュー実行[993]
+		CALL CHECK_NEWLINE
+	ENDIF
+
+	PRINTC 調教終了[999]
+ELSE
+	TFLAG:406--
+ENDIF
+
+IF PREVCOM >= 0
+	PRINTL 
+	PRINT ＜前回調教コマンド:
+	PRINTS STR:0
+	SIF TFLAG:50
+		PRINT (助손)
+	PRINTL ＞
+ENDIF
+
+
+@USERCOM
+;履歴表示
+IF RESULT == 800
+	CALL SHOW_EQUIP
+	RETURN 1
+;汚れ表示
+ELSEIF RESULT == 801
+	CALL STAIN_INFO
+	RETURN 1
+;所持品を確認
+ELSEIF RESULT == 802
+	CALL ITEM_LIST
+	WAIT
+	RETURN 1
+;能力表示（奴隷）
+ELSEIF RESULT == 803
+	CALL PRINT_STATUS(TARGET,1)
+	RETURN 1
+;能力表示（主人／助손）
+ELSEIF RESULT == 804
+	PRINTSL NAME:PLAYER
+	CALL PRINT_STATUS(PLAYER)
+	WAIT
+	RETURN 1
+;着替えさせる
+ELSEIF RESULT == 806 && D == 0
+	CALL CLOTHES_CHANGE
+	RETURN 1
+;콘돔設定
+ELSEIF RESULT == 807 && (PENIS(PLAYER) || PENIS(TARGET)) && ITEM:45
+	CALL CONDOM_SETTING
+	RETURN 1
+;自動사정先制御
+ELSEIF RESULT == 808 && (PENIS(PLAYER) || PENIS(TARGET))
+	CALL SAMENPLACE_SETTING
+	RETURN 1
+;汎用喘ぎ設定
+ELSEIF RESULT == 809
+	CALL PANT_VOICE_SETTING
+	RETURN 1
+;マスター／助손と交代
+ELSEIF RESULT == 900 && ASSI >= 0 && !TEQUIP:촉수
+	IF ASSIPLAY
+		ASSIPLAY = 0
+		PLAYER = MASTER
+	ELSE
+		ASSIPLAY = 1
+		PLAYER = ASSI
+	ENDIF
+	LOCAL = MASTER
+	MASTER = PLAYER
+	CALL MASTER_CHANGE_ON
+	CALL MASTER_CHANGE_OFF
+	MASTER = LOCAL
+	TFLAG:13 = 67
+	CALL KOJO_MESSAGE_EVENT
+	RETURN 1
+;助손に任せる
+ELSEIF RESULT == 901 && ASSIPLAY && !TEQUIP:촉수
+	CALL ASSI_SELECT_TRAIN
+	IF RESULT != 999
+		SELECTCOM:1 = RESULT
+		CALLTRAIN 1
+	ENDIF
+	RETURN 1
+;コマンド表示制御
+ELSEIF RESULT == 990
+	CALL COMMAND_CONTROL
+	RETURN 1
+;調教メニュー登録
+ELSEIF RESULT == 991
+	CALL COMSEQ_REGISTER
+	RETURN 1
+;調教メニュー表示
+ELSEIF RESULT == 992 && FLAG:200
+	CALL COMSEQ_SHOW
+	WAIT
+	RETURN 1
+;調教メニュー実行
+ELSEIF RESULT == 993 && FLAG:200
+	CALL COMSEQ_TRAIN
+	RETURN 1
+;調教終了
+ELSEIF RESULT == 999
+	BEGIN AFTERTRAIN
+	RETURN 1
+ENDIF
+RETURN 0
+
+
+
+
+@SHOW_EQUIP
+CALL SHOW_INFO_JUEL(TARGET)
+IF PREVCOM >= 0
+	PRINT 前回調教コマンド:
+	PRINTS STR:0
+	SIF TFLAG:50
+		PRINT (助손)
+	PRINTL 
+ENDIF
+
+SIF TEQUIP:미약
+	PRINTL [미약効果発揮中]
+SIF TEQUIP:이뇨제
+	PRINTL [이뇨제効果発揮中]
+IF TEQUIP:강정신약 == 1
+	PRINTL [강정신약反動中]
+ELSEIF TEQUIP:강정신약 > 1
+	PRINTL [강정신약効果発揮中]
+ELSEIF ZUIKI(TARGET)
+	PRINTL [가려움증약効果発揮中]
+ENDIF
+
+SIF TEQUIP:비디오카메라
+	PRINTFORML [비디오촬영中({TFLAG:70 - 1}/10)]
+SIF TEQUIP:촉수
+	PRINTL [촉수調教中]
+SIF TEQUIP:야외플레이
+	PRINTL [야외플레이中]
+SIF TEQUIP:수치플레이
+	PRINTL [수치플레이中]
+SIF TEQUIP:목욕탕
+	PRINTL [목욕탕플레이中]
+SIF TEQUIP:에이프런
+	PRINTL [신혼부부플레이中]
+SIF TEQUIP:삼각목마
+	PRINTL [삼각목마乗馬中]
+SIF TEQUIP:지하실
+	PRINTL [지하실]
+
+IF TEQUIP:밧줄
+	IF TEQUIP:촉수
+		PRINTL [촉수구속中]
+	ELSE
+		PRINTL [밧줄で緊縛中]
+	ENDIF
+ENDIF
+SIF TEQUIP:아이마스크
+	PRINTL [아이마스크装備中]
+SIF TEQUIP:볼개그
+	PRINTL [볼개그装備中]
+IF TEQUIP:정조대 && TEQUIP:사정관리
+	PRINTL [정조대で사정抑制中]
+ELSEIF TEQUIP:정조대
+	PRINTL [정조대装備中]
+ELSEIF TEQUIP:사정관리
+	PRINTL [사정抑制中]
+ENDIF
+SIF TEQUIP:샤워
+	PRINTL [샤워使用中]
+
+IF TEQUIP:니틀캡
+	IF TEQUIP:촉수
+		PRINTL [촉수유두고문]
+	ELSE
+		PRINTL [니틀캡装備中]
+	ENDIF
+ENDIF
+SIF TEQUIP:유두클립
+	PRINTL [유두클립装備中]
+IF TEQUIP:착유기
+	IF TEQUIP:촉수
+		PRINTL [촉수착유中]
+	ELSE
+		PRINTL [搾乳中]
+	ENDIF
+ENDIF
+
+IF TEQUIP:클리캡
+	IF TEQUIP:촉수
+		PRINTL [촉수클리고문]
+	ELSE
+		PRINTL [클리캡装備中]
+	ENDIF
+ENDIF
+SIF TEQUIP:음핵클립
+	PRINTL [음핵클립装備中]
+IF TEQUIP:전동오나홀
+	IF TEQUIP:촉수
+		PRINTL [촉수페니스고문]
+	ELSE
+		PRINTL [전동오나홀装備中]
+	ENDIF
+ENDIF
+
+SIF TEQUIP:로터삽입
+	PRINTL [로터삽입中]
+IF TEQUIP:바이브
+	IF TEQUIP:촉수
+		IF TEQUIP:바이브 == 3
+			PRINT [촉수자궁고문中]
+		ELSEIF TEQUIP:바이브 == 2
+			PRINT [촉수G스팟고문中]
+		ELSE
+			PRINT [촉수삽입中]
+		ENDIF
+	ELSE
+		PRINTL [바이브挿入中]
+	ENDIF
+ENDIF
+
+SIF TEQUIP:로터A삽입
+	PRINTL [로터A삽입中]
+SIF TEQUIP:애널비즈
+	PRINTL [애널비즈装備中]
+IF TEQUIP:애널바이브
+	IF TEQUIP:촉수
+		IF TEQUIP:애널바이브 == 2
+			PRINT [촉수전립선자극中]
+		ELSE
+			PRINT [촉수애널挿入中]
+		ENDIF
+	ELSE
+		PRINTL [애널바이브挿入中]
+	ENDIF
+ENDIF
+SIF TEQUIP:확장벌룬
+	PRINTL [애널拡張中]
+
+IF TEQUIP:카테터
+	IF TEQUIP:촉수
+		PRINTL [촉수尿道삽입中]
+	ELSE
+		PRINTL [카테터挿入中]
+	ENDIF
+ENDIF
+SIF TEQUIP:요도벌룬
+	PRINTL [尿道拡張中]
+
+SIF TEQUIP:촉수구욕
+	PRINTL [촉수구욕中]
+SIF TEQUIP:촉수유선삽입
+	PRINTL [촉수유선삽입中]
+IF TEQUIP:촉수질내산란 && TEQUIP:촉수장내산란
+	PRINT [촉수両穴産卵中]
+ELSEIF TEQUIP:촉수질내산란
+	PRINT [촉수질내산란中]
+ELSEIF TEQUIP:촉수장내산란
+	PRINT [촉수장내산란中]
+ENDIF
+
+SIF TEQUIP:꽐라플레이
+	PRINTL [꽐라플레이中]
+
+SIF EX:0
+	PRINTFORM C절정:{EX:0}回　
+SIF EX:1
+	PRINTFORM V절정:{EX:1}回　
+SIF EX:2
+	PRINTFORM A절정:{EX:2}回　
+SIF EX:3
+	PRINTFORM B절정:{EX:3}回　
+SIF EX:4
+	PRINTFORM 　噴乳:{EX:4}回　
+SIF EX:5
+	PRINTFORM 　사정:{EX:5}回　
+SIF EX:0 || EX:1 || EX:2 || EX:3 || EX:4 || EX:5
+	PRINTL 
+WAIT
+
+
+
+@CONDOM_SETTING
+A = 0
+B = 0
+C = 0
+T = 0
+PRINTW 콘돔の設定を行う対象を選択してください
+PRINTL  
+REPEAT 3
+	IF (PENIS(MASTER)) && A == 0
+		PRINTFORM [{COUNT}] %CALLNAME:MASTER%
+		IF TEQUIP:MASTER:콘돔 && (FLAG:98 & 4)
+			PRINTL (装着済み、常備)
+		ELSEIF TEQUIP:MASTER:콘돔
+			PRINTL (装着済み)
+		ELSE
+			PRINTL (未装着)
+		ENDIF
+			A = 1
+	ELSEIF ASSI >= 0
+		IF (PENIS(ASSI)) && B == 0
+			PRINTFORM [{COUNT}] %CALLNAME:ASSI%
+			IF TEQUIP:ASSI:콘돔 && (FLAG:98 & 2)
+				PRINTL (装着済み、常備)
+			ELSEIF TEQUIP:ASSI:콘돔
+				PRINTL (装着済み)
+			ELSE
+				PRINTL (未装着)
+			ENDIF
+			B = 1
+		ENDIF
+	ELSEIF (PENIS(TARGET)) && C == 0
+		PRINTFORM [{COUNT}] %CALLNAME%
+		IF TEQUIP:TARGET:콘돔 && (FLAG:98 & 1)
+			PRINTL (装着済み、常備)
+		ELSEIF TEQUIP:TARGET:콘돔
+			PRINTL (装着済み)
+		ELSE
+			PRINTL (未装着)
+		ENDIF
+			C = 1
+	ENDIF
+REND
+PRINTL [100]戻る
+$INPUT_LOOP1
+INPUT
+IF RESULT == 0
+	IF A == 1
+		T = MASTER
+	ELSEIF B == 1
+		T = ASSI
+	ELSEIF C == 1
+		T = TARGET
+	ENDIF
+ELSEIF RESULT == 1
+	IF B == 1
+		T = ASSI
+	ELSEIF C == 1
+		T = TARGET
+	ENDIF
+ELSEIF RESULT == 2
+	T = TARGET
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP1
+ENDIF
+
+PRINTL 콘돔の設定をしてください
+PRINTL  
+	PRINTFORM 設定対象：%CALLNAME:T%
+	IF TEQUIP:T:콘돔
+		PRINT (装着済み
+		IF (T == MASTER && (FLAG:98 & 4)) || (T == ASSI && (FLAG:98 & 2)) || (T == TARGET && (FLAG:98 & 1))
+			PRINTL 、常備)
+		ELSE
+			PRINTL )
+		ENDIF
+	ELSE
+		PRINTL (未装着)
+	ENDIF
+PRINTL [0]  콘돔を常に装着する
+PRINTL [1]  콘돔を装着する
+PRINTL [2]  콘돔を外す
+PRINTL [100]戻る
+
+$INPUT_LOOP2
+INPUT
+IF RESULT == 0
+	IF TEQUIP:T:콘돔 == 0
+		ITEM:45 -= 1
+		TEQUIP:T:콘돔 = 1
+	ENDIF
+	SIF T == MASTER
+		FLAG:98 |= 4
+	SIF T == ASSI
+		FLAG:98 |= 2
+	SIF T == TARGET
+		FLAG:98 |= 1
+	PRINTFORMW %CALLNAME:T%は、콘돔を常につけるようにした
+ELSEIF RESULT == 1
+	IF TEQUIP:T:콘돔 == 0
+		PRINTFORMW %CALLNAME:T%は、콘돔をつけた
+		ITEM:45 -= 1
+		TEQUIP:T:콘돔 = 1
+	ELSEIF (T == MASTER && (FLAG:98 & 4)) || (T == ASSI && (FLAG:98 & 2)) || (T == TARGET && (FLAG:98 & 1))
+		PRINTFORMW %CALLNAME:T%は、콘돔を常につけないようにした
+		SIF T == MASTER
+			FLAG:98 &= 3
+		SIF T == ASSI
+			FLAG:98 &= 5
+		SIF T == TARGET
+			FLAG:98 &= 6
+	ELSE
+		PRINTFORMW %CALLNAME:T%は、既に콘돔をつけている
+	ENDIF
+ELSEIF RESULT == 2
+	PRINTFORMW %CALLNAME:T%は콘돔を外した
+	SIF T == MASTER
+		FLAG:98 &= 3
+	SIF T == ASSI
+		FLAG:98 &= 5
+	SIF T == TARGET
+		FLAG:98 &= 6
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP2
+ENDIF
+
+
+
+
+@COMMAND_CONTROL
+;コマンドフィルタ移植(元は多分eracustom)
+COUNT:2 = 0
+$COMMAND
+PRINTL 
+PRINTFORML ＜page.{(COUNT:2)+1}/5＞
+VARSET LOCAL
+FOR COUNT,0,600
+	LOCALS = /{COUNT}/
+	SIF STRCOUNT(SAVESTR:0,LOCALS)
+		LOCAL:COUNT = 1
+NEXT
+SIF SAVESTR:0 == ""
+	SAVESTR:0 = /
+DRAWLINE
+COUNT:1 = 3
+FOR COUNT,0,100
+	COUNT:3 = COUNT + COUNT:2 * 100
+	LOCALS = /{COUNT:3}/
+	SIF STRCOUNT(SAVESTR:0,LOCALS)
+		SETCOLOR 120,120,120
+	IF STRLENS(TRAINNAME:(COUNT:3))
+		PRINTFORM %TRAINNAME:(COUNT:3),20%[{(COUNT:3),3}]
+		COUNT:1--
+		IF !COUNT:1
+			COUNT:1 = 3
+			PRINTL 
+		ELSE
+			PRINT 　
+		ENDIF
+	ENDIF
+	RESETCOLOR
+NEXT
+PRINTL 
+DRAWLINE
+PRINTFORML [1000] 決定 [1001] リセット \@ (COUNT:2 <= 0) ? %" " * 19% # [1002] 前のページ \@ \@(COUNT:2 >= 3) ? #  [1003] 次のページ\@
+PRINTL [1004] コマンドフィルタの保存 [1005] コマンドフィルタのロード
+LOCALS:100 = 
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001
+	SAVESTR:0 = 
+	GOTO COMMAND
+ELSEIF RESULT == 1002 && COUNT:2 >= 0
+	COUNT:2--
+ELSEIF RESULT == 1003 && COUNT:2 <= 3
+	COUNT:2++
+ELSEIF RESULT == 1004
+	$INPUT_LOOP_SAVE
+	LOADGLOBAL
+	FOR LOCAL,0,3
+		PRINTFORM [{LOCAL}] - 
+		IF STRLENS(GLOBALS:(LOCAL * 2 + 1))
+			PRINTFORML [%GLOBALS:(LOCAL * 2 + 1)%]
+		ELSE
+			PRINTL ----------
+		ENDIF
+	NEXT
+	PRINTL [100] - 戻る
+	INPUT
+	LOCAL = RESULT
+	IF RESULT == 100
+		RESTART
+	ELSEIF RESULT < 0 || RESULT > 2
+		GOTO INPUT_LOOP_SAVE
+	ENDIF
+	SIF STRLENS(GLOBALS:(RESULT * 2 + 1))
+		PRINTFORML 【%GLOBALS:(RESULT * 2 + 1)%】 このデータに上書きします
+	PRINTL コマンドフィルタの名前を登録して下さい
+	INPUTS
+	GLOBALS:(LOCAL * 2 + 1) = %RESULTS%
+	GLOBALS:(LOCAL * 2) = %SAVESTR:0%
+	PRINTFORMW コマンドフィルタ【%GLOBALS:(RESULT * 2 + 1)%を登録しました
+	SAVEGLOBAL
+	GOTO COMMAND
+ELSEIF RESULT == 1005
+	$INPUT_LOOP_LOAD
+	LOADGLOBAL
+	FOR LOCAL,0,3
+		PRINTFORM [{LOCAL}] - 
+		IF STRLENS(GLOBALS:(LOCAL * 2 + 1))
+			PRINTFORML [%GLOBALS:(LOCAL * 2 + 1)%]
+		ELSE
+			PRINTL ----------
+		ENDIF
+	NEXT
+	PRINTL [100] - 戻る
+	INPUT
+	IF RESULT == 100
+		RESTART
+	ELSEIF RESULT < 0 || RESULT > 2
+		GOTO INPUT_LOOP_LOAD
+	ENDIF
+	PRINTFORMW コマンドフィルタ【%GLOBALS:(RESULT * 2 + 1)%】を読み込みました
+	SAVESTR:0 = %GLOBALS:(RESULT * 2)%
+	GOTO COMMAND
+ELSEIF STRLENS(TRAINNAME:RESULT)
+	LOCAL:RESULT = !LOCAL:RESULT
+ELSE
+	GOTO COMMAND
+ENDIF
+SAVESTR:0 = /
+FOR COUNT,0,600
+	SIF !LOCAL:COUNT
+		CONTINUE
+	LOCALS = /{COUNT}/
+	SIF !STRCOUNT(SAVESTR:0,LOCALS)
+		SAVESTR:0 = %SAVESTR:0%{COUNT}/
+NEXT
+GOTO COMMAND
+
+
+
+
+
+;===========================================================
+;調教メニュー登録パッチ Emuera対応版
+;eratohoYMからの移植です
+;===========================================================
+;変数の説明-------------------------------------------------
+;TFLAG:406…主に現在選択している調教コマンド番号の一時的な保存と、USERCOM非表示
+;FLAG:200…メニューの長さ
+;FLAG:201～210…コマンド番号を保存
+;STR:20…調教メニューの登録の際、行番号揃える為に一時的に使用、他で再使用OK
+
+;関数の説明-------------------------------------------------
+;@COMSEQ_REGISTER          USERCOMから呼び出される調教メニュー登録
+;@COMSEQ_SHOW              登録した調教メニューを表示
+;@COMSEQ_TRAIN             USERCOMから調教メニュー実行
+;@MULTI_COMABLE            コマンドが実行可能かどうか調べる
+;@COMSEQSUB_PRINT_COMLIST  登録時のコマンドリスト表示
+;@COMSEQSUB_TRAIN_DO       調教メニュー実行の実体
+
+;-----------------------------------------------------------
+;調教メニューの登録
+;破壊する変数 : TFLAG:406
+;LOCAL:0 … ループ変数
+;LOCAL:1 … 繰り返し時動作に使用
+;-----------------------------------------------------------
+@COMSEQ_REGISTER
+FLAG:45 = 0
+PRINTL 調教メニュー登録
+VARSET LOCAL, 0
+FOR LOCAL, 0, 10
+	PRINTL 
+	PRINTL 
+	PRINTL 
+	$INPUT_LOOP
+	CALL COMSEQSUB_PRINT_COMLIST
+	SIF FLAG:200 > 0
+		PRINTLC [998] リセットする
+	SIF LOCAL:0 > 0
+		PRINTLC [999] 繰り返し
+	IF LOCAL:0 == 0 && FLAG:200 > 0
+		PRINTLC [1000] 変更しないで戻る
+	ELSEIF LOCAL:0 == 0
+		PRINTLC [1000] 登録しないで戻る
+	ELSE
+		PRINTLC [1000] 登録する
+	ENDIF
+	PRINTL 
+	DRAWLINE
+	CALL COMSEQ_SHOW
+	PRINTFORML メニュー {LOCAL:0+1} 
+	INPUT
+	IF RESULT == 1000 && LOCAL:0 == 0
+		RETURN 0
+	ELSEIF RESULT < 0 || RESULT > 999
+		BREAK
+	ENDIF
+
+	;リセットの処理
+	IF RESULT == 998 && FLAG:200 > 0
+		TFLAG:406 = 0
+		LOCAL:0 = 0
+		LOCAL:2 = 200
+		$RESET_MENU_LOOP
+		FLAG:(LOCAL:2) = 0
+		LOCAL:2 += 1
+		SIF LOCAL:2 <= 210
+			GOTO RESET_MENU_LOOP
+		GOTO INPUT_LOOP
+	;繰り返しの処理
+	ELSEIF RESULT == 999 && LOCAL:0 > 0
+		;現時点で何回目まで登録してるかをとっておく
+		LOCAL:1 = LOCAL:0
+		;二重REPEATはできない
+		$COMSEQ_REPEAT
+		;総数が10に達したらBREAK
+		SIF LOCAL:0 > 9
+			BREAK
+		LOCAL:2 = 201 + LOCAL:0
+		LOCAL:3 = 201 + (LOCAL:0 % LOCAL:1)
+		FLAG:(LOCAL:2) = FLAG:(LOCAL:3)
+		FLAG:200 += 1
+		LOCAL:0 += 1
+		GOTO COMSEQ_REPEAT
+	ENDIF
+
+	;TFLAG:406に選んだ調教コマンドを代入
+	TFLAG:406 = RESULT
+	;TFLAG:406に選んだ調教コマンドが登録できるかをチェック
+	CALL MULTI_COMABLE, TFLAG:406
+	IF RESULT == 0
+		PRINTL 登録できません
+		GOTO INPUT_LOOP
+	ENDIF
+	;登録できる番号が入力されたので登録
+	LOCAL:1 = 201 + LOCAL:0
+	FLAG:(LOCAL:1) = TFLAG:406
+	SIF LOCAL:0 == 0
+		FLAG:200 = 0
+	FLAG:200 += 1
+NEXT
+
+PRINTW 調教メニューを登録しました
+SIF RESULT == 999
+	CALL COMSEQ_SHOW
+TFLAG:406 = 0
+RETURN 0
+
+;-----------------------------------------------------------
+;調教メニューの表示
+;-----------------------------------------------------------
+@COMSEQ_SHOW
+VARSET LOCAL, 0
+PRINTL 現在登録されている調教メニューを表示します
+REPEAT FLAG:200
+	LOCAL = 201 + COUNT
+	PRINTFORM %TRAINNAME:(FLAG:LOCAL)%
+	;同コマンド連続実行を×で表示してみる
+	LOCAL:1 = 1
+	$TIMES_EXP_CHECK
+	IF COUNT < FLAG:200 - 1
+		LOCAL:2 = COUNT + 1
+		LOCAL:3 = 201 + LOCAL:2
+		IF FLAG:(LOCAL:3) == FLAG:LOCAL
+			LOCAL:1 += 1
+			COUNT += 1
+			GOTO TIMES_EXP_CHECK
+		ENDIF
+	ENDIF
+	SIF LOCAL:1 > 1
+		PRINTFORM ×{LOCAL:1}
+	SIF COUNT < FLAG:200 - 1
+		PRINT  → 
+REND
+PRINTL  
+
+;-----------------------------------------------------------
+;実行可能なコマンドのリストを表示する
+;破壊する変数 : STR:20
+;emueraのPRINTFORMCの仕様上複素数は対応できないため
+;-----------------------------------------------------------
+@COMSEQSUB_PRINT_COMLIST
+FLAG:45 = 0
+FOR LOCAL, 0, 350
+	CALL MULTI_COMABLE, LOCAL
+	;スペースとコマンド番号とTALENTNAMEを表示する
+	IF RESULT == 1
+		PRINTFORMLC [{LOCAL, 3}] %TRAINNAME:LOCAL%
+		CALL CHECK_NEWLINE
+	ENDIF
+NEXT
+PRINTL 
+RETURN 0
+
+;-----------------------------------------------------------
+;与えられたコマンド番号の調教コマンドが実行可能かどうか調べる
+;CSVからTRAINNAMEを取得してその文字列数が2以上(コメントアウトされていない)場合、
+;COM_ABLEを呼び出す
+;引数  ARG  : コマンド番号xxx
+;返値  1 コマンド番号xxxの調教コマンドが実行可能
+;      0 （封印されているとかそもそもそんなコマンドないとかで）不可能
+;内部でCOM_ABLExxxを呼び出すので，色々と変数が破壊されるかもしれない
+;-----------------------------------------------------------
+@MULTI_COMABLE, ARG
+;CSVにない調教コマンド名なら不可
+IF STRLENS(TRAINNAME:ARG) == 0
+	RETURN 0
+;COM_ABLExxxに分岐
+ELSE
+	TRYCALLFORM COM_ABLE{ARG}
+	RETURN RESULT
+ENDIF
+
+;-----------------------------------------------------------
+;調教メニューの実行
+;-----------------------------------------------------------
+@COMSEQ_TRAIN
+PRINTFORML 調教メニューを実行します
+CALL COMSEQ_SHOW
+;メニューの長さ回繰り返す
+LOCAL:1 = 0
+;PREVCOMを待避させておく
+LOCAL = PREVCOM
+REPEAT FLAG:200
+	CALLFORM COM_ABLE{FLAG:(201 + COUNT)}
+	IF RESULT == 0
+		LOCAL:1 = 1
+		BREAK
+	ENDIF
+	SELECTCOM:(COUNT + 1) = FLAG:(201 + COUNT)
+	PREVCOM = FLAG:(201 + COUNT)
+REND
+IF LOCAL:1 == 0
+	TFLAG:406 = FLAG:200
+	CALLTRAIN FLAG:200
+ELSE
+	PRINTL 実行できないコマンドがあったので実行をしませんでした。
+ENDIF
+PREVCOM = LOCAL
+RETURN 0
+
+
+@CHECK_NEWLINE
+FLAG:45 += 1
+IF FLAG:45 == 3
+	PRINTL 
+	FLAG:45 = 0
+ENDIF
+
+
+
+

@@ -11,7 +11,7 @@ DRAWLINE
 
 MASTER = 0
 
-;주인공에 의해 분기 하는 오프닝입상 1
+;주인공에 의해 분기 하는 오프닝대사 1
 CALL KOJO_PRE_OPENING_STORY
 
 ;위로부터 RETURN 1하면, 데포의 오프닝은 컷
@@ -35,7 +35,7 @@ REPEAT 8
 REND
 PRINTL 
 
-;주인공에 의해 분기 하는 오프닝입상 2
+;주인공에 의해 분기 하는 오프닝대사 2
 CALL KOJO_POST_OPENING_STORY
 
 RETURN 1
@@ -257,7 +257,7 @@ ENDIF
 
 ;배드 엔드
 @BADENDING_1
-;주인공마다의 배드 엔드입상 1
+;주인공마다의 배드 엔드대사 1
 CALL KOJO_BAD1_ENDING_STORY
 
 SIF RESULT
@@ -272,7 +272,7 @@ $BADENDING1
 QUIT
 
 @BADENDING_2
-;주인공마다의 배드 엔드입상 2
+;주인공마다의 배드 엔드대사 2
 CALL KOJO_BAD2_ENDING_STORY
 
 SIF RESULT
@@ -289,7 +289,7 @@ QUIT
 ;굿 엔드
 ;노멀 엔드
 @ENDING_1
-;주인공마다의 노멀 엔드입상
+;주인공마다의 노멀 엔드대사
 CALL KOJO_NORMAL_ENDING_STORY
 
 SIF RESULT

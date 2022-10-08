@@ -430,8 +430,8 @@ ENDIF
 SIF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET) || TEQUIP:비디오카메라 || ABL:노출벽 >= 3
 	PRINTFORML ,
 
-IF TEQUIP:니틀캡
-	PRINTFORMW 니틀캡를 이끌어
+IF TEQUIP:니플캡
+	PRINTFORMW 니플캡를 이끌어
 ELSEIF TEQUIP:유두클립
 	PRINTFORMW 유두클립를 이끌어
 ELSEIF TEQUIP:착유기
@@ -885,7 +885,7 @@ ENDIF
 IF TALENT:PLAYER:골드핑거 && (TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET))
 	PRINTFORM 가슴를 비비도록(듯이)애무 했다…
 ;욕망의 PALAMLV3 이상＋
-ELSEIF PALAM:욕정 >= PALAMLV:3 && TEQUIP:착유기 == 0 && TEQUIP:니틀캡 == 0
+ELSEIF PALAM:욕정 >= PALAMLV:3 && TEQUIP:착유기 == 0 && TEQUIP:니플캡 == 0
 	PRINTFORM 가슴의 첨단의,완전히 딱딱해진 돌기를 집어올렸다…
 ;작은체구
 ELSEIF TALENT:절벽
@@ -1016,14 +1016,14 @@ PRINTFORM 유두에 떨리는로터를 꽉 눌렀다…
 
 
 ;-------------------------------------------------
-;13,니틀캡
+;13,니플캡
 ;-------------------------------------------------
 @MESSAGE_COM13
 PRINTFORM %CALLNAME:PLAYER%는
-IF TEQUIP:니틀캡
-	PRINTFORM %CALLNAME%의 유두로부터니틀캡를 떼어냈다
+IF TEQUIP:니플캡
+	PRINTFORM %CALLNAME%의 유두로부터니플캡를 떼어냈다
 ELSE
-	PRINTFORM %CALLNAME%의 유두에니틀캡를 끌어당겼다
+	PRINTFORM %CALLNAME%의 유두에니플캡를 끌어당겼다
 ENDIF
 
 
@@ -1075,17 +1075,17 @@ ELSE
 	PRINT 아직 부드러운 돌기
 ENDIF
 
-SIF TEQUIP:니틀캡 || TEQUIP:유두클립
+SIF TEQUIP:니플캡 || TEQUIP:유두클립
 	PRINTFORM 에 매달렸다
 
-IF TEQUIP:니틀캡
-	PRINT 니틀캡
+IF TEQUIP:니플캡
+	PRINT 니플캡
 ELSEIF TEQUIP:유두클립
 	PRINT 유두클립
 ENDIF
 PRINTFORM 를
 
-IF TEQUIP:니틀캡 || TEQUIP:유두클립
+IF TEQUIP:니플캡 || TEQUIP:유두클립
 	;고문중
 	IF TEQUIP:지하실
 		PRINTFORM 마음껏 이끌었다…
@@ -5914,7 +5914,7 @@ SIF CFLAG:MASTER:1 == 3 && !CFLAG:MASTER:140 && CFLAG:MASTER:41 == NO:TARGET && 
 ;엔딩용 아이템
 ;이하의 구문은,현재 게임상에서는 표시되지 않게 comment out 되고 있습니다.
 ;캐릭터의 엔딩을 만들어,이하의선물를 표시시키고 싶은 사람은,
-;여기의 comment out를 제외하는 것은 아니고,캐릭터의 개별입상 플래그에 이동시켜 사용해 주세요.
+;여기의 comment out를 제외하는 것은 아니고,캐릭터의 개별대사 플래그에 이동시켜 사용해 주세요.
 ;----------------------------------
 ;주인(공범자)이 아니면 안돼,벌써 누군가에게 건네주고 있으면 안돼,함락 끝난 노예가 없으면 안돼,
 ;엔드리스 모드가 아니면 안돼,벌써 클리어가 끝난 상태라면 안돼,100만고슈금 없으면 안돼
@@ -6128,9 +6128,9 @@ IF TALENT:연모 || TALENT:음란 || TALENT:복종 || TALENT:친애 || TALENT:�
 		;V감각 3이상으로,처녀가 아니고,바이브를 가지고 있다
 		ELSEIF ABL:V감각 >= 3 && !TALENT:처녀 && ITEM:바이브 == 1
 			PRINTL 새로운바이브를선물 해 주었다
-		;B감각 3이상으로,니틀캡를 가지고 있다
+		;B감각 3이상으로,니플캡를 가지고 있다
 		ELSEIF ABL:B감각 >= 3 && ITEM:니플캡 == 1
-			PRINTL 새로운니틀캡를선물 해 주었다
+			PRINTL 새로운니플캡를선물 해 주었다
 		;로터를 가지고 있다
 		ELSEIF ITEM:로터 == 1
 			PRINTL 새로운로터를선물 해 주었다
@@ -6414,14 +6414,14 @@ PRINTFORML 유두에 떨리는로터를 꽉 눌러 왔다…
 
 
 ;-------------------------------------------------
-;230,니틀캡 시킨다
+;230,니플캡 시킨다
 ;-------------------------------------------------
 @MESSAGE_COM230
 PRINTFORML %CALLNAME%는 %CALLNAME:PLAYER%의
-IF TEQUIP:PLAYER:니틀캡
-	PRINTFORM 유두로부터니틀캡를 떼어냈다
+IF TEQUIP:PLAYER:니플캡
+	PRINTFORM 유두로부터니플캡를 떼어냈다
 ELSE
-	PRINTFORM 유두에니틀캡를 끌어당겨 왔다
+	PRINTFORM 유두에니플캡를 끌어당겨 왔다
 ENDIF
 
 ;-------------------------------------------------
@@ -8608,7 +8608,7 @@ ELSE
 			;노출벽 4 이상
 			SIF ABL:노출벽 >= 4
 				PRINTFORM 치태를 남기지 않고 찍히는 것에의 기대에 사타구니를\@ PENIS(TARGET) ? 부풀리고 # 적셔\@면서,
-			PRINTFORML 정중한 전입상을 말하고 있다…
+			PRINTFORML 정중한 전대사을 말하고 있다…
 		;그 외
 		CASEELSE
 			;굴복 3 한편,노출벽 3 이상 혹은순종 4 이상
@@ -9199,7 +9199,7 @@ ENDIF
 ;-------------------------------------------------
 @MESSAGE_COM341
 ;해제시
-IF TEQUIP:니틀캡
+IF TEQUIP:니플캡
 	PRINTFORML 촉수는%CALLNAME%의 유두로부터 멀어졌다
 ELSE
 	IF TEQUIP:지하실

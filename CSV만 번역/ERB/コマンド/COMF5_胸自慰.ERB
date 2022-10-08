@@ -1,0 +1,209 @@
+﻿;-------------------------------------------------
+;가슴자위
+;자위系コマンド
+;-------------------------------------------------
+@COM5
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教が기승위or기승위애널、기승위乳房자위のとき、騎乗乳房자위に
+	IF PREVCOM == 106 || PREVCOM == 116 || PREVCOM == 509
+		IF PREVCOM == 106
+			TFLAG:705 = 0
+		ELSEIF PREVCOM == 116
+			TFLAG:705 = 1
+		ENDIF
+		CALL COM_ABLE509
+		SIF RESULT == 1
+			JUMP COM509
+	ENDIF
+ENDIF
+
+LOCALS = 
+SIF TEQUIP:비디오카메라
+	LOCALS = 公開
+SIF TEQUIP:야외플레이
+	LOCALS =  %LOCALS%野外
+
+LOCALS = %LOCALS%가슴자위
+STR:0 = %LOCALS%
+PRINTFORML %STR:0%
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;すべての命令に共通の要素を考慮
+;(순종が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;実行判定操作
+CALL KOJO_DENIAL_PLUS
+
+;合計を表示(33以上で実行)
+PRINT  = 
+PRINTV A
+
+;難易度上昇
+;公開で+10
+V = 33
+SIF TEQUIP:비디오카메라
+	V += 10
+SIF TEQUIP:야외플레이
+	V += 10
+SIF TEQUIP:니틀캡
+	V += 3
+SIF TEQUIP:유두클립
+	V += 10
+SIF TEQUIP:착유기
+	V += 5
+
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+;実行不可입上/実行判定操作
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;実行者が奴隷であるフラグ
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 50
+
+SOURCE:쾌B += 80
+SIF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기
+	TIMES SOURCE:쾌B , 1.50
+
+SIF TEQUIP:유두클립
+	SOURCE:통증 += 200
+
+SOURCE:성행동 += 40
+SOURCE:두려움 += 100
+SOURCE:중독충족 += 100
+SOURCE:노출 += 200
+SOURCE:굴복 += 400
+SOURCE:일탈 += 150
+SOURCE:반발 += 150
+
+IF TEQUIP:비디오카메라 || TEQUIP:야외플레이
+	SOURCE:액체 += 50
+	SOURCE:일탈 += 100
+ENDIF
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;中毒による중독충족のソースは先に処理しておく
+;자위중독を見る
+IF ABL:자위중독 == 1
+	TIMES SOURCE:쾌B , 1.00
+	TIMES SOURCE:중독충족 , 0.00
+ELSEIF ABL:자위중독 == 2
+	TIMES SOURCE:쾌B , 1.10
+	TIMES SOURCE:중독충족 , 0.30
+ELSEIF ABL:자위중독 == 3
+	TIMES SOURCE:쾌B , 1.20
+	TIMES SOURCE:중독충족 , 0.60
+ELSEIF ABL:자위중독 == 4
+	TIMES SOURCE:쾌B , 1.30
+	TIMES SOURCE:중독충족 , 0.90
+ELSEIF ABL:자위중독 == 5
+	TIMES SOURCE:쾌B , 1.50
+	TIMES SOURCE:중독충족 , 1.20
+ELSEIF ABL:자위중독 == 6
+	TIMES SOURCE:쾌B , 1.70
+	TIMES SOURCE:중독충족 , 1.50
+ELSEIF ABL:자위중독 == 7
+	TIMES SOURCE:쾌B , 2.00
+	TIMES SOURCE:중독충족 , 1.80
+ELSEIF ABL:자위중독 == 8
+	TIMES SOURCE:쾌B , 2.30
+	TIMES SOURCE:중독충족 , 2.30
+ELSEIF ABL:자위중독 == 9
+	TIMES SOURCE:쾌B , 2.50
+	TIMES SOURCE:중독충족 , 3.00
+ELSEIF ABL:자위중독 >= 10
+	TIMES SOURCE:쾌B , 3.50
+	TIMES SOURCE:중독충족 , 5.00
+ENDIF
+
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 150
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;奴隷の손（장갑）⇔奴隷のＢの汚れが移動
+;道具がついてると汚れは移動しない
+IF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;비디오촬영時は経験にプラス
+IF TEQUIP:비디오카메라
+	EXP:자위경험 += 2
+	PRINTL 자위경험＋２
+	EXP:조교자위경험 += 2
+	PRINTL 조교자위경험＋２
+	
+	IF !EXP:공개자위 && !TALENT:음란 && !TALENT:창부
+		EXP:이상경험 += 1
+		PRINTL 공개자위初経験で이상경험＋１
+	ENDIF
+	EXP:공개자위 += 1
+	PRINTL 공개자위経験＋１
+ELSE
+	EXP:자위경험 += 1
+	PRINTL 자위경험＋１
+	EXP:조교자위경험 += 1
+	PRINTL 조교자위경험＋１
+ENDIF
+
+;게이경험とか加算
+CALL COM_EXP(3)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+

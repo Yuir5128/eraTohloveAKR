@@ -1,0 +1,174 @@
+﻿;-------------------------------------------------
+;로터A삽입
+;Ａ系調教コマンド
+;-------------------------------------------------
+@COM52
+
+PRINTL 로터A삽입
+STR:0 = 로터A삽입
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;着脱の処理
+IF TEQUIP:로터A삽입 == 0
+	TEQUIP:로터A삽입 = 1
+ELSE
+	TEQUIP:로터A삽입 = 0
+ENDIF
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 50
+
+SOURCE:쾌A += 150
+
+SOURCE:통증 += 130
+
+SOURCE:노출 += 50
+SOURCE:굴복 += 50
+SOURCE:일탈 += 50
+SOURCE:반발 += 50
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 60
+
+;Aへの고통は先に処理しておく
+;EXP:A경험をみる
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:통증 , 3.00
+	TIMES SOURCE:반발 , 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:통증 , 0.80
+	TIMES SOURCE:반발 , 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:통증 , 0.60
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:통증 , 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.00
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+EXP:A경험 += 1
+PRINTL A경험＋１
+
+;게이경험とか加算
+CALL COM_EXP(1)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+
+RETURN 1
+
+
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM52
+
+PRINTL ＜로터A삽입中＞
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 20
+
+SOURCE:쾌A += 60
+SOURCE:통증 += 65
+SOURCE:노출 += 25
+SOURCE:굴복 += 25
+SOURCE:일탈 += 25
+SOURCE:반발 += 25
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 30
+
+;Aへの고통は先に処理しておく
+;EXP:A경험をみる
+A = 50
+B = 15
+IF EXP:A경험 < EXPLV:1
+	TIMES A , 3.00
+	TIMES B , 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES A , 1.20
+	TIMES B , 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES A , 0.80
+	TIMES B , 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES A , 0.60
+	TIMES B , 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES A , 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES A , 0.20
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES A , 1.20
+	TIMES B , 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES A , 1.00
+	TIMES B , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES A , 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES A , 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES A , 0.20
+ENDIF
+SOURCE:통증 += A
+SOURCE:반발 += B
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+EXP:A경험 += 1
+PRINTL A경험＋１
+
+
+RETURN 1
+

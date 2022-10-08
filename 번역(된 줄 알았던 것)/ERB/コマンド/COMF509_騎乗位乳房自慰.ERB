@@ -57,7 +57,7 @@ LOSEBASE:체력 += 120
 LOSEBASE:기력 += 80
 
 SOURCE:쾌B += 80
-SIF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기
+SIF TEQUIP:니플캡 || TEQUIP:유두클립 || TEQUIP:착유기
 	TIMES SOURCE:쾌B , 1.50
 
 SOURCE:애정 += 400
@@ -239,7 +239,7 @@ ENDIF
 ;-------------------------------------------------
 ;노예의손(장갑)⇔노예의 B의 더러움이 이동
 ;도구가 붙어 있으면 더러움은 이동하지 않는다
-IF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기
+IF TEQUIP:니플캡 || TEQUIP:유두클립 || TEQUIP:착유기
 ELSE
 	;장갑를 하고 있을 때
 	IF TEQUIP:특수 1 == 1

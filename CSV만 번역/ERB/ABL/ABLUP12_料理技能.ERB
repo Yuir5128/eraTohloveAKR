@@ -1,0 +1,143 @@
+﻿;요리기능の可否
+@ISABLUP12
+;연모、친애、복종、예속はMAXLV10
+IF ABL:요리기능 >= 10
+	RETURN 0
+ELSEIF ABL:요리기능 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP12
+
+IF Z == 0
+	RETURN 0
+ELSE
+	RETURN 1
+ENDIF
+
+
+;요리기능
+@ABLUP12
+DRAWLINE
+;연모、친애、복종、예속はMAXLV10
+IF ABL:요리기능 >= 10
+	PRINTW 既にMAXです
+	RETURN 0
+ELSEIF ABL:요리기능 >= 5 && TALENT:연모 == 0 && TALENT:친애 == 0 && TALENT:복종 == 0 && TALENT:예속 == 0
+	PRINTW 既にMAXです
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP12
+
+PRINTFORM [0] - %PALAMNAME:8%の珠×{A}、%EXPNAME:61%{B}以上……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 珠不발 
+	SIF I & 2
+		PRINT 経験不발 
+ENDIF
+PRINTL 
+
+PRINTL [100] - やめる
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 条件を満たしていません
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:요리기능 += 1
+
+IF RESULT == 0
+	JUEL:습득 -= A
+ENDIF
+
+PRINTFORMW %ABLNAME:12%のレベルが{ABL:요리기능}になりました
+
+
+;요리기능LVUP判定
+@DECIDE_ABLUP12
+;条件別にＯＫかダメかを記録する
+I = 0
+
+;能力アップ可能なら1にする
+Z = 0
+
+IF ABL:요리기능 == 0
+	A = 75
+	B = 5
+ELSEIF ABL:요리기능 == 1
+	A = 500
+	B = 10
+ELSEIF ABL:요리기능 == 2
+	A = 3000
+	B = 30
+ELSEIF ABL:요리기능 == 3
+	A = 9000
+	B = 50
+ELSEIF ABL:요리기능 == 4
+	A = 24000
+	B = 100
+ELSEIF ABL:요리기능 == 5
+	A = 30000
+	B = 200
+ELSEIF ABL:요리기능 == 6
+	A = 35000
+	B = 300
+ELSEIF ABL:요리기능 == 7
+	A = 40000
+	B = 400
+ELSEIF ABL:요리기능 == 8
+	A = 45000
+	B = 500
+ELSEIF ABL:요리기능 == 9
+	A = 50000
+	B = 600
+ENDIF
+
+;연모
+IF TALENT:연모
+	TIMES A , 0.60
+	TIMES B , 0.60
+ENDIF
+;친애
+IF TALENT:친애
+	TIMES A , 0.40
+	TIMES B , 0.40
+ENDIF
+;일선을넘지않음
+IF TALENT:일선을넘지않음 && (TALENT:연모 == 0 && TALENT:음란 == 0 && TALENT:복종 == 0 && TALENT:친애 == 0 && TALENT:창부 == 0 && TALENT:예속 == 0)
+	TIMES A , 2.00
+	TIMES B , 2.00
+ENDIF
+;요리치
+IF TALENT:요리치
+	TIMES A , 3.00
+	TIMES B , 3.00
+ENDIF
+;요리고수
+IF TALENT:요리고수
+	TIMES A , 0.70
+	TIMES B , 0.70
+ENDIF
+
+;습득の珠で上げる
+SIF JUEL:습득 < A
+	I |= 1
+SIF EXP:가사경험 < B
+	I |= 2
+
+IF I == 0
+	Z = 1
+ENDIF
+
+RETURN 1
+

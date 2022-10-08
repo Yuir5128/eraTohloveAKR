@@ -1,0 +1,176 @@
+﻿;=============================================================================
+;特とか극とかに関連した関数ファイル
+;改変や再配布は自由です　（eraToLove以外での利用価値は皆無と思われますが…）
+;=============================================================================
+;-------------------------------------------------
+;関数名:TOKU_KIWAME
+;概　要:特か극かを判定する
+;引　数:ARG…キャラの登録番号
+;戻り値:0.男士以外　1.特　2.극
+;備　考:式中関数
+;히게키리までは偶数が극、히자마루からは奇数が극
+;-------------------------------------------------
+@TOKU_KIWAME(ARG)
+#FUNCTION
+
+SELECTCASE NO:ARG
+	;「あなた」は男士以外
+	CASE 0
+		RETURNF 0
+	;「아이」は男士以外
+	CASE 890 TO 899
+		RETURNF 0
+	;히게키리・히자마루の特
+	CASE 107 TO 110, 112 TO 113
+		RETURNF 1
+	;히게키리・히자마루の극
+	CASE 111,115
+		RETURNF 2
+	;長曽祢まで
+	CASE 1 TO 106
+		;キャラ固有番号が偶数なら극
+		IF LOCAL % 2 == 0
+			RETURNF 2
+		ELSE
+			RETURNF 1
+		ENDIF
+	;오오쿠리카라から
+	CASE IS >= 116
+		;キャラ固有番号が奇数なら극
+		IF LOCAL % 2 == 1
+			RETURNF 2
+		ELSE
+			RETURNF 1
+		ENDIF
+ENDSELECT
+
+;-------------------------------------------------
+;関数名:TOKU_KIWAME2
+;概　要:特か극かを判定する
+;引　数:ARG:0,ARG:1…キャラの登録番号
+;戻り値:0.両方男士以外　1.両方特　2.両方극
+;3.男士以外と特　4.男士以外と극　5.特と극　6.その他(バグ確認用で一応)
+;備　考:式中関数
+;どっちが特か극かの区別はつけないので別で判定してください
+;-------------------------------------------------
+@TOKU_KIWAME2(ARG:0, ARG:1)
+#FUNCTION
+
+LOCAL = TOKU_KIWAME(ARG:0)
+LOCAL:1 = TOKU_KIWAME(ARG:1)
+
+;特同士、극同士、それ以外同士は先に処理
+IF LOCAL == LOCAL:1
+	IF LOCAL == 0
+		RETURNF 0
+	ELSEIF LOCAL == 1
+		RETURNF 1
+	ELSE
+		RETURNF 2
+	ENDIF
+ENDIF
+
+LOCAL:2 = 0
+
+;ARG:0が特か극か男士以外かでビットを立てる場所を変える
+IF LOCAL == 2
+	LOCAL:2 |= 2
+ELSEIF LOCAL == 1
+	LOCAL:2 |= 1
+ELSE
+	LOCAL:2 |= 0
+ENDIF
+
+;ARG:1が特か극か男士以外かでビットを立てる場所を変える
+IF LOCAL:1 == 2
+	LOCAL:2 |= 2
+ELSEIF LOCAL:1 == 1
+	LOCAL:2 |= 1
+ELSE
+	LOCAL:2 |= 0
+ENDIF
+
+IF LOCAL:2 == 1
+	RETURNF 3
+ELSEIF LOCAL:2 == 2
+	RETURNF 4
+ELSEIF LOCAL:2 == 3
+	RETURNF 5
+;バグ確認用で一応
+ELSE
+	RETURNF 6
+ENDIF
+
+;-------------------------------------------------
+;関数名:SAME_TOKEN
+;概　要:同一刀剣か判定する
+;引　数:
+;ARG:2 == 0 → ARG:0,ARG:1…キャラ登録番号
+;ARG:2 == 1 → ARG:0,ARG:1…キャラ固有番号
+;戻り値:0.同一刀剣ではない　1.同一刀剣
+;備　考:式中関数
+;特と극の区別はつけないので別で判定してください
+;-------------------------------------------------
+@SAME_TOKEN(ARG:0, ARG:1, ARG:2)
+#FUNCTION
+
+IF ARG:2 == 0
+	LOCAL = NO:(ARG:0)
+	LOCAL:1 = NO:(ARG:1)
+ELSE
+	LOCAL = ARG:0
+	LOCAL:1 = ARG:1
+ENDIF
+
+;ありえないはずだけど一応
+SIF LOCAL == LOCAL:1
+	RETURNF 1
+
+;LOCAL:1の方が大きいなら入れ替える
+IF LOCAL:1 > LOCAL
+	;LOCAL:1の数字をLOCAL:2に一時退避しておく
+	LOCAL:2 = LOCAL:1
+	LOCAL:1 = LOCAL
+	LOCAL = LOCAL:2
+ENDIF
+
+;ここ以降は必ずLOCAL > LOCAL:1になる
+
+;どちらかが「あなた」
+SIF LOCAL == 0 || LOCAL:1 == 0
+	RETURNF 0
+
+;どちらかが「아이」
+SIF (LOCAL >= 890 && LOCAL <= 899 ) || ( LOCAL:1 >= 890 && LOCAL:1 <= 899)
+	RETURNF 0
+
+;히게키리は先に処理
+SIF ( LOCAL >= 107 && LOCAL <= 111 ) && ( LOCAL:1 >= 107 && LOCAL:1 <= 111 )
+	RETURNF 1
+
+;히자마루は先に処理
+SIF ( LOCAL >= 112 && LOCAL <= 115 ) && ( LOCAL:1 >= 112 && LOCAL:1 <= 115 )
+	RETURNF 1
+
+;キャラ番号が隣り合っていない
+SIF LOCAL - LOCAL:1 > 1
+	RETURNF 0
+
+;長曽祢まで大きい方が偶数なら同一刀剣
+IF LOCAL >= 1 && LOCAL <= 106
+	IF LOCAL % 2 == 0
+		RETURNF 1
+	ELSE
+		RETURNF 0
+	ENDIF
+;오오쿠리카라からは大きい方が奇数なら同一刀剣
+ELSEIF LOCAL >= 116
+	IF LOCAL % 2 == 1
+		RETURNF 1
+	ELSE
+		RETURNF 0
+	ENDIF
+ENDIF
+
+
+

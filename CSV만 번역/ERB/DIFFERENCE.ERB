@@ -1,0 +1,1071 @@
+﻿;-------------------------------------------------
+;個体差関連の関数
+;-------------------------------------------------
+;-------------------------------------------------
+;仕様メモ
+;※CSVの素質優先のビットがオンのとき
+;【소인체형/작은체구/큰체구/술꾼/알콜쓰레기/아이사이즈/단소/포경/요리치/요리고수】がCSVで設定されている場合はそちらが優先され
+;相反する素質がつくことはない
+;
+;引　数:ARG…キャラ登録番号
+;
+;FLAG:3 = ▲個体差設定フラグ
+;1:CSVの素質優先 |2:性転換 |4:반음반양　후타나리 |8:오메가 |16:ショタ化 |32:大型化 |64:濡れやすさ |128:酒の弱さ
+;|256:鈍感　敏感 |512:페니스の大きさ |1024:페니스の特徴 |2048:가슴の大きさ |4096:その他
+;
+;CFLAG:4   = ▲個体差記録フラグ
+;1桁目	個体差フラグオンオフ（0,個体差なし　1,CSVの素質優先　2,個体差優先）
+;2		性別（0,남자　1,（オンナ）　2,반음반양　3,후타나리　4,컨트보이　5,쉬메일）
+;3		性別　오메가バース（0,なし　1,오메가）
+;4		体格（0,なし　1,소인체형　2,작은체구　3,普通体型　4,큰체구）
+;5		濡れやすさ（0,なし　1,젖기쉬움　3,普通　3,젖기어려움）
+;6		酒の弱さ（0,なし　1,술꾼　3,普通　3,알콜쓰레기）
+;7		C둔감敏感(0,なし　1,C둔감,　2,C민감)
+;8		V둔감敏感(0,なし　1,V둔감,　2,V민감)
+;9		A둔감敏感(0,なし　1,A둔감,　2,A민감)
+;10		B둔감敏感(0,なし　1,B둔감,　2,B민감　3，함몰유두)
+;11		페니스の大きさ（0,なし　1,아이사이즈　2,단소　3,普通　4,거근　5,말자지）
+;12		페니스の特徴（0,なし　1,조루　2,지루　3,절륜　4,포경）
+;13		가슴の大きさ（0,なし　1,절벽　2,빈유　3,（並乳）　4,거유　5,폭유）
+;14		その他（0,なし　1,음모없음　2,요리치　3,독약내성　4,모유체질）
+;
+;※あくまで個体差の処理をする際についたもののみを記録し、もともとCSVで設定されているものは記録しない
+;　ただし重複して記録される場合もある（例：CSVで포경のキャラが個体差によって포경を得た場合）
+;-------------------------------------------------
+@DIFF_MAIN(ARG)
+;念のため初期化
+CFLAG:ARG:4 = 0
+
+;性別関連
+IF (FLAG:3 & 2) || (FLAG:3 & 4)
+	CALL DIFF_SEX(ARG)
+	CFLAG:ARG:4 += (POWER(10,1) * RESULT)
+ENDIF
+
+IF (FLAG:3 & 8) && MALE(ARG)
+	CALL DIFF_SEX_OMEGA(ARG)
+	CFLAG:ARG:4 += (POWER(10,2) * RESULT)
+ENDIF
+
+;体格関連
+IF (FLAG:3 & 16) || (FLAG:3 & 32)
+	CALL DIFF_BODY(ARG)
+	CFLAG:ARG:4 += (POWER(10,3) * RESULT)
+ENDIF
+
+;濡れやすさ
+IF (FLAG:3 & 64)
+	CALL DIFF_WET(ARG)
+	CFLAG:ARG:4 += (POWER(10,4) * RESULT)
+ENDIF
+
+;酒の弱さ
+IF (FLAG:3 & 128)
+	CALL DIFF_DRINK(ARG)
+	CFLAG:ARG:4 += (POWER(10,5) * RESULT)
+ENDIF
+
+;敏感鈍感
+;部位ごとに三分の一の確率で付与
+IF (FLAG:3 & 256)
+	;Ｃ
+	IF RAND:3 == 0
+		CALL DIFF_WEAK_C(ARG)
+		CFLAG:ARG:4 += (POWER(10,6) * RESULT)
+	ENDIF
+	;Ｖ
+	IF VAGINA(ARG) && RAND:3 == 0
+		CALL DIFF_WEAK_V(ARG)
+		CFLAG:ARG:4 += (POWER(10,7) * RESULT)
+	ENDIF
+	
+	;Ａ
+	IF RAND:3 == 0
+		CALL DIFF_WEAK_A(ARG)
+		CFLAG:ARG:4 += (POWER(10,8) * RESULT)
+	ENDIF
+	
+	;Ｂ
+	IF RAND:3 == 0
+		CALL DIFF_WEAK_B(ARG)
+		CFLAG:ARG:4 += (POWER(10,9) * RESULT)
+	ENDIF
+
+ENDIF
+
+;페니스の大きさ
+IF (FLAG:3 & 512) && PENIS(ARG)
+	CALL DIFF_PENIS_SIZE(ARG)
+	CFLAG:ARG:4 += (POWER(10,10) * RESULT)
+ENDIF
+
+;페니스の特徴
+IF (FLAG:3 & 1024) && PENIS(ARG)
+	CALL DIFF_PENIS_CHARA(ARG)
+	CFLAG:ARG:4 += (POWER(10,11) * RESULT)
+ENDIF
+
+;가슴の大きさ
+IF (FLAG:3 & 2048) && MALE(ARG) == 0
+	CALL DIFF_BREAST_SIZE(ARG)
+	CFLAG:ARG:4 += (POWER(10,12) * RESULT)
+ENDIF
+
+
+;その他
+IF (FLAG:3 & 4096)
+	CALL DIFF_ANOTHER(ARG)
+	CFLAG:ARG:4 += (POWER(10,13) * RESULT)
+ENDIF
+
+;何らかの個体差を得た場合
+IF CFLAG:ARG:4 > 0
+	
+	;個体差フラグオンオフ
+	;CSVの素質優先
+	IF (FLAG:3 & 1)
+		CFLAG:ARG:4 += (POWER(10,0) * 1)
+	;個体差優先
+	ELSE
+		CFLAG:ARG:4 += (POWER(10,0) * 2)
+	ENDIF
+
+	PRINTL 
+	PRINTL 
+	PRINTL ……！
+	PRINTFORML 迎え入れた%CALLNAME:ARG%は、どうやら通常とは少し異なる個体のようだ
+	PRINTFORM 得た素質：
+				CALL DIFF_TALENT_NAME(ARG)
+	PRINTL
+	PRINTL 
+	
+ENDIF
+
+
+;-------------------------------------------------
+;以下、個体差を得る処理
+;-------------------------------------------------
+;性別（남자　（オンナ）　반음반양　후타나리　컨트보이　쉬메일）
+@DIFF_SEX(ARG)
+TALENT:ARG:남자 = 0
+TALENT:ARG:반음반양 = 0
+TALENT:ARG:후타나리 = 0
+TALENT:ARG:컨트보이 = 0
+TALENT:ARG:쉬메일 = 0
+
+TALENT:ARG:처녀 = 0
+TALENT:ARG:동정 = 0
+
+;반음반양と후타나리と컨트보이と쉬메일
+IF (FLAG:3 & 4) && RAND:10 == 0
+	IF RAND:4 == 0
+		TALENT:ARG:반음반양 = 1
+		TALENT:ARG:처녀 = 1
+		TALENT:ARG:동정 = 1
+		RETURN 2
+	ELSEIF RAND:3 == 0
+		TALENT:ARG:후타나리 = 1
+		TALENT:ARG:처녀 = 1
+		TALENT:ARG:동정 = 1
+		RETURN 3
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:컨트보이 = 1
+		TALENT:ARG:처녀 = 1
+		RETURN 4
+	ELSE
+		TALENT:ARG:쉬메일 = 1
+		TALENT:ARG:동정 = 1
+		RETURN 5
+	ENDIF
+;オンナ
+ELSEIF (FLAG:3 & 2) && RAND:5 == 0
+	TALENT:ARG:처녀 = 1
+	RETURN 1
+;남자
+ELSE
+	TALENT:ARG:남자 = 1
+	TALENT:ARG:동정 = 1
+	RETURN 0
+ENDIF
+
+;矛盾する素質を削除
+SIF VAGINA(ARG) == 0
+	CALL CLEAR_TALENT_VAGINA(ARG)
+SIF PENIS(ARG) == 0
+	CALL CLEAR_TALENT_PENIS(ARG,3)
+SIF MALE(ARG) == 1
+	CALL CLEAR_TALENT_BREAST(ARG)
+
+
+;오메가性　※남자か반음반양か컨트보이のときのみ
+@DIFF_SEX_OMEGA(ARG)
+IF RAND:10 == 0
+	TALENT:ARG:오메가 = 1
+	;발정기のカウント　0-6でランダムで初期値を付与
+	CFLAG:ARG:700 = RAND:7
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+;体格（소인체형　작은체구　큰체구）
+@DIFF_BODY(ARG)
+IF RAND:10 == 0
+	;큰체구/작은체구/소인체형を持っている
+	IF CSVTALENT(NO:ARG, 113 ,0) || CSVTALENT(NO:ARG, 100 ,0) || CSVTALENT(NO:ARG, 142 ,0)
+		;CSVの素質優先ビットオン
+		SIF (FLAG:3 & 1)
+			RETURN 0
+		
+		TALENT:ARG:소인체형 = 0
+		TALENT:ARG:작은체구 = 0
+		TALENT:ARG:큰체구 = 0
+		
+		;普通体型になる
+		SIF RAND:4 == 0
+			RETURN 3
+	ENDIF
+	
+	IF (FLAG:3 & 32) && RAND:3 == 0
+		TALENT:ARG:큰체구 = 1
+		RETURN 4
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:작은체구 = 1
+		RETURN 2
+	ELSE
+		TALENT:ARG:소인체형 = 1
+		RETURN 1
+	ENDIF
+ELSE
+	;そのまま
+	RETURN 0
+ENDIF
+
+;濡れやすさ（젖기쉬움　젖기어려움）
+@DIFF_WET(ARG)
+IF RAND:10 == 0
+	;젖기쉬움/젖기어려움を持っている
+	;※現状初期値で持っているキャラはいない
+	IF CSVTALENT(NO:ARG, 42 ,0) || CSVTALENT(NO:ARG, 43 ,0)
+		;CSVの素質優先ビットオン
+		SIF (FLAG:3 & 1)
+			RETURN 0
+		
+		TALENT:ARG:젖기어려움 = 0
+		TALENT:ARG:젖기쉬움 = 0
+		
+		;普通になる
+		SIF RAND:3 == 0
+			RETURN 2
+	ENDIF
+	
+	IF RAND:2 == 0
+		TALENT:ARG:젖기쉬움 = 1
+		RETURN 1
+	ELSE
+		TALENT:ARG:젖기어려움 = 1
+		RETURN 3
+	ENDIF
+ELSE
+	;つかない
+	RETURN 0
+ENDIF
+
+;酒の弱さ（술꾼　알콜쓰레기）
+@DIFF_DRINK(ARG)
+IF RAND:10 == 0
+	;술꾼/알콜쓰레기を持っている
+	IF CSVTALENT(NO:ARG, 48 ,0) || CSVTALENT(NO:ARG, 49 ,0)
+		;CSVの素質優先ビットオン
+		SIF (FLAG:3 & 1)
+			RETURN 0
+		
+		TALENT:ARG:술꾼 = 0
+		TALENT:ARG:알콜쓰레기 = 0
+		
+		;普通になる
+		SIF RAND:3 == 0
+			RETURN 2
+	ENDIF
+	
+	IF RAND:2 == 0
+		TALENT:ARG:술꾼 = 1
+		RETURN 1
+	ELSE
+		TALENT:ARG:알콜쓰레기 = 1
+		RETURN 3
+	ENDIF
+ELSE
+	;つかない
+	RETURN 0
+ENDIF
+
+;C둔감敏感
+@DIFF_WEAK_C(ARG)
+IF RAND:2 == 0
+	SIF TALENT:ARG:C민감
+		TALENT:ARG:C민감 = 0
+	
+	TALENT:ARG:C둔감 = 1
+	RETURN 1
+ELSE
+	SIF TALENT:ARG:C둔감
+		TALENT:ARG:C둔감 = 0
+	
+	TALENT:ARG:C민감 = 1
+	RETURN 2
+ENDIF
+
+;V둔감敏感
+@DIFF_WEAK_V(ARG)
+IF RAND:2 == 0
+	SIF TALENT:ARG:V민감
+		TALENT:ARG:V민감 = 0
+	
+	TALENT:ARG:V둔감 = 1
+	RETURN 1
+ELSE
+	SIF TALENT:ARG:V둔감
+		TALENT:ARG:V둔감 = 0
+	
+	TALENT:ARG:V민감 = 1
+	RETURN 2
+ENDIF
+
+;A둔감敏感
+@DIFF_WEAK_A(ARG)
+IF RAND:2 == 0
+	SIF TALENT:ARG:A민감
+		TALENT:ARG:A민감 = 0
+	
+	TALENT:ARG:A둔감 = 1
+	RETURN 1
+ELSE
+	SIF TALENT:ARG:A둔감
+		TALENT:ARG:A둔감 = 0
+	
+	TALENT:ARG:A민감 = 1
+	RETURN 2
+ENDIF
+
+;B둔감敏感
+@DIFF_WEAK_B(ARG)
+IF RAND:3 == 0
+	SIF TALENT:ARG:B민감
+		TALENT:ARG:B민감 = 0
+	
+	TALENT:ARG:B둔감 = 1
+	RETURN 1
+ELSEIF RAND:2 == 0
+	SIF TALENT:ARG:B둔감
+		TALENT:ARG:B둔감 = 0
+	
+	TALENT:ARG:B민감 = 1
+	RETURN 2
+ELSE
+	TALENT:ARG:함몰유두 = 1
+	RETURN 3
+ENDIF
+
+
+;페니스の大きさ（아이사이즈　단소　거근　말자지）
+@DIFF_PENIS_SIZE(ARG)
+IF RAND:3 == 0
+	;아이사이즈/단소/거근/말자지を持っている
+	IF CSVTALENT(NO:ARG, 114 ,0) || CSVTALENT(NO:ARG, 115 ,0) || CSVTALENT(NO:ARG, 116 ,0) || CSVTALENT(NO:ARG, 117 ,0)
+		;CSVの素質優先ビットオン
+		SIF (FLAG:3 & 1)
+			RETURN 0
+		
+		;페니스の大きさ関連の素質削除
+		CALL CLEAR_TALENT_PENIS(ARG,1)
+		
+		;普通になる
+		SIF RAND:5 == 0
+			RETURN 3
+	ENDIF
+
+	IF RAND:4 == 0
+		TALENT:ARG:아이사이즈 = 1
+		RETURN 1
+	ELSEIF RAND:3 == 0
+		TALENT:ARG:단소 = 1
+		RETURN 2
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:거근 = 1
+		RETURN 4
+	ELSE
+		TALENT:ARG:말자지 = 1
+		RETURN 5
+	ENDIF
+ELSE
+	;そのまま
+	RETURN 0
+ENDIF
+
+;페니스の特徴（조루　지루　절륜　포경）
+@DIFF_PENIS_CHARA(ARG)
+IF RAND:5 == 0
+	IF RAND:4 == 0
+		SIF TALENT:ARG:지루
+			TALENT:ARG:지루 = 0
+		
+		TALENT:ARG:조루 = 1
+		RETURN 1
+	ELSEIF RAND:3 == 0
+		SIF TALENT:ARG:조루
+			TALENT:ARG:조루 = 0
+		
+		TALENT:ARG:지루 = 1
+		RETURN 2
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:절륜 = 1
+		RETURN 3
+	ELSE
+		;CSVの素質優先ビットオン　포경を持っている
+		SIF (FLAG:3 & 1) && CSVTALENT(NO:ARG, 119 ,0)
+			RETURN 0
+		
+		TALENT:ARG:포경 = 1
+		RETURN 4
+	ENDIF
+ELSE
+	RETURN 0
+ENDIF
+
+;가슴の大きさ（절벽　빈유　거유　폭유）
+@DIFF_BREAST_SIZE(ARG)
+IF RAND:3 == 0
+	;가슴の大きさ関連の素質削除
+	CALL CLEAR_TALENT_BREAST(ARG)
+	
+	IF RAND:4 == 0
+		TALENT:ARG:절벽 = 1
+		RETURN 1
+	ELSEIF RAND:3 == 0
+		TALENT:ARG:빈유 = 1
+		RETURN 2
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:거유 = 1
+		RETURN 4
+	ELSE
+		TALENT:ARG:폭유 = 1
+		RETURN 5
+	ENDIF
+ELSE
+	;並乳
+	RETURN 3
+ENDIF
+
+;その他（음모없음　요리치　독약내성　모유체질）
+@DIFF_ANOTHER(ARG)
+IF RAND:10 == 0
+	IF RAND:4 == 0
+		TALENT:ARG:음모없음 = 1
+		RETURN 1
+	ELSEIF RAND:3 == 0
+		;CSVの素質優先ビットオン　요리고수を持っている
+		SIF (FLAG:3 & 1) && CSVTALENT(NO:ARG, 59 ,0)
+			RETURN 0
+		
+		SIF TALENT:ARG:요리고수
+			TALENT:ARG:요리고수 = 0
+		
+		TALENT:ARG:요리치 = 1
+		RETURN 2
+	ELSEIF RAND:2 == 0
+		TALENT:ARG:독약내성 = 1
+		RETURN 3
+	ELSE
+		;남자모유取得コンフィグオフ
+		SIF (FLAG:2 & 256) == 0
+			RETURN 0
+			
+		TALENT:ARG:모유체질 = 1
+		RETURN 4
+	ENDIF
+ELSE
+	;つかない
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;関数名:@DIFF_GET_TALENT(ARG:0, ARG:1)
+;概　要:;購入時に取得した素質を求める関数
+;引　数:ARG:0…キャラ登録番号
+;　　　:ARG:1…CFLAG:4の何桁目か（1-14）
+;戻り値:CFLAG:4において、下のように素質に割り当てられている数字
+;備　考:文中関数
+;
+
+;CFLAG:4   = ▲個体差記録フラグ
+;1桁目	個体差フラグオンオフ（0,個体差なし　1,CSVの素質優先　2,個体差優先）
+;2		性別（0,남자　1,（オンナ）　2,반음반양　3,후타나리　4,컨트보이　5,쉬메일）
+;3		性別　오메가バース（0,なし　1,오메가）
+;4		体格（0,なし　1,소인체형　2,작은체구　3,普通体型　4,큰체구）
+;5		濡れやすさ（0,なし　1,젖기쉬움　3,普通　3,젖기어려움）
+;6		酒の弱さ（0,なし　1,술꾼　3,普通　3,알콜쓰레기）
+;7		C둔감敏感(0,なし　1,C둔감,　2,C민감)
+;8		V둔감敏感(0,なし　1,V둔감,　2,V민감)
+;9		A둔감敏感(0,なし　1,A둔감,　2,A민감)
+;10		B둔감敏感(0,なし　1,B둔감,　2,B민감　3，함몰유두)
+;11		페니스の大きさ（0,なし　1,아이사이즈　2,단소　3,普通　4,거근　5,말자지）
+;12		페니스の特徴（0,なし　1,조루　2,지루　3,절륜　4,포경）
+;13		가슴の大きさ（0,なし　1,절벽　2,빈유　3,（並乳）　4,거유　5,폭유）
+;14		その他（0,なし　1,음모없음　2,요리치　3,독약내성　4,모유체질）
+;
+;-------------------------------------------------
+@DIFF_GET_TALENT(ARG:0, ARG:1)
+#FUNCTION
+
+;明らかにおかしいのは弾く
+SIF ARG:1 <= 0 || ARG:1 > 14
+	RETURNF 100
+
+LOCAL:1 = ARG:1
+
+LOCAL = INTTU(CFLAG:(ARG:0):4, ARG:1)
+
+;明らかにおかしいのは弾く
+SIF LOCAL > 5
+	RETURNF 50
+
+;元々CSVで持ってるものは +10したものを返す　（個体差で得た素質と、元々CSVで持っている素質が被ったという状況）
+IF LOCAL > 0
+	;体型
+	IF ARG:1 == 4
+		;소인체형　작은체구　큰체구
+		SIF (CSVTALENT(NO:(ARG:0), 142 ,0) && LOCAL == 1) || (CSVTALENT(NO:(ARG:0), 100 ,0) && LOCAL == 2) || (CSVTALENT(NO:(ARG:0), 113 ,0) && LOCAL == 4)
+			LOCAL += 10
+	;酒の弱さ
+	ELSEIF ARG:1 == 6
+		;술꾼　알콜쓰레기
+		SIF (CSVTALENT(NO:(ARG:0), 48 ,0) && LOCAL == 1) || (CSVTALENT(NO:(ARG:0), 49 ,0) && LOCAL == 3)
+			LOCAL += 10
+	;페니스の大きさ
+	ELSEIF ARG:1 == 11
+		;아이사이즈　단소
+		SIF (CSVTALENT(NO:(ARG:0), 114 ,0) && LOCAL == 1 )|| (CSVTALENT(NO:(ARG:0), 115 ,0) && LOCAL == 2)
+			LOCAL += 10
+	;페니스の特徴
+	ELSEIF ARG:1 == 12
+		;포경
+		SIF CSVTALENT(NO:(ARG:0), 119 ,0) && LOCAL == 4
+			LOCAL += 10
+	;음모없음　독약내성
+	ELSEIF ARG:1 == 14
+		SIF (CSVTALENT(NO:(ARG:0), 118 ,0) && LOCAL ==1) || (CSVTALENT(NO:(ARG:0), 56 ,0) && LOCAL ==3)
+			LOCAL += 10
+	;いったん保留
+	;性別（元から남자の場合も+10されて返る）
+	;ELSEIF ARG:1 == 2
+	;	SIF (CSVTALENT(NO:(ARG:0), 140 ,0) && LOCAL == 0) || (CSVTALENT(NO:(ARG:0), 137 ,0) && LOCAL == 2) || (CSVTALENT(NO:(ARG:0), 139 ,0) && LOCAL == 3)
+	;		LOCAL += 10
+
+	ENDIF
+ENDIF
+
+RETURNF LOCAL
+
+;-------------------------------------------------
+;関数名 @DIFF_GET_BUY(ARG)
+;概　要:;購入時に取得した素質を付け直す関数
+;引　数:ARG…キャラ登録番号
+;備　考:되감기약用の処理
+;-------------------------------------------------
+@DIFF_GET_BUY(ARG)
+
+;個体差ナシなら早々に弾く
+SIF DIFF_GET_TALENT(ARG,1) == 0
+	RETURN 0
+
+LOCAL = DIFF_GET_TALENT(ARG, 2)
+;性別
+IF LOCAL > 0 && LOCAL < 10 
+	TALENT:ARG:남자 = 0
+	TALENT:ARG:반음반양 = 0
+	TALENT:ARG:후타나리 = 0
+	TALENT:ARG:컨트보이 = 0
+	TALENT:ARG:쉬메일 = 0
+	
+	TALENT:ARG:처녀 = 0
+	TALENT:ARG:동정 = 0
+	
+	SELECTCASE LOCAL
+		;남자
+		CASE 0
+			TALENT:ARG:남자 = 1
+			TALENT:ARG:동정 = 1
+		;オンナ
+		CASE 1
+			TALENT:처녀 = 1
+		;반음반양
+		CASE 2
+			TALENT:ARG:반음반양 = 1
+			TALENT:ARG:처녀 = 1
+			TALENT:ARG:동정 = 1
+		;후타나리
+		CASE 3
+			TALENT:ARG:후타나리 = 1
+			TALENT:ARG:처녀 = 1
+			TALENT:ARG:동정 = 1
+		;컨트보이
+		CASE 4
+			TALENT:ARG:컨트보이 = 1
+			TALENT:ARG:처녀 = 1
+		;쉬메일
+		CASE 5
+			TALENT:ARG:쉬메일 = 1
+			TALENT:ARG:동정 = 1
+	ENDSELECT
+
+	;矛盾する素質を削除
+	SIF PENIS(ARG) == 0
+		CALL CLEAR_TALENT_PENIS(ARG,3)
+	SIF MALE(ARG) == 1
+		CALL CLEAR_TALENT_BREAST(ARG)
+ENDIF
+
+;오메가
+SIF DIFF_GET_TALENT(ARG,3) > 0
+	TALENT:ARG:오메가 = 1
+
+
+LOCAL = DIFF_GET_TALENT(ARG,4)
+;体格
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:소인체형 = 0
+	TALENT:ARG:작은체구 = 0
+	TALENT:ARG:큰체구 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:소인체형 = 1
+		CASE 2
+			TALENT:ARG:작은체구 = 1
+		CASE 3
+			;普通体型
+		CASE 4
+			TALENT:ARG:큰체구 = 1
+	ENDSELECT
+	
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,5)
+;濡れやすさ
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:젖기쉬움 = 0
+	TALENT:ARG:젖기어려움 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:젖기쉬움 = 1
+		CASE 2
+			;普通の濡れやすさ
+		CASE 3
+			TALENT:ARG:젖기어려움 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,6)
+;酒の弱さ
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:술꾼 = 0
+	TALENT:ARG:알콜쓰레기 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:술꾼 = 1
+		CASE 2
+			;普通の酒の弱さ
+		CASE 3
+			TALENT:ARG:알콜쓰레기 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,7)
+;鈍感敏感　Ｃ
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:C둔감 = 0
+	TALENT:ARG:C민감 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			SIF TALENT:ARG:C민감
+				TALENT:ARG:C민감 = 0
+			
+			TALENT:ARG:C둔감 = 1
+		CASE 2
+			SIF TALENT:ARG:C둔감
+				TALENT:ARG:C둔감 = 0
+				
+			TALENT:ARG:C민감 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,8)
+;鈍感敏感　Ｖ
+IF (LOCAL > 0 && LOCAL < 10) && VAGINA(ARG)
+	TALENT:ARG:V둔감 = 0
+	TALENT:ARG:V민감 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			SIF TALENT:ARG:V민감
+				TALENT:ARG:V민감 = 0
+			
+			TALENT:ARG:V둔감 = 1
+		CASE 2
+			SIF TALENT:ARG:V둔감
+				TALENT:ARG:V둔감 = 0
+			
+			TALENT:ARG:V민감 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,9)
+;鈍感敏感　Ａ
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:A둔감 = 0
+	TALENT:ARG:A민감 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			SIF TALENT:ARG:A민감
+				TALENT:ARG:A민감 = 0
+			
+			TALENT:ARG:A둔감 = 1
+		CASE 2
+			SIF TALENT:ARG:A둔감
+				TALENT:ARG:A둔감 = 0
+			
+			TALENT:ARG:A민감 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,10)
+;鈍感敏感　Ｂ
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:B둔감 = 0
+	TALENT:ARG:B민감 = 0
+	TALENT:ARG:함몰유두 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			SIF TALENT:ARG:B민감
+				TALENT:ARG:B민감 = 0
+			
+			TALENT:ARG:B둔감 = 1
+		CASE 2
+			SIF TALENT:ARG:B둔감
+				TALENT:ARG:B둔감 = 0
+			
+			TALENT:ARG:B민감 = 1
+		CASE 3
+			TALENT:ARG:함몰유두 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,11)
+;페니스の大きさ
+IF (LOCAL > 0 && LOCAL < 10) && PENIS(ARG)
+	;페니스の大きさ関連の素質削除
+	CALL CLEAR_TALENT_PENIS(ARG,1)
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:아이사이즈 = 1
+		CASE 2
+			TALENT:ARG:단소 = 1
+		CASE 3
+			;普通の大きさ
+		CASE 4
+			TALENT:ARG:거근 = 1
+		CASE 5
+			TALENT:ARG:말자지 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,12)
+;페니스の特徴
+IF (LOCAL > 0 && LOCAL < 10) && PENIS(ARG)
+	SELECTCASE LOCAL
+		CASE 1
+			SIF TALENT:ARG:지루
+				TALENT:ARG:지루 = 0
+			
+			TALENT:ARG:조루 = 1
+		CASE 2
+			SIF TALENT:ARG:조루
+				TALENT:ARG:조루 = 0
+			
+			TALENT:ARG:지루 = 1
+		CASE 3
+			TALENT:ARG:절륜 = 1
+		CASE 4
+			TALENT:ARG:포경 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,13)
+;가슴の大きさ
+IF (LOCAL > 0 && LOCAL < 10) && MALE(ARG) == 0
+	;가슴の大きさ関連の素質削除
+	CALL CLEAR_TALENT_BREAST(ARG)
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:절벽 = 1
+		CASE 2
+			TALENT:ARG:빈유 = 1
+		CASE 3
+			;並乳
+		CASE 4
+			TALENT:ARG:거유 = 1
+		CASE 5
+			TALENT:ARG:폭유 = 1
+	ENDSELECT
+ENDIF
+
+LOCAL = DIFF_GET_TALENT(ARG,14)
+;その他
+IF LOCAL > 0 && LOCAL < 10
+	TALENT:ARG:음모없음 = 0
+	TALENT:ARG:요리치 = 0
+	TALENT:ARG:독약내성 = 0
+	TALENT:ARG:모유체질 = 0
+	
+	SELECTCASE LOCAL
+		CASE 1
+			TALENT:ARG:음모없음 = 1
+		CASE 2
+			SIF TALENT:ARG:요리고수
+				TALENT:ARG:요리고수 = 0
+			
+			TALENT:ARG:요리치 = 1
+		CASE 3
+			TALENT:ARG:독약내성 = 1
+		CASE 4
+			;남자모유取得コンフィグオンのときのみ　
+			SIF (FLAG:2 & 256)
+				TALENT:ARG:모유체질 = 1
+	ENDSELECT
+ENDIF
+
+
+;-------------------------------------------------
+;関数名:@DIFF_TALENT_NAME(ARG)
+;概　要:個体差で取得した素質を表示するやつ []で区切って表示
+;引　数:ARG…キャラ登録番号
+;戻り値:なし
+;備　考:
+;-------------------------------------------------
+@DIFF_TALENT_NAME(ARG)
+#DIM DYNAMIC GET_TALENT = 0
+#DIMS DYNAMIC GET_TALENT_NAME = ""
+
+
+FOR COUNT, 2, 15
+	GET_TALENT = DIFF_GET_TALENT(ARG, COUNT)
+	
+	SIF !GET_TALENT
+		CONTINUE
+	
+	;性別
+	IF COUNT == 2 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = オンナ
+			CASE 2 
+				LOCALS = 반음반양
+			CASE 3
+				LOCALS = 후타나리
+			CASE 4
+				LOCALS = 컨트보이
+			CASE 5
+				LOCALS = 쉬메일
+		ENDSELECT
+	;오메가
+	ELSEIF COUNT == 3 && GET_TALENT
+		LOCALS = 오메가
+	;体格
+	ELSEIF COUNT == 4 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1,11
+				LOCALS = 소인체형
+			CASE 2,12
+				LOCALS = 작은체구
+			CASE 3
+				LOCALS = 普通体型
+			CASE 4,14
+				LOCALS = 큰체구
+		ENDSELECT
+	;濡れやすさ
+	ELSEIF COUNT == 5 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = 젖기쉬움
+			CASE 2
+				LOCALS = 普通程度の濡れやすさ
+			CASE 3 
+				LOCALS = 젖기어려움
+		ENDSELECT
+	;酒の弱さ
+	ELSEIF COUNT == 6 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1,11
+				LOCALS = 술꾼
+			CASE 2
+				LOCALS = 普通程度の酒の強さ
+			CASE 3,13 
+				LOCALS = 알콜쓰레기
+		ENDSELECT
+	;C둔감敏感
+	ELSEIF COUNT == 7 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = C둔감
+			CASE 2
+				LOCALS = C민감
+		ENDSELECT
+	;V둔감敏感
+	ELSEIF COUNT == 8 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = V둔감
+			CASE 2
+				LOCALS = V민감
+		ENDSELECT
+	;A둔감敏感
+	ELSEIF COUNT == 9 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = A둔감
+			CASE 2
+				LOCALS = A민감
+		ENDSELECT
+	;B둔감敏感
+	ELSEIF COUNT == 10 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = B둔감
+			CASE 2
+				LOCALS = B민감
+			CASE 3
+				LOCALS = 함몰유두
+		ENDSELECT
+	;페니스の大きさ
+	ELSEIF COUNT == 11 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1,11
+				LOCALS = 아이사이즈
+			CASE 2,12
+				LOCALS = 단소
+			CASE 3
+				LOCALS = 普通程度の페니스の大きさ
+			CASE 4,14
+				LOCALS = 거근
+			CASE 5,15
+				LOCALS = 말자지
+		ENDSELECT
+	;페니스の特徴
+	ELSEIF COUNT == 12 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = 조루
+			CASE 2 
+				LOCALS = 지루
+			CASE 3 
+				LOCALS = 절륜
+			CASE 4,14
+				LOCALS = 포경
+		ENDSELECT
+	;가슴の大きさ
+	ELSEIF COUNT == 13 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1
+				LOCALS = 절벽
+			CASE 2 
+				LOCALS = 빈유
+			CASE 3 
+				LOCALS = 並乳
+			CASE 4 
+				LOCALS = 거유
+			CASE 5
+				LOCALS = 폭유
+		ENDSELECT
+	;その他
+	ELSEIF COUNT == 14 && GET_TALENT
+		SELECTCASE GET_TALENT
+			CASE 1,10
+				LOCALS = 음모없음
+			CASE 2 
+				LOCALS = 요리치
+			CASE 3,10
+				LOCALS = 독약내성
+			CASE 4 
+				LOCALS = 모유체질
+		ENDSELECT
+	ENDIF
+	SIF STRLENS(LOCALS)
+		GET_TALENT_NAME = %GET_TALENT_NAME%[%LOCALS%]
+	LOCALS =
+NEXT
+
+PRINTFORM %GET_TALENT_NAME%
+
+;-------------------------------------------------
+;関数名:@CLEAR_TALENT_VAGINA(ARG)
+;概　要:바기나関連の素質の削除
+;引　数:ARG…キャラ登録番号
+;戻り値:なし
+;備　考:
+;-------------------------------------------------
+@CLEAR_TALENT_VAGINA(ARG)
+TALENT:ARG: 처녀 = 0
+
+TALENT:ARG:V민감 = 0
+TALENT:ARG:V둔감 = 0
+
+;-------------------------------------------------
+;関数名:@CLEAR_TALENT_PENIS(ARG)
+;概　要:페니스関連素質の削除
+;引　数:
+;ARG:0…キャラ登録番号
+;ARG:1…1=大きさ　2=特徴　3=特徴/大きさ　(ビット演算)
+;戻り値:なし
+;備　考:
+;-------------------------------------------------
+@CLEAR_TALENT_PENIS(ARG:0, ARG:1)
+SIF ARG:1 < 1 && ARG:1 > 3
+	RETURN
+
+IF (ARG:1 & 1)
+	TALENT:(ARG:0):아이사이즈 = 0
+	TALENT:(ARG:0):단소 = 0
+	TALENT:(ARG:0):거근 = 0
+	TALENT:(ARG:0):말자지 = 0
+ENDIF
+
+IF (ARG:1 & 2)
+	TALENT:(ARG:0):지루 = 0
+	TALENT:(ARG:0):조루 = 0
+	TALENT:(ARG:0):절륜 = 0
+	TALENT:(ARG:0):포경 = 0
+ENDIF
+
+;-------------------------------------------------
+;関数名:@CLEAR_TALENT_BREAST(ARG)
+;概　要:가슴の大きさ関連素質の削除
+;引　数:ARG…キャラ登録番号
+;戻り値:なし
+;備　考:
+;-------------------------------------------------
+@CLEAR_TALENT_BREAST(ARG)
+TALENT:ARG:절벽 = 0
+TALENT:ARG:빈유 = 0
+TALENT:ARG:거유 = 0
+TALENT:ARG:폭유 = 0
+
+
+

@@ -1,0 +1,3634 @@
+﻿
+;==================================================
+;@KOJO_MESSAGE_COM関係（Xをキャラ番号に置換）
+;コマンド実行時に出力されます
+;==================================================
+@KOJO_MESSAGE_COM_K11
+;助손が調教した時に입上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI >= 0 && ASSIPLAY
+;	RETURN 0
+;볼개그着用時には地の文を表示して입上をスキップする
+IF TEQUIP:볼개그 &&  SELECTCOM != 107
+	CALL TRAIN_MESSAGE
+	RETURN 0
+ENDIF
+
+;--------------------------------------------------
+;特定助손、主人時に特殊助손입上を呼び出す(Y1を特定助손、Zを主人のキャラ番号に置換）
+;--------------------------------------------------
+;IF NO:MASTER == Y1
+;	CALL MESSAGE_COM_PY1_KZ
+;	RETURN 0
+;ENDIF
+;IF ASSI >= 0 && ASSIPLAY
+;	IF NO:ASSI == Y1
+;		CALL MESSAGE_COM_PY1_KZ
+;		RETURN 0
+;	ENDIF
+;ENDIF
+
+;==================================================
+;特定の条件を満たしている場合、コマンドを実行する度にソースが追加
+;노출벽とか마조끼とか趣味に合ったコマンドや状態で체력・기력回復する仕様に。
+;마조끼くそ高いのにすぐ기절するのなんとかしたかったんでテスト。
+;==================================================
+;奉仕系のコマンド実行時に체력／기력回復。
+IF ABL:봉사정신 >= 3
+	SELECTCASE SELECTCOM
+		;수身奉仕は체력回復
+		CASE 70,71,73 TO 80,85 TO 87,317,420,421,422
+			BASE:0 += ABL:봉사정신*2
+		;공奉仕は기력回復
+		CASE 220 TO 225,260,261,263,264,318
+			BASE:1 += ABL:봉사정신*2
+		;체력기력両方回復する
+		CASE 243 TO 245,319,503,504
+			BASE:0 += ABL:봉사정신*2
+			BASE:1 += ABL:봉사정신*2
+	ENDSELECT
+ENDIF
+
+;服を着てないと기력回復、노출プレイ中は체력回復。
+IF ABL:노출벽 >= 3
+	;全裸ルート
+	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래） && !TEQUIP:특수2 && !TEQUIP:특수1
+		BASE:1 += ABL:노출벽*2
+	;半裸ルート
+	ELSEIF (TEQUIP:전신상의 || (TEQUIP:상의 && TEQUIP:하의)) && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래）
+		BASE:1 += ABL:노출벽*2
+	ENDIF
+	SIF TEQUIP:비디오카메라 || TEQUIP:야외플레이 || TEQUIP:수치플레이 || SELECTCOM == 3
+		BASE:0 += ABL:노출벽*2
+ENDIF
+
+;拘束されてると기력回復。
+;고통コマンド実行時に체력回復。
+IF ABL:마조끼 >= 3
+	SIF TEQUIP:밧줄 || TEQUIP:아이마스크 || TEQUIP:볼개그 || TEQUIP:정조대 || TEQUIP:사정관리 || TEQUIP:전신상의 == 9
+		BASE:1 += ABL:마조끼*2
+	SELECTCASE SELECTCOM
+		CASE 16,25,44,56,62,140 TO 155
+			BASE:0 += ABL:마조끼*2
+	ENDSELECT
+ENDIF
+
+;奴隷공コマンド実行時に체력／기력回復。
+IF ABL:새드끼 >= 3
+	SIF TEQUIP:신발 > 0 && SELECTCOM == 80
+		BASE:0 += ABL:새드끼*2
+	SIF ABL:PLAYER:마조끼 >= 3 && (SELECTCOM == 226 || SELECTCOM == 227)
+		BASE:0 += ABL:새드끼*2
+		BASE:1 += ABL:새드끼*2
+	SIF SELECTCOM >= 226 && SELECTCOM <= 227
+		BASE:1 += ABL:새드끼*2
+ENDIF
+
+;자위をすると체력・기력回復。
+IF ABL:자위중독 >= 3
+	SELECTCASE SELECTCOM
+		CASE 4,5,6,7
+			BASE:1 += ABL:자위중독*2
+	ENDSELECT
+ENDIF
+
+;精液飲んで체력回復。
+;精液がもらえそうなコマンド実行時は기력回復。
+IF ABL:정액중독 >= 3
+	SIF TFLAG:0 == 0 && TFLAG:43 == 13
+		BASE:0 += ABL:정액중독*2
+	SELECTCASE SELECTCOM
+		CASE 70 TO 75,226,227,407,420,421,516
+			BASE:1 += ABL:정액중독*2
+		CASE 410,412
+			BASE:0 += ABL:정액중독*2
+	ENDSELECT
+ENDIF
+
+;セックスすると체력・기력回復。음란√なら特殊セックスでも回復。
+IF ABL:섹스중독 >= 3
+	IF TALENT:음란 || TALENT:창부
+		SELECTCASE SELECTCOM
+			CASE 322,381,405,406,430,431,511 TO 515,517 TO 525
+				BASE:0 += ABL:섹스중독*2
+				BASE:1 += ABL:섹스중독*2
+		ENDSELECT
+	ENDIF
+	SELECTCASE SELECTCOM
+		CASE 100 TO 116,260 TO 265,507 TO 510,526
+			BASE:0 += ABL:섹스중독*2
+			BASE:1 += ABL:섹스중독*2
+	ENDSELECT
+ENDIF
+
+;スカ系コマンド実行で체력回復。
+;변의／뇨의のあるときに기력回復。
+IF ABL:스캇중독 >= 3
+	SIF BASE:4 >= 60 || BASE:6 >= 60
+		BASE:1 += ABL:스캇중독*2
+	SELECTCASE SELECTCOM
+		CASE 182 TO 185,285,286,302,304
+			BASE:0 += ABL:스캇중독*2
+	ENDSELECT
+	;動くかわからんけど一応入れてみる
+	SIF TFLAG:58 == 1 || TFLAG:68 == 1
+		BASE:0 += ABL:스캇중독*2
+ENDIF
+
+
+;==================================================
+;ランダム小입上
+;==================================================
+;絶頂回数
+IF (EX:0 + EX:1 + EX:2 + EX:3 >= 20)
+	PRINTFORMW 二十回以上の絶頂を経て、%CALLNAME%は頭のネジが飛んでしまったようだ
+	PRINTFORMW だらしなく顔を緩ませ、呂律の回らない입調で品の無い喘ぎを洩らしている
+ELSEIF (EX:0 + EX:1 + EX:2 + EX:3 >= 10) && (EX:0 + EX:1 + EX:2 + EX:3 < 20)  && MARK:반발각인 != 3
+	PRINTFORMW 絶頂を何度も味あわされ、%CALLNAME%は息も絶え絶えに喘いでいる
+ENDIF
+
+
+;-------------------------------------------------
+;コマンド実行時のセリフ CFLAG 300～500
+;実行条件は資料フォルダ内、コマンド実行条件ファイルを参照
+;-------------------------------------------------
+
+;=================================================
+;基本系コマンド
+;=================================================
+;-------------------------------------------------
+;0,애무　CFLAG:300
+;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:300 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「えへへー、なでられるのはすきです」
+		ELSE
+			PRINTFORMW 「なでてくれるんですか？」
+		ENDIF
+		CFLAG:300 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:300 < 4 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%に喉元をくすぐられ、気持ちよさそうに目を細めた
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:300 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:300 < 3 || FLAG:7 == 2)
+			PRINTFORMW 「ぼくはどうすればいいですかー？」
+			CFLAG:300 = 3
+		;それ以外
+		ELSEIF CFLAG:300 < 2 || FLAG:7 == 2
+			IF RAND:2 == 0
+				PRINTFORMW 「どこなでてるんですか」
+			ELSE
+				PRINTFORMW 「くすぐったいですよ！」
+			ENDIF
+			
+		ENDIF
+			CFLAG:300 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;1,키스한다　CFLAG:301
+;-------------------------------------------------
+IF SELECTCOM == 1
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:301 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 「んぅ、ん……」
+			PRINTFORMW 「……くちすいは、あるじさまのじだいではきすというのですか」
+		ELSE
+			PRINTFORMW 「ぷはっ！　もう、そんなになめるからくちのまわりがべとべとです」
+		ENDIF
+		CFLAG:301 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:301 < 4 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「あるじさまーっ、もっときすしてください！きすはきもちイイですねっ%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 「もっとしてください！」
+			ENDIF
+			CFLAG:300 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:301 < 3 || FLAG:7 == 2)
+			PRINTFORMW 「んむ、んんっ%UNICODE(0x2661)%」
+			CFLAG:300 = 3
+		;それ以外
+		ELSEIF CFLAG:301 < 2 || FLAG:7 == 2
+			PRINTFORMW 「ん、んー！」
+		ENDIF
+		CFLAG:301 = 2
+		
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;2,아무것도안한다　CFLAG:302
+;-------------------------------------------------
+IF SELECTCOM == 2
+	CALL TRAIN_MESSAGE
+	IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+		PRINTFORMW 「あるじさまー、どうしました？　もうおわりですか？」
+	ELSE
+		PRINTFORMW 「もうおわりですか？」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;3,비패개장　CFLAG:303
+;-------------------------------------------------
+IF SELECTCOM == 3
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:303 == 0
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:303 = 1
+	;二回目以降
+	ELSE
+		IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:303 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;4,자위　CFLAG:304
+;-------------------------------------------------
+IF SELECTCOM == 4
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:304 == 0
+		PRINTFORMW 「ここをいじればいいんですか？　なんだかへんなかんじです……」
+		CFLAG:304 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:304 < 4 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「んふ%UNICODE(0x2661)%　せっかくぼくがシてるんだから、ちゃんとみていてくださいね！」
+			ELSE
+				PRINTFORMW 「ふふふ、どうです？　ぼくをみてこーふんしますか？」
+			ENDIF
+			CFLAG:304 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:304 < 3 || FLAG:7 == 2)
+			PRINTFORMW %CALLNAME%は大きく股を開くと\@TALENT:남자 ? 幼い陰茎 # 陰核\@を弄っている……
+			CFLAG:304 = 3
+		;それ以外
+		ELSEIF CFLAG:304 < 2 || FLAG:7 == 2
+			IF RAND:2 == 0
+				PRINTFORML 躊躇ってはいるものの、%CALLNAME%は拙い손つきで性器を弄っている……
+			ELSE
+				PRINTFORML 「ん、ぁ……はぁ、ああっ%UNICODE(0x2661)%」
+			ENDIF
+		ENDIF
+		CFLAG:304 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;5,가슴자위　CFLAG:305
+;-------------------------------------------------
+IF SELECTCOM == 5
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:305 == 0
+		PRINTFORMW 「おっぱいなんかないですよー？」
+		CFLAG:305 = 1
+	;二回目以降
+	ELSE
+		IF PALAM:욕정 > 20000
+			PRINTFORMW 「あん、あぁ、むね、さきがじんじんしますぅ%UNICODE(0x2661)%」
+		ELSE
+			PRINTFORMW 「うう～、まだやるんですか？」
+		ENDIF
+		CFLAG:305 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;6,자위　CFLAG:306
+;-------------------------------------------------
+IF SELECTCOM == 6
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:306 == 0
+		PRINTFORMW 「おしりをいじれなんて、しゅみがわるいです！」
+		CFLAG:306 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:306 < 3 || FLAG:7 == 2)
+			PRINTFORMW 「おしり、きもちいいです……」
+		CFLAG:306 = 3
+		ELSEIF CFLAG:306 < 2 || FLAG:7 == 2
+			PRINTFORMW 「ぼくにこんなことさせるなんて、へんたいですね！」
+		ENDIF
+		CFLAG:306 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;7,항문자위　CFLAG:307
+;-------------------------------------------------
+IF SELECTCOM == 7
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:307 == 0
+		CFLAG:307 = 1
+	;二回目以降
+	ELSE
+		CFLAG:307 = 2
+	ENDIF
+ENDIF
+
+
+
+
+;=================================================
+;Ｂ系コマンド
+;=================================================
+;-------------------------------------------------
+;10,가슴애무　CFLAG:308
+;-------------------------------------------------
+IF SELECTCOM == 10
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:308 == 0
+		PRINTFORMW 「そんなところをさわってたのしいですか？」
+		CFLAG:308 = 1
+	;二回目以降
+	ELSE
+		PRINTFORML 「んっ……%UNICODE(0x2661)%」
+		PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%に가슴をまさぐられ、切なげに吐息を漏らした
+		CFLAG:308 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;11,가슴주무르기　CFLAG:309
+;-------------------------------------------------
+IF SELECTCOM == 11
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:309 == 0
+		PRINTFORMW 「おっぱいなんかないですよ？」
+		CFLAG:309 = 1
+	;二回目以降
+	ELSE
+		;굴복각인Lv3
+		IF MARK:2 == 3 && (CFLAG:309 < 3 || FLAG:7 == 2)
+			PRINTFORMW 「ああぁ、あん%UNICODE(0x2661)%　も、もうやめてください……」
+			PRINTFORMW 가슴への刺激で感じているのが恥ずかしいのか、%CALLNAME%は真っ赤な顔を俯かせている
+		CFLAG:309 = 3
+		;それ以外
+		ELSEIF CFLAG:309 < 2 || FLAG:7 == 2
+		PRINTFORMW 「いたく、したら、いやです」
+		CFLAG:309 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;12,유두로터　CFLAG:310
+;-------------------------------------------------
+IF SELECTCOM == 12
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:310 == 0
+		PRINTFORMW 「それ、なんですか？」
+		CFLAG:310 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ぶるぶるするのいやです！　……へんになっちゃいます」
+		CFLAG:310 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;13,니틀캡　CFLAG:311
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 13 && TEQUIP:니틀캡 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:311 == 0
+		CFLAG:311 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ちくびがおおきくなったらこまります……」
+		CFLAG:311 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 13 && TEQUIP:니틀캡
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;14,유두고문　CFLAG:312
+;-------------------------------------------------
+IF SELECTCOM == 14
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:312 == 0
+		PRINTFORMW 「どこをさわって……！」
+		CFLAG:312 = 1
+	;二回目以降
+	ELSE
+		PRINTFORML 「ん……っ、ひ、やめ……ぁっ%UNICODE(0x2661)%」
+		CFLAG:312 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;15,유두클립　CFLAG:313
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 15 && TEQUIP:유두클립 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:313 == 0
+		PRINTFORMW 「いやです、これ、いたいっ」
+		CFLAG:313 = 1
+	;二回目以降
+	ELSE
+		IF PALAM:욕정 > 30000
+			PRINTFORMW 「ふぁああっ、いたいの、いいですっ%UNICODE(0x2661)%」
+		ELSE
+			PRINTFORMW 「いたいです、はやくはずしてください！」
+		ENDIF
+		CFLAG:313 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 15 && TEQUIP:유두클립
+	CALL TRAIN_MESSAGE
+		PRINTFORMW 「ふぅ、うう……むねのさきがじんじんしてます」
+ENDIF
+
+;-------------------------------------------------
+;16,유방전극　CFLAG:314
+;-------------------------------------------------
+IF SELECTCOM == 16
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:314 == 0
+		CFLAG:314 = 1
+	;二回目以降
+	ELSE
+		CFLAG:314 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;17,착유기　CFLAG:315
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 17 && TEQUIP:착유기 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:315 == 0
+		CFLAG:315 = 1
+	;二回目以降
+	ELSE
+		CFLAG:315 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 17 && TEQUIP:착유기
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;18,모유마시기　CFLAG:316
+;-------------------------------------------------
+IF SELECTCOM == 18
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:316 == 0
+		CFLAG:316 = 1
+	;二回目以降
+	ELSE
+		CFLAG:316 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;Ｃ系コマンド
+;=================================================
+;-------------------------------------------------
+;20,로터　CFLAG:317
+;-------------------------------------------------
+IF SELECTCOM == 20
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:317 == 0
+		PRINTFORMW 「なにをするんですかっ」
+		CFLAG:317 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「や、これ、へんですっ！」
+		CFLAG:317 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;21,진동마사지기　CFLAG:318
+;-------------------------------------------------
+IF SELECTCOM == 21
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:318 == 0
+		CFLAG:318 = 1
+	;二回目以降
+	ELSE
+		CFLAG:318 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;22,클리캡　CFLAG:319
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 22 && TEQUIP:클리캡 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:319 == 0
+		CFLAG:319 = 1
+	;二回目以降
+	ELSE
+		CFLAG:319 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 22 && TEQUIP:클리캡
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;23,클리고문　CFLAG:320
+;-------------------------------------------------
+IF SELECTCOM == 23
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:320 == 0
+		PRINTFORMW 「いやです、そんなところさわらないでください！」
+		CFLAG:320 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ひぃっ、あああっ！　だめ、だめですっ%UNICODE(0x2661)%」
+		CFLAG:320 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;24,음핵클립　CFLAG:321
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 24 && TEQUIP:음핵클립 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:321 == 0
+		CFLAG:321 = 1
+	;二回目以降
+	ELSE
+		CFLAG:321 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 24 && TEQUIP:음핵클립
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;25,음핵전극　CFLAG:322
+;-------------------------------------------------
+IF SELECTCOM == 25
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:322 == 0
+		CFLAG:322 = 1
+	;二回目以降
+	ELSE
+		CFLAG:322 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;Ｐ系コマンド
+;=================================================
+;-------------------------------------------------
+;30,수음한다　CFLAG:323
+;-------------------------------------------------
+IF SELECTCOM == 30
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:323 == 0
+		PRINTFORMW 「く、うぅ……」
+		CFLAG:323 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「だめです、こすっちゃ……ぐりぐりしちゃだめぇっ！」
+		CFLAG:323 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;31,펠라한다　CFLAG:324
+;-------------------------------------------------
+IF SELECTCOM == 31
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:324 == 0
+		CFLAG:324 = 1
+	;二回目以降
+	ELSE
+		PRINTFORML 「ん、ひ、やめ……ぁっ%UNICODE(0x2661)%」
+		PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%に페니스をしゃぶられ、堪えきれない喘ぎを漏らした
+		CFLAG:324 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;32,전동오나홀　CFLAG:325
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 32 && TEQUIP:전동오나홀 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:325 == 0
+		CFLAG:325 = 1
+	;二回目以降
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORML 「ふぁ…………もう、やめてくださっ……んんあっ！」
+		ELSE
+			PRINTFORML 「……これ……んっ……いじょ……ひあっ！　んはっ……。」
+		ENDIF
+		CFLAG:325 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 32 && TEQUIP:전동오나홀
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;33,귀두고문　CFLAG:326
+;-------------------------------------------------
+IF SELECTCOM == 33
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:326 == 0
+		CFLAG:326 = 1
+	;二回目以降
+	ELSE
+		CFLAG:326 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;34,구슬애무　CFLAG:327
+;-------------------------------------------------
+IF SELECTCOM == 34
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:327 == 0
+		CFLAG:327 = 1
+	;二回目以降
+	ELSE
+		CFLAG:327 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;35,구슬고문　CFLAG:328
+;-------------------------------------------------
+IF SELECTCOM == 35
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:328 == 0
+		PRINTFORMW 「あがっ！　ひ、あああっ！！」
+		CFLAG:328 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「やだ、やめてください！　いたい、いいいっ！！！」
+		CFLAG:328 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;36,벗겨낸다　CFLAG:329
+;-------------------------------------------------
+IF SELECTCOM == 36
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;Ｖ系コマンド
+;=================================================
+;-------------------------------------------------
+;40,커닐링구스　CFLAG:330
+;-------------------------------------------------
+IF SELECTCOM == 40
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:330 == 0
+		CFLAG:330 = 1
+	;二回目以降
+	ELSE
+		CFLAG:330 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;41,손가락삽입　CFLAG:331
+;-------------------------------------------------
+IF SELECTCOM == 41
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:331 == 0
+		PRINTFORMW 「く、うぅ……」
+		CFLAG:331 = 1
+	;二回目以降
+	ELSE
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:331 < 3 || FLAG:7 == 2)
+			PRINTFORMW 「きもち、いいです……」
+			PRINTFORMW 飲み込んだ指を膣肉で食み乍ら%CALLNAME%は腰を揺らしている
+		CFLAG:331 = 3
+		ELSEIF CFLAG:331 < 2 || FLAG:7 == 2
+			PRINTFORMW 「うう、ぼく、そんなところいじられるのいやです……」
+		ENDIF
+		CFLAG:331 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;42,로터삽입　CFLAG:332
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 42 && TEQUIP:로터삽입 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:332 == 0
+		CFLAG:332 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「なか、で、うごいて……んぅ%UNICODE(0x2661)%」
+		CFLAG:332 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 42 && TEQUIP:로터삽입
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;43,바이브　CFLAG:333
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 43 && TEQUIP:바이브 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:333 == 0
+		CFLAG:333 = 1
+	;二回目以降
+	ELSE
+		CFLAG:333 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 43 && TEQUIP:바이브
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;44,바기나전극　CFLAG:334
+;-------------------------------------------------
+IF SELECTCOM == 44
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:334 == 0
+		CFLAG:334 = 1
+	;二回目以降
+	ELSE
+		CFLAG:334 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;Ａ系コマンド
+;=================================================
+;-------------------------------------------------
+;50,애널자극　CFLAG:335
+;-------------------------------------------------
+IF SELECTCOM == 50
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:335 == 0
+		PRINTFORMW %CALLNAME:PLAYER%の舌がすぼまりの周辺を弄ると、%CALLNAME%は血相を変えて저항する。
+		PRINTFORMW しかし%CALLNAME:PLAYER%は気にせず、唾液をたっぷり含ませた舌先で硬いそこを舐めほぐし始めた……
+		CFLAG:336 = 1
+	;二回目以降
+	ELSE
+		IF PALAM:욕정 > 50000
+			PRINTFORMW 「ぬるぬる、きもちいいです%UNICODE(0x2661)%　もっと、いじって……！」
+		ELSE
+			PRINTFORML 「う、…んん…っ！」
+			PRINTFORMW 喘ぎを漏らさぬよう、%CALLNAME%は唇を噛み締めている……
+		ENDIF
+		CFLAG:337 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;51,애널애무　CFLAG:336
+;-------------------------------------------------
+IF SELECTCOM == 51
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:336 == 0
+		CFLAG:336 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「お、おしり、そんなにしたら、んんっ！」
+		CFLAG:336 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;52,로터A삽입　CFLAG:337
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 52 && TEQUIP:로터A삽입 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:337 == 0
+		CFLAG:337 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「うう……ぶるぶるって、おくまではいってきちゃ……っ！」
+		CFLAG:337 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 52 && TEQUIP:로터A삽입
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;53,애널비즈　CFLAG:338
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 53 && TEQUIP:애널비즈 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:338 == 0
+		CFLAG:338 = 1
+	;二回目以降
+	ELSE
+		CFLAG:338 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 53 && TEQUIP:애널비즈
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;54,애널바이브　CFLAG:339
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 54 && TEQUIP:애널바이브 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:339 == 0
+		CFLAG:339 = 1
+	;二回目以降
+	ELSE
+		CFLAG:339 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 54 && TEQUIP:애널바이브
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;55,확장벌룬　CFLAG:340
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 55 && TEQUIP:확장벌룬 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:340 == 0
+		CFLAG:340 = 1
+	;二回目以降
+	ELSE
+		CFLAG:340 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 55 && TEQUIP:확장벌룬
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;56,애널전극　CFLAG:341
+;-------------------------------------------------
+IF SELECTCOM == 56
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:341 == 0
+		CFLAG:341 = 1
+	;二回目以降
+	ELSE
+		CFLAG:341 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;Ｕ系コマンド
+;=================================================
+;-------------------------------------------------
+;60,카테터　CFLAG:342
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 60 && TEQUIP:카테터 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:342 == 0
+		CFLAG:342 = 1
+	;二回目以降
+	ELSE
+		IF PALAM:욕정 > 50000
+			PRINTFORMW 「ひは、ぬいて、おかしくなっちゃいますぅ！」
+		ELSE
+			PRINTFORMW 「や、いたい……っ！　ぬいてくださいっ！」
+		ENDIF
+		CFLAG:342 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 60 && TEQUIP:카테터
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;61,요도벌룬　CFLAG:343
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 61 && TEQUIP:요도벌룬 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:343 == 0
+		PRINTFORMW 「むりです！　そんな、はいりませんよう！」
+		CFLAG:343 = 1
+	;二回目以降
+	ELSE
+		CFLAG:343 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 61 && TEQUIP:요도벌룬
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;62,전극카테터　CFLAG:344
+;-------------------------------------------------
+IF SELECTCOM == 62
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:344 == 0
+		CFLAG:344 = 1
+	;二回目以降
+	ELSE
+		CFLAG:344 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;奉仕系コマンド
+;=================================================
+;-------------------------------------------------
+;70,수음　CFLAG:345
+;-------------------------------------------------
+IF SELECTCOM == 70
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:345 == 0
+		PRINTFORMW 「ううー、さわりたくないです！」
+		CFLAG:345 = 1
+	;二回目以降
+	ELSE
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:238 < 3 || FLAG:7 == 2)
+			PRINTFORMW 「きもちいいですか？」
+		CFLAG:345 = 3
+		ELSEIF CFLAG:238 < 2 || FLAG:7 == 2
+			PRINTFORMW 「まだですか？　てがつかれました……」
+		ENDIF
+		CFLAG:345 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;71,펠라치오　CFLAG:346
+;-------------------------------------------------
+IF SELECTCOM == 71
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:346 == 0
+		PRINTFORMW 「これを、なめろと？」
+		CFLAG:346 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ん、んふ……」
+		CFLAG:346 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;72,이라마치오　CFLAG:347
+;-------------------------------------------------
+IF SELECTCOM == 72
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:347 == 0
+		PRINTFORMW 「んぐっ！　ぐむっ！！！」
+		CFLAG:347 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ぅぐ！　……ふぐ、ぉう……むっ！」
+		CFLAG:347 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;73,파이즈리　CFLAG:348
+;-------------------------------------------------
+IF SELECTCOM == 73
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:348 == 0
+		CFLAG:348 = 1
+	;二回目以降
+	ELSE
+		CFLAG:348 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;74,세로파이즈리　CFLAG:349
+;-------------------------------------------------
+IF SELECTCOM == 74
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:349 == 0
+		CFLAG:349 = 1
+	;二回目以降
+	ELSE
+		CFLAG:349 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;75,파이즈리펠라　CFLAG:350
+;-------------------------------------------------
+IF SELECTCOM == 75
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:350 == 0
+		CFLAG:350 = 1
+	;二回目以降
+	ELSE
+		CFLAG:350 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;76,스마타　CFLAG:351
+;-------------------------------------------------
+IF SELECTCOM == 76
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:351 == 0
+		CFLAG:351 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「うう、ぬるぬるします……」
+		CFLAG:351 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;77,손가락츄파　CFLAG:352
+;-------------------------------------------------
+IF SELECTCOM == 77
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:352 == 0
+		CFLAG:352 = 1
+	;二回目以降
+	ELSE
+		CFLAG:352 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;80,풋잡　CFLAG:353
+;-------------------------------------------------
+IF SELECTCOM == 80
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:353 == 0
+		CFLAG:353 = 1
+	;二回目以降
+	ELSE
+		CFLAG:353 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;81,헤어잡　CFLAG:354
+;-------------------------------------------------
+IF SELECTCOM == 81
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:354 == 0
+		CFLAG:354 = 1
+	;二回目以降
+	ELSE
+		CFLAG:354 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;82,脇コキ　CFLAG:355
+;-------------------------------------------------
+IF SELECTCOM == 82
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:355 == 0
+		CFLAG:355 = 1
+	;二回目以降
+	ELSE
+		CFLAG:355 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;83,엉덩이더듬기　CFLAG:356
+;-------------------------------------------------
+IF SELECTCOM == 83
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:356 == 0
+		CFLAG:356 = 1
+	;二回目以降
+	ELSE
+		CFLAG:356 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;84,니플퍽　CFLAG:357
+;-------------------------------------------------
+IF SELECTCOM == 84
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:357 == 0
+		CFLAG:357 = 1
+	;二回目以降
+	ELSE
+		CFLAG:357 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;85,발핥기강제　CFLAG:358
+;-------------------------------------------------
+IF SELECTCOM == 85
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;86,구슬비비기강제　CFLAG:359
+;-------------------------------------------------
+IF SELECTCOM == 86
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:359 == 0
+		CFLAG:359 = 1
+	;二回目以降
+	ELSE
+		CFLAG:359 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;87,구슬핥기강제　CFLAG:360
+;-------------------------------------------------
+IF SELECTCOM == 87
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:360 == 0
+		CFLAG:360 = 1
+	;二回目以降
+	ELSE
+		CFLAG:360 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;セックス系コマンド
+;=================================================
+;-------------------------------------------------
+;100,정상위　CFLAG:361
+;-------------------------------------------------
+IF SELECTCOM == 100
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:361 == 0
+		IF TALENT:처녀
+			;연모、친애
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW %CALLNAME%の未成熟な秘所は小さすぎて、%CALLNAME:PLAYER%の肉棒の侵入を阻んでいる…
+					PRINTFORMW 「だいじょうぶです、あるじさま。あるじさまになら……なにをされてもぼくへいきです」
+					PRINTFORMW %CALLNAME%の言葉に意を決し、%CALLNAME:PLAYER%は自分の肉棒を손で支えると
+					PRINTFORML まだ男を수入れるには幼すぎる秘所に、強引にめり込ませていった…
+				ELSE
+					PRINTFORMW 「ぼくはへいきですから、きてください」
+					PRINTFORMW 組み敷かれ健気に笑う%CALLNAME%の幼い秘裂に、%CALLNAME:PLAYER%はいきり立つ強直を埋め込んでいった。
+				ENDIF
+			;음란、창부
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+				PRINTFORMW 
+			;복종、예속
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+				PRINTFORMW 
+			ENDIF
+		ELSE
+			;연모、친애
+			IF TALENT:3 || TALENT:6
+				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+					PRINTFORMW 「ぁあ……あるじさまぁ」
+					PRINTFORMW 正面からいきり立つ페니스を突きこまれた%CALLNAME%は全身で%CALLNAME:PLAYER%に抱き付いた
+				ELSE
+					PRINTFORMW 
+			ENDIF
+			;음란、창부
+			ELSEIF TALENT:4 || TALENT:7
+				PRINTFORMW 
+				PRINTFORMW 
+			;복종、예속
+			ELSEIF TALENT:5 || TALENT:8
+				PRINTFORMW 
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+				PRINTFORMW 「いたくしないでくださいね……」
+			ENDIF
+		ENDIF
+		CFLAG:361 = 1
+	;二回目以降
+	ELSE
+		;陥落済み
+		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:361 < 4 || FLAG:7 == 2)
+			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
+				PRINTFORMW 「ふふ、これだとあるじさまのおかおがみれますね%UNICODE(0x2661)%」
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:361 = 2
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:361 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:361 = 3
+		ELSEIF CFLAG:361 < 2 || FLAG:7 == 2
+			PRINTFORMW 
+		CFLAG:361 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;101,후배위　CFLAG:362
+;-------------------------------------------------
+IF SELECTCOM == 101
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:362 == 0
+		IF TALENT:처녀
+		ELSE
+			PRINTFORMW 「こ、こわれちゃいます……っ！」
+		ENDIF
+		CFLAG:362 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「おく、きてっ%UNICODE(0x2661)%　おなかっ、やぶれちゃいますぅ%UNICODE(0x2661)%」
+		CFLAG:362 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;102,대면좌위　CFLAG:363
+;-------------------------------------------------
+IF SELECTCOM == 102
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:363 == 0
+		IF TALENT:처녀
+		ELSE
+		ENDIF
+		CFLAG:363 = 1
+	;二回目以降
+	ELSE
+		CFLAG:363 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;103,배면좌위　CFLAG:364
+;-------------------------------------------------
+IF SELECTCOM == 103
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:364 == 0
+		IF TALENT:처녀
+		ELSE
+		ENDIF
+		CFLAG:364 = 1
+	;二回目以降
+	ELSE
+		CFLAG:364 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;104,대면입위　CFLAG:365
+;-------------------------------------------------
+IF SELECTCOM == 104
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:365 == 0
+		IF TALENT:처녀
+		ELSE
+		ENDIF
+		CFLAG:365 = 1
+	;二回目以降
+	ELSE
+		CFLAG:365 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;105,배면입위　CFLAG:366
+;-------------------------------------------------
+IF SELECTCOM == 105
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:366 == 0
+		IF TALENT:처녀
+		ELSE
+		ENDIF
+		CFLAG:366 = 1
+	;二回目以降
+	ELSE
+		CFLAG:366 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;106,기승위　CFLAG:367
+;-------------------------------------------------
+IF SELECTCOM == 106
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:367 == 0
+		IF TALENT:처녀
+		ELSE
+			PRINTFORMW 「ふふ、おなかいっぱいです%UNICODE(0x2661)%」
+			PRINTFORMW %CALLNAME%は大きく開いた股間を%CALLNAME:PLAYER%の腰にぴったりと押し付け、小さな膣입が陰茎を咥えこんでいる様子を晒している
+		ENDIF
+		CFLAG:367 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW %CALLNAME%は身体ごと大きく揺り動かし、音を立てるほど激しく強直を抜き差ししてる
+		CFLAG:367 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;애널セックス系コマンド
+;=================================================
+;-------------------------------------------------
+;110,정상위애널　CFLAG:368
+;-------------------------------------------------
+IF SELECTCOM == 110
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:368 == 0
+		IF TALENT:백버진
+		ELSE
+			PRINTFORMW 正面からいきり立つ페니스を突きこまれた%CALLNAME%は全身で%CALLNAME:PLAYER%に抱き付いた
+		ENDIF
+		CFLAG:368 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ふは、おしり、はげしくしちゃ……あんっ！」
+		CFLAG:368 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;111,후배위애널　CFLAG:369
+;-------------------------------------------------
+IF SELECTCOM == 111
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:369 == 0
+		IF TALENT:백버진
+		ELSE
+		ENDIF
+		CFLAG:369 = 1
+	;二回目以降
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORMW 「ああっ！　おしり、あついですっ%UNICODE(0x2661)%」
+		ELSE
+			PRINTFORMW 「ぼく、だめですっ！　そんな……だめぇ%UNICODE(0x2661)%」
+		ENDIF
+		PRINTFORMW 후ろから激しく突き込まれるたび%CALLNAME%は可愛らしい嬌声をあげていた
+		CFLAG:369 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;112,대면좌위애널　CFLAG:370
+;-------------------------------------------------
+IF SELECTCOM == 112
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:370 == 0
+		IF TALENT:백버진
+			;연모、친애
+			IF TALENT:3 || TALENT:6
+				PRINTFORMW %CALLNAME:PLAYER%は笑いながら%CALLNAME%を正面から抱き上げた。
+				PRINTFORMW 軽い%CALLNAME%の身体はやすやすと持ち上がり、%CALLNAME:PLAYER%はそのままいきり立つ肉棒の上に%CALLNAME%を下ろした。
+				PRINTFORMW 尻のすぼまりにあたる熱が何を望んでいるかを察した%CALLNAME%は%CALLNAME:PLAYER%の首に腕を回し、息を吐いて挿入を손助けする。
+				PRINTFORMW 「うう……いたいです、けど、……やめないで、くだ、んぅっ！」
+				PRINTFORMW 幼い体で初めて수る통증に涙を流しながら、%CALLNAME%はすがりついて最奥までの征服を希っている。
+				PRINTFORMW すべて収めきった%CALLNAME:PLAYER%は耐えきった%CALLNAME%を宥める様に抱きすくめた。
+			ENDIF
+		ELSE
+		ENDIF
+		CFLAG:370 = 1
+	;二回目以降
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORMW 「はうっ……ひっ、ひゃうっ！　あ、あんっ%UNICODE(0x2661)%」
+		ELSE
+			PRINTFORML 「んあっ……んっ……んんっ！」
+		ENDIF
+		IF RAND:2 == 0
+			PRINTFORMW %CALLNAME:PLAYER%は可愛く喘ぐ%CALLNAME%に興奮して腰を動かした。
+		ELSE
+			PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%の動きに合わせ腰を振っている。
+		ENDIF
+		CFLAG:370 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;113,배면좌위애널　CFLAG:371
+;-------------------------------------------------
+IF SELECTCOM == 113
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:371 == 0
+		IF TALENT:백버진
+		ELSE
+		ENDIF
+		CFLAG:371 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ふは、おしり、はげしくしちゃ……あんっ！」
+		CFLAG:371 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;114,대면입위애널　CFLAG:372
+;-------------------------------------------------
+IF SELECTCOM == 114
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:372 == 0
+		IF TALENT:백버진
+		ELSE
+		ENDIF
+		CFLAG:372 = 1
+	;二回目以降
+	ELSE
+		CFLAG:372 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;115,배면입위애널　CFLAG:373
+;-------------------------------------------------
+IF SELECTCOM == 115
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:373 == 0
+		IF TALENT:백버진
+		ELSE
+		ENDIF
+		CFLAG:373 = 1
+	;二回目以降
+	ELSE
+		CFLAG:373 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;116,기승위애널　CFLAG:374
+;-------------------------------------------------
+IF SELECTCOM == 116
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:374 == 0
+		IF TALENT:백버진
+		ELSE
+		ENDIF
+		CFLAG:374 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「う、ぁうっ！　きもちイイですっ%UNICODE(0x2661)%」
+		PRINTFORMW %CALLNAME%は%CALLNAME:PLAYER%に跨って激しく腰を振っている……
+		CFLAG:374 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;拘束系コマンド
+;=================================================
+;-------------------------------------------------
+;130,밧줄　CFLAG:375
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 130 && TEQUIP:밧줄 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:375 == 0
+		CFLAG:375 = 1
+	;二回目以降
+	ELSE
+		CFLAG:375 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 130 && TEQUIP:밧줄
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;131,아이마스크　CFLAG:376
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 131 && TEQUIP:아이마스크 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:376 == 0
+		CFLAG:376 = 1
+	;二回目以降
+	ELSE
+		CFLAG:376 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 131 && TEQUIP:아이마스크
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;132,볼개그　CFLAG:377
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 132 && TEQUIP:볼개그 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:377 == 0
+		CFLAG:377 = 1
+	;二回目以降
+	ELSE
+		CFLAG:377 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 132 && TEQUIP:볼개그
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;133,정조대　CFLAG:378
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 133 && TEQUIP:정조대 == 0
+	CALL TRAIN_MESSAGE
+		;初めて
+	IF CFLAG:378 == 0
+		CFLAG:378 = 1
+	;二回目以降
+	ELSE
+		CFLAG:378 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 133 && TEQUIP:정조대
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;134,사정관리　CFLAG:379
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 134 && TEQUIP:사정관리 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:379 == 0
+		CFLAG:379 = 1
+	;二回目以降
+	ELSE
+		CFLAG:379 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 134 && TEQUIP:사정관리
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;ＳＭ系コマンド
+;=================================================
+;-------------------------------------------------
+;140,스팽킹　CFLAG:380
+;-------------------------------------------------
+IF SELECTCOM == 140
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:380 == 0
+		PRINTFORMW 「ひんっ！ひゃああっ！　いたいですっ！！」
+		CFLAG:380 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「やだ、やめてください！　ひゃああん！！」
+		CFLAG:380 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;141,젖스팽킹　CFLAG:381
+;-------------------------------------------------
+IF SELECTCOM == 141
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:381 == 0
+		PRINTFORMW 「い、いたいですよぅ……なんでこんな……」
+		CFLAG:381 = 1
+	;二回目以降
+	ELSE
+		IF PALAM:TARGET:욕정 >= PALAMLV:4
+			PRINTFORMW 「ひぁんっ！むねのさき、びりびりしますぅ！」
+		ELSE
+			PRINTFORMW 「やだやだっ！いやです！」
+		ENDIF
+		CFLAG:381 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;142,채찍　CFLAG:382
+;-------------------------------------------------
+IF SELECTCOM == 142
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:382 == 0
+		CFLAG:382 = 1
+	;二回目以降
+	ELSE
+		CFLAG:382 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;143,바늘　CFLAG:383
+;-------------------------------------------------
+IF SELECTCOM == 143
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:383 == 0
+		CFLAG:383 = 1
+	;二回目以降
+	ELSE
+		CFLAG:383 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;144,촛불　CFLAG:374
+;-------------------------------------------------
+IF SELECTCOM == 144
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:374 == 0
+		CFLAG:374 = 1
+	;二回目以降
+	ELSE
+		CFLAG:374 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;145,삼각목마　CFLAG:375
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 145 && TEQUIP:삼각목마 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:375 == 0
+		CFLAG:375 = 1
+	;二回目以降
+	ELSE
+		CFLAG:375 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 145 && TEQUIP:삼각목마
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;暴力系コマンド
+;=================================================
+;-------------------------------------------------
+;150,가구로한다　CFLAG:386
+;-------------------------------------------------
+IF SELECTCOM == 150
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:386 == 0
+		CFLAG:386 = 1
+	;二回目以降
+	ELSE
+		CFLAG:386 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;151,拷問　CFLAG:387
+;-------------------------------------------------
+IF SELECTCOM == 151
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:387 == 0
+		CFLAG:387 = 1
+	;二回目以降
+	ELSE
+		CFLAG:387 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;152,매도한다　CFLAG:388
+;-------------------------------------------------
+IF SELECTCOM == 152
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:388 == 0
+		CFLAG:388 = 1
+	;二回目以降
+	ELSE
+		CFLAG:388 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;153,발로 밟는다　CFLAG:389
+;-------------------------------------------------
+IF SELECTCOM == 153
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:389 == 0
+		CFLAG:389 = 1
+	;二回目以降
+	ELSE
+		CFLAG:389 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;154,배빵　CFLAG:390
+;-------------------------------------------------
+IF SELECTCOM == 154
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:390 == 0
+		CFLAG:390 = 1
+	;二回目以降
+	ELSE
+		CFLAG:390 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;155,목조르기　CFLAG:391
+;-------------------------------------------------
+IF SELECTCOM == 155
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:391 == 0
+		CFLAG:391 = 1
+	;二回目以降
+	ELSE
+		CFLAG:391 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;156,낙인　CFLAG:392
+;地の文に細かい設定があるので、初回／２回目以降を分けない。
+;台詞を入れたい場合は地の文呼び出しをカットして、地の文をコピペする。
+;-------------------------------------------------
+IF SELECTCOM == 156
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;157,물고문　CFLAG:532
+;-------------------------------------------------
+IF SELECTCOM == 157
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:532 == 0
+		CFLAG:532 = 1
+	;二回目以降
+	ELSE
+		CFLAG:532 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;158,간지럼고문　CFLAG:533
+;-------------------------------------------------
+IF SELECTCOM == 158
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:533 == 0
+		PRINTFORMW 「ひゃは、あはははははっ！　はふっ、もう、やめ、あはは！！」
+		CFLAG:533 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「あはははははっ！　くるし、ははは、やめて、あっはははははは！」
+		CFLAG:533 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;フィスト系コマンド
+;=================================================
+;-------------------------------------------------
+;160,피스트퍽　CFLAG:393
+;-------------------------------------------------
+IF SELECTCOM == 160
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:393 == 0
+		CFLAG:393 = 1
+	;二回目以降
+	ELSE
+		CFLAG:393 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;161,애널피스트　CFLAG:394
+;-------------------------------------------------
+IF SELECTCOM == 161
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;162,양구멍피스트　CFLAG:395
+;-------------------------------------------------
+IF SELECTCOM == 162
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;スカ系コマンド
+;=================================================
+;-------------------------------------------------
+;180,관장　CFLAG:396
+;-------------------------------------------------
+IF SELECTCOM == 180
+	CALL TRAIN_MESSAGE
+	CFLAG:396 += 1
+ENDIF
+
+;-------------------------------------------------
+;181,육변기　CFLAG:397
+;-------------------------------------------------
+IF SELECTCOM == 181
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;182,放尿　CFLAG:398
+;-------------------------------------------------
+IF SELECTCOM == 182
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;183,排便　CFLAG:399
+;-------------------------------------------------
+IF SELECTCOM == 183
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;184,음뇨시킨다　CFLAG:400
+;-------------------------------------------------
+IF SELECTCOM == 184
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;185,식분시킨다　CFLAG:401
+;-------------------------------------------------
+IF SELECTCOM == 185
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;コミュニケーション系コマンド
+;=================================================
+;-------------------------------------------------
+;200,회화　CFLAG:402
+;-------------------------------------------------
+IF SELECTCOM == 200
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:402 == 0
+		PRINTFORMW 「おはなしですかー？」
+		CFLAG:402 = 1
+	;二回目以降
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORML 「そしてですね、よしつねこうは……」
+			PRINTFORMW %CALLNAME%は義経公の武勲を身振り손振りもはげしく生きいきと語っている
+		ELSE
+			PRINTFORMW 「きょうはごほんをよんでください！」
+			PRINTFORM %CALLNAME%は손に持った
+				LOCAL = RAND:100
+				IF LOCAL < 10
+				;10%の確率で実行　それあかんやつ
+					PRINT 【Pnakotic Manuscript】と書かれた禍々しい稀覯書を
+				ELSEIF LOCAL < 30
+				;30 - 10 = 20%の確率で実行
+					PRINT 無修正のいかがわしい本を
+				ELSEIF LOCAL < 60
+				;60 - 20 - 10 = 30%の確率で実行
+					PRINT 美しい絵巻物を
+				ELSE
+				;100 - 30 - 20 - 10 = 40%の確率で実行
+					PRINT 絵本を
+				ENDIF
+			PRINTFORMW %CALLNAME:PLAYER%に笑顔で差し出した
+		ENDIF
+		CFLAG:402 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;201,선물　CFLAG:403
+;何をあげてるか？は、コマンドフォルダ内선물の項目に入ってます。
+;自分であげるものを決めたい場合、CALL TRAIN_MESSAGEを消して、自分で書く。
+;-------------------------------------------------
+IF SELECTCOM == 201
+	CALL TRAIN_MESSAGE
+	;笑顔
+	IF TFLAG:17 == 1
+	;食べ物
+	ELSEIF TFLAG:17 == 2
+	;日用品
+	ELSEIF TFLAG:17 == 3
+	;악세사리
+	ELSEIF TFLAG:17 == 4
+	;服
+	ELSEIF TFLAG:17 == 5
+	;高価な物
+	ELSEIF TFLAG:17 == 6
+	;特別な선물（Extraモードエンディング用）
+	ELSEIF TFLAG:17 == 7
+		;エンゲージリング
+		IF CFLAG:5100 == 1
+		;オーダーメイド바이브
+		ELSEIF CFLAG:5101 == 1
+		;オーダーメイド首輪
+		ELSEIF CFLAG:5102 == 1
+		ENDIF
+	;プロミスリング
+	ELSEIF TFLAG:17 == 50
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;202,스킨십　CFLAG:404
+;-------------------------------------------------
+IF SELECTCOM == 202
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:404 == 0
+		PRINTFORMW 「わーい！」
+		PRINTFORMW %CALLNAME%は楽しそうに%CALLNAME:PLAYER%にじゃれついている
+		CFLAG:404 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「もっとぎゅーってしてください！」
+		CFLAG:404 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;203,느긋하게한다　CFLAG:405
+;-------------------------------------------------
+IF SELECTCOM == 203
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:405 == 0
+		CFLAG:405 = 1
+	;二回目以降
+	ELSE
+		CFLAG:405 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;204,가사　CFLAG:406
+;-------------------------------------------------
+IF SELECTCOM == 204
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:406 == 0
+		PRINTFORML 「ぼく、おてつだいしますね！」
+		PRINTFORMW %CALLNAME%は張り切った様子だ。
+		CFLAG:406 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「えへへ、おてつだいたのしいです」
+		CFLAG:406 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;205,노래연습　CFLAG:407
+;-------------------------------------------------
+IF SELECTCOM == 205
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:407 == 0
+		CFLAG:407 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「どうですか？　おうた、うまくなってますか？」
+		CFLAG:407 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;206,선물시킨다　CFLAG:408
+;-------------------------------------------------
+IF SELECTCOM == 206
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;207,데이트간다　CFLAG:409
+;-------------------------------------------------
+IF SELECTCOM == 207
+	CALL TRAIN_MESSAGE
+	;노출デート
+	IF TFLAG:17 == 2
+		;初めて
+		IF CFLAG:402 == 0
+			CFLAG:402 = 1
+		;二回目以降
+		ELSE
+			CFLAG:402 = 2
+		ENDIF
+	;普通のデート
+	ELSE
+		;初めて
+		IF CFLAG:402 == 0
+			CFLAG:402 = 1
+		;二回目以降
+		ELSE
+			CFLAG:402 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;애무시킨다系コマンド
+;=================================================
+;-------------------------------------------------
+;220,애무시킨다　CFLAG:410
+;-------------------------------------------------
+IF SELECTCOM == 220
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:220 == 0
+		CFLAG:220 = 1
+	;二回目以降
+	ELSE
+		CFLAG:220 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;221,가슴을주무르게한다　CFLAG:411
+;-------------------------------------------------
+IF SELECTCOM == 221
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;222,커닐링구스강제　CFLAG:412
+;-------------------------------------------------
+IF SELECTCOM == 222
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;223,손가락삽입시킨다　CFLAG:413
+;-------------------------------------------------
+IF SELECTCOM == 223
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;224,애널핥기강제　CFLAG:414
+;-------------------------------------------------
+IF SELECTCOM == 224
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;225,애널애무시킨다　CFLAG:415
+;-------------------------------------------------
+IF SELECTCOM == 225
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;226,자위과시한다　CFLAG:416
+;-------------------------------------------------
+IF SELECTCOM == 226
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;227,자위과시한다　CFLAG:417
+;-------------------------------------------------
+IF SELECTCOM == 226
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;逆奉仕・レズプレイ系コマンド
+;=================================================
+;-------------------------------------------------
+;240,파이즈리한다　CFLAG:418
+;-------------------------------------------------
+IF SELECTCOM == 240
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:418 == 0
+		CFLAG:418 = 1
+	;二回目以降
+	ELSE
+		CFLAG:418 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;241,파이즈리펠라한다　CFLAG:419
+;-------------------------------------------------
+IF SELECTCOM == 241
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;242,풋잡한다　CFLAG:420
+;-------------------------------------------------
+IF SELECTCOM == 242
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;243,가슴을비빈다　CFLAG:421
+;-------------------------------------------------
+IF SELECTCOM == 243
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;244,조개비비기　CFLAG:422
+;-------------------------------------------------
+IF SELECTCOM == 244
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;245,장대비비기　CFLAG:423
+;-------------------------------------------------
+IF SELECTCOM == 245
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;奴隷×主人セックス系コマンド
+;=================================================
+;-------------------------------------------------
+;260,정상위시킨다　CFLAG:424
+;-------------------------------------------------
+IF SELECTCOM == 260
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:424 == 0
+		IF TALENT:PLAYER:처녀
+		ELSE
+		ENDIF
+		CFLAG:424 = 1
+	;二回目以降
+	ELSE
+		CFLAG:424 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;261,후배위시킨다　CFLAG:425
+;-------------------------------------------------
+IF SELECTCOM == 261
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;262,기승위한다　CFLAG:426
+;-------------------------------------------------
+IF SELECTCOM == 262
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;263,정상위애널시킨다　CFLAG:427
+;-------------------------------------------------
+IF SELECTCOM == 263
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:427 == 0
+		IF TALENT:PLAYER:백버진
+		ELSE
+		ENDIF
+		CFLAG:427 = 1
+	;二回目以降
+	ELSE
+		CFLAG:427 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;264,후배위애널시킨다　CFLAG:428
+;-------------------------------------------------
+IF SELECTCOM == 264
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;265,기승위애널한다　CFLAG:429
+;-------------------------------------------------
+IF SELECTCOM == 265
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;助손×主人セックス系コマンド
+;=================================================
+;-------------------------------------------------
+;270,촉수에범하게시킨다　CFLAG:430
+;-------------------------------------------------
+IF SELECTCOM == 270
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:430 == 0
+		IF TALENT:PLAYER:처녀
+		ELSE
+		ENDIF
+		CFLAG:430 = 1
+	;二回目以降
+	ELSE
+		CFLAG:430 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;271,촉수에A를범하게시킨다　CFLAG:431
+;-------------------------------------------------
+IF SELECTCOM == 271
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:431 == 0
+		IF TALENT:PLAYER:백버진
+		ELSE
+		ENDIF
+		CFLAG:431 = 1
+	;二回目以降
+	ELSE
+		CFLAG:431 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;主人마조系コマンド
+;=================================================
+;-------------------------------------------------
+;280,이라마치오시킨다　CFLAG:432
+;-------------------------------------------------
+IF SELECTCOM == 280
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:432 == 0
+		CFLAG:432 = 1
+	;二回目以降
+	ELSE
+		CFLAG:432 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;281,매도당한다　CFLAG:433
+;-------------------------------------------------
+IF SELECTCOM == 281
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;282,발을핥는다　CFLAG:434
+;-------------------------------------------------
+IF SELECTCOM == 282
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;283,얻어맞는다　CFLAG:435
+;-------------------------------------------------
+IF SELECTCOM == 283
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;284,채찍으로맞는다　CFLAG:436
+;-------------------------------------------------
+IF SELECTCOM == 284
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;285,음뇨한다　CFLAG:437
+;-------------------------------------------------
+IF SELECTCOM == 285
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;286,식분한다　CFLAG:438
+;-------------------------------------------------
+IF SELECTCOM == 286
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;薬品系コマンド
+;=================================================
+;-------------------------------------------------
+;300,로션　CFLAG:439
+;-------------------------------------------------
+IF SELECTCOM == 300
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:439 == 0
+		CFLAG:439 = 1
+	;二回目以降
+	ELSE
+		CFLAG:439 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;301,미약　CFLAG:440
+;-------------------------------------------------
+IF SELECTCOM == 301
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:440 == 0
+		CFLAG:440 = 1
+	;二回目以降
+	ELSE
+		CFLAG:440 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;302,이뇨제　CFLAG:441
+;-------------------------------------------------
+IF SELECTCOM == 302
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:441 == 0
+		CFLAG:441 = 1
+	;二回目以降
+	ELSE
+		CFLAG:441 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;303,강정신약　CFLAG:442
+;-------------------------------------------------
+IF SELECTCOM == 303
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:442 == 0
+		CFLAG:442 = 1
+	;二回目以降
+	ELSE
+		CFLAG:442 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;304,구토제　CFLAG:443
+;-------------------------------------------------
+IF SELECTCOM == 304
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:443 == 0
+		CFLAG:443 = 1
+	;二回目以降
+	ELSE
+		CFLAG:443 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;305,가려움증약　CFLAG:538
+;-------------------------------------------------
+IF SELECTCOM == 305
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:538 == 0
+		CFLAG:538 = 1
+	;二回目以降
+	ELSE
+		CFLAG:538 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;シチュエーション別コマンド
+;=================================================
+;-------------------------------------------------
+;310,비디오촬영　CFLAG:444
+;-------------------------------------------------
+;撮影開始時
+IF SELECTCOM == 310 && TEQUIP:비디오카메라 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:444 == 0
+		CFLAG:444 = 1
+	;二回目以降
+	ELSE
+		CFLAG:444 = 2
+	ENDIF
+;撮影止めた時の反応
+ELSEIF SELECTCOM == 310 && TEQUIP:비디오카메라
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;311,비디오감상　CFLAG:445
+;-------------------------------------------------
+IF SELECTCOM == 311
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:445 == 0
+		CFLAG:445 = 1
+	;二回目以降
+	ELSE
+		CFLAG:445 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;312,사진촬영　CFLAG:446
+;-------------------------------------------------
+IF SELECTCOM == 312
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:446 == 0
+		CFLAG:446 = 1
+	;二回目以降
+	ELSE
+		CFLAG:446 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;313,수치플레이　CFLAG:447
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 313 && TEQUIP:수치플레이 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:447 == 0
+		CFLAG:447 = 1
+	;二回目以降
+	ELSE
+		CFLAG:447 = 2
+	ENDIF
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 313 && TEQUIP:수치플레이
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;314,제모　CFLAG:448
+;-------------------------------------------------
+IF SELECTCOM == 314
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:448 == 0
+		CFLAG:448 = 1
+	;二回目以降
+	ELSE
+		CFLAG:448 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;315,목욕탕플레이　CFLAG:449
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 315 && TEQUIP:목욕탕 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:449 == 0
+		CFLAG:449 = 1
+	;二回目以降
+	ELSE
+		CFLAG:449 = 2
+	ENDIF
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 315 && TEQUIP:목욕탕
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;316,샤워　CFLAG:450
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 316 && TEQUIP:샤워 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:450 == 0
+		CFLAG:450 = 1
+	;二回目以降
+	ELSE
+		CFLAG:450 = 2
+	ENDIF
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 316 && TEQUIP:샤워
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;317,거품비비기　CFLAG:451
+;-------------------------------------------------
+IF SELECTCOM == 317
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:451 == 0
+		CFLAG:451 = 1
+	;二回目以降
+	ELSE
+		CFLAG:451 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;318,거품비비기한다　CFLAG:452
+;-------------------------------------------------
+IF SELECTCOM == 318
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;319,신혼부부플레이　CFLAG:453
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 319 && TEQUIP:에이프런 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:451 == 0
+		CFLAG:451 = 1
+	;二回目以降
+	ELSE
+		CFLAG:451 = 2
+	ENDIF
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 319 && TEQUIP:에이프런
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;320,야외플레이　CFLAG:454
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 320 && TEQUIP:야외플레이 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:454 == 0
+		CFLAG:454 = 1
+	;二回目以降
+	ELSE
+		CFLAG:454 = 2
+	ENDIF
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 320 && TEQUIP:야외플레이
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;321,사람을부른다　CFLAG:455
+;-------------------------------------------------
+IF SELECTCOM == 321
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:455 == 0
+		CFLAG:455 = 1
+	;二回目以降
+	ELSE
+		CFLAG:455 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;322,윤간　CFLAG:456
+;-------------------------------------------------
+IF SELECTCOM == 322
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:456 == 0
+		CFLAG:456 = 1
+	;二回目以降
+	ELSE
+		CFLAG:456 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;323,지하실　CFLAG:457
+;-------------------------------------------------
+;移動時
+IF SELECTCOM == 323 && TEQUIP:지하실 == 0
+	CALL TRAIN_MESSAGE
+;戻ってきた時の反応
+ELSEIF SELECTCOM == 323 && TEQUIP:지하실
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;촉수系コマンド
+;=================================================
+;-------------------------------------------------
+;340,촉수소환　CFLAG:458
+;-------------------------------------------------
+;召喚時
+IF SELECTCOM == 340 && TEQUIP:촉수 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:458 == 0
+		CFLAG:458 = 1
+	;二回目以降
+	ELSE
+		CFLAG:458 = 2
+	ENDIF
+;還した時の反応
+ELSEIF SELECTCOM == 340 && TEQUIP:촉수
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;341,촉수유두고문　CFLAG:459
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 341 && TEQUIP:니틀캡 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:459 == 0
+		CFLAG:459 = 1
+	;二回目以降
+	ELSE
+		CFLAG:459 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 341 && TEQUIP:니틀캡
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;342,촉수클리고문　CFLAG:460
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 342 && TEQUIP:클리캡 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 342 && TEQUIP:클리캡
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;343,촉수페니스고문　CFLAG:461
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 343 && TEQUIP:전동오나홀 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 343 && TEQUIP:전동오나홀
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;344,촉수삽입　CFLAG:462
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 344 && TEQUIP:바이브 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:462 == 0
+		CFLAG:462 = 1
+	;二回目以降
+	ELSE
+		CFLAG:462 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 344 && TEQUIP:바이브
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;345,촉수애널　CFLAG:463
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 345 && TEQUIP:애널바이브 == 0
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:463 == 0
+		CFLAG:463 = 1
+	;二回目以降
+	ELSE
+		CFLAG:463 = 2
+	ENDIF
+;外した時の反応
+ELSEIF SELECTCOM == 345 && TEQUIP:애널바이브
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;350,촉수구욕　CFLAG:464
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 350 && TEQUIP:촉수구욕 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 350 && TEQUIP:촉수구욕
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;351,촉수구속　CFLAG:465
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 351 && TEQUIP:밧줄 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 351 && TEQUIP:밧줄
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;352,촉수관장　CFLAG:466
+;-------------------------------------------------
+;관장時
+IF SELECTCOM == 352
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;ハードな촉수系コマンド
+;=================================================
+;-------------------------------------------------
+;360,촉수착유　CFLAG:467
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 360 && TEQUIP:착유기 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 360 && TEQUIP:착유기
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;361,촉수유선고문　CFLAG:468
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 361 && TEQUIP:촉수유선삽입 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 361 && TEQUIP:촉수유선삽입
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;362,촉수G스팟고문　CFLAG:469
+;-------------------------------------------------
+IF SELECTCOM == 362
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;363,촉수자궁고문　CFLAG:470
+;-------------------------------------------------
+IF SELECTCOM == 362
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;364,촉수전립선자극　CFLAG:471
+;-------------------------------------------------
+IF SELECTCOM == 364
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;365,촉수尿道삽입　CFLAG:472
+;-------------------------------------------------
+;装着時
+IF SELECTCOM == 365 && TEQUIP:카테터 == 0
+	CALL TRAIN_MESSAGE
+;外した時の反応
+ELSEIF SELECTCOM == 365 && TEQUIP:카테터
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;366,촉수바기나확장　CFLAG:473
+;-------------------------------------------------
+IF SELECTCOM == 366
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;367,촉수애널확장　CFLAG:474
+;-------------------------------------------------
+IF SELECTCOM == 367
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;368,촉수양구멍확장　CFLAG:475
+;-------------------------------------------------
+IF SELECTCOM == 368
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;369,촉수산란　CFLAG:476
+;-------------------------------------------------
+IF SELECTCOM == 369
+	CALL TRAIN_MESSAGE
+	;全部抜いたとき
+	IF TFLAG:56 == 0
+	;片方だけ抜いたとき
+	ELSEIF TFLAG:56 == 1
+	;最初に入れたとき
+	ELSEIF TFLAG:56 == 2
+	;さらに追加したとき
+	ELSE
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;370,촉수애널산란　CFLAG:477
+;-------------------------------------------------
+IF SELECTCOM == 370
+	CALL TRAIN_MESSAGE
+	;全部抜いたとき
+	IF TFLAG:56 == 0
+	;片方だけ抜いたとき
+	ELSEIF TFLAG:56 == 1
+	;最初に入れたとき
+	ELSEIF TFLAG:56 == 2
+	;さらに追加したとき
+	ELSE
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;371,촉수관통　CFLAG:534
+;-------------------------------------------------
+IF SELECTCOM == 371
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;372,전기촉수　CFLAG:535
+;-------------------------------------------------
+IF SELECTCOM == 372
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;373,촉수뇌간　CFLAG:536
+;-------------------------------------------------
+IF SELECTCOM == 373
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;374,최면촉수　CFLAG:539
+;-------------------------------------------------
+IF SELECTCOM == 374
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;異種姦系コマンド
+;=================================================
+;-------------------------------------------------
+;380,버터견　CFLAG:478
+;-------------------------------------------------
+IF SELECTCOM == 380
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:478 == 0
+		CFLAG:478 = 1
+	;二回目以降
+	ELSE
+		CFLAG:478 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;381,수간　CFLAG:479
+;-------------------------------------------------
+IF SELECTCOM == 381
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;382,뱀장어탕　CFLAG:480
+;-------------------------------------------------
+IF SELECTCOM == 382
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;383,곤충탕　CFLAG:481
+;-------------------------------------------------
+IF SELECTCOM == 383
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;광기系コマンド
+;=================================================
+;-------------------------------------------------
+;390,한쪽팔절단　CFLAG:482
+;-------------------------------------------------
+IF SELECTCOM == 390
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:482 == 0
+		CFLAG:482 = 1
+	;二回目以降
+	ELSE
+		CFLAG:482 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;391,한쪽다리절단　CFLAG:483
+;-------------------------------------------------
+IF SELECTCOM == 391
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;392,모두발치　CFLAG:484
+;-------------------------------------------------
+IF SELECTCOM == 392
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;助손命令系コマンド
+;=================================================
+;-------------------------------------------------
+;400,클리토리스애무명령　CFLAG:485
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 400
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:485 == 0
+		CFLAG:485 = 1
+	;二回目以降
+	ELSE
+		CFLAG:485 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 400
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;401,페니스애무명령　CFLAG:486
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 401
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:486 == 0
+		CFLAG:486 = 1
+	;二回目以降
+	ELSE
+		CFLAG:486 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 401
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;402,가슴애무명령　CFLAG:487
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 402
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:487 == 0
+		CFLAG:487 = 1
+	;二回目以降
+	ELSE
+		CFLAG:487 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 402
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;403,손가락삽입명령　CFLAG:488
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 403
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:488 == 0
+		CFLAG:488 = 1
+	;二回目以降
+	ELSE
+		CFLAG:488 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 403
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;404,애널애무명령　CFLAG:489
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 404
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:489 == 0
+		CFLAG:489 = 1
+	;二回目以降
+	ELSE
+		CFLAG:489 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 404
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;405,삽입명령　CFLAG:490
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 405
+	CALL TRAIN_MESSAGE
+;止めさせた時の反応
+ELSEIF SELECTCOM == 405
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;406,애널삽입명령　CFLAG:491
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 406
+	CALL TRAIN_MESSAGE
+;止めさせた時の反応
+ELSEIF SELECTCOM == 406
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;407,구욕명령　CFLAG:492
+;-------------------------------------------------
+;命令実行時
+IF SELECTCOM == 407
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:492 == 0
+		CFLAG:492 = 1
+	;二回目以降
+	ELSE
+		CFLAG:492 = 2
+	ENDIF
+;止めさせた時の反応
+ELSEIF SELECTCOM == 407
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;精飲系コマンド
+;=================================================
+;-------------------------------------------------
+;410,콘돔精飲（奴隷）　CFLAG:493
+;-------------------------------------------------
+IF SELECTCOM == 410
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:493 == 0
+		CFLAG:493 = 1
+	;二回目以降
+	ELSE
+		CFLAG:493 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;411,콘돔精飲（助손）　CFLAG:494
+;-------------------------------------------------
+IF SELECTCOM == 411
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;412,정액키스　CFLAG:495
+;-------------------------------------------------
+IF SELECTCOM == 412
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;ダブル奉仕系コマンド
+;=================================================
+;-------------------------------------------------
+;420,더블펠라　CFLAG:496
+;-------------------------------------------------
+IF SELECTCOM == 420
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:496 == 0
+		CFLAG:496 = 1
+	;二回目以降
+	ELSE
+		CFLAG:496 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;421,더블파이즈리　CFLAG:497
+;-------------------------------------------------
+IF SELECTCOM == 421
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;422,더블스마타　CFLAG:498
+;-------------------------------------------------
+IF SELECTCOM == 422
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;奴隷×助손系コマンド
+;=================================================
+;-------------------------------------------------
+;430,조수를범하게시킨다　CFLAG:499
+;-------------------------------------------------
+IF SELECTCOM == 430
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:499 == 0
+		CFLAG:499 = 1
+	;二回目以降
+	ELSE
+		CFLAG:499 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;431,조수의A를범하게시킨다　CFLAG:502
+;-------------------------------------------------
+IF SELECTCOM == 431
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+
+;=================================================
+;主人×助손系コマンド
+;=================================================
+;-------------------------------------------------
+;440,조수를범한다　CFLAG:503
+;-------------------------------------------------
+IF SELECTCOM == 440
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:503 == 0
+		CFLAG:503 = 1
+	;二回目以降
+	ELSE
+		CFLAG:503 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;441,조수의A를범한다　CFLAG:504
+;-------------------------------------------------
+IF SELECTCOM == 441
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:504 == 0
+		CFLAG:504 = 1
+	;二回目以降
+	ELSE
+		CFLAG:504 = 2
+	ENDIF
+ENDIF
+
+
+
+;=================================================
+;派生コマンド
+;=================================================
+;-------------------------------------------------
+;500,Ｇスポット刺激　CFLAG:505
+;-------------------------------------------------
+IF SELECTCOM == 500
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:505 == 0
+		CFLAG:505 = 1
+	;二回目以降
+	ELSE
+		CFLAG:505 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;501,前立腺刺激　CFLAG:506
+;-------------------------------------------------
+IF SELECTCOM == 501
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:506 == 0
+		PRINTFORMW 「や、やあんっ！そこっ！」
+		CFLAG:506 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ふあ、ぐりぐりしちゃいやですよう！」
+		CFLAG:506 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;502,搾乳　CFLAG:507
+;-------------------------------------------------
+IF SELECTCOM == 502
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;503,シックスナイン　CFLAG:508
+;-------------------------------------------------
+IF SELECTCOM == 503
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;504,６９파이즈리　CFLAG:509
+;-------------------------------------------------
+IF SELECTCOM == 504
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;507,挿入Ｇスポ責め　CFLAG:512
+;-------------------------------------------------
+IF SELECTCOM == 507
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:512 == 0
+		PRINTFORMW 「なか、じんじんして、んんっ！」
+		CFLAG:512 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「ふっ…あっ、ああんっ！」
+		CFLAG:512 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;508,挿入子宮입責め　CFLAG:513
+;-------------------------------------------------
+IF SELECTCOM == 508
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:513 == 0
+		PRINTFORMW 「あ、あたって、おくっ！」
+		CFLAG:513 = 1
+	;二回目以降
+	ELSE
+		PRINTFORMW 「あひ、ぃっ、ごつごつあたって、ああぁっ！」
+		CFLAG:513 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;509,기승위乳房자위　CFLAG:514
+;-------------------------------------------------
+IF SELECTCOM == 509
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;510,駅弁　CFLAG:515
+;-------------------------------------------------
+IF SELECTCOM == 510
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:515 == 0
+		CFLAG:515 = 1
+	;二回目以降
+	ELSE
+		CFLAG:515 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;511,스팽킹セックス　CFLAG:516
+;-------------------------------------------------
+IF SELECTCOM == 511
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;512,스팽킹애널　CFLAG:517
+;-------------------------------------------------
+IF SELECTCOM == 512
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;513,목조르기セックス　CFLAG:518
+;-------------------------------------------------
+IF SELECTCOM == 513
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;514,목조르기애널　CFLAG:519
+;-------------------------------------------------
+IF SELECTCOM == 514
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;515,サンドイッチ　CFLAG:520
+;-------------------------------------------------
+IF SELECTCOM == 515
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;516,二本フェラ　CFLAG:521
+;-------------------------------------------------
+IF SELECTCOM == 516
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;517,二輪挿し　CFLAG:522
+;-------------------------------------------------
+IF SELECTCOM == 517
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;518,二輪挿し애널　CFLAG:523
+;-------------------------------------------------
+IF SELECTCOM == 518
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;519,連結　CFLAG:524
+;-------------------------------------------------
+IF SELECTCOM == 519
+	CALL TRAIN_MESSAGE
+ENDIF
+
+
+;-------------------------------------------------
+;520,サンドイッチさせる　CFLAG:525
+;-------------------------------------------------
+IF SELECTCOM == 520
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:525 == 0
+		CFLAG:525 = 1
+	;二回目以降
+	ELSE
+		CFLAG:525 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;521,助손をサンドイッチ　CFLAG:526
+;-------------------------------------------------
+IF SELECTCOM == 521
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;522,二輪挿しさせる　CFLAG:527
+;-------------------------------------------------
+IF SELECTCOM == 522
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;523,二輪挿し애널させる　CFLAG:528
+;-------------------------------------------------
+IF SELECTCOM == 523
+	CALL TRAIN_MESSAGE
+ENDIF
+
+;-------------------------------------------------
+;524,助손を二輪挿し　CFLAG:529
+;-------------------------------------------------
+IF SELECTCOM == 524
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:529 == 0
+		CFLAG:529 = 1
+	;二回目以降
+	ELSE
+		CFLAG:529 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;525,助손を二輪挿し애널　CFLAG:530
+;-------------------------------------------------
+IF SELECTCOM == 525
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:530 == 0
+		CFLAG:530 = 1
+	;二回目以降
+	ELSE
+		CFLAG:530 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;526,挿入前立腺刺激　CFLAG:531
+;-------------------------------------------------
+IF SELECTCOM == 526
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:531 == 0
+		PRINTFORMW 「ふっ…あっ、そ、こっ！」
+		CFLAG:531 = 1
+	;二回目以降
+	ELSE
+		IF RAND:2 == 0
+			PRINTFORMW 「あぁ、そこ、ばっかり、いじめちゃいやですぅ……」
+		ELSE
+			PRINTFORMW 「ふっ…あっ、そ、こっ！」
+		ENDIF
+		CFLAG:531 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;527,セルフ連結チューブ　CFLAG:540
+;-------------------------------------------------
+IF SELECTCOM == 527
+	CALL TRAIN_MESSAGE
+ENDIF
+
+

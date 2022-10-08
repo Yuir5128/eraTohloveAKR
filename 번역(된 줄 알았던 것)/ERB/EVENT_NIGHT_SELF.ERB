@@ -662,7 +662,7 @@ ELSEIF L:2 > 89 || ((TALENT:음란 || TALENT:창부) && L:2 > 59)
 		TFLAG:405 = 5
 	ENDIF
 ENDIF
-;이벤트입상 호출  
+;이벤트대사 호출  
 DRAWLINE
 TFLAG:13 = 35
 CALL KOJO_MESSAGE_EVENT
@@ -684,7 +684,7 @@ PRINTW
 ;------------------------------------------------------
 ;곁잠
 @NIGHT_SELF_SOINE
-;이벤트입상 호출  
+;이벤트대사 호출  
 DRAWLINE
 TFLAG:13 = 36
 CALL KOJO_MESSAGE_EVENT
@@ -709,7 +709,7 @@ ELSEIF L:2 > 33 || (ITEM:13 == 0)
 ELSE
 	K:5 = 2
 ENDIF
-;이벤트입상 호출  
+;이벤트대사 호출  
 DRAWLINE
 TFLAG:13 = 37
 CALL KOJO_MESSAGE_EVENT
@@ -795,7 +795,7 @@ ELSEIF L:2 > 33 || (ITEM:13 == 0)
 ELSE
 	K:5 = 2
 ENDIF
-;이벤트입상 호출  
+;이벤트대사 호출  
 DRAWLINE
 TFLAG:13 = 38
 CALL KOJO_MESSAGE_EVENT
@@ -858,7 +858,7 @@ PRINTW
 ;------------------------------------------------------
 ;착유
 @SELF_CHECK4
-;이벤트입상 호출
+;이벤트대사 호출
 DRAWLINE
 TFLAG:13 = 7
 CALL KOJO_MESSAGE_EVENT
@@ -926,7 +926,7 @@ POSITION_MASTER = PRIORITY_POSITION(MASTER)
 POSITION_TARGET = PRIORITY_POSITION(TARGET)
 POSITION_ASSI = PRIORITY_POSITION(ASSI)
 
-;이벤트입상 호출  
+;이벤트대사 호출  
 DRAWLINE
 TFLAG:13 = 43
 CALL KOJO_MESSAGE_EVENT
@@ -1510,7 +1510,7 @@ ENDIF
 ;------------------------------------------------------
 ;레즈비언 플레이 돌입하지 않고 서로 밀통하는 플레이
 @NIGHT_SELF_LES
-;이벤트입상 호출  
+;이벤트대사 호출  
 DRAWLINE
 TFLAG:13 = 39
 CALL KOJO_MESSAGE_EVENT
@@ -1527,7 +1527,7 @@ PRINTW
 ;------------------------------------------------------
 ;엿보기
 @NIGHT_SELF_PEEP
-;이벤트입상 호출  
+;이벤트대사 호출  
 DRAWLINE
 TFLAG:13 = 40
 CALL KOJO_MESSAGE_EVENT
@@ -1546,7 +1546,7 @@ PRINTW
 ;------------------------------------------------------
 ;주인 수면중
 @NIGHT_SELF_SLEEP
-;이벤트입상 호출  
+;이벤트대사 호출  
 DRAWLINE
 TFLAG:13 = 41
 CALL KOJO_MESSAGE_EVENT
@@ -1626,7 +1626,7 @@ ELSE
 	K:5 = 5
 ENDIF
 
-;이벤트입상 호출  
+;이벤트대사 호출  
 DRAWLINE
 TFLAG:13 = 42
 CALL KOJO_MESSAGE_EVENT
@@ -1650,7 +1650,7 @@ PRINTW
 ;------------------------------------------------------
 ;자위
 @SELF_CHECK5
-;이벤트입상 호출  
+;이벤트대사 호출  
 DRAWLINE
 TFLAG:13 = 44
 CALL KOJO_MESSAGE_EVENT
@@ -1666,7 +1666,7 @@ PRINTW
 ;------------------------------------------------------
 ;요바이 주인공
 @SELF_CHECK6
-;이벤트입상 호출
+;이벤트대사 호출
 DRAWLINE
 TFLAG:13 = 9
 CALL KOJO_MESSAGE_EVENT
@@ -1682,7 +1682,7 @@ PRINTW
 ;------------------------------------------------------
 ;요바이 주인수
 @SELF_CHECK8
-;이벤트입상 호출
+;이벤트대사 호출
 DRAWLINE
 TFLAG:13 = 27
 CALL KOJO_MESSAGE_EVENT

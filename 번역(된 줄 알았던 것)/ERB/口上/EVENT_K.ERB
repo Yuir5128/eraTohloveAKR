@@ -1,8 +1,8 @@
 ﻿;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
-;입상 호출용 터미널 파일
+;대사 호출용 터미널 파일
 ;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
 ;--------------------------------------------------
-;조교 개시입상의 호출
+;조교 개시대사의 호출
 ;--------------------------------------------------
 @EVENTSHOP
 #PRI
@@ -68,7 +68,7 @@ IF RESULT == 1
 		RETURN RESULT
 	ENDIF
 	RESULT = 0
-	;간이조수입상
+	;간이조수대사
 	TRYCALLFORM SELECTER_K{NO:TARGET}(TARGET,3)
 	$SELECT3
 	IF ASSI > -1
@@ -102,7 +102,7 @@ ELSEIF RESULT == 2
 ENDIF
 
 ;==================================================
-;조교 종료시입상부
+;조교 종료시대사부
 ;==================================================
 @EVENTEND
 DRAWLINE
@@ -142,7 +142,7 @@ IF RESULT == 1
 		RETURN RESULT
 	ENDIF
 	RESULT = 0
-	;간이조수입상
+	;간이조수대사
 	TRYCALLFORM SELECTER_K{NO:TARGET}(TARGET,4)
 	$SELECT2
 	IF ASSI > -1
@@ -200,13 +200,13 @@ IF !RESULT || RESULT == 3 || FLAG:7 <= 0 || TALENT:기절
 	RETURN 0
 ENDIF
 RESULT = 0
-;입상 스킵
+;대사 스킵
 TRYCCALLFORM KOJO%RESULTS:1%_TRAIN_MESSAGE_SKIP_K{NO:TARGET}
 CATCH
 	TRYCALLFORM KOJO_TRAIN_MESSAGE_SKIP_K{NO:TARGET}
 ENDCATCH
 LOCAL:2 = RESULT
-;PANCTION내의 장비품입상 보완 함수를 사용한다
+;PANCTION내의 장비품대사 보완 함수를 사용한다
 IF !TFLAG:59
 	CALL EQUIPTEXT
 ENDIF
@@ -215,8 +215,8 @@ IF LOCAL:2
 	RETURN 0
 ENDIF
 IF LOCAL == 1
-	;조건에 들어맞는 경우,대상 한정의입상 호출(커맨드별＞범용 커맨드＞범용 허덕여)→
-	;→발견되지 않았으면 배타적 연산을 확인→배타 체크되어 있지 않았으면 대상비한정입상 호출(커맨드별＞범용 커맨드＞범용 허덕여)
+	;조건에 들어맞는 경우,대상 한정의대사 호출(커맨드별＞범용 커맨드＞범용 허덕여)→
+	;→발견되지 않았으면 배타적 연산을 확인→배타 체크되어 있지 않았으면 대상비한정대사 호출(커맨드별＞범용 커맨드＞범용 허덕여)
 	$SELECTER
 	IF !FLAG:97
 		TRYCCALLFORM KOJO%RESULTS:1%_COLOR_K{NO:TARGET}
@@ -289,7 +289,7 @@ ENDIF
 
 ;-------------------------------------------------
 ;@KOJO_DENIAL 관계
-;커맨드 실행 판정을 트리거로 한입상과 실행 판정 조작
+;커맨드 실행 판정을 트리거로 한대사과 실행 판정 조작
 ;실행 불가가 되기 직전에 표시된다
 ;-------------------------------------------------
 ;커맨드 실행 판정 조작
@@ -315,7 +315,7 @@ IF STRLENS(RESULTS) && !RESULT
 ENDIF
 RETURN RESULT
 
-;커맨드 실행 판정을 트리거로 한입상
+;커맨드 실행 판정을 트리거로 한대사
 @KOJO_DENIAL
 ;텍스트를 표시하지 않는다
 IF !FLAG:6
@@ -375,8 +375,8 @@ ENDIF
 
 ;-------------------------------------------------
 ;@KOJO_MESSAGE_PALAMCNG 관계
-;파라미터 변동을 트리거로 한입상
-;파라미터 변동후에입상을 발동합니다
+;파라미터 변동을 트리거로 한대사
+;파라미터 변동후에대사을 발동합니다
 ;-------------------------------------------------
 ;조교자의사정텍스트
 @KOJO_MESSAGE_PALAMCNG_A
@@ -392,7 +392,7 @@ LOCAL = RESULT
 SIF !RESULT || RESULT == 3 || FLAG:7 <= 0 || TALENT:기절
 	GOTO PALAM_MESSAGE_A
 RESULT = 0
-;입상 스킵
+;대사 스킵
 TRYCCALLFORM KOJO%RESULTS:1%_PALAM_MESSAGE_SKIP_K{NO:TARGET}
 CATCH
 	RESULT = 0
@@ -551,8 +551,8 @@ ENDIF
 
 ;-------------------------------------------------
 ;@KOJO_MESSAGE_PALAMCNG 관계
-;파라미터 변동을 트리거로 한입상
-;파라미터 변동후에입상을 발동합니다
+;파라미터 변동을 트리거로 한대사
+;파라미터 변동후에대사을 발동합니다
 ;-------------------------------------------------
 ;노예의 절정을 트리거로 한 텍스트
 @KOJO_MESSAGE_PALAMCNG_B
@@ -570,7 +570,7 @@ IF !RESULT || RESULT == 3 || FLAG:7 <= 0 || TALENT:기절
 	RETURN 0
 ENDIF
 RESULT = 0
-;입상 스킵
+;대사 스킵
 TRYCCALLFORM KOJO%RESULTS:1%_PALAM_MESSAGE_SKIP_K{NO:TARGET}
 CATCH
 	RESULT = 0
@@ -763,10 +763,10 @@ ENDIF
 
 ;-------------------------------------------------
 ;@KOJO_MESSAGE_PALAMCNG 관계
-;파라미터 변동을 트리거로 한입상
-;파라미터 변동후에입상을 발동합니다
+;파라미터 변동을 트리거로 한대사
+;파라미터 변동후에대사을 발동합니다
 ;-------------------------------------------------
-;조교후의 변화를 트리거로 한입상
+;조교후의 변화를 트리거로 한대사
 @KOJO_MESSAGE_PALAMCNG_C
 ;텍스트를 표시하지 않는다
 IF !FLAG:6
@@ -782,7 +782,7 @@ IF !RESULT || RESULT == 3 || FLAG:7 <= 0 || TALENT:기절
 	RETURN 0
 ENDIF
 RESULT = 0
-;입상 스킵
+;대사 스킵
 TRYCCALLFORM KOJO%RESULTS:1%_PALAM_MESSAGE_SKIP_K{NO:TARGET}
 CATCH
 	RESULT = 0
@@ -863,10 +863,10 @@ ENDIF
 
 ;-------------------------------------------------
 ;@KOJO_MESSAGE_PALAMCNG 관계
-;파라미터 변동을 트리거로 한입상
-;파라미터 변동후에입상을 발동합니다
+;파라미터 변동을 트리거로 한대사
+;파라미터 변동후에대사을 발동합니다
 ;-------------------------------------------------
-;파라미터 변화를 트리거로 한입상
+;파라미터 변화를 트리거로 한대사
 @KOJO_MESSAGE_PALAMCNG_D
 ;텍스트를 표시하지 않는다
 IF !FLAG:6
@@ -886,7 +886,7 @@ ELSEIF !RESULT || FLAG:7 <= 0 || TALENT:기절
 	RETURN 0
 ENDIF
 RESULT = 0
-;입상 스킵
+;대사 스킵
 TRYCCALLFORM KOJO%RESULTS:1%_PALAM_MESSAGE_SKIP_K{NO:TARGET}
 CATCH
 	RESULT = 0
@@ -952,8 +952,8 @@ ENDIF
 
 ;-------------------------------------------------
 ;@KOJO_MESSAGE_PALAMCNG 관계
-;파라미터 변동을 트리거로 한입상
-;파라미터 변동후에입상을 발동합니다
+;파라미터 변동을 트리거로 한대사
+;파라미터 변동후에대사을 발동합니다
 ;-------------------------------------------------
 ;촉수가사정
 @KOJO_MESSAGE_PALAMCNG_E
@@ -974,7 +974,7 @@ IF !RESULT || RESULT == 3 || FLAG:7 <= 0 || TALENT:기절
 	RETURN 0
 ENDIF
 RESULT = 0
-;입상 스킵
+;대사 스킵
 TRYCCALLFORM KOJO%RESULTS:1%_PALAM_MESSAGE_SKIP_K{NO:TARGET}
 CATCH
 	RESULT = 0
@@ -1040,8 +1040,8 @@ ENDIF
 
 ;-------------------------------------------------
 ;@KOJO_MESSAGE_MARKCNG 관계
-;각인 변동을 트리거로 한입상
-;각인 변동후에입상을 발동합니다
+;각인 변동을 트리거로 한대사
+;각인 변동후에대사을 발동합니다
 ;-------------------------------------------------
 @KOJO_MESSAGE_MARKCNG
 ;텍스트를 표시하지 않는다
@@ -1060,7 +1060,7 @@ IF !RESULT || RESULT == 3 || FLAG:7 <= 0 || TALENT:기절
 	RETURN 0
 ENDIF
 RESULT = 0
-;입상 스킵
+;대사 스킵
 TRYCCALLFORM KOJO%RESULTS:1%_PALAM_MESSAGE_SKIP_K{NO:TARGET}
 CATCH
 	TRYCALLFORM KOJO_PALAM_MESSAGE_SKIP_K{NO:TARGET}
@@ -1175,7 +1175,7 @@ ENDIF
 
 ;-------------------------------------------------
 ;@KOJO_MESSAGE_MARKCNG 관계
-;커맨드 실행후에 표시되는입상
+;커맨드 실행후에 표시되는대사
 ;-------------------------------------------------
 @KOJO_MESSAGE_COMEND
 ;텍스트를 표시하지 않는다
@@ -1189,7 +1189,7 @@ LOCAL = RESULT
 SIF !RESULT || RESULT == 3 || FLAG:7 <= 0 || TALENT:기절
 	RETURN 0
 RESULT = 0
-;입상 스킵
+;대사 스킵
 TRYCCALLFORM KOJO%RESULTS:1%_PALAM_MESSAGE_SKIP_K{NO:TARGET}
 CATCH
 	RESULT = 0
@@ -1232,7 +1232,7 @@ RETURN RESULT
 
 ;-------------------------------------------------
 ;@KOJO_MESSAGE_EVENT 관계
-;이벤트시의입상,이벤트 개시시에 출력합니다
+;이벤트시의대사,이벤트 개시시에 출력합니다
 ;-------------------------------------------------
 @KOJO_MESSAGE_EVENT
 ;텍스트를 표시하지 않는다
@@ -1268,7 +1268,7 @@ IF !RESULT || RESULT == 3 || FLAG:7 <= 0 || TALENT:기절
 	GOTO END
 ENDIF
 RESULT = 0
-;입상 스킵
+;대사 스킵
 TRYCCALLFORM KOJO%RESULTS:1%_EVENT_MESSAGE_SKIP_K{NO:TARGET}
 CATCH
 	RESULT = 0
@@ -1344,7 +1344,7 @@ ENDIF
 ;-------------------------------------------------
 ;@DAILY_LIFE_MASSAGE 관계
 ;휴게 실행시에 출력합니다
-;선택되는 것은 반드시 TARGET라고는 할 수 없습니다(입상주는 A에 들어가 있습니다)
+;선택되는 것은 반드시 TARGET라고는 할 수 없습니다(대사주는 A에 들어가 있습니다)
 ;-------------------------------------------------
 @DAILY_LIFE_MASSAGE
 RESULT = 0
@@ -1389,7 +1389,7 @@ RETURN RESULT
 
 ;-------------------------------------------------
 ;@KOJO_MESSAGE_ENDING 관계
-;이벤트시의입상,이벤트 개시시에 출력합니다
+;이벤트시의대사,이벤트 개시시에 출력합니다
 ;-------------------------------------------------
 @KOJO_MESSAGE_ENDING
 ;연모·복종를 현재의 주인에 맞춘다
@@ -1554,7 +1554,7 @@ ENDIF
 RETURN RESULT
 
 ;-------------------------------------------------
-;주인공에 의해 분기 하는 오프닝입상 1
+;주인공에 의해 분기 하는 오프닝대사 1
 ;공통의 오프닝의 앞에 불려 간다
 ;-------------------------------------------------
 @KOJO_PRE_OPENING_STORY
@@ -1562,14 +1562,14 @@ TRYCALLFORM KOJO_PRE_OPENING_STORY_K{NO:MASTER}
 RETURN RESULT
 
 ;-------------------------------------------------
-;주인공에 의해 분기 하는 오프닝입상 2
+;주인공에 의해 분기 하는 오프닝대사 2
 ;공통의 오프닝의후에 불려 간다
 ;-------------------------------------------------
 @KOJO_POST_OPENING_STORY
 TRYCALLFORM KOJO_POST_OPENING_STORY_K{NO:MASTER}
 
 ;-------------------------------------------------
-;주인공에 의해 분기 하는 배드 엔드 1입상
+;주인공에 의해 분기 하는 배드 엔드 1대사
 ;일수 초과 배드 엔드시에 불러내진다
 ;-------------------------------------------------
 @KOJO_BAD1_ENDING_STORY
@@ -1577,7 +1577,7 @@ TRYCALLFORM KOJO_BAD1_ENDING_STORY_K{NO:MASTER}
 RETURN RESULT
 
 ;-------------------------------------------------
-;주인공에 의해 분기 하는 배드 엔드 2입상
+;주인공에 의해 분기 하는 배드 엔드 2대사
 ;소지금이 바닥난 엔드의후에 표시된다
 ;-------------------------------------------------
 @KOJO_BAD2_ENDING_STORY
@@ -1585,7 +1585,7 @@ TRYCALLFORM KOJO_BAD2_ENDING_STORY_K{NO:MASTER}
 RETURN RESULT
 
 ;-------------------------------------------------
-;주인공에 의해 분기 하는 노멀 엔드입상
+;주인공에 의해 분기 하는 노멀 엔드대사
 ;노멀 엔드시에 불려 간다
 ;-------------------------------------------------
 @KOJO_NORMAL_ENDING_STORY

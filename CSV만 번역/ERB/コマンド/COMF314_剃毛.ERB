@@ -1,0 +1,147 @@
+﻿;-------------------------------------------------
+;제모
+;シチュエーション別コマンド
+;-------------------------------------------------
+@COM314
+
+PRINTL 제모
+STR:0 = 제모
+CALL KOJO_MESSAGE_COM
+
+;스타킹脱がせる
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TEQUIP:특수2 = 0
+	TEQUIP:특수2 = 0
+ENDIF
+
+IF TALENT:음모없음 == 0
+	PRINTL 
+	PRINTFORMW %CALLNAME%は[%TALENTNAME:118%]になった
+	TALENT:음모없음 = 2
+ENDIF
+
+;털が生えている場合はツルツルになる
+BASE:털 = 0
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 100
+
+;두려움、노출、굴복、일탈、반발
+SOURCE:두려움 += 200
+SOURCE:노출 += 2000
+SOURCE:굴복 += 500
+SOURCE:일탈 += 800
+SOURCE:반발 += 300
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+;노출벽を見る
+IF ABL:노출벽 == 0
+	SOURCE:중독충족 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:노출벽 == 1
+	SOURCE:중독충족 += 20
+	SOURCE:욕정 += 30
+ELSEIF ABL:노출벽 == 2
+	SOURCE:중독충족 += 40
+	SOURCE:욕정 += 70
+ELSEIF ABL:노출벽 == 3
+	SOURCE:중독충족 += 70
+	SOURCE:욕정 += 120
+ELSEIF ABL:노출벽 == 4
+	SOURCE:중독충족 += 110
+	SOURCE:욕정 += 180
+ELSEIF ABL:노출벽 == 5
+	SOURCE:중독충족 += 150
+	SOURCE:욕정 += 250
+ELSEIF ABL:노출벽 == 6
+	SOURCE:중독충족 += 200
+	SOURCE:욕정 += 300
+ELSEIF ABL:노출벽 == 7
+	SOURCE:중독충족 += 250
+	SOURCE:욕정 += 350
+ELSEIF ABL:노출벽 == 8
+	SOURCE:중독충족 += 300
+	SOURCE:욕정 += 400
+ELSEIF ABL:노출벽 == 9
+	SOURCE:중독충족 += 350
+	SOURCE:욕정 += 450
+ELSEIF ABL:노출벽 >= 10
+	SOURCE:중독충족 += 500
+	SOURCE:욕정 += 500
+ENDIF
+;마조끼を見る
+IF ABL:마조끼 == 0
+	TIMES SOURCE:굴복 , 0.80
+	SOURCE:중독충족 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:굴복 , 1.00
+	SOURCE:중독충족 += 20
+	SOURCE:욕정 += 30
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:굴복 , 1.20
+	SOURCE:중독충족 += 40
+	SOURCE:욕정 += 70
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:굴복 , 1.40
+	SOURCE:중독충족 += 70
+	SOURCE:욕정 += 120
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:굴복 , 1.50
+	SOURCE:중독충족 += 110
+	SOURCE:욕정 += 180
+ELSEIF ABL:마조끼 == 5
+	TIMES SOURCE:굴복 , 1.70
+	SOURCE:중독충족 += 150
+	SOURCE:욕정 += 250
+ELSEIF ABL:마조끼 == 6
+	TIMES SOURCE:굴복 , 1.90
+	SOURCE:중독충족 += 200
+	SOURCE:욕정 += 300
+ELSEIF ABL:마조끼 == 7
+	TIMES SOURCE:굴복 , 2.10
+	SOURCE:중독충족 += 250
+	SOURCE:욕정 += 350
+ELSEIF ABL:마조끼 == 8
+	TIMES SOURCE:굴복 , 2.30
+	SOURCE:중독충족 += 300
+	SOURCE:욕정 += 400
+ELSEIF ABL:마조끼 == 9
+	TIMES SOURCE:굴복 , 2.50
+	SOURCE:중독충족 += 350
+	SOURCE:욕정 += 450
+ELSEIF ABL:마조끼 >= 10
+	TIMES SOURCE:굴복 , 3.00
+	SOURCE:중독충족 += 500
+	SOURCE:욕정 += 500
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;게이경험とか加算
+CALL COM_EXP(4)
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+;依存度補正値(복종で2、예속で4）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 4
+ENDIF
+
+RETURN 1
+

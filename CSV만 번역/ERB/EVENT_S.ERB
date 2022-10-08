@@ -1,0 +1,343 @@
+﻿;EVENT_S.ERB、EVENT_SUB、追加処理及びサブイベント
+;-------------------------------------------------
+;日付が変わった時のイベント
+;-------------------------------------------------
+@EVENT_NEXTDAY
+$INPUT_LOOP_2
+
+;구현持ちで레즈경험or게이경험2500以上
+IF TARGET >= 0 
+	IF !TALENT:반음반양 && !TALENT:후타나리 && !TALENT:컨트보이 && !TALENT:쉬메일 && TALENT:구현 && (EXP:레즈경험 >= 2500 || EXP:게이경험 >= 2500)
+		DRAWLINE
+		PRINTFORML ……どうやら[구현]の効果が現れそうだ
+		PRINTFORM %CALLNAME%を[
+		IF TALENT:남자
+			PRINT 반음반양
+		ELSE
+			PRINT 후타나리
+		ENDIF
+		PRINTL ]にしますか？
+		PRINTL [0] - する
+		PRINTL [1] - しない
+		INPUT
+		IF RESULT == 0
+			C = TARGET
+			;CALL FUTANARI
+		ELSEIF RESULT == 1
+			PRINTFORML %CALLNAME%は[구현]を失った
+			TALENT:구현 = 0
+		ELSE
+			GOTO INPUT_LOOP_2
+		ENDIF
+		DRAWLINE
+		WAIT
+	ENDIF
+ENDIF
+
+;절정배뇨경험30以上で실금버릇がつく
+IF TARGET >= 0 && !TALENT:실금버릇
+	IF (TALENT:유아／유아퇴행 || TALENT:소인체형 || (TALENT:유치 && TALENT:작은체구)) && EXP:절정배뇨경험 >= 15
+		TFLAG:13 = 65
+		CALL KOJO_MESSAGE_EVENT
+		PRINTFORMW %CALLNAME%は[실금버릇]がついた
+		TALENT:실금버릇 = 1
+	ELSEIF EXP:절정배뇨경험 >= 30
+		TFLAG:13 = 65
+		CALL KOJO_MESSAGE_EVENT
+		PRINTFORMW %CALLNAME%は[실금버릇]がついた
+		TALENT:실금버릇 = 1
+	ENDIF
+ENDIF
+
+;반발각인３があり、かつ[유치]である時に
+IF TARGET >= 0 
+	IF TALENT:유치 && MARK:반발각인 >= 3
+	;욕망が5かつ순종が5かつ마조끼が5かつ이상경험が５以上になる
+		SIF ABL:욕망 >= 5 && ABL:순종 >= 5 && ABL:마조끼 >= 5 && EXP:이상경험 >= 5
+			CALL EVENT_YOUJI
+	;반발각인３があり、かつ[유치]でなく、불사신がない時に
+	ELSEIF !TALENT:불사신 && !TALENT:유치 && MARK:반발각인 >= 3
+	;욕망が5かつ순종が5かつ마조끼が5かつ이상경험が７以上に加え노출５と실금버릇がつく
+		SIF ABL:욕망 >= 5 && ABL:순종 >= 5 && ABL:마조끼 >= 5 && ABL:노출벽 >= 5 && EXP:이상경험 >= 7 && TALENT:실금버릇
+			CALL EVENT_YOUJI
+	ENDIF
+ENDIF
+
+;털が生えてくる
+REPEAT CHARANUM
+	IF TALENT:COUNT:음모없음 == 2
+		BASE:COUNT:털 += 10
+		IF BASE:COUNT:털 >= 300
+			TALENT:COUNT:음모없음 = 0
+			PRINTFORML %CALLNAME:COUNT%の털が生えてきた
+		ENDIF
+	ENDIF
+REND
+
+;발정기のカウント
+CALL ESTRUS_PERIOD_COUNT
+
+;季節イベントフラグの処理
+REPEAT CHARANUM
+	CFLAG:COUNT:612 = 0
+	SIF FLAG:80 == 12 && FLAG:81 == 31
+		CFLAG:COUNT:613 = 0
+REND
+
+;夜イベントキャンセルフラグが立ってる場合、ここでリセット
+SIF FLAG:180 == 1
+	FLAG:180 = 0
+
+;奴隷と道具の維持費の処理
+;STARTモード限定でEASYでは20일、NORMALでは15일、HARDでは10일免除
+A = 300
+B = 25-FLAG:4*5
+REPEAT 25
+	SIF ITEM:COUNT
+		A += 50
+REND
+A += CHARANUM*200
+A -= 100
+;労役中の奴隷は除く
+REPEAT CHARANUM
+	SIF CFLAG:COUNT:12 > 0
+		A -= 200
+REND
+IF FLAG:5 == 0 && A && DAY > B
+	PRINTFORML 奴隷と道具の維持費、生活費に{A}고슈금かかった……
+	MONEY -= A
+ENDIF
+
+@EVENT_YOUJI
+;幼児退行
+TFLAG:13 = 66
+CALL KOJO_MESSAGE_EVENT
+TALENT:유치 = 0
+TALENT:일선을넘지않음 = 0
+TALENT:정조관념 = 0
+TALENT:억압 = 0
+TALENT:저항 = 0
+TALENT:유아／유아퇴행 = 1
+MARK:반발각인 = 0
+
+
+;-------------------------------------------------
+;朝になった時のイベント
+;-------------------------------------------------
+@EVENT_NEWDAY
+;奴隷レンタルの期日が来た場合の奴隷返却処理
+REPEAT CHARANUM
+	IF CFLAG:COUNT:12 == 1 && CFLAG:COUNT:13 == DAY
+		A = COUNT
+		CALL RETURN_SLAVE
+	ENDIF
+REND
+
+;娼館バイトが終わった場合の終了処理
+REPEAT CHARANUM
+	IF CFLAG:COUNT:12 == 2
+		A = COUNT
+		CALL END_PROSTITUTION
+	ENDIF
+REND
+
+;内番-손合わせが終わった場合の終了処理
+IF FLAG:161 & 1
+	CALL END_DUTY_PRACTICE
+ENDIF
+
+;内番-畑当番が終わった場合の終了処理
+IF FLAG:161 & 2
+	CALL END_DUTY_HATAKE
+ENDIF
+
+;内番-馬当番が終わった場合の終了処理
+IF FLAG:161 & 4
+	CALL END_DUTY_UMA
+ENDIF
+
+;극修行が終わった場合の終了処理
+IF FLAG:161 & 8 
+	REPEAT CHARANUM
+		IF CFLAG:COUNT:13 == DAY
+			CALL END_KIWAME
+			BREAK
+		ENDIF
+	REND
+	
+ENDIF
+
+;労役中は임신発覚しない為、임신関連処理を労役終了処理후に移動
+;全体の임신判定の処理
+CALL IN_VAGINA_ANAL_ALL
+
+;全体の임신発覚時のイベント
+CALL GET_CHILD_ALL
+
+;배란유발제と避妊結界の効果終了処理
+REPEAT CHARANUM
+	IF CFLAG:COUNT:108
+		PRINTFORMW %CALLNAME:COUNT%の避妊結界の効果が切れたようだ
+		CFLAG:COUNT:108 = 0
+	ELSEIF CFLAG:COUNT:109
+		PRINTFORMW %CALLNAME:COUNT%の배란유발제の効果が切れたようだ
+		CFLAG:COUNT:109 = 0
+	ENDIF
+REND
+
+;出産･育児室関連
+LOCAL = CHARANUM
+$INPUT_LOOP
+REPEAT LOCAL
+	IF TALENT:COUNT:임신 || CFLAG:COUNT:26
+
+		;出産3日前からは臨月突入で調教不可に
+		IF (CFLAG:COUNT:110 - 3) == DAY
+			DRAWLINE
+			CALL REACH_FULL_TERM
+		;出産前日には育児室への訪問を問うイベント発生
+		ELSEIF (CFLAG:COUNT:110 - 1) == DAY && TFLAG:701 != DAY
+			;父親をFATHERとする(いなければ-1)
+			FATHER = GETCHARA(CFLAG:COUNT:111)
+			
+			DRAWLINE
+			PRINTFORML %CALLNAME:COUNT%は出産が近づいているようだ……
+			PRINTFORML %CALLNAME:COUNT%の様子を見に行きますか？
+			PRINTL [0] - 育児室へ行く
+			SIF FATHER >= 0 && FATHER != MASTER
+				PRINTFORML [1] - 父親の%CALLNAME:(FATHER)%に行かせる
+			PRINTL [2] - 育児室へ行かない
+			INPUT
+			IF RESULT == 0 || (RESULT == 1 && FATHER >= 0 && FATHER != MASTER)
+				TFLAG:700 = 1
+				TFLAG:701 = DAY
+				TFLAG:702 = TIME
+				CALL CHILD_CARE_ROOM(FATHER, RESULT)
+			ELSEIF RESULT == 2
+				DRAWLINE
+			ELSE
+				GOTO INPUT_LOOP
+			ENDIF
+		;出産予定日、または出産予定日を過ぎて出産していなければ出産
+		ELSEIF CFLAG:COUNT:110 == DAY || (CFLAG:COUNT:110 < DAY && TALENT:COUNT:임신)
+			DRAWLINE
+			C = COUNT
+			CALL CHILD_BIRTH
+		ELSEIF CFLAG:COUNT:26
+			;父親をFATHERとする
+			FATHER = GETCHARA(CFLAG:COUNT:1000)
+			
+			LOCAL:1 = -1
+			LOCAL:2 = 0
+			;子育てしているのは誰か
+			FOR LOCAL, 0, CHARANUM
+				SIF CFLAG:COUNT:115 == NO:LOCAL
+					LOCAL:1 = LOCAL
+			NEXT
+			;育てているのは実子か
+			SIF CFLAG:(LOCAL:1):114 == NO:COUNT
+				LOCAL:2 = 1
+			;出産후3日には育児室への訪問を問うイベント発生
+			IF (CFLAG:COUNT:116 + 3) == DAY && TFLAG:701 != DAY
+				DRAWLINE
+				PRINTFORML %CALLNAME:(LOCAL:1)%が%CALLNAME:COUNT%\@ LOCAL:2 ? を出産して # を育てはじめて \@から三日経ちました
+				PRINTFORML %CALLNAME:(LOCAL:1)%の様子を見に行きますか？
+				PRINTL [0] - 育児室へ行く
+				SIF FATHER >= 0 && FATHER != MASTER
+					PRINTFORML [1] - 父親の%CALLNAME:(FATHER)%に行かせる
+				PRINTL [2] - 育児室へ行かない
+				INPUT
+				IF RESULT == 0 || (RESULT == 1 && FATHER >= 0 && FATHER != MASTER)
+					TFLAG:700 = 1
+					TFLAG:701 = DAY
+					TFLAG:702 = TIME
+					CALL CHILD_CARE_ROOM(FATHER, RESULT)
+				ELSEIF RESULT == 2
+					DRAWLINE
+				ELSE
+					GOTO INPUT_LOOP
+				ENDIF
+			;出産후5日には育児室への訪問を問うイベント発生
+			ELSEIF (CFLAG:COUNT:116 + 5) == DAY && TFLAG:701 != DAY
+				DRAWLINE
+				PRINTFORML %CALLNAME:(LOCAL:1)%が%CALLNAME:COUNT%\@ LOCAL:2 ? を出産して # を育てはじめて \@から五日経ちました
+				PRINTFORML %CALLNAME:(LOCAL:1)%の様子を見に行きますか？
+				PRINTL [0] - 育児室へ行く
+				SIF FATHER >= 0 && FATHER != MASTER
+					PRINTFORML [1] - 父親の%CALLNAME:(FATHER)%に行かせる
+				PRINTL [2] - 育児室へ行かない
+				INPUT
+				IF RESULT == 0 || (RESULT == 1 && FATHER >= 0 && FATHER != MASTER)
+					TFLAG:700 = 1
+					TFLAG:701 = DAY
+					TFLAG:702 = TIME
+					CALL CHILD_CARE_ROOM(FATHER, RESULT)
+				ELSEIF RESULT == 2
+					DRAWLINE
+				ELSE
+					GOTO INPUT_LOOP
+				ENDIF
+			;出産후10일には育児室への訪問を問うイベント発生
+			ELSEIF (CFLAG:COUNT:116 + 10) == DAY && TFLAG:701 != DAY
+				DRAWLINE
+				PRINTFORML %CALLNAME:(LOCAL:1)%が%CALLNAME:COUNT%\@ LOCAL:2 ? を出産して # を育てはじめて \@から十日経ちました
+				PRINTFORML %CALLNAME:(LOCAL:1)%の様子を見に行きますか？
+				PRINTL [0] - 育児室へ行く
+				SIF FATHER >= 0 && FATHER != MASTER
+					PRINTFORML [1] - 父親の%CALLNAME:(FATHER)%に行かせる
+				PRINTL [2] - 育児室へ行かない
+				INPUT
+				IF RESULT == 0 || (RESULT == 1 && FATHER >= 0 && FATHER != MASTER)
+					TFLAG:700 = 1
+					TFLAG:701 = DAY
+					TFLAG:702 = TIME
+					CALL CHILD_CARE_ROOM(FATHER, RESULT)
+				ELSEIF RESULT == 2
+					DRAWLINE
+				ELSE
+					GOTO INPUT_LOOP
+				ENDIF
+			;出産후15일には育児室への訪問を問うイベント発生
+			ELSEIF (CFLAG:COUNT:116 + 15) == DAY && TFLAG:701 != DAY
+				DRAWLINE
+				PRINTFORML %CALLNAME:(LOCAL:1)%が%CALLNAME:COUNT%\@ LOCAL:2 ? を出産して # を育てはじめて \@から十五日経ちました
+				PRINTFORML %CALLNAME:(LOCAL:1)%の様子を見に行きますか？
+				PRINTL [0] - 育児室へ行く
+				SIF FATHER >= 0 && FATHER != MASTER
+					PRINTFORML [1] - 父親の%CALLNAME:(FATHER)%に行かせる
+				PRINTL [2] - 育児室へ行かない
+				INPUT
+				IF RESULT == 0 || (RESULT == 1 && FATHER >= 0 && FATHER != MASTER)
+					TFLAG:700 = 1
+					TFLAG:701 = DAY
+					TFLAG:702 = TIME
+					CALL CHILD_CARE_ROOM(FATHER, RESULT)
+				ELSEIF RESULT == 2
+					DRAWLINE
+				ELSE
+					GOTO INPUT_LOOP
+				ENDIF
+			;出産20일で親離れで調教可能に
+			ELSEIF (CFLAG:COUNT:116 + 20) == DAY || ((CFLAG:COUNT:116 + 20) < DAY && TALENT:(LOCAL:1):육아중)
+				C = COUNT
+				DRAWLINE
+				CALL DEPEARENT
+				LOCAL = CHARANUM
+				GOTO INPUT_LOOP
+			ENDIF
+		ENDIF
+	ENDIF
+REND
+
+;C감각５以上、정액경험100以上
+IF TARGET >= 0
+	IF TALENT:아이사이즈
+		IF ABL:C감각 >= 5 && EXP:정액경험 >= 100
+			TFLAG:13 = 70
+			CALL KOJO_MESSAGE_EVENT
+			TALENT:아이사이즈 = 0
+			TALENT:단소 = 1
+		ENDIF
+	ENDIF
+ENDIF
+

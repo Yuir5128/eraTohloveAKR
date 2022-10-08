@@ -1,0 +1,1462 @@
+﻿
+;-------------------------------------------------
+;사정ゲージチェック
+;見辛いのでまとめテスト。主人と奴隷の場合
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_MT
+
+;【순종】　ほぼ全ての項目に関連
+SELECTCASE SELECTCOM
+	;순종の効果が小さいもの。세로파이즈리、스마타、헤어잡、겨드랑이잡、엉덩이더듬기、니플퍽
+	CASE 74,76,80,81,82,83,84
+		IF ABL:순종 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.90
+		ELSE
+			TIMES B , 1.00
+		ENDIF
+	;순종の効果が特に高いもの。기승위、기승위애널、기승위乳房자위
+	CASE 106,116,509
+		IF ABL:순종 == 0
+			TIMES B , 0.60
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:순종 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:순종 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	;奴隷の순종は関係ないもの。
+	;자위과시한다、자위과시한다、파이즈리한다、파이즈리펠라한다、발을핥는다
+	CASE 226,227,240,241,282
+		TIMES B , 1.00
+	;それ以外は通常の確認
+	CASEELSE
+		IF ABL:순종 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:순종 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:순종 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:순종 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+ENDSELECT
+
+;【기교】　수側が行動するものが特に効果が大きい
+SELECTCASE SELECTCOM
+	;수の기교はあんまり関係ないもの。主人の기교もチェックする
+	;스마타、헤어잡、겨드랑이잡、엉덩이더듬기、니플퍽、기승위以外のセックス、逆セックス기승위
+	CASE 76,81 TO 84,100 TO 105,110 TO 115,262,265,507,508,510 TO 514,526
+		IF ABL:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:PLAYER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:PLAYER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:기교 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;主人の기교だけが関係あるもの。자위과시한다、파이즈리한다、거품비비기한다
+	CASE 226,227,240,241,318
+		IF ABL:PLAYER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:PLAYER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	;どちらの기교も関係ないもの。매도당한다、발을핥는다
+	CASE 281,282
+		TIMES B , 1.00
+	;それ以外は通常の確認。
+	CASEELSE
+		IF ABL:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【고양이혀・혀놀림】　フェラ・커닐링구스系
+SELECTCASE SELECTCOM
+	;키스한다、フェラ、イラマ、파이즈리펠라、玉舐め、커닐링구스、애널자극、정액키스、６９
+	CASE 1,71,72,75,87,222,224,412,503
+		SIF TALENT:고양이혀
+			TIMES B , 0.50
+		SIF TALENT:혀놀림
+			TIMES B , 1.50
+ENDSELECT
+
+;【バスト】　主人が가슴を使う調教
+SELECTCASE SELECTCOM
+	;파이즈리、세로파이즈리、파이즈리펠라、니플퍽、６９파이즈리
+	CASE 73,74,75,84,504
+		;폭유
+		IF TALENT:폭유
+			TIMES B , 1.30
+		;거유
+		ELSEIF TALENT:거유
+			TIMES B , 1.20
+		;빈유
+		ELSEIF TALENT:빈유
+			TIMES B , 0.80
+		;가슴無し
+		ELSEIF !BREAST(TARGET)
+			TIMES B , 0.60
+		ENDIF
+ENDSELECT
+
+;【奉仕】　奉仕系
+SELECTCASE SELECTCOM
+	;奉仕系、애무시킨다系、逆セックス系、거품비비기、授乳손コキ
+	CASE 70 TO 75,80,86,87,106,116,220 TO 25,243 TO 245,260 TO 265,317,503,504,509,528
+		IF ABL:봉사정신 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:봉사정신 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:봉사정신 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:봉사정신 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:봉사정신 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【욕망】　セックス系
+SELECTCASE SELECTCOM
+	CASE 100 TO 116,260 TO 265,507 TO 514,526
+		IF ABL:욕망 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:욕망 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:욕망 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:욕망 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:욕망 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【마조】　마조끼が高いと感じる快感が大きい
+SELECTCASE SELECTCOM
+	;풋잡、매도당한다、발을핥는다、얻어맞는다、채찍으로맞는다
+	CASE 80,281 TO 284
+		IF ABL:PLAYER:마조끼 >= 8 || TALENT:PLAYER:마조 == 2
+			TIMES B , 5.00
+		ELSEIF ABL:PLAYER:마조끼 == 7
+			TIMES B , 3.50
+		ELSEIF ABL:PLAYER:마조끼 == 6
+			TIMES B , 2.50
+		ELSEIF ABL:PLAYER:마조끼 == 5 || TALENT:PLAYER:마조
+			TIMES B , 2.00
+		ELSEIF ABL:PLAYER:마조끼 == 4
+			TIMES B , 1.50
+		ELSEIF ABL:PLAYER:마조끼 == 3
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:마조끼 == 2
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:마조끼 == 1
+			TIMES B , 0.50
+		ELSE
+			TIMES B , 0.10
+		ENDIF
+ENDSELECT
+
+;【새드】　새드끼が高いと与える快感が大きい
+SELECTCASE SELECTCOM
+	;이라마치오、스팽킹セックス、목조르기セックス
+	CASE 72,511 TO 514
+		IF ABL:PLAYER:새드끼 >= 5 || TALENT:PLAYER:새드
+			TIMES B , 1.50
+		ELSEIF ABL:PLAYER:새드끼 == 4
+			TIMES B , 1.30
+		ELSEIF ABL:PLAYER:새드끼 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:PLAYER:새드끼 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:새드끼 == 1
+			TIMES B , 0.80
+		ELSE
+			TIMES B , 0.50
+		ENDIF
+ENDSELECT
+
+;【Ｂ感】　가슴を使う調教
+SELECTCASE SELECTCOM
+	;애무시킨다、가슴을주무르게한다、파이즈리한다、가슴을비빈다、거품비비기、６９파이즈리
+	CASE 220,221,240,241,243,317,318,504
+		IF ABL:PLAYER:B감각 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:B감각 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:PLAYER:B감각 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:B감각 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:B감각 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【Ｃ感】　페니스やクリを使う調教。セックスの공側もみる
+SELECTCASE SELECTCOM
+	;자위系は上がりづらい
+	CASE 76,81 TO 84,226,318
+		IF ABL:PLAYER:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:C감각 == 1
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:C감각 == 2
+			TIMES B , 1.20
+		ELSEIF ABL:PLAYER:C감각 == 3
+			TIMES B , 1.50
+		ELSEIF ABL:PLAYER:C감각 == 4
+			TIMES B , 1.80
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	CASE 70 TO 75,80,100 TO 116,220,222,244,245,317,503,504,507 TO 514,526,528
+		IF ABL:PLAYER:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:PLAYER:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:PLAYER:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:PLAYER:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+ENDSELECT
+
+;【Ｖ感】　Ｖセックス系
+IF VAGINA(PLAYER) && !TALENT:PLAYER:공
+	SELECTCASE SELECTCOM
+		;指入れさせる、자위과시한다、逆セックス
+		CASE 223,226,260,261,262
+			IF ABL:PLAYER:V감각 == 0
+				TIMES B , 0.50
+			ELSEIF ABL:PLAYER:V감각 == 1
+				TIMES B , 0.80
+			ELSEIF ABL:PLAYER:V감각 == 2
+				TIMES B , 1.00
+			ELSEIF ABL:PLAYER:V감각 == 3
+				TIMES B , 1.20
+			ELSEIF ABL:PLAYER:V감각 == 4
+				TIMES B , 1.50
+			ELSE
+				TIMES B , 2.00
+			ENDIF
+		CASEELSE
+	ENDSELECT
+ENDIF
+
+;【Ａ感】　Ａセックス系
+SELECTCASE SELECTCOM
+	;애널핥기강제、애널애무시킨다、자위과시한다、逆セックスＡ
+	CASE 224,225,227,263,264,265
+		IF ABL:PLAYER:A감각 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:PLAYER:A감각 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:A감각 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:A감각 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:PLAYER:A감각 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	CASEELSE
+ENDSELECT
+
+;【윤활】　セックス系全般
+SELECTCASE SELECTCOM
+	CASE 76,100 TO 116,507 TO 514,526
+		IF PALAM:윤활 < PALAMLV:1
+			TIMES B , 0.60
+		ELSEIF PALAM:윤활 < PALAMLV:2
+			TIMES B , 0.70
+		ELSEIF PALAM:윤활 < PALAMLV:3
+			TIMES B , 0.80
+		ELSEIF PALAM:윤활 < PALAMLV:4
+			TIMES B , 0.90
+		ELSEIF PALAM:윤활 >= PALAMLV:4
+			TIMES B , 1.00
+		ENDIF
+	CASEELSE
+ENDSELECT
+
+;-------------------------------------------------
+;사정ゲージチェック
+;見辛いのでまとめテスト。助손と奴隷の場合。
+;삽입명령、Ａ삽입명령、구욕명령、조수를범하게시킨다、조수의A를범하게시킨다
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_AT
+
+;【순종】　ほぼ全ての項目に関連
+IF ABL:순종 == 0
+	TIMES B , 0.80
+ELSEIF ABL:순종 == 1
+	TIMES B , 0.90
+ELSEIF ABL:순종 == 2
+	TIMES B , 1.00
+ELSEIF ABL:순종 == 3
+	TIMES B , 1.10
+ELSEIF ABL:순종 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;【기교】　수側が行動するものが特に効果が大きい
+SELECTCASE SELECTCOM
+	;수の기교はあんまり関係ないもの。助손の기교もチェックする
+	CASE 405,406
+		IF ABL:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:ASSI:기교 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	CASE 407,430,431
+		IF ABL:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【고양이혀・혀놀림】　フェラ・커닐링구스系
+IF SELECTCOM == 405
+	SIF TALENT:고양이혀
+		TIMES B , 0.50
+	SIF TALENT:혀놀림
+		TIMES B , 1.50
+ENDIF
+
+;【奉仕】　奉仕系
+SELECTCASE SELECTCOM
+	CASE 407,430,431
+		IF ABL:봉사정신 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:봉사정신 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:봉사정신 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:봉사정신 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:봉사정신 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【욕망】　奉仕、セックス系
+SELECTCASE SELECTCOM
+	CASE 405,406,430,431
+		IF ABL:욕망 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:욕망 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:욕망 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:욕망 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:욕망 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【Ｃ感】　페니스やクリを使う調教。セックスの공側もみる
+SELECTCASE SELECTCOM
+	CASE 405,406,407
+		IF ABL:ASSI:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:ASSI:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:ASSI:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:ASSI:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+ENDSELECT
+
+;【Ｖ感】　Ｖセックス系
+IF SELECTCOM == 430
+	IF ABL:ASSI:V감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:ASSI:V감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:ASSI:V감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:ASSI:V감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:ASSI:V감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+;【Ａ感】　Ａセックス系
+IF SELECTCOM == 431
+	IF ABL:ASSI:A감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:ASSI:A감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:ASSI:A감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:ASSI:A감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:ASSI:A감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+;【윤활】　セックス系全般
+SELECTCASE SELECTCOM
+	CASE 405,406
+		IF PALAM:윤활 < PALAMLV:1
+			TIMES B , 0.60
+		ELSEIF PALAM:윤활 < PALAMLV:2
+			TIMES B , 0.70
+		ELSEIF PALAM:윤활 < PALAMLV:3
+			TIMES B , 0.80
+		ELSEIF PALAM:윤활 < PALAMLV:4
+			TIMES B , 0.90
+		ELSEIF PALAM:윤활 >= PALAMLV:4
+			TIMES B , 1.00
+		ENDIF
+ENDSELECT
+
+
+;-------------------------------------------------
+;사정ゲージチェック
+;見辛いのでまとめテスト。主人と助손の場合の「主人」
+;奴隷に犯させる、奴隷にＡを犯させる、奴隷を犯す、奴隷のＡを犯す
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_MA1
+
+;【순종】　ほぼ全ての項目に関連
+IF ABL:ASSI:순종 == 0
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:순종 == 1
+	TIMES B , 0.90
+ELSEIF ABL:ASSI:순종 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:순종 == 3
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:순종 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;【기교】　수側が行動するものが特に効果が大きい
+SELECTCASE SELECTCOM
+	CASE 440,441
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:PLAYER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:PLAYER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	CASEELSE
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:ASSI:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【奉仕】　奉仕系
+SELECTCASE SELECTCOM
+	CASE 270,271
+		IF ABL:ASSI:봉사정신 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:ASSI:봉사정신 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:봉사정신 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:봉사정신 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:ASSI:봉사정신 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【욕망】　奉仕、セックス系
+IF ABL:ASSI:욕망 == 0
+	TIMES B , 0.50
+ELSEIF ABL:ASSI:욕망 == 1
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:욕망 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:욕망 == 3
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:욕망 == 4
+	TIMES B , 1.30
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;【Ｃ感】　페니스やクリを使う調教。セックスの공側もみる
+SELECTCASE SELECTCOM
+	CASE 440,441
+		IF ABL:PLAYER:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:PLAYER:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:PLAYER:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:PLAYER:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+ENDSELECT
+
+;【Ｖ感】　Ｖセックス系
+IF SELECTCOM == 270
+	IF ABL:PLAYER:V감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:PLAYER:V감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:PLAYER:V감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:PLAYER:V감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:PLAYER:V감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+;【Ａ感】　Ａセックス系
+IF SELECTCOM == 271
+	IF ABL:PLAYER:A감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:PLAYER:A감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:PLAYER:A감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:PLAYER:A감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:PLAYER:A감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;사정ゲージチェック
+;見辛いのでまとめテスト。主人と助손の場合の「助손」
+;奴隷に犯させる、奴隷にＡを犯させる、奴隷を犯す、奴隷のＡを犯す
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_MA2
+
+;【순종】　ほぼ全ての項目に関連
+IF ABL:ASSI:순종 == 0
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:순종 == 1
+	TIMES B , 0.90
+ELSEIF ABL:ASSI:순종 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:순종 == 3
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:순종 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;【기교】　수側が行動するものが特に効果が大きい
+SELECTCASE SELECTCOM
+	CASE 440,441
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:PLAYER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:PLAYER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:PLAYER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:PLAYER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:PLAYER:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	CASEELSE
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:ASSI:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【욕망】　奉仕、セックス系
+IF ABL:ASSI:욕망 == 0
+	TIMES B , 0.50
+ELSEIF ABL:ASSI:욕망 == 1
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:욕망 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:욕망 == 3
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:욕망 == 4
+	TIMES B , 1.30
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;【Ｃ感】　페니스やクリを使う調教。セックスの공側もみる
+SELECTCASE SELECTCOM
+	CASE 270,271
+		IF ABL:ASSI:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:ASSI:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:ASSI:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:ASSI:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+ENDSELECT
+
+;【Ｖ感】　Ｖセックス系
+IF SELECTCOM == 440
+	IF ABL:ASSI:V감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:ASSI:V감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:ASSI:V감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:ASSI:V감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:ASSI:V감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+;【Ａ感】　Ａセックス系
+IF SELECTCOM == 441
+	IF ABL:ASSI:A감각 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:ASSI:A감각 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:ASSI:A감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:ASSI:A감각 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:ASSI:A감각 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 2.00
+	ENDIF
+ENDIF
+
+
+
+;-------------------------------------------------
+;사정ゲージチェック
+;見辛いのでまとめテスト。３Ｐ系の「主人」
+;더블펠라、더블파이즈리、더블스마타、二本フェラ、サンドイッチ、二輪挿し、連結
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_3PM
+;【순종】　全ての項目に関連
+SELECTCASE SELECTCOM
+	;순종の効果が小さいもの。더블스마타
+	CASE 422
+		IF ABL:순종 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.90
+		ELSE
+			TIMES B , 1.00
+		ENDIF
+	;奴隷の순종だけみる
+	CASE 106,116,509
+		IF ABL:순종 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:순종 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:순종 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:순종 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;それ以外は奴隷と助손の순종を見る
+	CASEELSE
+		IF (ABL:순종+ABL:ASSI:순종) < 3
+			TIMES B , 0.80
+		ELSEIF (ABL:순종+ABL:ASSI:순종) < 6
+			TIMES B , 0.90
+		ELSEIF (ABL:순종+ABL:ASSI:순종) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:순종+ABL:ASSI:순종) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:순종+ABL:ASSI:순종) < 20
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+ENDSELECT
+
+;【기교】　수側が行動するものが特に効果が大きい
+SELECTCASE SELECTCOM
+	;奴隷と助손の기교をみるもの。더블펠라、더블파이즈리、二輪挿しさせる
+	CASE 420,421,522,523
+		IF (ABL:기교+ABL:ASSI:기교) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;奴隷と助손の기교はあんまり関係ないもの。主人の기교もチェックする
+	;더블스마타
+	CASE 422
+		IF (ABL:기교+ABL:ASSI:기교) < 3
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 6
+			TIMES B , 0.90
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 10
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:MASTER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:MASTER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:MASTER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:MASTER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:MASTER:기교 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;３人全員の기교を見るもの。サンドイッチ系、連結
+	CASE 515,519,520,521
+		IF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.40
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 25
+			TIMES B , 1.60
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 30
+			TIMES B , 1.80
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;奴隷の기교だけを確認。二本フェラ
+	CASE 516
+		IF ABL:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	;奴隷を二輪挿し
+	CASE 517,518
+		IF ABL:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF (ABL:ASSI:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.50
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;助손を二輪挿し
+	CASE 524,525
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF (ABL:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.50
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+ENDSELECT
+
+;【奉仕】　奉仕系
+SELECTCASE SELECTCOM
+	;奴隷、助손両方の봉사정신を見る
+	CASE 420,421,519,520,522,523
+		IF (ABL:봉사정신+ABL:ASSI:봉사정신) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;奴隷、助손両方の봉사정신を見る
+	CASE 422
+		IF (ABL:봉사정신+ABL:ASSI:봉사정신) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 20
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	;奴隷の봉사정신のみを見る
+	CASE 515,516
+		IF ABL:봉사정신 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:봉사정신 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:봉사정신 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:봉사정신 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:봉사정신 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【욕망】　セックス系
+SELECTCASE SELECTCOM
+	;욕망が関係ないもの。
+	CASE 516
+		TIMES B , 1.00
+	;それ以外
+	CASEELSE
+		IF (ABL:욕망+ABL:ASSI:욕망) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【Ｃ感】　페니스やクリを使う調教。セックスの공側もみる
+SELECTCASE SELECTCOM
+	CASE 420,421,422,516,517,518,524,525
+		IF ABL:MASTER:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:MASTER:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:MASTER:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:MASTER:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:MASTER:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+ENDSELECT
+
+;サンドイッチ、連結だけ別に判定
+SELECTCASE SELECTCOM
+	CASE 515,519,520,521
+		;【Ｃ感】　ペニクリ
+		IF TFLAG:40 == 1 || TFLAG:40 == 2 || TFLAG:49 == 8 || TFLAG:49 == 10 || TFLAG:49 == 10 || TFLAG:40 == 11 || TFLAG:40 == 12
+			IF ABL:MASTER:C감각 == 0
+				TIMES B , 1.00
+			ELSEIF ABL:MASTER:C감각 == 1
+				TIMES B , 1.50
+			ELSEIF ABL:MASTER:C감각 == 2
+				TIMES B , 2.00
+			ELSEIF ABL:MASTER:C감각 == 3
+				TIMES B , 2.50
+			ELSEIF ABL:MASTER:C감각 == 4
+				TIMES B , 3.50
+			ELSE
+				TIMES B , 5.00
+			ENDIF
+		ENDIF
+		
+		;【Ｖ感】　Ｖセックス系
+		IF TFLAG:40 == 6 || TFLAG:41 == 6
+			IF ABL:MASTER:V감각 == 0
+				TIMES B , 0.50
+			ELSEIF ABL:MASTER:V감각 == 1
+				TIMES B , 0.80
+			ELSEIF ABL:MASTER:V감각 == 2
+				TIMES B , 1.00
+			ELSEIF ABL:MASTER:V감각 == 3
+				TIMES B , 1.20
+			ELSEIF ABL:MASTER:V감각 == 4
+				TIMES B , 1.50
+			ELSE
+				TIMES B , 2.00
+			ENDIF
+		ENDIF
+		
+		;【Ａ感】　Ａセックス系
+		IF TFLAG:40 == 7 || TFLAG:41 == 7
+			IF ABL:MASTER:A감각 == 0
+				TIMES B , 0.50
+			ELSEIF ABL:MASTER:A감각 == 1
+				TIMES B , 0.80
+			ELSEIF ABL:MASTER:A감각 == 2
+				TIMES B , 1.00
+			ELSEIF ABL:MASTER:A감각 == 3
+				TIMES B , 1.20
+			ELSEIF ABL:MASTER:A감각 == 4
+				TIMES B , 1.50
+			ELSE
+				TIMES B , 2.00
+			ENDIF
+		ENDIF
+ENDSELECT
+
+;【윤활】　セックス系全般
+SELECTCASE SELECTCOM
+	CASE 515,517 TO 525
+		IF PALAM:윤활 < PALAMLV:1
+			TIMES B , 0.60
+		ELSEIF PALAM:윤활 < PALAMLV:2
+			TIMES B , 0.70
+		ELSEIF PALAM:윤활 < PALAMLV:3
+			TIMES B , 0.80
+		ELSEIF PALAM:윤활 < PALAMLV:4
+			TIMES B , 0.90
+		ELSEIF PALAM:윤활 >= PALAMLV:4
+			TIMES B , 1.00
+		ENDIF
+ENDSELECT
+
+
+;-------------------------------------------------
+;사정ゲージチェック
+;見辛いのでまとめテスト。３Ｐ系の「助손」
+;더블펠라、더블파이즈리、더블스마타、二本フェラ、サンドイッチ、二輪挿し、連結
+;-------------------------------------------------
+@SHOOT_GAUGE_CHECK_3PA
+
+;【순종】　ほぼ全ての項目に関連
+SELECTCASE SELECTCOM
+	;奴隷の순종だけみる
+	CASE 517,518,519,521,522,523,524,525
+		IF ABL:순종 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:순종 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:순종 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:순종 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:순종 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+ENDSELECT
+
+;【기교】　수側が行動するものが特に効果が大きい
+SELECTCASE SELECTCOM
+	;奴隷と助손の기교をみるもの。더블파이즈리、二輪挿しさせる
+	CASE 421,522,523
+		IF (ABL:기교+ABL:ASSI:기교) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:기교+ABL:ASSI:순종) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:순종) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:ASSI:순종) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:기교+ABL:ASSI:순종) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;奴隷と助손の기교はあんまり関係ないもの。主人の기교もチェックする
+	;더블스마타
+	CASE 422
+		IF (ABL:기교+ABL:ASSI:기교) < 3
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 6
+			TIMES B , 0.90
+		ELSEIF (ABL:기교+ABL:ASSI:기교) < 10
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF ABL:MASTER:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:MASTER:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:MASTER:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:MASTER:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:MASTER:기교 == 4
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;３人全員の기교を見るもの。サンドイッチ系、連結
+	CASE 515,519,520,521
+		IF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.40
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 25
+			TIMES B , 1.60
+		ELSEIF (ABL:기교+ABL:ASSI:기교+ABL:MASTER:기교) < 30
+			TIMES B , 1.80
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;奴隷の기교だけを確認。二本フェラ
+	CASE 516
+		IF ABL:기교 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:기교 == 3
+			TIMES B , 1.10
+		ELSEIF ABL:기교 == 4
+			TIMES B , 1.30
+		ELSE
+			TIMES B , 1.50
+		ENDIF
+	;奴隷を二輪挿し
+	CASE 517,518
+		IF ABL:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF (ABL:ASSI:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.50
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:ASSI:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+	;助손を二輪挿し
+	CASE 524,525
+		IF ABL:ASSI:기교 == 0
+			TIMES B , 0.80
+		ELSEIF ABL:ASSI:기교 == 1
+			TIMES B , 0.90
+		ELSEIF ABL:ASSI:기교 == 2
+			TIMES B , 1.00
+		ELSE
+			TIMES B , 1.10
+		ENDIF
+		IF (ABL:기교+ABL:MASTER:기교) < 3
+			TIMES B , 0.50
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 15
+			TIMES B , 1.10
+		ELSEIF (ABL:기교+ABL:MASTER:기교) < 20
+			TIMES B , 1.20
+		ELSE
+			TIMES B , 1.30
+		ENDIF
+ENDSELECT
+
+;【奉仕】　奉仕系
+SELECTCASE SELECTCOM
+	;奴隷、助손両方の봉사정신を見る
+	CASE 519,520,524,525
+		IF (ABL:봉사정신+ABL:ASSI:봉사정신) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:봉사정신+ABL:ASSI:봉사정신) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+	;奴隷の봉사정신のみを見る
+	CASE 515,516
+		IF ABL:봉사정신 == 0
+			TIMES B , 0.50
+		ELSEIF ABL:봉사정신 == 1
+			TIMES B , 0.80
+		ELSEIF ABL:봉사정신 == 2
+			TIMES B , 1.00
+		ELSEIF ABL:봉사정신 == 3
+			TIMES B , 1.20
+		ELSEIF ABL:봉사정신 == 4
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【욕망】　セックス系
+SELECTCASE SELECTCOM
+	;욕망が関係ないもの。
+	CASE 420,421,516
+		TIMES B , 1.00
+	;それ以外
+	CASEELSE
+		IF (ABL:욕망+ABL:ASSI:욕망) < 3
+			TIMES B , 0.60
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 6
+			TIMES B , 0.80
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 10
+			TIMES B , 1.00
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 15
+			TIMES B , 1.20
+		ELSEIF (ABL:욕망+ABL:ASSI:욕망) < 20
+			TIMES B , 1.50
+		ELSE
+			TIMES B , 2.00
+		ENDIF
+ENDSELECT
+
+;【Ｂ感】　가슴を使う調教
+IF SELECTCOM == 421
+	IF ABL:ASSI:B감각 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:ASSI:B감각 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:ASSI:B감각 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:ASSI:B감각 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:ASSI:B감각 == 4
+		TIMES B , 1.30
+	ELSE
+		TIMES B , 1.50
+	ENDIF
+ENDIF
+
+;【Ｃ感】　페니스やクリを使う調教。セックスの공側もみる
+SELECTCASE SELECTCOM
+	CASE 517,518,522,523
+		IF ABL:ASSI:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:C감각 == 1
+			TIMES B , 1.50
+		ELSEIF ABL:ASSI:C감각 == 2
+			TIMES B , 2.00
+		ELSEIF ABL:ASSI:C감각 == 3
+			TIMES B , 2.50
+		ELSEIF ABL:ASSI:C감각 == 4
+			TIMES B , 3.50
+		ELSE
+			TIMES B , 5.00
+		ENDIF
+	CASE 422
+		IF ABL:ASSI:C감각 == 0
+			TIMES B , 1.00
+		ELSEIF ABL:ASSI:C감각 == 1
+			TIMES B , 1.20
+		ELSEIF ABL:ASSI:C감각 == 2
+			TIMES B , 1.50
+		ELSEIF ABL:ASSI:C감각 == 3
+			TIMES B , 1.80
+		ELSEIF ABL:ASSI:C감각 == 4
+			TIMES B , 2.10
+		ELSE
+			TIMES B , 2.50
+		ENDIF
+ENDSELECT
+
+;サンドイッチ、連結だけ別に判定
+SELECTCASE SELECTCOM
+	CASE 515,519,520,521
+		;【Ｃ感】　ペニクリ
+		IF TFLAG:41 == 1 || TFLAG:41 == 2 || TFLAG:41 == 6 || TFLAG:41 == 7 || TFLAG:49 == 13
+			IF ABL:ASSI:C감각 == 0
+				TIMES B , 1.00
+			ELSEIF ABL:ASSI:C감각 == 1
+				TIMES B , 1.50
+			ELSEIF ABL:ASSI:C감각 == 2
+				TIMES B , 2.00
+			ELSEIF ABL:ASSI:C감각 == 3
+				TIMES B , 2.50
+			ELSEIF ABL:ASSI:C감각 == 4
+				TIMES B , 3.50
+			ELSE
+				TIMES B , 5.00
+			ENDIF
+		ENDIF
+		
+		;【Ｖ感】　Ｖセックス系
+		IF TFLAG:40 == 6 || TFLAG:41 == 6
+			IF ABL:ASSI:V감각 == 0
+				TIMES B , 0.50
+			ELSEIF ABL:ASSI:V감각 == 1
+				TIMES B , 0.80
+			ELSEIF ABL:ASSI:V감각 == 2
+				TIMES B , 1.00
+			ELSEIF ABL:ASSI:V감각 == 3
+				TIMES B , 1.20
+			ELSEIF ABL:ASSI:V감각 == 4
+				TIMES B , 1.50
+			ELSE
+				TIMES B , 2.00
+			ENDIF
+		ENDIF
+		
+		;【Ａ感】　Ａセックス系
+		IF TFLAG:40 == 7 || TFLAG:41 == 7
+			IF ABL:ASSI:A감각 == 0
+				TIMES B , 0.50
+			ELSEIF ABL:ASSI:A감각 == 1
+				TIMES B , 0.80
+			ELSEIF ABL:ASSI:A감각 == 2
+				TIMES B , 1.00
+			ELSEIF ABL:ASSI:A감각 == 3
+				TIMES B , 1.20
+			ELSEIF ABL:ASSI:A감각 == 4
+				TIMES B , 1.50
+			ELSE
+				TIMES B , 2.00
+			ENDIF
+		ENDIF
+ENDSELECT
+
+;【윤활】　セックス系全般
+SELECTCASE SELECTCOM
+	CASE 515,517 TO 525
+		IF PALAM:윤활 < PALAMLV:1
+			TIMES B , 0.60
+		ELSEIF PALAM:윤활 < PALAMLV:2
+			TIMES B , 0.70
+		ELSEIF PALAM:윤활 < PALAMLV:3
+			TIMES B , 0.80
+		ELSEIF PALAM:윤활 < PALAMLV:4
+			TIMES B , 0.90
+		ELSEIF PALAM:윤활 >= PALAMLV:4
+			TIMES B , 1.00
+		ENDIF
+ENDSELECT
+
+
+
+

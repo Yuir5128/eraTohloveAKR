@@ -1,0 +1,89 @@
+﻿;-------------------------------------------------
+;전기촉수
+;촉수-拷問系コマンド
+;-------------------------------------------------
+@COM372
+
+PRINTL 전기촉수
+STR:0 = 전기촉수
+
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 500
+LOSEBASE:기력 += 700
+
+IF EXP:촉수경험 < EXPLV:1
+	TIMES LOSEBASE:체력 , 1.10
+	TIMES LOSEBASE:기력 , 2.00
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES LOSEBASE:체력 , 0.90
+	TIMES LOSEBASE:기력 , 1.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES LOSEBASE:체력 , 0.80
+	TIMES LOSEBASE:기력 , 1.50
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES LOSEBASE:체력 , 0.70
+	TIMES LOSEBASE:기력 , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES LOSEBASE:체력 , 0.60
+	TIMES LOSEBASE:기력 , 1.00
+ELSE
+	TIMES LOSEBASE:체력 , 0.50
+	TIMES LOSEBASE:기력 , 0.50
+ENDIF
+
+IF TEQUIP:니틀캡 || TEQUIP:착유기
+	SOURCE:쾌B += 500
+	SOURCE:통증 += 500
+ENDIF
+IF TEQUIP:클리캡 || TEQUIP:전동오나홀
+	SOURCE:쾌C += 500
+	SOURCE:통증 += 500
+ENDIF
+IF TEQUIP:바이브
+	SOURCE:쾌V += 500
+	SOURCE:통증 += 500
+ENDIF
+IF TEQUIP:애널바이브
+	SOURCE:쾌A += 500
+	SOURCE:통증 += 500
+ENDIF
+IF TEQUIP:카테터
+	SOURCE:쾌C += 500
+	SOURCE:통증 += 500
+ENDIF
+
+SOURCE:통증 += 5000
+SOURCE:두려움 += 4000
+SOURCE:노출 += 1200
+SOURCE:굴복 += 1200
+SOURCE:일탈 += 2200
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;電극初体験のとき、이상경험追加
+IF EXP:전극경험 == 0
+	EXP:이상경험 += 1
+	PRINTL 電극初経験で이상경험＋１
+ENDIF
+EXP:전극경험 += 2
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+

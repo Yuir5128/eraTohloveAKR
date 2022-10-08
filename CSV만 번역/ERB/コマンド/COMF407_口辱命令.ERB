@@ -1,0 +1,196 @@
+﻿;-------------------------------------------------
+;구욕명령
+;助손命令系コマンド
+;-------------------------------------------------
+@COM407
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回コマンドがフェラか二本フェラ＝「二本フェラ」
+	IF PREVCOM == 71 || PREVCOM == 516
+		CALL COM_ABLE516
+		IF RESULT == 1
+			TFLAG:40 = 0
+			TFLAG:41 = 0
+			TFLAG:49 = 20
+			JUMP COM516
+		ENDIF
+	;前回コマンドが조수를범한다のとき＝「助손をサンドイッチ」
+	ELSEIF PREVCOM == 440 || PREVCOM == 441
+		CALL COM_ABLE521
+		IF RESULT == 1
+			IF PREVCOM == 440
+				TFLAG:40 = 11
+			ELSE
+				TFLAG:40 = 12
+			ENDIF
+			TFLAG:41 = 0
+			TFLAG:49 = 13
+			JUMP COM521
+		ENDIF
+	;前回コマンドが奴隷を犯すとき＝「サンドイッチ」
+	ELSEIF PREVCOM == 101 || PREVCOM == 103 || PREVCOM == 111 || PREVCOM == 113
+		CALL COM_ABLE515
+		IF RESULT == 1
+			IF PREVCOM == 101 || PREVCOM == 103
+				TFLAG:40 = 1
+			ELSE
+				TFLAG:40 = 1
+			ENDIF
+			TFLAG:41 = 0
+			TFLAG:49 = 13
+			JUMP COM515
+		ENDIF
+	;前回コマンドがサンドイッチか、助손をサンドイッチのとき
+	ELSEIF PREVCOM == 515 || PREVCOM == 521
+		;主人が奴隷を犯してるときは「サンドイッチ」
+		IF TFLAG:40 == 1 || TFLAG:40 == 2
+			CALL COM_ABLE515
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:49 = 13
+				JUMP COM515
+			ENDIF
+		;主人が助손を犯してるときは「助손をサンドイッチ」
+		ELSEIF TFLAG:40 == 11 || TFLAG:40 == 12
+			CALL COM_ABLE521
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:49 = 13
+				JUMP COM521
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;何も読まずにこっちに来たときはフラグ解除
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 구욕명령
+STR:0 = 구욕명령
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;すべての命令に共通の要素を考慮
+;(순종が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;実行判定操作
+CALL KOJO_DENIAL_PLUS
+
+;合計を表示(24以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 24
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+;実行不可입上/実行判定操作
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;実行者が奴隷であるフラグ
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;사정ゲージチェック（助손）
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_AT
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:ASSI:9 > 0
+	B /= 20
+
+SIF PENIS(ASSI)
+	BASE:ASSI:사정 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 50
+
+SOURCE:성행동 += 300
+SOURCE:성취감 += 50
+SOURCE:굴복 += 100
+SOURCE:불결 += 60
+SOURCE:일탈 += 60
+SOURCE:반발 += 60
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 60
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;奴隷の입⇔助손の페니스の汚れが移動
+STAIN:입 |= STAIN:ASSI:페니스
+STAIN:ASSI:페니스 = 2
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;펠라경험
+PRINTFORML %EXPNAME:22%＋１
+EXP:펠라경험 += 1
+
+;奴隷が고양이혀持ちの場合は、奴隷に가학쾌락경험を追加
+IF TALENT:TARGET:고양이혀
+	EXP:가학쾌락경험 += 1
+	PRINTFORML %EXPNAME:32%＋１
+ENDIF
+
+;奉仕快楽フラグ
+TFLAG:100 = 1
+
+;助손に쾌C・습득・순종・부정の珠
+JUEL:ASSI:쾌C += 50
+JUEL:ASSI:순종 += 50
+JUEL:ASSI:부정 += 50
+PRINTFORML %CALLNAME:ASSI%に%PALAMNAME:0%の珠＋50
+PRINTFORML %CALLNAME:ASSI%に%PALAMNAME:5%の珠＋50
+PRINTFORMW %CALLNAME:ASSI%に%PALAMNAME:100%の珠＋50
+
+;게이경험とか加算
+CALL COM_EXP(3)
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+
+RETURN 1
+
+

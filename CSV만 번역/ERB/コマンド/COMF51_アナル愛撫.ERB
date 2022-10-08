@@ -1,0 +1,135 @@
+﻿;-------------------------------------------------
+;애널애무
+;Ａ系調教コマンド
+;-------------------------------------------------
+@COM51
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教が애널애무、前立腺刺激だと前立腺刺激に
+	IF PREVCOM == 51 || PREVCOM == 501
+		CALL COM_ABLE501
+		SIF RESULT == 1
+			JUMP COM501
+	ENDIF
+ENDIF
+
+PRINTL 애널애무
+STR:0 = 애널애무
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+SIF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 50
+
+SOURCE:쾌A += 80
+
+IF TEQUIP:확장벌룬
+	TIMES SOURCE:쾌A , 1.80
+	SOURCE:통증 += 200
+ELSEIF TEQUIP:애널바이브
+	TIMES SOURCE:쾌A , 1.50
+	SOURCE:통증 += 200
+ELSEIF TEQUIP:애널비즈
+	TIMES SOURCE:쾌A , 1.35
+	SOURCE:통증 += 200
+ELSEIF TEQUIP:로터A삽입
+	TIMES SOURCE:쾌A , 1.20
+	SOURCE:통증 += 130
+ELSE
+	IF PREVCOM == 77
+		SOURCE:통증 += 80
+	ELSE
+		SOURCE:통증 += 100
+	ENDIF
+ENDIF
+
+SOURCE:굴복 += 100
+SOURCE:일탈 += 80
+SOURCE:반발 += 60
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 100
+
+;스킨십선호だと애정のソース追加
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+;Aへの고통は先に処理しておく
+;EXP:A경험をみる
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:통증 , 3.00
+	TIMES SOURCE:반발 , 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:통증 , 0.80
+	TIMES SOURCE:반발 , 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:통증 , 0.60
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:통증 , 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.00
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;調教者の손⇔奴隷のＡ장내の汚れが移動
+;道具を使用する場合は汚れは移動しない
+IF TEQUIP:확장벌룬 || TEQUIP:애널바이브 || TEQUIP:애널비즈 || TEQUIP:로터A삽입
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+EXP:A경험 += 1
+PRINTL A경험＋１
+
+;게이경험とか加算
+CALL COM_EXP(2)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+
+RETURN 1
+
+

@@ -1071,7 +1071,7 @@ PRINTL [1] 아니오
 $INPUT_LOOPSALE
 INPUT
 IF RESULT == 0
-	;매각시의 이벤트입상
+	;매각시의 이벤트대사
 	TFLAG:13 = 18
 	CALL KOJO_MESSAGE_EVENT
 	;매각액
@@ -1308,13 +1308,13 @@ IF RESULT == 0
 	PRINTFORML 조교시에 녹화한 비디오를 팔아,{TFLAG:36}고슈금손에 넣었습니다
 	MONEY += TFLAG:36
 	TFLAG:36 = 0
-	;이벤트입상 호출(비디오 매각시)
+	;이벤트대사 호출(비디오 매각시)
 	TFLAG:13 = 19
 	CALL KOJO_MESSAGE_EVENT
 ELSEIF RESULT == 1
 	PRINTFORML 조교시에 녹화한 비디오를손바탕으로 남겨 두었다
 	CFLAG:20 += 1
-	;이벤트입상 호출(비디오 보유시) 23은 아침밥으로 사용
+	;이벤트대사 호출(비디오 보유시) 23은 아침밥으로 사용
 	TFLAG:13 = 24
 	CALL KOJO_MESSAGE_EVENT
 ELSE
@@ -1366,7 +1366,7 @@ IF TEQUIP:클리캡 || TEQUIP:전동오나홀 || TEQUIP:음핵클립
 ENDIF
 ;B계
 ;니플캡장착, 착유기, 유두클립
-IF TEQUIP:니틀캡 || TEQUIP:착유기 || TEQUIP:유두클립
+IF TEQUIP:니플캡 || TEQUIP:착유기 || TEQUIP:유두클립
 	A += 15
 	C += 1
 ENDIF

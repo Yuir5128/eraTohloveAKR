@@ -10,7 +10,7 @@ PRINTW
 @EVENT_MESSAGE
 TRYCALLFORM EVENT_MESSAGE_{TFLAG:13}
 
-;커맨드입상의 도구 착탈 분기
+;커맨드대사의 도구 착탈 분기
 @MESSAGE_VARIATION
 SELECTCASE SELECTCOM
 	;클리캡,촉수클리고문
@@ -45,9 +45,9 @@ SELECTCASE SELECTCOM
 	CASE 46
 		SIF TEQUIP:애널비즈
 			TFLAG:54 = 1
-	;니틀캡,촉수유두고문
+	;니플캡,촉수유두고문
 	CASE 47,164
-		SIF TEQUIP:니틀캡
+		SIF TEQUIP:니플캡
 			TFLAG:54 = 1
 	;유두클립
 	CASE 15

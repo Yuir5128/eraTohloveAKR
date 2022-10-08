@@ -1,0 +1,566 @@
+﻿;-------------------------------------------------
+;汎用関数置き場
+;素質関連(素質分類系など)
+;-------------------------------------------------
+;-------------------------------------------------
+;関数名:GET_TALENTNAME
+;概　要:素質名取得関数
+;引　数:ARG:0…キャラ登録番号
+;　　　:ARG:1…TALENT番号
+;戻り値:素質名
+;備　考:文中関数
+;素質の名前を返す。上位素質名の処理を行う
+;-------------------------------------------------
+@GET_TALENTNAME(ARG:0, ARG:1)
+#FUNCTIONS
+SELECTCASE ARG:1
+	CASE 65
+		RETURNF "스킨십好"
+	CASE 66
+		RETURNF "스킨십嫌"
+	;새드/ドＳ
+	CASE 83
+		RETURNF @"\@ TALENT:ARG:새드 == 2 ? ドＳ # %TALENTNAME:83% \@"
+	;마조/ドМ
+	CASE 84
+		RETURNF @"\@ TALENT:ARG:마조 == 2 ? ドМ # %TALENTNAME:84% \@"
+ENDSELECT
+RETURNF TALENTNAME:(ARG:1)
+
+;-------------------------------------------------
+;関数名:GET_SEX
+;概　要:性別取得関数
+;引　数:ARG:0…キャラ登録番号
+;戻り値:性別を表す文字列
+;備　考:文中関数
+;-------------------------------------------------
+@GET_SEX(ARG)
+#FUNCTIONS
+IF TALENT:ARG:반음반양
+	RETURNF TALENTNAME:137
+ELSEIF TALENT:ARG:후타나리
+	RETURNF TALENTNAME:139
+ELSEIF TALENT:ARG:남자
+	RETURNF TALENTNAME:140
+ELSEIF TALENT:ARG:컨트보이
+	RETURNF TALENTNAME:172
+ELSEIF TALENT:ARG:쉬메일
+	RETURNF TALENTNAME:173
+ELSE
+	RETURNF "女の子"
+ENDIF
+
+;-------------------------------------------------
+;関数名:TALENT_TYPE
+;概　要:素質分類関数
+;引　数:ARG:0…TALENT番号,ARG:1…キャラ登録番号
+;戻り値:素質分類番号
+;       (0.非表示/1.性別/2.性格/3.体質/4.技能/5.후天素質/6.陥落素質/7.未分類)
+;備　考:文中関数
+;素質分類テーブル。素質の分類番号を返す。
+;素質整頓表示に用いる
+;
+;-------------------------------------------------
+@TALENT_TYPE(ARG:0, ARG:1)
+#FUNCTION
+SELECTCASE ARG:0
+	;페니스ありの時表示させる素質
+	;동정/아이사이즈/단소/거근/말자지/포경/절륜
+	CASE 114 TO 117, 119, 152
+		IF PENIS(ARG:1)
+			RETURNF 3
+		ELSE
+			RETURNF 0
+		ENDIF
+	CASE 160
+		IF PENIS(ARG:1)
+			RETURNF 1
+		ELSE
+			RETURNF 0
+		ENDIF
+	;女性器ありの時表示させる素質
+	;처녀/재생처녀/음란구멍/V둔감/V민감
+	CASE 75, 103, 104
+		IF !VAGINA(ARG:1)
+			RETURNF 0
+		ELSE
+			RETURNF 3
+		ENDIF
+	CASE 0, 1
+		IF !VAGINA(ARG:1)
+			RETURNF 0
+		ELSE
+			RETURNF 1
+		ENDIF
+	;가슴ありの時表示させる素質
+	;빈유/절벽/거유/폭유
+	CASE 109 TO 112
+		RETURNF 3
+;	;0.非表示(表示させない素質)
+;	CASE 
+;		RETURNF 0
+	;1.性別
+	CASE 0, 1, 137 TO 140, 157, 158, 160, 161, 170, 172, 173
+		RETURNF 1
+	;2.性格
+	CASE 10 TO 36, 38, 63 TO 71, 82, 87, 88, 151, 166 TO 168
+		RETURNF 2
+	;3.体質
+	CASE 40 TO 49, 54, 56, 57, 60 TO 62, 72 TO 84, 90 TO 134, 142, 143, 145 TO 150, 171,
+		RETURNF 3
+	;4.技能
+	CASE 50 TO 53, 55, 58, 59, 135, 136, 144, 156, 169, 181
+		RETURNF 4
+	;5.후天素質
+	CASE 37, 85, 86, 141, 153 TO 155, 159, 163, 165, 200 TO 205, 180
+		RETURNF 5
+	;6.陥落素質
+	CASE 3 TO 9, 162
+		RETURNF 6
+ENDSELECT
+;7.未分類(これがあるのは望ましくない)
+RETURNF 7
+
+
+;-------------------------------------------------
+;関数名:TALENT_TYPENAME
+;概　要:素質分類名取得関数
+;引　数:ARG…TALENT分類番号
+;戻り値:素質分類を表す文字列
+;       (0.非表示/1.性別/2.性格/3.体質/4.技能/5.후天素質/6.種族特性/7.未分類)
+;備　考:文中関数
+;素質の分類名を返す。素質整頓表示に用いる
+;-------------------------------------------------
+@TALENT_TYPENAME(ARG)
+#FUNCTIONS
+SIF !STRLENS(LOCALS)
+	SPLIT "非表示/性別/性格/体質/技能/후天素質/陥落素質/未分類", "/", LOCALS
+RETURNF LOCALS:ARG
+
+;-------------------------------------------------
+;汎用関数置き場
+;未分類
+;-------------------------------------------------
+;-------------------------------------------------
+;関数名:CHOICE
+;概　要:２～１０択関数
+;引　数:ARGS:0…質問内容
+;      :ARGS:1～10…選択肢の文字列(3以降は省略可)
+;戻り値:ユーザ入力結果(0～9)
+;選択条件の無い、シンプルな選択肢作成関数
+;입上とかでも使えるかもしれない
+;とりあえず10択まで。増やしてもいいけど
+;-------------------------------------------------
+@CHOICE(ARGS:0, ARGS:1, ARGS:2, ARGS:3, ARGS:4, ARGS:5, ARGS:6, ARGS:7, ARGS:8, ARGS:9, ARGS:10)
+PRINTSL ARGS:0
+FOR LOCAL, 0, 10
+	PRINTFORML [{LOCAL}] - %ARGS:(1 + LOCAL)%
+	SIF LOCAL && !STRLENS(ARGS:(2 + LOCAL))
+		BREAK
+NEXT
+$INPUT_LOOP
+INPUT
+SELECTCASE RESULT
+	CASE 0 TO LOCAL - 1
+	CASEELSE
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+ENDSELECT
+RETURN RESULT
+
+;-------------------------------------------------
+;関数名:PRINT_BASE
+;概　要:BASE表示用関数
+;引　数:ARGS …BASEの名前
+;　　　 ARG:0…キャラ登録番号
+;       ARG:1…表示するBASE
+;       ARG:2…BARの長さ(省略した場合32)
+;       ARG:3…真ならBASEの値を0以上に補正する
+;              (省略した場合、補正しない)
+;戻り値:なし
+;-------------------------------------------------
+@PRINT_BASE(ARGS, ARG:0, ARG:1, ARG:2, ARG:3)
+PRINTS ARGS
+LOCAL:0 = ARG:3 ? MAX(BASE:(ARG:0):(ARG:1), 0) # BASE:(ARG:0):(ARG:1)
+LOCAL:1 = MAXBASE:(ARG:0):(ARG:1)
+BAR LOCAL:0, LOCAL:1, ARG:2 ? ARG:2 # 32
+PRINTFORM ({LOCAL:0, 5}/{LOCAL:1, 5})
+
+@PRINT_BASEL(ARGS, ARG:0, ARG:1, ARG:2, ARG:3)
+CALL PRINT_BASE(ARGS, ARG:0, ARG:1, ARG:2, ARG:3)
+PRINTL 
+
+@PRINT_BASEW(ARGS, ARG:0, ARG:1, ARG:2, ARG:3)
+CALL PRINT_BASE(ARGS, ARG:0, ARG:1, ARG:2, ARG:3)
+WAIT
+
+;-------------------------------------------------
+;関数名:COM_EXP
+;概　要:게이경험とか追加関数
+;引　数: ARG…追加される経験
+;戻り値:なし
+;-------------------------------------------------
+@COM_EXP(ARG)
+IF MALE(TARGET) && MALE(PLAYER)
+	PRINTFORML %EXPNAME:41%+{ARG}
+	EXP:게이경험 += ARG
+ELSEIF MALE(TARGET) == 0 && MALE(PLAYER) == 0
+	PRINTFORML %EXPNAME:40%+{ARG}
+	EXP:레즈경험 += ARG
+ENDIF
+;調教者を記録
+LOCAL = NO:PLAYER +1099
+CFLAG:(LOCAL) += ARG
+
+;-------------------------------------------------
+;関数名:MALE
+;概　要:男性か女性か判定関数
+;引　数: ARG…キャラ登録番号
+;戻り値:男性なら１、女性なら０
+;-------------------------------------------------
+@MALE(ARG)
+#FUNCTION
+IF TALENT:ARG:남자 || TALENT:ARG:반음반양 || TALENT:ARG:컨트보이
+	RETURNF 1
+ELSE
+	RETURNF 0
+ENDIF
+
+;-------------------------------------------------
+;関数名:MALE2
+;概　要:元が男性か女性か判定関数
+;引　数: ARG…キャラ登録番号
+;戻り値:男性なら１、女性なら０
+;-------------------------------------------------
+@MALE2(ARG)
+#FUNCTION
+;
+;性転換している場合に備えて元の性別を見る
+;CSVで남자・반음반양・컨트보이
+IF CSVTALENT(NO:ARG, 140, CFLAG:0) || CSVTALENT(NO:ARG, 137, CFLAG:0) || CSVTALENT(NO:ARG, 172, CFLAG:0)
+	;個体差によって女体化・후타나리・쉬메일化した
+	IF DIFF_GET_TALENT(ARG,2) == 1 || DIFF_GET_TALENT(ARG,2) == 3 ||  DIFF_GET_TALENT(ARG,2) == 5
+		RETURNF 0
+	ELSE
+		RETURNF 1
+	ENDIF
+;CSVで후타나리
+ELSEIF CSVTALENT(NO:ARG, 139, CFLAG:0)
+	;個体差によって男体化・반음반양・컨트보이化した
+	SIF DIFF_GET_TALENT(ARG,2) == 0 || DIFF_GET_TALENT(ARG,2) == 2 ||  DIFF_GET_TALENT(ARG,2) == 4
+		RETURNF 1
+;CSVで女
+ELSE
+	;個体差によって男体化・반음반양・컨트보이化した
+	SIF DIFF_GET_TALENT(ARG,2) == 0 || DIFF_GET_TALENT(ARG,2) == 2 ||  DIFF_GET_TALENT(ARG,2) == 4
+		RETURNF 1
+ENDIF
+RETURNF 0
+
+;-------------------------------------------------
+;関数名:POSITION(ARG)
+;概　要:Ｖ수・Ａ수・挿入のどれが可能か（複数可能アリ）
+;引　数: ARG…キャラ登録番号
+;戻り値:0…いずれも不可　1…Ｖ수可能　2…Ａ수可能　3…Ｖ수Ａ수可能
+;4…挿入可能　5…Ｖ수挿入可能　6…Ａ수挿入可能　7…Ｖ수Ａ수挿入可能
+;（ビット演算で計算　000 001 010 011 100 101 110 111）
+;-------------------------------------------------
+@POSITION(ARG)
+#FUNCTION
+
+#DIM DYNAMIC ABLE_POSITION = 0
+
+;Ｖ수
+;공を持っていない
+IF TALENT:ARG:공 == 0
+	;Ｖがある　かつ　Ｖが開発されている
+	IF VAGINA(ARG) == 1 && ABL:ARG:V감각 >= 3
+		;처녀と재생처녀を持っていない
+		IF TALENT:ARG:처녀 == 0 && TALENT:ARG:재생처녀 == 0
+			ABLE_POSITION |= 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;Ａ수
+;공を持っていない
+IF TALENT:ARG:공 == 0
+	;백버진を持っていない　かつ　Ａが開発されている
+	IF TALENT:ARG:백버진 == 0 && ABL:ARG:A감각 >= 3
+		ABLE_POSITION |= 2
+	ENDIF
+ENDIF
+
+;挿入
+;수と오메가を持っていない
+IF TALENT:ARG:수 == 0 && TALENT:ARG:오메가 == 0
+	;페니스がある　かつ　Ｃが開発されている
+	IF PENIS(ARG) == 1 && ABL:ARG:C감각 >= 3
+		;동정を持っていない
+		IF TALENT:ARG:동정 == 0
+			ABLE_POSITION |= 4
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURNF ABLE_POSITION
+
+;-------------------------------------------------
+;関数名:PRIORITY_POSITION(ARG)
+;概　要:Ｖ수・Ａ수・挿入のどれを優先するか
+;引　数: ARG…キャラ登録番号
+;戻り値:0…いずれも不可　1…Ｖ수優先　2…Ａ수優先　3…挿入優先
+;-------------------------------------------------
+@PRIORITY_POSITION(ARG)
+#FUNCTION
+
+#DIM DYNAMIC POSITION
+;どのポジションが可能か
+POSITION = POSITION(ARG)
+
+;いずれも不可
+SIF POSITION == 0
+	RETURNF 0
+;Ｖ수のみ可能
+SIF POSITION == 1
+	RETURNF 1
+;Ａ수のみ可能
+SIF POSITION == 2
+	RETURNF 2
+;挿入のみ可能
+SIF POSITION == 4
+	RETURNF 3
+
+;Ｖ수とＡ수が可能
+IF POSITION == 3
+	;元の性別に限らず、能力と経験で優先する方を決める　同値ならＶ優先
+	;Ｖ優先
+	IF (ABL:ARG:V감각 * 10 + EXP:ARG:V경험 + EXP:ARG:V사정경험) >= (ABL:ARG:A감각 * 10 + EXP:ARG:A경험 + EXP:ARG:A사정경험)
+		RETURNF 1
+	;Ａ優先
+	ELSE
+		RETURNF 2
+	ENDIF
+;수と挿入が可能
+ELSEIF POSITION >= 4
+	;元の性別に限らず、能力と経験で優先する方を決める
+	;挿入優先　同値の場合含む
+	{
+		IF (ABL:ARG:C감각 * 10 + EXP:ARG:사정경험 + EXP:ARG:삽입경험) >= (ABL:ARG:V감각 * 10 + EXP:ARG:V사정경험 + (EXP:ARG:성교경험 - EXP:ARG:삽입경험))
+		|| (ABL:ARG:C감각 * 10 + EXP:ARG:사정경험 + EXP:ARG:삽입경험) >= (ABL:ARG:A감각 * 10 + EXP:ARG:A사정경험 + (EXP:ARG:성교경험 - EXP:ARG:삽입경험))
+	}
+		RETURNF 3
+	;Ｖ優先　同値の場合含む
+	ELSEIF (ABL:ARG:V감각 * 10 + EXP:ARG:V경험 + EXP:ARG:V사정경험) >= (ABL:ARG:A감각 * 10 + EXP:ARG:A경험 + EXP:ARG:A사정경험)
+		RETURNF 1
+	;Ａ優先
+	ELSE
+		RETURNF 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;関数名:ABLE_SHOOT(ARG)
+;概　要:사정が可能かどうか
+;夜イベントの３Ｐプレイで使う用
+;引　数: ARG…キャラ登録番号
+;戻り値:1…사정可能
+;-------------------------------------------------
+@ABLE_SHOOT(ARG)
+#FUNCTION
+
+SIF TALENT:ARG:아이사이즈
+	RETURNF 0
+
+SIF PENIS(ARG) == 0
+	RETURNF 0
+
+;사정残数
+SIF CFLAG:ARG:11 <= 0
+	RETURNF 0
+
+RETURNF 1
+
+;-------------------------------------------------
+;関数名: INTTU(ARG:0,ARG:1)
+;概　要:{引数1}の{引数2}桁目を求める
+;引　数:
+;ARG:0…元となる数(数値)
+;ARG:1…桁数(数値)
+;戻り値:数値
+;備考：CHARATU(文字列,数値)の数値verのようなものを作りたかった
+
+;例)引数1=56200 引数2=4のとき、56200%10000 = 6200 → 6200/ 1000 = 6
+;-------------------------------------------------
+@INTTU(ARG:0, ARG:1)
+#FUNCTION
+
+SIF ARG:1 <= 0
+	RETURNF 0
+
+LOCAL = ARG:0 % POWER(10, ARG:1) / POWER(10, ARG:1 - 1)
+
+RETURNF LOCAL
+
+;-------------------------------------------------------------------------------
+;    BARカラー化 (eraMeiQ外伝より)
+;-------------------------------------------------------------------------------
+;    例  PRINTFORM %PRINT_COLORBAR(40,100,8,%UNICODE(0x2584)%,%UNICODE(0x2584)%,,0x404040,)% 
+;        [===     ]
+;	引数はBARとほぼ一緒 + ARGSで描写文字の変更が可能(指定しない場合はBARと同じ仕様)
+;	ARG:6はバー色(0xFFFFFF形式で指定),
+;	ARG:7はバー背景色(0xFFFFFF形式で指定),
+;	ARG:8はバーグラデーション幅(バー色数値に10進で四則演算)
+;===============================================================================
+@PRINT_COLORBAR(ARG, ARG:1, ARG:2, ARGS = "*", ARGS:1 = ".", ARG:3, ARG:4, ARG:5 = 0)
+LOCAL:1 = ARG:1 / (ARG:2+ARG:2/32)
+LOCAL:2 = GETCOLOR()
+LOCAL:3 = COUNT
+
+REPEAT ARG:2
+ARG = ARG - LOCAL:1
+IF ARG >= 0
+	SETCOLOR ARG:3 - (ARG:5 * COUNT)
+	PRINTFORM %ARGS%
+ELSE
+	SETCOLOR ARG:4
+	PRINTFORM %ARGS:1%
+ENDIF
+REND
+COUNT = LOCAL:3
+SETCOLOR LOCAL:2
+
+@PRINT_TARGET_SHOOT_COLORBAR
+LOCAL:1 = MAXBASE:사정 / 33
+LOCAL:2 = GETCOLOR()
+LOCAL:3 = BASE:사정
+LOCALS = %UNICODE(0x2583)%
+FOR LOCAL, 0, 32
+	LOCAL:3 = LOCAL:3 - LOCAL:1
+	;再装填期間
+	IF CFLAG:9 > 0
+		;ゲージが貯まってる
+		IF LOCAL:3 >= 0
+			;10000以上
+			IF LOCAL > 22
+				SETCOLOR 0xb3b3b3
+			ELSE
+				SETCOLOR 0x666666
+			ENDIF
+		ELSE
+			SIF LOCAL > 22
+				LOCALS = %UNICODE(0x2581)%
+			SETCOLOR 0x333333
+		ENDIF
+	ELSE
+		;ゲージが貯まってる
+		IF LOCAL:3 >= 0
+			;10000以上
+			IF LOCAL > 22
+				SETCOLOR 0xFF99FF
+			ELSE
+				SETCOLOR 0xFFCCFF
+			ENDIF
+		ELSE
+			SIF LOCAL > 22
+				LOCALS = %UNICODE(0x2581)%
+			SETCOLOR 0x300020
+		ENDIF
+	ENDIF
+	PRINTFORM %LOCALS%
+NEXT
+SETCOLOR LOCAL:2
+
+;-------------------------------------------------
+;カスタムバー用色セット関数@BARCOLORSET(eraMeiQ外伝より)
+;PRINT_COLORBARのARG:3に利用し、ARG;4にRESULTを使う
+;-------------------------------------------------
+@BARCOLORSET, ARGS
+#FUNCTION
+ ;LOCALに色を代入
+SELECTCASE ARGS
+	CASE "濃赤"
+		RESULT:1 = 0x701000
+		RETURNF 0xF06050
+	CASE "赤"
+		RESULT:1 = 0x502020
+		RETURNF 0xC07070
+	CASE "青"
+		RESULT:1 = 0x202050
+		RETURNF 0x7070C0
+	CASE "紺"
+		RESULT:1 = 0x000000
+		RETURNF 0x6666FF
+	CASE "緑"
+		RESULT:1 = 0x205020
+		RETURNF 0x66DD66
+	CASE "紫"
+		RESULT:1 = 0x502050
+		RETURNF 0xC070C0
+	CASE "黄"
+		RESULT:1 = 0x505020
+		RETURNF 0xC0B050
+	CASE "桃"
+		RESULT:1 = 0x300020
+		RETURNF 0xFFCCFF
+	CASE "青緑"
+		RESULT:1 = 0x205050
+		RETURNF 0x70C0C0
+	CASE "灰"
+		RESULT:1 = 0x333333
+		RETURNF 0x666666
+	 ;白
+	 CASEELSE
+		RESULT:1 = 0x202020
+		RETURNF 0xC0C0C0
+ENDSELECT
+
+@PRINT_BASE_SHOP(ARG)
+PRINTFORM 　체력%UNICODE(0x208D)%
+CALL PRINT_COLORBAR,BASE:ARG:체력,MAXBASE:ARG:체력,10,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("赤"),RESULT:1, 327685
+PRINTFORM %UNICODE(0x208E)%
+PRINTFORM  {BASE:ARG:체력}/{MAXBASE:ARG:체력} 
+PRINTFORM 기력%UNICODE(0x208D)%
+CALL PRINT_COLORBAR,BASE:ARG:기력,MAXBASE:ARG:기력,10,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("紺"),RESULT:1, 327685
+PRINTFORM %UNICODE(0x208E)%
+PRINTFORML  {BASE:ARG:기력}/{MAXBASE:ARG:기력} \@ TALENT:ARG:기절 ? [기절] # \@
+
+;-------------------------------------------------
+;漢数字表記@MONEY_FORM
+;-------------------------------------------------
+@MONEY_FORM(ARG)
+#FUNCTIONS
+;～億～万表記
+LOCALS:1 = {ABS(ARG)}
+STRLENS LOCALS:1
+LOCAL:2 = RESULT
+LOCALS = 
+LOCAL:1 = 0
+
+FOR LOCAL,LOCAL:2,0,-1
+	IF LOCALS == ""
+		SUBSTRING LOCALS:1,LOCAL-1,1
+		IF RESULTS != "0"
+			SELECTCASE LOCAL:1 / 4
+				CASE 1
+					LOCALS:2 = 万
+				CASEELSE
+					LOCALS:2 = 
+			ENDSELECT
+			LOCAL:12 = LOCAL:1 % 4
+			IF LOCAL:12 > 0
+				LOCALS = %RESULTS%%"0" * LOCAL:12%%LOCALS:2%
+			ELSE
+				LOCALS = %RESULTS%%LOCALS:2%
+			ENDIF
+		ENDIF
+	ELSE
+		SIF LOCAL:1 == 4
+			LOCALS = 万%LOCALS%
+		SUBSTRING LOCALS:1,LOCAL-1,1
+		LOCALS = %RESULTS%%LOCALS%
+	ENDIF
+	LOCAL:1++
+NEXT
+RETURNF LOCALS
+

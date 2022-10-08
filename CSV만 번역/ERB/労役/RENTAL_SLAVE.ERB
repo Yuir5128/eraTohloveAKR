@@ -1,0 +1,2278 @@
+﻿;====================================================================
+;奴隷レンタルの処理
+;期日に応じて奴隷を顧客に貸し出します。より순종で헌신적な奴隷が好まれ、レンタル金額が高くなります。
+@RENTAL_SLAVE
+;====================================================================
+;使用する変数の初期化
+A = 0
+B = 0
+S = 0
+V = 0
+C = 0
+D = 0
+J = 0
+
+DRAWLINE
+PRINTL 【 奴隷のレンタル 】
+PRINTL １日～最大１０日までの期間、奴隷の貸し出しを行うサービスです。
+PRINTL 多彩なプレイをお楽しみ頂けますが、基本料金は高めですのでご注意下さい。
+PRINTL 
+PRINTL ■ 基本サービス
+PRINTL 　：[性的奉仕全般] [挿入] [애널ファック] [逆セックス]
+PRINTL 　：[野外노출] [ソフトSM（簡単な拘束等、軽いものに限る）]
+PRINTL 
+PRINTL ■ 選択されている追加オプション
+PRINT 　：
+
+SIF (FLAG:160 & 1) == 0
+	FONTSTYLE 4
+PRINT [처녀貫通]
+FONTSTYLE LOCAL:4
+PRINT  
+
+SIF (FLAG:160 & 2) == 0
+	FONTSTYLE 4
+PRINT [백버진貫通]
+FONTSTYLE LOCAL:4
+PRINT  
+
+SIF (FLAG:160 & 4) == 0
+	FONTSTYLE 4
+PRINT [동정食い]
+FONTSTYLE LOCAL:4
+PRINT  
+
+SIF (FLAG:160 & 8) == 0
+	FONTSTYLE 4
+PRINTL [ハードSM]
+FONTSTYLE LOCAL:4
+
+PRINT 　：
+
+SIF (FLAG:160 & 192) == 0
+	FONTSTYLE 4
+PRINT [聖水プレイ]
+FONTSTYLE LOCAL:4
+PRINT  
+
+SIF (FLAG:160 & 768) == 0
+	FONTSTYLE 4
+PRINT [黄金プレイ]
+FONTSTYLE LOCAL:4
+PRINT  
+
+SIF (FLAG:160 & 16) == 0
+	FONTSTYLE 4
+PRINT [複数人プレイ]
+FONTSTYLE LOCAL:4
+PRINT  
+
+SIF (FLAG:160 & 32) == 0
+	FONTSTYLE 4
+PRINTL [수간]
+FONTSTYLE LOCAL:4
+
+DRAWLINE
+
+
+;--------------------------------------------------------
+;レンタル対象の選択
+;--------------------------------------------------------
+PRINTL レンタルする奴隷を選択してください
+REPEAT CHARANUM
+	SIF COUNT == MASTER
+		CONTINUE
+	SIF CFLAG:COUNT:1 < 2
+		CONTINUE
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+	C = COUNT
+	CALL CHECK_CHILD_CARE
+	SIF RESULT == 1
+		CONTINUE
+	SIF CFLAG:COUNT:1 == 2 && (CFLAG:COUNT:151 & 16) && BASE:COUNT:체력 > 500
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%
+REND
+PRINTL [ 999] - オプションを選択する
+PRINTL [1000] - 戻る
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 999
+	CALL OPTION_WORK
+	CALL RENTAL_SLAVE
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+ELSEIF RESULT == MASTER
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:1 < 2
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:12 > 0
+	GOTO INPUT_LOOP
+ELSEIF ((CFLAG:RESULT:151 & 16) == 0) || BASE:RESULT:체력 <= 500
+	GOTO INPUT_LOOP
+ELSE
+	A = RESULT
+ENDIF
+
+
+SIF A == 0
+	RETURN 0
+
+;--------------------------------------------------------
+;レンタル期間の選択
+;--------------------------------------------------------
+PRINTL レンタル期間を選択してください
+SIF BASE:A:체력 > 500
+	PRINTL [0]   -   １日
+SIF BASE:A:체력 > 800
+	PRINTL [1]   -   ３日
+SIF BASE:A:체력 > 1000
+	PRINTL [2]   -   ５日
+SIF BASE:A:체력 > 1500
+	PRINTL [3]   - １０日
+PRINTL [100] -   戻る
+$INPUT_LOOP2
+INPUT
+IF RESULT == 0 && BASE:A:체력 > 500
+	B = 1
+ELSEIF RESULT == 1 && BASE:A:체력 > 800
+	B = 3
+ELSEIF RESULT == 2 && BASE:A:체력 > 1000
+	B = 5
+ELSEIF RESULT == 3 && BASE:A:체력 > 1500
+	B = 10
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP2
+ENDIF
+
+
+;--------------------------------------------------------
+;避妊具と정조대の選択
+;--------------------------------------------------------
+PRINTL 
+PRINTL 避妊具／정조대の設定を選択してください
+PRINT □ 現在の状態 … 
+SIF TEQUIP:A:정조대
+	PRINT [정조대装着中] 
+SIF CFLAG:A:108
+	PRINT [避妊結界有効] 
+SIF !CFLAG:A:108 && !TEQUIP:A:정조대
+	PRINT 避妊具は選択されていません
+PRINTL 
+PRINTL [ 0] - 避妊しない
+PRINTL [ 1] - 콘돔を着用
+SIF MONEY > 2000
+	PRINTL [ 2] - 避妊結界（￥-2000）
+SIF ITEM:30
+	PRINTL [ 3] - 정조대（C・V使用不可／売上DOWN↓）
+PRINTL [100] - 戻る
+$INPUT_LOOP_SKIN
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSEIF RESULT == 0
+	J = 0
+	IF TEQUIP:A:정조대 || CFLAG:A:108
+		SIF TEQUIP:A:정조대
+			PRINT [정조대]を外し
+		SIF TEQUIP:A:정조대 && CFLAG:A:108
+			PRINT 、
+		SIF CFLAG:A:108
+			PRINT [避妊結界]の効果を消し
+		PRINTL ます
+	ELSE
+		PRINTL 避妊措置をせず労役を行わせます
+	ENDIF
+	TEQUIP:A:정조대 = 0
+	CFLAG:A:108 = 0
+	IF TALENT:A:쉬메일 || (!TALENT:A:오메가 && MALE(A))
+	ELSE
+		PRINTL 中出しされると임신をする可能性があります
+	ENDIF
+ELSEIF RESULT == 1
+	J = 1
+	PRINTL [콘돔]の着用を義務付けます
+ELSEIF RESULT == 2 && MONEY > 2000
+	J = 2
+	SIF TEQUIP:A:정조대
+		PRINT [정조대]を外し、
+	PRINTL [避妊結界]を使用します
+	TEQUIP:A:정조대 = 0
+	CFLAG:A:108 = 1
+	MONEY -= 2000
+ELSEIF RESULT == 3 && ITEM:30
+	J = 3
+	IF TEQUIP:A:정조대
+		PRINTL [정조대]を装着したまま労役を行わせます
+	ELSE
+		PRINTL [정조대]を装着させます
+		TEQUIP:A:정조대 = 1
+	ENDIF
+ELSE
+	GOTO INPUT_LOOP_SKIN
+ENDIF
+
+
+;--------------------------------------------------------
+;レンタル金額の計算
+;--------------------------------------------------------
+;ABLによる基礎値計算
+V = 0
+;ABL:순종をみる
+IF ABL:A:순종 == 0
+	V = 0
+ELSEIF ABL:A:순종 == 1
+	V = 1200
+ELSEIF ABL:A:순종 == 2
+	V = 1800
+ELSEIF ABL:A:순종 == 3
+	V = 2500
+ELSEIF ABL:A:순종 == 4
+	V = 3300
+ELSEIF ABL:A:순종 == 5
+	V = 4200
+ELSEIF ABL:A:순종 == 6
+	V = 5200
+ELSEIF ABL:A:순종 == 7
+	V = 6300
+ELSEIF ABL:A:순종 == 8
+	V = 7500
+ELSEIF ABL:A:순종 == 9
+	V = 8800
+ELSE
+	V = 12000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:0%{ABL:A:순종}LV +{V}
+S += V
+
+
+;ABL:욕망をみる
+IF ABL:A:욕망 == 0
+	V = 0
+ELSEIF ABL:A:욕망 == 1
+	V = 1000
+ELSEIF ABL:A:욕망 == 2
+	V = 1500
+ELSEIF ABL:A:욕망 == 3
+	V = 2100
+ELSEIF ABL:A:욕망 == 4
+	V = 2800
+ELSEIF ABL:A:욕망 == 5
+	V = 3600
+ELSEIF ABL:A:욕망 == 6
+	V = 4500
+ELSEIF ABL:A:욕망 == 7
+	V = 5500
+ELSEIF ABL:A:욕망 == 8
+	V = 6700
+ELSEIF ABL:A:욕망 == 9
+	V = 8000
+ELSE
+	V = 10000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:1%{ABL:A:욕망}LV +{V}
+S += V
+
+
+;ABL:기교をみる
+IF ABL:A:기교 == 0
+	V = 0
+ELSEIF ABL:A:기교 == 1
+	V = 800
+ELSEIF ABL:A:기교 == 2
+	V = 1200
+ELSEIF ABL:A:기교 == 3
+	V = 1700
+ELSEIF ABL:A:기교 == 4
+	V = 2300
+ELSEIF ABL:A:기교 == 5
+	V = 3000
+ELSEIF ABL:A:기교 == 6
+	V = 3800
+ELSEIF ABL:A:기교 == 7
+	V = 4600
+ELSEIF ABL:A:기교 == 8
+	V = 5500
+ELSEIF ABL:A:기교 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:2%{ABL:A:기교}LV +{V}
+S += V
+
+
+;ABL:C감각をみる
+IF ABL:A:C감각 == 0
+	V = 0
+ELSEIF ABL:A:C감각 == 1
+	V = 800
+ELSEIF ABL:A:C감각 == 2
+	V = 1200
+ELSEIF ABL:A:C감각 == 3
+	V = 1700
+ELSEIF ABL:A:C감각 == 4
+	V = 2300
+ELSEIF ABL:A:C감각 == 5
+	V = 3000
+ELSEIF ABL:A:C감각 == 6
+	V = 3800
+ELSEIF ABL:A:C감각 == 7
+	V = 4600
+ELSEIF ABL:A:C감각 == 8
+	V = 5500
+ELSEIF ABL:A:C감각 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+;정조대ついてたら０に
+SIF TEQUIP:A:정조대
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:3%{ABL:A:C감각}LV +{V}
+S += V
+
+
+;ABL:V감각をみる
+IF ABL:A:V감각 == 0
+	V = 0
+ELSEIF ABL:A:V감각 == 1
+	V = 800
+ELSEIF ABL:A:V감각 == 2
+	V = 1200
+ELSEIF ABL:A:V감각 == 3
+	V = 1700
+ELSEIF ABL:A:V감각 == 4
+	V = 2300
+ELSEIF ABL:A:V감각 == 5
+	V = 3000
+ELSEIF ABL:A:V감각 == 6
+	V = 3800
+ELSEIF ABL:A:V감각 == 7
+	V = 4600
+ELSEIF ABL:A:V감각 == 8
+	V = 5500
+ELSEIF ABL:A:V감각 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+;공、정조대だったら０に
+SIF TALENT:A:공 || TEQUIP:A:정조대
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:4%{ABL:A:V감각}LV +{V}
+S += V
+
+
+;ABL:A감각をみる
+IF ABL:A:A감각 == 0
+	V = 0
+ELSEIF ABL:A:A감각 == 1
+	V = 800
+ELSEIF ABL:A:A감각 == 2
+	V = 1200
+ELSEIF ABL:A:A감각 == 3
+	V = 1700
+ELSEIF ABL:A:A감각 == 4
+	V = 2300
+ELSEIF ABL:A:A감각 == 5
+	V = 3000
+ELSEIF ABL:A:A감각 == 6
+	V = 3800
+ELSEIF ABL:A:A감각 == 7
+	V = 4600
+ELSEIF ABL:A:A감각 == 8
+	V = 5500
+ELSEIF ABL:A:A감각 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+;공だったら０に
+SIF TALENT:A:공
+	V = 0
+SIF V > 0
+	PRINTFORML %ABLNAME:5%{ABL:A:A감각}LV +{V}
+S += V
+
+
+;ABL:B감각をみる
+IF ABL:A:B감각 == 0
+	V = 0
+ELSEIF ABL:A:B감각 == 1
+	V = 800
+ELSEIF ABL:A:B감각 == 2
+	V = 1200
+ELSEIF ABL:A:B감각 == 3
+	V = 1700
+ELSEIF ABL:A:B감각 == 4
+	V = 2300
+ELSEIF ABL:A:B감각 == 5
+	V = 3000
+ELSEIF ABL:A:B감각 == 6
+	V = 3800
+ELSEIF ABL:A:B감각 == 7
+	V = 4600
+ELSEIF ABL:A:B감각 == 8
+	V = 5500
+ELSEIF ABL:A:B감각 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:6%{ABL:A:B감각}LV +{V}
+S += V
+
+
+;ABL:봉사정신をみる
+IF ABL:A:봉사정신 == 0
+	V = 0
+ELSEIF ABL:A:봉사정신 == 1
+	V = 1200
+ELSEIF ABL:A:봉사정신 == 2
+	V = 1800
+ELSEIF ABL:A:봉사정신 == 3
+	V = 2500
+ELSEIF ABL:A:봉사정신 == 4
+	V = 3300
+ELSEIF ABL:A:봉사정신 == 5
+	V = 4200
+ELSEIF ABL:A:봉사정신 == 6
+	V = 5200
+ELSEIF ABL:A:봉사정신 == 7
+	V = 6300
+ELSEIF ABL:A:봉사정신 == 8
+	V = 7500
+ELSEIF ABL:A:봉사정신 == 9
+	V = 8800
+ELSE
+	V = 12000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:7%{ABL:A:봉사정신}LV +{V}
+S += V
+
+
+;ABL:노출벽をみる
+IF ABL:A:노출벽 == 0
+	V = 0
+ELSEIF ABL:A:노출벽 == 1
+	V = 800
+ELSEIF ABL:A:노출벽 == 2
+	V = 1200
+ELSEIF ABL:A:노출벽 == 3
+	V = 1700
+ELSEIF ABL:A:노출벽 == 4
+	V = 2300
+ELSEIF ABL:A:노출벽 == 5
+	V = 3000
+ELSEIF ABL:A:노출벽 == 6
+	V = 3800
+ELSEIF ABL:A:노출벽 == 7
+	V = 4600
+ELSEIF ABL:A:노출벽 == 8
+	V = 5500
+ELSEIF ABL:A:노출벽 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:8%{ABL:A:노출벽}LV +{V}
+S += V
+
+
+;ABL:마조끼をみる
+IF ABL:A:마조끼 == 0
+	V = 0
+ELSEIF ABL:A:마조끼 == 1
+	V = 1000
+ELSEIF ABL:A:마조끼 == 2
+	V = 1500
+ELSEIF ABL:A:마조끼 == 3
+	V = 2100
+ELSEIF ABL:A:마조끼 == 4
+	V = 2800
+ELSEIF ABL:A:마조끼 == 5
+	V = 3600
+ELSEIF ABL:A:마조끼 == 6
+	V = 4500
+ELSEIF ABL:A:마조끼 == 7
+	V = 5500
+ELSEIF ABL:A:마조끼 == 8
+	V = 6700
+ELSEIF ABL:A:마조끼 == 9
+	V = 8000
+ELSE
+	V = 10000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:9%{ABL:A:마조끼}LV +{V}
+S += V
+
+
+;ABL:새드끼をみる
+IF ABL:A:새드끼 == 0
+	V = 0
+ELSEIF ABL:A:새드끼 == 1
+	V = 800
+ELSEIF ABL:A:새드끼 == 2
+	V = 1200
+ELSEIF ABL:A:새드끼 == 3
+	V = 1700
+ELSEIF ABL:A:새드끼 == 4
+	V = 2300
+ELSEIF ABL:A:새드끼 == 5
+	V = 3000
+ELSEIF ABL:A:새드끼 == 6
+	V = 3800
+ELSEIF ABL:A:새드끼 == 7
+	V = 4600
+ELSEIF ABL:A:새드끼 == 8
+	V = 5500
+ELSEIF ABL:A:새드끼 == 9
+	V = 6500
+ELSE
+	V = 8000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:10%{ABL:A:새드끼}LV +{V}
+S += V
+
+
+;ABL:정액중독をみる
+IF ABL:A:정액중독 == 0
+	V = 0
+ELSEIF ABL:A:정액중독 == 1
+	V = 1500
+ELSEIF ABL:A:정액중독 == 2
+	V = 2200
+ELSEIF ABL:A:정액중독 == 3
+	V = 3000
+ELSEIF ABL:A:정액중독 == 4
+	V = 3900
+ELSEIF ABL:A:정액중독 == 5
+	V = 4900
+ELSEIF ABL:A:정액중독 == 6
+	V = 6000
+ELSEIF ABL:A:정액중독 == 7
+	V = 7200
+ELSEIF ABL:A:정액중독 == 8
+	V = 8500
+ELSEIF ABL:A:정액중독 == 9
+	V = 10000
+ELSE
+	V = 14000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:16%{ABL:A:정액중독}LV +{V}
+S += V
+
+
+;ABL:섹스중독をみる
+IF ABL:A:섹스중독 == 0
+	V = 0
+ELSEIF ABL:A:섹스중독 == 1
+	V = 1500
+ELSEIF ABL:A:섹스중독 == 2
+	V = 2200
+ELSEIF ABL:A:섹스중독 == 3
+	V = 3000
+ELSEIF ABL:A:섹스중독 == 4
+	V = 3900
+ELSEIF ABL:A:섹스중독 == 5
+	V = 4900
+ELSEIF ABL:A:섹스중독 == 6
+	V = 6000
+ELSEIF ABL:A:섹스중독 == 7
+	V = 7200
+ELSEIF ABL:A:섹스중독 == 8
+	V = 8500
+ELSEIF ABL:A:섹스중독 == 9
+	V = 10000
+ELSE
+	V = 14000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:18%{ABL:A:섹스중독}LV +{V}
+S += V
+
+IF ABL:A:스캇중독 == 0
+	V = 0
+ELSEIF ABL:A:스캇중독 == 1
+	V = 1500
+ELSEIF ABL:A:스캇중독 == 2
+	V = 2200
+ELSEIF ABL:A:스캇중독 == 3
+	V = 3000
+ELSEIF ABL:A:스캇중독 == 4
+	V = 3900
+ELSEIF ABL:A:스캇중독 == 5
+	V = 4900
+ELSEIF ABL:A:스캇중독 == 6
+	V = 6000
+ELSEIF ABL:A:스캇중독 == 7
+	V = 7200
+ELSEIF ABL:A:스캇중독 == 8
+	V = 8500
+ELSEIF ABL:A:스캇중독 == 9
+	V = 10000
+ELSE
+	V = 14000
+ENDIF
+SIF V > 0
+	PRINTFORML %ABLNAME:22%{ABL:A:스캇중독}LV +{V}
+S += V
+
+
+;--------------------------------------------------------
+;奴隷の素質を計算
+;--------------------------------------------------------
+V = 100
+;素質による売却額補正値計算
+;TALENT:처녀をみる
+IF TALENT:A:처녀
+	C = 100
+	V += 100
+	PRINTFORML %TALENTNAME:0% ＋{C}％
+ENDIF
+;TALENT:재생처녀をみる
+IF TALENT:A:재생처녀
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:1% ＋{C}％
+ENDIF
+;TALENT:백버진をみる
+IF TALENT:A:백버진
+	C = 100
+	V += 100
+	PRINTFORML %TALENTNAME:161% ＋{C}％
+ENDIF
+;素質による増減
+;陥落素質
+;연모
+IF TALENT:A:연모
+	C = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:3% －{C}％
+ENDIF
+;음란
+IF TALENT:A:음란
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:4% ＋{C}％
+ENDIF
+;복종
+IF TALENT:A:복종
+	C = 50
+	V += 50
+	PRINTFORML %TALENTNAME:5% ＋{C}％
+ENDIF
+;친애
+IF TALENT:A:친애
+	C = 80
+	V -= 80
+	PRINTFORML %TALENTNAME:6% －{C}％
+ENDIF
+;창부
+IF TALENT:A:창부
+	C = 60
+	V += 60
+	PRINTFORML %TALENTNAME:7% ＋{C}％
+ENDIF
+;예속
+IF TALENT:A:예속
+	C = 100
+	V += 100
+	PRINTFORML %TALENTNAME:8% ＋{C}％
+ENDIF
+
+;その他素質
+;겁쟁이
+IF TALENT:A:겁쟁이
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:10% －{C}％
+ENDIF
+;반항적
+IF TALENT:A:반항적
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:11% ＋{C}％
+ENDIF
+;꿋꿋함
+IF TALENT:A:꿋꿋함
+	C = 40
+	V += 40
+	PRINTFORML %TALENTNAME:12% ＋{C}％
+ENDIF
+;솔직함
+IF TALENT:A:솔직함
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:13% －{C}％
+ENDIF
+;얌전함
+IF TALENT:A:얌전함
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:14% －{C}％
+ENDIF
+;프라이드높음
+IF TALENT:A:프라이드높음
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:15% ＋{C}％
+ENDIF
+;건방짐
+IF TALENT:A:건방짐
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:16% ＋{C}％
+ENDIF
+;프라이드낮음
+IF TALENT:A:프라이드낮음
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:17% －{C}％
+ENDIF
+;츤데레
+IF TALENT:A:츤데레
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:18% ＋{C}％
+ENDIF
+;자제심
+IF TALENT:A:자제심
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:20% ＋{C}％
+ENDIF
+;무관심
+IF TALENT:A:무관심
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:21% －{C}％
+ENDIF
+;감정부족
+IF TALENT:A:감정부족
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:22% －{C}％
+ENDIF
+;호기심
+IF TALENT:A:호기심
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:23% ＋{C}％
+ENDIF
+;보수적
+IF TALENT:A:보수적
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:24% ＋{C}％
+ENDIF
+;일선을넘지않음
+IF TALENT:A:일선을넘지않음
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:27% ＋{C}％
+ENDIF
+;눈에띄고싶음
+IF TALENT:A:눈에띄고싶음
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:28% ＋{C}％
+ENDIF
+;정조관념
+IF TALENT:A:정조관념
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:30% ＋{C}％
+ENDIF
+;정조무관심
+IF TALENT:A:정조무관심
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:31% －{C}％
+ENDIF
+;해방
+IF TALENT:A:해방
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:33% ＋{C}％
+ENDIF
+;부끄럼쟁이
+IF TALENT:A:부끄럼쟁이
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:35% ＋{C}％
+ENDIF
+;수치심없음
+IF TALENT:A:수치심없음
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:36% －{C}％
+ENDIF
+;고통에강함
+IF TALENT:A:고통에강함
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:40% －{C}％
+ENDIF
+;고통에약함
+IF TALENT:A:고통에약함
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:41% ＋{C}％
+ENDIF
+;젖기쉬움
+IF TALENT:A:젖기쉬움
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:42% ＋{C}％
+ENDIF
+;젖기어려움
+IF TALENT:A:젖기어려움
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:43% －{C}％
+ENDIF
+;습득빠름
+IF TALENT:A:습득빠름
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:50% ＋{C}％
+ENDIF
+;습득느림
+IF TALENT:A:습득느림
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:51% －{C}％
+ENDIF
+;혀놀림
+IF TALENT:A:혀놀림
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:52% ＋{C}％
+ENDIF
+;독약내성
+IF TALENT:A:독약내성
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:56% －{C}％
+ENDIF
+;실금버릇
+IF TALENT:A:실금버릇
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:57% ＋{C}％
+ENDIF
+;자위하기쉬움
+IF TALENT:A:자위하기쉬움
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:60% ＋{C}％
+ENDIF
+;악취둔감
+IF TALENT:A:악취둔감
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:61% －{C}％
+ENDIF
+;악취민감
+IF TALENT:A:악취민감
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:62% ＋{C}％
+ENDIF
+;헌신적
+IF TALENT:A:헌신적
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:63% ＋{C}％
+ENDIF
+;더러움무시
+IF TALENT:A:더러움무시
+	C = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:64% －{C}％
+ENDIF
+;쾌감에솔직
+IF TALENT:A:쾌감에솔직
+	C = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:70% －{C}％
+ENDIF
+;쾌감을부정
+IF TALENT:A:쾌감을부정
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:71% ＋{C}％
+ENDIF
+;즉각함락
+IF TALENT:A:즉각함락
+	C = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:73% －{C}％
+ENDIF
+;자위광
+IF TALENT:A:자위광
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:74% ＋{C}％
+ENDIF
+;음란구멍
+IF TALENT:A:음란구멍
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:75% ＋{C}％
+ENDIF
+;항문광
+IF TALENT:A:항문광
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:76% ＋{C}％
+ENDIF
+;음란가슴
+IF TALENT:A:음란가슴
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:77% ＋{C}％
+ENDIF
+;섹스광
+IF TALENT:A:섹스광
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:78% ＋{C}％
+ENDIF
+;도착적
+IF TALENT:A:도착적
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:80% ＋{C}％
+ENDIF
+;남자혐오
+IF TALENT:A:남자혐오
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:82% －{C}％
+ENDIF
+;새드
+IF TALENT:A:새드
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:83% ＋{C}％
+ENDIF
+;마조
+IF TALENT:A:마조
+	C = 40
+	V += 40
+	PRINTFORML %TALENTNAME:84% ＋{C}％
+ENDIF
+;맹신
+IF TALENT:A:맹신
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:86% ＋{C}％
+ENDIF
+;여자혐오
+IF TALENT:A:여자혐오
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:88% －{C}％
+ENDIF
+;소악마
+IF TALENT:A:소악마
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:87% ＋{C}％
+ENDIF
+;요호
+IF TALENT:A:요호
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:91% ＋{C}％
+ENDIF
+;매력
+IF TALENT:A:매력
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:92% ＋{C}％
+ENDIF
+;수수께끼의매력
+IF TALENT:A:수수께끼의매력
+	C = 100
+	V += 100
+	PRINTFORML %TALENTNAME:94% ＋{C}％
+ENDIF
+;C둔감（感覚が4以上なら無効）
+IF TALENT:A:C둔감 && ABL:A:C감각 < 4
+	C = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:101% －{C}％
+ENDIF
+;C민감（感覚が3未満なら無効）
+IF TALENT:A:C민감 && ABL:A:C감각 >= 3
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:102% ＋{C}％
+ENDIF
+;V둔감（感覚が4以上なら無効）
+IF TALENT:A:V둔감 && ABL:A:V감각 < 4
+	C = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:103% －{C}％
+ENDIF
+;V민감（感覚が3未満なら無効）
+IF TALENT:A:V민감 && ABL:A:V감각 >= 3
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:104% ＋{C}％
+ENDIF
+;A둔감（感覚が4以上なら無効）
+IF TALENT:A:A둔감 && ABL:A:A감각 < 4
+	C = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:105% －{C}％
+ENDIF
+;A민감（感覚が3未満なら無効）
+IF TALENT:A:A민감 && ABL:A:A감각 >= 3
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:106% ＋{C}％
+ENDIF
+;B둔감（感覚が4以上なら無効）
+IF TALENT:A:B둔감 && ABL:A:B감각 < 4
+	C = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:107% －{C}％
+ENDIF
+;B민감（感覚が3未満なら無効）
+IF TALENT:A:B민감 && ABL:A:B감각 >= 3
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:108% ＋{C}％
+ENDIF
+;빈유
+IF TALENT:A:빈유
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:109% －{C}％
+ENDIF
+;절벽
+IF TALENT:A:절벽
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:110% ＋{C}％
+ENDIF
+;거유
+IF TALENT:A:거유
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:111% ＋{C}％
+ENDIF
+;폭유
+IF TALENT:A:폭유
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:112% ＋{C}％
+ENDIF
+;함몰유두
+IF TALENT:A:함몰유두
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:120% ＋{F}％
+ENDIF
+;회복빠름
+IF TALENT:A:회복빠름
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:130% ＋{C}％
+ENDIF
+;회복느림
+IF TALENT:A:회복느림
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:131% －{C}％
+ENDIF
+;흡혈귀
+IF TALENT:A:흡혈귀
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:132% ＋{C}％
+ENDIF
+;동물귀
+IF TALENT:A:동물귀
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:143% ＋{C}％
+ENDIF
+;인기
+IF TALENT:A:인기
+	C = 50
+	V += 50
+	PRINTFORML %TALENTNAME:145% ＋{C}％
+ENDIF
+;불사신
+IF TALENT:A:불사신
+	C = 70
+	V += 70
+	PRINTFORML %TALENTNAME:147% ＋{C}％
+ENDIF
+;모유체질
+IF TALENT:A:모유체질
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:149% ＋{C}％
+ENDIF
+;발정기
+IF TALENT:A:발정기
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:171% ＋{C}％
+ENDIF
+;극
+IF TALENT:A:극
+	C = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:180% ＋{C}％
+ENDIF
+
+
+;補正値が0以下の場合は1にする
+SIF V < 0
+	V = 1
+
+PRINTFORML 最終倍率 {V}％
+
+;補正値の適用
+S *= V
+S /= 100
+
+;붕괴,광기,임신は報酬をかなり低くする（순종によって、80％まで回復）
+IF TALENT:A:붕괴 || TALENT:A:광기 || TALENT:A:임신
+PRINTL 
+	IF TALENT:A:붕괴
+		S *= ABL:A:순종
+		TIMES S , 0.08
+		Z = ABL:A:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:9% ×{Z}％
+	ELSEIF TALENT:A:광기
+		S *= ABL:A:순종
+		TIMES S , 0.08
+		Z = ABL:A:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:141% ×{Z}％
+	ELSEIF TALENT:A:임신
+		S *= ABL:A:순종
+		TIMES S , 0.08
+		Z = ABL:A:순종
+		Z *= 8
+		PRINTFORML %TALENTNAME:153% ×{Z}％
+	ENDIF
+PRINTL 
+ENDIF
+
+;難易度処理
+;EASY
+IF FLAG:4 == 1
+	PRINTFORML 難易度:EASY ×120％
+	TIMES S , 1.20
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES S , 1.00
+;HARD
+ELSEIF FLAG:4 == 3
+	PRINTFORML 難易度:HARD ×80％
+	TIMES S , 0.80
+ENDIF
+
+;콘돔の場合は、レンタル額にペナルティ補正がかかる
+SIF J == 1
+	TIMES S , 0.80
+
+;정조대ついてる場合、レンタル額にペナルティ
+SIF TEQUIP:A:정조대
+	TIMES S , 0.60
+
+IF S > 0
+	PRINTFORML %CALLNAME:A%のレンタル基本額は{S}고슈금になります
+ELSE
+	PRINTFORMW レンタル額が0고슈금を下回ったので、中止します
+	RETURN 0
+ENDIF
+
+
+;--------------------------------------------------------
+;レンタルを実行するか？
+;--------------------------------------------------------
+PRINTFORML %CALLNAME:A%をレンタルしますか？
+PRINTL [0] -   実行する
+PRINTL [100] - やめる
+$INPUT_LOOP_4
+INPUT
+IF RESULT == 0
+	PRINTFORML %CALLNAME:A%をレンタルしました
+	
+	;このタイミングでプレイ内容を判定します
+	;（労役中にオプションが変更される可能性があるため）
+	CALL RENTAL_PLAY_CHECK
+	
+	;労役フラグをレンタルに設定
+	CFLAG:A:12 = 1
+	CFLAG:A:13 = DAY+B
+	;日数と金額保存
+	CFLAG:A:14 = B
+	CFLAG:A:15 = S
+	
+	;イベント입上の表示
+	T = TARGET
+	TARGET = A
+	TFLAG:13 = 68
+	CALL KOJO_MESSAGE_EVENT
+	TARGET = T
+	SIF A == TARGET
+		TARGET = -1
+	SIF A == ASSI
+		ASSI = -1
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP_4
+ENDIF
+
+
+
+
+;====================================================================
+;プレイ内容の判定
+;====================================================================
+@RENTAL_PLAY_CHECK
+
+;-----------------------
+;奴隷の수(LOCAL:1)공(LOCAL:2)保存
+;-----------------------
+IF TALENT:A:공
+	LOCAL:2 = 1
+ELSEIF TALENT:A:수 || TALENT:A:오메가
+	LOCAL:1 = 1
+ELSE
+	IF !RAND:5
+		LOCAL:2 = 1
+	ELSE
+		LOCAL:1 = 1
+	ENDIF
+ENDIF
+
+;-----------------------
+;客のドＳ(LOCAL:3)、Ｓ(LOCAL:4)、普通(LOCAL:5)、Ｍ(LOCAL:6)
+;-----------------------
+;奴隷が공
+IF LOCAL:2
+	;Ｍの客が増える
+	IF RAND:10 < ABL:A:새드끼
+		LOCAL:6 = 1
+	;でなければ普通の客
+	ELSE
+		LOCAL:5 = 1
+	ENDIF
+;奴隷が수
+ELSE
+	K:1 = RAND:10
+	;ドＳ
+	IF K:1 < 2
+		LOCAL:3 = 1
+	;Ｓの客が増える
+	ELSEIF K:1 < ABL:A:마조끼
+		LOCAL:4 = 1
+	;でなければ普通の客
+	ELSE
+		LOCAL:5 = 1
+	ENDIF
+ENDIF
+
+;-----------------------
+;メインとなるプレイの判定
+;-----------------------
+;수간（奴隷수のみ）
+IF RAND:12 == 0 && (FLAG:160 & 32) && LOCAL:1
+	CFLAG:A:152 |= 1
+;スカトロ（奴隷수のみ）
+ELSEIF RAND:11 == 0 && (FLAG:160 & 960) && LOCAL:1
+	CFLAG:A:152 |= 2
+;ハードSM
+ELSEIF RAND:10 == 0 && (FLAG:160 & 8) && (LOCAL:4 || LOCAL:6)
+	;客がドＳ
+	IF LOCAL:4
+		CFLAG:A:152 |= 8
+	;客がＭ
+	ELSE
+		CFLAG:A:152 |= 4
+	ENDIF
+;複数プレイ
+ELSEIF RAND:9 == 0 && (FLAG:160 & 16)
+	;奴隷공
+	IF LOCAL:2
+		CFLAG:A:152 |= 64
+	;奴隷수
+	ELSE
+		CFLAG:A:152 |= 128
+	ENDIF
+;ソフトSM
+ELSEIF RAND:8 == 0 && (LOCAL:3 || LOCAL:6)
+	;客がＳ
+	IF LOCAL:3
+		CFLAG:A:152 |= 32
+	;客がＭ
+	ELSE
+		CFLAG:A:152 |= 16
+	ENDIF
+;フェチ。挿入なし
+ELSEIF RAND:7 == 0
+	CFLAG:A:152 |= 256
+;羞恥系
+ELSEIF RAND:6 == 0
+	CFLAG:A:152 |= 512
+;快楽責め
+ELSEIF RAND:5 == 0
+	;ランダムで焦らし責めに
+	IF TEQUIP:A:정조대 || !RAND:3
+		CFLAG:A:152 |= 4096
+	ELSE
+		CFLAG:A:152 |= 1024
+	ENDIF
+;何もなかった（いちゃいちゃ含む）
+ELSE
+	CFLAG:A:152 = 0
+ENDIF
+
+
+;-----------------------
+;実際に行われたプレイの詳細
+;-----------------------
+;日数によって施行回数が異なる
+LOCAL = B*2
+X = 0
+
+;-----------------------
+;メインとなるプレイの判定
+;-----------------------
+;수간（수）		CFLAG:A:152 & 1
+;スカトロ（수）	CFLAG:A:152 & 2
+;ハードSM（공）	CFLAG:A:152 & 4
+;ハードSM（수）	CFLAG:A:152 & 8
+;ソフトSM（공）	CFLAG:A:152 & 16
+;ソフトSM（수）	CFLAG:A:152 & 32
+;複数人（공）		CFLAG:A:152 & 64
+;複数人（수）		CFLAG:A:152 & 128
+;フェチ。挿入なし	CFLAG:A:152 & 256
+;羞恥系				CFLAG:A:152 & 512
+;快楽責め			CFLAG:A:152 & 1024
+;焦らし責め			CFLAG:A:152 & 4096
+;何もなかった		CFLAG:A:152 & 0
+
+;性的奉仕(受)	CFLAG:A:160
+;性的奉仕(攻)	CFLAG:A:161
+;Ｖセックス		CFLAG:A:162
+;Ａセックス		CFLAG:A:163
+;逆セックス		CFLAG:A:164
+;처녀貫通		CFLAG:A:165
+;Ａ처녀貫通		CFLAG:A:166
+;동정食い		CFLAG:A:167
+;ソフトSM(受)	CFLAG:A:168
+;ソフトSM(攻)	CFLAG:A:169
+;ハードSM(受)	CFLAG:A:170
+;ハードSM(攻)	CFLAG:A:171
+;羞恥心			CFLAG:A:172
+;複数人(受)		CFLAG:A:173
+;複数人(攻)		CFLAG:A:174
+;수간			CFLAG:A:175
+;放尿鑑賞		CFLAG:A:176
+;飲尿プレイ		CFLAG:A:177
+;관장プレイ		CFLAG:A:178
+;食糞			CFLAG:A:179
+
+CFLAG:A:160 = 0
+CFLAG:A:161 = 0
+CFLAG:A:162 = 0
+CFLAG:A:163 = 0
+CFLAG:A:164 = 0
+CFLAG:A:165 = 0
+CFLAG:A:166 = 0
+CFLAG:A:167 = 0
+CFLAG:A:168 = 0
+CFLAG:A:169 = 0
+CFLAG:A:170 = 0
+CFLAG:A:171 = 0
+CFLAG:A:172 = 0
+CFLAG:A:173 = 0
+CFLAG:A:174 = 0
+CFLAG:A:175 = 0
+CFLAG:A:176 = 0
+CFLAG:A:177 = 0
+CFLAG:A:178 = 0
+CFLAG:A:179 = 0
+
+
+;--------------------------------------------------------
+REPEAT 30
+	;最大施行回数超えたら抜ける
+	IF X == LOCAL
+		BREAK
+	;체력ないと休憩。休憩すると체력回復
+	ELSEIF BASE:A:체력 < 500
+		IF TALENT:A:회복빠름 || TALENT:A:창부 || TALENT:A:예속 || ABL:A:마조끼 >= 5
+			BASE:A:체력 += 300
+		ELSEIF TALENT:A:회복느림 || TALENT:A:발정기 || ABL:A:마조끼 < 3
+			BASE:A:체력 += 100
+		ELSE
+			BASE:A:체력 += 200
+		ENDIF
+	;なんもなければプレイ判定
+	ELSE
+		;-----------------------
+		;수간
+		;-----------------------
+		IF CFLAG:A:152 & 1
+			CFLAG:A:175 += 1
+			;余裕
+			IF EXP:수간경험 >= EXPLV:5
+				BASE:A:체력 -= 100
+			;疲れる
+			ELSEIF EXP:수간경험 < EXPLV:2
+				BASE:A:체력 -= 300
+			ELSE
+				BASE:A:체력 -= 200
+			ENDIF
+		ENDIF
+		
+		;-----------------------
+		;スカトロ
+		;-----------------------
+		IF CFLAG:A:152 & 2
+			;-----------------------
+			;食糞プレイ
+			;-----------------------
+			IF (FLAG:160 & 512) && LOCAL:4 && !RAND:3
+				CFLAG:A:179 += 1
+				;余裕
+				IF ABL:A:마조끼 >= 5 || TALENT:A:마조 || EXP:A:식분경험 >= 50 || ABL:A:스캇중독 >= 3
+					BASE:A:체력 -= 200
+				;疲れる
+				ELSEIF ABL:A:마조끼 < 3 || EXP:A:식분경험 < 20
+					BASE:A:체력 -= 500
+				ELSE
+					BASE:A:체력 -= 350
+				ENDIF
+			ENDIF
+			
+			;-----------------------
+			;관장プレイ
+			;-----------------------
+			IF (FLAG:160 & 256) && ((LOCAL:3 && !RAND:2) || LOCAL:4)
+				CFLAG:A:178 += 1
+				;余裕
+				IF ABL:A:마조끼 >= 5 || TALENT:A:마조 || EXP:A:관장경험 >= 50 || ABL:A:스캇중독 >= 3
+					BASE:A:체력 -= 200
+					CFLAG:A:172 += 1
+				;疲れる
+				ELSEIF ABL:A:마조끼 < 3 || EXP:A:관장경험 < 20
+					BASE:A:체력 -= 500
+					CFLAG:A:172 += 5
+				ELSE
+					BASE:A:체력 -= 350
+					CFLAG:A:172 += 3
+				ENDIF
+			ENDIF
+			
+			;-----------------------
+			;飲尿プレイ
+			;-----------------------
+			IF (FLAG:160 & 128) && ((LOCAL:3 && !RAND:3) || (LOCAL:4 && !RAND:2))
+				CFLAG:A:177 += 1
+				;余裕
+				IF ABL:A:마조끼 >= 5 || TALENT:A:마조 || EXP:A:음뇨경험 >= 50 || ABL:A:스캇중독 >= 3
+					BASE:A:체력 -= 50
+				;疲れる
+				ELSEIF ABL:A:마조끼 < 3 || EXP:A:음뇨경험 < 10
+					BASE:A:체력 -= 300
+				ELSE
+					BASE:A:체력 -= 150
+				ENDIF
+			ENDIF
+			
+			;-----------------------
+			;放尿鑑賞
+			;-----------------------
+			IF (FLAG:160 & 64) && !RAND:3
+				CFLAG:A:176 += 1
+				;余裕
+				IF ABL:A:마조끼 >= 5 || TALENT:A:마조 || EXP:A:배뇨경험 >= 50 || ABL:A:스캇중독 >= 3
+					BASE:A:체력 -= 50
+					CFLAG:A:172 += 1
+				;疲れる
+				ELSEIF ABL:A:마조끼 < 3 || EXP:A:배뇨경험 < 20
+					BASE:A:체력 -= 200
+					CFLAG:A:172 += 5
+				ELSE
+					BASE:A:체력 -= 100
+					CFLAG:A:172 += 3
+				ENDIF
+			ENDIF
+		ENDIF
+		
+		;-----------------------
+		;ハードＳＭ（奴隷공）
+		;-----------------------
+		IF CFLAG:A:152 & 4
+			CFLAG:A:171 += 1
+			;余裕
+			IF LOCAL:2 && (ABL:A:새드끼 >= 5 || TALENT:A:새드)
+				BASE:A:체력 -= 300
+			;疲れる
+			ELSEIF LOCAL:2 && (ABL:A:새드끼 < 3 || TALENT:A:소악마)
+				BASE:A:체력 -= 800
+			ELSE
+				BASE:A:체력 -= 500
+			ENDIF
+		ENDIF
+		
+		;-----------------------
+		;ハードＳＭ（奴隷수）
+		;-----------------------
+		IF CFLAG:A:152 & 8
+			CFLAG:A:170 += 1
+			;余裕
+			IF LOCAL:1 && (ABL:A:마조끼 >= 5 || TALENT:A:마조)
+				BASE:A:체력 -= 300
+			;疲れる
+			ELSEIF LOCAL:1 && (ABL:A:마조끼 < 3 || !TALENT:A:도착적)
+				BASE:A:체력 -= 800
+			ELSE
+				BASE:A:체력 -= 500
+			ENDIF
+		ENDIF
+		
+		;-----------------------
+		;ソフトＳＭ（奴隷공）
+		;-----------------------
+		IF CFLAG:A:152 & 16
+			CFLAG:A:169 += 1
+			;余裕
+			IF LOCAL:2 && (ABL:A:새드끼 >= 5 || TALENT:A:새드)
+				BASE:A:체력 -= 100
+			;疲れる
+			ELSEIF LOCAL:2 && (ABL:A:새드끼 < 3 || TALENT:A:소악마)
+				BASE:A:체력 -= 300
+			ELSE
+				BASE:A:체력 -= 200
+			ENDIF
+		ENDIF
+		
+		;-----------------------
+		;ソフトＳＭ（奴隷수）
+		;-----------------------
+		IF CFLAG:A:152 & 32
+			CFLAG:A:168 += 1
+			;余裕
+			IF LOCAL:1 && (ABL:A:마조끼 >= 5 || TALENT:A:마조)
+				BASE:A:체력 -= 100
+			;疲れる
+			ELSEIF LOCAL:1 && (ABL:A:마조끼 < 3 || TALENT:A:도착적)
+				BASE:A:체력 -= 300
+			ELSE
+				BASE:A:체력 -= 200
+			ENDIF
+		ENDIF
+		
+		;-----------------------
+		;複数人（공）
+		;-----------------------
+		IF CFLAG:A:152 & 64
+			CFLAG:A:174 += 1
+			BASE:A:체력 -= 200
+		ENDIF
+		
+		;-----------------------
+		;複数人（수）
+		;-----------------------
+		IF CFLAG:A:152 & 128
+			CFLAG:A:173 += 1
+			;余裕
+			IF EXP:윤간경험 >= EXPLV:5
+				BASE:A:체력 -= 100
+				CFLAG:A:172 += 1
+			;疲れる
+			ELSEIF EXP:윤간경험 < EXPLV:2
+				BASE:A:체력 -= 300
+				CFLAG:A:172 += 3
+			ELSE
+				BASE:A:체력 -= 200
+				CFLAG:A:172 += 2
+			ENDIF
+		ENDIF
+		
+		;-----------------------
+		;羞恥系
+		;-----------------------
+		IF CFLAG:A:152 & 512
+			;余裕
+			IF ABL:A:노출벽 >= 5 || TALENT:A:수치심없음
+				CFLAG:A:172 += 5
+			;恥ずかしい
+			ELSEIF ABL:A:노출벽 < 3 || TALENT:A:부끄럼쟁이
+				CFLAG:A:172 += 15
+			ELSE
+				CFLAG:A:172 += 10
+			ENDIF
+		ENDIF
+		
+		;-----------------------
+		;本番があるか判定（フェチ、焦らし責め以外）
+		;-----------------------
+		IF (CFLAG:A:152 & 256) == 0 && (CFLAG:A:152 & 4096) == 0
+			;奴隷공
+			IF LOCAL:2
+				;本番無し（奴隷동정でオプションがない、もしくはランダム1/5）
+				IF TALENT:A:동정 && (FLAG:160 & 4) == 0 || RAND:4 == 0
+					BASE:A:체력 -= 100
+				;-----------------------
+				;本番有り
+				;-----------------------
+				ELSE
+					CFLAG:A:164 += 1
+					BASE:A:체력 -= 200
+					;-----------------------
+					;동정食い
+					;-----------------------
+					IF TALENT:A:동정 && (FLAG:160 & 4)
+						CFLAG:A:167 += 1
+						BASE:A:체력 -= 200
+					ENDIF
+				ENDIF
+			;奴隷수
+			ELSE
+				;Ｖ本番無し（奴隷처녀でオプションがない、もしくはランダム1/5、もしくは바기나ない）
+				IF !VAGINA(A) || ((TALENT:A:처녀 || TALENT:A:재생처녀) && (FLAG:160 & 1) == 0)
+					SIF VAGINA(A)
+						BASE:A:체력 -= 100
+				;-----------------------
+				;Ｖ本番有り
+				;-----------------------
+				ELSE
+					CFLAG:A:162 += 1
+					BASE:A:체력 -= 200
+					;-----------------------
+					;처녀姦通
+					;-----------------------
+					IF (TALENT:A:처녀 || TALENT:A:재생처녀) && (FLAG:160 & 1)
+						CFLAG:A:165 += 1
+						BASE:A:체력 -= 300
+					ENDIF
+				ENDIF
+				
+				;Ａ本番無し（奴隷처녀でオプションがない、もしくはランダム1/5(女は3/4)）
+				IF (TALENT:A:백버진 && (FLAG:160 & 2) == 0) || (VAGINA(A) && RAND:3 > 0)
+					BASE:A:체력 -= 100
+				;-----------------------
+				;Ａ本番有り
+				;-----------------------
+				ELSE
+					CFLAG:A:163 += 1
+					BASE:A:체력 -= 200
+					;-----------------------
+					;백버진姦通
+					;-----------------------
+					IF TALENT:A:백버진 && (FLAG:160 & 2)
+						CFLAG:A:166 += 1
+						BASE:A:체력 -= 300
+					ENDIF
+				ENDIF
+			ENDIF
+		ENDIF
+		
+		;-----------------------
+		;性的奉仕は絶対にある
+		;-----------------------
+		;奴隷공
+		IF LOCAL:2
+			CFLAG:A:161 += 1
+			BASE:A:체력 -= 150
+		;奴隷수
+		ELSE
+			;快楽責めや焦らし責めのときは、回数倍に。
+			IF CFLAG:A:152 & 5120
+				CFLAG:A:160 += 2
+				BASE:A:체력 -= 200
+			ELSE
+				CFLAG:A:160 += 1
+				BASE:A:체력 -= 100
+			ENDIF
+		ENDIF
+		
+	ENDIF
+	X += 1
+REND
+
+
+
+
+;====================================================================
+;レンタルの結果は返却時に処理
+;====================================================================
+@RETURN_SLAVE
+DRAWLINE
+PRINTFORML %CALLNAME:A%が帰ってきた
+
+;補完してたフラグを変数に代入
+B = CFLAG:A:14
+S = CFLAG:A:15
+
+;イベント입上の表示
+T = TARGET
+TARGET = A
+TFLAG:13 = 17
+CALL KOJO_MESSAGE_EVENT
+TARGET = T
+
+
+;--------------------------------------------------------
+;経験の加算処理と表示
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+L = 0
+Q = 0
+R = 0
+U = 0
+V = 0
+;--------------------------------------------------------
+PRINTFORML 【%CALLNAME:A%の経験と珠】
+
+
+;-----------------------------
+;奉仕系
+;-----------------------------
+IF CFLAG:A:160 || CFLAG:A:161
+	L = CFLAG:A:160+CFLAG:A:161
+	
+	IF CFLAG:A:160
+		EXP:A:펠라경험 += L
+		PRINTFORML 펠라경험＋{L}
+		EXP:A:정액경험 += L/2
+		PRINTFORML 정액경험＋{L/2}
+	ENDIF
+	
+	EXP:A:봉사쾌락경험 += L*ABL:A:봉사정신
+	PRINTFORML 봉사쾌락경험＋{L*ABL:A:봉사정신}
+	
+	;습득の珠用
+	Q += L*(ABL:A:봉사정신+1)
+	
+	;불쾌の珠
+	SIF TALENT:A:연모
+		G += E+F
+	SIF TALENT:A:친애
+		G += (E+F)*2
+ENDIF
+
+
+;-----------------------------
+;性交、絶頂系
+;-----------------------------
+;C = 回数と쾌Cの珠用
+IF !TEQUIP:A:정조대 && (CFLAG:A:160 || CFLAG:A:161 || CFLAG:A:164 || CFLAG:A:167)
+	;性的奉仕（수/공）、逆セックス
+	C += CFLAG:A:160+CFLAG:A:161+CFLAG:A:164
+	
+	;U = 絶頂回数保存
+	U += C/3
+	
+	;습득の珠用
+	Q += (CFLAG:A:161+CFLAG:A:164)*(ABL:A:욕망+1)
+	;쾌Cの珠用
+	C += C*(ABL:A:C감각+1)
+ENDIF
+
+;E = 回数と쾌Vの珠用
+IF !TEQUIP:A:정조대 && VAGINA(A) && (CFLAG:A:160 || CFLAG:A:162 || CFLAG:A:165)
+	;性的奉仕（수）、Ｖセックス
+	E += CFLAG:A:160+CFLAG:A:162
+	
+	;U = 絶頂回数保存
+	U += E/3
+	
+	EXP:A:V경험 += E
+	PRINTFORML %EXPNAME:0%＋{E}
+	
+	;쾌Vの珠用
+	E += E*(ABL:A:V감각+1)
+ENDIF
+
+;F = 回数と쾌Aの珠用
+IF CFLAG:A:160 || CFLAG:A:163 || CFLAG:A:166 || CFLAG:A:178
+	;性的奉仕（수）、Ａセックス、관장プレイ
+	F += CFLAG:A:160
+	F += CFLAG:A:163
+	F += CFLAG:A:178/3
+	
+	;U = 絶頂回数保存
+	U += F/3
+	
+	EXP:A:A경험 += F
+	PRINTFORML %EXPNAME:1%＋{F}
+	
+	;쾌Aの珠用
+	F += F*(ABL:A:A감각+1)
+		
+	;고통の珠用
+	SIF CFLAG:A:178
+		D += CFLAG:A:178
+ENDIF
+
+;L = 성교경험
+L = 0
+IF CFLAG:A:162 || CFLAG:A:163 || CFLAG:A:164
+	L = CFLAG:A:162+CFLAG:A:163+CFLAG:A:164
+	
+	EXP:A:성교경험 += L
+	PRINTFORML 성교경험＋{L}
+	
+	IF CFLAG:A:164
+		EXP:A:삽입경험 += L
+		PRINTFORML 삽입경험＋{L}
+	ENDIF
+	
+	;동정喪失　逆セックスの時のみ
+	IF CFLAG:A:167
+		PRINTFORML 奴隷レンタルで동정喪失
+		PRINTFORML 이상경험＋１
+		EXP:A:이상경험 += 1
+		TALENT:A:동정 = 0
+		CSTR:A:11 = 奴隷レンタル
+		
+		;불쾌の珠
+		SIF TALENT:A:연모
+			G += E+F
+		SIF TALENT:A:친애
+			G += (E+F)*2
+	ENDIF
+	
+	;처녀喪失
+	IF CFLAG:A:165 && TALENT:A:처녀
+		PRINTFORML 奴隷レンタルで처녀喪失
+		PRINTFORML 이상경험＋１
+		EXP:A:이상경험 += 1
+		TALENT:A:처녀 = 0
+		CSTR:A:10 = 奴隷レンタル
+		
+		;고통の珠用
+		D += 10
+		
+		;불쾌の珠
+		SIF TALENT:A:연모
+			G += (E+F)*3
+		SIF TALENT:A:친애
+			G += (E+F)*5
+	ELSEIF CFLAG:A:165 && TALENT:A:재생처녀
+		PRINTFORML 奴隷レンタルで재생처녀喪失
+		TALENT:A:재생처녀 = 0
+		
+		;고통の珠用
+		D += 5
+		
+		;불쾌の珠
+		SIF TALENT:A:연모
+			G += (E+F)*2
+		SIF TALENT:A:친애
+			G += (E+F)*3
+	ENDIF
+	
+	;질내사정경험
+	IF E && (CFLAG:A:108 == 0 || TEQUIP:A:정조대 == 0)
+		EXP:A:질내사정경험 += E/2
+		;娼館などの客と奴隷間の中田氏カウント用
+		CFLAG:A:105 += E/2
+		PRINTFORML %EXPNAME:5%＋{E/2}
+		
+		;불쾌の珠
+		SIF TALENT:A:연모
+			G += (E+F)*2
+		SIF TALENT:A:친애
+			G += (E+F)*3
+	ENDIF
+	
+	;백버진喪失
+	IF CFLAG:A:166
+		PRINTFORML 奴隷レンタルで백버진喪失
+		PRINTFORML 이상경험＋１
+		EXP:A:이상경험 += 1
+		TALENT:A:백버진 = 0
+		CSTR:A:12 = 奴隷レンタル
+		
+		;고통の珠用
+		D += 10
+		
+		;불쾌の珠
+		SIF TALENT:A:연모
+			G += (E+F)*2
+		SIF TALENT:A:친애
+			G += (E+F)*3
+	ENDIF
+	
+	;장내사정경험
+	IF F && CFLAG:A:108 == 0
+		EXP:A:장내사정경험 += F/2
+		;娼館などの客と奴隷間の腸中田氏カウント用
+		CFLAG:A:705 += F/2
+		PRINTFORML %EXPNAME:14%＋{F/2}
+		
+		;불쾌の珠
+		SIF TALENT:A:연모
+			G += (E+F)*2
+		SIF TALENT:A:친애
+			G += (E+F)*3
+	ENDIF
+	
+	;U = 絶頂回数保存
+	U += L/3
+ENDIF
+
+;U = 絶頂回数
+;焦らし責めのときは絶頂できない
+SIF CFLAG:A:152 & 4096
+	U = 0
+;快楽責めのときは絶頂回数大幅UP
+SIF CFLAG:A:152 & 1024
+	U *= 2
+
+IF U
+	EXP:A:절정경험 += U
+	PRINTFORML 절정경험＋{U}
+	
+	IF PENIS(A)
+		IF TALENT:A:아이사이즈
+			EXP:A:허공사정경험 += U
+			PRINTFORML 허공사정경험＋{U}
+		ELSEIF TEQUIP:A:정조대
+			EXP:A:사정경험 += U/2
+			PRINTFORML 사정경험＋{U/2}
+		ELSE
+			EXP:A:사정경험 += U
+			PRINTFORML 사정경험＋{U}
+		ENDIF
+	ENDIF
+ENDIF
+
+
+;--------------------------------------------------------
+;수간경험
+;--------------------------------------------------------
+IF CFLAG:A:175
+	;수간初体験により이상경험
+	IF EXP:A:수간경험 == 0
+		EXP:A:이상경험 += 1
+		PRINTL 수간初経験で이상경험＋１
+	ENDIF
+	EXP:A:수간경험 += CFLAG:A:175
+	PRINTFORML 수간경험＋{CFLAG:A:175}
+	
+	;불쾌の珠
+	SIF EXP:A:수간경험 < 30
+		G += CFLAG:A:175*5
+ENDIF
+
+;--------------------------------------------------------
+;윤간경험
+;G = 불쾌の珠
+;--------------------------------------------------------
+IF CFLAG:A:173 || CFLAG:A:174
+	IF EXP:A:윤간경험 == 0
+		EXP:A:이상경험 += 1
+		PRINTL 윤간初経験で이상경험＋１
+	ENDIF
+	EXP:A:윤간경험 += CFLAG:A:173+CFLAG:A:174
+	PRINTFORML 윤간경험＋{CFLAG:A:173+CFLAG:A:174}
+	
+	;불쾌の珠用
+	IF TALENT:A:친애
+		G += (CFLAG:A:173+CFLAG:A:174)*5
+	ELSEIF TALENT:A:연모
+		G += (CFLAG:A:173+CFLAG:A:174)*2
+	ENDIF
+ENDIF
+
+
+;-----------------------------
+;ＳＭ系
+;-----------------------------
+;공
+L = 0
+IF CFLAG:A:169 || CFLAG:A:171
+	L += CFLAG:A:169
+	L += CFLAG:A:171*2
+	
+	IF ABL:A:새드끼 >= 8 || TALENT:A:새드 == 2
+		L *= 3
+	ELSEIF ABL:A:새드끼 >= 5 || TALENT:A:새드
+		L *= 2
+	ELSEIF ABL:A:새드끼 >= 3
+	ELSEIF ABL:A:새드끼 == 2 || TALENT:A:소악마
+		L /= 2
+	ELSEIF ABL:A:새드끼 == 1
+		L /= 3
+	ELSE
+		L /= 5
+	ENDIF
+	
+	IF L > 0
+		EXP:A:가학쾌락경험 += L
+		PRINTFORML 가학쾌락경험＋{L}
+	ENDIF
+	
+	;습득の珠用
+	Q += L*(ABL:A:새드끼+1)
+ENDIF
+
+;수
+L = 0
+IF CFLAG:A:168 || CFLAG:A:170
+	L += CFLAG:A:168
+	L += CFLAG:A:170*3
+	
+	EXP:A:속박경험 += (CFLAG:A:168+CFLAG:A:170)/2
+	PRINTFORML 속박경험＋{(CFLAG:A:168+CFLAG:A:170)/2}
+	
+	IF ABL:A:마조끼 >= 8 || TALENT:A:마조 == 2
+		L *= 3
+	ELSEIF ABL:A:마조끼 >= 5 || TALENT:A:마조
+		L *= 2
+	ELSEIF ABL:A:마조끼 >= 3
+	ELSEIF ABL:A:마조끼 == 2 || TALENT:A:도착적
+		L /= 2
+	ELSEIF ABL:A:마조끼 == 1
+		L /= 3
+	ELSE
+		L /= 5
+	ENDIF
+	
+	IF L > 0
+		EXP:A:고통쾌락경험 += L
+		PRINTFORML 고통쾌락경험＋{L}
+	ENDIF
+	
+	;습득の珠用
+	Q += L*(ABL:A:마조끼+1)
+	
+	;고통、공포の珠用
+	D += L
+ENDIF
+
+
+;-----------------------------
+;スカトロ系
+L = 0
+;-----------------------------
+IF CFLAG:A:176 || CFLAG:A:177 || CFLAG:A:178 || CFLAG:A:179
+	;食糞プレイ
+	IF CFLAG:A:179
+		L += CFLAG:A:179
+		
+		EXP:A:식분경험 += CFLAG:A:179
+		PRINTFORML 식분경험＋{CFLAG:A:179}
+		
+		;불쾌の珠
+		G += (10-ABL:A:스캇중독)*5
+	ENDIF
+	
+	;관장プレイ
+	IF CFLAG:A:178
+		;ハードＳＭは数が増える
+		IF CFLAG:A:170
+			L += CFLAG:A:178*2
+			
+			;고통、공포の珠用
+			D += CFLAG:A:178*2
+		ELSE
+			L += CFLAG:A:178
+			
+			;고통、공포の珠用
+			D += CFLAG:A:178
+		ENDIF
+		
+		EXP:A:관장경험 += CFLAG:A:178*2
+		PRINTFORML 관장경험＋{CFLAG:A:178*2}
+		EXP:A:배변경험 += CFLAG:A:178
+		PRINTFORML 배변경험＋{CFLAG:A:178}
+		
+		;불쾌の珠
+		G += (10-ABL:A:스캇중독)*2
+	ENDIF
+	
+	;飲尿プレイ
+	IF CFLAG:A:177
+		L += CFLAG:A:177
+		
+		EXP:A:음뇨경험 += CFLAG:A:177
+		PRINTFORML 음뇨경험＋{CFLAG:A:177}
+		
+		;불쾌の珠
+		G += (10-ABL:A:스캇중독)*2
+	ENDIF
+	
+	;放尿鑑賞
+	IF CFLAG:A:176
+		L += CFLAG:A:176
+		
+		EXP:A:배뇨경험 += CFLAG:A:176
+		PRINTFORML 배뇨경험＋{CFLAG:A:176}
+		
+		;불쾌の珠
+		G += 10-ABL:A:스캇중독
+	ENDIF
+	
+	EXP:A:스캇경험 += L
+	PRINTFORML 스캇경험＋{L}
+ENDIF
+
+
+;-----------------------------
+;수치
+;-----------------------------
+R = CFLAG:A:172
+
+
+;--------------------------------------------------------
+;珠
+;E = Ｖ、F = Ａ
+;C = 回数と쾌Cの珠用
+;R = 수치の珠用
+;D = 고통、공포の珠用
+;Q = 습득の珠に使用
+;G = 불쾌の珠に使用
+;--------------------------------------------------------
+IF C > 0
+	JUEL:A:쾌C += C*50
+	PRINTFORML 쾌Cの珠＋{C*50}
+ENDIF
+IF E > 0
+	JUEL:A:쾌V += E*30
+	PRINTFORML 쾌Vの珠＋{E*30}
+ENDIF
+IF F > 0
+	JUEL:A:쾌A += F*30
+	PRINTFORML 쾌Aの珠＋{F*30}
+ENDIF
+
+JUEL:A:순종 += B*100
+PRINTFORML 순종の珠＋{B*100}
+
+JUEL:A:습득 += Q*35
+PRINTFORML 습득の珠＋{Q*35}
+
+IF R > 0
+	JUEL:A:수치 += R*50
+	PRINTFORML 수치の珠＋{R*50}
+ENDIF
+
+IF CFLAG:A:152 & 4352 || TEQUIP:A:정조대
+	JUEL:A:욕정 += B*200+1000
+	PRINTFORML 욕정の珠＋{B*200+1000}
+ELSE
+	JUEL:A:욕정 += B*50
+	PRINTFORML 욕정の珠＋{B*50}
+ENDIF
+
+IF D > 0
+	JUEL:A:고통 += D*30
+	PRINTFORML 고통の珠＋{D*30}
+	JUEL:A:공포 += D*15
+	PRINTFORML 공포の珠＋{D*15}
+ENDIF
+IF G > 0
+	JUEL:A:불쾌 += G*50
+	PRINTFORML 불쾌の珠＋{G*50}
+ENDIF
+
+IF D > 0 || G > 0 || E > 0 || F > 0
+	JUEL:A:부정 += ((D+G+E+F)*200)/ABL:A:순종
+	PRINTFORML 부정の珠＋{((D+G+E+F)*200)/ABL:A:순종}
+ENDIF
+
+
+;--------------------------------------------------------
+;체력の減少、ストレス、禁欲ポイント
+;--------------------------------------------------------
+
+;禁欲ポイント
+IF TEQUIP:A:정조대 || CFLAG:A:152 & 4352
+	CFLAG:A:602 += B*5
+	SIF TALENT:PLAYER:천리안
+		PRINTFORML 禁欲ポイント＋{B*5}
+ELSE
+	CFLAG:A:602 = 0
+ENDIF
+
+;ストレス値の付加
+CFLAG:A:10 += B*2
+SIF TALENT:PLAYER:천리안
+	PRINTFORML 疲労度＋{B}
+
+
+;-----------------------------
+;報酬額の加算
+;-----------------------------
+;最후に金額の加算
+;수간（奴隷수のみ）
+SIF CFLAG:A:175
+	S += B*5000
+;スカトロ大（奴隷수のみ）
+SIF CFLAG:A:179
+	S += B*5000
+;ハードSM
+SIF CFLAG:A:170
+	S += B*3500
+;複数プレイ
+SIF CFLAG:A:173 || CFLAG:A:174
+	S += B*2000
+;スカトロ小（奴隷수のみ）
+SIF CFLAG:A:176 || CFLAG:A:177
+	S += B*1000
+
+;満발してもらえなかった場合はむしろ減らす
+;ハードＳＭ공
+SIF CFLAG:A:171 && ABL:A:새드끼 < 4
+	S -= B*5000
+;ソフトＳＭ공
+SIF CFLAG:A:169 && ABL:A:새드끼 < 2
+	S -= B*3500
+
+PRINTFORMW %CALLNAME:A%のレンタル額として{S}고슈금を得ました
+MONEY += S
+
+;フラグのリセット
+CFLAG:A:12 = 0
+CFLAG:A:13 = 0
+CFLAG:A:14 = 0
+CFLAG:A:15 = 0
+
+
+RETURN 1
+
+
+
+

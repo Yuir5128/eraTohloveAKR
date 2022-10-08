@@ -1,0 +1,110 @@
+﻿;-------------------------------------------------
+;스팽킹
+;ＳＭ系コマンド
+;-------------------------------------------------
+@COM140
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教が후배위、배면입위、스팽킹セックスのとき、스팽킹セックスに
+	IF PREVCOM == 101 || PREVCOM == 105 || PREVCOM == 511
+		CALL COM_ABLE511
+		SIF RESULT == 1
+			JUMP COM511
+	;前回の調教が후배위Ａ、배면입위Ａ、스팽킹애널のとき、스팽킹애널に
+	ELSEIF PREVCOM == 111 || PREVCOM == 115 || PREVCOM == 511
+		CALL COM_ABLE512
+		SIF RESULT == 1
+			JUMP COM512
+	ENDIF
+ENDIF
+
+PRINTL 스팽킹
+STR:0 = 스팽킹
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+IF TEQUIP:지하실
+	;消費체력、기력
+	LOSEBASE:체력 += 50
+	LOSEBASE:기력 += 20
+	
+	SOURCE:통증 += 900
+ELSE
+	;消費체력、기력
+	LOSEBASE:체력 += 30
+	LOSEBASE:기력 += 10
+	
+	SOURCE:통증 += 450
+ENDIF
+;着衣のとき、통증が軽減
+SIF BOTTOMS(TARGET) >= 4
+	TIMES SOURCE:통증 , 0.70
+SIF TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5
+	TIMES SOURCE:통증 , 0.90
+
+SOURCE:두려움 += 400
+;지하실にいると두려움のソース追加
+SIF TEQUIP:지하실
+	TIMES SOURCE:두려움 , 2.00
+
+SOURCE:일탈 += 50
+SOURCE:반발 += 300
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;고통のパラメータによる고통のソース増加は先に処理しておく
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증 , 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증 , 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증 , 3.00
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;하의類を着てるとき、調教者の손の汚れ⇔奴隷の하의類の汚れが移動
+;지하실にいるときは道具を使用するので、汚れない
+IF TEQUIP:지하실
+ELSEIF TEQUIP:하의 > 1 || TEQUIP:전신상의 == 8 || TEQUIP:전신상의 == 11 || TEQUIP:전신상의 == 12 || (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5)
+	CALL COM_STAIN
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;게이경험とか加算
+CALL COM_EXP(2)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+
+

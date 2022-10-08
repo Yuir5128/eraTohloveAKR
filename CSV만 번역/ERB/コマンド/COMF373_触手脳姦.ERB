@@ -1,0 +1,162 @@
+﻿;-------------------------------------------------
+;촉수뇌간
+;촉수-拷問系コマンド
+;-------------------------------------------------
+@COM373
+
+PRINTL 촉수뇌간
+STR:0 = 촉수뇌간
+
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 1000
+LOSEBASE:기력 += 500
+
+IF EXP:촉수경험 < EXPLV:1
+	TIMES LOSEBASE:체력 , 1.10
+	TIMES LOSEBASE:기력 , 2.00
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES LOSEBASE:체력 , 0.90
+	TIMES LOSEBASE:기력 , 1.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES LOSEBASE:체력 , 0.80
+	TIMES LOSEBASE:기력 , 1.50
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES LOSEBASE:체력 , 0.70
+	TIMES LOSEBASE:기력 , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES LOSEBASE:체력 , 0.60
+	TIMES LOSEBASE:기력 , 1.00
+ELSE
+	TIMES LOSEBASE:체력 , 0.50
+	TIMES LOSEBASE:기력 , 0.50
+ENDIF
+
+IF ABL:B감각 == 0
+	SOURCE:쾌B += 5000
+ELSEIF ABL:B감각 == 1
+	SOURCE:쾌B += 8000
+ELSEIF ABL:B감각 == 2
+	SOURCE:쾌B += 10000
+ELSEIF ABL:B감각 == 3
+	SOURCE:쾌B += 15000
+ELSEIF ABL:B감각 == 4
+	SOURCE:쾌B += 20000
+ELSEIF ABL:B감각 == 5
+	SOURCE:쾌B += 25000
+ELSEIF ABL:B감각 == 6
+	SOURCE:쾌B += 30000
+ELSEIF ABL:B감각 == 7
+	SOURCE:쾌B += 35000
+ELSEIF ABL:B감각 == 8
+	SOURCE:쾌B += 40000
+ELSEIF ABL:B감각 == 9
+	SOURCE:쾌B += 45000
+ELSEIF ABL:B감각 == 10
+	SOURCE:쾌B += 50000
+ENDIF
+
+IF ABL:C감각 == 0
+	SOURCE:쾌C += 5000
+ELSEIF ABL:C감각 == 1
+	SOURCE:쾌C += 8000
+ELSEIF ABL:C감각 == 2
+	SOURCE:쾌C += 10000
+ELSEIF ABL:C감각 == 3
+	SOURCE:쾌C += 15000
+ELSEIF ABL:C감각 == 4
+	SOURCE:쾌C += 20000
+ELSEIF ABL:C감각 == 5
+	SOURCE:쾌C += 25000
+ELSEIF ABL:C감각 == 6
+	SOURCE:쾌C += 30000
+ELSEIF ABL:C감각 == 7
+	SOURCE:쾌C += 35000
+ELSEIF ABL:C감각 == 8
+	SOURCE:쾌C += 40000
+ELSEIF ABL:C감각 == 9
+	SOURCE:쾌C += 45000
+ELSEIF ABL:C감각 == 10
+	SOURCE:쾌C += 50000
+ENDIF
+
+IF VAGINA(TARGET) && ABL:V감각 == 0
+	SOURCE:쾌V += 5000
+ELSEIF VAGINA(TARGET) && ABL:V감각 == 1
+	SOURCE:쾌V += 8000
+ELSEIF VAGINA(TARGET) && ABL:V감각 == 2
+	SOURCE:쾌V += 10000
+ELSEIF VAGINA(TARGET) && ABL:V감각 == 3
+	SOURCE:쾌V += 15000
+ELSEIF VAGINA(TARGET) && ABL:V감각 == 4
+	SOURCE:쾌V += 20000
+ELSEIF VAGINA(TARGET) && ABL:V감각 == 5
+	SOURCE:쾌V += 25000
+ELSEIF VAGINA(TARGET) && ABL:V감각 == 6
+	SOURCE:쾌V += 30000
+ELSEIF VAGINA(TARGET) && ABL:V감각 == 7
+	SOURCE:쾌V += 35000
+ELSEIF VAGINA(TARGET) && ABL:V감각 == 8
+	SOURCE:쾌V += 40000
+ELSEIF VAGINA(TARGET) && ABL:V감각 == 9
+	SOURCE:쾌V += 45000
+ELSEIF VAGINA(TARGET) && ABL:V감각 == 10
+	SOURCE:쾌V += 50000
+ENDIF
+
+IF ABL:A감각 == 0
+	SOURCE:쾌A += 5000
+ELSEIF ABL:A감각 == 1
+	SOURCE:쾌A += 8000
+ELSEIF ABL:A감각 == 2
+	SOURCE:쾌A += 10000
+ELSEIF ABL:A감각 == 3
+	SOURCE:쾌A += 15000
+ELSEIF ABL:A감각 == 4
+	SOURCE:쾌A += 20000
+ELSEIF ABL:A감각 == 5
+	SOURCE:쾌A += 25000
+ELSEIF ABL:A감각 == 6
+	SOURCE:쾌A += 30000
+ELSEIF ABL:A감각 == 7
+	SOURCE:쾌A += 35000
+ELSEIF ABL:A감각 == 8
+	SOURCE:쾌A += 40000
+ELSEIF ABL:A감각 == 9
+	SOURCE:쾌A += 45000
+ELSEIF ABL:A감각 == 10
+	SOURCE:쾌A += 50000
+ENDIF
+
+SOURCE:성취감 += 10000
+SOURCE:중독충족 += 10000
+SOURCE:액체 += 10000
+SOURCE:욕정 += 50000
+SOURCE:굴복 += 10000
+SOURCE:일탈 += 12000
+SOURCE:반발 += 12000
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;ストレスいっぱい増加
+CFLAG:10 += RAND:50
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF EXP:뇌간경험 == 0
+	EXP:이상경험 += 1
+	PRINTL 촉수뇌간初経験で이상경험＋1
+ENDIF
+
+T = 1
+
+RETURN 1
+

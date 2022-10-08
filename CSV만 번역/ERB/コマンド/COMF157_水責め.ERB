@@ -1,0 +1,132 @@
+﻿;-------------------------------------------------
+;물고문
+;ＳＭ-拷問系コマンド
+;-------------------------------------------------
+@COM157
+
+PRINTL 물고문
+STR:0 = 물고문
+
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 125
+LOSEBASE:기력 += 100
+
+;통증、두려움、일탈、반감
+SOURCE:통증 += 1500
+SOURCE:두려움 += 3000
+SOURCE:일탈 += 800
+SOURCE:반발 += 1000
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;고통のパラメータによる고통のソース増加は先に処理しておく
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증 , 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증 , 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증 , 3.00
+ENDIF
+
+;마조끼を見る
+IF ABL:마조끼 == 0
+	TIMES SOURCE:굴복 , 0.80
+	SOURCE:중독충족 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:굴복 , 1.00
+	SOURCE:중독충족 += 20
+	SOURCE:욕정 += 30
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:굴복 , 1.20
+	SOURCE:중독충족 += 40
+	SOURCE:욕정 += 70
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:굴복 , 1.40
+	SOURCE:중독충족 += 70
+	SOURCE:욕정 += 120
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:굴복 , 1.50
+	SOURCE:중독충족 += 110
+	SOURCE:욕정 += 180
+ELSEIF ABL:마조끼 == 5
+	TIMES SOURCE:굴복 , 1.70
+	SOURCE:중독충족 += 150
+	SOURCE:욕정 += 250
+ELSEIF ABL:마조끼 == 6
+	TIMES SOURCE:굴복 , 1.90
+	SOURCE:중독충족 += 200
+	SOURCE:욕정 += 300
+ELSEIF ABL:마조끼 == 7
+	TIMES SOURCE:굴복 , 2.10
+	SOURCE:중독충족 += 250
+	SOURCE:욕정 += 350
+ELSEIF ABL:마조끼 == 8
+	TIMES SOURCE:굴복 , 2.30
+	SOURCE:중독충족 += 300
+	SOURCE:욕정 += 400
+ELSEIF ABL:마조끼 == 9
+	TIMES SOURCE:굴복 , 2.50
+	SOURCE:중독충족 += 350
+	SOURCE:욕정 += 450
+ELSEIF ABL:마조끼 >= 10
+	TIMES SOURCE:굴복 , 3.00
+	SOURCE:중독충족 += 500
+	SOURCE:욕정 += 500
+ENDIF
+
+;마조を見る
+IF TALENT:마조
+	TIMES SOURCE:욕정 , 1.50
+	TIMES SOURCE:반발 , 0.80
+ENDIF
+
+;体格差により공포のソース追加
+CALL BUILD
+IF S == 3
+	TIMES SOURCE:두려움 , 2.00
+ELSEIF S == 2
+	TIMES SOURCE:두려움 , 1.50
+ELSEIF S == 1
+	TIMES SOURCE:두려움 , 1.20
+ELSEIF S == 0
+	TIMES SOURCE:두려움 , 1.00
+ELSEIF S == -3
+	TIMES SOURCE:두려움 , 0.75
+ELSE
+	TIMES SOURCE:두려움 , 0.90
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+CALL COM_STAIN
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;依存度ベクトル
+TFLAG:33 = 3
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종
+	TFLAG:30 += 1
+ELSEIF TALENT:예속
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+

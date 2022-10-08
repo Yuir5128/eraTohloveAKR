@@ -1,0 +1,275 @@
+﻿;-------------------------------------------------
+;꽐라플레이
+;シチュエーション別コマンド
+;-------------------------------------------------
+@COM306
+
+PRINTL 꽐라플레이
+STR:0 = 꽐라플레이
+
+;飲ませたお酒
+CALL DRINK_TYPE
+
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+;감주
+IF TFLAG:76 == 1
+	LOSEBASE:체력 += 10
+	LOSEBASE:기력 += 20
+;맥주
+ELSEIF TFLAG:76 == 2
+	IF TALENT:알콜쓰레기
+		LOSEBASE:체력 = 20
+		LOSEBASE:기력 = 70
+	ELSE
+		LOSEBASE:체력 = 10
+		LOSEBASE:기력 = 50
+	ENDIF
+;사케
+ELSEIF TFLAG:76 == 3
+	IF TALENT:술꾼
+		LOSEBASE:체력 = 10
+		LOSEBASE:기력 = 50
+	ELSE
+		LOSEBASE:체력 = 20
+		LOSEBASE:기력 = 70
+	ENDIF
+ENDIF
+
+SOURCE:일탈 += 100
+SOURCE:반발 += 100
+
+;알콜쓰레기が사케
+IF TALENT:알콜쓰레기 && TFLAG:76 == 3
+	BASE:구역질 += 80
+;알콜쓰레기が감주・맥주　もしくは　술꾼以外が사케
+ELSEIF TALENT:알콜쓰레기 || (TFLAG:76 == 3 && !TALENT:술꾼)
+	BASE:구역질 += 60
+ELSE
+	;알콜쓰레기以外が감주
+	IF TFLAG:76 == 1
+		BASE:구역질 += 30
+	;알콜쓰레기以外が맥주　もしくは　술꾼が사케
+	ELSE
+		BASE:구역질 += 50
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 300
+
+A = 20
+B = 50
+;욕망を見る
+IF ABL:욕망 == 0
+	TIMES A , 0.80
+	TIMES B , 0.80
+	;SOURCE:액체 += 0
+	;SOURCE:욕정 += 0
+ELSEIF ABL:욕망 == 1
+	TIMES A , 1.00
+	TIMES B , 1.00
+	;SOURCE:액체 += 20
+	;SOURCE:욕정 += 30
+ELSEIF ABL:욕망 == 2
+	TIMES A , 1.20
+	TIMES B , 1.20
+	;SOURCE:액체 += 40
+	;SOURCE:욕정 += 70
+ELSEIF ABL:욕망 == 3
+	TIMES A , 1.40
+	TIMES B , 1.40
+	;SOURCE:액체 += 70
+	;SOURCE:욕정 += 120
+ELSEIF ABL:욕망 == 4
+	TIMES A , 1.50
+	TIMES B , 1.50
+	;SOURCE:액체 += 110
+	;SOURCE:욕정 += 180
+ELSEIF ABL:욕망 == 5
+	TIMES A , 1.70
+	TIMES B , 1.70
+	;SOURCE:액체 += 150
+	;SOURCE:욕정 += 250
+ELSEIF ABL:욕망 == 6
+	TIMES A , 1.90
+	TIMES B , 1.90
+	;SOURCE:액체 += 200
+	;SOURCE:욕정 += 300
+ELSEIF ABL:욕망 == 7
+	TIMES A , 2.10
+	TIMES B , 2.10
+	;SOURCE:액체 += 250
+	;SOURCE:욕정 += 350
+ELSEIF ABL:욕망 == 8
+	TIMES A , 2.30
+	TIMES B , 2.30
+	;SOURCE:액체 += 300
+	;SOURCE:욕정 += 400
+ELSEIF ABL:욕망 == 9
+	TIMES A , 2.50
+	TIMES B , 2.50
+	;SOURCE:액체 += 350
+	;SOURCE:욕정 += 450
+ELSEIF ABL:욕망 >= 10
+	TIMES A , 3.00
+	TIMES B , 3.00
+	;SOURCE:액체 += 500
+	;SOURCE:욕정 += 500
+ENDIF
+
+;맥주
+IF TFLAG:76 == 2
+	TIMES A , 2.00
+	TIMES B , 2.00
+;사케
+ELSEIF TFLAG:76 == 3
+	TIMES A , 1.50
+	TIMES B , 1.50
+ENDIF
+
+SOURCE:액체 += A
+SOURCE:욕정 += B
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;依存度ベクトル
+TFLAG:33 = 3
+
+RETURN 1
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM306
+;꽐라플레이
+
+PRINTL ＜꽐라플레이中＞
+
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 20
+
+SOURCE:일탈 += 200
+SOURCE:반발 += 200
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 300
+
+A = 20
+B = 50
+;욕망を見る
+IF ABL:욕망 == 0
+	TIMES A , 0.80
+	TIMES B , 0.80
+	;SOURCE:액체 += 0
+	;SOURCE:욕정 += 0
+ELSEIF ABL:욕망 == 1
+	TIMES A , 1.00
+	TIMES B , 1.00
+	;SOURCE:액체 += 20
+	;SOURCE:욕정 += 30
+ELSEIF ABL:욕망 == 2
+	TIMES A , 1.20
+	TIMES B , 1.20
+	;SOURCE:액체 += 40
+	;SOURCE:욕정 += 70
+ELSEIF ABL:욕망 == 3
+	TIMES A , 1.40
+	TIMES B , 1.40
+	;SOURCE:액체 += 70
+	;SOURCE:욕정 += 120
+ELSEIF ABL:욕망 == 4
+	TIMES A , 1.50
+	TIMES B , 1.50
+	;SOURCE:액체 += 110
+	;SOURCE:욕정 += 180
+ELSEIF ABL:욕망 == 5
+	TIMES A , 1.70
+	TIMES B , 1.70
+	;SOURCE:액체 += 150
+	;SOURCE:욕정 += 250
+ELSEIF ABL:욕망 == 6
+	TIMES A , 1.90
+	TIMES B , 1.90
+	;SOURCE:액체 += 200
+	;SOURCE:욕정 += 300
+ELSEIF ABL:욕망 == 7
+	TIMES A , 2.10
+	TIMES B , 2.10
+	;SOURCE:액체 += 250
+	;SOURCE:욕정 += 350
+ELSEIF ABL:욕망 == 8
+	TIMES A , 2.30
+	TIMES B , 2.30
+	;SOURCE:액체 += 300
+	;SOURCE:욕정 += 400
+ELSEIF ABL:욕망 == 9
+	TIMES A , 2.50
+	TIMES B , 2.50
+	;SOURCE:액체 += 350
+	;SOURCE:욕정 += 450
+ELSEIF ABL:욕망 >= 10
+	TIMES A , 3.00
+	TIMES B , 3.00
+	;SOURCE:액체 += 500
+	;SOURCE:욕정 += 500
+ENDIF
+
+IF TFLAG:76 == 2
+	TIMES A , 1.50
+	TIMES B , 1.50
+ELSEIF TFLAG:76 == 3
+	TIMES A , 1.20
+	TIMES B , 1.20
+ENDIF
+
+SOURCE:액체 += A
+SOURCE:욕정 += B
+
+RETURN 1
+
+;-------------------------------------------------
+;飲ませたお酒の種類
+;-------------------------------------------------
+@DRINK_TYPE
+
+PRINTL 何を飲ませますか？
+SIF ITEM:86 > 0
+	PRINTL [0] - 감주
+SIF ITEM:87 > 0
+	PRINTL [1] - 맥주
+SIF ITEM:88 > 0
+	PRINTL [2] - 사케
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	TFLAG:76 = 1
+	ITEM:86 -= 1
+ELSEIF RESULT == 1
+	TFLAG:76 = 2
+	ITEM:87 -= 1
+ELSEIF RESULT == 2
+	TFLAG:76 = 3
+	ITEM:88 -= 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+TEQUIP:꽐라플레이 = 1
+

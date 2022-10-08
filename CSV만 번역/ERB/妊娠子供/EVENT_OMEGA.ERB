@@ -1,0 +1,45 @@
+﻿;오메가関連のイベント（발정기　男体임신）
+;---------------------------------------------------------
+;使用フラグ
+;---------------------------------------------------------
+;CFLAG
+;700→발정기カウント
+		;1-15を繰り返し　0にはならない
+		;カウントが9以上のときランダムで발정기に入る
+		;カウントが12以上のときランダムで발정기が終わる
+		;カウントが15以上のとき確定で발정기が終わる
+
+;발정기と通常期（？）の日数をカウントする
+;１日が終わった…　ときにカウントを進める
+;ARG キャラ登録番号
+@ESTRUS_PERIOD_COUNT
+;現在の調教対象を退避
+LOCAL = TARGET
+REPEAT CHARANUM
+	;오메가を持っていないなら終了
+	SIF TALENT:COUNT:오메가 == 0
+		CONTINUE
+
+	CFLAG:COUNT:700 += 1
+	
+	;발정기終了
+	IF (CFLAG:COUNT:700 >= 12 && TALENT:COUNT:발정기 && RAND:2 == 0) || (CFLAG:COUNT:700 >= 15 && TALENT:COUNT:발정기)
+		TALENT:COUNT:발정기 = 0
+		CFLAG:COUNT:700 = 1
+		TARGET = COUNT
+		TFLAG:13 = 79
+		CALL KOJO_MESSAGE_EVENT
+	ENDIF
+	
+	;발정기開始
+	IF (CFLAG:COUNT:700 >= 9 && TALENT:COUNT:발정기 == 0) && RAND:2 == 0
+		TALENT:COUNT:발정기 = 1
+		TARGET = COUNT
+		TFLAG:13 = 79
+		CALL KOJO_MESSAGE_EVENT
+	ENDIF
+	
+REND
+
+TARGET = LOCAL
+

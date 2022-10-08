@@ -1,0 +1,149 @@
+﻿;-------------------------------------------------
+;목조르기
+;ＳＭ-ハード系コマンド
+;-------------------------------------------------
+@COM155
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教が정상위、대면입위、목조르기セックスのとき、목조르기セックスに
+	IF PREVCOM == 100 || PREVCOM == 104 || PREVCOM == 513
+		CALL COM_ABLE513
+		SIF RESULT == 1
+			JUMP COM513
+	;前回の調教が정상위Ａ、대면입위Ａ、목조르기애널のとき、목조르기애널に
+	ELSEIF PREVCOM == 110 || PREVCOM == 114 || PREVCOM == 514
+		CALL COM_ABLE514
+		SIF RESULT == 1
+			JUMP COM514
+	ENDIF
+ENDIF
+
+PRINTL 목조르기
+STR:0 = 목조르기
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 125
+LOSEBASE:기력 += 100
+
+;통증、두려움、일탈、반감
+SOURCE:통증 += 1000
+SOURCE:두려움 += 2500
+SOURCE:일탈 += 600
+SOURCE:반발 += 800
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;고통のパラメータによる고통のソース増加は先に処理しておく
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증 , 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증 , 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증 , 3.00
+ENDIF
+
+;마조끼を見る
+IF ABL:마조끼 == 0
+	TIMES SOURCE:굴복 , 0.80
+	SOURCE:중독충족 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:굴복 , 1.00
+	SOURCE:중독충족 += 20
+	SOURCE:욕정 += 30
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:굴복 , 1.20
+	SOURCE:중독충족 += 40
+	SOURCE:욕정 += 70
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:굴복 , 1.40
+	SOURCE:중독충족 += 70
+	SOURCE:욕정 += 120
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:굴복 , 1.50
+	SOURCE:중독충족 += 110
+	SOURCE:욕정 += 180
+ELSEIF ABL:마조끼 == 5
+	TIMES SOURCE:굴복 , 1.70
+	SOURCE:중독충족 += 150
+	SOURCE:욕정 += 250
+ELSEIF ABL:마조끼 == 6
+	TIMES SOURCE:굴복 , 1.90
+	SOURCE:중독충족 += 200
+	SOURCE:욕정 += 300
+ELSEIF ABL:마조끼 == 7
+	TIMES SOURCE:굴복 , 2.10
+	SOURCE:중독충족 += 250
+	SOURCE:욕정 += 350
+ELSEIF ABL:마조끼 == 8
+	TIMES SOURCE:굴복 , 2.30
+	SOURCE:중독충족 += 300
+	SOURCE:욕정 += 400
+ELSEIF ABL:마조끼 == 9
+	TIMES SOURCE:굴복 , 2.50
+	SOURCE:중독충족 += 350
+	SOURCE:욕정 += 450
+ELSEIF ABL:마조끼 >= 10
+	TIMES SOURCE:굴복 , 3.00
+	SOURCE:중독충족 += 500
+	SOURCE:욕정 += 500
+ENDIF
+
+;마조を見る
+IF TALENT:마조
+	TIMES SOURCE:욕정 , 1.50
+	TIMES SOURCE:반발 , 0.80
+ENDIF
+
+;体格差により공포のソース追加
+CALL BUILD
+IF S == 3
+	TIMES SOURCE:두려움 , 2.00
+ELSEIF S == 2
+	TIMES SOURCE:두려움 , 1.50
+ELSEIF S == 1
+	TIMES SOURCE:두려움 , 1.20
+ELSEIF S == 0
+	TIMES SOURCE:두려움 , 1.00
+ELSEIF S == -3
+	TIMES SOURCE:두려움 , 0.75
+ELSE
+	TIMES SOURCE:두려움 , 0.90
+ENDIF
+
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;게이경험とか加算
+CALL COM_EXP(2)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+;依存度補正値(主人かつ연모、음란、복종で1。친애、창부、예속で2）
+IF (TALENT:연모 || TALENT:음란 || TALENT:복종) && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF (TALENT:친애 || TALENT:창부 || TALENT:예속) && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+

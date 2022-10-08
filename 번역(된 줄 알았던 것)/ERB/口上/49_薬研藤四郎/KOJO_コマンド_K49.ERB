@@ -4,17 +4,17 @@
 ;커맨드 실행시에 출력됩니다
 ;==================================================
 @KOJO_MESSAGE_COM_K49
-;조수가 조교했을 때에입상을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
+;조수가 조교했을 때에대사을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
 ;SIF ASSI >= 0 && ASSIPLAY
 ;	RETURN 0
-;볼개그착용시에는 지문을 표시해입상을 스킵 한다
+;볼개그착용시에는 지문을 표시해대사을 스킵 한다
 IF TEQUIP:볼개그 &&  SELECTCOM != 107
 	CALL TRAIN_MESSAGE
 	RETURN 0
 ENDIF
 
 ;--------------------------------------------------
-;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;특정조수,주인시에 특수조수대사을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
 ;--------------------------------------------------
 ;IF NO:MASTER == Y1
 ;	CALL MESSAGE_COM_PY1_KZ
@@ -136,7 +136,7 @@ ENDIF
 
 
 ;==================================================
-;랜덤소입상
+;랜덤소대사
 ;==================================================
 ;절정 회수
 IF (EX:0 + EX:1 + EX:2 + EX:3 >= 20)
@@ -694,10 +694,10 @@ IF SELECTCOM == 12
 ENDIF
 
 ;-------------------------------------------------
-;13,니틀캡 CFLAG:311
+;13,니플캡 CFLAG:311
 ;-------------------------------------------------
 ;장착시
-IF SELECTCOM == 13 && TEQUIP:니틀캡 == 0
+IF SELECTCOM == 13 && TEQUIP:니플캡 == 0
 	CALL TRAIN_MESSAGE
 	;처음
 	IF CFLAG:311 == 0
@@ -710,7 +710,7 @@ IF SELECTCOM == 13 && TEQUIP:니틀캡 == 0
 		CFLAG:311 = 2
 	ENDIF
 ;제외했을 때의 반응
-ELSEIF SELECTCOM == 13 && TEQUIP:니틀캡
+ELSEIF SELECTCOM == 13 && TEQUIP:니플캡
 	CALL TRAIN_MESSAGE
 ENDIF
 
@@ -1756,7 +1756,7 @@ IF SELECTCOM == 71
 			IF TALENT:3 || TALENT:6
 				IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
 					IF RAND:2 == 0
-						;비처녀,비백버진 비처녀만이라면남자에서도입상이 나와 버리므로w
+						;비처녀,비백버진 비처녀만이라면남자에서도대사이 나와 버리므로w
 						IF (TALENT:남자 == 0 && TALENT:처녀 == 0) || TALENT:백버진 == 0
 							PRINTFORMW 무엇을 생각했는지%CALLNAME%는,아구,라고 연입를 닫고손안의 노장[怒張]을 빈번히 응시했다.
 							PRINTFORM 「매번 이 녀석이 나의 \@TALENT:남자? 엉덩이 # 나카\@로 날뛰고 있는 것이구나……
@@ -3430,7 +3430,7 @@ IF SELECTCOM == 204
 		;함락이 끝난 상태
 		IF (TALENT:3 || TALENT:4 || TALENT:5 || TALENT:6 || TALENT:7 || TALENT:8) && (CFLAG:406 < 3 || FLAG:7 == 2)
 			IF NO:MASTER == 0 || (ASSI > 0 && NO:ASSI == 0)
-				IF ((TEQUIP:로터삽입 || TEQUIP:바이브 || TEQUIP:로터A삽입 || TEQUIP:애널바이브 || TEQUIP:전동오나홀 || TEQUIP:니틀캡 || TEQUIP:카테터) && PALAM:TARGET:욕정 >= PALAMLV:4)
+				IF ((TEQUIP:로터삽입 || TEQUIP:바이브 || TEQUIP:로터A삽입 || TEQUIP:애널바이브 || TEQUIP:전동오나홀 || TEQUIP:니플캡 || TEQUIP:카테터) && PALAM:TARGET:욕정 >= PALAMLV:4)
 					PRINTFORMW 「후아,아,아%UNICODE(0x2661)% 이것,취해,덩이는%UNICODE(0x2661)% 일에,히웃,군요……!」
 					PRINTFORMW %CALLNAME%는,\@ RAND:2 == 0? 세면대의 인연 # 세운 자루걸레 \@에 매달리면서도 주저앉은 신체를 움찔움찔 진동시켜 허덕이고 있다
 				ELSE
@@ -4205,7 +4205,7 @@ ENDIF
 ;341,촉수유두고문 CFLAG:459
 ;-------------------------------------------------
 ;장착시
-IF SELECTCOM == 341 && TEQUIP:니틀캡 == 0
+IF SELECTCOM == 341 && TEQUIP:니플캡 == 0
 	CALL TRAIN_MESSAGE
 	;처음
 	IF CFLAG:459 == 0
@@ -4215,7 +4215,7 @@ IF SELECTCOM == 341 && TEQUIP:니틀캡 == 0
 		CFLAG:459 = 2
 	ENDIF
 ;제외했을 때의 반응
-ELSEIF SELECTCOM == 341 && TEQUIP:니틀캡
+ELSEIF SELECTCOM == 341 && TEQUIP:니플캡
 	CALL TRAIN_MESSAGE
 ENDIF
 

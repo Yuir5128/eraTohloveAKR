@@ -1,0 +1,168 @@
+﻿;-------------------------------------------------
+;배빵
+;ＳＭ-ハード系コマンド
+;-------------------------------------------------
+@COM154
+
+PRINTL 배빵
+STR:0 = 배빵
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 100
+LOSEBASE:기력 += 60
+
+SOURCE:통증 += 1800
+
+SOURCE:두려움 += 2000
+SOURCE:굴복 += 1000
+SOURCE:일탈 += 300
+SOURCE:반발 += 800
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;고통を伴わない마조끼及び마조の処理は先にしておく
+;마조끼を見る
+IF ABL:마조끼 == 0
+	TIMES SOURCE:굴복 , 0.80
+	SOURCE:액체 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:굴복 , 1.00
+	SOURCE:액체 += 20
+	SOURCE:욕정 += 30
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:굴복 , 1.20
+	SOURCE:액체 += 40
+	SOURCE:욕정 += 70
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:굴복 , 1.40
+	SOURCE:액체 += 70
+	SOURCE:욕정 += 120
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:굴복 , 1.50
+	SOURCE:액체 += 110
+	SOURCE:욕정 += 180
+ELSEIF ABL:마조끼 == 5
+	TIMES SOURCE:굴복 , 1.70
+	SOURCE:액체 += 150
+	SOURCE:욕정 += 250
+ELSEIF ABL:마조끼 == 6
+	TIMES SOURCE:굴복 , 1.90
+	SOURCE:액체 += 200
+	SOURCE:욕정 += 300
+ELSEIF ABL:마조끼 == 7
+	TIMES SOURCE:굴복 , 2.10
+	SOURCE:액체 += 250
+	SOURCE:욕정 += 350
+ELSEIF ABL:마조끼 == 8
+	TIMES SOURCE:굴복 , 2.30
+	SOURCE:액체 += 300
+	SOURCE:욕정 += 400
+ELSEIF ABL:마조끼 == 9
+	TIMES SOURCE:굴복 , 2.50
+	SOURCE:액체 += 350
+	SOURCE:욕정 += 450
+ELSEIF ABL:마조끼 >= 10
+	TIMES SOURCE:굴복 , 3.00
+	SOURCE:액체 += 500
+	SOURCE:욕정 += 500
+ENDIF
+
+;마조を見る
+IF TALENT:마조
+	TIMES SOURCE:굴복 , 2.50
+	TIMES SOURCE:액체 , 1.20
+	TIMES SOURCE:욕정 , 1.20
+ENDIF
+
+;TALENT:반항적をみる
+IF TALENT:반항적 == 1
+	TIMES SOURCE:두려움 , 0.75
+	TIMES SOURCE:굴복 , 0.75
+	TIMES SOURCE:반발 , 1.50
+ENDIF
+
+;TALENT:꿋꿋함をみる
+IF TALENT:꿋꿋함 == 1
+	TIMES SOURCE:두려움 , 0.75
+	TIMES SOURCE:반발 , 2.50
+ENDIF
+
+;TALENT:프라이드높음をみる
+IF TALENT:프라이드높음 == 1
+	TIMES SOURCE:두려움 , 0.75
+	TIMES SOURCE:굴복 , 1.50
+	TIMES SOURCE:반발 , 2.00
+ENDIF
+
+;TALENT:건방짐をみる
+IF TALENT:건방짐 == 1
+	TIMES SOURCE:두려움 , 0.80
+	TIMES SOURCE:굴복 , 0.80
+	TIMES SOURCE:반발 , 1.80
+ENDIF
+
+;TALENT:프라이드낮음をみる
+IF TALENT:프라이드낮음 == 1
+	TIMES SOURCE:두려움 , 1.50
+	TIMES SOURCE:굴복 , 0.75
+	TIMES SOURCE:반발 , 0.75
+ENDIF
+
+;밧줄で緊縛中のとき効果上昇
+SIF TEQUIP:밧줄
+	TIMES SOURCE:두려움 , 1.50
+
+;体格差により공포のソース追加
+CALL BUILD
+IF S == 3
+	TIMES SOURCE:두려움 , 2.00
+ELSEIF S == 2
+	TIMES SOURCE:두려움 , 1.50
+ELSEIF S == 1
+	TIMES SOURCE:두려움 , 1.20
+ELSEIF S == 0
+	TIMES SOURCE:두려움 , 1.00
+ELSEIF S == -3
+	TIMES SOURCE:두려움 , 0.75
+ELSE
+	TIMES SOURCE:두려움 , 0.90
+ENDIF
+
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;게이경험とか加算
+CALL COM_EXP(1)
+
+;애정경험(減少）
+IF (TALENT:연모 == 1 || TALENT:친애 == 1) && ASSIPLAY == 0 && EXP:애정경험 > 0
+	PRINTS EXPNAME:23
+	PRINTL -1
+	EXP:애정경험 -= 1
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+

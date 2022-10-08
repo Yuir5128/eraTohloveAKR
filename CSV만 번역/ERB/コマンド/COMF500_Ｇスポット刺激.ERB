@@ -1,0 +1,112 @@
+﻿;-------------------------------------------------
+;Ｇスポット刺激
+;派生系コマンド
+;-------------------------------------------------
+@COM500
+
+PRINTL Ｇスポット刺激
+STR:0 = Ｇスポット刺激
+
+SELECTCOM = 500
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 30
+LOSEBASE:기력 += 50
+
+SOURCE:쾌V += 180
+
+SOURCE:통증 += 20
+SOURCE:액체 += 50
+SOURCE:노출 += 80
+SOURCE:일탈 += 100
+SOURCE:반발 += 100
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 100
+
+;처녀だった場合は、고통のソースと반발のソースを追加する
+IF TALENT:처녀 == 1
+	SOURCE:통증 += 2000
+	SOURCE:반발 += 3000
+ENDIF
+
+;재생처녀だった場合は、고통のソースと반발のソースを追加する
+IF TALENT:재생처녀 == 1
+	SOURCE:통증 += 500
+	SOURCE:반발 += 1000
+ENDIF
+
+;Vへの고통は先に処理しておく
+;EXP:V경험をみる（처녀の반감は別途処理済みなので省略）
+IF EXP:V경험 < EXPLV:1
+	TIMES SOURCE:통증 , 2.50
+ELSEIF EXP:V경험 < EXPLV:2
+	TIMES SOURCE:통증 , 0.80
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:V경험 < EXPLV:3
+	TIMES SOURCE:통증 , 0.40
+ELSEIF EXP:V경험 < EXPLV:4
+	TIMES SOURCE:통증 , 0.10
+ELSEIF EXP:V경험 < EXPLV:5
+	TIMES SOURCE:통증 , 0.00
+ELSEIF EXP:V경험 >= EXPLV:5
+	TIMES SOURCE:통증 , 0.00
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 0.70
+	TIMES SOURCE:반발 , 1.20
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 0.40
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 0.10
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 0.10
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;調教者の손⇔奴隷のＶ질내の汚れが移動
+;道具を使用する場合は汚れは移動しない
+IF TEQUIP:로터삽입 || TEQUIP:바이브
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;V경험
+EXP:V경험 += 2
+PRINTL V경험＋２
+
+;게이경험とか加算
+CALL COM_EXP(1)
+
+;依存度ベクトル
+IF TALENT:처녀
+	TFLAG:33 = 3
+ELSE
+	TFLAG:33 = 1
+ENDIF
+
+
+RETURN 1
+

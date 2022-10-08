@@ -1,0 +1,104 @@
+﻿;-------------------------------------------------
+;한쪽팔절단
+;猟奇系コマンド
+;-------------------------------------------------
+@COM390
+
+PRINTL 한쪽팔절단
+STR:0 = 한쪽팔절단
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+LOSEBASE:체력 += 700
+LOSEBASE:기력 += 500
+
+;통증、두려움、굴복、일탈、반발
+SOURCE:통증 += 6000
+SOURCE:두려움 += 6000
+SOURCE:굴복 += 2500
+SOURCE:일탈 += 3000
+SOURCE:반발 += 4000
+IF TALENT:한팔결손
+	PRINTFORMW ＜%CALLNAME%は両腕を失いました＞
+	TALENT:한팔결손 = 0
+	IF TALENT:양다리결손
+		TALENT:양다리결손 = 0
+		TALENT:달마 = 1
+	ELSE
+		TALENT:양팔결손 = 1
+	ENDIF
+ELSE
+	PRINTFORMW ＜%CALLNAME%は片腕を失いました＞
+	TALENT:한팔결손 = 1
+ENDIF
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;친애・복종・예속の場合반발減、순종のソース追加
+IF TALENT:친애 || TALENT:복종 || TALENT:예속
+	TIMES SOURCE:반발 , 0.10
+	SOURCE:순종 += 3000
+ENDIF
+;마조끼
+IF ABL:마조끼 == 0
+	TIMES SOURCE:일탈 , 2.00
+ELSEIF ABL:마조끼 < 3
+	TIMES SOURCE:일탈 , 1.00
+ELSEIF ABL:마조끼 < 5
+	TIMES SOURCE:일탈 , 0.70
+ELSEIF ABL:마조끼 < 7
+	TIMES SOURCE:일탈 , 0.50
+ELSEIF ABL:마조끼 < 9
+	TIMES SOURCE:일탈 , 0.30
+ELSE
+	TIMES SOURCE:일탈 , 0.10
+ENDIF
+
+;고통のパラメータによる고통のソース増加は先に処理しておく
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증 , 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증 , 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증 , 3.00
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;이상경험
+IF EXP:절단경험 < 9
+	EXP:이상경험 += 1
+	PRINTL 이상경험＋１
+ENDIF
+
+;절단경험
+EXP:절단경험 += 1
+PRINTL 절단경험＋１
+
+;게이경험とか加算
+CALL COM_EXP(5)
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(연모・복종で1、친애・예속で2）
+IF TALENT:연모 || TALENT:복종
+	TFLAG:30 += 1
+ELSEIF TALENT:친애 || TALENT:예속
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+

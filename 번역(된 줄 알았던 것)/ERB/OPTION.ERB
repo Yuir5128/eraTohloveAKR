@@ -10,7 +10,7 @@ PRINTL 설정 항목을 선택해 주세요
 
 PRINT [  0] - 텍스트 표시
 	IF FLAG:6 == 1 && FLAG:7 == 2
-		PRINTL 　　　　　　　【입상 텍스트(항상 표시)＋정경 텍스트】
+		PRINTL 　　　　　　　【대사 텍스트(항상 표시)＋정경 텍스트】
 	ELSEIF FLAG:6 == 1 && FLAG:7 == -1
 		PRINTL 　　　　　　　　　　　　　　　　　　【정경 텍스트만】
 	ELSEIF FLAG:6 == 0 && FLAG:7 == -1
@@ -71,7 +71,7 @@ PRINT [  3] - 스테이터스 표시 설정
 	ELSEIF (FLAG:26 & 3) == 3
 		PRINTL 　　　　　　　　　　　　　　　　　　【표시하지 않는다】
 	ENDIF
-PRINT [  4] - 캐릭터입상
+PRINT [  4] - 캐릭터대사
 IF !FLAG:97
 	PRINTL 　　　　　　　　　　　　　　　　　　　　　　　　【칼라】
 ELSE
@@ -81,7 +81,7 @@ PRINT [  5] - 범용 허덕여 사용 설정
 IF FLAG:152 == 1
 	PRINTL 　　　　　　　　　　　　　　　　　　　【사용하지 않는다】
 ELSE
-	PRINTL 　　　　　　　　　【전용입상이 없는 경우에 사용한다】
+	PRINTL 　　　　　　　　　【전용대사이 없는 경우에 사용한다】
 ENDIF
 PRINTL 
 ;FLAG:2 = ●비트 연산으로 확장 기능 전체에 적용한다(것으로 하면 만지기 쉬울까)

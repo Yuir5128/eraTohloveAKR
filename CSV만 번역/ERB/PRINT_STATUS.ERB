@@ -1,0 +1,421 @@
+﻿;-------------------------------------------------
+;ステータス表示
+;-------------------------------------------------
+;１Ｐ、名前、체력기력、素質、연모・畏怖対象、喪失相손
+@PRINT_STATUS(ARG,ARG:1)
+DRAWLINE
+PRINTFORM ■ 
+SIF TALENT:ARG:붕괴
+	PRINTFORM ＜折れた＞
+PRINTFORML %NAME:ARG%のステータス ■
+IF CFLAG:ARG:1 < 3
+	;調教者変更対応
+	LOCAL:1 = 0
+	FOR LOCAL, 0, CHARANUM
+		SIF CFLAG:LOCAL:40 && CFLAG:LOCAL:41 == NO:ARG
+			LOCAL:1++
+	NEXT
+	SIF LOCAL:1 > 0
+		PRINTFORM (堕とした人数：{LOCAL:1}人)　
+	SIF TALENT:MASTER:천리안
+		PRINTFORML (依存度:{CFLAG:ARG:2} ストレス{CFLAG:ARG:10} 禁欲値{CFLAG:ARG:602})
+	SIF LOCAL:1 > 0 && !TALENT:MASTER:천리안
+		PRINTL 
+	VARSET T
+ELSEIF ARG == MASTER
+	;調教者変更対応
+	LOCAL:1 = 0
+	FOR LOCAL, 0, CHARANUM
+		SIF CFLAG:LOCAL:40 && CFLAG:LOCAL:41 == NO:ARG
+			LOCAL:1++
+	NEXT
+	PRINTFORM (堕とした人数：{LOCAL:1}人)　
+	IF FLAG:4
+		PRINT 難易度:
+		IF FLAG:4 == 1
+			PRINTL 易
+		ELSEIF FLAG:4 == 2
+			PRINTL 普通
+		ELSEIF FLAG:4 == 3
+			PRINTL 難
+		ENDIF
+	ELSE
+		PRINTL 
+	ENDIF
+ENDIF
+PRINTFORM 체력%UNICODE(0x208D)%
+CALL PRINT_COLORBAR,BASE:ARG:체력,MAXBASE:ARG:체력,32,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("赤"),RESULT:1
+PRINTFORM %UNICODE(0x208E)%
+PRINTFORML  {BASE:ARG:체력}/{MAXBASE:ARG:체력} 
+
+PRINTFORM 기력%UNICODE(0x208D)%
+CALL PRINT_COLORBAR,BASE:ARG:기력,MAXBASE:ARG:기력,32,UNICODE(0x2583),UNICODE(0x2583),BARCOLORSET("紺"),RESULT:1
+PRINTFORM %UNICODE(0x208E)%
+PRINTFORML  {BASE:ARG:기력}/{MAXBASE:ARG:기력} 
+PRINTL 
+;調教者変更拡張対応
+IF CFLAG:ARG:40
+	R = CFLAG:ARG:41
+	M = NO2(R)
+	IF KANRAKU(ARG) == 1 || KANRAKU(ARG) == 4
+		PRINT □ 思慕
+	ELSEIF KANRAKU(ARG) == 3 || KANRAKU(ARG) == 5
+		PRINT □ 畏怖
+	;共犯者の執心対象設定が有効
+	ELSEIF CFLAG:ARG:1 == 3
+		;少なくとも相손が연모系統に傾いていて、かつ思慕対象がその相互であるとき
+		IF CFLAG:M:41 == NO:ARG && CFLAG:M:2 > 1000
+			PRINT ■ 思慕
+		;一方通行かもしれない
+		ELSE
+			PRINT ■ 執心
+		ENDIF
+	ENDIF
+	PRINTFORML 対象 … %NAME:M%
+ENDIF
+CALL NEW_PRINT_TALENT(ARG)
+CALL NEW_PRINT_EXP(ARG)
+CALL NEW_PRINT_ABL(ARG)
+PRINTL □ 刻印 □---------------------------------------------------------------------
+CALL SHOW_INFO_MARK(ARG)
+PRINTL 
+PRINTL 　　　　　　　　　　[100] - 戻る　[102] - 次のページ
+$INPUT_LOOP
+INPUT
+IF RESULT != 100 && RESULT != 102
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+SIF RESULT == 102
+	CALL PRINT_STATUS2(ARG)
+SIF RESULT == 100
+	RETURN 0
+RESTART
+
+;２Ｐめ、経験、能力、珠、刻印
+@PRINT_STATUS2(ARG)
+PRINTL 
+PRINTL 
+PRINTL 
+CALL SHOW_INFO_JUEL(ARG)
+PRINTL 
+CALL PRINT_LOSTVIRGIN(ARG)
+CALL PRINT_RELATION(ARG)
+CALL PRINT_HITYOUKYOU(ARG)
+PRINTL [101] - 前のページ　[100] - 戻る
+$INPUT_LOOP
+INPUT
+IF RESULT != 100 && RESULT != 101
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+RETURN RESULT
+
+;３Ｐめ、おとした相손
+
+
+@PRINT_LOSTVIRGIN(ARG)
+PRINTL □ 처녀系素質喪失相손 □-------------------------------------------------------
+PRINTFORM %CALLNAME:ARG,16,RIGHT%の처녀喪失相손：
+STRLENS CSTR:ARG:10
+IF TALENT:ARG:처녀 && VAGINA(ARG)
+	PRINTFORML %CALLNAME:ARG%は처녀です
+ELSEIF RESULT
+	PRINTFORML %CSTR:ARG:10%
+ELSE
+	PRINTL ――――――――――――
+ENDIF
+PRINTFORM 　　　　　　　　　동정喪失相손：
+STRLENS CSTR:ARG:11
+IF TALENT:ARG:동정 && PENIS(ARG)
+	PRINTFORML %CALLNAME:ARG%は동정です
+ELSEIF RESULT
+	PRINTFORML %CSTR:ARG:11%
+ELSE
+	PRINTL ――――――――――――
+ENDIF
+PRINTFORM 　　　　백버진喪失相손：
+STRLENS CSTR:ARG:12
+IF TALENT:ARG:백버진
+	PRINTFORML %CALLNAME:ARG%は백버진です
+ELSEIF RESULT
+	PRINTFORML %CSTR:ARG:12%
+ELSE
+	PRINTL ――――――――――――
+ENDIF
+IF TALENT:ARG:낙인
+	STRLENS CSTR:ARG:1
+	SIF RESULT
+		PRINTFORML 　　　　%CALLNAME:ARG%に낙인を残したのは%CSTR:ARG:1%です
+ENDIF
+IF (CFLAG:ARG:112 + CFLAG:ARG:113) > 0
+	PRINTL 
+	PRINTL □ 子 □-----------------------------------------------------------------------
+	IF CFLAG:ARG:112
+		PRINTFORML 　　　出産した아이の数：{CFLAG:ARG:112}人
+	ENDIF
+	IF CFLAG:ARG:113
+		PRINTFORML 　　　孕ませた아이の数：{CFLAG:ARG:113}人
+	ENDIF
+	IF STRLENS(CSTR:ARG:13)
+		PRINTFORML %CALLNAME:ARG,16,RIGHT%の아이：%CSTR:ARG:13%
+	ENDIF
+ENDIF
+IF STRLENS(CSTR:ARG:3)
+	PRINTL 
+	PRINTL □ 親 □-----------------------------------------------------------------------
+	PRINTFORM %CALLNAME:ARG,16,RIGHT%の父親：
+	IF STRLENS(CSTR:ARG:2)
+		PRINTFORML %CSTR:ARG:2%
+	ELSE
+		PRINTL 不明
+	ENDIF
+	PRINTFORML 　　　　　　　　　母親：%CSTR:ARG:3%
+	IF STRLENS(CSTR:ARG:4) || STRLENS(CSTR:ARG:5)
+		PRINTFORM 　　　　　　　　父の父：
+		IF STRLENS(CSTR:ARG:4)
+			PRINTFORML %CSTR:ARG:4%
+		ELSE
+			PRINTL 不明
+		ENDIF
+		PRINTFORML 　　　　　　　　父の母：%CSTR:ARG:5%
+	ENDIF
+	IF STRLENS(CSTR:ARG:6) || STRLENS(CSTR:ARG:7)
+		PRINTFORM 　　　　　　　　母の父：
+		IF STRLENS(CSTR:ARG:6)
+			PRINTFORML %CSTR:ARG:6%
+		ELSE
+			PRINTL 不明
+		ENDIF
+		PRINTFORML 　　　　　　　　母の母：%CSTR:ARG:7%
+	ENDIF
+ENDIF
+PRINTL 
+
+@PRINT_HITYOUKYOU(ARG)
+VARSET LOCAL
+PRINTL □ 조교경험 □-----------------------------------------------------------------
+FOR LOCAL:1, 0, CHARANUM
+	LOCAL = NO:ARG + 1099
+	IF CFLAG:(LOCAL:1):LOCAL
+		PRINTFORM %NATION_OR_H(NO:(LOCAL:1)), 16%：{CFLAG:(LOCAL:1):LOCAL,6}
+		IF (LOCAL:2 % 3) == 2
+			PRINTL 
+		ELSE
+			PRINT 　
+		ENDIF
+		LOCAL:2++
+	ENDIF
+NEXT
+SIF (LOCAL:2 % 3) != 0
+	PRINTL 
+PRINTL 
+LOCAL:2 = 0
+PRINTL □ 被조교경험 □---------------------------------------------------------------
+FOR LOCAL:1, 0, 500
+	LOCAL = LOCAL:1 + 1099
+	IF CFLAG:ARG:LOCAL
+		PRINTFORM %NATION_OR_H(LOCAL:1), 16%：{CFLAG:ARG:LOCAL,6}
+		IF (LOCAL:2 % 3) == 2
+			PRINTL 
+		ELSE
+			PRINT 　
+		ENDIF
+		LOCAL:2++
+	ENDIF
+NEXT
+SIF (LOCAL:2 % 3) != 0
+	PRINTL 
+PRINTL 
+
+@NEW_PRINT_EXP(ARG)
+PRINTL □ 経験 □---------------------------------------------------------------------
+;表示順の設定
+; 0,　　　V경험　 1,　　　A경험　 2,　　절정경험　 3,　　사정경험
+; 4,　　성교경험　 5,　　질내사정경험　 6,　　　U경험　 7,　　　Ｍ경험
+;10,　　자위경험　11,조교자위경험　12,공개자위　20,　　정액경험
+;21,봉사쾌락경험　22,　펠라경험　23,　　애정경험　24,정음절정경험
+;25,　허공사정경험　26,　V사정경험　27,　A사정경험　28,　Ｂ사정경험
+;30,고통쾌락경험　31,　　배뇨경험　32,가학쾌락경험　33,　　스캇경험
+;34,　　기절경험　35,　　관장경험　36,야외방뇨경험　37,　　식분경험
+;38,　　전극경험　39,채내배뇨경험　40,　　레즈경험　41,　　게이경험
+;42,강제정음절정　43,　　윤간경험　49,　U확장경험　50,　　이상경험
+;51,　　속박경험　52,　V확장경험　53,　A확장경험　54,　　분유경험
+;55,　　촉수경험　56,　　수간경험　57,　뱀장어탕경험　58,　곤충탕경험
+;59,　　산란경험　60,　　출산경험　61,　　가사경험　62,　　촬영경험
+;63,　　피사경험　64,　　가창경험　65,창관봉공경험　70,　　조교경험
+LOCAL:2 = 0
+FOR LOCAL, 0, 100
+	;[공]のときＶＡ関連経験は非表示
+	IF TALENT:ARG:공
+		SELECTCASE LOCAL
+			CASE 0,1,26,27,52,53
+				CONTINUE
+		ENDSELECT
+	ENDIF
+	IF EXP:ARG:LOCAL
+		PRINTFORM %EXPNAME:LOCAL, 12%:{EXP:ARG:LOCAL, 5}
+		LOCAL:2++
+		IF LOCAL:2 % 4 == 0
+			PRINTL 
+		ELSE
+			PRINT 　
+		ENDIF
+	ENDIF
+NEXT
+;最후のループで改行してなかったら改行
+SIF LOCAL:2 % 4 != 0
+	PRINTL 
+
+@NEW_PRINT_ABL(ARG)
+PRINTL □ 能力 □---------------------------------------------------------------------
+;表示順の設定
+; 0,　　순종　 1,　　욕망　 2,　　기교　 7,봉사정신
+; 3,　C감각　 4,　V감각　 5,　A감각　 6,　B감각
+; 8,　노출벽　12,요리기능　13,촬영기능　14,가창기능
+; 9,마조끼　10,새드끼　11,레즈끼　20,게이끼
+;15,자위중독　16,정액중독　17,레즈중독　18,섹스중독
+;19,착유중독　21,게이중독　22,스캇중독　
+LOCAL:2 = 0
+FOR LOCAL, 0, 23
+	;[공]のときＶＡ関連能力は非表示
+	IF TALENT:ARG:공
+		SELECTCASE LOCAL
+			CASE 4,5
+				CONTINUE
+		ENDSELECT
+	ENDIF
+	IF ABL:ARG:LOCAL
+		PRINTFORM 　%ABLNAME:LOCAL,12%Lv{ABL:ARG:LOCAL,2}
+		LOCAL:2++
+		IF LOCAL:2 % 4 == 0
+			PRINTL 
+			LOCAL:2 = 0
+		ELSE
+			PRINT 　
+		ENDIF
+	ENDIF
+NEXT
+;最후のループで改行してなかったら改行
+SIF LOCAL:2 % 4 != 0
+	PRINTL 
+
+
+@NEW_PRINT_TALENT(ARG)
+PRINTL □ 素質 □---------------------------------------------------------------------
+;SIF FLAG:2002
+;	PRINTFORML %PERSONA(ARG)%
+;通常表示
+;IF !FLAG:2003
+;	LOCAL:1 = 0
+;	FOR LOCAL, 0, 300
+;		;非表示素質
+;		SIF !TALENT_TYPE(LOCAL, ARG)
+;			CONTINUE
+;		IF TALENT:ARG:LOCAL
+;			LOCALS = %GET_TALENTNAME(ARG, LOCAL)%
+;			LOCAL:2 = STRLENS(LOCALS)
+;			LOCAL:1 += LOCAL:2 + 3
+;			;あまり詰めない
+;			IF LOCAL:1 > 70
+;				PRINTL 
+;				LOCAL:1 = LOCAL:2 + 3
+;			ENDIF
+;			PRINTFORM [%LOCALS%] 
+;		ENDIF
+;	NEXT
+;	PRINTL 
+;;素質整頓表示
+;ELSE
+	;ループを200×ｎ回윤간すのはさすがにちょっと重たいんじゃないか…と思ったのでこんなやり方に。
+	;TALENTは使ってもせいぜい200種程度だと思うので所持している番号だけを、少し強引な손입を使用してLOCALだけで保持。
+	;今のやり方だと各タイプについて99種しか扱えないけど、それ以前に素質を99種持つのも難しいと思うのできっと大丈夫。
+	;ダメになったらダメになった時になんとかしてください。なお、現在の仕様では素質分類は9までしか扱えません。
+	
+	;LOCAL初期化
+	VARSET LOCAL
+	
+	;素質分類処理のループ
+	;LOCAL:0		ループカウンタ(素質番号)
+	;LOCAL:1		素質分類番号
+	;LOCAL:X00		その系統のTALENTをいくつ保有しているか(X=素質分類番号)
+	;LOCAL:X01～X99	所持しているTALENTの番号を順に格納していく(X=素質分類番号)
+	FOR LOCAL, 0, 300
+		;素質が無いなら処理しない。無駄に関数呼ぶのも嫌なので
+		SIF !TALENT:ARG:LOCAL
+			CONTINUE
+		LOCAL:1 = TALENT_TYPE(LOCAL, ARG)
+		;非表示は表示しない。性別は別処理のためここでは扱わない
+		SIF LOCAL:1 > 1
+			LOCAL:(100 * LOCAL:1 + 1 + LOCAL:(100 * LOCAL:1)++) = LOCAL
+	NEXT
+	
+	;性別は特殊なので別処理。ここで表示する
+	PRINTFORML %TALENT_TYPENAME(1)%：[%GET_SEX(ARG)%]\@ TALENT:ARG:처녀 && VAGINA(ARG) ? %" "%[%GET_TALENTNAME(ARG, 0)%] # \@\@ TALENT:ARG:동정 && PENIS(ARG) ? %" "%[%GET_TALENTNAME(ARG, 160)%] # \@\@ TALENT:ARG:백버진 ? %" "%[%GET_TALENTNAME(ARG, 161)%] # \@\@ TALENT:ARG:수 ? %" "%[%GET_TALENTNAME(ARG, 157)%] # \@\@ TALENT:ARG:공 ? %" "%[%GET_TALENTNAME(ARG, 158)%] # \@\@ TALENT:ARG:오메가 ? %" "%[%GET_TALENTNAME(ARG, 170)%] #  \@
+	
+	;表示のループ
+	;LOCAL:0	ループカウンタ1(素質分類番号)
+	;LOCAL:1	処理中の行オフセット(桁位置)
+	;LOCAL:2	タイトル部分の文字数(『○○：』の部分)
+	;LOCAL:3	ループカウンタ2(その分類の所持素質数だけループ)
+	;LOCAL:4	素質名の長さ
+	;LOCAL:5	その分類の素質所持数が格納されているLOCALの番号
+	;LOCALS:0	汎用の文字列格納域(素質分類名/素質名)
+	FOR LOCAL, 2, 8
+		;素質分類番号を配列の添え字に変換
+		LOCAL:5 = LOCAL * 100
+		;その分類の素質を1つも所持していなければ아무것도안한다
+		SIF !LOCAL:(LOCAL:5)
+			CONTINUE
+		;素質分類名を取得→出力
+		LOCALS = %TALENT_TYPENAME(LOCAL)%
+		PRINTFORM %LOCALS%：
+		LOCAL:1 = 0
+		LOCAL:2 = STRLENS(LOCALS) + 2
+		;素質を所持している数だけループ
+		FOR LOCAL:3, 0, LOCAL:(LOCAL:5)
+			;素質名を取得
+			LOCALS = %GET_TALENTNAME(ARG, LOCAL:(LOCAL:5 + 1 + LOCAL:3))%
+			LOCAL:4 = STRLENS(LOCALS)
+			LOCAL:1 += LOCAL:4 + 3
+			;改行処理
+			IF LOCAL:1 > 78 - LOCAL:2
+				PRINTL 
+				PRINTS " " * LOCAL:2
+				LOCAL:1 = LOCAL:2 + 3 + LOCAL:4
+			ENDIF
+			;素質名の出力
+			PRINTFORM [%LOCALS%] 
+		NEXT
+		PRINTL 
+	NEXT
+;ENDIF
+
+@PRINT_RELATION(ARG)
+PRINTL □ 相性 □---------------------------------------------------------------------
+LOCAL:1 = 0
+FOR LOCAL, 0, 500
+	IF RELATION:(ARG):LOCAL != 0 && RELATION:(ARG):LOCAL != 100
+		PRINTFORM 　%NATION_OR_H(LOCAL), 16%×
+		IF RELATION:(ARG):LOCAL > 100
+			SETCOLOR 0xcc7eb1
+		ELSE
+			SETCOLOR 0x8491c3
+		ENDIF
+		PRINTFORM {RELATION:(ARG):LOCAL, 3}
+		RESETCOLOR
+		PRINT ％
+		IF (LOCAL:1 % 3) == 2
+			PRINTL 
+		ELSE
+			PRINT 　
+		ENDIF
+		LOCAL:1++
+	ENDIF
+NEXT
+SIF !LOCAL:1
+	PRINTL 　特になし
+SIF (LOCAL:1 % 3) != 0
+	PRINTL 
+PRINTL 
+

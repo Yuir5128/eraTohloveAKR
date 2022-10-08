@@ -1,0 +1,364 @@
+﻿;-------------------------------------------------
+;기승위
+;セックス系コマンド
+;-------------------------------------------------
+@COM106
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;両方Ｖ挿入だと「二輪挿し」
+	IF PREVCOM == 405
+		CALL COM_ABLE517
+		IF RESULT == 1
+			TFLAG:40 = 1
+			TFLAG:41 = 1
+			TFLAG:49 = 0
+			JUMP COM517
+		ENDIF
+	;助손が애널に入れてると「サンドイッチ（二穴挿入）」
+	ELSEIF PREVCOM == 406
+		CALL COM_ABLE515
+		IF RESULT == 1
+			TFLAG:40 = 1
+			TFLAG:41 = 2
+			TFLAG:49 = 0
+			JUMP COM515
+		ENDIF
+	;前回コマンドが二輪挿しかサンドイッチ
+	ELSEIF PREVCOM == 517 || PREVCOM == 515
+		;前回コマンドが二輪挿しで、助손が挿入してる
+		IF TFLAG:41 == 1
+			CALL COM_ABLE517
+			IF RESULT == 1
+				TFLAG:40 = 1
+				TFLAG:41 = 1
+				TFLAG:49 = 0
+				JUMP COM517
+			ENDIF
+		;助손が애널に入れてると「サンドイッチ（二穴挿入）」
+		ELSEIF TFLAG:41 == 2
+			CALL COM_ABLE515
+			IF RESULT == 1
+				TFLAG:40 = 1
+				TFLAG:41 = 2
+				TFLAG:49 = 0
+				JUMP COM515
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;何も読まずにこっちに来たときはフラグ解除
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 기승위セックス
+STR:0 = 기승위セックス
+
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;すべての命令に共通の要素を考慮
+;(순종が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;実行判定操作
+CALL KOJO_DENIAL_PLUS
+
+;合計を表示(38以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 38
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+;実行不可입上/実行判定操作
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;実行者が奴隷であるフラグ
+TFLAG:28 = 1
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;처녀喪失フラグ
+SIF TALENT:처녀 || TALENT:재생처녀
+	TFLAG:19 |= 1
+;主人による처녀喪失
+SIF TALENT:처녀 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0
+	TFLAG:20 = 1
+
+;調教者が동정だった場合の喪失フラグ
+SIF TALENT:PLAYER:동정
+	TFLAG:160 |= 2
+
+
+;-------------------------------------------------
+;사정ゲージチェック
+;-------------------------------------------------
+B = 1350
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 100
+LOSEBASE:기력 += 100
+
+SOURCE:쾌V += 400
+
+SIF PENIS(TARGET)
+	SOURCE:쾌C += 80
+
+SOURCE:애정 += 300
+;스킨십선호だと애정のソース追加
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+SOURCE:통증 += 500
+
+SOURCE:성행동 += 250
+SOURCE:성취감 += 250
+SOURCE:중독충족 += 350
+SOURCE:노출 += 120
+SOURCE:일탈 += 600
+SOURCE:반발 += 800
+
+;上のほうで計算した汚れデータ
+SOURCE:불결 += Y*10 + 60
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 800
+
+;調教者が大柄だった場合は굴복ソース追加
+SIF TALENT:PLAYER:큰체구
+	SOURCE:굴복 += 800
+
+;調教者が大柄かつ、調教相손が小柄だった場合は순종ソース追加
+SIF TALENT:PLAYER:큰체구 && TALENT:작은체구
+	SOURCE:순종 += 300
+
+;정조관념持ちで연모、친애持ち以外には常に반발のソースを追加する（セックス系のみ）
+SIF TALENT:정조관념 && (TALENT:연모 == 0 && TALENT:친애 == 0)
+	SOURCE:반발 += 1000
+
+;처녀だった場合は、고통のソースと반발のソースを追加する
+IF TALENT:처녀 == 1
+	SOURCE:통증 += 2000
+	SOURCE:반발 += 3000
+ENDIF
+
+;재생처녀だった場合は、고통のソースと반발のソースを追加する
+IF TALENT:재생처녀 == 1
+	SOURCE:통증 += 500
+	SOURCE:반발 += 1000
+ENDIF
+
+;소인체형で調教者が거근か말자지の場合、고통と공포のソースを追加
+IF TALENT:소인체형
+	IF TALENT:PLAYER:거근
+		SOURCE:통증 += 200
+		SOURCE:두려움 += 500
+	ELSEIF TALENT:PLAYER:말자지
+		SOURCE:통증 += 500
+		SOURCE:두려움 += 1000
+	ENDIF
+ENDIF
+
+;調教者が말자지の場合
+IF TALENT:PLAYER:말자지
+	;V확장경험一定以上で중독충족のソースを追加
+	IF EXP:V확장경험 >= 20
+		SOURCE:중독충족 += 500
+	;V확장경험一定以下で고통と공포のソースを追加
+	ELSE
+		SOURCE:통증 += 500
+		SOURCE:두려움 += 1000
+	ENDIF
+ENDIF
+
+;Vへの고통は先に処理しておく
+;EXP:V경험をみる（처녀の반감は別途処理済みなので省略）
+IF EXP:V경험 < EXPLV:1
+	TIMES SOURCE:통증 , 2.50
+ELSEIF EXP:V경험 < EXPLV:2
+	TIMES SOURCE:통증 , 0.80
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:V경험 < EXPLV:3
+	TIMES SOURCE:통증 , 0.40
+ELSEIF EXP:V경험 < EXPLV:4
+	TIMES SOURCE:통증 , 0.10
+ELSEIF EXP:V경험 < EXPLV:5
+	TIMES SOURCE:통증 , 0.00
+ELSEIF EXP:V경험 >= EXPLV:5
+	TIMES SOURCE:통증 , 0.00
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 0.70
+	TIMES SOURCE:반발 , 1.20
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 0.40
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 0.10
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 0.10
+ENDIF
+
+;中毒による중독충족のソースは先に処理しておく
+;섹스중독を見る
+IF ABL:섹스중독 == 1
+	TIMES SOURCE:중독충족 , 0.00
+ELSEIF ABL:섹스중독 == 2
+	TIMES SOURCE:중독충족 , 0.30
+ELSEIF ABL:섹스중독 == 3
+	TIMES SOURCE:중독충족 , 0.60
+ELSEIF ABL:섹스중독 == 4
+	TIMES SOURCE:중독충족 , 0.90
+ELSEIF ABL:섹스중독 == 5
+	TIMES SOURCE:중독충족 , 1.20
+ELSEIF ABL:섹스중독 == 6
+	TIMES SOURCE:중독충족 , 1.50
+ELSEIF ABL:섹스중독 == 7
+	TIMES SOURCE:중독충족 , 1.80
+ELSEIF ABL:섹스중독 == 8
+	TIMES SOURCE:중독충족 , 2.30
+ELSEIF ABL:섹스중독 == 9
+	TIMES SOURCE:중독충족 , 3.00
+ELSEIF ABL:섹스중독 >= 10
+	TIMES SOURCE:중독충족 , 5.00
+ENDIF
+
+;-------------------------------------------------
+;사정チェック
+;-------------------------------------------------
+CALL SAMEN_CHECK(PLAYER,1)
+
+;사정時の処理
+IF E >= 1
+	;사정先タイプの設定
+	TFLAG:703 = 1
+	;사정先選択の可・不可
+	TFLAG:704 = 1
+	;汎用的な処理はこの関数で行う
+	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;페니스밴드を使う場合、汚れは移動しない
+IF !PENIS(PLAYER)
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;V経験
+EXP:V경험 += 1
+PRINTL V경험＋１
+
+;調教者が말자지で奴隷が소인체형だった場合、V확장경험
+IF TALENT:소인체형 && TALENT:PLAYER:말자지
+	IF EXP:V확장경험 == 0
+		EXP:이상경험 += 1
+		PRINTL Ｖ拡張初経験で이상경험＋１
+	ENDIF
+	EXP:V확장경험 += 1
+	PRINTL V확장경험＋１
+ENDIF
+
+;성교경험
+EXP:PLAYER:성교경험 += 1
+EXP:성교경험 += 1
+PRINTS EXPNAME:4
+PRINTL +1
+
+;삽입경험
+EXP:PLAYER:삽입경험 += 1
+
+;이상경험
+IF TALENT:처녀 == 1 && ASSI >= 0 && TALENT:PLAYER:남자 == 0
+	EXP:이상경험 += 2
+	PRINTFORML %EXPNAME:50%＋２
+ELSEIF TALENT:처녀 == 1 && (ASSI >= 0 || TALENT:PLAYER:남자 == 0)
+	EXP:이상경험 += 1
+	PRINTFORML %EXPNAME:50%＋１
+ENDIF
+
+;게이경험とか加算
+CALL COM_EXP(7)
+
+;애정경험
+IF TALENT:연모 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +2
+	EXP:애정경험 += 2
+ELSEIF TALENT:친애 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +4
+	EXP:애정경험 += 4
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+;依存度補正値(연모で2、친애で4）
+IF TALENT:연모 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ELSEIF TALENT:친애 && ASSIPLAY == 0
+	TFLAG:30 += 4
+ENDIF
+
+;奉仕快楽フラグ
+TFLAG:100 = 1
+
+RETURN 1
+
+
+

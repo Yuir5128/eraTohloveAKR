@@ -53,7 +53,7 @@ SIF TEQUIP:비디오카메라
 	V += 10
 SIF TEQUIP:야외플레이
 	V += 10
-SIF TEQUIP:니틀캡
+SIF TEQUIP:니플캡
 	V += 3
 SIF TEQUIP:유두클립
 	V += 10
@@ -69,7 +69,7 @@ SIF A > V
 PRINT 실행치
 PRINTV V
 
-;실행 불가입상/실행 판정 조작
+;실행 불가대사/실행 판정 조작
 SIF A < V
 	CALL KOJO_DENIAL
 
@@ -94,7 +94,7 @@ LOSEBASE:체력 += 10
 LOSEBASE:기력 += 50
 
 SOURCE:쾌B += 80
-SIF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기
+SIF TEQUIP:니플캡 || TEQUIP:유두클립 || TEQUIP:착유기
 	TIMES SOURCE:쾌B , 1.50
 
 SIF TEQUIP:유두클립
@@ -161,7 +161,7 @@ SIF TALENT:억압 || TALENT:저항
 ;-------------------------------------------------
 ;노예의손(장갑)⇔노예의 B의 더러움이 이동
 ;도구가 붙어 있으면 더러움은 이동하지 않는다
-IF TEQUIP:니틀캡 || TEQUIP:유두클립 || TEQUIP:착유기
+IF TEQUIP:니플캡 || TEQUIP:유두클립 || TEQUIP:착유기
 ELSE
 	CALL COM_STAIN
 ENDIF

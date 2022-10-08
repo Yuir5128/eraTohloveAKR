@@ -17,7 +17,7 @@ ENDIF
 IF TEQUIP:촉수 == 0
 	TEQUIP:촉수 = 1
 	;촉수계 커맨드에 영향을 주는 장비는 제외한다(도구가촉수취급이 되기 (위해)때문에)
-	TEQUIP:니틀캡 = 0
+	TEQUIP:니플캡 = 0
 	TEQUIP:클리캡 = 0
 	TEQUIP:전동오나홀 = 0
 	TEQUIP:바이브 = 0
@@ -30,7 +30,7 @@ IF TEQUIP:촉수 == 0
 ELSE
 	TEQUIP:촉수 = 0
 	;촉수계 커맨드의 장비도 해제한다
-	TEQUIP:니틀캡 = 0
+	TEQUIP:니플캡 = 0
 	TEQUIP:클리캡 = 0
 	TEQUIP:전동오나홀 = 0
 	TEQUIP:바이브 = 0
@@ -202,7 +202,7 @@ IF MAXBASE:MASTER:뇨의!= 0
 	SIF TEQUIP:클리캡
 		TIMES B , 1.20
 	;촉수유두고문
-	SIF TEQUIP:니틀캡
+	SIF TEQUIP:니플캡
 		TIMES B , 1.20
 	;촉수착유
 	SIF TEQUIP:착유기
@@ -357,7 +357,7 @@ IF E > 0
 	SIF TEQUIP:클리캡
 		STAIN:바기나 |= 32
 	;촉수유두고문, 촉수착유
-	SIF TEQUIP:니틀캡 || TEQUIP:착유기
+	SIF TEQUIP:니플캡 || TEQUIP:착유기
 		STAIN:가슴 |= 32
 	;촉수페니스고문
 	SIF TEQUIP:전동오나홀

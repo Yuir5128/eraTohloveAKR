@@ -1,0 +1,503 @@
+﻿;===========================================================
+;EVENT_T.ERB、EVENT_TRAIN、調教時及び調教前후のイベント
+;===========================================================
+@EVENTTRAIN
+#PRI
+
+;-------------------------------------------------
+;ゲージの初期値と限界数確保
+;-------------------------------------------------
+;사정の初期値は0
+BASE:사정 = 0
+BASE:PLAYER:사정 = 0
+SIF ASSI >= 0
+	BASE:ASSI:사정 = 0
+;사정限界数の確保
+REPEAT CHARANUM
+	IF COUNT == MASTER
+		CFLAG:COUNT:11 = 10
+	ELSEIF COUNT == ASSI
+		CFLAG:COUNT:11 = 10
+	ELSEIF COUNT == TARGET
+		CFLAG:COUNT:11 = 10
+	ENDIF
+	SIF TALENT:COUNT:절륜
+		CFLAG:COUNT:11 += 10
+	SIF TALENT:COUNT:말자지
+		CFLAG:COUNT:11 += 3
+REND
+;사정フラグ、처녀喪失フラグなどをリセット
+REPEAT 200
+	TFLAG:COUNT = 0
+REND
+
+;모유
+BASE:모유 = 0
+BASE:PLAYER:모유 = 0
+SIF ASSI >= 0
+	BASE:ASSI:모유 = 0
+
+;뇨의
+BASE:뇨의 = 10
+BASE:PLAYER:뇨의 = 10
+SIF ASSI >= 0
+	BASE:ASSI:뇨의 = 10
+
+;변의
+BASE:변의 = 10
+BASE:PLAYER:변의 = 10
+SIF ASSI >= 0
+	BASE:ASSI:변의 = 10
+
+;구역질
+BASE:구역질 = 10
+BASE:PLAYER:구역질 = 10
+SIF ASSI >= 0
+	BASE:ASSI:구역질 = 10
+
+
+;질내に바기나汚れを付加
+SIF VAGINA(TARGET)
+	STAIN:질내 |= 1
+SIF VAGINA(MASTER)
+	STAIN:MASTER:질내 |= 1
+IF ASSI >= 0
+	SIF VAGINA(ASSI)
+		STAIN:ASSI:질내 |= 1
+ENDIF
+
+;콘돔自動装着設定のリセット
+FLAG:98 = 0
+
+;콘돔사정フラグをリセット
+CFLAG:107 = 0
+
+;調教者は誰か
+IF ASSIPLAY == 0
+	PLAYER = MASTER
+ELSE
+	PLAYER = ASSI
+	ASSI = MASTER
+ENDIF
+
+SIF TEQUIP:속옷（아래） == 5
+	TEQUIP:정조대 = 1
+
+;残り時間をセット
+TFLAG:74 = 30
+
+@EVENTTURNEND
+#PRI
+;売却や助손化が可能になったか
+SIF TARGET < 0
+	RETURN 0
+SIF ABL:순종 + ABL:욕망 < 6
+	RETURN 0
+SIF ABL:순종 < 4 && ((TALENT:반항적 && TALENT:복종 == 0 && TALENT:예속 == 0) || TALENT:꿋꿋함)
+	RETURN 0
+SIF ABL:욕망 < 4 && (TALENT:자제심 || TALENT:억압 || TALENT:저항)
+	RETURN 0
+
+IF ABL:기교 >= 3 || ABL:봉사정신 >= 3 || ABL:마조끼 >= 3 || ABL:순종 >= 5 || ABL:욕망 >= 5 || ABL:C감각+ABL:V감각+ABL:A감각+ABL:B감각 >= 13
+	IF CFLAG:1 <= 0
+		PRINTFORMW %NAME:TARGET%が売却可能になりました
+		CFLAG:1 = 1
+	ENDIF
+ELSE
+	RETURN 0
+ENDIF
+
+IF (ABL:순종+ABL:욕망+ABL:기교+ABL:C감각+ABL:레즈끼+ABL:게이끼 >= 12) || (ABL:순종 >=5 && ABL:욕망 >= 4)
+	IF CFLAG:1 <= 1
+		PRINTFORMW %NAME:TARGET%が助손可能になりました
+		CFLAG:1 = 2
+	ENDIF
+ENDIF
+
+@EVENTTURNEND
+IF TARGET >= 0
+	;ストレス値の加算
+	CFLAG:TARGET:10 += 1
+	SIF MARK:반발각인 > 2
+		CFLAG:TARGET:10 += 1
+	
+	;ストレス値の減少（白山が助손か主人時のみ）
+	LOCAL = SINGI(TARGET)
+	CFLAG:TARGET:10 -= LOCAL
+	PRINTL
+	SIF LOCAL > 0
+		PRINTFORML 하쿠산 요시미츠の신기が発動しました
+	
+	;ストレス値100以上で붕괴を得る
+	SIF CFLAG:TARGET:10 >= 100 && TALENT:붕괴 == 0
+		CALL COLLAPSE_MIND_TRAIN
+ENDIF
+
+IF ASSI >= 0
+	IF TALENT:ASSI:요호 && ITEM:미약 == 0
+		PRINTW [요호]の効果で미약を손に入れました
+		ITEM:미약 = 1
+	ENDIF
+ENDIF
+
+;消耗品の自動補充
+CALL ITEM_AUTO_SUPPLY
+
+REPEAT 200
+	SIF ITEM:COUNT < 0
+		ITEM:COUNT = 0
+REND
+
+RETURN 0
+
+@ASSI_CHANGE
+;[여우]かつ기교LV5、C감각LV5で처녀か백버진
+IF TALENT:ASSI:여우 && (ABL:ASSI:기교 >= 5 && ABL:ASSI:C감각 >= 5 && ((TALENT:ASSI:처녀 && VAGINA(ASSI)) || (TALENT:ASSI:백버진 && !VAGINA(ASSI))))
+	DRAWLINE
+	PRINTFORML %NAME:ASSI%は[요호]となった
+	DRAWLINE
+	WAIT
+	TALENT:ASSI:여우 = 0
+	TALENT:ASSI:요호 = 1
+ENDIF
+
+$INPUT_LOOP
+;[이상한뿌리]かつC감각LV5、정액중독LV3以上
+IF TALENT:ASSI:반음반양 == 0 &&  TALENT:ASSI:후타나리 == 0 && TALENT:ASSI:이상한뿌리 && (ABL:ASSI:C감각 >= 5 && ABL:ASSI:정액중독 >= 3)
+	DRAWLINE
+	PRINTFORML ……どうやら[이상한뿌리]の効果が現れそうだ
+	PRINTFORM %CALLNAME:ASSI%を[
+	IF MALE(ASSI)
+		PRINT 반음반양
+	ELSE
+		PRINT 후타나리
+	ENDIF
+	PRINTL ]にしますか？
+	PRINTL [0] - する
+	PRINTL [1] - しない
+	INPUT
+	IF RESULT == 0
+		C = ASSI
+		;CALL FUTANARI
+	ELSEIF RESULT == 1
+		PRINTFORML %NAME:ASSI%は[이상한뿌리]を失った
+		TALENT:ASSI:이상한뿌리 = 0
+	ELSE
+		GOTO INPUT_LOOP_2
+	ENDIF
+	DRAWLINE
+	WAIT
+ENDIF
+
+$INPUT_LOOP_2
+;[구현]かつ욕망LV5か레즈끼or게이끼LV4以上
+;남자は반음반양、そうでないときは후타나리化
+IF TALENT:ASSI:반음반양 == 0 &&  TALENT:ASSI:후타나리 == 0 && TALENT:ASSI:구현 && (ABL:ASSI:욕망 >= 5 || ABL:ASSI:레즈끼 >= 4 || ABL:ASSI:게이끼 >= 4)
+	DRAWLINE
+	PRINTFORML ……どうやら[구현]の効果が現れそうだ
+	PRINTFORM %CALLNAME:ASSI%を[
+	IF MALE(ASSI)
+		PRINT 반음반양
+	ELSE
+		PRINT 후타나리
+	ENDIF
+	PRINTL ]にしますか？
+	PRINTL [0] - する
+	PRINTL [1] - しない
+	INPUT
+	IF RESULT == 0
+		C = ASSI
+		;CALL FUTANARI
+	ELSEIF RESULT == 1
+		PRINTFORML %NAME:ASSI%は[구현]を失った
+		TALENT:ASSI:구현 = 0
+	ELSE
+		GOTO INPUT_LOOP_2
+	ENDIF
+	DRAWLINE
+	WAIT
+ENDIF
+
+ISASSI:ASSI = 1
+
+RETURN 0
+
+
+@YOUJI
+;調教者が유치
+IF TALENT:PLAYER:유치
+	PRINTS NAME:PLAYER
+	PRINT が乳を吸ううちに
+	PRINTS NAME:TARGET
+	PRINTW は모유が出るようになった
+	TALENT:모유체질 = 1
+ENDIF
+
+@EVENTCOMEND
+
+IF VAGINA(TARGET) && TALENT:처녀 && EXP:A경험 > 0 && TALENT:정조관념 && !CFLAG:100
+	CFLAG:100 = 1
+	PRINTW 貞操を守れるなら、少しは후ろを責められてもよいと思っているようだ……
+ENDIF
+
+;신기の処理　ストレス値の減少値を返す
+@SINGI(ARG)
+#FUNCTION
+;白山が主人ではない　かつ　助손がいない
+SIF NO:MASTER != 164 && ASSI < 0
+	RETURNF 0
+;白山が主人ではない　かつ　助손がいる、ただし白山ではない
+SIF NO:MASTER != 164 && (ASSI >= 0 && NO:ASSI != 164)
+	RETURNF 0
+;ARGのストレス値が一定以下
+SIF CFLAG:ARG:10 < 90
+	RETURNF 0
+;白山の체력が1000未満
+SIF (NO:MASTER == 164 && BASE:MASTER:체력 < 1000) || (ASSI >= 0 && NO:ASSI == 164 && BASE:ASSI:체력 < 1000)
+	RETURNF 0
+
+;最低でも5は回復
+LOCAL = 5
+;0から5までランダムで回復
+LOCAL += RAND:6
+
+;기교によって更に回復
+;白山が主人
+IF NO:MASTER == 164
+	LOCAL += ABL:MASTER:기교
+	;一律で체력が削れる
+	BASE:MASTER:체력 -= 500
+;白山が助손
+ELSE
+	LOCAL += ABL:ASSI:기교
+	;一律で체력が削れる
+	BASE:ASSI:체력 -= 500
+ENDIF
+RETURNF LOCAL
+
+;調教で【붕괴】を得た場合のイベント
+@COLLAPSE_MIND_TRAIN
+TFLAG:13 = 52
+;입上分岐フラグ
+TFLAG:53 = 3
+CALL KOJO_MESSAGE_EVENT
+;부적があれば復活
+IF CFLAG:693 || CFLAG:694
+	TFLAG:13 = 72
+	CALL KOJO_MESSAGE_EVENT
+	IF CFLAG:694
+		CFLAG:10 = 0
+		CFLAG:694 -= 1
+	ELSE
+		CFLAG:10 = 90
+		CFLAG:693 -= 1
+	ENDIF
+ELSE
+	TALENT:붕괴 = 1
+	IF CFLAG:39
+		PRINTFORM %CALLNAME%は[
+		SIF TALENT:연모
+			PRINTS TALENTNAME:3
+		SIF TALENT:음란
+			PRINTS TALENTNAME:4
+		SIF TALENT:복종
+			PRINTS TALENTNAME:5
+		SIF TALENT:친애
+			PRINTS TALENTNAME:6
+		SIF TALENT:창부
+			PRINTS TALENTNAME:7
+		SIF TALENT:예속
+			PRINTS TALENTNAME:8
+		PRINTW ]を失った
+	ENDIF
+	SIF TALENT:연모
+		TALENT:연모 = 0
+	SIF TALENT:음란
+		TALENT:음란 = 0
+	SIF TALENT:복종
+		TALENT:복종 = 0
+	SIF TALENT:친애
+		TALENT:친애 = 0
+	SIF TALENT:창부
+		TALENT:창부 = 0
+	SIF TALENT:예속
+		TALENT:예속 = 0
+	;상사상애がある場合、상사상애相손の[상사상애]を消し、陥落素質記録フラグを[친애]に戻す
+	IF CFLAG:39 == 165
+		TALENT:(NO2(CFLAG:LOCAL:41)):상사상애 = 0
+		CFLAG:(NO2(CFLAG:LOCAL:41)):39 = 6
+	ENDIF
+	CFLAG:40 = 0
+	CFLAG:41 = -1
+	CFLAG:10 = 0
+ENDIF
+
+@EVENTEND
+#PRI
+PLAYER = MASTER
+CALL MASTER_CHANGE_ON
+CALL MASTER_CHANGE_OFF
+
+@EVENTEND
+#LATER
+PRINTL 調教を終了しました
+
+;調教후の후処理
+IF TEQUIP:촉수질내산란 || TEQUIP:촉수장내산란
+	IF TEQUIP:촉수질내산란 && TEQUIP:촉수장내산란
+		CALL TRAIN_MESSAGE_DOUBLE_EGGPLAY_OUT
+		CALL DOUBLE_EGGPLAY_OUT
+	ELSEIF TEQUIP:촉수질내산란
+		CALL TRAIN_MESSAGE_EGGPLAY_OUT
+		CALL EGGPLAY_OUT
+	ELSEIF TEQUIP:촉수장내산란
+		CALL TRAIN_MESSAGE_KANTYO_EGGPLAY_OUT
+		CALL KANTYO_EGGPLAY_OUT
+	ENDIF
+ELSEIF BASE:변의 >= 60
+	CALL AFTERTRAIN_KANTYO
+ENDIF
+
+
+;調教후行為のチェック
+CALL SELF_CHECK
+
+;搾乳した모유の売却
+CALL SELL_MILK
+
+;調教時に録画したビデオを売却
+CALL SELL_VIDEO
+
+;調教時に撮影した写真を売却
+CALL SELL_PICTURE
+
+;調教時に減った체력、기력に応じて체력、기력の最大値上昇
+CALL EVENT_GROWTH
+
+;何の珠を得られたか
+CALL JUEL_CHECK
+
+;부정の珠の打ち消しチェック
+CALL DENIAL_CHECK
+
+BEGIN ABLUP
+
+@JUEL_CHECK
+REPEAT 15
+	IF PALAM:COUNT < PALAMLV:1
+		G = 0
+	ELSEIF PALAM:COUNT < PALAMLV:1*3
+		G = 1
+	ELSEIF PALAM:COUNT < PALAMLV:2
+		G = 2
+	ELSEIF PALAM:COUNT < PALAMLV:2*3
+		G = 10
+	ELSEIF PALAM:COUNT < PALAMLV:3
+		G = 20
+	ELSEIF PALAM:COUNT < PALAMLV:3*2
+		G = 100
+	ELSEIF PALAM:COUNT < PALAMLV:4
+		G = 200
+	ELSEIF PALAM:COUNT < PALAMLV:5
+		G = 1000
+	ELSEIF PALAM:COUNT < PALAMLV:6
+		G = 2000
+	ELSEIF PALAM:COUNT < PALAMLV:7
+		G = 3000
+	ELSEIF PALAM:COUNT < PALAMLV:8
+		G = 5000
+	ELSEIF PALAM:COUNT < PALAMLV:9
+		G = 8000
+	ELSEIF PALAM:COUNT < 1000000
+		G = 12000
+	ELSEIF PALAM:COUNT < 5000000
+		G = 25000
+	ELSEIF PALAM:COUNT < 30000000
+		G = 40000
+	ELSEIF PALAM:COUNT < 100000000
+		G = 60000
+	ELSE
+		G = 100000
+	ENDIF
+
+	IF COUNT == 0
+		GOTJUEL:COUNT = G + EX:0 * 1000
+	ELSEIF COUNT == 1
+		GOTJUEL:COUNT = G + EX:1 * 1000
+	ELSEIF COUNT == 2
+		GOTJUEL:COUNT = G + EX:2 * 1000
+	ELSEIF COUNT == 3
+		GOTJUEL:COUNT = G + EX:3 * 1000
+	ELSEIF COUNT < 12
+		GOTJUEL:COUNT = G
+	ELSE
+		GOTJUEL:100 += G
+	ENDIF
+REND
+
+DRAWLINE
+PRINTL 調教の結果：
+REPEAT 15
+	D = COUNT
+	
+	IF D == 12
+		PRINTFORML %PALAMNAME:100%の珠×({JUEL:부정}+{GOTJUEL:100})
+		JUEL:부정 += GOTJUEL:100
+	ELSEIF D != 4 && D != 13 && D != 14
+		PRINTFORML %PALAMNAME:D%の珠×({JUEL:D}+{GOTJUEL:D})
+		JUEL:D += GOTJUEL:D
+	ENDIF
+	
+REND
+
+PRINTW 以上の珠を得ました
+
+@DENIAL_CHECK
+SIF JUEL:부정 == 0
+	RETURN 0
+
+$LABEL_1
+A = RAND:3 + 5
+B = JUEL:부정 / 2
+SIF B == 0 && JUEL:부정 > 0
+	B = 1
+SIF JUEL:A < B
+	B = JUEL:A
+JUEL:A -= B
+JUEL:부정 -= B
+
+SIF B > 0
+	PRINTFORML %PALAMNAME:A%の珠×{B}減少
+SIF JUEL:부정 > 0 && (JUEL:순종 + JUEL:욕정 + JUEL:굴복) > 0
+	GOTO LABEL_1
+
+$LABEL_2
+A = RAND:3 + 5
+B = JUEL:부정 / 2
+SIF B == 0 && JUEL:부정 > 0
+	B = 1
+SIF JUEL:A < B
+	B = JUEL:A
+JUEL:A -= B
+JUEL:부정 -= B
+SIF B > 0
+	PRINTFORML %PALAMNAME:A%の珠×{B}個減少
+SIF JUEL:부정 > 0 && (JUEL:순종 + JUEL:욕정 + JUEL:굴복) > 0
+	GOTO LABEL_2
+
+DRAWLINE
+PRINTL 부정の珠と他の珠の打ち消しが発生しています
+PRINTL その結果、
+REPEAT 13
+	D = COUNT
+	
+	IF D == 12
+		PRINTFORML %PALAMNAME:100%の珠×({JUEL:부정})
+	ELSEIF D != 4
+		PRINTFORML %PALAMNAME:D%の珠×({JUEL:D})
+	ENDIF
+
+REND
+
+PRINTW 以上のように変化しました
+

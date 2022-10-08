@@ -1,0 +1,177 @@
+﻿;-------------------------------------------------
+;セルフ連結チューブ
+;派生系コマンド
+;-------------------------------------------------
+@COM527
+
+PRINTL セルフ連結チューブ
+STR:0 = セルフ連結チューブ
+
+SELECTCOM = 527
+
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+IF TFLAG:56 == 1
+	;消費체력、기력
+	LOSEBASE:체력 += 50
+	LOSEBASE:기력 += 300
+	
+	;성행동、노출、굴복、불결、일탈、반감
+	SOURCE:굴복 += 2500
+	SOURCE:불결 += 1000
+	SOURCE:일탈 += 1800
+	SOURCE:반발 += 1500
+	
+	;억압、저항持ちには、억울ソース追加
+	SIF TALENT:억압 || TALENT:저항
+		SOURCE:울굴 += 1000
+ELSEIF TFLAG:56 == 2
+	;消費체력、기력
+	LOSEBASE:체력 += 20
+	LOSEBASE:기력 += 600
+	
+	;굴복、불결、일탈、반발
+	SOURCE:굴복 += 3000
+	SOURCE:불결 += 1500
+	SOURCE:일탈 += 2500
+	SOURCE:반발 += 2500
+	
+	;억압、저항持ちには、억울ソース追加
+	SIF TALENT:억압 || TALENT:저항
+		SOURCE:울굴 += 1500
+ENDIF
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+IF TFLAG:56 == 1
+	;마조끼を見る
+	IF ABL:마조끼 == 0
+		TIMES SOURCE:굴복 , 0.80
+		SOURCE:중독충족 += 0
+		SOURCE:욕정 += 0
+	ELSEIF ABL:마조끼 == 1
+		TIMES SOURCE:굴복 , 1.00
+		SOURCE:중독충족 += 20
+		SOURCE:욕정 += 30
+	ELSEIF ABL:마조끼 == 2
+		TIMES SOURCE:굴복 , 1.20
+		SOURCE:중독충족 += 40
+		SOURCE:욕정 += 70
+	ELSEIF ABL:마조끼 == 3
+		TIMES SOURCE:굴복 , 1.40
+		SOURCE:중독충족 += 70
+		SOURCE:욕정 += 120
+	ELSEIF ABL:마조끼 == 4
+		TIMES SOURCE:굴복 , 1.50
+		SOURCE:중독충족 += 110
+		SOURCE:욕정 += 180
+	ELSEIF ABL:마조끼 == 5
+		TIMES SOURCE:굴복 , 1.70
+		SOURCE:중독충족 += 150
+		SOURCE:욕정 += 250
+	ELSEIF ABL:마조끼 == 6
+		TIMES SOURCE:굴복 , 1.90
+		SOURCE:중독충족 += 200
+		SOURCE:욕정 += 300
+	ELSEIF ABL:마조끼 == 7
+		TIMES SOURCE:굴복 , 2.10
+		SOURCE:중독충족 += 250
+		SOURCE:욕정 += 350
+	ELSEIF ABL:마조끼 == 8
+		TIMES SOURCE:굴복 , 2.30
+		SOURCE:중독충족 += 300
+		SOURCE:욕정 += 400
+	ELSEIF ABL:마조끼 == 9
+		TIMES SOURCE:굴복 , 2.50
+		SOURCE:중독충족 += 350
+		SOURCE:욕정 += 450
+	ELSEIF ABL:마조끼 >= 10
+		TIMES SOURCE:굴복 , 3.00
+		SOURCE:중독충족 += 500
+		SOURCE:욕정 += 500
+	ENDIF
+
+	;마조を見る
+	IF TALENT:마조
+		TIMES SOURCE:욕정 , 1.50
+		TIMES SOURCE:반발 , 0.80
+	ENDIF
+ELSEIF TFLAG:56 == 2
+	;스캇중독で중독충족増、반발と消費기력減
+	IF ABL:스캇중독 == 0
+		TIMES SOURCE:일탈 , 1.50
+		LOSEBASE:기력 += 200
+	ELSEIF ABL:스캇중독 == 1
+		SOURCE:중독충족 += 200
+		TIMES SOURCE:일탈 , 1.00
+		LOSEBASE:기력 += 100
+	ELSEIF ABL:스캇중독 == 2
+		SOURCE:중독충족 += 500
+		TIMES SOURCE:일탈 , 0.50
+		LOSEBASE:기력 += 70
+	ELSEIF ABL:스캇중독 == 3
+		SOURCE:중독충족 += 800
+		TIMES SOURCE:일탈 , 0.20
+		LOSEBASE:기력 += 50
+	ELSEIF ABL:스캇중독 == 4
+		SOURCE:중독충족 += 1000
+		TIMES SOURCE:일탈 , 0.10
+		LOSEBASE:기력 += 20
+	ELSE
+		SOURCE:중독충족 += 2000
+		TIMES SOURCE:일탈 , 0.05
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+IF TFLAG:56 == 1
+	;調教対象の입に尿汚れ
+	STAIN:입 |= 128
+ELSEIF TFLAG:56 == 2
+	;調教対象の입に便汚れ
+	STAIN:입 |= 512
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;스캇경험を伴う調教による이상경험
+IF EXP:스캇경험 == 0
+	EXP:이상경험 += 1
+	PRINTL スカトロ初経験で이상경험＋１
+ENDIF
+EXP:스캇경험 += 1
+PRINTL 스캇경험＋１
+
+IF TFLAG:56 == 1
+	EXP:음뇨경험 += 1
+	PRINTFORML %CALLNAME%に음뇨경험＋１
+	BASE:뇨의 = 0
+ELSEIF TFLAG:56 == 2
+	EXP:식분경험 += 1
+	PRINTFORML %CALLNAME%に식분경험＋１
+	BASE:변의 = 0
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+

@@ -1,0 +1,149 @@
+﻿;-------------------------------------------------
+;낙인
+;ＳＭ-ハード系コマンド
+;-------------------------------------------------
+@COM156
+
+PRINTL 낙인
+STR:0 = 낙인
+
+TFLAG:56 = 0
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;どの낙인を付けたか
+IF TFLAG:56
+	;통증、두려움、굴복、일탈、반발
+	SOURCE:통증 += 6000
+	SOURCE:두려움 += 6000
+	SOURCE:굴복 += 2000
+	SOURCE:일탈 += 800
+	SOURCE:반발 += 2500
+
+	;初낙인のとき이상경험、굴복・일탈・반발のソース
+	IF TALENT:TARGET:낙인 == 0
+		EXP:이상경험 += 1
+		PRINTL 낙인初経験で이상경험＋１
+		SOURCE:굴복 += 500
+		SOURCE:일탈 += 800
+		SOURCE:반발 += 2000
+	ENDIF
+
+	;傷痕
+	IF TALENT:낙인 & 1
+		;消費체력、기력
+		LOSEBASE:체력 += 100
+		LOSEBASE:기력 += 300
+		
+		TALENT:낙인 |= 1
+	ENDIF
+	;刺青
+	IF TALENT:낙인 & 2
+		;消費체력、기력
+		LOSEBASE:체력 += 500
+		LOSEBASE:기력 += 400
+		
+		TALENT:낙인 |= 2
+	ENDIF
+	;焼き印
+	IF TALENT:낙인 & 4
+		;消費체력、기력
+		LOSEBASE:체력 += 500
+		LOSEBASE:기력 += 400
+		
+		TALENT:낙인 |= 4
+	ENDIF
+	;ピアス
+	IF TALENT:낙인 & 8
+		;すでにピアスがついてるとき、つけかえるだけなので통증は少ない…という設定
+		IF TALENT:낙인 & 8
+			;消費체력、기력
+			LOSEBASE:체력 += 0
+			LOSEBASE:기력 += 20
+			
+			TIMES SOURCE:통증 , 0.00
+			TIMES SOURCE:두려움 , 0.50
+			TIMES SOURCE:반발 , 1.50
+		ELSE
+			;消費체력、기력
+			LOSEBASE:체력 += 100
+			LOSEBASE:기력 += 300
+			
+			TALENT:낙인 |= 8
+		ENDIF
+	ENDIF
+
+	PRINTFORML %CALLNAME%の体に【낙인】が付けられた
+
+	;へたくしょん用面識判定の更新
+	IF TALENT:낙인 && NO:MASTER != S
+		;最大使用ビット数を17ビットと仮定
+		G = GETCHARA(S)
+		H = (2099 + NO:TARGET)
+		LOCAL = S + 2099
+		SIF G >= 0
+			CFLAG:G:H &= 130047
+		CFLAG:TARGET:(LOCAL) &= 129023
+		G = (2099 + NO:PLAYER)
+	ELSE
+		G = (2099 + NO:PLAYER)
+		H = (2099 + NO:TARGET)
+	ENDIF
+	
+	CFLAG:PLAYER:H |= 1024
+	CFLAG:TARGET:G |= 2048
+
+	;낙인を押した相손の名前を記録
+	CSTR:1 = %CALLNAME:MASTER%
+ENDIF
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+IF TFLAG:56
+	;연모・친애・복종・예속で낙인がついているとき순종のソース追加、두려움と반발のソース減少
+	IF TALENT:낙인 && (TALENT:연모 || TALENT:복종 || TALENT:친애 || TALENT:예속)
+		SOURCE:순종 += 2000
+		TIMES SOURCE:두려움 , 0.80
+		TIMES SOURCE:반발 , 0.50
+	ENDIF
+
+	;고통のパラメータによる고통のソース増加は先に処理しておく
+	IF PALAM:고통 < PALAMLV:1
+		TIMES SOURCE:통증 , 1.00
+	ELSEIF PALAM:고통 < PALAMLV:2
+		TIMES SOURCE:통증 , 1.50
+	ELSEIF PALAM:고통 < PALAMLV:3
+		TIMES SOURCE:통증 , 2.00
+	ELSEIF PALAM:고통 < PALAMLV:4
+		TIMES SOURCE:통증 , 2.50
+	ELSEIF PALAM:고통 >= PALAMLV:4
+		TIMES SOURCE:통증 , 3.00
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF TFLAG:56
+	;게이경험とか加算
+	CALL COM_EXP(5)
+	
+	;依存度ベクトル
+	TFLAG:33 = 3
+	
+	;依存度補正値(연모・복종で1、친애・예속で2）
+	IF TALENT:연모 || TALENT:복종
+		TFLAG:30 += 1
+	ELSEIF TALENT:친애 || TALENT:예속
+		TFLAG:30 += 2
+	ENDIF
+ENDIF
+
+
+RETURN 1
+

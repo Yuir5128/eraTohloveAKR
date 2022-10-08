@@ -1,7 +1,7 @@
 ﻿;EVENT_P, EVENT_PREGNANCY, 임신관련의 이벤트
 
 ;---------------------------------------------------------
-;플래그 관리 입상용의 플래그와 입으므로, 변경
+;플래그 관리 대사용의 플래그와 입으므로, 변경
 ;---------------------------------------------------------
 
 ;CFLAG
@@ -38,7 +38,7 @@
 ;---------------------------------------------------------
 ;음란시의 부친과의 궁합에 의한 스트레스 경감 처리를 변경
 ;육아실 판정의 변경(육아 기간이 30일이 되어 있었다)
-;입상표시시의 ASSI 번호 보존 처리 삭제(필요하다고는 생각되지 않기 때문에)
+;대사표시시의 ASSI 번호 보존 처리 삭제(필요하다고는 생각되지 않기 때문에)
 
 ;임신발각 처리의 GET_CHILD계가 어떻게도 이상했기 때문에 통째로 변경
 ;하는 김에 주인도임신 하도록(듯이) 마개조…… 어째서 이렇게 되었다
@@ -380,7 +380,7 @@ V = TARGET
 TARGET = PREGNANT
 ;여기서의 A는 CFLAG:PREGNANT:38에 들어가 있는지를 판정하므로 부친의 고유 번호
 A = CFLAG:PREGNANT:111
-;임신발각시의 이벤트입상
+;임신발각시의 이벤트대사
 TFLAG:13 = 11
 CALL KOJO_MESSAGE_EVENT
 ;조교 대상을 되돌린다
@@ -469,7 +469,7 @@ ELSE
 		CALL MASTER_CHANGE_OFF
 		CALL MASTER_CHANGE_ON
 	ENDIF
-	;출산시의 이벤트입상
+	;출산시의 이벤트대사
 	TFLAG:13 = 12
 	CALL KOJO_MESSAGE_EVENT
 	TARGET = T
@@ -640,7 +640,7 @@ ELSE
 	PRINTW 
 	;방문이 끝난 상태
 	LOCAL:(10 + RESULT)++
-	;육아실의 이벤트입상
+	;육아실의 이벤트대사
 	A = TARGET
 	TARGET = RESULT
 	TFLAG:13 = 13
@@ -697,7 +697,7 @@ PRINTFORML [2] %CALLNAME:ASSI%의 능력을 본다
 $INPUT_LOOP
 INPUT
 IF RESULT == 0
-	;자립시의 이벤트입상
+	;자립시의 이벤트대사
 	TFLAG:13 = 14
 	LOCAL:1 = TARGET
 	TARGET = C
@@ -729,7 +729,7 @@ IF RESULT == 0
 	FLAG:33--
 ELSEIF RESULT == 1
 	TARGET = C
-	;손바탕으로 둘 때의 이벤트입상
+	;손바탕으로 둘 때의 이벤트대사
 	TFLAG:13 = 45
 	CALL KOJO_MESSAGE_EVENT
 	TARGET = ASSI

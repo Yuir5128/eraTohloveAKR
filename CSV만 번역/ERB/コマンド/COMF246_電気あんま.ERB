@@ -1,0 +1,181 @@
+﻿;-------------------------------------------------
+;전기안마
+;奉仕する系コマンド
+;-------------------------------------------------
+@COM246
+PRINTL 전기안마
+STR:0 = 전기안마
+
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 50
+
+SOURCE:쾌C += 80
+
+SIF !TEQUIP:속옷（아래） && !TEQUIP:하의
+	SOURCE:쾌V += 40
+
+IF TEQUIP:야외플레이 || TEQUIP:지하실
+	SOURCE:통증 += 1500
+ELSEIF ABL:PLAYER:새드끼 >= 3
+	SOURCE:통증 += 200
+ENDIF
+
+SIF TEQUIP:야외플레이 || TEQUIP:지하실
+	SOURCE:두려움 += 350
+
+SOURCE:성취감 += 200
+SOURCE:노출 += 300
+SOURCE:굴복 += 300
+SOURCE:일탈 += 350
+SOURCE:반발 += 350
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 400
+
+;고통を伴わない마조끼及び마조の処理は先にしておく
+;마조끼を見る
+IF ABL:마조끼 == 0
+	TIMES SOURCE:성취감 , 0.80
+	TIMES SOURCE:굴복 , 0.80
+	SOURCE:액체 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:성취감 , 1.00
+	TIMES SOURCE:굴복 , 1.00
+	SOURCE:액체 += 20
+	SOURCE:욕정 += 30
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:성취감 , 1.20
+	TIMES SOURCE:굴복 , 1.20
+	SOURCE:액체 += 40
+	SOURCE:욕정 += 70
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:성취감 , 1.40
+	TIMES SOURCE:굴복 , 1.40
+	SOURCE:액체 += 70
+	SOURCE:욕정 += 120
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:성취감 , 1.50
+	TIMES SOURCE:굴복 , 1.50
+	SOURCE:액체 += 110
+	SOURCE:욕정 += 180
+ELSEIF ABL:마조끼 == 5
+	TIMES SOURCE:성취감 , 1.70
+	TIMES SOURCE:굴복 , 1.70
+	SOURCE:액체 += 150
+	SOURCE:욕정 += 250
+ELSEIF ABL:마조끼 == 6
+	TIMES SOURCE:성취감 , 1.90
+	TIMES SOURCE:굴복 , 1.90
+	SOURCE:액체 += 200
+	SOURCE:욕정 += 300
+ELSEIF ABL:마조끼 == 7
+	TIMES SOURCE:성취감 , 2.10
+	TIMES SOURCE:굴복 , 2.10
+	SOURCE:액체 += 250
+	SOURCE:욕정 += 350
+ELSEIF ABL:마조끼 == 8
+	TIMES SOURCE:성취감 , 2.30
+	TIMES SOURCE:굴복 , 2.30
+	SOURCE:액체 += 300
+	SOURCE:욕정 += 400
+ELSEIF ABL:마조끼 == 9
+	TIMES SOURCE:성취감 , 2.50
+	TIMES SOURCE:굴복 , 2.50
+	SOURCE:액체 += 350
+	SOURCE:욕정 += 450
+ELSEIF ABL:마조끼 >= 10
+	TIMES SOURCE:성취감 , 3.00
+	TIMES SOURCE:굴복 , 3.00
+	SOURCE:액체 += 500
+	SOURCE:욕정 += 500
+ENDIF
+
+;마조を見る
+IF TALENT:마조
+	TIMES SOURCE:성취감 , 2.50
+	TIMES SOURCE:굴복 , 2.50
+	TIMES SOURCE:액체 , 1.20
+	TIMES SOURCE:욕정 , 1.20
+ENDIF
+
+;도착적
+SIF TALENT:도착적
+	TIMES SOURCE:성취감 , 1.80
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+CALL COM_STAIN
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;게이경험とか加算
+CALL COM_EXP(4)
+
+;依存度ベクトル
+P = PLAYER
+IF RELATION:P > 100
+	TFLAG:33 = 2
+ELSEIF RELATION:P < 100
+	TFLAG:33 = 3
+ELSE
+	TFLAG:33 = 1
+ENDIF
+
+;依存度補正値(相性100↑かつ음란で1、창부で2）
+P = PLAYER
+IF TALENT:음란 && RELATION:P > 100
+	TFLAG:30 += 1
+ELSEIF TALENT:창부 && RELATION:P > 100
+	TFLAG:30 += 2
+ENDIF
+
+;調教者が새드持ちならパラメータに応じた가학쾌락경험と고통쾌락경험も入れる（地の文から判断）
+IF TALENT:PLAYER:새드 || TEQUIP:지하실
+	E = 1
+	L = 0
+	;마조끼で고통쾌락경험
+	IF ABL:PLAYER:9 <= 3
+		E += 0
+		L += 0
+	ELSEIF ABL:PLAYER:9 >= 4
+		E += 1
+		L += 2
+	ENDIF
+	;調教者の새드끼に応じて가학쾌락경험
+	IF ABL:PLAYER:10 <= 4
+		E += 0
+		L += 0
+	ELSEIF ABL:PLAYER:10 >= 5
+		E += 2
+		L += 1
+	ENDIF
+	IF L > 0
+		PRINT 고통쾌락경험+
+		PRINTVL L
+		EXP:고통쾌락경험 += L
+		TFLAG:27 = L
+	ENDIF
+	EXP:PLAYER:가학쾌락경험 += E
+	PRINTFORM %CALLNAME:PLAYER%の%EXPNAME:32%+
+	PRINTVL E
+ENDIF
+
+
+RETURN 1
+

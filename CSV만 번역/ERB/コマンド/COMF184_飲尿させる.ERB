@@ -1,0 +1,200 @@
+﻿;-------------------------------------------------
+;음뇨시킨다
+;スカ系コマンド
+;-------------------------------------------------
+@COM184
+
+PRINTL 음뇨시킨다
+STR:0 = 음뇨시킨다
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;지하실にいて、촉수구욕中、뇨의があって촉수尿道삽입していると連結チューブ（小）
+IF TEQUIP:지하실 && TEQUIP:촉수구욕 && TEQUIP:카테터 && BASE:뇨의 > 60
+	CALL COM_ABLE527
+	IF RESULT == 1
+		TFLAG:56 = 1
+		JUMP COM527
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;すべての命令に共通の要素を考慮
+;(순종が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;実行判定操作
+CALL KOJO_DENIAL_PLUS
+
+;合計を表示(40以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 40
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+;実行不可입上/実行判定操作
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;実行者が奴隷であるフラグ
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 100
+
+;성행동、노출、굴복、불결、일탈、반감
+SOURCE:성행동 += 300
+SOURCE:노출 += 400
+SOURCE:굴복 += 2200
+SOURCE:불결 += 1000
+SOURCE:일탈 += 1500
+SOURCE:반발 += 1000
+
+;上のほうで計算した汚れデータ
+SOURCE:불결 += Y*10 + 60
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 1000
+
+;마조끼を見る
+IF ABL:마조끼 == 0
+	TIMES SOURCE:굴복 , 0.80
+	SOURCE:중독충족 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:굴복 , 1.00
+	SOURCE:중독충족 += 20
+	SOURCE:욕정 += 30
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:굴복 , 1.20
+	SOURCE:중독충족 += 40
+	SOURCE:욕정 += 70
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:굴복 , 1.40
+	SOURCE:중독충족 += 70
+	SOURCE:욕정 += 120
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:굴복 , 1.50
+	SOURCE:중독충족 += 110
+	SOURCE:욕정 += 180
+ELSEIF ABL:마조끼 == 5
+	TIMES SOURCE:굴복 , 1.70
+	SOURCE:중독충족 += 150
+	SOURCE:욕정 += 250
+ELSEIF ABL:마조끼 == 6
+	TIMES SOURCE:굴복 , 1.90
+	SOURCE:중독충족 += 200
+	SOURCE:욕정 += 300
+ELSEIF ABL:마조끼 == 7
+	TIMES SOURCE:굴복 , 2.10
+	SOURCE:중독충족 += 250
+	SOURCE:욕정 += 350
+ELSEIF ABL:마조끼 == 8
+	TIMES SOURCE:굴복 , 2.30
+	SOURCE:중독충족 += 300
+	SOURCE:욕정 += 400
+ELSEIF ABL:마조끼 == 9
+	TIMES SOURCE:굴복 , 2.50
+	SOURCE:중독충족 += 350
+	SOURCE:욕정 += 450
+ELSEIF ABL:마조끼 >= 10
+	TIMES SOURCE:굴복 , 3.00
+	SOURCE:중독충족 += 500
+	SOURCE:욕정 += 500
+ENDIF
+
+;마조を見る
+IF TALENT:마조
+	TIMES SOURCE:욕정 , 1.50
+	TIMES SOURCE:반발 , 0.80
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;その場に尿があって、奴隷が스캇중독３／마조끼４+스캇중독２だと全部飲む
+IF TFLAG:66 && (ABL:스캇중독 >= 3 || (ABL:마조끼 >= 4 && ABL:스캇중독 >= 2))
+	TFLAG:66 = 0
+ELSE
+	;プレイヤーの尿が床に
+	TFLAG:66 |= 2
+ENDIF
+
+;汚れの移動は、その場に尿がないときのみ
+SIF TFLAG:66 == 0
+	CALL COM_STAIN
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;음뇨경험
+EXP:음뇨경험 += 1
+PRINTFORML 음뇨경험＋１
+
+;스캇경험を伴う調教による이상경험
+IF EXP:스캇경험 == 0
+	EXP:이상경험 += 1
+	PRINTL スカトロ初経験で이상경험＋１
+ENDIF
+EXP:스캇경험 += 1
+PRINTL 스캇경험＋１
+
+IF TFLAG:66 == 0
+	;調教者に배뇨경험
+	PRINTFORML %CALLNAME:PLAYER%に%EXPNAME:31%＋１
+	EXP:PLAYER:배뇨경험 += 1
+ENDIF
+
+;調教者に스캇경험
+IF EXP:PLAYER:스캇경험 == 0
+	EXP:PLAYER:이상경험 += 1
+	PRINTFORML スカトロ初経験で%CALLNAME:PLAYER%に이상경험＋１
+ENDIF
+EXP:PLAYER:스캇경험 += 1
+PRINTFORML %CALLNAME:PLAYER%に스캇경험＋１
+
+;게이경험とか加算
+CALL COM_EXP(2)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+;依存度補正値(主人かつ연모、음란、복종で1。친애、창부、예속で2）
+IF (TALENT:연모 || TALENT:음란 || TALENT:복종) && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF (TALENT:친애 || TALENT:창부 || TALENT:예속) && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+

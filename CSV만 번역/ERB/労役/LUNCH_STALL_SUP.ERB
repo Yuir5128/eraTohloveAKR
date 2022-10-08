@@ -1,0 +1,730 @@
+﻿@LUNCH_STALL_SUP
+
+SIF ITEM:93 == 0
+	RETURN
+
+PRINTL 
+T = 0
+E = 0
+F = 0
+D = 0
+PRINTL 他の奴隷をサポートにつけますか？
+PRINTL [0] - はい
+PRINTL [1] - いいえ
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	CALL LUNCH_STALL_SUP2
+ELSEIF RESULT == 1
+	RETURN
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+
+
+
+
+
+
+@LUNCH_STALL_SUP2
+
+REPEAT FLAG:44
+	G:COUNT = 0
+REND
+
+PRINTL サポートにつける奴隷を選択してください
+
+REPEAT CHARANUM
+	SIF COUNT == MASTER || COUNT == A
+		CONTINUE
+	SIF CFLAG:COUNT:1 < 2
+		CONTINUE
+	SIF CFLAG:COUNT:12 > 0
+		CONTINUE
+	C = COUNT
+	CALL CHECK_CHILD_CARE
+	SIF (CFLAG:COUNT:151 & 1) && BASE:COUNT:체력 > 500
+		PRINTFORML [{COUNT}] - %CALLNAME:COUNT%
+	G:COUNT = 1
+REND
+PRINTL [1000] - やめる
+
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	PRINTFORMW サポートをつけるのをやめました
+	RETURN
+ELSEIF G:RESULT == 0
+	GOTO INPUT_LOOP
+ELSE
+	E = RESULT
+ENDIF
+
+
+;奴隷の요리기능と가사경험のレベルによって、料理の内容と値段の基礎値が上昇
+;ABL:요리기능をみる
+IF ABL:E:12 == 0
+	T += 0
+ELSEIF ABL:E:12 == 1
+	T += 600
+ELSEIF ABL:E:12 == 2
+	T += 1000
+ELSEIF ABL:E:12 == 3
+	T += 1500
+ELSEIF ABL:E:12 == 4
+	T += 2100
+ELSEIF ABL:E:12 == 5
+	T += 2800
+ELSEIF ABL:E:12 == 6
+	T += 3600
+ELSEIF ABL:E:12 == 7
+	T += 4500
+ELSEIF ABL:E:12 == 8
+	T += 5500
+ELSEIF ABL:E:12 == 9
+	T += 6600
+ELSE
+	T += 7800
+ENDIF
+SIF S
+	PRINTFORML %ABLNAME:12%{ABL:E:12}LV +{T}
+
+;가사경험による補正
+IF EXP:E:가사경험 < EXPLV:1
+	D += 10
+ELSEIF EXP:E:가사경험 < EXPLV:2
+	D += 200
+ELSEIF EXP:E:가사경험 < EXPLV:3
+	D += 800
+ELSEIF EXP:E:가사경험 < EXPLV:4
+	D += 1800
+ELSEIF EXP:E:가사경험 < EXPLV:5
+	D += 3000
+ELSE
+	D += 5000
+ENDIF
+	PRINTFORML %EXPNAME:61%{EXP:E:가사경험} +{D}
+T += D
+
+;奴隷の能力、素質による倍率計算（요리기능は前項で見ているので省略）
+V = 100
+;ABL:순종をみる
+IF ABL:E:0 == 0
+	C = 0
+ELSEIF ABL:E:0 == 1
+	C = 10
+ELSEIF ABL:E:0 == 2
+	C = 20
+ELSEIF ABL:E:0 == 3
+	C = 30
+ELSEIF ABL:E:0 == 4
+	C = 40
+ELSEIF ABL:E:0 == 5
+	C = 50
+ELSEIF ABL:E:0 == 6
+	C = 60
+ELSEIF ABL:E:0 == 7
+	C = 70
+ELSEIF ABL:E:0 == 8
+	C = 80
+ELSEIF ABL:E:0 == 9
+	C = 90
+ELSE
+	C = 100
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:0%{ABL:E:0}LV +{C}％
+V += C
+
+
+;ABL:욕망をみる
+IF ABL:E:1 == 0
+	C = 0
+ELSEIF ABL:E:1 == 1
+	C = 10
+ELSEIF ABL:E:1 == 2
+	C = 20
+ELSEIF ABL:E:1 == 3
+	C = 30
+ELSEIF ABL:E:1 == 4
+	C = 40
+ELSEIF ABL:E:1 == 5
+	C = 50
+ELSEIF ABL:E:1 == 6
+	C = 60
+ELSEIF ABL:E:1 == 7
+	C = 70
+ELSEIF ABL:E:1 == 8
+	C = 80
+ELSEIF ABL:E:1 == 9
+	C = 90
+ELSE
+	C = 100
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:1%{ABL:E:1}LV +{C}％
+V += C
+
+
+;ABL:기교をみる
+IF ABL:E:2 == 0
+	C = 0
+ELSEIF ABL:E:2 == 1
+	C = 5
+ELSEIF ABL:E:2 == 2
+	C = 10
+ELSEIF ABL:E:2 == 3
+	C = 15
+ELSEIF ABL:E:2 == 4
+	C = 20
+ELSEIF ABL:E:2 == 5
+	C = 25
+ELSEIF ABL:E:2 == 6
+	C = 30
+ELSEIF ABL:E:2 == 7
+	C = 35
+ELSEIF ABL:E:2 == 8
+	C = 40
+ELSEIF ABL:E:2 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:2%{ABL:E:2}LV +{C}％
+V += C
+
+
+;ABL:V감각をみる
+IF ABL:E:4 == 0
+	C = 0
+ELSEIF ABL:E:4 == 1
+	C = 5
+ELSEIF ABL:E:4 == 2
+	C = 10
+ELSEIF ABL:E:4 == 3
+	C = 15
+ELSEIF ABL:E:4 == 4
+	C = 20
+ELSEIF ABL:E:4 == 5
+	C = 25
+ELSEIF ABL:E:4 == 6
+	C = 30
+ELSEIF ABL:E:4 == 7
+	C = 35
+ELSEIF ABL:E:4 == 8
+	C = 40
+ELSEIF ABL:E:4 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:4%{ABL:E:4}LV +{C}％
+V += C
+
+
+;ABL:봉사정신をみる
+IF ABL:E:7 == 0
+	C = 0
+ELSEIF ABL:E:7 == 1
+	C = 5
+ELSEIF ABL:E:7 == 2
+	C = 10
+ELSEIF ABL:E:7 == 3
+	C = 15
+ELSEIF ABL:E:7 == 4
+	C = 20
+ELSEIF ABL:E:7 == 5
+	C = 25
+ELSEIF ABL:E:7 == 6
+	C = 30
+ELSEIF ABL:E:7 == 7
+	C = 35
+ELSEIF ABL:E:7 == 8
+	C = 40
+ELSEIF ABL:E:7 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:7%{ABL:E:7}LV +{C}％
+V += C
+
+
+;ABL:노출벽をみる
+IF ABL:E:8 == 0
+	C = 0
+ELSEIF ABL:E:8 == 1
+	C = 5
+ELSEIF ABL:E:8 == 2
+	C = 10
+ELSEIF ABL:E:8 == 3
+	C = 15
+ELSEIF ABL:E:8 == 4
+	C = 20
+ELSEIF ABL:E:8 == 5
+	C = 25
+ELSEIF ABL:E:8 == 6
+	C = 30
+ELSEIF ABL:E:8 == 7
+	C = 35
+ELSEIF ABL:E:8 == 8
+	C = 40
+ELSEIF ABL:E:8 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:8%{ABL:E:8}LV +{C}％
+V += C
+
+
+;ABL:마조끼をみる
+IF ABL:E:9 == 0
+	C = 0
+ELSEIF ABL:E:9 == 1
+	C = 5
+ELSEIF ABL:E:9 == 2
+	C = 10
+ELSEIF ABL:E:9 == 3
+	C = 15
+ELSEIF ABL:E:9 == 4
+	C = 20
+ELSEIF ABL:E:9 == 5
+	C = 25
+ELSEIF ABL:E:9 == 6
+	C = 30
+ELSEIF ABL:E:9 == 7
+	C = 35
+ELSEIF ABL:E:9 == 8
+	C = 40
+ELSEIF ABL:E:9 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:9%{ABL:E:9}LV +{C}％
+V += C
+
+
+;ABL:새드끼をみる
+IF ABL:E:10 == 0
+	C = 0
+ELSEIF ABL:E:10 == 1
+	C = 5
+ELSEIF ABL:E:10 == 2
+	C = 10
+ELSEIF ABL:E:10 == 3
+	C = 15
+ELSEIF ABL:E:10 == 4
+	C = 20
+ELSEIF ABL:E:10 == 5
+	C = 25
+ELSEIF ABL:E:10 == 6
+	C = 30
+ELSEIF ABL:E:10 == 7
+	C = 35
+ELSEIF ABL:E:10 == 8
+	C = 40
+ELSEIF ABL:E:10 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:10%{ABL:E:10}LV +{C}％
+V += C
+
+
+;ABL:가창기능をみる
+IF ABL:E:14 == 0
+	C = 0
+ELSEIF ABL:E:14 == 1
+	C = 5
+ELSEIF ABL:E:14 == 2
+	C = 10
+ELSEIF ABL:E:14 == 3
+	C = 15
+ELSEIF ABL:E:14 == 4
+	C = 20
+ELSEIF ABL:E:14 == 5
+	C = 25
+ELSEIF ABL:E:14 == 6
+	C = 30
+ELSEIF ABL:E:14 == 7
+	C = 35
+ELSEIF ABL:E:14 == 8
+	C = 40
+ELSEIF ABL:E:14 == 9
+	C = 45
+ELSE
+	C = 50
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:14%{ABL:E:14}LV +{C}％
+V += C
+
+
+;ABL:섹스중독をみる
+IF ABL:E:18 == 0
+	C = 0
+ELSEIF ABL:E:18 == 1
+	C = 10
+ELSEIF ABL:E:18 == 2
+	C = 20
+ELSEIF ABL:E:18 == 3
+	C = 30
+ELSEIF ABL:E:18 == 4
+	C = 40
+ELSEIF ABL:E:18 == 5
+	C = 50
+ELSEIF ABL:E:18 == 6
+	C = 60
+ELSEIF ABL:E:18 == 7
+	C = 70
+ELSEIF ABL:E:18 == 8
+	C = 80
+ELSEIF ABL:E:18 == 9
+	C = 90
+ELSE
+	C = 100
+ENDIF
+SIF C > 0
+	PRINTFORML %ABLNAME:18%{ABL:E:18}LV +{C}％
+V += C
+
+
+;陥落素質
+;연모
+IF TALENT:E:연모
+	C = 100
+	V += 100
+	PRINTFORML %TALENTNAME:3% ＋{C}％
+ENDIF
+;음란
+IF TALENT:E:음란
+	C = 30
+	V -= 30
+	PRINTFORML %TALENTNAME:4% －{C}％
+ENDIF
+;복종
+IF TALENT:E:복종
+	C = 50
+	V -= 50
+	PRINTFORML %TALENTNAME:5% ＋{C}％
+ENDIF
+;친애
+IF TALENT:E:친애
+	C = 200
+	V += 200
+	PRINTFORML %TALENTNAME:6% ＋{C}％
+ENDIF
+;창부
+IF TALENT:E:창부
+	C = 60
+	V -= 60
+	PRINTFORML %TALENTNAME:7% －{C}％
+ENDIF
+;예속
+IF TALENT:E:예속
+	C = 100
+	V -= 100
+	PRINTFORML %TALENTNAME:8% ＋{C}％
+ENDIF
+
+
+
+;その他素質
+;겁쟁이
+IF TALENT:E:겁쟁이
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:10% ＋{C}％
+ENDIF
+;반항적
+IF TALENT:E:반항적
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:11% －{C}％
+ENDIF
+;꿋꿋함
+IF TALENT:E:꿋꿋함
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:12% ＋{C}％
+ENDIF
+;솔직함
+IF TALENT:E:솔직함
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:13% ＋{C}％
+ENDIF
+;얌전함
+IF TALENT:E:얌전함
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:14% ＋{C}％
+ENDIF
+;프라이드높음
+IF TALENT:E:프라이드높음
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:15% －{C}％
+ENDIF
+;건방짐
+IF TALENT:E:건방짐
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:16% －{C}％
+ENDIF
+;프라이드낮음
+IF TALENT:E:프라이드낮음
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:17% ＋{C}％
+ENDIF
+;츤데레
+IF TALENT:E:츤데레
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:18% ＋{C}％
+ENDIF
+;자제심
+IF TALENT:E:자제심
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:20% ＋{C}％
+ENDIF
+;무관심
+IF TALENT:E:무관심
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:21% －{C}％
+ENDIF
+;감정부족
+IF TALENT:E:감정부족
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:22% －{C}％
+ENDIF
+;일선을넘지않음
+IF TALENT:E:일선을넘지않음
+	C = 15
+	V += 15
+	PRINTFORML %TALENTNAME:27% ＋{C}％
+ENDIF
+;눈에띄고싶음
+IF TALENT:E:눈에띄고싶음
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:28% ＋{C}％
+ENDIF
+;정조관념
+IF TALENT:E:정조관념
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:30% ＋{C}％
+ENDIF
+;정조무관심
+IF TALENT:E:정조무관심
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:31% －{C}％
+ENDIF
+;습득빠름
+IF TALENT:E:습득빠름
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:50% ＋{C}％
+ENDIF
+;습득느림
+IF TALENT:E:습득느림
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:51% －{C}％
+ENDIF
+;요리고수
+IF TALENT:E:요리고수
+	C = 40
+	V += 40
+	PRINTFORML %TALENTNAME:59% ＋{C}％
+ENDIF
+;헌신적
+IF TALENT:E:헌신적
+	C = 15
+	V += 15
+	PRINTFORML %TALENTNAME:63% ＋{C}％
+ENDIF
+;남자혐오
+IF TALENT:E:남자혐오
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:82% －{C}％
+ENDIF
+;맹신
+IF TALENT:E:맹신
+	C = 15
+	V += 15
+	PRINTFORML %TALENTNAME:86% ＋{C}％
+ENDIF
+;소악마
+IF TALENT:E:소악마
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:87% ＋{C}％
+ENDIF
+;요호
+IF TALENT:E:요호
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:91% ＋{C}％
+ENDIF
+;매력
+IF TALENT:E:매력
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:92% ＋{C}％
+ENDIF
+;수수께끼의매력
+IF TALENT:E:수수께끼의매력
+	C = 50
+	V += 50
+	PRINTFORML %TALENTNAME:94% ＋{C}％
+ENDIF
+;빈유
+IF TALENT:E:빈유
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:109% －{C}％
+ENDIF
+;절벽
+IF TALENT:E:절벽
+	C = 20
+	V -= 20
+	PRINTFORML %TALENTNAME:110% －{C}％
+ENDIF
+;거유
+IF TALENT:E:거유
+	C = 20
+	V += 20
+	PRINTFORML %TALENTNAME:111% ＋{C}％
+ENDIF
+;폭유
+IF TALENT:E:폭유
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:112% ＋{C}％
+ENDIF
+;흡혈귀
+IF TALENT:E:흡혈귀
+	C = 10
+	V -= 10
+	PRINTFORML %TALENTNAME:132% －{C}％
+ENDIF
+;동물귀
+IF TALENT:E:동물귀
+	C = 10
+	V += 10
+	PRINTFORML %TALENTNAME:143% ＋{C}％
+ENDIF
+;인기
+IF TALENT:E:인기
+	C = 25
+	V += 25
+	PRINTFORML %TALENTNAME:145% ＋{C}％
+ENDIF
+;임신
+IF TALENT:E:임신
+	C = 30
+	V += 30
+	PRINTFORML %TALENTNAME:153% ＋{C}％
+ENDIF
+;모성
+IF TALENT:E:모성
+	C = 60
+	V += 60
+	PRINTFORML %TALENTNAME:155% ＋{C}％
+ENDIF
+;LONG MODE
+IF FLAG:5 == 1
+	TIMES V , 0.4
+	PRINTFORML LONG MODE × 0.4
+ENDIF
+
+;サポート
+TIMES V , 0.5
+PRINTL サポート × 0.5
+
+
+;補正値の適用
+T *= V
+T /= 100
+
+
+;붕괴,광기は利潤をかなり低くする（순종によって、80％まで回復）
+IF TALENT:E:붕괴 || TALENT:E:광기
+PRINTL 
+	IF TALENT:E:붕괴
+		S *= ABL:E:0
+		TIMES S , 0.08
+		Z = ABL:E:0
+		Z *= 8
+		PRINTFORML %TALENTNAME:9% ×{Z}％
+	ELSEIF TALENT:E:광기
+		S *= ABL:E:0
+		TIMES S , 0.08
+		Z = ABL:E:0
+		Z *= 8
+		PRINTFORML %TALENTNAME:141% ×{Z}％
+	ENDIF
+PRINTL 
+ENDIF
+
+
+;難易度処理
+;EASY
+IF FLAG:4 == 1
+	TIMES S , 1.20
+;NORMAL
+ELSEIF FLAG:4 == 2
+	TIMES S , 1.00
+;HARD
+ELSEIF FLAG:4 == 3
+	TIMES S , 0.80
+ENDIF
+
+
+;相性値
+IF RELATION:A:(NO:E) > 0 || RELATION:E:(NO:A) > 0
+	PRINTL 
+	PRINTL 相性
+	C = RELATION:A:(NO:E)
+	S *= C
+	S /= 100
+	V = C % 100
+	C /= 100
+	PRINTFORM %CALLNAME:A% → %CALLNAME:E%
+	PRINTFORM ：{C}.{V}
+	SIF V == 0
+		PRINT 0
+	PRINTL 倍
+	C = RELATION:E:(NO:A)
+	T *= C
+	T /= 100
+	V = C % 100
+	C /= 100
+	PRINTFORM %CALLNAME:E% → %CALLNAME:A%
+	PRINTFORM ：{C}.{V}
+	SIF V == 0
+		PRINT 0
+	PRINTL 倍
+ENDIF
+S += T
+PRINT 最終的な
+

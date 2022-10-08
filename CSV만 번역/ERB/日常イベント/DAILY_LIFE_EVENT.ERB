@@ -1,0 +1,4847 @@
+﻿;日常イベント本文
+;
+;※イベント対象キャラはAに入っている。その他出場キャラは場合によりBまたはCに入れる
+;　B、Cの初期値は-1。特定素質持ちキャラの呼び出し、特定キャラの出現判定の際は一旦初期値に戻すこと
+;　日常登場フラグを立てる処理がされるのはMASTER/A/B/Cだけなので注意
+;
+;※直前に調教者機能OFFにされているため、対象の思慕・畏怖対象が主人でない場合
+;　연모/친애/상사상애/복종/예속は消えていることに注意
+;　対象を問わず陥落素質を見る場合は、CFLAG:39を使う
+;　[상사상애]になったらCFLAG:39 == 165
+;
+;※汎用日常イベント内では未陥落キャラは部屋から出さないことにする
+;　出したいときは個別日常イベント使用を推奨
+;
+;※出場確率は연모＞음란・복종＞未陥落・반발３＞共犯者
+;　イベントが増えたら確率変えてもいい
+;
+;やりたいこと
+;●下位陥落/上位陥落の差
+;●손발が無い場合の分岐
+;●思慕・畏怖対象による分岐（主人、A、他出場キャラ）
+;●共犯者分岐、イベント（共犯者が奴隷物色してるとか）
+;●主人の素質により分岐
+;●아이の分岐
+;-------------------------------------------------
+;日常イベントに登場できるキャラがいない場合、손持無沙汰な主人
+;こういうところに無駄に凝り始めるのが私という人間です
+;-------------------------------------------------
+@DAILY_LIFE_RETURN
+
+;가사とか屋敷のこと
+IF RAND:7 <= 1
+	;料理
+	IF RAND:3 == 0
+		PRINTFORMW お腹が空いた%CALLNAME:MASTER%は、料理をすることにした
+		IF TALENT:MASTER:요리고수 || ABL:MASTER:요리기능 >= 4 || (ABL:MASTER:요리기능 >= 2 && RAND:2)
+			PRINTFORMW 有り合わせだったのだが、我ながらなかなかの出来だ…
+			PRINTFORM 満腹になった%CALLNAME:MASTER%は、
+			IF !TIME
+				PRINT 日が暮れるまで
+			ELSE
+				PRINT 就寝まで
+			ENDIF
+			PRINTFORMW のんびりと過ごした…
+		ELSEIF TALENT:MASTER:요리치 || ABL:MASTER:요리기능 == 0 || (ABL:MASTER:요리기능 <= 2 && RAND:2)
+			PRINTFORMW だが、出来上がった料理は我ながら酷いものだ…
+			PRINTFORMW 作った料理をゴミ箱に捨て、%CALLNAME:MASTER%は外で食事をすることにした…
+		ELSE
+			PRINTFORMW 出来上がった料理は、まぁまぁの出来だった
+			PRINTFORM 適当に腹をいっぱいにし、%CALLNAME:MASTER%は
+			IF !TIME
+				PRINT 日が暮れるまで
+			ELSE
+				PRINT 就寝まで
+			ENDIF
+			PRINTFORMW のんびりと過ごした…
+		ENDIF
+		EXP:MASTER:가사경험 += 1
+		PRINTFORMW %CALLNAME:MASTER%の가사경험 ＋１
+	;洗濯
+	ELSEIF RAND:2 == 0 && TIME == 0
+		PRINTFORMW 손持無沙汰な%CALLNAME:MASTER%は、溜まった洗濯物を片づけることにした
+		PRINTFORMW よく晴れた日の洗濯は気持ちがいい…
+		EXP:MASTER:가사경험 += 1
+		PRINTFORMW %CALLNAME:MASTER%の가사경험 ＋１
+	;掃除
+	ELSE
+		PRINTFORMW 손持無沙汰な%CALLNAME:MASTER%は、館内の掃除をすることにした
+		IF RAND:5 == 0 && !TALENT:MASTER:금지된지식
+			PRINTFORMW 色々見て回っていると、지하실への扉が目に留まった
+			PRINTFORMW ここも片付けておこう……そう思って、中にある道具などを片付け始める
+			PRINTFORMW すると、奥の書棚から古い本が１冊出てきた
+			PRINTFORMW %CALLNAME:MASTER%はそれを손に取って、読みふけった。
+			PRINTFORMW そこには、およそ人間には及びのつかない深い知識を得るための方法が書かれていた	……
+			PRINTL 【금단의지식】を身に付けた
+			TALENT:MASTER:금지된지식 = 1
+		ELSE
+			PRINTFORMW 色々見て回ると、館の中はけっこう汚れている
+			IF TALENT:MASTER:악취민감 || (!TALENT:MASTER:더러움무시 && RAND:3)
+				PRINTFORM %CALLNAME:MASTER%は我慢ならなくなり、そのまま
+				IF !TIME
+					PRINT 日が暮れるまで
+				ELSE
+					PRINT 就寝まで
+				ENDIF
+				PRINTFORMW 掃除に明け暮れた…
+				EXP:MASTER:가사경험 += 3
+				PRINTFORMW %CALLNAME:MASTER%の가사경험 ＋３
+			ELSEIF TALENT:MASTER:더러움무시 || (!TALENT:MASTER:악취민감 && RAND:3)
+				PRINTFORMW ……だが、まぁこれくらいなら次でもいいんじゃないかと思い立ち、
+				PRINTFORM %CALLNAME:MASTER%は掃除をやめて
+				IF !TIME
+					PRINTFORMW 昼寝をすることにした…
+				ELSE
+					PRINTFORMW 寝てしまうことにした…
+				ENDIF
+			ELSE
+				PRINTFORMW 軽い気持ちのはずだったのだが、掃除にはけっこう時間がかかった…
+				EXP:MASTER:가사경험 += 1
+				PRINTFORMW %CALLNAME:MASTER%の가사경험 ＋１
+			ENDIF
+		ENDIF
+	ENDIF
+;休憩
+ELSEIF RAND:5 <= 1
+	;のんびり
+	IF RAND:5 == 0
+		PRINTFORM %CALLNAME:MASTER%は
+		IF !TIME
+			PRINT 日が暮れるまで
+		ELSE
+			PRINT 就寝まで
+		ENDIF
+		PRINTFORMW のんびりと過ごすことにした……
+	;読書
+	ELSEIF RAND:4 == 0
+		PRINTFORM %CALLNAME:MASTER%は
+		IF !TIME
+			PRINT 日が暮れるまで
+		ELSE
+			PRINT 就寝まで
+		ENDIF
+		PRINTFORMW 本を読んで過ごした……
+	;空想に耽る
+	ELSEIF RAND:3 == 0
+		PRINTFORM %CALLNAME:MASTER%は
+		IF !TIME
+			PRINT 日が暮れるまで
+		ELSE
+			PRINT 就寝まで
+		ENDIF
+		PRINTFORMW 空想に耽って過ごした……
+	;風呂
+	ELSEIF RAND:2 == 0
+		PRINTFORMW %CALLNAME:MASTER%は、少し早いが風呂に入ることにした
+		IF !TIME
+			PRINTFORMW 昼から入る風呂はとても気持ちがいい…
+		ELSE
+			PRINTFORMW のんびり湯に浸かりながら、鼻歌など歌ってみた…
+			EXP:MASTER:가창경험 += 1
+			PRINTFORML %CALLNAME:MASTER%の가창경험 ＋１
+		ENDIF
+	;昼寝
+	ELSE
+		PRINTFORM %CALLNAME:MASTER%は
+		IF !TIME
+			PRINTFORMW 日が暮れるまで昼寝をして過ごした…
+		ELSE
+			PRINTFORMW 少し早いが寝てしまおうと、ベッドに入った…
+		ENDIF
+		IF RAND:5
+			PRINTFORMW だが、途中で悪夢を見て飛び起きてしまった……
+			PRINTFORMW 酷い寝汗をかいている…溜め息を吐いて、再びベッドに潜った
+		ENDIF
+	ENDIF
+;ひとり遊び
+ELSEIF RAND:3 <= 1
+	;薬の開発をしてみる
+	IF RAND:4 == 0 && TALENT:MASTER:조제지식
+		PRINTFORMW 손持無沙汰になり、%CALLNAME:MASTER%は薬の調合にチャレンジしてみた
+		PRINTFORMW 自作のレシピを見ながら、薬の材料を慎重に混ぜていく……
+		;五分の一の確率、対象が[습득느림]か기교２以下の場合は二分の一の確率
+		IF ((TALENT:MASTER:습득느림 || ABL:MASTER:기교 <= 2) && RAND:2 == 0) || RAND:5 == 0
+			IF RAND:2 == 0
+				PRINTFORML 
+				PRINTFORMW 次の瞬間、フラスコが爆発した
+				PRINTFORMW 立ち上る煙の中で激しく咳き込みながら、%CALLNAME:MASTER%は意識を失った…
+			ELSE
+				PRINTFORMW だが、フラスコの中身はなんの反応も示さない
+				PRINTFORMW どうやら失敗のようだ…
+			ENDIF
+		ELSE
+			PRINTFORMW 全ての工程を終えた瞬間、フラスコの中身が怪しく光り始めた
+			PRINTFORMW 実験は成功だ…！
+			PRINTFORML 
+			PRINTFORM %CALLNAME:MASTER%は
+			IF RAND:8 == 0
+				PRINTFORMW 【로션】を손に入れた
+				ITEM:로션 += 1
+			ELSEIF RAND:7 == 0
+				PRINTFORMW 【구토제】を손に入れた
+				ITEM:구토제 += 1
+			ELSEIF RAND:6 == 0
+				PRINTFORMW 【이뇨제】を손に入れた
+				ITEM:이뇨제 += 1
+			ELSEIF RAND:5 == 0
+				PRINTFORMW 【강정신약】を손に入れた
+				ITEM:강정신약 += 1
+			ELSE
+				PRINTFORMW 【미약】を손に入れた
+				ITEM:미약 += 1
+			ENDIF
+		ENDIF
+	;ドミノをしてみる
+	ELSEIF RAND:3 == 0
+		PRINTFORMW 暇つぶしとして%CALLNAME:MASTER%は、食堂でドミノ倒しを始めた
+		IF RAND:3 == 0
+			PRINTFORM 集中してやっていたせいか、気付けば窓の外は
+			IF !TIME
+				PRINTFORMW 暗くなり始めている
+			ELSE
+				PRINTFORMW 真っ暗になっている
+			ENDIF
+			PRINTFORMW 時間はかかったが、どうにか倒さずに並べ終えることができた
+			PRINTFORMW ドミノが綺麗に倒れるのを最후まで見届け、%CALLNAME:MASTER%は満발げに頷いた…
+		ELSE
+			PRINTFORMW しばらく集中してやっていたが、半分ほど駒を並べたところで一区切りつけて立ちあがると、
+			PRINTFORMW その衝撃で、うっかりドミノを倒してしまった…
+			IF TALENT:MASTER:낙관적
+				PRINTFORMW ……まぁ、こういう時間も楽しいものだ
+				PRINTFORMW 仕方ないと諦め、%CALLNAME:MASTER%は再び駒を並べ始めた…
+			ELSE
+				PRINTFORMW 
+				PRINTFORMW ……ショックから立ち直るのに、しばらくかかった
+			ENDIF
+		ENDIF
+	;酒を飲んでみる
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 손持無沙汰になり、%CALLNAME:MASTER%は一人で酒など飲んでみた
+		IF RAND:3 == 0
+			PRINTFORMW だが、どうにも気分が乗らない…
+			PRINTFORMW 持ち出した酒瓶を早々に片付け、
+			IF !TIME
+				PRINTFORMW 日が暮れるまでぼーっとして過ごした…
+			ELSE
+				PRINTFORMW 就寝までぼーっとして過ごした…
+			ENDIF
+		ELSEIF RAND:2 == 0
+			PRINTFORMW するとすっかり気分もよくなり、心地良い睡魔も襲ってきた
+			PRINTFORM %CALLNAME:MASTER%はベッドに入り、そのまま
+			IF !TIME
+				PRINTFORMW 昼寝を楽しむことにした…
+			ELSE
+				PRINTFORMW 朝までぐっすりと眠った…
+			ENDIF
+		ELSE
+			PRINTFORMW するとうっかり飲み過ぎてしまい、발下もふらついてきた…
+			PRINTFORMW ……明日に響かなければいいのだが
+		ENDIF
+	;買い物に行ってみる
+	ELSE
+		PRINTFORMW 色々生活に必要なものがあると思い、%CALLNAME:MASTER%は一人で買い出しに出かけた
+		PRINTFORMW 街は賑わって、とても楽しそうだ
+		IF (TALENT:MASTER:호기심 || TALENT:MASTER:낙관적) && RAND:3
+			PRINTFORM ついつい色々見て回っていると、いつの間にか
+			IF !TIME
+				PRINTFORMW 辺りが暗くなり始めている
+			ELSE
+				PRINTFORMW 辺りは真っ暗になっている
+			ENDIF
+			PRINTFORMW 買い込んだ品物を持って、早발で岐路についた…
+		ELSEIF (TALENT:MASTER:무관심 || TALENT:MASTER:감정부족) && RAND:3
+			PRINTFORMW それを横目に通り過ぎ、さっさと買い物を済ませて岐路についた
+		ELSE
+			PRINTFORMW ……なんとなく、寂しい気持ちになった
+		ENDIF
+	ENDIF
+;ネタ
+ELSE
+	IF RAND:3 == 0
+		PRINTFORMW %CALLNAME:MASTER%はテレビをつけた
+		PRINTFORMW テレビで　えいがを　やってる！
+		PRINTFORMW おとこのこが　よにん　せんろのうえを　あるいてる……
+		PRINTFORMW ……%CALLNAME:MASTER%も　もう　いかなきゃ！
+	ELSEIF RAND:2 == 0
+		PRINTFORMW %CALLNAME:MASTER%はテレビをつけた
+		PRINTFORMW テレビで　えいがを　やってる！
+		PRINTFORMW おとなと　こどもが　ふたりならんで　おおきなピアノのまえで　おどってる……
+		PRINTFORMW ……もう　いかなきゃ！
+	ELSE
+		PRINTFORMW %CALLNAME:MASTER%は　ぱそこん　をしてる！
+		PRINTFORMW …………よし！　そろそろ　でかけよう！
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;休憩中
+;-------------------------------------------------
+@DAILY_LIFE_SLEEP
+;対象の思慕・畏怖対象をBに入れる
+IF CFLAG:A:41 > -1
+	B = NO2(CFLAG:A:41)
+ELSE
+	B = MASTER
+ENDIF
+
+;昼の일광욕
+IF !TIME && CFLAG:A:10 < 10 && RAND:3
+	;未陥落
+	IF !KANRAKU(A)
+		PRINTFORML 通りすがりにふと%CALLNAME:A%の部屋を覗いてみた
+		PRINTFORMW %CALLNAME:A%は日の当たる窓の傍に털布を敷いて眠っている
+	ELSEIF TALENT:A:동물귀
+		PRINTFORML 通りすがりに、庭の日のあたる場所で%CALLNAME:A%を見つけた
+		PRINTFORMW %CALLNAME:A%は털布を敷いてその上で丸くなって眠っている
+	ELSE
+		PRINTFORML 通りすがりに、庭の日のあたる場所で眠っている%CALLNAME:A%を見つけた
+		PRINTFORMW %CALLNAME:A%は木にかけたハンモックに털布を敷いて寝ている
+	ENDIF
+;동물귀
+ELSEIF TALENT:A:동물귀 || TALENT:A:유아／유아퇴행
+	PRINTFORML 通りすがりにふと%CALLNAME:A%の部屋を覗いてみた
+	PRINTFORMW %CALLNAME:A%はベッドの上で丸くなって眠っている
+;その他
+ELSE
+	PRINTFORML 通りすがりにふと%CALLNAME:A%の部屋を覗いてみた
+	PRINTFORMW %CALLNAME:A%はベッドで眠っているようだ
+ENDIF
+
+;반발각인３か실의
+IF MARK:A:반발각인 >= 3 || TALENT:A:실의
+	IF TALENT:A:겁쟁이 || TALENT:A:비관적
+		PRINTFORMW その表情は悲しげだ…
+	ELSEIF !RAND:2
+		PRINTFORMW その表情は険しい…
+	ELSE
+		PRINTFORMW その表情は固い…
+	ENDIF
+;協力者
+ELSEIF CFLAG:A:1 == 3
+	;건방짐or소악마
+	IF (TALENT:A:건방짐 || TALENT:A:소악마) && !RAND:3
+		PRINTFORML 眠りながらニヤニヤしている
+		PRINTFORMW ……何の夢を見ているんだか…
+	;유치または幼児/幼児退行
+	ELSEIF (TALENT:A:유치 || TALENT:A:유아／유아퇴행) && RAND:2
+		PRINTFORMW 蹴飛ばしてずれた털布を直してやりました
+	ELSE
+		PRINTFORMW 静かに眠っているようだ…
+	ENDIF
+;陥落済み
+ELSEIF KANRAKU(A)
+	;건방짐or소악마
+	IF (TALENT:A:건방짐 || TALENT:A:소악마) && !RAND:7
+		PRINTFORML 眠りながらニヤニヤしている
+		PRINTFORMW ……何の夢を見ているんだか…
+	;수수께끼의매력or매혹
+	ELSEIF (TALENT:A:수수께끼의매력 || TALENT:A:매혹) && !RAND:6
+		PRINTFORMW ふっとその寝顔に魅入られてしまうような気がした…
+	;유치または幼児/幼児退行
+	ELSEIF (TALENT:A:유치 || TALENT:A:유아／유아퇴행) && RAND:5
+		PRINTFORMW 蹴飛ばしてずれた털布を直してやりました…
+	ELSEIF !RAND:4
+		PRINTFORMW 寝乱れた姿が色っぽい…
+	ELSEIF !RAND:3
+		PRINTFORMW その表情は安らかだ…
+	ELSEIF !RAND:2
+		PRINTFORML 眠りながら微笑んでいるように見える
+		PRINTFORMW 何か夢を見ているのだろうか？
+	ELSE
+		PRINTFORMW かすかに寝言で%CALLNAME:B%を呼んだ…
+	ENDIF
+;굴복각인３
+ELSEIF MARK:A:굴복각인 >= 3
+	;건방짐or소악마
+	IF (TALENT:A:건방짐 || TALENT:A:소악마) && !RAND:7
+		PRINTFORML 眠りながらニヤニヤしている
+		PRINTFORMW ……何の夢を見ているんだか…
+	;수수께끼의매력or매혹
+	ELSEIF (TALENT:A:수수께끼의매력 || TALENT:A:매혹) && !RAND:6
+		PRINTFORMW ふっとその寝顔に魅入られてしまうような気がした…
+	;유치または幼児/幼児退行
+	ELSEIF (TALENT:A:유치 || TALENT:A:유아／유아퇴행) && RAND:5
+		PRINTFORMW 蹴飛ばしてずれた털布を直してやりました…
+	ELSEIF !RAND:4
+		PRINTFORMW 寝乱れた姿が色っぽい…
+	ELSEIF !RAND:3
+		PRINTFORMW 静かに眠っているようだ…
+	ELSEIF !RAND:2
+		PRINTFORMW 寝息に合わせて上下する가슴の動きが色っぽい…
+	ELSE
+		PRINTFORML 泥のように眠っている
+		PRINTFORMW よっぽど疲れてしまったらしい…
+	ENDIF
+;それ以下
+ELSE
+	IF RAND:3
+		PRINTFORML 身を守るように털布をかぶっている
+		PRINTFORMW まだここの生活に慣れていない感じがした…
+	ELSEIF RAND:2
+		PRINTFORMW 寝返りをうってこちらに背中を向けた…
+	ELSE
+		PRINTFORML 泥のように眠っている
+		PRINTFORMW よっぽど疲れてしまったらしい…
+	ENDIF
+ENDIF
+
+;체력・기력を２０％回復
+BASE:A:체력 += MAXBASE:A:체력 / 10 * 2
+BASE:A:기력 += MAXBASE:A:기력 / 10 * 2
+
+;-------------------------------------------------
+;部屋にいる
+;-------------------------------------------------
+@DAILY_LIFE_0
+VARSET LOCAL
+PRINTFORM %CALLNAME:A%の部屋を覗くと、%CALLNAME:A%
+;主人以外の思慕・畏怖対象がいればBに入れる
+SIF CFLAG:A:41 > -1 && CFLAG:A:41 != NO:MASTER
+	B = NO2(CFLAG:A:41)
+;실의
+IF TALENT:A:실의
+	PRINTFORMW はただぼんやりとベッドに腰掛けている…
+;반발３
+ELSEIF MARK:A:반발각인 >= 3
+	PRINTFORMW は苛立たしげに部屋を歩き回っている…
+;主人以外に상사상애相손がいる
+ELSEIF B > -1 && CFLAG:A:39 == 165
+	PRINTFORML は%CALLNAME:B%と二人で部屋にいた…
+	IF RAND:3 == 0
+		PRINTFORMW 甘い甘い甘い囁きが聞こえてきた…
+	ELSEIF RAND:2 == 0
+		PRINTFORMW じっとお互いを見つめあっているようだ…
+	ELSE
+		PRINTFORMW 二人とも実に幸福そうな顔をしている…
+	ENDIF
+	PRINTFORMW 二人に気付かれる前に、そっとその場を離れた…
+	EXP:A:애정경험 += 1
+	EXP:B:애정경험 += 1
+	PRINTFORML %CALLNAME:A%と%CALLNAME:B%の애정경험 ＋１
+;연모陥落済み(思慕対象が他にいる)
+ELSEIF B > -1 && (CFLAG:A:39 == 3 || CFLAG:A:39 == 6)
+	PRINTFORMW はのんびりと休憩していたようだ
+	PRINTFORML こちらの気配に気付いた%CALLNAME:A%は
+	PRINTFORMW 嬉しそうに%CALLNAME:B%の名を呼び近寄ってきた
+	PRINTFORML しかし覗いていたのが%CALLNAME:MASTER%だと気付くと、
+	PRINTFORMW がっかりした様子で部屋に戻って行ってしまった…
+ELSEIF TALENT:A:상사상애
+	PRINTFORMW は読書をしていた
+	PRINTFORML %CALLNAME:A%はこちらに気付くと、本を置き、笑顔で部屋へ招き入れた
+	PRINTFORMW そして飲み物を用意してくれた
+	PRINTFORMW …%CALLNAME:A%が用意してくれた飲み物はおいしかった
+	PRINTFORML %CALLNAME:A%に関心しつつ、先程まで%CALLNAME:A%が読んでいた本のタイトルを見てみた
+	IF RAND:4 == 0
+		PRINTFORMW 本のタイトルは「これでばっちり！花嫁修業」だった
+	ELSEIF RAND:3 == 0
+		PRINTFORMW 本のタイトルは「意中の相손の心をつかむ尽くす方法100選」だった
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 本のタイトルは「おもてなしの作法と心構え」だった
+	ELSE
+		PRINTFORMW 本のタイトルは「彼を虜にする為の仕草・行動」だった
+	ENDIF
+	PRINTFORML どうやら%CALLNAME:A%は%CALLNAME:MASTER%の為に色々と試行錯誤しているようだ
+	PRINTFORMW 心の中で感謝しつつ%CALLNAME:A%の部屋を후にした…
+;연모陥落
+ELSEIF TALENT:A:연모 || TALENT:A:친애
+	IF RAND:3 == 0
+		PRINTFORML はちょうどお茶を飲んでいたようだ
+		PRINTFORMW %CALLNAME:MASTER%に目ざとく気付くと、一緒にお茶はどうかと誘ってきた
+		PRINTFORMW 二人で穏やかな時間をすごしました…
+	ELSEIF RAND:2 == 0
+		PRINTFORMW はのんびりと休憩していたようだ
+		PRINTFORML こちらの気配に気付いた%CALLNAME:A%は
+		PRINTFORMW 嬉しそうに%CALLNAME:MASTER%の名を呼び近寄ってきた
+		PRINTFORMW 二人で穏やかな時間を過ごしました…
+	ELSE
+		PRINTFORML は読書をしていた
+		PRINTFORMW %CALLNAME:MASTER%が来たのに気付くと
+		PRINTFORMW 一緒に話がしたい、と%CALLNAME:MASTER%を部屋に招き入れた
+		PRINTFORMW 上機嫌の%CALLNAME:A%と二人でお喋りして過ごした…
+	ENDIF
+;음란陥落
+ELSEIF TALENT:A:음란 || TALENT:A:창부
+	;何かしら道具は持っているか？
+	FOR LOCAL, 0, 28
+		SIF LOCAL == 25
+			CONTINUE
+		SIF ITEM:LOCAL
+			LOCAL:1++
+	NEXT
+	IF LOCAL:1
+		$REPLAY
+		LOCAL:2 = RAND:28
+		SIF !ITEM:(LOCAL:2) || LOCAL:2 == 25
+			GOTO REPLAY
+	ENDIF
+	;道具ありかつ確率二分の一
+	IF LOCAL:1 && !RAND:2
+		PRINTFORML は%ITEMNAME:(LOCAL:2)%の손入れをしている
+		IF !RAND:2
+			PRINTFORMW 特に気に入りのアイテムらしく、念入りに손をかけている
+		ELSE
+			PRINTFORMW ……と思いきや、손つきがいやらしくなってきたので突っこんでおきました
+		ENDIF
+	;노출벽４以上
+	ELSEIF ABL:A:노출벽 >= 4 && FLAG:1 != 3
+		PRINTFORML は全裸生活を楽しんでいた
+		PRINTFORMW とりあえず、服は着ておくように言いました…
+	ELSE
+		PRINTFORML は손持ち無沙汰のようだ
+		PRINTFORMW %CALLNAME:MASTER%の姿を見つけると、次の調教はまだかと問い詰めてきた…
+	ENDIF
+;복종陥落、対象は問わず
+ELSEIF CFLAG:A:39 == 5 || CFLAG:A:39 == 8
+	PRINTFORML は%CALLNAME:MASTER%の命令通り
+	PRINTFORMW おとなしく過ごしているようだ…
+;未陥落＆굴복각인３
+ELSEIF !KANRAKU(A) && MARK:A:굴복각인 >= 3
+	IF !RAND:2
+		PRINTW は読書で暇をつぶしていたようだ…
+	ELSE
+		PRINTW はぼんやりと窓の外を眺めていたようだ…
+	ENDIF
+;未陥落
+ELSE
+	PRINTW は不機嫌そうに部屋をうろうろ歩き回っている…
+ENDIF
+
+;-------------------------------------------------
+;노래연습をしている
+;-------------------------------------------------
+@DAILY_LIFE_1
+PRINTFORMW %CALLNAME:A%の部屋の前を通りすがると、中から歌声が漏れてきた
+;반발３もしくは실의
+IF MARK:A:반발각인 >= 3 || TALENT:A:실의
+	PRINTFORML どうもワンフレーズを繰り返し繰り返し歌い続けているようだ
+	IF TALENT:A:낙관적
+		PRINTFORML 旋律は明るいが、その歌声はひどく物悲しい…
+	ELSEIF TALENT:A:비관적
+		PRINTFORML 時々涙声が混じるその歌声は、暗い旋律と相まって気分を落ち込ませる…
+	ELSE
+		PRINTFORML 淡々とした歌声に、深い\@ TALENT:A:실의 ? 悲しみ # 怒り \@を滲ませている…
+	ENDIF
+	PRINTFORMW 落ち着かない心持ちになったので、발早にその場を離れた
+;가창경험１００以上
+ELSEIF EXP:A:가창경험 >= 100 && RAND:2 == 0
+	IF TALENT:A:낙관적
+		PRINTFORML リズミカルなテンポにつられて、知らず知らず心が躍っていく
+	ELSEIF TALENT:A:비관적
+		PRINTFORML しっとりとした歌い方に心が落ち着いていく
+	ELSE
+		PRINTFORML 透き通るような高音が見事で、聞いていて心地良い
+	ENDIF
+	PRINTFORMW %CALLNAME:A%が一曲を歌いきるまで 時間を忘れて聞き惚れてしまった…
+;陥落済みのみ
+ELSEIF !RAND:3 && KANRAKU(A)
+	PRINTFORML 苦손なパートを克服しようとしているのだろうか
+	PRINTFORMW 同じフレーズばかりを何度も繰り返し歌っている…
+ELSEIF !RAND:2
+	PRINTFORMW \@ !RAND:2 ? 昔の流行歌だろうか # %CALLNAME:A%の故郷の歌だろうか \@、懐かしい感じがする…
+ELSE
+	PRINTFORML どうしたことだろう、今日の%CALLNAME:A%の歌声は少しおかしい
+	PRINTFORML 音程も不安定だし、テンポも目まぐるしく変わるし…
+	PRINTFORMW 目眩がしてきたので耳を塞ぎながら발早に立ち去りました
+ENDIF
+EXP:A:가창경험 += 1
+PRINTFORMW %CALLNAME:A%の가창경험 ＋１
+
+;-------------------------------------------------
+;
+;-------------------------------------------------
+;@DAILY_LIFE_2
+
+;-------------------------------------------------
+;魔法っぽいことをしている
+;-------------------------------------------------
+;@DAILY_LIFE_3
+;魔法の練習中。
+;IF !RAND:2
+;	PRINTFORML %CALLNAME:A%の部屋の前を通りすがると、
+;	PRINTFORML 中で%CALLNAME:A%が魔法の練習をしているのが見えた
+;	PRINTFORMW 魔法陣を描き、なにやら呪文を唱えている
+;	;五分の一の確率、対象が[습득느림]か기교２以下の場合は二分の一の確率
+;	IF ((TALENT:A:습득느림 || ABL:A:기교 <= 2) && !RAND:2) || !RAND:5
+;		PRINTFORML と思ったら爆発した……
+;		PRINTFORML もうもうと立ち上る煙の中から真っ黒の%CALLNAME:A%が現れて、
+;		PRINTFORML %CALLNAME:MASTER%の前でぱったり倒れました
+;		PRINTFORMW 仕方がないので손当てして別の部屋に寝かせることにした…
+;		;순종の珠
+;	ELSE
+;		PRINTFORML と思った瞬間、魔方陣の中心が光り、青い炎のようなものが点った
+;		PRINTFORML %CALLNAME:A%は続けて別な呪文を唱え始めたようだ
+;		PRINTFORMW 集中しているようなのでひとまずそこを離れた…
+;	ENDIF
+;研究。本を読んでる
+;ELSE
+;	PRINTFORML %CALLNAME:A%の部屋の前を通りすがると、
+;	PRINTFORML 中で%CALLNAME:A%が魔法書を読んでいるのが見えた
+;	PRINTFORMW 何やら真剣な表情をしている
+;	;五分の一の確率、対象が[습득느림]か기교２以下の場合は二分の一の確率
+;	IF ((TALENT:A:습득느림 || ABL:A:기교 <= 2) && !RAND:2) || !RAND:5
+;		PRINTFORML 魔法の研究をしているようだが、うまくいっていないらしい
+;		PRINTFORMW 難しい表情のまま、同じページを見つめ続けている…
+;	ELSE
+;		PRINTFORML %CALLNAME:A%はしばらく腕を組みながらページを睨んでいたが、ふと表情が明るくなった
+;		PRINTFORMW どうやら本の内容が理解できたようだ…
+;	ENDIF
+;ENDIF
+
+;-------------------------------------------------
+;実験っぽいことをしている
+;-------------------------------------------------
+@DAILY_LIFE_4
+;フラスコで実験
+IF !RAND:2
+	PRINTFORML 台所で、%CALLNAME:A%が鍋やフラスコなどを組み合わせて実験をしている
+	PRINTFORMW 鍋の中でぐつぐつと煮えたぎる액체の中にコップから青い액체をたらした
+	;五分の一の確率、対象が[습득느림]か기교２以下の場合は二分の一の確率
+	IF ((TALENT:A:습득느림 || ABL:A:기교 <= 2) && !RAND:2) || !RAND:5
+		IF !RAND:2
+			PRINTFORML と思ったら爆発した
+			PRINTFORML もうもうと立ち上る煙の中から真っ黒の%CALLNAME:A%が現れて、
+			PRINTFORML %CALLNAME:MASTER%の前でぱったり倒れました
+			PRINTFORMW 呆れながら손当てして別の部屋に寝かせることにした…
+			;순종の珠
+		ELSE
+			PRINTFORMW ………
+			PRINTFORMW ………………
+			PRINTFORMW ………………………
+			PRINTFORML 意図に反して何の変化も示さないフラスコを、
+			PRINTFORMW 不思議そうに見つめる%CALLNAME:A%さんでした
+		ENDIF
+	ELSE
+		IF !RAND:2
+			PRINTFORML と思った瞬間、鍋から紫色の煙が立ち上り、煮え立っていた액체が静まり返った
+			PRINTFORML %CALLNAME:A%はきょろきょろとあたりを見回し、こちらを見つけてにやりとした
+			PRINTFORMW それから、館中を巻き込んだ鬼ごっこが始まった…
+			;순종の珠
+		ELSE
+			PRINTFORML フラスコの中身は虹色に染まり、明るいながらも不気味に輝いている
+			PRINTFORMW %CALLNAME:A%は一瞬ためらった후、覚悟を決めて一気に飲み干した
+			IF !RAND:2
+				PRINTFORML どうやら実験は成功したらしい
+				PRINTFORMW 今度は研究ノートにペンを走らせ始めた…
+			ELSE
+				PRINTFORML 次の瞬間、%CALLNAME:A%の顔色も虹色に染まった
+				PRINTFORMW 残念ながら大失敗らしい…
+			ENDIF
+		ENDIF
+	ENDIF
+ELSE
+	PRINTFORM 何気なく%CALLNAME:A%の部屋を覗くと
+	IF TALENT:A:금지된지식 || ABL:A:기교 >= 5
+		IF !RAND:2
+			PRINTFORML 幾つもの箱が並んでいるのが見える
+			PRINTFORML イモリだかヤモリだか、その様なものを飼っているらしい
+			PRINTFORM 秘薬を調合するための材料を育てているのだろうか
+			IF !RAND:3
+				PRINTFORMW それとも、ただのペットなのか…
+			ELSE
+				PRINTW 
+			ENDIF
+		ELSE
+			PRINTFORML 妙ちくりんな植物の鉢植えが数多く置かれていて目を引かれる
+			PRINTFORML 毒々しい色の花、怪しげな形のキノコ
+			PRINTFORM 秘薬を調合するための材料を育てているのだろうか
+			IF !RAND:3
+				PRINTFORMW それとも、ただの観葉植物なのか…
+			ELSE
+				PRINTW 
+			ENDIF
+		ENDIF
+	ELSE
+		PRINTFORML 強い香りが鼻を突いた
+		PRINTFORML その発生源はベッドの横に並べられたハーブ類の鉢植えのようだ
+		IF !RAND:3
+			PRINTFORMW ハーブティ用の自家栽培だろうか…
+		ELSE
+			PRINTFORMW 薬を調合するための材料を育てているのだろうか…
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;読書
+;-------------------------------------------------
+@DAILY_LIFE_5
+;部屋で読書
+IF MARK:A:반발각인 >= 3 || TALENT:A:실의 || !KANRAKU(A)
+	PRINTFORMW 部屋を覗くと、%CALLNAME:A%が本を読んでいた
+	IF MARK:A:반발각인 >= 3
+		PRINTFORML %CALLNAME:A%は入ってきた%CALLNAME:MASTER%に気付くと、
+		PRINTFORML 本を閉じてそっぽを向いてしまった
+		PRINTFORM %CALLNAME:A%の読んでいた本のタイトルは
+		IF !RAND:3
+			PRINTFORMW 『復讐者』だった…
+		ELSEIF !RAND:2
+			PRINTFORMW 『監獄からの脱出』だった…
+		ELSE
+			PRINTFORMW 『殺さずに苦しませる方法』だった…
+		ENDIF
+	ELSEIF TALENT:A:실의
+		PRINTFORM よく見ると、%CALLNAME:A%はまるで上の空で、
+		IF !RAND:3
+			PRINTFORMW 本をめくる손が動かない…
+		ELSEIF !RAND:2
+			PRINTFORMW パラパラとただページを繰っている…
+		ELSE
+			PRINTFORMW 本が逆さまだ…
+		ENDIF
+	;未陥落
+	ELSE
+		PRINTFORML %CALLNAME:A%は入ってきた%CALLNAME:MASTER%に気付くと、
+		PRINTFORMW 本を閉じてそっぽを向いてしまった
+		PRINTFORMW ……気まずい空気になった
+	ENDIF
+;図書室で読書
+ELSE
+	IF TALENT:A:유치 || TALENT:A:유아／유아퇴행
+		PRINTFORMW 図書室に来てみると、%CALLNAME:A%が妙にしゃちほこばって本を読んでいるのを見つけた
+		PRINTFORML %CALLNAME:MASTER%に気付くと得意げに笑ってみせてからまた本を読み始めた
+		PRINTFORMW 自分の読みたい本を探しに行くことにした……
+		IF !RAND:2
+			PRINTFORML 戻ってきてみると、机の上に本を散らかしたまま%CALLNAME:A%の姿は既になくなっていた
+			PRINTFORMW もう飽きてしまったのだろうか？
+			B = DAILYLIFE_GETTALENT_1(63)
+			IF B > -1 && MARK:B:반발각인 < 3
+				PRINTFORMW ………………
+				PRINTFORML 帰りがけに%CALLNAME:A%が散らかした机を片付けていると、
+				PRINTFORMW いつの間にかそばに居た%CALLNAME:B%が整理を손伝ってくれた…
+			ENDIF
+		ELSE
+			PRINTFORMW 戻ってきてみると、%CALLNAME:A%は本の上につっぷして寝息を立てている
+			IF TALENT:A:연모 || TALENT:A:친애 || TALENT:A:음란 || TALENT:A:창부 || TALENT:A:복종 || TALENT:A:예속
+				PRINTFORML 何か寝言を言っている……
+				IF TALENT:A:복종 || TALENT:A:예속
+					PRINTFORML 勉強していっぱい%CALLNAME:MASTER%の役に立つんだそうです
+				ELSE
+					PRINTFORML 勉強して%CALLNAME:MASTER%をメロメロにするそうです
+				ENDIF
+				PRINTFORMW 苦笑して部屋まで抱いて連れて行った…
+			;思慕・畏怖対象が主人以外はこちらに
+			ELSE
+				PRINTFORMW 仕方ないので部屋に抱いて連れて行くことにした…
+			ENDIF
+		ENDIF
+	;主人と상사상애
+	ELSEIF TALENT:A:상사상애
+		PRINTFORMW 図書室に来てみると、%CALLNAME:A%が本を読んでいた
+		IF !RAND:2
+			PRINTFORML %CALLNAME:MASTER%に気付いた%CALLNAME:A%は嬉しそうに微笑みかけてきた
+			PRINTFORML 近くに座って楽しそうな表情の%CALLNAME:A%と一緒に
+			PRINTFORMW 好きな本について話して過した…
+		ELSE
+			PRINTFORML %CALLNAME:MASTER%は自分の読む本を取ってきて微笑みかけてきた%CALLNAME:A%の近くに座り、
+			PRINTFORMW 幸せそうな表情の%CALLNAME:A%と一緒に本を読んで静かに過した…
+		ENDIF
+	;主人に対して연모陥落
+	ELSEIF TALENT:A:연모 || TALENT:A:친애
+		PRINTFORMW 図書室に来てみると、%CALLNAME:A%が本を読んでいた
+		PRINTFORML %CALLNAME:A%は%CALLNAME:MASTER%に気付くと慌てて読んでいた本を戻しにいった
+		PRINTFORM 不思議に思って何を読んでいたか聞くと、
+		IF TALENT:A:부끄럼쟁이 || TALENT:A:정조관념
+			PRINTFORMW 顔を赤くして何か小声で言いながら図書室を出て行った
+			PRINTFORMW なんだったんだろう…
+		ELSEIF TALENT:A:반항적 || TALENT:A:츤데레 || TALENT:A:프라이드높음
+			PRINTFORML 赤くなった%CALLNAME:A%に怒られた
+			PRINTFORMW そして%CALLNAME:A%は逃げるように図書室を出て行った
+			PRINTFORMW なんだったんだろう…
+		ELSEIF TALENT:A:솔직함 || TALENT:A:수치심없음
+			PRINTL 
+			PRINTFORMW 『好きな人を振り向かせる方法』だと教えてくれた
+		ELSE
+			PRINTFORMW しどろもどろに何か言いながら図書室を出て行った
+			PRINTFORMW なんだったんだろう…
+		ENDIF
+	ELSE
+		PRINTFORMW 図書室に来てみると、%CALLNAME:A%が本を読んでいた
+		IF !RAND:3
+			PRINTFORMW %CALLNAME:A%は本に夢中になっていて%CALLNAME:MASTER%に気付かない…
+			PRINTFORMW 邪魔をしないように自分の読みたい本を探すことにした
+		ELSEIF !RAND:2
+			PRINTFORMW %CALLNAME:A%は本に夢中になっていて%CALLNAME:MASTER%に気付かない…
+			PRINTFORMW 自分の読みたい本を探して一緒に読み始めた
+			PRINTFORMW 暫くすると驚いて声を上げた
+			PRINTFORMW ちょっと面白い
+		ELSE
+			PRINTFORMW %CALLNAME:A%はこちらに気付いて挨拶し、また本に目を落とした
+			IF TALENT:A:음란 || TALENT:A:창부
+				PRINTFORMW 『いけないおはなし』……？
+			;복종陥落(畏怖対象は主人と限らない)
+			ELSEIF CFLAG:A:39 == 5 || CFLAG:A:39 == 8
+				IF TALENT:A:새드 && !RAND:2
+					PRINTFORMW 『人体の急所』……？
+				ELSE
+					PRINTFORMW 『ＳＭ百選』……？
+				ENDIF
+			;主人以外が思慕対象の연모陥落
+			ELSE
+				B = NO2(CFLAG:A:41)
+				PRINTFORMW 『好きな人を振り向かせる方法』……？
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;おもらし
+;-------------------------------------------------
+@DAILY_LIFE_6
+;他に[실금버릇]持ちのキャラがいるか検索
+B = DAILYLIFE_GETTALENT_1(57)
+;[실금버릇]持ちがいるとき二分の一の確率で、二人で布団干し
+IF B > -1 && !RAND:2
+	PRINTFORML ふと窓から庭を見下ろすと布団が二枚干されている
+	PRINTFORML 今朝、粗相をしてしまったのは……%CALLNAME:A%と……%CALLNAME:B%、だ
+	PRINTFORMW 奇妙な連帯感が生じたらしく、二人で仲良くお喋りしながら布団干し作業を楽しんでいる…
+;１人で布団干し
+ELSE
+	PRINTFORML ふと窓から庭を見下ろすと布団が干されている
+	IF TALENT:A:부끄럼쟁이 || TALENT:A:얌전함
+		PRINTFORML 傍らには顔を真っ赤に染めた%CALLNAME:A%の姿がある
+	ELSEIF TALENT:A:낙관적 || TALENT:A:수치심없음
+		PRINTFORML 傍らにはあっけらかんとした表情の%CALLNAME:A%の姿がある
+	ELSE
+		PRINTFORML 傍らには浮かない表情の%CALLNAME:A%の姿がある
+	ENDIF
+	PRINTFORM どうやらまた粗相をしてしまったようだ
+	IF TALENT:A:습득느림 || TALENT:A:유치 || TALENT:A:유아／유아퇴행
+		PRINTL 
+		PRINTFORMW それにしても干す前に洗濯した方が良いと思うのだが…
+	ELSE
+		PRINTW …
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;庭でひなたぼっこ
+;-------------------------------------------------
+@DAILY_LIFE_7
+PRINTFORML 庭で%CALLNAME:A%が日向ぼっこをしているところに通りすがりました
+IF MARK:A:반발각인 >= 3 || TALENT:A:실의
+	PRINTFORMW %CALLNAME:A%は%CALLNAME:MASTER%を見つけると、直ぐに固い表情でその場を立ち去った…
+ELSEIF TALENT:A:동물귀
+	PRINTFORML %CALLNAME:A%は日差しの中で気持ち良さそうに目を細めている
+	PRINTFORML こちらに気付くと、目を細めて耳を動かした
+	IF RAND:2 == 0
+		PRINTFORMW 気持ち良さそうだったので、二人で一緒に暫くぼーっとしました…
+	ELSE
+		PRINTFORMW 気持ち良さそうな%CALLNAME:A%を眺めていたら、何時の間にか日が暮れていました…
+	ENDIF
+ELSE
+	PRINTFORML %CALLNAME:A%は日差しの中で気持ち良さそうに空を見上げている
+	PRINTFORML こちらに気付くと、目を細めて頷いてきた
+	IF RAND:2 == 0
+		PRINTFORMW 気持ち良さそうだったので、二人で一緒に暫くぼーっとしました…
+	ELSE
+		PRINTFORMW 気持ち良さそうな%CALLNAME:A%を眺めていたら、何時の間にか日が暮れていた…
+	ENDIF
+ENDIF
+;체력・기력を１０％回復
+BASE:A:체력 += MAXBASE:A:체력 / 10
+BASE:A:기력 += MAXBASE:A:기력 / 10
+
+;-------------------------------------------------
+;屋根の上で笑っている
+;-------------------------------------------------
+@DAILY_LIFE_8
+PRINTFORML ふと窓の外から見える屋根のてっぺんに、%CALLNAME:A%がいるのが見えた
+PRINTFORMW 月を見上げて、全身に青白い光を浴び、この世のものではないように見える
+IF MARK:A:반발각인 >= 3 || TALENT:A:실의
+	PRINTFORMW こちらに気付いて、姿を隠した…
+ELSEIF TALENT:A:연모 || TALENT:A:친애
+	PRINTFORML こちらに気付いて、神秘的ながら優しさのあふれる微笑みを返し、屋根から降りた
+	PRINTFORMW 少したって、やってきた%CALLNAME:A%が寄り添ってきたので、しばらく二人で月を眺めた…
+ELSEIF TALENT:A:음란 || TALENT:A:창부
+	PRINTFORMW こちらに気付いて、妖しく神秘的な微笑みを浮かべ、また月を見上げた…
+ELSEIF TALENT:A:복종 || TALENT:A:예속
+	PRINTFORMW こちらに気付いて屋根から下りると、%CALLNAME:MASTER%の下に跪いた…
+ENDIF
+
+;-------------------------------------------------
+;동물귀/庭でふらふらしている
+;-------------------------------------------------
+@DAILY_LIFE_9
+IF TIME == 0
+	PRINTFORML 窓から外を見てみると、庭を%CALLNAME:A%が歩き回っているのが見えた
+	PRINTFORMW 鼻を突き出して……？　何かを探しているのだろうか？
+ELSE
+	PRINTFORML 庭のほうから物音が聞こえる
+	PRINTFORML 窓から外を見てみると、窓から漏れる灯りに%CALLNAME:A%が庭を歩き回っているのが
+	PRINTFORML ちらちらと照らされるのが見えた
+	PRINTFORMW 鼻を突き出して……？　何かを探しているのだろうか？
+ENDIF
+IF RAND:5 == 0
+	PRINTFORML おや。何か見つけたようだ
+	PRINTFORML ……興味がないものらしく、ぽいっと捨ててまた探し始めた
+	PRINTFORMW 何を探しているんだか…
+ELSEIF RAND:4 == 0
+	PRINTFORML 急にポーンと跳んでそこから逃げ出した
+	PRINTFORMW 何かに驚いたらしい
+	PRINTFORML また恐々と近づいてみている
+	PRINTFORML 何を探しているんだか…
+	PRINTFORMW あ。また逃げた
+ELSEIF RAND:3 == 0
+	PRINTFORML ？　草むらに気になるものがあったらしく、顔を突っ込んでごそごそやっている
+	PRINTFORML お尻と尻尾がぴょこぴょこ揺れている
+	PRINTFORMW 何を探しているんだか…
+ELSEIF RAND:2 == 0
+	PRINTFORML 暫くうろうろしていたが見つからず、あきらめてどこかにいってしまったようだ
+	PRINTFORMW 何を探しているんだか…
+ELSE
+	PRINTFORML おや。何か見つけたようだ
+	PRINTFORML 嬉しそうに見つけたものをもって得意そうにどこかにいってしまった
+	PRINTFORMW ……なんだったんだ…
+ENDIF
+
+;-------------------------------------------------
+;縫物
+;-------------------------------------------------
+@DAILY_LIFE_10
+;BにAの思慕・畏怖対象を代入、主人であることもある
+SIF CFLAG:A:41 > -1
+	B = NO2(CFLAG:A:41)
+PRINTFORM 通りすがりに
+IF RAND:2 == 0
+	PRINTFORM 台所で
+ELSE
+	PRINTFORM %CALLNAME:A%の部屋で
+ENDIF
+PRINTFORM %CALLNAME:A%が縫い物をしているのが見えた
+IF TALENT:A:바느질잘함
+	PRINTL 
+	PRINTFORMW さすが器用に바늘を操っている
+ELSEIF TALENT:A:습득느림 || TALENT:A:유아／유아퇴행 || TALENT:A:유치
+	PRINTL 
+	PRINTFORMW 危なっかしい손つきで바늘を扱っている
+ELSE
+	PRINTW 
+ENDIF
+IF TALENT:A:실의
+	PRINTFORML %CALLNAME:MASTER%がやってきたことにも気付かない様子で、
+	PRINTFORML ぼんやりと繕いものを続けている
+	PRINTFORM 不安に思い眺めていると、
+	IF !RAND:2
+		PRINTFORMW %CALLNAME:A%は指に바늘を刺してしまった
+		PRINTFORM 血を流しながらも
+	ELSE
+		PRINTFORMW %CALLNAME:A%の頬を涙が一筋伝っていった
+		PRINTFORM 泣きながら
+	ENDIF
+	PRINTFORMW 바늘仕事を続けようとする%CALLNAME:A%を押しとどめ、部屋まで送って行った…
+ELSEIF MARK:A:반발각인 >= 3
+	PRINTFORML が、こちらに気付くと바늘を構えたまま睨みつけてきた
+	PRINTFORML そのまま睨みあっていると、諦めたのか%CALLNAME:A%は바늘仕事をやめ立ち去った…
+ELSEIF TALENT:A:마조 == 2 && !RAND:2
+	PRINTFORML 感心しながら眺めていると、どうやらただ바늘仕事をしていたわけではないようだ
+	PRINTFORML 時々こっそりと指に바늘を刺しては、興奮して息を荒げている
+	PRINTFORMW ……布が血まみれになるので止めさせました
+;主人に対して연모陥落＆임신中
+ELSEIF (TALENT:A:연모 || TALENT:A:친애) && TALENT:A:임신
+	PRINTFORML 時折お腹をさすっている
+	PRINTFORMW どうやらおなかに宿した아이のために何か作ろうとしているようだ
+	PRINTFORML 上機嫌で縫い物をしていた%CALLNAME:A%は、
+	PRINTFORML ふと%CALLNAME:MASTER%に気づくと微笑みを浮かべ손招きした
+	PRINTFORMW %CALLNAME:A%と談笑して心地よい時間を満喫した
+;主人に対して연모陥落＆임신していない場合
+ELSEIF TALENT:A:연모 || TALENT:A:친애
+	IF TALENT:A:반항적 || TALENT:A:츤데레 || TALENT:A:건방짐
+		PRINTFORML 感心して眺めていると、だんだん%CALLNAME:A%の顔が赤くなってきて…
+		PRINTFORMW 邪魔をするなと怒られました
+		PRINTFORML とりあえず謝っていると、
+		PRINTFORML ぷりぷりしながら%CALLNAME:A%は%CALLNAME:MASTER%にものさしを当てている
+		PRINTFORMW 不思議に思って聞いてみると、また怒られました…
+	ELSE
+		PRINTFORML 上機嫌で縫い物をしていた%CALLNAME:A%が、%CALLNAME:MASTER%に気づくと笑顔で손招きをした
+		PRINTFORMW %CALLNAME:A%に近づくと、てきぱきと%CALLNAME:MASTER%の寸法を測った
+		PRINTFORML どうやら%CALLNAME:MASTER%の為に何か作ろうとしているようだ
+		PRINTFORMW %CALLNAME:A%と談笑して心地よい時間を満喫した
+	ENDIF
+ELSEIF (TALENT:A:음란 || TALENT:A:창부) && TALENT:A:임신
+	PRINTFORML 時折お腹をさすっている
+	PRINTFORML どうやらおなかに宿した아이のために何か作ろうとしているようだ
+	PRINTFORMW 邪魔をしないようそっとその場を立ち去った
+ELSEIF TALENT:A:음란 || TALENT:A:창부
+	PRINTFORM 感心して眺めていると
+	IF TALENT:A:새드 || TALENT:A:마조
+		PRINTFORML %CALLNAME:A%は妖しい笑顔を浮かべ、
+		PRINTFORMW 次は바늘プレイはどうかと聞いてくる…
+		IF TALENT:A:새드 && TALENT:MASTER:새드
+			PRINTFORML 刺す方ならやってもいい、と答えた
+			PRINTFORMW %CALLNAME:A%は自分が刺したかったらしく不満そうだ…
+		ELSEIF TALENT:A:마조 && TALENT:MASTER:마조
+			PRINTFORML 刺される方ならやってもいい、と答えた
+			PRINTFORMW %CALLNAME:A%は自分が刺されたかったらしく不満そうだ…
+		ELSEIF TALENT:MASTER:새드 || TALENT:MASTER:마조
+			PRINTFORML ＳとＭの需要も合うことだし、やってみようか…
+			PRINTFORMW 二人でＳＭプレイの話題で盛り上がった
+		ELSE
+			PRINTFORMW それは流石に遠慮したい……急いでその場を逃げ出した
+		ENDIF
+	ELSE
+		PRINTFORMW 바늘プレイは流石に勘弁だと言われた
+		IF TALENT:MASTER:새드
+			PRINTFORMW 바늘プレイ……次回の調教メニューに加えてみようか…
+		ELSEIF TALENT:MASTER:마조
+			PRINTFORMW 바늘プレイ……刺される方なら興味があるが…
+		ELSE
+			PRINTFORMW そんなつもりで見ていたのではないのだが…
+		ENDIF
+	ENDIF
+;その他、主人以外に対しての연모陥落or복종陥落のとき
+ELSE
+	PRINTFORMW %CALLNAME:A%は%CALLNAME:B%の繕いものをしていたようだ
+ENDIF
+EXP:A:가사경험 += 3
+PRINTFORMW %CALLNAME:A%の가사경험 ＋３
+
+;-------------------------------------------------
+;掃除
+;-------------------------------------------------
+@DAILY_LIFE_11
+;一緒に掃除したフラグ
+LOCAL = 0
+PRINTFORM %CALLNAME:A%が
+IF !TIME && !RAND:3
+	PRINT 庭の
+ELSEIF !RAND:2
+	PRINT 廊下の
+ELSE
+	PRINT 台所の
+ENDIF
+PRINTFORMW 掃除をしているところに通りすがった
+IF MARK:A:반발각인 >= 3 || TALENT:A:실의
+	PRINTFORML %CALLNAME:A%は%CALLNAME:MASTER%に気が付くと、
+	PRINTFORML やりかけのまま固い表情でどこかにいってしまった
+	PRINTFORMW …………おい
+ELSE
+	IF TALENT:A:츤데레 || TALENT:A:부끄럼쟁이
+		PRINTFORML 褒めると、顔を赤くして掃除を続ける
+		PRINTFORMW 照れているようだ
+		PRINTFORML 更に礼を言うと、首から上を真っ赤にしてしどろもどろになりました
+		PRINTFORMW ……さっきから何度も同じところを掃除している
+	ELSEIF TALENT:A:습득빠름 || TALENT:A:헌신적
+		PRINTFORML %CALLNAME:A%は丁寧に掃除していく
+		PRINTFORMW どんどん綺麗になっていくのを感心しながら眺めた…
+	ELSEIF TALENT:A:프라이드높음 || TALENT:A:건방짐
+		PRINTFORML やたらにこやかな%CALLNAME:A%に押し切られ、
+		PRINTFORML %CALLNAME:MASTER%は손伝うことにした
+		PRINTFORMW %CALLNAME:A%と一緒にというよりは指図されながら掃除をした…
+		LOCAL = 1
+	ELSE
+		PRINTFORML %CALLNAME:MASTER%は손伝うことにした
+		PRINTFORMW %CALLNAME:A%のハミングを聞きながら一緒に掃除をした…
+		LOCAL = 1
+	ENDIF
+ENDIF
+EXP:A:가사경험 += 3
+IF LOCAL
+	EXP:MASTER:가사경험 += 3
+	PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の가사경험 ＋３
+ELSE
+	PRINTFORMW %CALLNAME:A%の가사경험 ＋３
+ENDIF
+
+;-------------------------------------------------
+;洗濯
+;-------------------------------------------------
+@DAILY_LIFE_12
+LOCAL = 0
+PRINTFORML %CALLNAME:A%が洗濯をしているところに通りすがった……
+;対象に主人以外の思慕・畏怖対象が居てイベント出場可
+IF CFLAG:A:41 != NO:MASTER && CFLAG:A:41 > -1 && DAILYLIFE_CHARA(NO2(CFLAG:A:41))
+	B = NO2(CFLAG:A:41)
+ELSE
+	B = MASTER
+ENDIF
+IF TALENT:A:헌신적
+	PRINTFORMW %CALLNAME:B%とみんなの分も一緒に洗濯しているようだ
+;主人しかいない
+ELSE
+	PRINTFORMW %CALLNAME:B%の分も一緒に洗濯しているようだ
+ENDIF
+IF MARK:A:반발각인 >= 3
+	PRINTFORML %CALLNAME:A%は%CALLNAME:MASTER%に気が付くと、
+	PRINTFORML やりかけのまま固い表情でどこかにいってしまった
+	PRINTFORMW …………おい
+ELSE
+	;対象が연모陥落もしくは、음란陥落かつ보수적/정조관념/부끄럼쟁이持ちのとき、二分の一の確率
+	IF ((CFLAG:A:39 == 3 || CFLAG:A:39 == 6 || CFLAG:A:39 == 165) || ((TALENT:A:음란 || TALENT:A:창부) && (TALENT:A:보수적 || TALENT:A:정조관념 || TALENT:A:부끄럼쟁이))) && !RAND:2
+		PRINTFORML 不意に%CALLNAME:A%が固まった
+		PRINTFORMW %CALLNAME:B%の下着を손に顔を赤らめている
+		IF TALENT:A:음란 || TALENT:A:창부
+			PRINTFORML そしてごそごそと下着を懐に隠した…
+			PRINTFORMW はっと気が付いてあたりを見回した%CALLNAME:A%と%CALLNAME:MASTER%の目が合いました
+			PRINTFORML %CALLNAME:A%は逃げ出した！
+			PRINTFORMW 下着を持ったまま…
+		ELSEIF B != MASTER
+			PRINTFORMW そしてこっそりと下着を懐に隠した…
+			PRINTFORMW 見なかったことにしてあげました
+			;욕정の珠
+		ELSE
+			PRINTFORML 深呼吸を繰り返し、暫く何事か考えてから、洗濯を再開しました
+			PRINTFORMW ？
+		ENDIF
+	;음란陥落かつ보수적/정조관념/부끄럼쟁이がないとき、二分の一の確率
+	ELSEIF ((TALENT:A:음란 || TALENT:A:창부) && !TALENT:A:보수적 && !TALENT:A:정조관념 && !TALENT:A:부끄럼쟁이) && !RAND:2
+		PRINTFORML と、洗濯物の塊の中から何か引っ張り出した
+		PRINTFORMW %CALLNAME:MASTER%の下着のようだ
+		IF !RAND:2
+			PRINTFORML ごそごそと自分の懐にしまっている…
+			PRINTFORMW とりあえずツッコんでおきました
+		ELSE
+			PRINTFORML なにやら匂いを嗅いでいる…
+			PRINTFORMW そのまま片손をイケナイ感じに動かし始めたので、ツッコんでおきました
+		ENDIF
+		;욕정の珠
+	ELSE
+		;主人と상사상애
+		IF TALENT:A:상사상애
+			PRINTFORMW こちらに気付いて微笑む%CALLNAME:A%と挨拶を交わした
+			IF !RAND:2
+				PRINTFORML %CALLNAME:A%はうきうきした顔で洗濯物を干し始めた
+				PRINTFORMW 絶好の洗濯日和の空の下に洗濯物が並んでいく…
+			ELSE
+				PRINTFORML %CALLNAME:MASTER%は손伝うことにした
+				PRINTFORMW からっと晴れた空の下で、嬉しそうな%CALLNAME:A%と一緒に洗濯をした…
+				LOCAL = 1
+			ENDIF
+		;主人に対して연모陥落
+		ELSEIF TALENT:A:연모 || TALENT:A:친애
+			PRINTFORML やたらにこやかな%CALLNAME:A%に押し切られ、%CALLNAME:MASTER%は손伝うことにした
+			PRINTFORMW からっと晴れた空の下で、%CALLNAME:A%と一緒に洗濯をした…
+			LOCAL = 1
+		;主人以外に陥落＆상사상애
+		ELSEIF B > -1 && CFLAG:A:39 == 165
+			PRINTFORML そこに%CALLNAME:B%がやってきて손伝い始めた
+			PRINTFORMW 洗濯日和の空の下で、ふたりは楽しそうに洗濯を続けた…
+			LOCAL = 2
+		;その他
+		ELSE
+			PRINTFORMW 晴れた空の下で%CALLNAME:A%がてきぱきと洗濯物を干していくのを眺めた…
+		ENDIF
+	ENDIF
+ENDIF
+EXP:A:가사경험 += 3
+IF LOCAL == 1
+	EXP:MASTER:가사경험 += 3
+	PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の가사경험 ＋３
+ELSEIF LOCAL == 2
+	EXP:B:가사경험 += 3
+	PRINTFORMW %CALLNAME:B%と%CALLNAME:A%の가사경험 ＋３
+ELSE
+	PRINTFORMW %CALLNAME:A%の가사경험 ＋３
+ENDIF
+
+;-------------------------------------------------
+;お祈り
+;-------------------------------------------------
+@DAILY_LIFE_13
+;未陥落
+IF !KANRAKU(A)
+	PRINTFORM %CALLNAME:A%の部屋を覗いてみると、
+;昼
+ELSEIF !TIME
+	PRINTFORM 庭の陽だまりに来てみると、
+;夜
+ELSE
+	PRINTFORML %CALLNAME:A%の部屋を覗いてみると、月の光に照らされて
+ENDIF
+PRINTFORMW %CALLNAME:A%が祈りを捧げていた
+IF MARK:A:반발각인 >= 3 || TALENT:A:실의
+	PRINTFORML %CALLNAME:A%は%CALLNAME:MASTER%に気付くと、少し涙を浮かべ再び祈りに入った
+	PRINTFORM %CALLNAME:A%の祈っていたことはと言うと
+	IF TALENT:A:실의
+		PRINTFORMW 『――が無事でいますように』
+	ELSEIF !RAND:3
+		PRINTFORMW 『どうか改心しますように』
+	ELSEIF !RAND:2
+		PRINTFORMW 『神様…助けて』
+	ELSE
+		PRINTFORMW 『真人間になりますように』
+	ENDIF
+;主人と친애両想い、상사상애
+ELSEIF TALENT:A:상사상애 || (TALENT:A:친애 && MASTER_SEARCH2(MASTER,A))
+	PRINTFORML %CALLNAME:A%は%CALLNAME:MASTER%に気付くと美しい笑顔を浮かべた。
+	PRINTFORM 不思議に思って何を祈っていたか聞くと、
+	IF (TALENT:A:솔직함 || TALENT:A:수치심없음) && !RAND:2
+		PRINTFORML 『ずっとこの生活が続きますように』
+	ELSEIF TALENT:A:꿋꿋함 || TALENT:A:프라이드높음
+		PRINTFORML %CALLNAME:A%は静かに笑った
+		PRINTFORML そして%CALLNAME:A%は軽くキスをして部屋へ戻った
+	ELSE
+		PRINTFORML 『いい事がありますように』
+	ENDIF
+	PRINTFORMW …ちょっとだけお祈りをしてみた
+;연모
+ELSEIF TALENT:A:연모
+	IF !RAND:2
+		PRINTFORML %CALLNAME:MASTER%に気付いた%CALLNAME:A%は嬉しそうに微笑みかけて自分のそばに誘ってきた
+		PRINTFORMW %CALLNAME:A%と一緒に日向ぼっこをした…
+	ELSE
+		PRINTFORML %CALLNAME:MASTER%は微笑みかけてきた%CALLNAME:A%の近くに座り
+		PRINTFORMW 祈りを捧げる%CALLNAME:A%の隣で静かに過した…
+	ENDIF
+;未陥落
+ELSEIF !KANRAKU(A)
+	PRINTFORML 神に助けを求めているのだろうか
+	PRINTFORMW ……無駄なことだろうが
+;その他
+ELSE
+	IF !RAND:3 && TALENT:MASTER:호기심
+		PRINTFORML %CALLNAME:A%は祈りに夢中になっていて%CALLNAME:MASTER%に気付かない…
+		PRINTFORML 隣に座り込みしばらく一緒に目を瞑ってみる…不思議な気分だ
+		PRINTFORML 暫くすると驚いて声を上げた
+		PRINTFORMW ちょっと可愛い
+	ELSEIF !RAND:2
+		PRINTFORML %CALLNAME:A%は祈りに夢中になっていて%CALLNAME:MASTER%に気付かない…
+		PRINTFORMW 邪魔をしないようにその場を去った
+	ELSE
+		PRINTFORMW %CALLNAME:A%はこちらに気付いて挨拶し、また静かに祈り始めた
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;ぼー
+;-------------------------------------------------
+@DAILY_LIFE_14
+IF !TIME && !RAND:3 && KANRAKU(A)
+	PRINTFORM 庭に立って
+ELSEIF !RAND:2 && KANRAKU(A)
+	PRINTFORM 食堂の椅子に座って
+ELSE
+	PRINTFORM 部屋のベッドに腰掛けて
+ENDIF
+PRINTFORMW %CALLNAME:A%がぼーっとしているところに通りすがった
+;연모陥落＆반발２以下
+IF (TALENT:A:연모 || TALENT:A:친애) && MARK:A:반발각인 <= 2
+	PRINTFORMW …………
+	PRINTFORMW …………
+	PRINTFORMW あ。赤くなった
+;복종陥落＆반발２以下
+ELSEIF (TALENT:A:복종 || TALENT:A:예속) && MARK:A:반발각인 <= 2
+	PRINTFORMW …………
+	PRINTFORMW …………
+	PRINTFORML こちらに気付いてびくりと身を震わせた%CALLNAME:A%は
+	PRINTFORMW バランスを崩して転んでしまった
+;それ以外
+ELSE
+	PRINTFORMW …………
+	PRINTFORMW 動かない…
+ENDIF
+
+;-------------------------------------------------
+;ダンシング
+;-------------------------------------------------
+@DAILY_LIFE_15
+VARSET LOCAL
+;CにAの思慕・畏怖対象を代入
+SIF CFLAG:A:41 > -1
+	C = NO2(CFLAG:A:41)
+;他出場キャラをBに代入(未陥落/실의状態のキャラを除く)
+B = DAILYLIFE_GETCHARA(1)
+;主人が思慕・畏怖対象である
+IF C == MASTER
+	PRINTFORM 廊下を歩いていると、%CALLNAME:A%が寄ってきて、食堂まで引っ張られた
+;主人以外に思慕・畏怖対象がいる
+ELSEIF C > -1
+	PRINTFORML 廊下を歩いていると、%CALLNAME:A%が%CALLNAME:C%を食堂に引っ張り込む所だ
+	PRINTFORM 何をする気なのか見に寄ってみよう…
+;それ以外(음란陥落)
+ELSE
+	PRINTFORM ふと食堂に通りかかると、%CALLNAME:A%の姿が見える…
+ENDIF
+;他に日常イベント出場可なキャラが二人以上いる
+IF B > -1 && C > -1
+	PRINTL 
+	PRINTFORMW 他のみんなもきているようだ
+;他に日常イベント出場可なキャラがいる
+ELSEIF B > -1
+	PRINTL 
+	PRINTFORMW %CALLNAME:B%もきているようだ
+;他出場キャラがいない
+ELSE
+	PRINTW 
+ENDIF
+PRINTFORMW %CALLNAME:A%はテーブルの上にのぼるとポーズをとって、踊り始めた
+IF TALENT:A:건방짐 || TALENT:A:호기심
+	PRINTFORML リズムの早いアクロバティックなダンスだ
+ELSEIF TALENT:A:프라이드높음 || TALENT:A:보수적
+	PRINTFORML 演劇調のゆったりとした繊細な舞だ…
+ELSEIF TALENT:A:해방 || TALENT:A:정조무관심
+	PRINTFORML 身体のラインを強調しながらイヤラシイ動きを繰り返している…
+ELSE
+	PRINTFORML いったい何の踊りなのだろうか…
+ENDIF
+PRINTFORM %CALLNAME:A%は
+;음란陥落
+IF TALENT:A:음란 || TALENT:A:창부
+	PRINTFORMW 艶っぽい視線をふりまいている
+;복종陥落(相손は問わず)
+ELSEIF CFLAG:A:39 == 5 || CFLAG:A:39 == 8
+	PRINTFORMW 芝居がかったしぐさで%CALLNAME:C%に一礼してみせた
+;主人以外に思慕
+ELSEIF C != MASTER
+	IF TALENT:A:건방짐 || TALENT:A:호기심
+		PRINTFORML %CALLNAME:C%に向けてウインクをした
+	ELSEIF TALENT:A:프라이드높음 || TALENT:A:보수적
+		PRINTFORML %CALLNAME:C%に儚げな視線を送っている
+	ELSEIF TALENT:A:해방 || TALENT:A:정조무관심
+		PRINTFORML %CALLNAME:C%に艶っぽい視線を送っている
+	ELSE
+		PRINTFORML %CALLNAME:C%に向けて軽く손を振っている
+	ENDIF
+;主人に思慕
+ELSE
+	IF TALENT:A:건방짐 || TALENT:A:호기심
+		PRINTFORML %CALLNAME:C%にウインクしてみせた
+	ELSEIF TALENT:A:프라이드높음 || TALENT:A:보수적
+		PRINTFORML %CALLNAME:C%に儚げな視線を送ってきた
+	ELSEIF TALENT:A:해방 || TALENT:A:정조무관심
+		PRINTFORML %CALLNAME:C%に艶っぽい視線を送ってきた
+	ELSE
+		PRINTFORML %CALLNAME:C%に軽く손を振ってみせた
+	ENDIF
+ENDIF
+;成功
+IF (ABL:A:기교 - TALENT:A:습득느림 + TALENT:A:습득빠름) * 20 > RAND:100
+	PRINTFORM %CALLNAME:A%の全身を使った見事な踊りとバランス感覚に
+	IF C == MASTER || C < 0
+		PRINTFORML %CALLNAME:MASTER%は惹きこまれた
+	ELSE
+		PRINTFORML %CALLNAME:C%は惹きこまれている
+	ENDIF
+	IF C > -1 && RAND:2
+		LOCAL:1 = C
+	ELSEIF B > -1
+		LOCAL:1 = B
+	ENDIF
+	IF LOCAL:1
+		IF TALENT:(LOCAL:1):감정부족
+			PRINTFORML %CALLNAME:(LOCAL:1)%も淡々とした表情ながら瞳を輝かせて見ている
+		ELSEIF TALENT:(LOCAL:1):반항적 || TALENT:(LOCAL:1):건방짐
+			PRINTFORML %CALLNAME:(LOCAL:1)%も斜に構えながらも感心した様子だ
+		ELSEIF TALENT:(LOCAL:1):솔직함 || TALENT:(LOCAL:1):유치 || TALENT:(LOCAL:1):유아／유아퇴행
+			PRINTFORML %CALLNAME:(LOCAL:1)%も大喜びで歓声をあげて見ている
+		ELSE
+			PRINTFORML %CALLNAME:(LOCAL:1)%も感心して見入っている
+		ENDIF
+	ENDIF
+	IF C > -1
+		PRINTFORM %CALLNAME:C%
+	ELSE
+		PRINTFORM %CALLNAME:MASTER%
+	ENDIF
+	PRINTFORMW の見つめる中、佳境に入った%CALLNAME:A%は最후のポーズを決めた
+	PRINTFORM %CALLNAME:MASTER%
+	SIF C != MASTER || B > -1 || C > -1
+		PRINT たち
+	PRINTFORM の拍손に得意げになって%CALLNAME:A%はテーブルから降り
+	;失敗
+	IF RAND:10 > 8
+		PRINTFORMW 、
+		PRINTFORMW ……るはずがテーブルが前に倒れかけて후ろに盛大な音と共にひっくり返った
+		IF C == MASTER || C < 0
+			PRINTFORMW 目を回してぶっ倒れている%CALLNAME:A%に溜息をついて部屋に運びました…
+		ELSE
+			PRINTFORML %CALLNAME:C%は目を回してぶっ倒れている%CALLNAME:A%に溜息をつくと、
+			;体格差を検索
+			LOCAL:1 = BUILD2(C, A)
+			IF LOCAL:1 > 1
+				PRINTFORMW 軽々と抱き上げて運んで行きました…
+			ELSEIF LOCAL:1 > -1
+				PRINTFORMW 抱えて運んで行きました…
+			ELSEIF LOCAL:1 > -2
+				PRINTFORMW ずるずる引きずって運んで行きました…
+			ELSE
+				PRINTFORMW %CALLNAME:A%を部屋まで運ぶのを손伝ってほしいと頼んできました…
+			ENDIF
+		ENDIF
+	;成功
+	ELSE
+		PRINTFORML 、
+		IF TALENT:A:연모 || TALENT:A:친애
+			PRINTFORMW %CALLNAME:MASTER%に嬉しそうに抱きついてきた…
+		ELSEIF C > -1 && C != MASTER
+			PRINTFORMW %CALLNAME:C%に嬉しそうに抱きついた…
+		ELSE
+			PRINTFORMW 鼻を高くしてご満悦の様子だ
+		ENDIF
+	ENDIF
+;失敗
+ELSE
+	PRINTFORMW と思ったらテーブルから발を踏み外し盛大な音を立てて落ちた…
+	;主人以外の思慕・畏怖対象がいる
+	IF C > -1
+		PRINTFORML %CALLNAME:C%は目を回してぶっ倒れている%CALLNAME:A%に溜息をつくと、
+		;体格差を検索
+		LOCAL:1 = BUILD2(C, A)
+		IF LOCAL:1 > 1
+			PRINTFORMW 軽々と抱き上げて運んで行きました…
+		ELSEIF LOCAL:1 > -1
+			PRINTFORMW 抱えて運んで行きました…
+		ELSEIF LOCAL:1 > -2
+			PRINTFORMW ずるずる引きずって運んで行きました…
+		ELSE
+			PRINTFORMW %CALLNAME:A%を部屋まで運ぶのを손伝ってほしいと頼んできました…
+		ENDIF
+	ELSE
+		PRINTFORMW 目を回してぶっ倒れている%CALLNAME:A%に溜息をついて部屋に運びました…
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;夜にトイレに
+;-------------------------------------------------
+@DAILY_LIFE_16
+PRINTFORML ランプ片손に薄暗い館内を見回りしていると、
+PRINTFORMW ちょうどトイレから出てきた%CALLNAME:A%と鉢合わせになった
+IF MARK:A:반발각인 == 3
+	PRINTFORML %CALLNAME:MASTER%を不審者と勘違いした%CALLNAME:A%によって乱暴に取り押さえられ、
+	PRINTFORMW 酷い目に遭いました……
+ELSEIF TALENT:A:겁쟁이
+	IF ABL:A:순종 > RAND:6
+		PRINTFORMW 暗闇に震えてしがみつく%CALLNAME:A%を、部屋までエスコートしました…
+	ELSE
+		PRINTFORML お化けにでも見えたのだろうか、%CALLNAME:A%は声にならない悲鳴を上げると
+		PRINTFORMW 自室の方へ走り去ってしまった…
+	ENDIF
+ELSEIF TALENT:A:꿋꿋함 && (TALENT:A:연모 || TALENT:A:친애)
+	PRINTFORMW そのまま%CALLNAME:A%にも巡回に付き合ってもらいました…
+	
+ELSEIF TALENT:A:꿋꿋함
+	PRINTFORML 暗闇にも全く動じることのない%CALLNAME:A%であったが、
+	PRINTFORMW 念のため部屋までエスコートしました…
+ELSE
+	PRINTFORMW 軽く挨拶をして、巡回を続けました…
+ENDIF
+
+;-------------------------------------------------
+;木に登っている
+;-------------------------------------------------
+@DAILY_LIFE_17
+;동물귀(네코미미)
+IF TALENT:A:동물귀 == 11
+	IF !RAND:2
+		PRINTFORMW 窓の外から、庭の木に上って得意げにしている%CALLNAME:A%の姿が見える
+		PRINTFORMW 耳の후ろを掻いたり顔を洗ったりして余裕の表情だ
+		PRINTFORMW ちょっと感心して事務仕事に戻った
+		PRINTFORMW …………
+		PRINTFORMW 日が暮れかけた頃、%CALLNAME:A%の鳴き声が聞こえてきた
+		PRINTFORML 悲しそうな鳴き声に不思議に思って窓の外を見ると、
+		PRINTFORMW 木にのぼったままの%CALLNAME:A%がしきりに鳴いている
+		PRINTFORMW 降りられなくなったようだ
+		PRINTFORMW はしごを持って助けに行きました…
+	ELSE
+		PRINTFORMW 館の一角で、廊下の絨毯に爪が立てられ 窓のカーテンもビリビリに裂かれていました
+		PRINTFORML 犯人の발取りを追うと、たどり着いたのは%CALLNAME:A%の部屋…
+		PRINTFORMW ドアを開けるとそこにはマタタビ酒を抱えたまま酩酊している%CALLNAME:A%の姿が…
+		PRINTFORMW 苦笑いしか浮かびませんでした
+	ENDIF
+;동물귀(自前で持っている)
+ELSEIF TALENT:A:동물귀
+	PRINTFORMW 窓の外から、庭の木に登って遠くを眺める%CALLNAME:A%の姿が見える
+	PRINTFORMW どうやって登ったものか、동물귀を震わせて得意げにしている
+	PRINTFORMW …………
+	PRINTFORMW 日が暮れかけた頃、%CALLNAME:A%の鳴き声が聞こえてきた
+	PRINTFORML 悲しそうな鳴き声に不思議に思って窓の外を見ると、
+	PRINTFORMW 木にのぼったままの%CALLNAME:A%がしきりに鳴いている
+	PRINTFORMW 降りられなくなったようだ
+	PRINTFORMW はしごを持って助けに行きました…
+ELSE
+	PRINTFORMW 窓の外から%CALLNAME:A%が%CALLNAME:MASTER%を呼ぶ声が聞こえてきた
+	PRINTFORMW しかし、窓の下を覗いても%CALLNAME:A%の姿が見当たらない…
+	PRINTFORMW 不思議に思い辺りを見渡すと、庭の木に登りこちらに손を振る%CALLNAME:A%を見つけた
+	PRINTFORMW そんな所でいったい何をしているのか…%CALLNAME:A%は楽しそうに笑っている
+	SIF !RAND:3
+		PRINTFORMW ……あ、落っこちた
+ENDIF
+
+;-------------------------------------------------
+;손伝い
+;-------------------------------------------------
+@DAILY_LIFE_18
+PRINTFORML 街で買い込んできた生活物資を倉庫に運ぼうとした丁度そのとき、
+PRINTFORMW 良いタイミングで%CALLNAME:A%が通りかかった
+IF TALENT:A:습득느림  || TALENT:A:유아／유아퇴행 || TALENT:A:유치
+	LOCALS = 一生懸命
+ELSE
+	LOCALS = テキパキ
+ENDIF
+IF TALENT:A:솔직함
+	IF TALENT:A:헌신적 || ABL:A:봉사정신 >= 5
+		PRINTFORMW %CALLNAME:A%は山と積まれた荷物を見るとすぐに、自発的に손伝いを申し出てくれた
+		PRINTFORMW %CALLNAME:A%が%LOCALS%働いてくれたお陰で あっという間に作業が終わりました…
+	ELSE
+		PRINTFORMW %CALLNAME:A%に声を掛けると、快く손伝ってくれた
+		IF TIME == 0
+			PRINTFORMW %CALLNAME:A%が%LOCALS%働いてくれたお陰で 日が暮れるまでに作業が終わりました…
+		ELSE
+			PRINTFORMW %CALLNAME:A%が%LOCALS%働いてくれたお陰で 日付が変わるまでに作業が終わりました…
+		ENDIF
+	ENDIF
+ELSEIF TALENT:A:반항적
+	IF (TALENT:A:연모 && ABL:A:봉사정신 >= 5) || TALENT:A:친애 || TALENT:A: 복종 || TALENT:A:예속
+		PRINTFORML %CALLNAME:A%はそのまま素通りする勢いだったが、
+		PRINTFORMW %CALLNAME:MASTER%と目が合うと、少し頬を染めながら손伝いを申し出てくれた
+		PRINTFORMW %CALLNAME:A%が%LOCALS%働いてくれたお陰で あっという間に作業が終わりました…
+	ELSEIF ABL:A:봉사정신 >= 5
+		PRINTFORMW 素通りする勢いの%CALLNAME:A%を慌てて呼び止めて、お손伝いをお願いしました
+		IF TIME == 0
+			PRINTFORMW %CALLNAME:A%が%LOCALS%働いてくれたお陰で 日が暮れるまでに作業が終わりました…
+		ELSE
+			PRINTFORMW %CALLNAME:A%が%LOCALS%働いてくれたお陰で 日付が変わるまでに作業が終わりました…
+		ENDIF
+	ELSE
+		PRINTFORMW しかし無情にも%CALLNAME:A%はそのまま素通りしていきました…
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;庭で遊んでいる
+;-------------------------------------------------
+@DAILY_LIFE_19
+;[유치][유아／유아퇴행]のいずれかを持つキャラから１人選択する
+B = DAILYLIFE_GETTALENT_1(150,151)
+IF B > -1 && !RAND:2
+	PRINTFORMW 庭の花壇で%CALLNAME:A%と%CALLNAME:B%が遊んでいた
+	
+	PRINTFORMW 追いかけっこをしているようだ
+	PRINTFORMW %CALLNAME:B%が鬼で、%CALLNAME:A%を追いかけまわしている
+	IF ABL:A:기교 >= ABL:B:기교
+		PRINTFORMW %CALLNAME:A%は%CALLNAME:B%の飛び掛かりを巧みに回避して上機嫌だ…
+	ELSE
+		PRINTFORMW %CALLNAME:A%はあっという間に%CALLNAME:B%に捕まってしまった
+		PRINTFORMW %CALLNAME:A%はこんどは自分が鬼になろうと、%CALLNAME:B%に飛びかかっていった…
+	ENDIF
+ELSE
+	PRINTFORMW 庭の花壇で%CALLNAME:A%が遊んでいた
+	IF !RAND:3
+		PRINTFORMW 花の周りを歌いながらひらひらと踊るように遊びまわっている
+	ELSEIF !RAND:2
+		PRINTFORMW ちょうちょと追いかけっこをしている
+	ELSE
+		PRINTFORMW てんとうむしと……にらめっこをしている？
+	ENDIF
+	IF MARK:A:반발각인 >= 3
+		PRINTFORML %CALLNAME:A%は%CALLNAME:MASTER%に気がつくと、
+		PRINTFORMW あっかんべーをしてどこかに走って行った…
+	ELSEIF TALENT:A:연모 || TALENT:A:친애
+		PRINTFORMW %CALLNAME:MASTER%に気がつくと、一緒に遊ぼうと誘ってきました
+		PRINTFORMW 承諾すると、嬉しそうにはにかんだ…
+	ELSE
+		PRINTFORMW %CALLNAME:MASTER%に気付かないくらい夢中のようだ
+		PRINTFORMW 暫く遊んでいる%CALLNAME:A%を眺めて過した…
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;ビデオ観賞
+;-------------------------------------------------
+@DAILY_LIFE_20
+PRINTFORMW 廊下を歩いているとどこからか物音が聞こえてくる…
+PRINTFORMW 不思議に思って物音を探してみると、%CALLNAME:A%の部屋からだった
+PRINTFORMW 部屋を覗いてみると、%CALLNAME:A%が顔を손で押さえて、撮影した映像を見ていた…
+;Bにイベント出場できるキャラを入れる
+B = DAILYLIFE_GETCHARA(1)
+;CにAの思慕・畏怖対象を入れる
+SIF CFLAG:A:41 > -1
+	C = NO2(CFLAG:A:41)
+;主人に思慕＆主人のビデオがある
+IF (TALENT:A:연모 || TALENT:A:친애) && CFLAG:MASTER:20
+	PRINTFORMW その画面には、%CALLNAME:MASTER%の姿が映っている！
+	IF TALENT:MASTER:음란 || TALENT:MASTER:창부
+		PRINTFORMW 自分のビデオを見る%CALLNAME:A%を視姦するプレイもなかなか良いものだと思いました…
+	ELSEIF TALENT:MASTER:무관심 || TALENT:MASTER:감정부족
+		PRINTFORMW いったいどこから見つけ出したのだろう
+		PRINTFORMW もっと物品の管理を厳重にしなければ…
+	ELSE
+		PRINTFORMW 慌ててビデオを取り返しました…
+	ENDIF
+;主人以外に思慕・畏怖対象がいて、そのキャラのビデオを持っているとき二分の一の確率
+ELSEIF (CFLAG:A:39 == 3 || CFLAG:A:39 == 6 || CFLAG:A:39 == 165) && C > -1 && CFLAG:C:20 && RAND:2
+	PRINTFORMW その画面には、%CALLNAME:C%の姿が映っているH
+	PRINTFORMW 厳重に保管していたはずだが…
+	IF TALENT:A:음란 || TALENT:A:창부
+		PRINTFORML %CALLNAME:A%は%CALLNAME:C%のの写ったビデオを食い入るように見つめながら、
+		PRINTFORMW 片손をイケナイ感じに動かしている
+	ELSEIF TALENT:A:무관심 || TALENT:A:감정부족
+		PRINTFORMW %CALLNAME:A%はいつもの淡々とした表情をほんの少し上気させて画面を見ている…
+	ELSEIF TALENT:A:정조관념 || TALENT:A:부끄럼쟁이 || TALENT:A:보수적
+		PRINTFORMW %CALLNAME:A%は真っ赤な顔で、指の隙間から喰い入るように画面を見ている…
+	ELSEIF TALENT:A:반항적 || TALENT:A:프라이드높음 || TALENT:A:츤데레
+		PRINTFORML %CALLNAME:A%は独り言でぶつぶつと言い訳めいた文句を吐きながら、
+		PRINTFORMW 食い入るように画面を見つめている…
+	ELSE
+		PRINTFORMW %CALLNAME:A%は顔を赤らめながら、喰い入るように画面を見ている…
+	ENDIF
+	PRINTFORMW どうしたもんかと頭をかきました……
+;誰かイベントに出られるキャラがいるかつ二分の一の確率
+ELSEIF B > -1 && RAND:2
+	PRINTFORML 更に、そんな%CALLNAME:A%のすぐ후ろで%CALLNAME:B%が、
+	IF TALENT:B:음란 || TALENT:B:창부
+		PRINTFORMW 興奮した様子で息を荒げながら画面と%CALLNAME:A%を見つめていた
+	ELSEIF TALENT:B:무관심 || TALENT:B:감정부족
+		PRINTFORMW いつも通りの無表情で画面を見ている
+	ELSEIF TALENT:B:정조관념 || TALENT:B:부끄럼쟁이
+		PRINTFORMW 顔を真っ赤に染めながら画面を見つめている
+	ELSE
+		PRINTFORMW によによしながら画面を見つめている
+	ENDIF
+	PRINTFORMW どうやら『覗き魔』には先客が居たようだ…
+	SIF !RAND:2
+		PRINTFORMW 程なくして%CALLNAME:A%に気づかれた%CALLNAME:B%が部屋から叩き出されてきた…
+;その他
+ELSE
+	PRINTFORMW 物音の正体はこれだったらしい
+	IF TALENT:A:음란 || TALENT:A:창부
+		PRINTFORML %CALLNAME:A%は自分の写ったビデオを食い入るように見つめながら、
+		PRINTFORMW 片손をイケナイ感じに動かしている
+	ELSEIF TALENT:A:무관심 || TALENT:A:감정부족
+		PRINTFORMW %CALLNAME:A%はいつもの淡々とした表情をほんの少し上気させて画面を見ている…
+	ELSEIF TALENT:A:정조관념 || TALENT:A:부끄럼쟁이 || TALENT:A:보수적
+		PRINTFORMW %CALLNAME:A%は真っ赤な顔で、指の隙間から喰い入るように画面を見ている…
+	ELSEIF TALENT:A:반항적 || TALENT:A:프라이드높음
+		PRINTFORML %CALLNAME:A%は独り言でぶつぶつと言い訳めいた文句を吐きながら、
+		PRINTFORMW 食い入るように画面を見つめている…
+	ELSE
+		PRINTFORMW %CALLNAME:A%は顔を赤らめながら、喰い入るように画面を見ている…
+	ENDIF
+	PRINTFORMW どうしたもんかと頭をかきました…
+ENDIF
+
+;-------------------------------------------------
+;風呂上がり
+;-------------------------------------------------
+@DAILY_LIFE_21
+;対象は[수치심없음]を持っていることが前提
+;主人と同性で보수적/정조관념が無いか、눈에띄고싶음/해방で노출벽３以上か、노출벽５以上
+IF (DOUSEI(A,MASTER) && !TALENT:A:보수적 && !TALENT:A:정조관념) || ((TALENT:A:눈에띄고싶음 || TALENT:A:해방) && ABL:A:노출벽 >= 3) || ABL:A:노출벽 >= 5
+	LOCALS = 全裸の
+ELSE
+	LOCALS = バスタオルを羽織っただけの
+ENDIF
+PRINTFORMW 部屋でお茶を飲んで休んでいると、廊下を%LOCALS%%CALLNAME:A%が通り過ぎた…？
+PRINTFORMW 気のせいだろうか…
+PRINTFORMW …………
+;他に[수치심없음]持ちのキャラがいるか検索
+B = DAILYLIFE_GETTALENT_1(36)
+IF B > -1 && !RAND:3
+	;主人と同性で보수적/정조관념が無いか、눈에띄고싶음/해방で노출벽３以上か、노출벽５以上
+	IF (DOUSEI(B,MASTER) && !TALENT:B:보수적 && !TALENT:B:정조관념) || ((TALENT:B:눈에띄고싶음 || TALENT:B:해방) && ABL:B:노출벽 >= 3) || ABL:B:노출벽 >= 5
+		LOCALS = 全裸の
+	ELSE
+		LOCALS = バスタオルを羽織っただけの
+	ENDIF
+	PRINTFORMW 暫くすると、今度はやはりバスタオルだけの%LOCALS%%CALLNAME:B%が通り過ぎました
+	PRINTFORMW お茶を吹きました
+ELSE
+	;陥落済みかつ思慕・畏怖対象は主人
+	IF KANRAKU(A) && KANRAKU(A) <= 3
+		PRINTFORMW 不思議そうな顔をした%CALLNAME:A%が戻ってきた
+		PRINTFORMW どうやらお風呂に入った후食堂に飲み物を取りにいったらしい
+	ENDIF
+	IF TALENT:A:연모 || TALENT:A:친애
+		PRINTFORML %CALLNAME:A%は軽くポーズを取って見せて%CALLNAME:MASTER%ににっこり微笑みかけると、
+		PRINTFORMW お尻をふりふり戻っていった…
+	ELSEIF TALENT:A:음란 || TALENT:A:창부
+		PRINTFORML %CALLNAME:A%はセクシーなポーズを取って見せて%CALLNAME:MASTER%にウィンクを送ると、
+		PRINTFORMW お尻をふりふり戻っていった…
+	ELSEIF TALENT:A:복종 || TALENT:A:예속
+		PRINTFORMW %CALLNAME:A%は軽く%CALLNAME:MASTER%に挨拶すると、お尻をふりふり戻っていった…
+	ENDIF
+	;説教キャラから出場可なキャラがいるか
+	;이시키리마루、一にぃ、薬研ニキ、燭台切
+	;CASE 7,25,49,73
+	VARSET LOCAL
+	B = -1
+	SIF DAILYLIFE_NOCHARA(7,1) > -1
+		LOCAL++
+	SIF DAILYLIFE_NOCHARA(25,1) > -1
+		LOCAL++
+	SIF DAILYLIFE_NOCHARA(49,1) > -1
+		LOCAL++
+	SIF DAILYLIFE_NOCHARA(73,1) > -1
+		LOCAL++
+	IF LOCAL
+		;お説教キャラからランダムで１人選択する
+		$RAND_CHARA
+		B = RAND:CHARANUM
+		SIF !DAILYLIFE_CHARA(B)
+			GOTO RAND_CHARA
+		SELECTCASE NO:B
+			;이시키리마루、一にぃ、薬研ニキ、燭台切
+			CASE 7,25,49,73
+			CASEELSE
+				GOTO RAND_CHARA
+		ENDSELECT
+	ENDIF
+	;出場可なキャラがいるとき三分の一の確率で激しくお説教イベント
+	IF LOCAL && !RAND:3
+		PRINTFORMW %CALLNAME:MASTER%が呆気にとられていると、ちょうど%CALLNAME:B%がやってきた
+		PRINTFORML %CALLNAME:B%が%CALLNAME:A%のあられもない姿を見ると、
+		PRINTFORMW 有無を言わさない입調で%CALLNAME:A%を呼び止め、その場に正座させた
+		PRINTFORMW …………どうやら%CALLNAME:B%のありがたいお説教タイムが始まったみたいだ
+		PRINTFORMW %CALLNAME:MASTER%はこちらに火の粉が飛ばない内に退散することにした…
+		PRINTFORMW ……………
+		PRINTFORMW …………
+		PRINTFORMW ………
+		PRINTFORMW ……
+		PRINTFORMW …
+		IF !TIME
+			PRINTFORMW %CALLNAME:B%の説教は昼過ぎになっても続いていた…
+		ELSE
+			PRINTFORMW %CALLNAME:B%の説教は夜遅くになっても続いていた…
+		ENDIF
+		PRINTFORMW %CALLNAME:A%は%CALLNAME:MASTER%に気づくと、助けて欲しそうにすがる様な視線を送っている
+		;Aが主人に対して연모陥落か、主人の思慕・畏怖対象がA
+		IF TALENT:A:연모 || TALENT:A:친애 || CFLAG:MASTER:41 == NO:A
+			PRINTFORMW さすがに可哀想なので説教を続ける%CALLNAME:B%をなんとかなだめ、%CALLNAME:A%を해방した
+			;Bの思慕・畏怖対象がAで、主人の思慕・畏怖対象がAでない
+			IF CFLAG:B:41 == NO:A && CFLAG:MASTER:41 != NO:A
+				PRINTFORML %CALLNAME:A%が%CALLNAME:MASTER%に感謝の言葉を言って立ち上がった瞬間、
+				PRINTFORMW 大きくバランスを崩しよろめいた%CALLNAME:A%を、とっさに%CALLNAME:B%が支えた
+				PRINTFORML %CALLNAME:A%が随分と衰弱していることに気が付かなかったと%CALLNAME:B%は謝り
+				PRINTFORMW 部屋まで送って行こうと申し出た
+				LOCAL:1 = BUILD2(B, A)
+				IF CFLAG:A:41 == NO:B
+					PRINTFORM %CALLNAME:B%は%CALLNAME:A%を
+					IF LOCAL:1 > 0
+						PRINT お姫様だっこし、
+					ELSEIF LOCAL:1 > -1
+						PRINT 背中に背負い
+					ELSE
+						PRINT 支え、
+					ENDIF
+					PRINTFORMW 部屋まで連れて行った
+					PRINTFORMW なんだかんだで二人ともまんざらではない様子で、見ているこちらが恥ずかしくなりました…
+				ELSE
+					PRINTFORMW %CALLNAME:A%はすでに文句を言う기력もないようで、おとなしく引きずられていった…
+				ENDIF
+			;主人の思慕・畏怖対象がA
+			ELSEIF CFLAG:MASTER:41 == NO:A
+				PRINTFORML 長時間正座をしていた為か、感謝の言葉を言って立ち上がった瞬間
+				PRINTFORMW %CALLNAME:A%は大きくバランスを崩した
+				PRINTFORML 慌てて수止めたが、予想以上に衰弱しているようなので
+				PRINTFORM %CALLNAME:A%
+				;体格差を検索
+				LOCAL:1 = BUILD2(MASTER, A)
+				IF LOCAL:1 > 0
+					PRINTL をお姫様だっこして部屋まで連れて行った
+					SIF CFLAG:A:41 == NO:MASTER
+						PRINTFORMW その間%CALLNAME:A%はとても嬉しそうで、背中に顔を密着させてきた
+				ELSEIF LOCAL:1 > -1
+					PRINTL を背負って部屋まで連れて行った
+					SIF CFLAG:A:41 == NO:MASTER
+						PRINTFORMW %CALLNAME:A%は顔を真っ赤にしたが表情は嬉しそうで、おずおずと腕を絡ませてきた
+				ELSE
+					PRINTL に付き添い部屋まで送って行った
+					SIF CFLAG:A:41 == NO:MASTER
+						PRINTFORMW %CALLNAME:A%は嬉しそうに、おずおずと손を握ってきた
+				ENDIF
+				SIF CFLAG:A:41 != NO:MASTER
+					PRINTFORMW その間%CALLNAME:A%は感謝の言葉を繰り返した
+				PRINTL 
+				;Bの思慕対象が主人
+				IF CFLAG:B:41 == NO:MASTER && (CFLAG:B:39 == 3 || CFLAG:B:39 == 6) 
+					PRINTFORM %CALLNAME:A%にかまっている間、%CALLNAME:B%はつまらなそうな表情をしていた
+					IF CFLAG:A:41 == NO:MASTER
+						PRINTL が、
+						PRINTFORMW 機会があれば%CALLNAME:A%にしてあげたことを%CALLNAME:B%にもするといったら機嫌を直した
+					ELSE
+						PRINTW 
+					ENDIF
+				ENDIF
+			ELSE
+				PRINTFORM 予想以上に衰弱している%CALLNAME:A%に
+				LOCAL:1 = BUILD2(MASTER, A)
+				IF LOCAL:1 > 1 || LOCAL:1 < -1
+					PRINTW 付添い、部屋まで送って行った
+				ELSE
+					PRINTW 肩を貸し、部屋まで付き添って行った
+				ENDIF
+				PRINTFORMW その間%CALLNAME:A%は感謝の言葉を繰り返した
+			ENDIF
+		ELSE
+			PRINTFORMW さすがに可哀想かと思ったが、そのまま放置しておくことにした
+			PRINTFORMW …………%CALLNAME:A%が해방されるまで、もう小一時間かかったらしい…
+		ENDIF
+	;出場可なキャラがいるとき三分の二の確率で普通にお説教
+	ELSEIF LOCAL
+		PRINTFORMW 呆気に取られ気味に見送ると、%CALLNAME:B%の怒った声が聞こえてきた
+		PRINTFORMW どうやら裸でうろうろしていることを説教されているようです…
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;可愛いものを見ている
+;-------------------------------------------------
+@DAILY_LIFE_22
+PRINTFORMW 食堂に来てみると、%CALLNAME:A%が何かを\@ TALENT:A:실의 ? 見るともなし # 熱心 \@に見つめている
+IF RAND:8 == 0
+	LOCALS = おもちゃの刀
+ELSEIF RAND:7 == 0
+	LOCALS = 空の鳥かご
+ELSEIF RAND:6 == 0
+	LOCALS = おもちゃの楽器
+ELSEIF RAND:5 == 0
+	LOCALS = キツネのぬいぐるみ
+ELSEIF RAND:4 == 0
+	LOCALS = 過去の偉人について書かれた本
+ELSEIF RAND:3 == 0
+	LOCALS = 동물귀の付いた帽子
+ELSEIF RAND:2 == 0
+	LOCALS = クマの抱き枕
+ELSE
+	LOCALS = 額に入れて飾られた絵画
+ENDIF
+PRINTFORMW その視線の先にあるのは%LOCALS%だ…
+IF TALENT:A:실의
+	PRINTFORMW %CALLNAME:A%に%LOCALS%を선물すると、そっと確かめるように撫でて表情を緩ませた
+	PRINTFORMW 少しは元気づけられただろうか…
+ELSEIF MARK:A:반발각인 >= 3
+	PRINTFORML %CALLNAME:A%はしばらく眺めていたが、
+	PRINTFORMW %CALLNAME:MASTER%の存在に気が付くと발早にその場を立ち去った…
+ELSEIF TALENT:A:반항적
+	PRINTFORMW 頂戴オーラを発していたので선물しようとしたが、%CALLNAME:A%は慌てて拒絶する
+	;主人に対して연모・복종陥落
+	IF TALENT:A:연모 || TALENT:A:친애 || TALENT:A:복종 || TALENT:A:예속
+		PRINTFORMW だが%CALLNAME:A%の가슴元に小物を押し付けるように差し出すと、何とか수取ってくれた
+		PRINTFORMW その態度とは裏腹に、とても喜んでもらえたようだ…
+	ELSE
+		PRINTFORMW 気になる小物から精一杯目を逸らし、%CALLNAME:A%は自分の部屋に帰って行ってしまった…
+	ENDIF
+ELSEIF TALENT:A:건방짐 || TALENT:A:프라이드높음 || TALENT:A:츤데레
+	PRINTFORML 頂戴オーラを発していたので%CALLNAME:A%に선물しようと声をかけると、
+	PRINTFORMW %CALLNAME:MASTER%がどうしても선물したいのなら、と言い訳めいたことを言って수取った
+	PRINTFORMW %CALLNAME:A%はその日一日上機嫌でした…
+ELSEIF TALENT:A:솔직함 || TALENT:A:유치 || TALENT:A:유아／유아퇴행
+	PRINTFORML %CALLNAME:A%が頂戴オーラを発していたので선물すると、
+	PRINTFORMW 目を輝かせながら抱きかかえて自分の部屋に走り去っていった…
+ELSE
+	PRINTFORML %CALLNAME:MASTER%がお茶を淹れ、注ぎ、飲み終えても、
+	PRINTFORMW %CALLNAME:A%は小物を観察し続けていた…
+ENDIF
+
+;-------------------------------------------------
+;つまみぐい
+;-------------------------------------------------
+@DAILY_LIFE_23
+IF !TIME
+	PRINTFORMW 인기のない台所に忍び寄る黒い人影…
+ELSE
+	PRINTFORMW 漆黒の闇が支配する台所に忍び寄る怪しい人影…
+ENDIF
+PRINTFORMW その正体は――%CALLNAME:A%だ！
+;욕망に솔직함
+IF TALENT:A:반항적 || TALENT:A:건방짐 || ABL:A:욕망 >= ABL:A:순종
+	PRINTFORM 戸棚の中にオヤツを見つけると、少しも躊躇せず입に放り込み
+	IF ABL:A:기교 >= RAND:6
+		PRINTFORML 包み紙を器用に丸めて
+		PRINTFORMW つまみ食いの痕跡を消してから立ち去っていった…
+	ELSE
+		PRINTFORMW そのまま満발げに立ち去っていった…
+	ENDIF
+ELSE
+	PRINTFORMW 戸棚の中にオヤツを見つけると、すかさず손を伸ばしかけた
+	PRINTFORMW が、急に神妙な顔つきになった후、くるりと反転して部屋に帰っていった…
+	PRINTFORMW 욕망より理性に軍配が上がったらしい…
+ENDIF
+
+;-------------------------------------------------
+;他の奴隷を慰めている
+;-------------------------------------------------
+@DAILY_LIFE_24
+;비관적か실의を持つキャラからランダムで１人選択する
+B = DAILYLIFE_GETTALENT_1(26,162)
+PRINTFORMW %CALLNAME:B%の部屋で、%CALLNAME:A%と%CALLNAME:B%が何かしているようだ
+PRINTFORMW %CALLNAME:A%が、何だか悲しそうな表情の%CALLNAME:B%を慰めているらしい
+PRINTFORMW %CALLNAME:B%の表情は冴えない…
+PRINTFORMW %CALLNAME:A%は諦めずに優しい態度を取っている
+IF KANRAKU(A) && KANRAKU(B)
+	PRINTFORMW ……どうやら%CALLNAME:B%は気を取り直したようだ
+	PRINTFORMW 少し安心して、ひとまずそこを立ち去った
+ELSE
+	PRINTFORMW 邪魔をしても悪いと思い、ひとまずそこを立ち去った…
+ENDIF
+
+;-------------------------------------------------
+;鼻歌ふふんふ
+;-------------------------------------------------
+@DAILY_LIFE_25
+IF ABL:A:가창기능 && !RAND:2
+	PRINTFORMW ふと%CALLNAME:A%の部屋を通りかかると、水音と%CALLNAME:A%の鼻歌が聞こえてきた…
+	PRINTFORMW 楽しそうな鼻歌だ
+	PRINTFORMW ひとまずその場を去った…
+	PRINTFORMW と思ったら同じ鼻歌を何時の間にか입ずさんでいた
+ELSE
+	PRINTFORMW %CALLNAME:MASTER%の部屋の前を、誰かが鼻歌を歌いながら通り過ぎた
+	PRINTFORMW 姿こそ見えないが、声の主はきっと%CALLNAME:A%だろう…
+ENDIF
+EXP:A:가창경험 += 1
+PRINTFORML %CALLNAME:A%の가창경험 ＋１
+
+;-------------------------------------------------
+;ため息ひとつ
+;-------------------------------------------------
+@DAILY_LIFE_26
+PRINTFORMW %CALLNAME:A%の部屋に通りかかると、%CALLNAME:A%が窓の外を眺めているのが見えた
+PRINTFORMW 小さく溜息をついたようだ
+IF TALENT:A:상사상애
+	PRINTFORMW %CALLNAME:A%は%CALLNAME:MASTER%に気付いて振り返り、悲しげな顔を伏せた
+	PRINTFORMW ……隣に立って肩に손を置いた
+	PRINTFORMW 暫く二人で寄り添ったままでいた…
+ELSEIF TALENT:MASTER:낙관적 || TALENT:MASTER:고무적
+	PRINTFORMW 落ち込んだ様子の%CALLNAME:A%を、精一杯励ました…
+ELSE
+	PRINTFORMW その후姿は暗く、儚げだ
+	PRINTFORMW 何かいうことも出来ず、そのままその場を立ち去った…
+ENDIF
+
+;-------------------------------------------------
+;食事当番
+;-------------------------------------------------
+@DAILY_LIFE_27
+LOCAL:2 = 1
+;日常に登場できるキャラを１人選択
+B = DAILYLIFE_GETCHARA(0)
+PRINTFORMW 今日の\@ TIME ? 夕食 # 昼食 \@の当番は%CALLNAME:A%だ
+IF TALENT:A:헌신적 || TALENT:A:고무적 || TALENT:A:낙관적
+	PRINTFORMW %CALLNAME:A%ははりきって料理を始めた…
+ELSEIF TALENT:A:무관심 || TALENT:A:감정부족
+	PRINTFORMW %CALLNAME:A%は無表情に頷いてみせると料理を始めた…
+ELSEIF TALENT:A:반항적 || TALENT:A:건방짐 || TALENT:A:프라이드높음 || TALENT:A:저항
+	PRINTFORMW %CALLNAME:A%はしぶしぶといった様子で料理を始めた…
+ELSE
+	PRINTFORMW %CALLNAME:A%は頷いて料理を始めた…
+ENDIF
+SIF TALENT:A:요리고수
+	PRINTFORMW きっと素晴らしい\@ TIME ? 夕食 # 昼食 \@が食べられることだろう
+SIF TALENT:A:요리치
+	PRINTFORMW いまいち不安が拭えないが、ここは任せるしかないだろう
+LOCAL = 1
+;BがAの守備範囲か判定
+IF B > -1
+	;Aが음란陥落でない
+	SIF !TALENT:A:음란 && !TALENT:A:창부
+		LOCAL = 0
+	;Bが[소인체형]のとき、Aが[아이좋아]でない
+	SIF TALENT:B:소인체형 && !TALENT:A:아이좋아
+		LOCAL = 0
+	;Bが男性のとき、Aが[남자혐오]をもっているか、[남자좋아]が無く게이중독が２以下
+	SIF MALE(B) && (!TALENT:A:남자좋아 || (TALENT:A:남자혐오 && ABL:A:게이중독 <= 2))
+		LOCAL = 0
+	;Bが女性の時、Aが[여자혐오]をもっているか、[여자좋아]が無く레즈중독が２以下
+	SIF !MALE(B) && (!TALENT:A:여자좋아 || (TALENT:A:여자혐오 && ABL:A:레즈중독 <= 2))
+		LOCAL = 0
+ENDIF
+;AがBの守備範囲か判定
+LOCAL:1 = 1
+IF B > -1
+	;Aが[소인체형]のとき、Bが[아이좋아]でない
+	SIF TALENT:A:소인체형 && !TALENT:B:아이좋아
+		LOCAL:1 = 0
+	;Aが男性のとき、Bが[남자혐오]をもっているか、[남자좋아]が無く게이중독が２以下
+	SIF MALE(A) && !TALENT:B:남자좋아 && TALENT:B:남자혐오 && ABL:B:게이중독 <= 2
+		LOCAL:1 = 0
+	;Aが女性の時、Bが[여자혐오]をもっているか、[여자좋아]が無く레즈중독が２以下
+	SIF !MALE(A) && !TALENT:B:여자좋아 && TALENT:B:여자혐오 && ABL:B:레즈중독 <= 2
+		LOCAL:1 = 0
+ENDIF
+IF B > -1 && LOCAL && !RAND:2
+	PRINTFORMW どうも遅い……
+	PRINTFORMW 気になって台所に様子を見に行った
+	PRINTFORMW ……%CALLNAME:A%が%CALLNAME:B%を料理しています…
+	PRINTFORMW ひとまず%CALLNAME:A%にツッコミを入れておきました
+	;B→Aで思慕・畏怖
+	IF CFLAG:B:41 == NO:A
+		PRINTFORM %CALLNAME:A%に
+		IF CFLAG:B:39 == 5 || CFLAG:B:39 == 8
+			PRINTFORM なら何をされてもいいという
+		ELSE
+			PRINTFORM 想いをよせる
+		ENDIF
+		PRINTFORML %CALLNAME:B%は、
+		PRINTFORMW 二人の邪魔をした%CALLNAME:MASTER%に馬に蹴られてしまえと言わんばかりの冷たい視線を送ってきた
+		PRINTFORMW いたたまれなくなった%CALLNAME:MASTER%は、空腹のまま台所から退散しました…
+	ELSEIF TALENT:B:음란 || TALENT:B:창부
+		PRINTFORML わりとノリノリで襲われていた%CALLNAME:B%は、
+		IF LOCAL:1
+			PRINTFORMW 無言で%CALLNAME:MASTER%に冷たい視線を送ってきた
+		ELSE
+			PRINTFORMW 助けた%CALLNAME:MASTER%に感謝の言葉を言いつつも、少し残念そうだ…
+		ENDIF
+	ELSEIF LOCAL:1
+		PRINTFORML 危うく流されて料理されそうになっていた%CALLNAME:B%は、
+		IF MARK:B:반발각인 >= 3
+			PRINTFORMW 助けた%CALLNAME:MASTER%に小さな声でお礼を言った
+		ELSEIF CFLAG:B:41 == NO:MASTER
+			PRINTFORMW 助けた%CALLNAME:MASTER%に感謝とそんなつもりではなかったと言い訳の言葉を繰り返した
+		ELSE
+			PRINTFORMW 助けた%CALLNAME:MASTER%に感謝の言葉を繰り返した
+		ENDIF
+	ELSE
+		PRINTFORMW %CALLNAME:A%に襲われ怯えていた%CALLNAME:B%は、助けてくれてありがとうと感謝してくれた
+	ENDIF
+	LOCAL:2 = 0
+ELSEIF TALENT:A:요리치 && !RAND:2
+	PRINTFORMW %CALLNAME:A%が出来た料理を運んできてくれた
+	PRINTFORMW %CALLNAME:MASTER%は礼を言って食べ始めた
+	PRINTFORMW ……！
+	PRINTFORMW 自分が生きていることが不思議な味です……
+	PRINTFORMW 不思議そうな%CALLNAME:A%の目の前で、顔が真っ青になった%CALLNAME:MASTER%はぶっ倒れました
+	IF TALENT:A:반항적 || TALENT:A:건방짐 || TALENT:A:프라이드높음 || TALENT:A:저항
+		PRINTFORMW %CALLNAME:A%は%CALLNAME:MASTER%のあんまりな反応に怒って自分で料理を食べてみた
+		PRINTFORMW そして、二人で仲良くノックダウンすることになった…
+	ELSEIF TALENT:A:헌신적 || TALENT:A:고무적 || TALENT:A:낙관적 || TALENT:A:겁쟁이 || TALENT:A:얌전함 || TALENT:A:유치
+		PRINTFORML %CALLNAME:A%は慌てて心配そうに%CALLNAME:MASTER%に駆け寄り、自分のつくった料理を食べてみた
+		PRINTFORMW そして、二人で仲良くノックダウンすることになった…
+	ELSE
+		PRINTFORMW %CALLNAME:A%は苦笑いしながら頭を掻いて、薬を取りに行った…
+	ENDIF
+ELSEIF TALENT:A:요리치 || (ABL:A:요리기능 <= 2 && !RAND:3)
+	PRINTFORMW %CALLNAME:A%が出来た料理を運んできてくれた
+	PRINTFORMW %CALLNAME:MASTER%は礼を言って食べ始めた
+	PRINTFORMW ……！
+	PRINTFORMW ギリギリセー……いやアウトな味です……
+	IF TALENT:A:반항적 || TALENT:A:건방짐 || TALENT:A:프라이드높음 || TALENT:A:저항
+		PRINTFORMW 顔を青くして押し黙った%CALLNAME:MASTER%に不審な目をむけ、%CALLNAME:A%は自分の料理を食べてみた
+		PRINTFORMW そして、自分も顔を青くすると逃げていきました…
+	ELSEIF TALENT:A:헌신적 || TALENT:A:고무적 || TALENT:A:낙관적 || TALENT:A:겁쟁이 || TALENT:A:얌전함 || TALENT:A:유치
+		PRINTFORMW %CALLNAME:MASTER%はにこにこしている%CALLNAME:A%を見て、覚悟を決めて飲み込んだ
+		PRINTFORML 味を尋ねてくる%CALLNAME:A%に、正直に言うべきか嘘も方便でいくか悩んだ瞬間
+		PRINTFORMW 答えを直ぐ言わないとという方向へ思考が傾き、후に考えたほうのひとまずおいしいと言いました
+		PRINTFORMW %CALLNAME:A%は嬉しそうに笑って料理を勧めてくる
+		PRINTFORMW 更なる決断を求められることになった…
+	ELSE
+		PRINTFORML %CALLNAME:A%に味の具合を尋ねられた
+		PRINTL 
+		$INPUT_LOOP_1
+		PRINTL [0]おいしいという
+		PRINTL [1]おいしくないという
+		INPUT
+		IF RESULT == 0
+			PRINTFORMW %CALLNAME:A%は感心して中身が半分減った塩の瓶を眺めている
+			PRINTFORML 納得して部屋を出て行く%CALLNAME:A%に訂正の言葉を言う기력も起きず、
+			PRINTFORMW %CALLNAME:MASTER%は机に突っ伏した…
+		ELSEIF RESULT == 1
+			PRINTFORMW %CALLNAME:A%は感心して中身が半分減った塩の瓶を眺めている
+			PRINTFORMW 納得して部屋を出て行く%CALLNAME:A%につっこむ기력も起きず、%CALLNAME:MASTER%は机に突っ伏した…
+		ELSE
+			GOTO INPUT_LOOP_1
+		ENDIF
+	ENDIF
+ELSEIF ABL:A:요리기능 >= 5 || (TALENT:A:요리고수 && !RAND:2)
+	PRINTFORMW %CALLNAME:A%が出来た料理を運んできてくれた
+	PRINTFORMW %CALLNAME:MASTER%は礼を言って食べ始めた
+	IF RAND:4 >= 1
+		PRINTFORMW ……とても美味しい…
+	ELSE
+		PRINTFORMW ……好物が増えたかもしれない
+	ENDIF
+	PRINTFORMW 思わずうまいと입にした
+	IF TALENT:A:반항적 || TALENT:A:건방짐 || TALENT:A:프라이드높음 || TALENT:A:저항
+		PRINTFORMW %CALLNAME:A%は当然だという顔で가슴を張った
+		IF TALENT:A:연모 || TALENT:A:친애
+			PRINTFORML そして、%CALLNAME:MASTER%が食べ終わるまで
+			PRINTFORMW にやにやするのを我慢している赤い顔で%CALLNAME:MASTER%を見つめた…
+		ELSE
+			PRINTFORMW そして、ふんと鼻を鳴らして台所に戻っていった
+		ENDIF
+	ELSEIF TALENT:A:헌신적 || TALENT:A:고무적 || TALENT:A:겁쟁이 || TALENT:A:얌전함 || TALENT:A:유치
+		PRINTFORMW %CALLNAME:A%は嬉しそうにはにかんだ
+		IF (TALENT:A:연모 || TALENT:A:친애) && (TALENT:A:헌신적 || TALENT:A:고무적 || TALENT:A:유치)
+			PRINTFORMW そして赤い顔で抱きついてきた
+			PRINTFORMW ちょっと食べづらいが抱きつかれたまま食べました
+		ELSEIF TALENT:A:연모 || TALENT:A:친애
+			PRINTFORMW 持っていたお盆で입元を隠したが、顔が赤いのがわかる
+			PRINTFORMW そして嬉しそうに小走りでお代わり用の鍋を取ってくると台所に行きました
+		ELSE
+			PRINTFORMW そして照れて台所に戻っていった
+		ENDIF
+	ELSE
+		IF TALENT:A:연모 || TALENT:A:친애
+			PRINTFORMW %CALLNAME:A%は嬉しそうに微笑んで%CALLNAME:MASTER%の食事を見つめている
+			PRINTFORMW 食べ終わって、ごちそうさまと言う%CALLNAME:MASTER%にデザートだといってキスをした…
+		ELSE
+			PRINTFORMW %CALLNAME:A%はちょっと得意そうに軽く礼を言い、台所に戻っていった
+		ENDIF
+	ENDIF
+ELSE
+	PRINTFORMW %CALLNAME:A%が出来た料理を運んできてくれた
+	PRINTFORMW %CALLNAME:MASTER%は礼を言って食べ始めた
+	IF RAND:2 == 0
+		PRINTFORMW なかなか悪くない味だ…
+	ELSE
+		PRINTFORMW お。これは好きな味のようだ…
+	ENDIF
+	PRINTFORML %CALLNAME:A%は味を尋ねてきた
+	PRINTL 
+	$INPUT_LOOP_2
+	PRINTL [0]おいしいという
+	PRINTL [1]おいしくないという
+	INPUT
+	IF RESULT == 0
+		IF TALENT:A:반항적 || TALENT:A:건방짐 || TALENT:A:프라이드높음 || TALENT:A:저항
+			PRINTFORMW %CALLNAME:A%は当然だという顔をしている
+			SIF TALENT:A:연모 || TALENT:A:친애
+				PRINTFORMW だが、嬉しさは隠せないようだ…
+		ELSEIF TALENT:A:헌신적 || TALENT:A:고무적 || TALENT:A:겁쟁이 || TALENT:A:얌전함 || TALENT:A:유치
+			PRINTFORMW %CALLNAME:A%はよかったと가슴を撫で下ろした…
+			SIF TALENT:A:연모 || TALENT:A:친애
+				PRINTFORMW 次はもっと頑張るとはりきっている
+		ELSE
+			PRINTFORMW %CALLNAME:A%はちょっと得意げに頷いた
+			SIF TALENT:A:연모 || TALENT:A:친애
+				PRINTFORMW %CALLNAME:A%のおでこにキスをして食堂に戻っていった…
+		ENDIF
+	ELSEIF RESULT == 1
+		PRINTFORMW %CALLNAME:A%は感心して中身が半分減った塩の瓶を眺めている
+		PRINTFORMW 納得して部屋を出て行く%CALLNAME:A%につっこむ기력も起きず、%CALLNAME:MASTER%は机に突っ伏した…
+	ENDIF
+ENDIF
+IF LOCAL:2
+	EXP:A:가사경험 += 5
+	PRINTFORMW %CALLNAME:A%の가사경험 ＋５
+ENDIF
+
+;-------------------------------------------------
+;ナルシズム
+;-------------------------------------------------
+@DAILY_LIFE_28
+PRINTFORMW %CALLNAME:A%はどうしているかと様子を見に行ってみた…
+PRINTFORMW %CALLNAME:A%の部屋の扉が軽く開いている
+PRINTFORMW ちょっと覗いてみると、%CALLNAME:A%が鏡の前で色々ポーズを取っていた
+IF TALENT:A:거유 || TALENT:A:폭유
+	PRINTFORMW %CALLNAME:A%は自分の豊かな가슴を確認するように触り始めた
+	IF TALENT:A:겁쟁이 || TALENT:A:얌전함 || TALENT:A:비관적
+		PRINTFORMW どうやら自分の가슴があまり好きでないらしく、浮かぬ顔をしている
+	ELSE
+		PRINTFORMW そして、自分の가슴を持ち上げてみている……重そうだ
+	ENDIF
+ELSEIF TALENT:A:빈유 || TALENT:A:절벽
+	PRINTFORML %CALLNAME:A%は自分の控えめな가슴にぺたぺたと손を当てた
+	SIF TALENT:A:작은체구
+		PRINTFORMW それから、自分のくびれの辺りも確かめるように触る
+	PRINTFORMW 色々と考えるところがあるようだ…
+ELSE
+	IF RAND:3 == 0
+		PRINTFORMW 色々と向きを変えて、確かめているようだ
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 二の腕の辺りを気にしているようだ
+	ELSE
+		PRINTFORMW 腰の周りを入念にチェックしているようだ
+	ENDIF
+ENDIF
+IF MARK:A:반발각인 >= 3
+	PRINTFORML と、%CALLNAME:MASTER%に気がついた%CALLNAME:A%が振り返り、
+	PRINTFORMW つかつかと冷たい表情で歩いてきて、扉を強く閉めた……
+	PRINTFORMW 肩をすくめてそこを立ち去った……
+ELSEIF TALENT:A:보수적 || TALENT:A:부끄럼쟁이
+	PRINTFORMW と、%CALLNAME:MASTER%に気がついて真っ赤になった%CALLNAME:A%が慌てて跳んで来て、扉を閉めた
+	PRINTFORMW %CALLNAME:MASTER%は頭を掻いてそこを離れることにした
+ELSEIF TALENT:A:무관심 || TALENT:A:감정부족
+	PRINTFORMW %CALLNAME:A%が、ふと鏡越しに%CALLNAME:MASTER%をちらりと見た
+	PRINTFORMW だが気にしないで続けている……
+ELSEIF TALENT:A:정조무관심 || TALENT:A:수치심없음 || TALENT:A:건방짐 || TALENT:A:소악마
+	PRINTFORMW と、%CALLNAME:MASTER%に気がつくと、%CALLNAME:A%は挑発的にポーズを取ってみせた…
+ELSEIF TALENT:A:반항적 || TALENT:A:프라이드높음 || TALENT:A:저항
+	PRINTFORMW %CALLNAME:A%は%CALLNAME:MASTER%に気付くと、少し怒った様子で扉を閉めた
+	PRINTFORMW %CALLNAME:MASTER%は頭を掻いてそこを離れることにした
+ELSE
+	PRINTFORMW %CALLNAME:A%は%CALLNAME:MASTER%に気がつくと、首を傾げて見せた…
+	PRINTFORMW 適当なことを言って戻りました
+ENDIF
+
+;-------------------------------------------------
+;普段の態度
+;-------------------------------------------------
+@DAILY_LIFE_29
+PRINTFORMW 台所を横切ると、%CALLNAME:A%が見えた
+PRINTFORMW %CALLNAME:A%は四つん這いになって何やら必死に隅の奥に손を伸ばしている
+PRINTFORMW どうやら何か落としたようだ…仕方がないので%CALLNAME:MASTER%は適当な棒を持ってきた
+;실의
+IF TALENT:A:실의
+	PRINTFORML 肩に손をのせると、%CALLNAME:A%は一瞬びっくりしたような反応をして、
+	PRINTFORMW %CALLNAME:MASTER%だと気付くととたんに不安そうな顔になった
+	PRINTFORMW まあ、日頃の行動の結果が%CALLNAME:A%の態度につながっているので仕方がないが…
+	PRINTFORML 持ってきた棒を%CALLNAME:A%に渡して使うように言うと、%CALLNAME:A%は怪訝な表情をしたが、
+	PRINTFORMW 再度押しつけると割と솔직함に수取って使い始めた
+	PRINTFORMW ようやく隅の奥から%CALLNAME:A%が落としたであろう物が出てきた
+	PRINTFORMW %CALLNAME:A%は%CALLNAME:MASTER%に少し好感を持ったのであろうか、珍しく笑顔でお礼を言って去って行った
+;반발３
+ELSEIF MARK:A:반발각인 >= 3
+	PRINTFORML 肩に손をのせると、%CALLNAME:A%は一瞬びっくりしたような反応をして、
+	PRINTFORMW %CALLNAME:MASTER%だと気付くととたんに嫌そうな顔になった
+	PRINTFORMW まあ、日頃の調教の結果が%CALLNAME:A%の態度につながっているので仕方がないが…
+	PRINTFORML 持ってきた棒を%CALLNAME:A%に渡して使うように言うと、%CALLNAME:A%はいらないと言ったが、
+	PRINTFORMW 再度押しつけるとしぶしぶ수取って使い始めた
+	PRINTFORMW ようやく隅の奥から%CALLNAME:A%が落としたであろう物が出てきた
+	PRINTFORMW %CALLNAME:A%は一応感謝したのであろうか、小さな声でお礼を言って去って行った
+;복종
+ELSE
+	PRINTFORML 肩に손をのせると、%CALLNAME:A%は一瞬びっくりしたような反応をして、
+	PRINTFORMW %CALLNAME:MASTER%だと気付くととたんに怯えた顔になった
+	PRINTFORMW そして%CALLNAME:MASTER%が棒を持っている事に気付くと、折우리されると勘違いしたのかガタガタと震えだした
+	PRINTFORMW まあ、日頃の調教の結果が%CALLNAME:A%の態度につながっているので仕方がないが…
+	PRINTFORMW 持ってきた棒を%CALLNAME:A%に渡して使うように言うと、%CALLNAME:A%は恐る恐る수取って使い始めた
+	PRINTFORMW ようやく隅の奥から%CALLNAME:A%が落としたであろう物が出てきた
+	PRINTFORMW %CALLNAME:A%はほんの少し공포心が和らいだようだが、幾分か引きつった笑顔でお礼を言って去って行った
+ENDIF
+
+;-------------------------------------------------
+;栄養剤
+;-------------------------------------------------
+@DAILY_LIFE_30
+;체력が半分以下のキャラを検索
+VARSET LOCAL
+FOR LOCAL, 0, CHARANUM
+	;主人は除く
+	SIF LOCAL == MASTER
+		CONTINUE
+	;日常イベントに登場不可
+	SIF !DAILYLIFE_CHARA(LOCAL)
+		CONTINUE
+	;既に登場しているキャラと被っていたら不可
+	SIF LOCAL == A
+		CONTINUE
+	;체력が半分以下でなければ不可
+	SIF (BASE:LOCAL:체력 * 2) > MAXBASE:LOCAL:체력
+		CONTINUE
+	LOCAL:(10 + LOCAL:1) = LOCAL
+	LOCAL:1++
+NEXT
+;条件に当てはまるキャラからランダムで１人選択する
+IF LOCAL:1
+	LOCAL:2 = RAND:(LOCAL:1)
+	B = LOCAL:(10 + LOCAL:2)
+ENDIF
+;B체력回復
+IF B > -1 && RAND:2
+	PRINTFORMW %CALLNAME:MASTER%が%CALLNAME:A%の部屋の近くを通ると、部屋の中から話し声が聞こえる
+	PRINTFORMW 中を覗くと%CALLNAME:A%と%CALLNAME:B%がいたが、%CALLNAME:B%の손には小瓶があった
+	PRINTFORML %CALLNAME:B%は疲れているのだろうか、顔色が若干良くない
+	PRINTFORMW そのまま様子を見ていたが不意に%CALLNAME:B%が小瓶を입元まで持っていき、そのまま中身を飲んでしまった
+	PRINTFORML 大丈夫なのかと心配したが、少し経つと%CALLNAME:B%の顔色が若干良くなった気がする
+	PRINTFORMW %CALLNAME:B%が%CALLNAME:A%にお礼を述べた…どうやら%CALLNAME:A%が栄養剤のようなものを調合したみたいだ
+	PRINTFORML %CALLNAME:A%と%CALLNAME:B%は和気あいあいと회화をつづけている
+	PRINTFORMW 覗き続けるのも何なので%CALLNAME:MASTER%はその場を후にした
+	;체력を５０％回復
+	BASE:B:체력 += MAXBASE:B:체력 / 10 * 5
+;B기력回復
+ELSEIF B > -1
+	PRINTFORMW %CALLNAME:MASTER%が%CALLNAME:A%の部屋の近くを通ると、部屋の中から話し声が聞こえる
+	PRINTFORMW 中を覗くと%CALLNAME:A%と%CALLNAME:B%がいて、%CALLNAME:B%は気分がすぐれないと話していた
+	PRINTFORML それを聞いた%CALLNAME:A%が%CALLNAME:B%に小瓶を渡した
+	PRINTFORMW %CALLNAME:A%曰く、簡単な栄養剤とのことだ
+	PRINTFORMW %CALLNAME:B%は渡された栄養剤を飲みだし、少し経つと%CALLNAME:B%は幾分か気分が良くなってきたと答えた
+	PRINTFORML %CALLNAME:B%が%CALLNAME:A%にお礼を述べ、その후、他愛のない회화を続けた
+	PRINTFORMW 覗き続けるのも何なので%CALLNAME:MASTER%はその場を후にした
+	;기력を５０％回復
+	BASE:B:기력 += MAXBASE:B:기력 / 10 * 5
+	;체력を５０％回復
+	BASE:B:체력 += MAXBASE:B:체력 / 10 * 5
+;主人元気回復
+ELSE
+	PRINTFORMW 廊下を歩いていると、%CALLNAME:A%がこちらを見つけ笑顔で近寄ってきた
+	PRINTFORMW そして疲れてはいないかと問い、答えもきかずに小瓶を差し出してきた
+	PRINTFORMW 思わず수取ったが、中身は一体何なのだろうか…
+	PRINTFORMW %CALLNAME:A%は、簡単な栄養剤のようなものだ、気にせず飲むようにと言っている
+	;상사상애
+	IF TALENT:A:상사상애
+		PRINTFORMW そう言えば最近少し疲れが残る…
+		PRINTFORMW %CALLNAME:A%に感謝して小瓶の中身を飲んだ
+		PRINTFORMW ……少し元気になった気がする！
+	;主人に対して연모陥落
+	ELSEIF TALENT:A:연모 || TALENT:A:친애
+		PRINTFORMW %CALLNAME:A%が持ってくるのだからまさか怪しいものでは無いだろうが…
+		PRINTFORMW ためらっていると、%CALLNAME:A%は小瓶の中身を一입飲んでみせた
+		PRINTFORML そこまでされて断るのもなんなのでありがたく頂くことにした
+		PRINTFORMW %CALLNAME:A%は、%CALLNAME:MASTER%が元気になってくれればそれでいい、と言っている
+		PRINTFORMW 少し元気が出てきたような気がする…
+	ELSE
+		PRINTFORMW 栄養剤のようなもの、と言われても得体がしれない物を飲む気にはなれない…丁重にお断りした
+		PRINTFORMW %CALLNAME:A%は不満そうに戻って行った
+	ENDIF
+	IF TALENT:A:상사상애 || TALENT:A:연모 || TALENT:A:친애
+		;체력・기력を５０％回復
+		BASE:MASTER:체력 += MAXBASE:MASTER:체력 / 10 * 5
+		BASE:MASTER:기력 += MAXBASE:MASTER:기력 / 10 * 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;部屋から連れだす
+;-------------------------------------------------
+@DAILY_LIFE_31
+;Aの思慕・畏怖対象をBに入れる
+SIF CFLAG:A:41 > -1
+	B = NO2(CFLAG:A:41)
+;Aの様子
+;무관심or감정부족
+IF TALENT:A:무관심 || TALENT:A:감정부족
+	PRINTFORMW %CALLNAME:A%の部屋を覗いてみると、%CALLNAME:A%は部屋の隅でぼーっとしていた
+;비관적
+ELSEIF TALENT:A:비관적
+	PRINTFORML %CALLNAME:A%の部屋を覗いてみると、%CALLNAME:A%は暗い表情で椅子に腰かけている
+	PRINTFORMW また何か비관적な事でも考えているのだろう…
+;얌전함
+ELSE
+	PRINTFORMW %CALLNAME:A%の部屋を覗いてみると、%CALLNAME:A%は部屋の真ん中でぽつんと座っていた
+ENDIF
+PRINTFORML あらかじめ自由な事をしてもよいと伝えていたのに、
+PRINTFORMW 消극的な%CALLNAME:A%は一向に部屋から出ようとしない
+;Aの思慕・畏怖対象が他にいる
+IF B > -1 && B != MASTER
+	PRINTFORML せっかくの休憩時間、何か気晴らしになることでもした方が良いだろうにと気にしていると、
+	PRINTFORMW %CALLNAME:B%がやってきた
+	PRINTFORMW %CALLNAME:B%は%CALLNAME:A%の손を取り、部屋から連れだしていった
+	PRINTFORMW ……数時間후、図書室の前を通ると、%CALLNAME:A%が明るい表情で%CALLNAME:B%にお礼を言いながら出てきた
+	PRINTFORMW どうやら気晴らしできたようだ…
+ELSE
+	PRINTFORML せっかくの休憩時間、もっと気晴らしになることをした方が良いだろうと思ったので
+	PRINTFORMW %CALLNAME:A%を部屋から連れ出すことにした
+	;무관심or감정부족
+	IF TALENT:A:무관심 || TALENT:A:감정부족
+		PRINTFORML 部屋に入り%CALLNAME:A%に話しかけてもあまり反応が無いので、
+		PRINTFORMW やや強引に部屋から連れ出した
+		PRINTFORMW さて何処に連れて行こうか…ひとまず図書室へ連れて行った
+		PRINTFORML 好きな本を読むようにと%CALLNAME:A%に言うと、
+		PRINTFORMW %CALLNAME:A%はしばらく本棚を見た후、なぜか辞書を持ってきて読みだした
+		PRINTFORMW %CALLNAME:MASTER%も好きな本を取り、%CALLNAME:A%の隣で読むことにした
+		PRINTFORML そっと隣の様子をうかがうと、%CALLNAME:A%は時々うなずいたりしながら読書をしている
+		PRINTFORMW それなりに楽しんでくれているようだ…
+		PRINTFORMW そろそろ休憩時間も終わりに近づいてきたので、%CALLNAME:A%に声をかけ、部屋まで送って行った
+		PRINTFORMW 部屋に辿り着くと%CALLNAME:A%はわずかに顔を赤くして、部屋から連れ出した事を感謝してくれた
+	;비관적
+	ELSEIF TALENT:A:비관적
+		PRINTFORML 部屋に入り%CALLNAME:A%の손を取ると、%CALLNAME:A%はなにかひどい事をされると勘違いしたのか
+		PRINTFORMW 身体をこわばらせたが構わず손を取って部屋から連れ出した
+		PRINTFORML 好きな本を読むようにと%CALLNAME:A%に言うと、%CALLNAME:A%はしばらく本棚を見た후、
+		PRINTFORMW 悲しい結末を迎える小説を손に取った
+		PRINTFORMW %CALLNAME:MASTER%も好きな本を取り、%CALLNAME:A%の隣で読むことにした
+		PRINTFORML そっと隣の様子をうかがうと、%CALLNAME:A%は時折嗚咽を漏らしながら読書をしている
+		PRINTFORMW それなりに楽しんでくれているようだ…
+		PRINTFORMW そろそろ休憩時間も終わりに近づいてきたので、%CALLNAME:A%に声をかけ、部屋まで送って行った
+		PRINTFORMW 部屋に辿り着くと%CALLNAME:A%はわずかに顔を赤くして、部屋から連れ出した事を感謝してくれた
+	;얌전함
+	ELSE
+		PRINTFORMW 部屋に入り%CALLNAME:A%の손を取ると、%CALLNAME:A%はオロオロと狼狽したが、やや強引に部屋から連れ出した
+		PRINTFORML 好きな本を読むようにと%CALLNAME:A%に言うと、%CALLNAME:A%はしばらく本棚を見た후、
+		PRINTFORMW 一般的な小説を持ってきて読み始めた
+		PRINTFORMW %CALLNAME:MASTER%も好きな本を取り、%CALLNAME:A%の隣で読むことにした
+		PRINTFORML そっと隣の様子をうかがうと、%CALLNAME:A%は周りが目に入らないほど読書に入り込んでいる
+		PRINTFORMW それなりに楽しんでくれているようだ…
+		PRINTFORMW そろそろ休憩時間も終わりに近づいてきたので、%CALLNAME:A%に声をかけ、部屋まで送って行った
+		PRINTFORML 部屋に辿り着くと%CALLNAME:A%は顔を赤くして、部屋から連れ出した事を感謝してくれた
+		PRINTFORMW そして慌てて部屋のドアを閉めた
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;유치な奴隷を励ます
+;-------------------------------------------------
+@DAILY_LIFE_32
+;[유치][유아／유아퇴행]持ちを検索
+B = DAILYLIFE_GETTALENT_1(150, 151)
+PRINTFORMW 風呂場の前を通りかかると、%CALLNAME:A%と%CALLNAME:B%の姿が見えた
+PRINTFORML 良く見ると%CALLNAME:B%はやたら埃っぽい…
+PRINTFORMW また何処かの空き部屋で遊んでいたのだろうか
+PRINTFORML %CALLNAME:A%はうーうー唸る%CALLNAME:B%を脱衣所まで連れて行き………
+PRINTFORMW 少したった후、%CALLNAME:B%が着ていた服を洗濯かごの中に入れた
+PRINTFORML %CALLNAME:A%が洗濯の準備をしている最中に、%CALLNAME:B%が裸のまま脱衣所から出てきて
+PRINTFORMW 何処かへ逃げようとしたが、それに気付いた%CALLNAME:A%によって御用となった
+PRINTFORMW ………%CALLNAME:B%よ、裸のままで何処かへ行こうとするのはあまり感心しないぞ
+PRINTFORML %CALLNAME:A%は%CALLNAME:B%を再び脱衣所に連れて行き………
+PRINTFORMW そのあとは水しぶきの音や%CALLNAME:B%のはしゃぐ声、%CALLNAME:A%の아이をさとす様な声が聞こえてきた
+PRINTFORMW ……………ちょっぴりうらやましい………
+PRINTFORMW ずっとその場にいるのもどうかと思ったので%CALLNAME:MASTER%は風呂場を후にした
+PRINTFORML その후食事を取るために食堂へ向かう際廊下で、
+PRINTFORMW 風呂に入りさっぱりしてご機嫌な%CALLNAME:B%と遭遇した
+
+;-------------------------------------------------
+;헌신적な掃除
+;-------------------------------------------------
+@DAILY_LIFE_33
+PRINTFORML 倉庫の整理をして全身埃塗れになったので、風呂にでも入ろうかと思い、
+PRINTFORMW 着替えを持って風呂場へ向かうと%CALLNAME:A%が掃除をしていた
+IF MARK:A:반발각인 >= 3
+	PRINTFORMW %CALLNAME:A%に労いの声をかけても無視をされた
+	PRINTFORMW そして%CALLNAME:A%は掃除を切り上げ何処かへ去ってしまった
+	PRINTFORMW 仕方が無いので%CALLNAME:MASTER%はそのまま脱衣所に入った
+	PRINTFORMW ………%CALLNAME:A%は浴室まで掃除をしてくれていたようだ
+	PRINTFORMW 無視されたので穏やかな心情とはいかないが、心の中で一応感謝はしておこう
+ELSEIF TALENT:A:연모 || TALENT:A:친애 || TALENT:A:음란 || TALENT:A:창부 || TALENT:A:복종 || TALENT:A:예속
+	PRINTFORML %CALLNAME:MASTER%が%CALLNAME:A%に労いの声をかけると、
+	PRINTFORMW %CALLNAME:A%は若干顔を赤くしながらはにかんだ
+	PRINTFORML %CALLNAME:MASTER%はもしかして浴室も掃除してくれたのかと問うと、
+	PRINTFORMW 綺麗に掃除したので利用してほしいと言ってくれた
+	PRINTFORMW せっかくだから%CALLNAME:A%の好意に甘えるとしよう
+	PRINTFORMW 浴室は見違えるほど綺麗になっていた…
+	IF TALENT:A:연모 || TALENT:A:친애
+		PRINTFORMW %CALLNAME:MASTER%が感心してしばらく浴室を見渡し続けていたら、背후から物音が聞こえてきた
+		PRINTFORMW 振り向くと%CALLNAME:A%がバスタオル一枚で身体を覆って立っており、背中を流しに来たと言う
+		PRINTFORMW 上機嫌で%CALLNAME:A%は、%CALLNAME:MASTER%の背中や腹部、가슴部、更には秘部まで、体の隅々を丹念に洗ってくれた
+		PRINTFORML あまりに헌신적な손つきと%CALLNAME:A%の香りによってすっかり変な気分になってしまった%CALLNAME:MASTER%は、
+		PRINTFORMW 今度は%CALLNAME:A%の体を有無を言わさず洗いだした
+		PRINTFORMW %CALLNAME:MASTER%によって体を洗われている間、%CALLNAME:A%は顔を真っ赤にしているが全く저항しなかった
+		PRINTFORMW その후%CALLNAME:MASTER%と%CALLNAME:A%は、仲良く湯船につかって疲れを取った…
+	ELSEIF TALENT:A:음란 || TALENT:A:창부
+		PRINTFORMW %CALLNAME:MASTER%が感心してしばらく浴室を見渡し続けていたら、背후から物音が聞こえてきた
+		PRINTFORMW 振り向くと%CALLNAME:A%がバスタオル一枚で身体を覆って立っており、背中を流してあげると言ってきた
+		PRINTFORMW せっかくなので수入れると、%CALLNAME:A%は上機嫌で%CALLNAME:MASTER%身体を洗いだした
+		PRINTFORMW その손が秘部に至るとどんどん손つきが妖しくなり、興奮した%CALLNAME:A%の荒い息が背中にかかる
+		PRINTFORMW 慌てて%CALLNAME:A%を風呂場から追い出した…
+	ELSEIF TALENT:A:복종 || TALENT:A:예속
+		PRINTFORMW %CALLNAME:MASTER%が感心してしばらく浴室を見渡し続けていたら、背후から物音が聞こえてきた
+		PRINTFORMW 振り向くと%CALLNAME:A%がバスタオル一枚で身体を覆って立っており、背中を流したいと懇願してきた
+		PRINTFORMW ………承諾を渋っていると、%CALLNAME:A%が瞳を潤ませ、途轍もない罪悪感に襲われたので許可した
+		PRINTFORMW 上機嫌で%CALLNAME:A%は、%CALLNAME:MASTER%の背中や腹部、가슴部、更には秘部まで、体の隅々を丹念に洗ってくれた
+		PRINTFORMW すっかり埃を落として気分がさっぱりした所で気分良く湯船につかった…
+	ENDIF
+ELSE
+	PRINTFORMW %CALLNAME:A%は懸命に掃除を続けている…
+	PRINTFORMW 労いの声をかけると、ようやく%CALLNAME:MASTER%に気付いたみたいだ
+	PRINTFORMW もしかして浴室も掃除してくれたのかと問うと、%CALLNAME:A%は照れくさそうに頷いた
+	PRINTFORMW %CALLNAME:A%に感謝の言葉をかけ、%CALLNAME:MASTER%は脱衣所へと向かった
+	PRINTFORMW 綺麗になった浴室を見て、改めて%CALLNAME:A%に心の中で感謝し、身体を洗い湯船につかった…
+ENDIF
+EXP:A:가사경험 += 3
+PRINTFORMW %CALLNAME:A%の가사경험 ＋３
+
+;-------------------------------------------------
+;ドミノ倒し
+;-------------------------------------------------
+@DAILY_LIFE_34
+PRINTFORMW 暇つぶしとして%CALLNAME:MASTER%は、食堂でドミノ倒しを始めた
+PRINTFORML しばらく集中してやっていたが、半分ほど駒を並べたところで一区切りつけて立ちあがると、
+PRINTFORMW いつの間にか%CALLNAME:A%がいる事に気付いた
+IF MARK:A:반발각인 >= 3
+	PRINTFORMW 何かと思い声をかけると、慌てて立ち去ろうとした
+	PRINTFORMW しかし廊下の角から顔だけ出して、小声で頑張れといって走り去って行った
+	PRINTFORMW ………一応、応援はしてくれたようだ…
+ELSEIF TALENT:A:연모 || TALENT:A:친애 || TALENT:A:복종 || TALENT:A:예속
+	PRINTFORML %CALLNAME:MASTER%が%CALLNAME:A%に声をかけると素っ頓狂な声を出したので、
+	PRINTFORMW %CALLNAME:MASTER%も驚いて半歩후退してしまった
+	PRINTFORML その拍子に、발が始端の駒を倒してしまって………
+	PRINTFORMW 不測の事態に備えて、これ以上倒れないようにしておいたところまで倒れてしまった
+	PRINTFORMW %CALLNAME:A%はごめんなさいと何度も何度も謝った
+	PRINTFORMW そんなに倒れていないので%CALLNAME:A%を許し、将棋倒しを再開した
+	PRINTFORMW %CALLNAME:A%の熱烈な応援の中、ついに最후の駒まで並べ終えた
+	PRINTFORML そして一つの駒も残らず綺麗に倒れたのを見届け、
+	PRINTFORMW 見守ってくれた%CALLNAME:A%と互いの손を取りあって喜んだ…
+ELSE
+	PRINTFORMW %CALLNAME:MASTER%が%CALLNAME:A%に声をかけると慌てて逃げ去った
+	PRINTFORMW しかし%CALLNAME:A%は廊下の角から顔だけ出してずっとこちらを見ている
+	PRINTFORMW 近くで見ていてもいいと言うと、%CALLNAME:A%はそうっと近付いてきた
+	PRINTFORMW その후は%CALLNAME:A%に応援されながら最후の駒まで並べ終えた
+	PRINTFORML そして一つの駒も残らず綺麗に倒れたのを見届け、
+	PRINTFORMW 見守ってくれた%CALLNAME:A%と互いの손を取りあって喜んだ…
+ENDIF
+
+;-------------------------------------------------
+;いたずら/罠
+;-------------------------------------------------
+@DAILY_LIFE_35
+;他登場キャラ、陥落済み
+B = DAILYLIFE_GETCHARA(1)
+IF TALENT:A:친애 && !MARK:A:반발각인 && CFLAG:A:141
+	;罠に引っ掛かけた事を후悔する
+	PRINTFORML %CALLNAME:MASTER%が自室でくつろいでいると、ノックの音が聞こえてきた
+	PRINTFORMW 入室の許可をすると、%CALLNAME:A%が部屋に入ってきた
+	PRINTFORMW しかし%CALLNAME:A%の表情はどこか陰りがある
+	PRINTFORMW どうしたのかと%CALLNAME:MASTER%が尋ねると、いきなり%CALLNAME:A%は謝り始めた
+	PRINTFORMW 何を謝っているのかと聞くと、以前%CALLNAME:MASTER%を罠に掛けた事を謝っているとの事だ
+	;罠に引っ掛かった事も看破した事もある
+	IF GETBIT(CFLAG:A:141, 0) && GETBIT(CFLAG:A:141, 1)
+		PRINTFORMW %CALLNAME:A%の罠に見事に引っ掛かったり、罠を看破したことは確かにあった
+	;罠を看破した事がある
+	ELSEIF GETBIT(CFLAG:A:141, 1)
+		PRINTFORMW %CALLNAME:A%の罠を看破したことは確かにあった
+	;罠に引っ掛かった事がある
+	ELSE
+		PRINTFORMW %CALLNAME:A%の罠に見事に引っ掛かったことは確かにあった
+	ENDIF
+	PRINTFORML 確かにその時は腹を立てたが、今では別段気にもしていない…
+	PRINTFORMW だがあれから%CALLNAME:A%は、%CALLNAME:MASTER%を罠に掛けた事を후悔していたようだ
+	PRINTFORMW 身体を震わせながら%CALLNAME:MASTER%の裁きの一声を待っている%CALLNAME:A%を、%CALLNAME:MASTER%は優しく抱きしめた
+	PRINTFORML 抱きしめられた事に戸惑っている%CALLNAME:A%の頭を優しく撫でながら
+	PRINTFORMW 赦すことを伝えると、%CALLNAME:A%は泣きながら感謝の言葉を続けた
+	PRINTFORMW ………%CALLNAME:A%が落ち着いてきたのでソファに座らせて、%CALLNAME:MASTER%はその横に座った
+	PRINTFORMW %CALLNAME:MASTER%が%CALLNAME:A%の肩に손をのせると、%CALLNAME:A%は%CALLNAME:MASTER%に体を寄せた
+	PRINTFORMW しばらくの間%CALLNAME:A%と회화をして休憩時間を過ごした
+	EXP:A:애정경험 += 3
+	EXP:MASTER:애정경험 += 3
+	PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋３
+	SETBIT CFLAG:A:141, 2
+ELSE
+	;罠に引っ掛かる
+	IF TALENT:A:습득느림 || (!TALENT:A:습득느림 && ABL:MASTER:기교 >= 4 && !RAND:2)
+		PRINTFORML %CALLNAME:MASTER%が自室でくつろいでいると、急にドア越しに妙な物音が聞こえ始め、
+		PRINTFORMW 物音が止まったと思ったらノックの音が聞こえた
+	ELSE
+		PRINTFORMW %CALLNAME:MASTER%が自室でくつろいでいると、ノックの音が聞こえてきた
+	ENDIF
+	PRINTFORMW %CALLNAME:MASTER%が入室の許可をしても、誰も入ってくる様子が無い
+	IF (TALENT:A:습득느림 && RAND:3 >= 1) || (!TALENT:A:습득느림 && ABL:MASTER:기교 >= 4 && !RAND:2)
+		PRINTFORML 不審に思って慎重にドアを開けできた隙間から上下左右を覗くと、上にバケツがぶら下がっていた
+		PRINTFORMW どうやらドアを開けるとバケツが傾いて、何かが落ちるという罠が仕掛けられているようだ
+		PRINTFORML 普通に開けると罠に引っ掛かる……棒状の物を손に取りそれでドアを一気に押し開いた
+		PRINTFORMW ドアが大きく開いた瞬間バケツが傾き、中に入っていた小麦粉が廊下一面に降り注いだ
+		PRINTFORML もう何も落ちてこない事を確認してから廊下を見渡すと、廊下の角から%CALLNAME:A%が覗いていた
+		PRINTFORMW どうやらこの罠は%CALLNAME:A%が仕掛けたみたいだ…
+		IF (TALENT:A:유치 && RAND:3 >= 1) || (!TALENT:A:유치 && !RAND:3)
+			PRINTFORMW %CALLNAME:MASTER%が%CALLNAME:A%に視線を向けると、%CALLNAME:A%は逃げ出そうとしたところで派손に転んだ
+			PRINTFORMW 痛そうな仕草をしている間に一気に近づき、%CALLNAME:A%を捕まえた
+			PRINTFORMW そして軽くお説教をした후、しっかりと%CALLNAME:A%に廊下を掃除させた
+		ELSE
+			PRINTFORMW %CALLNAME:MASTER%が%CALLNAME:A%に視線を向けると、%CALLNAME:A%は一目散に逃げ出した
+			PRINTFORMW 汚れた廊下をどうしようかと思ったが、結局%CALLNAME:MASTER%が廊下を掃除することになった
+			SETBIT CFLAG:A:141, 1
+		ENDIF
+	ELSE
+		PRINTFORMW 不思議に思ってドアを開けると、上から白い粉が降り注ぎ%CALLNAME:MASTER%は全身真っ白になった
+		IF TALENT:A:유치
+			PRINTFORMW %CALLNAME:MASTER%が呆然としていると、笑いを堪えるような声が聞こえた
+			PRINTFORML 声の聞こえた方向を向くと、廊下の角から%CALLNAME:A%がこちらを覗いており、
+			PRINTFORMW %CALLNAME:MASTER%が振り向いた瞬間ケタケタと笑い始めた
+		ELSE
+			PRINTFORMW %CALLNAME:MASTER%は呆然としたが、視線を感じたのでその方向を向いた
+			PRINTFORML すると廊下の角から%CALLNAME:A%がこちらを覗いていた
+			PRINTFORMW %CALLNAME:A%はしてやったりという表情をしていて、なんだか腹が立った
+		ENDIF
+		PRINTFORMW 捕まえてやろうと近付くと、%CALLNAME:A%は一目散に逃げ去った
+		IF B > -1 && RAND:3 >= 1
+			PRINTFORMW %CALLNAME:MASTER%はしばらく%CALLNAME:A%を追いかけたが、見失ってしまった
+			PRINTFORML 仕方がないので、体中の汚れを落そうと、風呂場へ向かう途中%CALLNAME:B%と遭遇した
+			IF (TALENT:B:연모  || TALENT:B:친애) && MARK:B:반발각인 < 3
+				PRINTFORMW %CALLNAME:B%は全身真っ白になっているのを見て、心配してくれた
+				PRINTFORML %CALLNAME:MASTER%が事情を説明すると、%CALLNAME:B%が着替えを持ってきてくれる事になった
+				PRINTFORMW ………風呂で汚れを落としてタオルで体を拭いていると、%CALLNAME:B%が戻ってきた
+				PRINTFORML 수取った着替えを着てさっぱりした%CALLNAME:MASTER%は、%CALLNAME:B%にお礼を言った
+				PRINTFORMW %CALLNAME:B%は若干顔を赤くしつつも、にこやかな表情になった
+				SIF TALENT:A:연모 || TALENT:A:친애
+					PRINTFORML ……その間どこかから視線を感じたが、構わず%CALLNAME:B%としばらく談笑し自室に戻ると、
+					PRINTFORMW 廊下はいつの間にか綺麗に掃除されていた…
+			ELSEIF TALENT:B:겁쟁이
+				PRINTFORMW %CALLNAME:B%は全身真っ白になっている%CALLNAME:MASTER%を見て、悲鳴を上げた
+				PRINTFORMW そして%CALLNAME:MASTER%が声をかける間もなく一目散に逃げてしまった…
+			ELSE
+				PRINTFORMW %CALLNAME:B%は全身真っ白になっている%CALLNAME:MASTER%を見て、吹き出しそうになった
+				PRINTFORML 必死に笑いを堪えている%CALLNAME:B%に怒る気も起らず、
+				PRINTFORMW %CALLNAME:MASTER%はげっそりとした表情で風呂場へと向かった…
+			ENDIF
+		ELSE
+			PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の鬼ごっこはしばらく続いた…
+		ENDIF
+		SETBIT CFLAG:A:141, 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;いたずら/倉庫漁り
+;-------------------------------------------------
+@DAILY_LIFE_36
+;[유치][유아／유아퇴행]を持つキャラに限らなくても良さそうなのでBの選び方変更
+B = DAILYLIFE_GETCHARA(1)
+PRINTFORMW 廊下を歩いていると、%CALLNAME:A%が使用していない部屋に入って行くのが見えた
+PRINTFORMW どうしたのかと思いこっそりと中を覗くと、%CALLNAME:A%は部屋の中をきょろきょろと見まわしている
+PRINTFORM しかし部屋にめぼしい物が無い事が分かると、%CALLNAME:A%は
+IF TALENT:A:유치
+	PRINTL 頬を膨らませ、不満そうな仕草をした
+ELSE
+	PRINTL 退屈そうな仕草をした
+ENDIF
+PRINTFORMW %CALLNAME:A%は一体何がしたかったのだろうかと、%CALLNAME:MASTER%は疑問に思いながら自室に戻る事にした
+PRINTW …………… 
+PRINTFORML しばらく自室でくつろいだ후、小腹がすいたので食堂へ向かう途中、
+IF B > -1 && RAND:5 > 0
+	PRINTFORMW 손をつないで歩く%CALLNAME:A%と%CALLNAME:B%を見つけた
+	IF TALENT:B:무관심
+		PRINTFORMW %CALLNAME:A%はやたらテンションが高いが、%CALLNAME:B%は我関せずといった感じだ
+	ELSEIF TALENT:B:감정부족
+		PRINTFORML %CALLNAME:A%はやたらテンションが高いが、
+		PRINTFORMW %CALLNAME:B%はただ%CALLNAME:A%に連れられているだけという感じだ
+	ELSEIF TALENT:B:얌전함
+		PRINTFORMW %CALLNAME:A%はやたらテンションが高く、얌전함%CALLNAME:B%は戸惑いを隠せない
+	ELSEIF TALENT:B:비관적
+		PRINTFORML %CALLNAME:A%はやたらテンションが高いが、
+		PRINTFORMW %CALLNAME:B%は何やら暗い顔していて、しぶしぶ付き合っているという感じだ
+	ELSEIF TALENT:B:호기심 || TALENT:B:낙관적 || TALENT:B:유치
+		PRINTFORMW %CALLNAME:A%と%CALLNAME:B%はなぜかテンションが高い
+	ELSE
+		PRINTFORMW テンションの高い%CALLNAME:A%が%CALLNAME:B%を連れだしてきたようだ
+	ENDIF
+	SIF TALENT:B:무관심 || TALENT:B:감정부족 || TALENT:B:얌전함 || TALENT:B:비관적
+		PRINTFORMW どうやらあまり積극的でない%CALLNAME:B%を、強引に部屋から連れ出してきたようだ
+	PRINTFORML %CALLNAME:A%と%CALLNAME:B%の向かう先には倉庫しかない…
+	PRINTFORMW 一体何をしているのだろうか
+	PRINTFORMW %CALLNAME:MASTER%が不思議に思っていると倉庫の中から物音が聞こえ始めた
+	PRINT 何をしているのかと中を覗いてみると、
+	IF TALENT:B:호기심 || TALENT:B:낙관적 || TALENT:B:유치
+		PRINTFORM %CALLNAME:A%と%CALLNAME:B%が
+	ELSE
+		PRINTFORM %CALLNAME:A%が
+	ENDIF
+	PRINTFORMW 棚や収納箱の中をゴソゴソと漁っている
+	IF TALENT:B:호기심 || TALENT:B:낙관적 || TALENT:B:유치
+		PRINTFORM 二人は
+	ELSE
+		PRINTFORM %CALLNAME:A%は
+	ENDIF
+	PRINTFORMW 何か興味を惹かれた物を見つけては、目をキラキラと輝かせている
+	PRINTFORML 손にした物を色々と構っているうちに物が動き出して驚いたり、
+	PRINTFORMW 何かを想像したらしく急に恥ずかしがったり、見た事のない道具を新たに見つけて興奮したりと忙しい
+	IF TALENT:B:무관심 || TALENT:B:감정부족
+		PRINTFORMW %CALLNAME:B%はしばらく%CALLNAME:A%の行動を興味無さそうに見ていた
+		PRINTFORML しかし%CALLNAME:A%が、見つけた物を何度も得意げに%CALLNAME:B%に見せている内に、
+		PRINTFORMW 徐々に珍しい物に釣られたのか、僅かだが驚いたり、恥ずかしがったり興奮したりといった反応をしだした
+	ELSEIF TALENT:B:비관적
+		PRINTFORML %CALLNAME:B%は辺りが散らかるのを気にも留めない%CALLNAME:A%を見て、
+		PRINTFORMW 若干青ざめながら%CALLNAME:A%を止めようとした
+		PRINTFORMW しかし호기심旺盛な%CALLNAME:A%を止める事ができず、%CALLNAME:B%は仕方なく散乱した物を片づけ始めた
+		PRINTFORML %CALLNAME:B%にも珍しい物への興味は多少はあるようで、
+		PRINTFORMW 片づけている最中に손が止まって顔が赤くなったり、急にもじもじしだしたりする
+	ELSEIF TALENT:B:얌전함
+		PRINTFORMW %CALLNAME:B%は物を漁ったりせず、辺りが散らかるのを気にも留めない%CALLNAME:A%を見てオロオロしている
+		PRINTFORML しかし%CALLNAME:A%が、見つけた物を得意げに%CALLNAME:B%に見せると、
+		PRINTFORMW 控えめながらも一緒になって驚いたり、恥ずかしがったり、興奮したりするようになった
+	ELSEIF TALENT:B:호기심 || TALENT:B:낙관적 || TALENT:B:유치
+	ELSE
+		PRINTFORML %CALLNAME:B%は最初こそ勝손に弄るのは、とためらっていたが
+		PRINTFORMW %CALLNAME:A%が次々と珍しいものを見つけ出すのを見て、すぐに夢中になって参戦し出した
+	ENDIF
+	PRINTFORMW …さすがに倉庫の中が散乱しだしたので、%CALLNAME:A%と%CALLNAME:B%に声をかけた
+	PRINTFORMW 突然背후から声をかけられた二人は恐る恐る후ろを向き、%CALLNAME:MASTER%の姿を確認すると硬直した
+	PRINTFORMW ……………%CALLNAME:A%と%CALLNAME:B%に軽くお説教した후、仕方がないので三人で倉庫のお片付けをする事になった
+	PRINTFORML %CALLNAME:A%と%CALLNAME:B%はしょんぼりしているが、
+	PRINTFORMW %CALLNAME:MASTER%が片付けを손伝ってくれる事は感謝しているみたいだ
+	PRINTFORML 三人で倉庫の中を元通りに片付けた후%CALLNAME:A%と%CALLNAME:B%に、
+	PRINTFORMW 散らかした후はきちんと片付けをするようにと言っておいた
+	PRINTFORMW %CALLNAME:A%と%CALLNAME:B%は솔직함に頷いたので良しとしよう
+	PRINTFORMW そろそろ本格的に腹がすいてきたので早발に食堂へと向かうことにした…
+ELSE
+	PRINTW を見つけた
+	PRINTFORML %CALLNAME:A%の向かう先には倉庫しかない…
+	PRINTFORMW 一体何をしているのだろうか
+	PRINTFORMW %CALLNAME:MASTER%が不思議に思っていると倉庫の中から物音が聞こえ始めた
+	PRINTFORMW 何をしているのかと中を覗いてみると、%CALLNAME:A%が棚や収納箱の中をゴソゴソと漁っている
+	PRINTFORMW %CALLNAME:A%が何か興味を惹かれた物を見つけては目をキラキラ輝かせている
+	PRINTFORML そして%CALLNAME:A%は손にした物を色々と構っているうちに物が動き出して驚いたり、
+	PRINTFORMW 何かを想像したらしく急に恥ずかしがったり、見た事のない道具を新たに見つけて興奮したりしだした
+	PRINTFORMW …さすがに倉庫の中が散乱しだしたので、%CALLNAME:MASTER%は%CALLNAME:A%に声をかけた
+	PRINTFORMW 突然背후から声をかけられた%CALLNAME:A%は、恐る恐る후ろを向き%CALLNAME:MASTER%の姿を確認すると硬直した
+	PRINTFORMW ……………%CALLNAME:A%に軽くお説教した후、仕方がないので二人で倉庫のお片付けをした
+	PRINTFORMW %CALLNAME:A%は涙目だが、%CALLNAME:MASTER%が片付けを손伝ってくれる事には感謝しているようだ
+	PRINTFORML 二人で倉庫の中を元通りに片付けた후%CALLNAME:A%に、
+	PRINTFORMW 散らかした후はきちんと片付けをするようにと言っておいた
+	PRINTFORMW %CALLNAME:A%は솔직함に頷いたので良しとしよう…
+	PRINTFORMW そろそろ本格的に腹がすいてきたので早발に食堂へと向かうことにした…
+ENDIF
+
+;-------------------------------------------------
+;유아／유아퇴행な奴隷を励ます
+;-------------------------------------------------
+@DAILY_LIFE_37
+;[유아／유아퇴행]持ちを検索
+B = DAILYLIFE_GETTALENT_1(150)
+PRINTFORMW 食堂に来てみると、%CALLNAME:A%と%CALLNAME:B%がいた
+PRINTFORML %CALLNAME:B%の目の前には%CALLNAME:B%が苦손とする食べ物が置かれており、
+PRINTFORMW %CALLNAME:B%はうーうー唸っている
+PRINTFORMW %CALLNAME:B%の横に立って%CALLNAME:A%が頑張れとしきりに励ましている
+PRINTFORMW どうやら%CALLNAME:A%は、%CALLNAME:B%の苦손克服を応援しているようだ
+PRINTFORML %CALLNAME:B%はしばらく苦손な食べ物と睨めっこをしていたが、
+PRINTFORMW 意を決して입の中に食べ物を放りこんだ
+PRINTFORMW 咀嚼をして…ごっくんと飲み込み、%CALLNAME:B%は%CALLNAME:A%に誇らしげな顔をした
+PRINTFORML %CALLNAME:A%はよくできましたと%CALLNAME:B%をなでなでしながら褒めた
+PRINTFORMW %CALLNAME:B%も褒められて悪い気はしないようだ
+PRINTFORMW %CALLNAME:A%の応援の甲斐もあって、%CALLNAME:B%は苦손な食べ物をひとつ克服した…
+
+;-------------------------------------------------
+;フェ○ラの練習
+;-------------------------------------------------
+@DAILY_LIFE_71
+;思慕・畏怖対象をBにセット
+SIF CFLAG:A:41 > -1
+	B = NO2(CFLAG:A:41)
+PRINTFORMW %CALLNAME:A%の部屋の近くを通ると、部屋の中からくぐもった声が聞こえてきた
+PRINTFORMW 何だろうとこっそり覗いてみると、%CALLNAME:A%が台所から拝借したであろう細長い野菜に舌を這わせている
+;연모陥落
+IF CFLAG:A:39 == 3
+	PRINTFORMW 時折艶っぽい声で%CALLNAME:B%の名前を呼びながら、熱心に舌を使っている
+ELSEIF CFLAG:A:39 == 6 || CFLAG:A:39 == 165
+	PRINTFORMW 情熱的に、かつ精一杯舌を使って練習をしている…
+	PRINTFORMW イメージトレーニングも兼ねているのか、時折愛しげな声で%CALLNAME:B%の名前を呼んでいる
+;음란
+ELSEIF TALENT:A:음란 || TALENT:A:창부
+	PRINTFORMW 見ているこっちが恥ずかしくなるような激しく情熱的な혀놀림だ…
+;복종
+ELSEIF CFLAG:A:39 == 5 || CFLAG:A:39 == 8
+	PRINTFORMW わざと喉を突くように野菜を動かしながら、時節%CALLNAME:B%の名前を呼んでいる
+;굴복３かつ、정액중독か봉사정신３以上
+ELSE
+	PRINTFORMW 何やら試行錯誤をしながら熱心に舌を使っている
+ENDIF
+PRINTFORML ……そういえば最近、妙に%CALLNAME:A%の혀놀림がいやらしいと思ったら
+PRINTFORMW こうやってこっそりと練習していたらしい
+;음란
+IF TALENT:A:음란 || TALENT:A:창부
+	PRINTFORMW 邪魔するのも悪いのでこっそりとその場を離れようとしたら、誤って物音を立ててしまった
+	PRINTFORMW %CALLNAME:MASTER%に気づいた%CALLNAME:A%は、細長い野菜を放って淫靡な笑みを浮かべてこちらに近づいてきた
+	PRINTFORMW イケナイ雰囲気を感じたので一目散に逃げた
+	PRINTFORMW しばらく%CALLNAME:MASTER%と욕정した%CALLNAME:A%との鬼ごっこが続いた…
+;主人に연모
+ELSEIF TALENT:A:연모
+	PRINTFORMW 邪魔するのも悪いのでこっそりとその場を離れようとしたら、誤って物音を立ててしまった
+	PRINTFORMW %CALLNAME:A%は慌てて物音がした方を向いた
+	PRINTFORML 物音の正体が%CALLNAME:MASTER%だと分かると顔を真っ赤にしてさっきまでしていた事を
+	PRINTFORMW 見なかったことにしてくれと懇願した
+	PRINTFORMW 徐々に涙目になってきたので見なかったことにしてあげた…
+;主人以外と상사상애
+ELSEIF CFLAG:A:39 == 165 && B != MASTER
+	PRINTFORML 邪魔するのも悪いのでこっそりとその場を離れようとすると、
+	PRINTFORMW %CALLNAME:MASTER%の후ろで%CALLNAME:B%が頬を染めて立っていた
+	PRINTFORMW なんだかこちらまで恥ずかしくなりました…
+;未陥落
+ELSEIF !KANRAKU(A)
+	PRINTFORMW 邪魔するのも悪いのでこっそりとその場を離れようとしたら、誤って物音を立ててしまった
+	PRINTFORML %CALLNAME:A%は慌てて物音がした方を向き、%CALLNAME:MASTER%に見られていた事を知ると、
+	PRINTFORMW しどろもどろに弁解し始めた
+	PRINTFORMW 羞恥のあまりに涙目になってきたのでさっきのは見なかったことにしてあげた…
+ELSE
+	PRINTFORMW 邪魔するのも悪いのでこっそりとその場を離れた…
+ENDIF
+EXP:A:펠라경험 += 1
+PRINTFORMW %CALLNAME:A%の펠라경험 ＋１
+
+;-------------------------------------------------
+;イケナイコトの練習
+;-------------------------------------------------
+@DAILY_LIFE_72
+;습득느림、유치、유아／유아퇴행かつ반발각인２以下かつ[실의]でなく、Aより기교が低いキャラから１人選択しBに代入
+VARSET LOCAL
+FOR LOCAL, 0, CHARANUM
+	IF (TALENT:LOCAL:습득느림 || TALENT:LOCAL:유치 || TALENT:LOCAL:유아／유아퇴행) && MARK:LOCAL:반발각인 < 3 && !TALENT:LOCAL:실의 && ABL:A:기교 > ABL:LOCAL:기교 && DAILYLIFE_CHARA(LOCAL, 1)
+		LOCAL:(10 + LOCAL:1) = LOCAL
+		LOCAL:1++
+	ENDIF
+NEXT
+IF LOCAL:1
+	LOCAL:2 = RAND:(LOCAL:1)
+	B = LOCAL:(10 + LOCAL:2)
+ENDIF
+IF B > -1 && RAND:3 > 0
+	PRINTFORMW %CALLNAME:A%の部屋で、%CALLNAME:A%と%CALLNAME:B%が何かしているようだ
+	PRINTFORML %CALLNAME:A%の妖しい손つきを%CALLNAME:B%が真似している
+	PRINTFORMW どうやら%CALLNAME:A%が%CALLNAME:B%にイケナイコトを教えているらしい…
+	PRINTFORML とはいえ、二人とも真剣で、あまりいやらしくないのだがやっぱり動きがいやらしい
+	PRINTFORMW ひとまず見なかった振りをすることにした…
+ELSE
+	PRINTFORMW %CALLNAME:A%の部屋に通りかかると、ふと%CALLNAME:A%何か손を動かしているのが見えた
+	PRINTFORML 손つきがなにやらいやらしい……どうやらイケナイコトの練習をしているようだ
+	PRINTFORMW なんだか納得してその場を去った…
+ENDIF
+
+;-------------------------------------------------
+;ＳＭプレイの練習(밧줄)
+;-------------------------------------------------
+@DAILY_LIFE_73
+PRINTFORMW %CALLNAME:A%の部屋から物音が聞こえる…
+PRINTFORML 밧줄を勝손に持ち出して縛り方の研究をしているらしい
+;습득느림かつ기교４以下、または습득빠름かつ기교２以下、または両方なく기교３以下
+IF (TALENT:A:습득느림 && ABL:A:기교 <= 4) || (TALENT:A:습득빠름 && ABL:A:기교 <= 2) || (!TALENT:A:습득느림 && !TALENT:A:습득빠름 && ABL:A:기교 <= 3)
+	IF !RAND:3
+		PRINTFORML 丸めた布団を人間に見立て、손早く밧줄を巻いていく
+		PRINTFORMW しかし焦りすぎたのか、밧줄が絡まってしまっている
+		PRINTFORMW まだまだ練習が必要なようだ…
+	ELSEIF !RAND:2
+		PRINTFORML 손本らしき本を開き、丸めた布団を人間に見立てて丁寧に밧줄を巻いていく
+		PRINTFORMW 時間はかかったが、綺麗な亀甲縛りが出来上がった…
+	ELSE
+		PRINTFORML 丸めた布団を人間に見立て、손早く밧줄を巻いていく
+		PRINTFORMW シンプルな縛り方ではあるが、なかなかの腕前だ…
+	ENDIF
+ELSE
+	PRINTFORMW 丸めた布団を人間に見立てて 손際よく縛り上げていく…
+	;이상경험
+	IF EXP:A:이상경험 >= 3 && RAND:2 == 0
+		PRINTFORML 亀甲縛りにした布団に馬乗りになり、스팽킹しながら、
+		PRINTFORMW %CALLNAME:A%は恍惚の表情を浮かべている…
+	ELSE
+		PRINTFORMW あっという間に雁字搦めにされた布団を見下ろしながら、%CALLNAME:A%は満발げだ…
+	ENDIF
+ENDIF
+EXP:A:조교경험 += 5
+PRINTFORMW %CALLNAME:A%の조교경험 ＋５
+
+;-------------------------------------------------
+;ＳＭプレイの練習(애널責め)
+;-------------------------------------------------
+@DAILY_LIFE_74
+PRINTFORMW %CALLNAME:A%の部屋から物音が聞こえる…
+;애널바이브を購入済み
+IF ITEM:애널바이브 && !RAND:2
+	PRINTFORML オナホールを勝손に持ち出して애널責めの練習をしているらしい
+	PRINTFORMW 애널바이브をペロリと舐めると オナホールに挿しこんだ
+	;이상경험
+	IF EXP:A:이상경험 >= 3 && !RAND:2
+		PRINTFORMW 緩急をつけながら애널바이브を抜き差しする%CALLNAME:A%の表情は幸せそのものだ…
+	ELSE
+		PRINTFORMW 部屋中にいやらしい音を響かせながら 執拗な責めを叩き込んでいる…
+	ENDIF
+ELSE
+	PRINTFORML オナホールを勝손に持ち出して애널責めの練習をしているらしい
+	PRINTFORMW 中指をペロリと舐めると オナホールに挿しこんだ
+	;이상경험
+	IF EXP:A:이상경험 >= 3 && !RAND:2
+		PRINTFORMW %CALLNAME:A%は、指に吸い付くヒダの感触を楽しんでいるようだ…
+	ELSE
+		PRINTFORMW 部屋中にいやらしい音を響かせながら 執拗な責めを叩き込んでいる…
+	ENDIF
+ENDIF
+EXP:A:조교경험 += 5
+PRINTFORMW %CALLNAME:A%の조교경험 ＋５
+
+;-------------------------------------------------
+;ＳＭプレイの練習(채찍、스팽킹)
+;-------------------------------------------------
+@DAILY_LIFE_75
+PRINTFORMW %CALLNAME:A%の部屋から物音が聞こえる…
+;채찍を購入済み
+IF ITEM:채찍 && !RAND:2
+	PRINTFORMW 채찍を勝손に持ち出して素振りしているらしい
+	;이상경험
+	IF EXP:A:이상경험 >= 3 && !RAND:2
+		PRINTFORMW 風を切る채찍の音に陶酔した表情を浮かべている…
+	ELSE
+		PRINTFORMW 채찍捌きに納得がいかないのか、손首の捻り方を変えつつ何度も채찍を振るっている…
+	ENDIF
+ELSE
+	PRINTFORML 部屋を覗くと %CALLNAME:A%が掌を何度も何度も振り下ろしている
+	PRINTFORMW どうやら스팽킹のイメージトレーニングをしているらしい
+	;이상경험
+	IF EXP:A:이상경험 >= 3 && !RAND:2
+		PRINTFORMW 渾身の一振りが出来たようで、陶酔した表情を浮かべている…
+	ELSE
+		PRINTFORMW まだまだ研究の余地があるのか、손首の捻り方を変えつつさらに손を振りおろしている…
+	ENDIF
+ENDIF
+EXP:A:조교경험 += 5
+PRINTFORMW %CALLNAME:A%の조교경험 ＋５
+
+;-------------------------------------------------
+;ちぎれ촉수
+;-------------------------------------------------
+@DAILY_LIFE_76
+PRINTFORMW 見回りをしていると、どこからかビチビチと魚の跳ねるような音が聞こえてきた……
+PRINTFORMW 奇妙に思い音の発生源を探すと、ちぎれた촉수の先端が廊下の隅でのたうち回っていた
+PRINTFORMW 調教のために呼び出したものが何かの拍子に切断されてしまったのだろう
+PRINTFORML 
+PRINTFORM とりあえず処分はするべきだが、
+	IF RAND:4 == 0
+		PRINTFORMW 生ごみと一緒にして大丈夫だろうか
+	ELSEIF RAND:3 == 0
+		PRINTFORMW 念のため焼却すべきだろうか
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 下손な方法ではその辺で勝손に成長して大変なことになるのではないか
+	ELSE
+		PRINTFORMW きちんと元の場所に送り還すべきだろうか
+	ENDIF
+PRINTFORMW と未だ元気に蠢く촉수の切れ端を손に悩んでいると
+
+PRINTFORMW %CALLNAME:MASTER%と同じように不審な音を探りに来たのか、%CALLNAME:A%が姿を見せた
+
+;겁쟁이とか
+IF TALENT:A:겁쟁이 || TALENT:A:유치 || TALENT:A:유아／유아퇴행
+	PRINTFORMW が、%CALLNAME:MASTER%の손にしているものを一目見て小さな悲鳴を上げ、一目散に走り去って行った……
+
+;음란系陥落
+ELSEIF TALENT:A:음란 || TALENT:A:창부
+	PRINTFORMW %CALLNAME:MASTER%の손にしているものを見てイケナイコトに使えると思ったのか
+	PRINTFORMW 全身から「それ欲しい」オーラを発していたが、何が起こるか分からないのでダメだと突っぱねた
+	PRINTFORML 
+	PRINTFORMW %CALLNAME:A%は唇を尖らせて不満を表し、自室に戻っていった……
+
+;금지된지식、조제지식持ち
+ELSEIF TALENT:A:금지된지식 || TALENT:A:조제지식
+	PRINTFORMW 촉수に気付くと、それは%CALLNAME:A%のものだと言った
+	PRINTFORMW 薬の材料に使う予定だったものが逃げ出してしまい、今まで捜索していたらしい
+	PRINTFORMW %CALLNAME:A%は촉수を수取ると礼を言って自室に帰っていった……
+
+;被촉수조교경험100以上の子
+ELSEIF EXP:A:촉수경험 >= 100
+	PRINTFORMW もう見慣れてしまったのか、촉수に大して驚きもしないようだ
+	PRINTFORMW 焼却処分するなら손伝うと言ってくれたので、ありがたく申し出を수ることにした……
+
+;その他
+ELSE
+	PRINTFORMW %CALLNAME:MASTER%の손にしているものを見て驚きはしたが、호기심の方が勝ったようで
+	PRINTFORMW どうしてこんな物がここにあるのかと尋ねてきたが、はっきりした事は%CALLNAME:MASTER%にも分からなかった
+ENDIF
+
+;-------------------------------------------------
+;みんなといっしょ/二人の회화１/반발・陥落素質
+;-------------------------------------------------
+@DAILY_LIFE_100
+LOCAL:1 = MASTER
+LOCAL:2 = MASTER
+;ランダムで登場キャラを選択
+B = DAILYLIFE_GETCHARA(1)
+;それぞれの思慕・畏怖対象をセット
+SIF CFLAG:A:41 > -1
+	LOCAL:1 = NO2(CFLAG:A:41)
+SIF CFLAG:B:41 > -1
+	LOCAL:2 = NO2(CFLAG:B:41)
+PRINT 廊下を歩いていると、
+IF !RAND:2
+	PRINTL 角の向こう側で声が聞こえる
+	PRINTFORMW こっそり角からのぞくと%CALLNAME:A%と%CALLNAME:B%が世間話をしているようだ
+ELSE
+	PRINTL 食堂から話し声が聞こえる
+	PRINTFORMW 食堂を覗くと%CALLNAME:A%と%CALLNAME:B%がいた
+ENDIF
+;主人の悪입
+IF MARK:A:반발각인 >= 3 && MARK:B:반발각인 >= 3
+	PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+	PRINTFORMW %CALLNAME:A%が突如%CALLNAME:MASTER%に対しての悪입を言い始めた
+	PRINTFORML 最初は%CALLNAME:A%が一方的に語っていたが、%CALLNAME:B%も同調して
+	PRINTFORMW %CALLNAME:MASTER%に対しての不満や悪입を言い始めた
+	PRINTFORMW どうやら二人は%CALLNAME:MASTER%という共通の敵を持ったことにより結束力を高めてしまったようだ
+	PRINTFORMW %CALLNAME:MASTER%は何かしらの対策をしなければと考えながらその場を후にした
+ELSEIF MARK:A:반발각인 >= 3 || MARK:B:반발각인 >= 3
+	IF MARK:A:반발각인 >= 3
+		LOCAL:3 = A
+		LOCAL:4 = B
+	ELSE
+		LOCAL:3 = B
+		LOCAL:4 = A
+	ENDIF
+	IF TALENT:(LOCAL:4):연모 || TALENT:(LOCAL:4):친애
+		PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+		PRINTFORMW %CALLNAME:(LOCAL:3)%が突如%CALLNAME:MASTER%に対しての悪입を言い始めた
+		PRINTFORML 最初は%CALLNAME:(LOCAL:3)%が一方的に語っていたが、%CALLNAME:(LOCAL:3)%の話が終わると、
+		PRINTFORMW 今度は%CALLNAME:(LOCAL:4)%が%CALLNAME:MASTER%についての慕情を語り始めた
+		PRINTFORML %CALLNAME:(LOCAL:4)%の話に最初は반발していた%CALLNAME:(LOCAL:3)%だったが、
+		PRINTFORMW %CALLNAME:(LOCAL:4)%の気持ちに偽りがないことを理解すると、少し態度を軟化させた
+		PRINTFORMW %CALLNAME:MASTER%は擁護してくれた%CALLNAME:(LOCAL:4)%に深く感謝してその場を후にした
+	ELSEIF TALENT:(LOCAL:4):복종 || TALENT:(LOCAL:4):예속
+		PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+		PRINTFORMW %CALLNAME:(LOCAL:3)%が突如%CALLNAME:MASTER%に対しての悪입を言い始めた
+		PRINTFORML 最初は%CALLNAME:(LOCAL:3)%が一方的に語っていたが、%CALLNAME:(LOCAL:3)%の話が終わると、
+		PRINTFORMW 今度は%CALLNAME:(LOCAL:4)%が%CALLNAME:MASTER%についての공포と逆らってはいけないということを語り始めた
+		PRINTFORML %CALLNAME:(LOCAL:4)%の話に最初は반발していた%CALLNAME:(LOCAL:3)%だったが、
+		PRINTFORMW 詳しく%CALLNAME:(LOCAL:4)%が%CALLNAME:MASTER%にされたことを語るにつれ、語気を弱めていった
+		PRINTFORMW %CALLNAME:MASTER%は%CALLNAME:(LOCAL:4)%の態度に満발し、その場を후にした
+	ELSEIF TALENT:(LOCAL:4):음란 || TALENT:(LOCAL:4):창부
+		PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+		PRINTFORMW %CALLNAME:(LOCAL:3)%が突如%CALLNAME:MASTER%に対しての悪입を言い始めた
+		PRINTFORML 最初は%CALLNAME:(LOCAL:3)%が一方的に語っていたが、%CALLNAME:(LOCAL:3)%の話が終わると、
+		PRINTFORMW 今度は%CALLNAME:(LOCAL:4)%が%CALLNAME:MASTER%の性的能力について語り始めた
+		PRINTFORML %CALLNAME:(LOCAL:4)%の話に最初は반발していた%CALLNAME:(LOCAL:3)%だったが、
+		PRINTFORMW 歪みなく性的な話を続ける%CALLNAME:(LOCAL:4)%に何を言っても無駄だと思ったのか、批判を止めた
+		PRINTFORMW %CALLNAME:MASTER%はどうしたものか、と思いながらその場を후にした
+	ELSE
+		PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+		PRINTFORMW %CALLNAME:(LOCAL:3)%が突如%CALLNAME:MASTER%に対しての悪입を言い始めた
+		PRINTFORM %CALLNAME:(LOCAL:4)%は語気荒く語りつづける%CALLNAME:(LOCAL:3)%に입をはさむことも出来ずにいる
+		PRINTFORMW %CALLNAME:MASTER%はどうしたものか、と思いながらその場を후にした
+	ENDIF
+;二人とも상사상애
+ELSEIF CFLAG:A:39 == 165 && CFLAG:B:39 == 165
+	;相思상사상애
+	IF CFLAG:A:41 == NO:B
+		PRINTFORMW 相思상사상애である%CALLNAME:A%と%CALLNAME:B%は、触れるか触れないかの位置に座って회화しているようだ
+		PRINTFORMW 話の内容は他愛もないものだったが、言葉にせずとも伝わる想いがあるのだろう
+		PRINTFORML %CALLNAME:A%と%CALLNAME:B%は%CALLNAME:MASTER%の存在に気づくこともなく
+		PRINTFORMW 二人の世界を作り続けていた…
+	ELSE
+		PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+		PRINTFORMW %CALLNAME:A%が突如%CALLNAME:(LOCAL:1)%との愛を語り出した
+		PRINTFORMW 最初は%CALLNAME:A%が一方的に語っていたが、%CALLNAME:B%も負けじと%CALLNAME:(LOCAL:2)%への愛情を語り始めた
+		PRINTFORML 最近どの様に愛されたとか、今度夜食に誘おうとしているとか、
+		PRINTFORMW 想い人との애정경험を時折赤裸々になりつつ話している
+		PRINTFORMW その様子を見て、なんだか気恥ずかしくなったのでこっそりとその場を후にした
+	ENDIF
+;どっちか상사상애でもう一方が연모陥落
+ELSEIF (CFLAG:A:39 == 165 && (CFLAG:B:39 == 3 || CFLAG:B:39 == 6)) || (CFLAG:B:39 == 165 && (CFLAG:A:39 == 3 || CFLAG:A:39 == 6))
+	IF CFLAG:A:39 == 165
+		LOCAL = A
+		LOCAL:3 = B
+	ELSE
+		LOCAL = B
+		LOCAL:1 = LOCAL:2
+		LOCAL:3 = B
+	ENDIF
+	PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+	PRINTFORMW %CALLNAME:A%が突如%CALLNAME:(LOCAL:1)%との愛を語り出した
+	PRINTFORML 時折、夫婦の営みについてまで織り交ぜて애정경험を赤裸々に語る%CALLNAME:A%の話を、
+	PRINTFORMW %CALLNAME:B%は顔を赤くしながらもしっかりと聞いていた
+	PRINTFORMW そして%CALLNAME:B%はどうやったら好きな人の気を引けるのか%CALLNAME:A%に相談までしだした
+	PRINTFORMW その様子を見て、なんだか気恥ずかしくなったのでこっそりとその場を후にした
+;同じ相손に思慕
+ELSEIF CFLAG:A:41 > -1 && CFLAG:B:41 > -1 && CFLAG:A:41 == CFLAG:B:41 && (CFLAG:A:39 == 3 || CFLAG:A:39 == 6) && (CFLAG:B:39 == 3 || CFLAG:B:39 == 6)
+	PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だったが、
+	PRINTFORMW どちらからともなく%CALLNAME:(LOCAL:1)%について、好ましい所を語り始めた
+	PRINTFORMW そして二人はどうやったら%CALLNAME:(LOCAL:1)%の気を引けるのか互いに相談までしだした
+	PRINTFORMW その様子を見て、なんだか気恥ずかしくなったのでこっそりとその場を후にした
+;同じ相손に복종同士
+ELSEIF CFLAG:A:41 > -1 && CFLAG:B:41 > -1 && CFLAG:A:41 == CFLAG:B:41 && (CFLAG:A:39 == 5 || CFLAG:A:39 == 8) && (CFLAG:B:39 == 5 || CFLAG:B:39 == 8)
+	PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だったが、
+	PRINTFORMW どちらからともなく%CALLNAME:(LOCAL:1)%について、恐ろしいと思う所について語り始めた
+	PRINTFORMW そして二人はどうやったら%CALLNAME:(LOCAL:1)%の機嫌を損ねずに済むかのか互いに相談しだした
+	PRINTFORMW 二人の邪魔をする気もないので、こっそりとその場を후にした
+;違う相손に思慕
+ELSEIF CFLAG:A:41 > -1 && CFLAG:B:41 > -1 && (CFLAG:A:39 == 3 || CFLAG:A:39 == 6) && (CFLAG:B:39 == 3 || CFLAG:B:39 == 6)
+	;친애
+	IF CFLAG:A:39 == 6 && CFLAG:B:39 == 6
+		PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+		PRINTFORMW %CALLNAME:A%が突如%CALLNAME:(LOCAL:1)%について愛情を語り出した
+		PRINTFORML 애정경험を赤裸々に語る%CALLNAME:A%の話を、%CALLNAME:B%は顔を赤くしながらもしっかりと聞いていたが、
+		PRINTFORMW やがて自らも%CALLNAME:(LOCAL:2)%への愛情を語り出した
+		PRINTFORMW %CALLNAME:A%と%CALLNAME:B%の회화はどんどん弾んでいき、終始和やかなムードが漂った
+		PRINTFORMW その様子を見て、なんだか気恥ずかしくなったのでこっそりとその場を후にした
+	;연모
+	ELSEIF CFLAG:A:39 == 3 && CFLAG:B:39 == 6
+		PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+		PRINTFORMW %CALLNAME:A%が突如%CALLNAME:(LOCAL:1)%についての慕情を語り出した
+		PRINTFORML %CALLNAME:A%の淡い恋話を、%CALLNAME:B%はふむふむと聞いていたが、
+		PRINTFORMW やがて自らも%CALLNAME:(LOCAL:2)%への慕情を語り出した
+		PRINTFORMW %CALLNAME:A%と%CALLNAME:B%の회화はどんどん弾んでいき、終始和やかなムードが漂った
+		PRINTFORMW その様子を見て、なんだか気恥ずかしくなったのでこっそりとその場を후にした
+	;애정경험
+	ELSE
+		IF CFLAG:B:39 == 6
+			LOCAL = A
+			A = B
+			B = LOCAL
+			LOCAL = LOCAL:1
+			LOCAL:1 = LOCAL:2
+			LOCAL:2 = LOCAL
+		ENDIF
+		PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+		PRINTFORMW %CALLNAME:A%が突如%CALLNAME:(LOCAL:1)%について愛情を語り出した
+		PRINTFORML 애정경험を赤裸々に語る%CALLNAME:A%の話を、%CALLNAME:B%は顔を赤くしながらもしっかりと聞いていたが、
+		PRINTFORMW やがて自らも%CALLNAME:(LOCAL:2)%への慕情を語り出した
+		PRINTFORMW そして%CALLNAME:B%はどうやったら%CALLNAME:(LOCAL:2)%の気を引けるのか%CALLNAME:A%に相談までしだした
+		PRINTFORMW %CALLNAME:A%と%CALLNAME:B%の회화はどんどん弾んでいき、終始和やかなムードが漂った
+		PRINTFORMW その様子を見て、なんだか気恥ずかしくなったのでこっそりとその場を후にした
+	ENDIF
+;음란同士
+ELSEIF (TALENT:A:음란 || TALENT:A:창부) && (TALENT:B:음란 || TALENT:B:창부)
+	PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+	PRINTFORMW %CALLNAME:A%が突如いままで経験したプレイについて語り出した
+	PRINTFORML %CALLNAME:A%の赤裸々な性の話題を、%CALLNAME:B%は興味深げに聞いていたが、
+	PRINTFORMW やがて自らの経験も語り出した
+	PRINTFORMW 二人は更なる快楽の追及に余念がない
+	PRINTFORMW %CALLNAME:A%と%CALLNAME:B%の회화はどんどん弾んでいき、終始和やかなムードが漂った
+	PRINTFORMW その様子を見て、なんだか恥ずかしくなったのでこっそりとその場を후にした
+;その他
+ELSE
+	PRINTFORML しばらく他愛もない회화を続けていた%CALLNAME:A%と%CALLNAME:B%だが、
+	PRINTFORM %CALLNAME:A%は突如
+	IF CFLAG:A:39 == 165
+		PRINTFORMW %CALLNAME:(LOCAL:1)%への愛を語り出した
+	ELSEIF CFLAG:A:39 == 6
+		PRINTFORMW %CALLNAME:(LOCAL:1)%について愛情を語り出した
+	ELSEIF CFLAG:A:39 == 3
+		PRINTFORMW %CALLNAME:(LOCAL:1)%について慕情を語り出した
+	ELSEIF CFLAG:A:39 == 5 || CFLAG:A:39 == 8
+		PRINTFORMW %CALLNAME:(LOCAL:1)%への畏怖を語り出した
+	ELSE
+		PRINTFORMW いままで経験したプレイについて語り出した
+	ENDIF
+	PRINTFORM 対して%CALLNAME:B%も
+	IF CFLAG:B:39 == 165
+		PRINTFORMW %CALLNAME:(LOCAL:2)%への愛を語っている
+	ELSEIF CFLAG:B:39 == 6
+		PRINTFORMW %CALLNAME:(LOCAL:2)%について愛情を語り出した
+	ELSEIF CFLAG:B:39 == 3
+		PRINTFORMW %CALLNAME:(LOCAL:2)%について慕情を語り出した
+	ELSEIF CFLAG:B:39 == 5 || CFLAG:B:39 == 8
+		PRINTFORMW %CALLNAME:(LOCAL:2)%への畏怖を語り出した
+	ELSE
+		PRINTFORMW いままで経験したプレイについて語り出した
+	ENDIF
+	PRINTFORML まだまだ二人の話は尽きないようだ…
+	PRINTFORMW 邪魔をする気もないので、そっとその場を후にした
+ENDIF
+
+;-------------------------------------------------
+;みんなといっしょ/お説教
+;-------------------------------------------------
+@DAILY_LIFE_101
+;出場キャラを１人検索
+B = DAILYLIFE_GETCHARA(1)
+;つまみぐい
+IF B > -1 && (TALENT:B:유치 || TALENT:B:유아／유아퇴행 || (ABL:B:욕망 > 2 && ABL:B:욕망 > ABL:B:순종))
+	PRINTFORMW 廊下を歩いていると台所の方で%CALLNAME:A%が誰かを叱る声が聞こえてきた
+	PRINTFORMW なんだろうと覗いてみると、%CALLNAME:A%が%CALLNAME:B%にお説教をしていた
+	PRINTFORML %CALLNAME:B%の손にはオヤツが握られていた
+	PRINTFORMW どうやら%CALLNAME:B%がつまみ食いをしていたところを%CALLNAME:A%に見つかってしまったようだ
+	IF (TALENT:B:연모 || TALENT:B:친애 || TALENT:B:음란 || TALENT:B:창부 || TALENT:B:복종 || TALENT:B:예속) && MARK:B:반발각인 >= 3
+		PRINTFORMW 日頃から何かと반발してくるので、この際%CALLNAME:B%にお灸をすえてもらうことにしよう
+	ELSE
+		PRINTFORMW 少し可哀想だが今回は%CALLNAME:B%が悪いので、そのままにしておくことにした
+	ENDIF
+	PRINTFORMW ……………
+	PRINTFORMW …………
+	PRINTFORMW ………
+	PRINTFORMW ……
+	PRINTFORML …
+	PRINTFORMW 数時間후、さすがに終わっているだろうと台所を覗いたら、まだお説教中だ…
+	IF MARK:B:반발각인 >= 3
+		PRINTFORML 普段%CALLNAME:MASTER%に반발している%CALLNAME:B%だが、
+		PRINTFORMW %CALLNAME:MASTER%を見つけると涙目で助けてほしそうな視線を送ってきた
+		PRINTL 
+		$INPUT_LOOP_OSEKKYOU1
+		PRINTL [0]仕方ないので助けてあげる
+		PRINTL [1]助けない
+		INPUT
+		IF RESULT == 0
+			PRINTFORMW 仕方がないので、涙目になっている%CALLNAME:B%を助けることにした
+			PRINTFORMW %CALLNAME:A%のお説教から해방された%CALLNAME:B%は、走り去る時に小声でお礼を言った…
+		ELSEIF RESULT == 1
+			PRINTFORMW まあ、せっかくなのでとことん説教してもらおうと思い、そのまま去っていった
+			PRINTFORMW %CALLNAME:B%は助けてもらえないと分かると悲痛な表情を浮かべた
+			PRINTFORMW …%CALLNAME:A%のお説教が終わるのに、更に小一時間かかったみたいだ
+		ELSE
+			GOTO INPUT_LOOP_OSEKKYOU1
+		ENDIF
+	ELSE
+		PRINTFORMW %CALLNAME:MASTER%を見つけた%CALLNAME:B%は助けてほしそうな視線を送ってきた
+		PRINTFORML 涙目状態な%CALLNAME:B%は、今回の事で深く反省しただろう
+		PRINTFORMW さすがにこれ以上は可哀想なので助けてあげることにした
+		PRINTFORML ようやく%CALLNAME:A%のお説教から해방された%CALLNAME:B%はげっそりしていたが、
+		PRINTFORMW %CALLNAME:MASTER%に感謝の言葉を述べた
+		PRINTFORMW %CALLNAME:A%の方は、まだ説教し발りなかったみたいで、ぷんすかしていた
+	ENDIF
+;裸
+ELSEIF B > -1 && (TALENT:B:수치심없음 || ABL:B:노출벽 >= 5)
+	PRINTFORMW 廊下を歩いていると、バスタオル姿の%CALLNAME:B%を説教している%CALLNAME:A%と遭遇した
+	PRINTFORMW どうやら샤워を浴びた후、バスタオル一枚でうろついているところを%CALLNAME:A%に見つかったらしい
+	PRINTFORML そして震えている%CALLNAME:B%を見る限り、相当な時間が経過しているのだろう
+	PRINTFORMW このままだと%CALLNAME:B%が体調を崩しかねないと判断したので助けることにした
+	PRINTFORMW 羞恥心の薄い%CALLNAME:B%に大層ご立腹の%CALLNAME:A%をなんとかなだめることができた
+	PRINTFORML そして震えている%CALLNAME:B%に温かいものをかぶせてあげたら、%CALLNAME:B%は感謝してくれた
+	PRINTFORMW …とりあえず%CALLNAME:B%にバスタオル一枚でうろつくのは程々にと忠告しておいた
+;よくわからない
+ELSEIF B > -1 && !RAND:2
+	PRINTFORMW 廊下を歩いていると%CALLNAME:A%が%CALLNAME:B%にお説教をしている場面に遭遇した
+	PRINTFORMW %CALLNAME:A%になんで説教をしているのか尋ねてみたが、どうやら些細なことで叱ったのが始まりらしい
+	PRINTFORMW %CALLNAME:MASTER%はまあ程々にと言い、その場を離れた
+	PRINTFORML ………説教が終わったのが、一時間후ぐらいだったらしいが、
+	PRINTFORMW  %CALLNAME:A%にしてみれば程々の時間で切り上げたらしい
+	PRINTFORMW %CALLNAME:B%よ…ご愁傷様
+;説教体験
+ELSE
+	PRINTFORMW ふと%CALLNAME:MASTER%は、%CALLNAME:A%がどれぐらいの時間、説教を続けるのか興味が湧いた
+	PRINTFORMW …ちょうど良いことに%CALLNAME:A%が近くにいた
+	IF !RAND:3
+		PRINTFORML 実際に説教をしてもらってどれぐらいか体験してみよう
+		PRINTFORMW ………そう考えて実行したのを激しく후悔した
+		PRINTFORMW わざと%CALLNAME:A%を怒らせた%CALLNAME:MASTER%は、半日ほどずっと説教された
+		PRINTFORMW おかげでご飯を食べられなかった…トホホ…
+	ELSE
+		PRINTFORML 実際に説教をしてもらおうと一瞬考えたが、洒落にならない時間だったら嫌だと思い至り、
+		PRINTFORMW %CALLNAME:A%にどれぐらいの時間説教をしたことがあるか尋ねることにした
+		PRINTFORML %CALLNAME:A%はそんな事を知っても意味がないと諭したが、律儀に答えてくれた
+		PRINTFORMW ………あぶなかった
+		PRINTFORMW 最初に思いついた事を実行しなくて本当によかったと思った%CALLNAME:MASTER%だった
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;みんなといっしょ/二人の회화２/相性・兄弟
+;-------------------------------------------------
+@DAILY_LIFE_102
+;出場キャラを１人検索
+B = DAILYLIFE_GETCHARA(1)
+
+;血縁判定
+LOCAL = RELATIONS2(A, B)
+;0=血縁無し1=兄弟2=兄弟？3=姉弟4=兄妹5=姉妹6=親子7=爺孫8=同派9=同一人物
+SELECTCASE LOCAL
+	CASE 1
+		LOCALS = 兄弟
+	CASE 2
+		LOCALS = 兄弟？
+	CASE 3
+		LOCALS = 姉弟
+	CASE 4
+		LOCALS = 兄妹
+	CASE 5
+		LOCALS = 姉妹
+	CASE 6
+		LOCALS = 親子
+	CASE 7
+		LOCALS = 爺孫
+	CASE 8
+		LOCALS = 同派
+	CASE 9
+		LOCALS = 同一人物
+ENDSELECT
+
+LOCAL:4 = NO:B + 2099
+
+LOCAL:5 = NO:A + 1099
+LOCAL:6 = NO:B + 1099
+
+;面識があるか判定
+LOCAL:1 = 0
+;0=ない1=あったことはある3=結構あってる
+IF CFLAG:A:(LOCAL:4)
+	LOCAL:1 = 1
+	SIF CFLAG:A:(LOCAL:6) + CFLAG:B:(LOCAL:5) >= 1000
+		LOCAL:1 = 3
+ENDIF
+;血縁があるとき、最低でも会ったことがある
+SIF LOCAL && !LOCAL:1
+	LOCAL:1 = 1
+
+;話は弾むか？
+LOCAL:2 = 0
+;0=全然1=あんまり2=そこそこ3=弾むよ4=仲良し
+IF RELATION:A:(NO:B) > 100 && RELATION:B:(NO:A) > 100
+	LOCAL:2 = 3 + RAND:2
+ELSEIF (RELATION:A:(NO:B) > 100 && !RELATION:B:(NO:A)) || (RELATION:B:(NO:A) > 100 && !RELATION:A:(NO:B))
+	LOCAL:2 = 2 + RAND:2
+ELSEIF !RELATION:A:(NO:B) && !RELATION:B:(NO:A)
+	LOCAL:2 = 1 + RAND:2
+ELSEIF RELATION:A:(NO:B) > 100 || RELATION:B:(NO:A) > 100
+	LOCAL:2 = 1
+ENDIF
+
+;好感度が高い方をAに入れ替え
+IF RELATION:B:(NO:A) > RELATION:A:(NO:B)
+	LOCAL:3 = B
+	B = A
+	A = LOCAL:3
+ENDIF
+
+PRINTFORMW 廊下を歩いていると、食堂から話し声が聞こえる
+PRINTFORML 食堂を覗くと%CALLNAME:A%と%CALLNAME:B%がいた
+PRINTFORMW どうやら話し声は\@ LOCAL ? %LOCALS%である # \@%CALLNAME:A%と%CALLNAME:B%のものだったようだ
+;상사상애
+IF CFLAG:A:39 == 165 && CFLAG:A:41 == NO:B
+	PRINTFORML 二人は\@ LOCAL ? %LOCALS%の関係にありながら # 、 \@お互い想いあっている
+	PRINTFORMW 話し声からも、あからさまでないとはいえ確かな愛情が伝わってくる
+		LOCAL:1 = 4
+;A→Bが연모
+ELSEIF (CFLAG:A:39 == 3 || CFLAG:A:39 == 6) && CFLAG:A:41 == NO:B
+	;B→Aが연모
+	IF (CFLAG:B:39 == 3 || CFLAG:B:39 == 6) && CFLAG:B:41 == NO:A
+		PRINTFORML 二人は\@ LOCAL ? %LOCALS%の関係にありながら # \@、お互いに연모の情を抱いているようだ
+		PRINTFORMW 話し声からは、二人の想いと微妙な緊張感が漂ってくる
+		LOCAL:1 = 3
+	;B→Aが복종
+	ELSEIF (CFLAG:B:39 == 5 || CFLAG:B:39 == 8) && CFLAG:B:41 == NO:A
+		PRINTFORML 二人は\@ LOCAL ? %LOCALS%の関係にありながら # \@、%CALLNAME:B%は%CALLNAME:A%に복종しきっている
+		PRINTFORMW 対して%CALLNAME:A%は%CALLNAME:B%に恋心を持っているようだ…
+		PRINTFORMW 話し声からは、二人の想いと微妙な緊張感が漂ってくる
+		LOCAL:1 = 2
+	;その他
+	ELSE
+		PRINTFORMW 二人は\@ LOCAL ? %LOCALS%の関係にありながら # \@、%CALLNAME:A%は%CALLNAME:B%に연모の情を抱いている
+		LOCAL:1 = 2
+	ENDIF
+;A→Bが복종
+ELSEIF (CFLAG:A:39 == 5 || CFLAG:A:39 == 8) && CFLAG:A:41 == NO:B
+	;B→Aが연모
+	IF (CFLAG:B:39 == 3 || CFLAG:B:39 == 6) && CFLAG:B:41 == NO:A
+		PRINTFORML 二人は\@ LOCAL ? %LOCALS%の関係にありながら # \@、%CALLNAME:A%は%CALLNAME:B%に복종しきっている
+		PRINTFORMW 対して%CALLNAME:B%は%CALLNAME:A%に恋心を持っているようだ…
+		PRINTFORMW 話し声からは、二人の想いと微妙な緊張感が漂ってくる
+		LOCAL:1 = 2
+	;B→Aが복종
+	ELSEIF (CFLAG:B:39 == 5 || CFLAG:B:39 == 8) && CFLAG:B:41 == NO:A
+		PRINTFORMW 二人は\@ LOCAL ? %LOCALS%でありながら # \@、お互いに굴복するという倒錯した関係だ
+		LOCAL:1 = 2
+	;その他
+	ELSE
+		PRINTFORMW 二人は\@ LOCAL ? %LOCALS%の関係にありながら # \@、%CALLNAME:A%は%CALLNAME:B%に복종しきっている
+		LOCAL:1 = 1
+	ENDIF
+;A→Bが100以上
+ELSEIF RELATION:A:(NO:B) > 100
+	;B→Aが100以上
+	IF RELATION:B:(NO:A) > 100
+		PRINTFORML それにしても二人は\@ LOCAL ? %LOCALS%だけあって # \@仲が良い
+		;調教での面識あり
+		IF LOCAL:1
+			PRINTFORMW 二人が一緒にいる所をよく見かける
+		ELSE
+			PRINTFORMW 회화も弾んでいるようだ
+		ENDIF
+		LOCAL:1 = 4
+	;B→Aが100以下
+	ELSEIF RELATION:B:(NO:A) < 100
+		PRINTFORMW 二人の組み合わせは\@ LOCAL ? %LOCALS%とはいえ # \@珍しい
+		PRINTFORML %CALLNAME:A%は%CALLNAME:B%に好感を持っているみたいだが、
+		PRINTFORMW %CALLNAME:B%は%CALLNAME:A%のことを苦손に思っているようだ…
+		LOCAL:1 = 3
+	;B→Aが100
+	ELSE
+		PRINTFORMW 二人の組み合わせは\@ LOCAL ? %LOCALS%とはいえ # \@少し珍しい
+		PRINTFORML %CALLNAME:A%は%CALLNAME:B%に好感を持っているみたいだが、
+		PRINTFORMW %CALLNAME:B%は%CALLNAME:A%のことを別段どうとも思っていないようだ…
+		LOCAL:1 = 1
+	ENDIF
+;A→Bが100以下
+ELSEIF RELATION:A:(NO:B) < 100
+	PRINTFORML 二人が회화しているとは、珍しい光景だ
+	PRINTFORMW %CALLNAME:A%と%CALLNAME:B%は\@ LOCAL ? %LOCALS%でありながら # \@お互いに苦손意識を持っていたはずだ…
+	LOCAL:1 = 0
+;A→Bが100
+ELSE
+	;B→Aが100以下
+	IF RELATION:B:(NO:A) < 100
+		PRINTFORMW 二人の組み合わせは\@ LOCAL ? %LOCALS%とはいえ # \@珍しい
+		PRINTFORML %CALLNAME:B%は%CALLNAME:A%のことを苦손にしているみたいだが、
+		PRINTFORMW %CALLNAME:A%は%CALLNAME:B%のことを別段どうとも思っていないようだ…
+		LOCAL:1 = 2
+	;B→Aが100
+	ELSE
+		;調教での面識あり
+		IF LOCAL:1
+			PRINTFORMW \@ LOCAL ? %LOCALS%とはいえ、 # \@二人はお互いに別段どうとも思っていないようだ…
+		ELSE
+			PRINTFORMW \@ LOCAL ? %LOCALS%とはいえ、 # \@ここで二人で居るところは初めて見たような気がする…
+		ENDIF
+		LOCAL:1 = 1
+	ENDIF
+ENDIF
+;회화は弾む？
+SELECTCASE LOCAL:2
+	;全然
+	CASE 0
+		PRINTFORML 二人の회화はぎすぎすしたもので、聞いているこちらの胃が痛くなる…
+		PRINTFORMW %CALLNAME:MASTER%は頭をかいてその場を후にした
+	;あんまり
+	CASE 1
+		PRINTFORML 二人の회화は話題がとぎれとぎれになっていて、あまり盛り上がっていないようだ
+		PRINTFORMW %CALLNAME:MASTER%は頭をかいてその場を후にした
+	;そこそこ
+	CASE 2
+		PRINTFORML %CALLNAME:A%と%CALLNAME:B%は他愛もない회화を続けている
+		PRINTFORMW %CALLNAME:MASTER%は頭をかいてその場を후にした
+	;弾むよ
+	CASE 3
+		PRINTFORML 二人の회화はなかなか弾んでいて、まだまだ話は尽きなさそうだ
+		PRINTFORMW %CALLNAME:MASTER%は頭をかいてその場を후にした
+	;仲良し
+	CASEELSE
+		PRINTFORML 話の内容は他愛もないものだったが、二人の회화はどんどん盛り上がり
+		PRINTFORMW 放っておくと、いつまでも회화を続けそうだ
+		PRINTFORMW %CALLNAME:MASTER%は頭をかいてその場を후にした
+ENDSELECT
+
+;-------------------------------------------------
+;読書にドキッとする
+;-------------------------------------------------
+@DAILY_LIFE_130
+PRINTFORMW %CALLNAME:MASTER%が図書室に来てみると、%CALLNAME:A%が本を読んでいた
+PRINTFORML なんとなく図書室に来ただけなので、%CALLNAME:MASTER%は손ごろな本を取り、
+PRINTFORMW 読むふりをして%CALLNAME:A%を観察することにした
+PRINTFORML …%CALLNAME:A%の本を読む仕草が妙に艶やかだ
+PRINTFORMW なぜだか%CALLNAME:A%が行う、何気ないひとつひとつの仕草にドキッとする
+PRINTFORML いつのまにかぼーっとしていたのが悪かったのだろう、
+PRINTFORMW %CALLNAME:A%が若干顔を赤くして、視線をこちらに向けていた
+IF TALENT:A:음란 || TALENT:A:창부 || TALENT:A:소악마
+	PRINTFORML %CALLNAME:MASTER%は%CALLNAME:A%になんでもないと言ってごまかそうとしたが、
+	PRINTFORMW どうやらはっきりと表情に出てしまっていたらしい
+	PRINTFORMW %CALLNAME:A%は上機嫌になり次々と際どい仕草をしていき、%CALLNAME:MASTER%を翻弄していく
+	PRINTFORML たび重なる%CALLNAME:A%の誘惑に屈し、
+	PRINTFORMW とうとう%CALLNAME:MASTER%は%CALLNAME:A%を観察していた事を白状した
+	PRINTFORML %CALLNAME:A%の反応は意外にも好意的で、%CALLNAME:A%曰く、
+	PRINTFORMW 「%CALLNAME:MASTER%の気を引けた事は솔직함にうれしい」とのことだ
+	PRINTFORML その후%CALLNAME:A%は%CALLNAME:MASTER%の隣に席を移り、
+	PRINTFORMW 本を読みつつ時折욕정を煽る様な仕草を%CALLNAME:MASTER%に見せつけた
+	PRINTFORMW %CALLNAME:MASTER%は%CALLNAME:A%の소악마ぶりを存分に味わった………まあ、むしろ役得だったが
+ELSE
+	PRINTFORML %CALLNAME:A%に見惚れていたというのも、なんだか気恥ずかしい
+	PRINTFORMW なので%CALLNAME:MASTER%は%CALLNAME:A%になんでもないと言って、本のほうに視線を向けた
+	PRINTFORMW %CALLNAME:A%は不思議そうな表情をしたが、%CALLNAME:A%も再び本のほうに視線を向けた
+	PRINTFORMW %CALLNAME:MASTER%はこっそりと、%CALLNAME:A%の観察を再開した
+	PRINTFORMW 何気ない%CALLNAME:A%の仕草に、何度も翻弄される%CALLNAME:MASTER%だった
+ENDIF
+
+;-------------------------------------------------
+;食事にドキッとする
+;-------------------------------------------------
+@DAILY_LIFE_131
+PRINTFORMW %CALLNAME:MASTER%が食堂に来てみると、%CALLNAME:A%が%LUNCH_NAME_DETAIL(A)%を食べていた
+PRINTFORMW 美味しそうに食べていたので%CALLNAME:MASTER%も同じ料理を食べた
+PRINTFORMW %CALLNAME:MASTER%がふと%CALLNAME:A%を見ると、%CALLNAME:A%が何気なくした仕草にドキッとした
+PRINTFORMW そのまま見惚れてしまったようで気がつくと、%CALLNAME:A%が顔を赤くしながら%CALLNAME:MASTER%を見ていた
+IF TALENT:A:음란 || TALENT:A:창부 || TALENT:A:소악마
+	PRINTFORML %CALLNAME:MASTER%は%CALLNAME:A%になんでもないと言ってごまかそうとしたが、
+	PRINTFORMW どうやらはっきりと表情に出てしまっていたらしい
+	PRINTFORMW %CALLNAME:A%は上機嫌になり次々と際どい仕草をしていき、%CALLNAME:MASTER%を翻弄していく
+	PRINTFORML たび重なる%CALLNAME:A%の誘惑に屈し、
+	PRINTFORMW とうとう%CALLNAME:MASTER%は先程%CALLNAME:A%に見惚れていた事を白状した
+	PRINTFORML %CALLNAME:A%の反応は意外にも好意的で、%CALLNAME:A%曰く、
+	PRINTFORMW 「%CALLNAME:MASTER%の気を引けた事は솔직함にうれしい」とのことだ
+	PRINTFORML その후%CALLNAME:A%は%CALLNAME:MASTER%の隣に席を移り、
+	PRINTFORMW 食事をとりつつ時折욕정を煽る様な仕草を%CALLNAME:MASTER%に見せつけた
+	PRINTFORMW %CALLNAME:MASTER%は%CALLNAME:A%の소악마ぶりを存分に味わった………まあ、むしろ役得だったが
+ELSE
+	PRINTFORMW %CALLNAME:A%に見惚れていたというのも、なんだか気恥ずかしい
+	PRINTFORMW なので%CALLNAME:MASTER%は%CALLNAME:A%になんでもないと言って、食事を再開した
+	PRINTFORMW %CALLNAME:A%は不思議そうな表情をしたが、%CALLNAME:A%も食事を再開した
+	PRINTFORMW %CALLNAME:MASTER%は食事をとりながらこっそりと、%CALLNAME:A%の仕草を観察しつづけた
+	PRINTFORMW 何気ない%CALLNAME:A%の仕草に、何度も翻弄される%CALLNAME:MASTER%だった
+ENDIF
+
+;-------------------------------------------------
+;嫁との一時/買い物
+;-------------------------------------------------
+@DAILY_LIFE_132
+VARSET LOCAL
+;연모陥落を１人選択
+B = DAILYLIFE_GETTALENT_1(3, 6)
+PRINTFORMW そろそろ生活用品がなくなり始めたので買い出しに行く必要がある…
+PRINTFORMW その為買い出しリストを作っていると%CALLNAME:A%が部屋に訪れた
+PRINTFORML %CALLNAME:A%は買い出しリストを見て、%CALLNAME:MASTER%が街に出かけることを知ると、
+PRINTFORMW 一緒についていきたいと頼んできた
+;両方상사상애でない
+IF B > -1 && KANRAKU(A) == 1 && !TALENT:A:상사상애 && !TALENT:B:상사상애 && !MARK:B:반발각인
+	PRINTFORMW 更にやってきた%CALLNAME:B%も同様についていきたいと言う
+	PRINTFORML 今ではすっかり%CALLNAME:MASTER%に친애の情を抱いている二人の頼みだ、
+	PRINTFORMW 無下に断ることもないので許可すると、二人はちょっと待ってと言って駈け出していった
+	PRINTFORMW …数分후、二人は軽く身だしなみを整えて戻ってきた
+	PRINTFORMW 準備ができたので街へ出かけよう
+	PRINTFORML ……………
+	;AとBの性格タイプ
+	IF TALENT:A:무관심 || TALENT:A:감정부족 || TALENT:A:얌전함 || TALENT:A:비관적
+		LOCAL = 1
+	ELSEIF TALENT:A:호기심 || TALENT:A:유치
+		LOCAL = 2
+	ELSEIF TALENT:A:프라이드높음 || TALENT:A:건방짐 || TALENT:A:반항적 || TALENT:A:츤데레
+		LOCAL = 3
+	ELSE
+		LOCAL = 4
+	ENDIF
+	IF TALENT:B:무관심 || TALENT:B:감정부족 || TALENT:B:얌전함 || TALENT:B:비관적
+		LOCAL:1 = 1
+	ELSEIF TALENT:B:호기심 || TALENT:B:유치
+		LOCAL:1 = 2
+	ELSEIF TALENT:B:프라이드높음 || TALENT:B:건방짐 || TALENT:B:반항적 || TALENT:B:츤데레
+		LOCAL:1 = 3
+	ELSE
+		LOCAL:1 = 4
+	ENDIF
+	IF LOCAL == LOCAL:1
+		IF LOCAL == 1
+			PRINTFORML 普段消극的な二人は、それでも%CALLNAME:MASTER%と街に出られることが嬉しいようだ
+			PRINTFORMW %CALLNAME:A%はいつになく입数が多いし、%CALLNAME:B%は%CALLNAME:MASTER%の腕を取って離さない
+		ELSEIF LOCAL == 2
+			PRINTFORML %CALLNAME:A%と%CALLNAME:B%は珍しいものを見つけたといっては、
+			PRINTFORMW 両側から%CALLNAME:MASTER%の腕を取って引っ張りだす
+			PRINTFORML 遊びに来ているわけではないのだが…
+			PRINTFORM 楽しそうな二人の様子に、
+		ELSEIF LOCAL == 3
+			PRINTFORML %CALLNAME:A%と%CALLNAME:B%は、お互いの顔と%CALLNAME:MASTER%を
+			PRINTFORMW 行ったり来たり、ちらちら見ながら歩いている
+			PRINTFORML どうかしたのかと聞くと、二人で一瞬固まった후、
+			PRINTFORMW %CALLNAME:A%が強引に%CALLNAME:MASTER%の腕に抱きついてきた
+			PRINTFORMW 一拍遅れて反対側の腕に、負けじと%CALLNAME:B%も抱きついた
+			PRINTFORMW どうやらただ腕を組んで歩きたかったらしい…
+		ELSE
+			PRINTFORMW %CALLNAME:A%と%CALLNAME:B%は、両側から%CALLNAME:MASTER%の腕に抱きつき上機嫌だ
+			PRINTFORMW 和気あいあいと회화をしながら店をまわった
+		ENDIF
+	ELSE
+		PRINTFORM %CALLNAME:A%
+		IF LOCAL == 1
+			PRINTFORML は%CALLNAME:MASTER%の静かに후ろを歩き、
+		ELSEIF LOCAL == 2
+			PRINTFORML は%CALLNAME:MASTER%の손を取ってはしゃぎ、
+		ELSEIF LOCAL == 3
+			PRINTFORML は買い出しリストを손に%CALLNAME:MASTER%の前を歩き、
+		ELSE
+			PRINTFORML は%CALLNAME:MASTER%の腕に抱きつき上機嫌で、
+		ENDIF
+		PRINTFORM %CALLNAME:B%
+		IF LOCAL:1 == 1
+			PRINTFORMW は후ろから静かについてくる
+		ELSEIF LOCAL:1 == 2
+			PRINTFORMW は興奮してきょろきょろ辺りを見回しては%CALLNAME:MASTER%の名を呼んでいる
+		ELSEIF LOCAL:1 == 3
+			PRINTFORMW は買い出しリストを손に買い物を先導している
+		ELSE
+			PRINTFORMW は上機嫌で腕に抱きついている
+		ENDIF
+		PRINTFORMW 三人でにぎやかに회화しながら店をまわった
+	ENDIF
+	PRINTFORMW 普段は必要に駆られて訪れる街だが、偶にはこういうのもいいな、と思いました…
+ELSEIF TALENT:A:예속
+	PRINTFORML %CALLNAME:A%は既に身も心も%CALLNAME:MASTER%のモノだ
+	PRINTFORMW まあいいだろうと思い、%CALLNAME:A%を連れて買い出しにいくことにした
+	PRINTFORMW ……………
+	IF TALENT:A:소인체형
+		IF TALENT:MASTER:소인체형
+			PRINTFORMW %CALLNAME:A%は小さな体いっぱいに荷物を抱えて運んでいる
+			PRINTFORML 所詮は%CALLNAME:MASTER%と同じ程度の体格なので大した量ではないのだが、
+			PRINTFORMW それでも１人で運ぶことを考えたら随分と買い出しははかどった、
+		ELSE
+			PRINTFORML ……が、%CALLNAME:A%の小さな体では大した荷物も持たせられない
+			PRINTFORMW それでも何か손伝いたいと言うので、果物を一袋だけ持たせてやった
+		ENDIF
+		PRINTFORMW 帰宅した후%CALLNAME:A%を褒めてやると、しばらく嬉しそうにしていました…
+	ELSE
+		PRINTFORML 二人で손分けして손早く買い物を済ませ、%CALLNAME:A%が荷物の大半を持ってくれたので
+		PRINTFORMW %CALLNAME:MASTER%は悠々と帰宅することができた…
+	ENDIF
+ELSE
+	IF TALENT:A:상사상애
+		PRINTFORML 今ではすっかり%CALLNAME:MASTER%の恋人である%CALLNAME:A%の頼みだ、
+		PRINTFORMW 無下に断ることもないので共に行くことにした
+		PRINTFORMW それになんだかんだいって%CALLNAME:A%と一緒に過ごす時間を大切にしたいという気持ちもある
+	ELSEIF TALENT:A:친애
+		PRINTFORML %CALLNAME:A%が反抗することはもう殆どなく、
+		PRINTFORMW %CALLNAME:MASTER%に確かな愛情を抱いているので許可してあげた
+	ELSE
+		PRINTFORMW この頃%CALLNAME:A%が反抗することは殆どなく、연모まで抱いている節があるので許可してあげた
+	ENDIF
+	PRINTFORML %CALLNAME:MASTER%と街に出かけられる事が分かると、
+	PRINTFORMW %CALLNAME:A%はちょっと待ってと言って駆け出して行った
+	PRINTFORML …数分후、%CALLNAME:A%が戻ってきた
+	PRINTFORMW どうやら身だしなみを整えてきたようだ
+	PRINTFORMW 準備ができたので、街へ出かけよう
+	PRINTFORMW ……………
+	PRINTFORML 普段は必要に駆られて訪れる街も、和気あいあいと회화しながら歩くと随分と違う
+	PRINTFORMW %CALLNAME:A%も%CALLNAME:MASTER%の腕に抱きつき、上機嫌である
+	IF TALENT:A:상사상애
+		PRINTFORML 本当に%CALLNAME:A%は%CALLNAME:MASTER%にとってかけがえのない存在になった事を実感する
+		PRINTFORMW %CALLNAME:A%の仕草ひとつに愛おしさを感じ、%CALLNAME:A%が笑顔でいるだけでこちらも幸せになる
+		PRINTFORML 今度買い出しではなく、%CALLNAME:A%と純粋にデートを楽しむのもありかもしれない
+		PRINTFORMW 甘える%CALLNAME:A%を손繰り寄せて帰路に就いた
+	ELSE
+		PRINTFORMW ふと気付くと%CALLNAME:MASTER%は自分たちに多数の視線が向いていることに気づいた
+		LOCAL = RAND:3
+		IF TALENT:A:수수께끼의매력
+			PRINTFORML ………老若男女を問わず…
+			PRINTFORMW 誰をも惹きつける수수께끼의매력を持つ%CALLNAME:A%に寄り添われているのが羨ましいのだろう
+		ELSEIF TALENT:A:매혹
+			PRINTFORML ………男女を問わず…
+			PRINTFORMW 매혹的な%CALLNAME:A%に寄り添われているのが羨ましいのだろう
+		ELSEIF TALENT:A:인기
+			PRINTFORML ………老若を問わず…
+			PRINTFORMW 인기の%CALLNAME:A%と歩いているのだからしかたがないか…
+		ELSEIF TALENT:A:소인체형 || TALENT:MASTER:소인체형
+			PRINTFORML ………どうも視線が暖かい…
+			PRINTFORMW 아이扱いで微笑ましく思われている気がする…
+		ELSEIF (MALE(A) && !LOCAL) || (!MALE(A) && LOCAL > 0)
+			PRINTFORML ………主に男性陣から…
+			PRINTFORMW %CALLNAME:A%に寄り添われているのが羨ましいのだろう
+		ELSE
+			PRINTFORML ………主に女性陣から…
+			PRINTFORMW %CALLNAME:A%に寄り添われているのが羨ましいのだろう
+		ENDIF
+		IF TALENT:A:겁쟁이
+			PRINTFORML 視線に怯えたのか%CALLNAME:A%が更に強く抱きついてきた
+			PRINTFORMW それによって更に注目を浴びた気がする…
+			PRINTFORMW %CALLNAME:MASTER%達は買い出しを손短に済ませ、そそくさと帰路に就いた
+		ELSE
+			PRINTFORMW %CALLNAME:A%も視線に気づいたが一向に離れようとはしない
+			PRINTFORML そればかりか見せつけるようにさらに密着してきたので、
+			PRINTFORMW %CALLNAME:MASTER%は苦笑して買い出しを早く済ませることにした
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;嫁との一時/耳掃除
+;-------------------------------------------------
+@DAILY_LIFE_133
+PRINTFORML %CALLNAME:MASTER%が部屋で耳掃除をしていると%CALLNAME:A%が通りかかった
+PRINTFORM %CALLNAME:A%は%CALLNAME:MASTER%を見つけると
+IF TALENT:A:무관심 || TALENT:A:감정부족
+	PRINT そっと
+ELSE
+	PRINT にこやかな笑顔で
+ENDIF
+PRINTW 寄り添ってきた
+PRINT そして、
+SIF TALENT:A:얌전함
+	PRINT おずおずと控え目ながら
+PRINTFORMW %CALLNAME:MASTER%の耳掃除をしたいと申し出てくれた
+PRINTFORMW せっかくなので耳掃除を%CALLNAME:A%にやってもらうことにしよう
+SIF !TALENT:A:양다리결손 || TALENT:A:달마
+	PRINTFORMW そう思い%CALLNAME:MASTER%は%CALLNAME:A%の膝に頭を乗せた
+PRINTFORML ………%CALLNAME:A%がしてくれる耳掃除はとても心地よかった
+PRINTFORMW 自分でやる時は、どうしても届きにくい箇所もやってもらえるのはとてもありがたい
+IF TALENT:A:상사상애 && TALENT:A:헌신적 && TALENT:A:습득빠름
+	PRINTFORMW %CALLNAME:A%は耳垢を要領よく丹念に取り除いてくれている
+	PRINTFORML あまりの손際の良さに感心していると、%CALLNAME:A%は%CALLNAME:MASTER%が仮眠をとっている時、
+	PRINTFORMW たまにこっそりと耳掃除をしていたと教えてくれた
+	PRINTFORML %CALLNAME:A%が見えないところでも尽くしてくれていることを知った%CALLNAME:MASTER%は、
+	PRINTFORMW なんだか穏やかな気分になった
+ELSEIF TALENT:A:상사상애 && TALENT:A:습득느림
+	PRINTFORML %CALLNAME:A%は熱心に耳掃除をしてくれているが、時折통증を感じる…
+	PRINTFORMW まあ、元々器用ではないので仕方がないのだが…
+	PRINTFORML それに痛いという度に顔を真っ赤にして縮こまって、小さく「ごめんなさい」という%CALLNAME:A%の姿が、
+	PRINTFORMW それはそれで可愛らしくてそれ以上強く言えない
+ELSEIF TALENT:A:헌신적 && TALENT:A:습득빠름
+	PRINTFORMW %CALLNAME:A%は耳垢を要領よく丹念に取り除いてくれている
+ELSEIF TALENT:A:헌신적
+	PRINTFORMW %CALLNAME:A%は耳垢を丹念に取り除いてくれている
+ELSEIF TALENT:A:습득빠름
+	PRINTFORMW %CALLNAME:A%は耳垢を要領よく取り除いてくれている
+ELSEIF !TALENT:A:습득느림
+	PRINTFORML %CALLNAME:A%は耳垢をなかなか上손に取り除いてくれている
+	PRINTFORMW %CALLNAME:A%を褒めると、さらに上機嫌になって耳掃除を続けた
+ELSEIF TALENT:A:습득느림
+	PRINTFORML %CALLNAME:A%は熱心に耳掃除をしてくれているが、時折통증を感じる…
+	PRINTFORMW まあ、元々器用ではないので仕方がないのだが…
+ELSE
+	PRINTFORMW %CALLNAME:A%は熱心に耳掃除をしてくれている
+ENDIF
+PRINTFORMW それにしても…
+;消滅or無効化したものを調べる
+LOCAL = 0
+;0:일선을넘지않음
+CSVTALENT NO:A, 27, CFLAG:A:0
+SIF RESULT
+	SETBIT LOCAL, 0
+;1:억압
+CSVTALENT NO:A, 32, CFLAG:A:0
+SIF RESULT && !TALENT:A:억압
+	SETBIT LOCAL, 1
+;2:저항
+CSVTALENT NO:A, 34, CFLAG:A:0
+SIF RESULT && !TALENT:A:저항
+	SETBIT LOCAL, 2
+;3:스킨십불편
+CSVTALENT NO:A, 66, CFLAG:A:0
+SIF RESULT && !TALENT:A:스킨십불편
+	SETBIT LOCAL, 3
+;4:남자혐오
+SIF TALENT:A:남자혐오 && MALE(MASTER)
+	SETBIT LOCAL, 4
+;5:여자혐오
+SIF TALENT:A:여자혐오 && !MALE(MASTER)
+	SETBIT LOCAL, 5
+;相性
+CSVRELATION NO:A, NO:MASTER, CFLAG:A:0
+SIF RESULT != 0 && RESULT < 100 && RELATION:A:(NO:MASTER) > 100
+	SETBIT LOCAL, 6
+SIF LOCAL
+	PRINT 最初は
+SIF GETBIT(LOCAL, 1)
+	PRINTFORM 頑なに心を閉ざして
+SIF GETBIT(LOCAL, 2)
+	PRINTFORM 激しい저항をして
+SIF GETBIT(LOCAL, 0)
+	PRINTFORM 何をしてもどこか一線を保って
+SIF GETBIT(LOCAL, 3)
+	PRINTFORM 触れるのも触れられるのも嫌がって
+SIF GETBIT(LOCAL, 4)
+	PRINTFORM 男など嫌いだと言って
+SIF GETBIT(LOCAL, 5)
+	PRINTFORM 女など嫌いだと言って
+SIF GETBIT(LOCAL, 6)
+	PRINTFORM %CALLNAME:MASTER%を特に嫌って
+SIF LOCAL
+	PRINT いた
+PRINTFORM %CALLNAME:A%が
+SIF  !TALENT:A:양다리결손 || TALENT:A:달마
+	PRINT 膝枕をしてくれて
+PRINTW 、耳掃除をしてくれるようなった
+IF TALENT:A:상사상애
+	PRINTFORML そして今ではこうやって色々と尽くしてくれる
+	PRINTFORMW その事に%CALLNAME:MASTER%は嬉しさを隠せず、ついつい顔が綻んでくる
+	SIF !TALENT:A:양다리결손 || TALENT:A:달마
+		PRINTFORMW 耳掃除が終わるまでの間、%CALLNAME:A%の膝枕を堪能した
+	PRINTFORMW 今度またやってもらおうかな…
+ELSE
+	PRINTFORMW 調教の成果は確実に出てきているようだ…
+ENDIF
+EXP:A:애정경험 += 5
+EXP:MASTER:애정경험 += 5
+PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;嫁との一時/お風呂
+;-------------------------------------------------
+@DAILY_LIFE_134
+PRINTFORML %CALLNAME:MASTER%が風呂に入ろうと浴室に向かう途中、%CALLNAME:A%と出会った
+PRINTFORMW %CALLNAME:A%は%CALLNAME:MASTER%に労いの言葉をかけた후、少したってから浴室に入ってきた
+PRINTFORML 背中を流す、とはにかみながら申し出てくれるので、好意に甘えるとしよう
+PRINTFORMW %CALLNAME:A%は熱心に身体をきれいにしてくれる
+PRINTFORMW 繊細な場所まで丹念に洗ってくれる
+PRINTFORML ふと%CALLNAME:A%の손が止まった
+PRINTFORMW どうしたのかと思っていると、%CALLNAME:A%がそっと%CALLNAME:MASTER%の背中に寄り添ってきた
+PRINTFORMW その状態で%CALLNAME:MASTER%に対する慕情を語りだした
+PRINTFORML %CALLNAME:A%の語りが終わってもしばらくこのままの状態でいさせてほしいと懇願したので好きにさせてあげた
+PRINTFORMW しばらくたった후、%CALLNAME:A%はより熱心に背中を流してくれた
+IF TALENT:A:상사상애
+	;体格差判定
+	LOCAL = BUILD2(MASTER, A)
+	;同じか主人の方がおおきい
+	IF LOCAL > -1
+		PRINTFORML 背中を流してくれたお礼に、%CALLNAME:A%を抱き込むようにして浴槽につかった
+	ELSE
+		PRINTFORML 背中を流してくれたお礼に、%CALLNAME:A%と抱き合うようにして浴槽につかった
+	ENDIF
+	PRINTFORMW %CALLNAME:A%は顔を赤く染めながらもどこか嬉しそうに大人しくつかっている
+	PRINTFORML %CALLNAME:MASTER%が耳元で愛を囁くと更に顔を赤く染めた
+	PRINTFORMW %CALLNAME:A%の仕草があまりにも可愛らしいのでついつい色々なことをしたくなる
+	PRINTFORML 浴室から出ると%CALLNAME:A%はまだ顔を赤くしながら、機会があればまたやると告げ、
+	PRINTFORMW 顔を染めながらそそくさと去って行った
+ENDIF
+EXP:A:애정경험 += 5
+EXP:MASTER:애정경험 += 5
+PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;嫁との一時/晩酌
+;-------------------------------------------------
+@DAILY_LIFE_135
+PRINTFORML 今宵は月が綺麗なので、%CALLNAME:MASTER%はそれを肴に酒を楽しんでいる
+PRINTFORMW %CALLNAME:A%が寄り添って酌をしてくれている
+IF ABL:A:요리기능 >= 3
+	PRINTFORMW %CALLNAME:A%は손作りのおつまみまで用意してくれた
+ELSE
+	PRINTFORMW %CALLNAME:A%はおつまみも用意してくれた
+ENDIF
+PRINTFORMW おかげでかなり気分がよい
+PRINTFORMW %CALLNAME:A%も%CALLNAME:MASTER%の横でにこやかにしている
+IF TALENT:A:상사상애
+	PRINTFORML 月の光を浴びた%CALLNAME:A%はいつもよりも綺麗に見える
+	PRINTFORMW まるで月下に咲く一輪の花のようにさえ感じる
+	PRINTFORMW そんな%CALLNAME:A%と想い会い、情を交わしている
+	PRINTFORML ふと%CALLNAME:A%が頬を染めて徳利を見つめていることに気付いた
+	PRINTFORML どうかしたのかと見守ると、%CALLNAME:A%は徳利に入っている酒を입に含み、
+	PRINTFORMW そのまま%CALLNAME:MASTER%にキスをした
+	PRINTFORML 不意をつかれた形で입移しを享受することになった%CALLNAME:MASTER%だったが、
+	PRINTFORMW あまりの心地よさにされるがままになった
+	PRINTFORML やがて長いキスが終わり、%CALLNAME:A%がどうだったかと上目づかいで聞くので、
+	PRINTFORMW %CALLNAME:A%の腰に손をまわして引き寄せて、最高だったと答えた
+	PRINTFORMW %CALLNAME:A%と夜遅くまでいい雰囲気で月見酒を楽しんだ
+ELSE
+	PRINTFORMW %CALLNAME:A%から注ぎ込まれたお酒を楽しみながら月見を続けた
+ENDIF
+EXP:A:애정경험 += 5
+EXP:MASTER:애정경험 += 5
+PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;嫁との一時/料理
+;-------------------------------------------------
+@DAILY_LIFE_136
+LOCALS = %LUNCH_NAME_DETAIL(A,1)%
+PRINTFORMW %CALLNAME:MASTER%が台所の近くを通りかかると、%CALLNAME:A%の姿が見えた
+PRINTFORMW 様子を窺って見ると、%CALLNAME:A%はどうやら料理を作っているようだ
+;ヘタ
+IF TALENT:A:요리치 || (!ABL:A:요리기능 && !TALENT:A:요리고수)
+	PRINTFORML %CALLNAME:A%の料理の腕は筆舌につくしがたい…
+	PRINTFORMW それでも少しは上손になりたいと、料理の特訓をしているようだ
+	PRINTFORMW %CALLNAME:A%の側には、料理に関する本がいくつも開かれている…
+;上손
+ELSEIF TALENT:A:요리고수 || (ABL:A:요리기능 >= 4 && !TALENT:A:요리치)
+	PRINTFORMW 요리고수な%CALLNAME:A%は、손際良く作業を進めている
+;そこそこ
+ELSE
+	PRINTFORML %CALLNAME:A%はあまり料理が得意でないせいか、四苦八苦しながら頑張っている
+	PRINTFORMW %CALLNAME:A%の側には、料理に関する本がいくつも開かれている…料理の特訓をしているようだ
+ENDIF
+PRINTFORMW あまりにも熱心にやっているので、声をかけるのも悪いかなと思いそっと台所を離れた
+PRINTFORML ………
+PRINTFORMW 自室に戻りしばらく本を読んでいると、ドア越しにノックの音と%CALLNAME:A%の声が聞こえた
+PRINTFORML %CALLNAME:A%に部屋に入るように促すと、%CALLNAME:A%はを%LOCALS%の皿を持っていた
+PRINTFORMW そして%CALLNAME:MASTER%に食べてほしいとお願いしてきた
+;ヘタ
+IF TALENT:A:요리치 || (!ABL:A:요리기능 && !TALENT:A:요리고수)
+	PRINTFORMW %CALLNAME:A%が作ったとみられる%LOCALS%の見た目は少々不格好だ
+	PRINTFORML 食べる事に少し躊躇したが、%CALLNAME:A%のすがる様な視線と%LOCALS%を作った際に怪我をしたのであろうか、
+	PRINTFORMW 指の包帯を見て、拒絶するのも可哀想なので食べてあげる事にした
+	PRINTFORMW ……………
+	IF TALENT:A:상사상애 && !RAND:3
+		PRINTFORML %CALLNAME:A%の作った%LOCALS%は予想外に美味しく、%CALLNAME:MASTER%は思わずうまい…と呟いた
+		PRINTFORMW 見た目は良くないのだが味は%CALLNAME:MASTER%好みになっており、愛情が感じられた
+		PRINTFORMW %CALLNAME:MASTER%の反応を見て、%CALLNAME:A%は料理が成功した事に感극まったのかうれし涙を流した
+		PRINTFORML %CALLNAME:MASTER%は感극まった%CALLNAME:A%を宥めながら、
+		PRINTFORMW 今度も料理を作ってくれるかと聞いたらしっかりと嬉しそうに%CALLNAME:A%は頷いた
+	ELSEIF !RAND:3
+		PRINTFORML %CALLNAME:A%の作った%LOCALS%は可もなく不可もなくといった感じだった
+		PRINTFORMW まあ元々の%CALLNAME:A%の料理の腕を考えれば、特訓の成果は十分出ていると思う
+		PRINTFORMW %CALLNAME:MASTER%の反応を見て、成果が芳しくないと思ったのか%CALLNAME:A%は表情を曇らせた
+		PRINTFORML %CALLNAME:MASTER%はそんな%CALLNAME:A%の頭を撫でてあげて、
+		PRINTFORMW 次はもっと美味しいのを期待すると励ますと%CALLNAME:A%はしっかりと頷いた
+	ELSE
+		PRINTFORML %CALLNAME:A%の作った%LOCALS%は予想通りというか、不思議な味がした…
+		PRINTFORMW 食べ続けているうちに%CALLNAME:MASTER%は軽い目眩がしてきた
+		PRINTFORMW %CALLNAME:MASTER%の様子を見て%CALLNAME:A%は料理が失敗した事を悟り、涙目になって謝罪した
+		PRINTFORML 泣き出した%CALLNAME:A%をなんとか宥め、部屋に帰らせた후%CALLNAME:MASTER%はベッドに倒れ込んだ
+		PRINTFORMW そして残りの休憩時間を%CALLNAME:MASTER%は安静して過ごすことになった
+	ENDIF
+;上손
+ELSEIF TALENT:A:요리고수 || (ABL:A:요리기능 >= 4 && !TALENT:A:요리치)
+	PRINTFORML 요리고수な%CALLNAME:A%が作ったであろう%LOCALS%の見た目は抜群に良い
+	PRINTFORMW 何よりおいしそうな香りが食欲をそそったので%CALLNAME:MASTER%は喜んで頂くことにした
+	PRINTFORMW ……………
+	IF TALENT:A:상사상애
+		PRINTFORML %CALLNAME:A%の作った%LOCALS%は극上だった
+		PRINTFORMW 見た目と香りだけでなく味も絶品で、しかも%CALLNAME:MASTER%好みの味付けに仕上がっており文句無しに美味しかった
+		PRINTFORMW あまりの美味しさに、一人で食べるのも勿体ないと考え、%CALLNAME:A%も一緒に食べようと提案した
+		PRINTFORMW %CALLNAME:A%は頬を染め笑顔をこぼすと、喜んで誘いに応じた
+		PRINTFORMW 二人で和気あいあいと회화を交わしながら、%LOCALS%を堪能した
+		PRINTFORML 食事を堪能した후、%CALLNAME:MASTER%は%CALLNAME:A%を膝に座らせ、
+		PRINTFORMW 抱きしめる格好でソファに座って時折キスを交えながらゆったりと休憩時間を過ごした
+		PRINTFORML %CALLNAME:A%は%CALLNAME:MASTER%に甘えるようにしなだれかかり、嬉しそうにキスを甘受している
+		PRINTFORMW %CALLNAME:A%のおかげで幸せなひと時を過ごした
+	ELSE
+		PRINTFORML %CALLNAME:A%の作った%LOCALS%は予想通りに美味しかった
+		PRINTFORMW あまりの美味しさに、一人で食べるのも勿体ないと考え、%CALLNAME:A%も一緒に食べようと提案した
+		PRINTFORMW %CALLNAME:A%はその提案に少し驚いたようだが、料理を気にいった上での提案だと気付くと喜んで応じた
+		PRINTFORML %CALLNAME:MASTER%と%CALLNAME:A%は、和気あいあいと회화を交わしながら%LOCALS%を堪能した
+		PRINTFORMW 食事を堪能した후、改めて%CALLNAME:A%にお礼を言うと、%CALLNAME:A%は濃厚なキスをした
+		PRINTFORMW キスを楽しんだ후、%CALLNAME:A%にまた料理を作ってくれるかとお願いしたら、はにかみながら快諾してくれた
+	ENDIF
+;そこそこ
+ELSE
+	PRINTFORML %CALLNAME:A%が作ったであろう%LOCALS%は素朴な雰囲気を漂わせている
+	PRINTFORMW おいしそうな香りが食欲をそそられたので、ありがたく頂くことにした
+	PRINTFORMW ……………
+	IF TALENT:A:상사상애 || !RAND:2
+		PRINTFORML %CALLNAME:A%の作った%LOCALS%は予想以上に美味しく、%CALLNAME:MASTER%は思わずうまい…と呟いた
+		PRINTFORMW 味が%CALLNAME:MASTER%好みで、%CALLNAME:A%の愛情が感じられる
+		PRINTFORMW %CALLNAME:MASTER%の反応を見て、%CALLNAME:A%はにこにこと笑っている
+		PRINTFORMW 今度も料理を作ってくれるかと聞くと、%CALLNAME:A%は嬉しそうに頷いた
+	ELSE
+		PRINTFORML %CALLNAME:A%の作った%LOCALS%は悪くは無いのだが、どうにも一味발りない
+		PRINTFORMW これから頑張ればもっと美味しくなるだろうが…
+		PRINTFORMW %CALLNAME:MASTER%の反応を見て、成果が芳しくないと思ったのか%CALLNAME:A%は表情を曇らせた
+		PRINTFORML %CALLNAME:MASTER%はそんな%CALLNAME:A%の頭を撫でてあげて、
+		PRINTFORMW 次はもっと美味しいのを期待すると励ますと%CALLNAME:A%はしっかりと頷いた
+	ENDIF
+ENDIF
+EXP:A:가사경험 += 3
+PRINTFORML %CALLNAME:A%の가사경험 ＋３
+EXP:A:애정경험 += 5
+EXP:MASTER:애정경험 += 5
+PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;嫁との一時/デート
+;-------------------------------------------------
+@DAILY_LIFE_137
+PRINTFORML ふと%CALLNAME:MASTER%は、以前買い出しの為に%CALLNAME:A%と街へ出かけた際の事を思い出した
+PRINTFORMW 今考えると、あの時は随分と充実した時間だったと感じる…
+PRINTFORML 休憩をとる事にしたのでやる事はあまりない…
+PRINTFORMW せっかくだから%CALLNAME:A%と街へ出かけて羽を伸ばそうと考えた
+PRINTFORMW 善は急げと%CALLNAME:MASTER%は%CALLNAME:A%の部屋へと向かった
+IF !RAND:3
+	PRINTFORMW %CALLNAME:A%の部屋へと向かう途中、偶然にも%CALLNAME:A%が通りかかった
+	IF !RAND:3
+		PRINTFORML %CALLNAME:A%に今何かする予定があるのかと尋ねると、
+		PRINTFORMW 特にないので%CALLNAME:MASTER%と過ごそうと考えていたと答えてくれた
+		PRINTFORML 街へ出かけないかと%CALLNAME:A%を誘うと、一瞬驚いたような顔をした후、
+		PRINTFORMW とびきりの笑顔ではにかみ了承してくれた
+		PRINTFORMW そして顔を赤らめながら小さな声で、「これって…デートの誘い………」と呟いた
+	ELSEIF !RAND:2
+		PRINTFORMW %CALLNAME:A%に今何かする予定があるのかと尋ねると、ちょっとした予定があると答えた
+		PRINTFORML タイミングが悪かったかなと思いつつも、街へ出かけないかと%CALLNAME:A%を誘うと、
+		PRINTFORMW 一瞬驚いたような顔をした후、笑顔で了承してくれた
+		PRINTFORML %CALLNAME:A%曰く、ちょっとした予定は別に今すぐやる必要がない事なのと、
+		PRINTFORMW せっかく%CALLNAME:MASTER%がデートに誘ってくれたからデートを楽しみたいとのことだ
+	ELSE
+		PRINTFORML %CALLNAME:A%に今何かする予定があるのか聞いてみると、どうやら予定があるらしい
+		PRINTFORMW 残念だなと感じているとどうやら顔に出ていたらしく、%CALLNAME:A%が何か用事があったのか聞いてきた
+		PRINTFORML 街へ出かけようと%CALLNAME:A%を誘うつもりだったと答えると、
+		PRINTFORMW %CALLNAME:A%は一瞬驚き、少しの間待ってほしいと答え相当慌てた様子でその場を立ち去った
+		PRINTFORML その光景に唖然とした후、%CALLNAME:MASTER%は所在無げにその場で待っていると、
+		PRINTFORMW 数分ぐらいたった頃に%CALLNAME:A%が息を切らしながらやってきた
+		PRINTFORML どうしたのかと聞くと、%CALLNAME:A%は大急ぎで用事を済ませてきたと答えた
+		PRINTFORMW %CALLNAME:A%は、%CALLNAME:MASTER%がデートに誘ってくれた事がとても嬉しかったようだ
+	ENDIF
+ELSE
+	IF !RAND:2
+		PRINTFORML %CALLNAME:A%の部屋に訪れると%CALLNAME:A%は読書をしていた
+	ELSE
+		PRINTFORML %CALLNAME:A%の部屋に訪れると%CALLNAME:A%はくつろいでいた
+	ENDIF
+	PRINTFORMW %CALLNAME:A%にこれから何かする予定があるのかと尋ねると、特にないと答えた
+	PRINTFORML 街へ出かけないかと%CALLNAME:A%を誘うと、一瞬驚いたような顔をした후、
+	PRINTFORMW とびきりの笑顔ではにかみ了承してくれた
+	PRINTFORMW そして顔を赤らめながら小さな声で、「これって…デートの誘い………」と呟いた
+ENDIF
+PRINTFORML 二人で街へと出かけた
+PRINTFORMW %CALLNAME:A%が%CALLNAME:MASTER%の腕に抱きつく格好なのでゆっくりと歩いている
+PRINTFORML %CALLNAME:A%は%CALLNAME:MASTER%から贈られた指輪を見せつけるようにして、
+PRINTFORMW しきりに甘えてきたりするのが愛しく感じる
+PRINTFORML 人目も憚らずキスをしたり、イチャイチャしているので、
+PRINTFORMW 街の人からは痛い、もしくは妬ましいという視線を送られてくるがさほど気にならない
+PRINTFORML %CALLNAME:A%が行きたいとねだった場所に一通り行って、二人で存分に楽しみ羽を伸ばした
+PRINTFORMW 話すたびに극上の笑顔を見せてくれる%CALLNAME:A%が嫁である事に改めて幸せを噛みしめた
+PRINTFORML 帰路に就いている際に、またデートをしようと誘うと、%CALLNAME:A%は笑顔で快諾してくれた
+PRINTFORMW %CALLNAME:MASTER%は本当に良い時間を過ごせたと思い、知らず知らずのうちに笑顔がこぼれていた
+EXP:A:애정경험 += 5
+EXP:MASTER:애정경험 += 5
+PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;嫁との一時/花嫁修業
+;-------------------------------------------------
+@DAILY_LIFE_138
+LOCAL:3 = NO:MASTER + 1099
+
+VARSET LOCAL
+;共犯者か、陥落済みの奴隷で主人からの조교경험１０００以上のキャラを検索
+FOR LOCAL, 0, CHARANUM
+	;主人は除く
+	SIF LOCAL == MASTER
+		CONTINUE
+	;日常イベントに登場不可
+	SIF !DAILYLIFE_CHARA(LOCAL)
+		CONTINUE
+	;既に登場しているキャラと被っていたら不可
+	SIF LOCAL == A
+		CONTINUE
+	;共犯者でなく未陥落奴隷か[실의]、主人からの조교경험１０００未満なら不可
+	SIF CFLAG:LOCAL:1 != 3 && (!KANRAKU(LOCAL) || TALENT:LOCAL:실의 || CFLAG:LOCAL:(LOCAL:3) < 1000)
+		CONTINUE
+	LOCAL:(10 + LOCAL:1) = LOCAL
+	LOCAL:1++
+NEXT
+IF LOCAL:1
+	LOCAL:2 = RAND:(LOCAL:1)
+	B = LOCAL:(10 + LOCAL:2)
+ENDIF
+LOCAL = RAND:2
+;アドバイスを수る
+IF B > -1 && ((!LOCAL && !GETBIT(CFLAG:A:142, 0)) || (LOCAL && !GETBIT(CFLAG:A:142, 1)))
+	PRINTFORML 廊下を歩いていると、%CALLNAME:B%の部屋で話し声が聞こえた
+	PRINTFORMW 中を覗くと、%CALLNAME:B%の他に%CALLNAME:A%がいた
+	PRINTFORML 様子を窺っていると、%CALLNAME:A%は%CALLNAME:B%に%CALLNAME:MASTER%の好みや仕草、
+	PRINTFORMW 癖などを細かく聞いていた
+	PRINTFORMW そしてそれらをメモしていて、%CALLNAME:B%から何やらアドバイスを수ている
+	IF TALENT:B:헌신적
+		PRINTFORML %CALLNAME:A%が何のためにそのような事を聞いているのか不思議だが、
+		PRINTFORMW 普段から헌신적な%CALLNAME:B%のするアドバイスは、中々的確であると感心した
+	ELSEIF TALENT:B:무관심
+		PRINTFORML 普段から周りに무관심な態度を取っている%CALLNAME:B%だが、
+		PRINTFORMW %CALLNAME:A%の熱心さに折れたのかぽつぽつと答えているようだ
+	ELSEIF TALENT:B:감정부족
+		PRINTFORMW %CALLNAME:B%は訥々と、しかし意外と的確なアドバイスをしている
+	ELSEIF TALENT:B:반항적 || TALENT:B:건방짐
+		PRINTFORML %CALLNAME:B%は솔직함に答えるような性格でもないのだが、
+		PRINTFORMW %CALLNAME:A%の熱心さに折れたのか、意外と的確なアドバイスをしている
+	ELSEIF TALENT:B:솔직함 || TALENT:B:낙관적 || TALENT:B:호기심
+		PRINTFORML %CALLNAME:B%は時に聞かれていないことまでぺらぺらと答えている
+		PRINTFORMW そのアドバイスは意外と的確で、よく見ているものだと感心した
+	ELSE
+		PRINTFORMW %CALLNAME:B%は%CALLNAME:A%の熱心さに、知っていることをいくつか答えている
+	ENDIF
+	PRINTFORMW 邪魔をするのも悪いと思い、自室へと戻ることにした
+	PRINTFORMW ………少したった후、突然%CALLNAME:A%が部屋に訪れてきた
+	IF !LOCAL
+		PRINTFORML 何か用かと聞いてみると、%CALLNAME:A%は何の用というわけではないが
+		PRINTFORMW %CALLNAME:MASTER%にマッサージをしに来たと答えた
+		PRINTFORMW 突然の事なのでびっくりしたがせっかくなのでマッサージをしてもらう事にしよう
+		PRINTFORML …%CALLNAME:A%のマッサージはとても気持ち良かった
+		PRINTFORMW 先程%CALLNAME:B%に色々聞いていたのはこの事の為かと納得した
+		PRINTFORMW %CALLNAME:A%に礼を言うと、%CALLNAME:A%は笑顔で部屋を후にした
+		SETBIT CFLAG:A:142, 0
+	ELSE
+		PRINTFORML 何か用かと聞いてみると、%CALLNAME:A%は何の用というわけではないが
+		PRINTFORMW %CALLNAME:MASTER%に飲み物を用意してきたと答えた
+		PRINTFORML 突然の事なのでびっくりしたが丁度喉が渇いていたので、
+		PRINTFORMW せっかくなので%CALLNAME:A%が用意してくれた飲み物をいただいた
+		PRINTFORML …%CALLNAME:A%が用意してくれた飲み物はとてもおいしかった
+		PRINTFORMW %CALLNAME:MASTER%の好みにばっちり合っていた
+		PRINTFORMW 先程%CALLNAME:B%に色々聞いていたのはこの事の為かと納得した
+		PRINTFORMW %CALLNAME:A%に礼を言うと、%CALLNAME:A%は笑顔で部屋を후にした
+		SETBIT CFLAG:A:142, 1
+	ENDIF
+ELSE
+	IF !LOCAL
+		PRINTFORMW 部屋で休憩していると、%CALLNAME:A%がやってきた
+		PRINTFORML 何か用かと聞いてみると、%CALLNAME:A%は何の用というわけではないが
+		PRINTFORMW %CALLNAME:MASTER%にマッサージをしに来たと答えた
+		PRINTFORMW 突然の事なのでびっくりしたがせっかくなのでマッサージをしてもらう事にしよう
+		PRINTFORM …%CALLNAME:A%のマッサージは
+		IF GETBIT(CFLAG:A:142, 0)
+			PRINTFORML とても気持ちがいい…
+			PRINTFORMW %CALLNAME:A%に礼を言うと、%CALLNAME:A%は笑顔で部屋を후にした
+		ELSE
+			PRINTFORML 力が入りすぎていて、思わず悲鳴を上げた
+			PRINTFORMW マッサージを途中でやめさせると、%CALLNAME:A%はすまなそうに部屋を후にした
+		ENDIF
+	ELSE
+		IF GETBIT(CFLAG:A:142,1)
+			PRINTFORMW 部屋で休憩していると、%CALLNAME:A%がやってきた
+			PRINTFORML 何か用かと聞いてみると、%CALLNAME:A%は何の用というわけではないが
+			PRINTFORMW %CALLNAME:MASTER%に飲み物を用意してきたと答えた
+			PRINTFORML 突然の事なのでびっくりしたが丁度喉が渇いていたので、
+			PRINTFORMW せっかくなので%CALLNAME:A%が用意してくれた飲み物をいただいた
+			PRINTFORML …%CALLNAME:A%が用意してくれた飲み物はとてもおいしかった
+			PRINTFORMW %CALLNAME:MASTER%の好みにばっちり合っていた
+			PRINTFORMW %CALLNAME:A%に礼を言うと、%CALLNAME:A%は笑顔で部屋を후にした
+		ELSE
+			PRINTFORMW 図書室へ行くと、熱心に本を読む%CALLNAME:A%がいた
+			PRINTFORMW 本のタイトルは……『栄養ドリンクの作り方』……？
+		ENDIF
+	ENDIF
+ENDIF
+EXP:A:애정경험 += 5
+EXP:MASTER:애정경험 += 5
+PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;
+;-------------------------------------------------
+@DAILY_LIFE_139
+
+
+;-------------------------------------------------
+;嫁との一時/妊婦を労わる
+;-------------------------------------------------
+@DAILY_LIFE_140
+IF ABL:A:가창기능 >= 3
+	PRINTFORMW %CALLNAME:A%の部屋の近くを通ろうとしたら、%CALLNAME:A%の部屋から安らかな歌声が聞こえる
+ELSE
+	PRINTFORMW %CALLNAME:A%の部屋の近くを通ろうとしたら、%CALLNAME:A%の部屋から心地よい鼻歌が聞こえる
+ENDIF
+PRINTFORML そっと中に入ってみると%CALLNAME:A%が、お腹を優しくさすりながら歌っていた
+PRINTFORMW それにしても聞いているだけで、こっちも優しい気分になるような雰囲気を醸し出している
+IF !RAND:2
+	PRINTFORML %CALLNAME:A%が一曲歌い終わった후に、声をかけた
+	PRINTFORMW %CALLNAME:A%は驚き、少し顔を赤くした후ごにょごにょとつぶやいた
+	PRINTFORML どうやら歌を聞かれていたことが恥ずかしかったようで、部屋に入った事は別に気にしてないらしい
+	PRINTFORMW %CALLNAME:MASTER%が褒めると、さらに頬を染めてはにかんだ
+ELSE
+	PRINTFORML しばらく静聴していたが、%CALLNAME:A%が顔をあげた拍子に気づかれてしまったようだ
+	PRINTFORMW %CALLNAME:MASTER%に気づくと少し驚いたような顔をしたが、すぐに笑顔に変わり入室を歓迎した
+ENDIF
+PRINTFORML %CALLNAME:A%の側に寄り、お腹を優しくさすってあげた
+PRINTFORMW %CALLNAME:A%とお腹に宿った아이についての話題をして、幸せなひと時を堪能した
+EXP:A:애정경험 += 5
+EXP:MASTER:애정경험 += 5
+PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;嫁との一時/写真
+;-------------------------------------------------
+@DAILY_LIFE_141
+B = DAILYLIFE_GETCHARA(1)
+PRINTFORML %CALLNAME:MASTER%が部屋で카메라をいじっていると、%CALLNAME:A%が訪れた
+PRINTFORMW どうやら%CALLNAME:A%は%CALLNAME:MASTER%と過ごそうとしたらしい
+;両想い
+IF TALENT:A:상사상애 && B > -1 && !RAND:2
+	PRINTFORML %CALLNAME:MASTER%が카메라を持っているのを見ると、
+	PRINTFORMW %CALLNAME:A%が%CALLNAME:MASTER%と一緒の写真が欲しいとせがんできた
+	PRINTFORML ………そういえば%CALLNAME:A%と一緒の写真をとったことがろくにない
+	PRINTFORML そう思い、사진촬영を%CALLNAME:B%に頼むことにした
+	PRINTFORMW %CALLNAME:A%に%CALLNAME:B%を呼んできてもらい、카메라を%CALLNAME:B%に손渡した
+	LOCAL = BUILD2(MASTER, A)
+	IF !RAND:3 && LOCAL > 1
+		PRINTFORML 撮影するとき、%CALLNAME:A%に上目遣いで懇願されたので、
+		PRINTFORML 少し恥ずかしいが%CALLNAME:A%をお姫様だっこした
+		PRINTFORMW %CALLNAME:A%はこれ以上ないぐらい上機嫌で、満面の笑みを浮かべている
+	ELSEIF !RAND:2
+		PRINTFORML 撮影するとき%CALLNAME:A%が背中にもたれかかった
+		PRINTFORMW 少し気恥ずかしいが%CALLNAME:A%の笑顔に毒気を抜かれ、そのまま撮影してもらった
+	ELSE
+		PRINTFORML 撮影するとき%CALLNAME:A%は%CALLNAME:MASTER%にすり寄り、しなだれかかってきた
+		PRINTFORMW 甘々な雰囲気を醸し出す中で写真を撮ってもらった
+	ENDIF
+	ITEM:필름 -= 1
+	IF ABL:B:촬영기능 >= 3
+		PRINTFORMW 撮影が得意な%CALLNAME:B%の손により、その場の雰囲気まで映し出すかのような素晴らしい写真ができた
+	ELSEIF ABL:B:촬영기능 == 0
+		PRINTFORML あまり撮影などしたことが無い%CALLNAME:B%の撮った写真は
+		PRINTFORMW 少しぼやけているが、甘ったるい二人の雰囲気はよく映し出されている
+	ENDIF
+	IF MARK:A:반발각인 < 3 && CFLAG:B:41 == NO:MASTER && ITEM:필름
+		IF CFLAG:B:39 == 5 || CFLAG:B:39 == 8
+			PRINTFORML %CALLNAME:B%は、現像された写真をみて上機嫌の%CALLNAME:A%を羨ましそうに見ていたが
+			PRINTFORMW 自分も写真が欲しいと言いだせないまま部屋へと戻って行った
+		ELSE
+			PRINTFORML 現像された写真をみて上機嫌の%CALLNAME:A%を羨ましそうにみていた%CALLNAME:B%は、
+			PRINTFORMW 自分も%CALLNAME:MASTER%との写真が欲しいとねだってきた
+			PRINTFORMW %CALLNAME:B%に%CALLNAME:MASTER%の写真も撮らせてあげました
+		ENDIF
+	ENDIF
+;撮り合いっこする
+ELSEIF ITEM:필름 >= 2 && TALENT:A:상사상애
+	PRINTFORML %CALLNAME:MASTER%が카메라を持っているのを見ると、
+	PRINTFORMW %CALLNAME:A%が%CALLNAME:MASTER%の写真を欲しいと言ってきた
+	PRINTFORML そういえば%CALLNAME:MASTER%も調教してない時の%CALLNAME:A%の写真をほとんど持っていない…
+	PRINTFORMW ついでだから写真の撮りあいをしようということになった
+	PRINTFORML まず%CALLNAME:MASTER%が、にこやかな%CALLNAME:A%を撮影した
+	PRINTFORMW 一旦、現像してから今度は%CALLNAME:A%が、%CALLNAME:MASTER%を필름に収めた
+	PRINTFORML %CALLNAME:A%は現像した写真を大切そうに抱き締め、嬉しそうに部屋へ駆けて行った
+	PRINTFORMW ………写真立てにこの写真を入れておこうかなと%CALLNAME:MASTER%も思った
+	ITEM:필름 -= 2
+;主人→Aの片思い
+ELSE
+	PRINTFORML ふと%CALLNAME:MASTER%は%CALLNAME:A%の、普段の写真をほとんど持っていない事に気づいた
+	PRINTFORMW なので%CALLNAME:A%を撮影することにした
+	PRINTFORML 最初%CALLNAME:A%は恥ずかしい写真を撮られると勘違いしたのか困惑していたが、
+	PRINTFORM %CALLNAME:MASTER%が普段の時の写真が欲しいと言うと
+	IF TALENT:A:솔직함 || TALENT:A:눈에띄고싶음
+		PRINTW 喜んで撮影に応じた
+		PRINT にこやかな表情の
+	ELSEIF TALENT:A:반항적 || TALENT:A:프라이드높음 || TALENT:A:츤데레
+		PRINTW しぶしぶと言った素振りで撮影に応じた
+		PRINT はにかんだ表情の
+	ELSEIF TALENT:A:무관심 || TALENT:A:감정부족
+		PRINTW ほっとした様子で撮影に応じた
+		PRINT いつも通りの淡々とした表情の
+	ELSE
+		PRINTW ほっとした様子で撮影に応じた
+		PRINT はにかんだ表情の
+	ENDIF
+	PRINTFORML %CALLNAME:A%を필름に収めた
+	PRINTFORMW ………후で写真立てに現像した写真をかざっておこう
+	ITEM:필름 -= 1
+ENDIF
+EXP:A:애정경험 += 5
+EXP:MASTER:애정경험 += 5
+PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;嫁との一時/差し入れ
+;-------------------------------------------------
+@DAILY_LIFE_142
+PRINTFORML 調教が休みなのでたまっていた雑務をこなしていると、
+PRINTFORMW ノックの音がして%CALLNAME:A%が扉越しに声をかけてきた
+PRINTFORMW 部屋に入れてやると%CALLNAME:A%はねぎらいの言葉を言いながらお盆を差し出した
+IF (ABL:A:요리기능 >= 4 || (TALENT:A:습득빠름 && ABL:A:요리기능 >= 3))
+	PRINTFORML どうやらお茶と손作りのお茶請けを用意してくれたようだ
+	PRINTFORMW %CALLNAME:A%に礼を言ってありがたく頂戴した
+	PRINTFORML …%CALLNAME:A%が淹れたお茶はとても美味しい
+	IF TALENT:A:요리치
+		PRINTFORML 손作りのお茶請けもまた……なんとか食べれるようになった
+	ELSE
+		PRINTFORML 손作りのお茶請けもまた絶品だ
+	ENDIF
+	PRINTFORMW %CALLNAME:A%は%CALLNAME:MASTER%の好みを把握してくれているようだ
+ELSE
+	PRINTFORML どうやらお茶とお茶請けを用意してくれたようだ
+	PRINTFORMW %CALLNAME:A%に礼を言ってありがたく頂戴した
+	PRINTFORMW お茶が雑務で疲れた体にしみわたった
+ENDIF
+;従者的な立場
+IF TALENT:A:프라이드낮음 && !RAND:2
+	PRINTFORMW お茶とお茶請けで一息ついていると%CALLNAME:A%が雑務を손伝うと申し出てくれた
+	PRINTFORMW せっかくなので%CALLNAME:A%の申し出を수た
+	PRINTFORMW ………元からかなり期待していたのだが、予想以上に%CALLNAME:A%が손伝ってくれたことはありがたかった
+	PRINTFORMW してほしいと思うことによく気が付き、てきぱきと仕事をこなしている
+	PRINTFORMW そればかりか%CALLNAME:MASTER%がうっかり忘れていた事まで気づいてくれた
+	PRINTFORMW %CALLNAME:A%のおかげで予定より早く終わらせることができた
+	IF TALENT:A:복종 || TALENT:A:예속
+		PRINTFORML なにかお礼をしようかと言ったら、%CALLNAME:MASTER%に喜んでもらえたら十分だという
+		PRINTFORMW 奴隷の鑑だ…
+	ELSE
+		PRINTFORML なにかお礼をしようかと言ったら、%CALLNAME:A%は残りの時間を一緒に過ごしたいと言ったので
+		PRINTFORMW 一緒に過ごすことにした
+	ENDIF
+;教育者
+ELSEIF TALENT:A:보수적 && !RAND:2
+	PRINTFORMW お茶とお茶請けで一息ついていると%CALLNAME:A%が雑務を손伝うと申し出てくれた
+	PRINTFORML %CALLNAME:A%なら、色々と間違いを指摘してくれるだろう
+	PRINTFORMW そう考えこちらからも%CALLNAME:A%に손伝いをお願いした
+	PRINTFORMW ………やはり%CALLNAME:A%に손伝ってもらって正解だった
+	PRINTFORML 事務的な事を%CALLNAME:A%は次々とこなし、
+	PRINTFORML %CALLNAME:MASTER%一人だったら気付かなかったような間違いも逐一指摘してくれた
+	PRINTFORMW これなら후日やり直すことにはならないだろう
+	PRINTFORML %CALLNAME:A%のおかげであっという間に雑務が片付いた
+	PRINTFORMW あまった時間を、お礼も兼ねて%CALLNAME:A%と和やかに過ごした
+;切れ者
+ELSEIF TALENT:A:습득빠름 && !RAND:2
+	PRINTFORMW お茶とお茶請けで一息ついていると%CALLNAME:A%が雑務を손伝うと申し出てくれた
+	PRINTFORML 普段から頭の切れる%CALLNAME:A%が손伝ってくれる
+	PRINTFORMW %CALLNAME:MASTER%はぜひにとお願いした
+	PRINTFORML ………改めて%CALLNAME:A%はすごいと%CALLNAME:MASTER%は感じた
+	PRINTFORML てきぱきと次々こなし、%CALLNAME:MASTER%の倍ぐらいの速度で終わらせていく
+	PRINTFORMW 気づいたら半分…いや六割以上は%CALLNAME:A%がやってくれた
+	PRINTFORML %CALLNAME:MASTER%が大変感謝すると、%CALLNAME:A%は顔を赤くしながらどういたしましてと言い、
+	PRINTFORMW %CALLNAME:MASTER%に寄り添った
+	PRINTFORML それにしても……
+	SIF ABL:A:요리기능 >= 4
+		PRINT 요리고수で
+	PRINTFORM 器量が良くて、頭も切れる%CALLNAME:A%
+	IF TALENT:A:상사상애
+		PRINTL と想い合うことができ、
+		PRINTFORMW とても幸せだと改めて思った…
+	ELSEIF TALENT:A:연모 || TALENT:A:친애
+		PRINTL に慕われ
+		PRINTFORMW 幸せだと改めて思った…
+	ELSE
+		PRINTFORML が%CALLNAME:MASTER%の言うことなら何でもきく
+		PRINTFORMW そんな状況に改めて満발を覚えた…
+	ENDIF
+;헌신적
+ELSEIF TALENT:A:헌신적 && !RAND:2
+	PRINTFORMW %CALLNAME:A%が用意してくれたお茶とお茶請けで一息ついていると、%CALLNAME:A%が손伝いたいと申し出てくれた
+	PRINTFORML 元々헌신적な%CALLNAME:A%だから、山のようにたまった雑務を見かねたのだろう…
+	PRINTFORMW 正直一人でやるのもしんどいので손伝ってもらうことにした
+	PRINTFORML ……………
+	PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%でたまっていた雑務を一つずつこなしていった
+	PRINTFORML やっぱり%CALLNAME:A%がいるだけで精神的な疲労感がずいぶん違うと思う
+	PRINTFORMW おかげで雑務をやりながら%CALLNAME:A%と회화を楽しむゆとりすらできた
+	PRINTFORMW 予定していた時間の頃までに%CALLNAME:A%のおかげで残っていた雑務をすべて終わらせることができた
+;호기심
+ELSEIF (TALENT:A:호기심 || TALENT:A:유치 || TALENT:A:유아／유아퇴행) && !RAND:2
+	PRINTFORML %CALLNAME:A%が用意してくれたお茶を飲み、お茶請けをほおばっていると、
+	PRINTFORMW %CALLNAME:A%が何かを興味津津に見つめていた
+	PRINTFORMW そしてそれについての事を손伝わせてほしいと言ってきた
+	PRINTFORMW %CALLNAME:MASTER%にしても雑務をやってもらえるのでお願いした
+	PRINTW ……
+	PRINTW …………
+	PRINTW …………やっと雑務が片付いた
+	PRINTFORMW %CALLNAME:A%も興味をもったものだけ손伝ってくれた、まあ何にせよありがたかったが…
+;お説教
+ELSEIF (TALENT:A:꿋꿋함 || TALENT:A: 프라이드높음) && !RAND:2
+	PRINTFORML %CALLNAME:A%が用意してくれたお茶とお茶請けで一息ついた후、%CALLNAME:A%に説教をされた
+	PRINTFORMW %CALLNAME:MASTER%一人では손に負えないぐらいの量の雑務を放置したことにご立腹のようだ
+	PRINTFORML …小一時間説教をされたので%CALLNAME:MASTER%は少しぐったりとしたが、
+	PRINTFORMW なんだかんだいって優しい%CALLNAME:A%は雑務を손伝ってくれた
+	PRINTFORML ………時々%CALLNAME:MASTER%に説教をしながらも%CALLNAME:A%は正確に雑務をこなしていった
+	PRINTFORMW というより説教している時間を差し引くと、すごい速さで片づけている
+	PRINTFORMW おかげで残るだろうなと覚悟していた雑務がすべて終わってしまった
+	PRINTFORMW %CALLNAME:A%に感謝すると、%CALLNAME:A%は小言を言いながらも頬を染めた
+	PRINTFORMW …少し時間が余ったのだが、次回からはここまでため込まないようにと、%CALLNAME:A%の有難いお話が続いた…
+ELSEIF (TALENT:A:헌신적 || TALENT:A:습득빠름) && !RAND:3
+	PRINTFORML お茶とお茶請けで一息ついていると%CALLNAME:A%が雑務を손伝うと申し出てくれた
+	PRINTFORMW せっかくなので손伝ってもらうことにした
+	PRINTFORML …正直、%CALLNAME:A%が손伝ってくれてとても助かった
+	IF TALENT:A:습득빠름
+		PRINTFORMW てきぱきと雑務をこなす%CALLNAME:A%のおかげで予定より早く終わらせることができた
+	ELSE
+		PRINTFORML %CALLNAME:MASTER%を労わりつつ雑務をこなす%CALLNAME:A%のおかげで
+		PRINTFORMW 予定より早く終わらせることができた
+	ENDIF
+	PRINTFORMW その為お礼も兼ねて、あまった時間を%CALLNAME:A%と談笑しながら楽しく過ごした
+ELSE
+	PRINTFORMW お茶とお茶請けで一息ついた후、残った雑務を片づけることにした
+	PRINTFORML %CALLNAME:A%から元気をもらった%CALLNAME:MASTER%は、
+	PRINTFORMW 予定していた時間より少し早く雑務を終わらせることができた
+ENDIF
+
+;-------------------------------------------------
+;嫁との一時/お菓子作り
+;-------------------------------------------------
+@DAILY_LIFE_143
+;[연모][친애]持ちを検索
+B = DAILYLIFE_GETTALENT_1(3,6)
+;Aの思慕対象をCに入れる
+SIF CFLAG:A:41 > -1
+	C = NO2(CFLAG:A:41)
+;へたくそ　[요리치]を持っているか、[요리고수]が無く요리기능０
+;요리고수　[요리고수]を持っているか、[요리치]が無く요리기능４以上
+;そこそこ　[요리치]も[요리고수]もなく요리기능１～３
+
+;二人でお菓子作り　AとBが主人に対して연모陥落
+IF B > -1 && C == MASTER
+	;二人とも料理が上손な場合
+	IF (TALENT:A:요리고수 || (ABL:A:요리기능 >= 4 && !TALENT:A:요리치)) && (TALENT:B:요리고수 || (ABL:B:요리기능 >= 4 && !TALENT:B:요리치))
+		LOCAL:2 = 0
+	;二人とも料理がヘタな場合
+	ELSEIF (TALENT:A:요리치 || (!ABL:A:요리기능 && !TALENT:A:요리고수)) && (TALENT:B:요리치 || (!ABL:B:요리기능 && !TALENT:A:요리고수))
+		LOCAL:2 = 1
+	;ふたりともそこそこな場合
+	ELSEIF (!TALENT:A:요리치 && !TALENT:A:요리고수 && ABL:A:요리기능 >= 1 && ABL:A:요리기능 <= 3) && (!TALENT:B:요리치 && !TALENT:B:요리고수 && ABL:B:요리기능 >= 1 && ABL:B:요리기능 <= 3)
+		LOCAL:2 = 2
+	;片方が片方に教えながら
+	ELSE
+		;Aが上손＆Bがそこそこ
+		IF (TALENT:A:요리고수 || (ABL:A:요리기능 >= 4 && !TALENT:A:요리치)) && (!TALENT:B:요리치 && !TALENT:B:요리고수 && ABL:B:요리기능 >= 1 && ABL:B:요리기능 <= 3)
+			LOCAL = A
+			LOCAL:1 = B
+			LOCAL:2 = 3
+		;Aが上손＆Bがヘタ
+		ELSEIF (TALENT:A:요리고수 || (ABL:A:요리기능 >= 4 && !TALENT:A:요리치)) && (TALENT:B:요리치 || (!ABL:B:요리기능 && !TALENT:A:요리고수))
+			LOCAL = A
+			LOCAL:1 = B
+			LOCAL:2 = 4
+		;Aがそこそこ＆Bが上손
+		ELSEIF (!TALENT:A:요리치 && !TALENT:A:요리고수 && ABL:A:요리기능 >= 1 && ABL:A:요리기능 <= 3) && (TALENT:B:요리고수 || (ABL:B:요리기능 >= 4 && !TALENT:B:요리치))
+			LOCAL = B
+			LOCAL:1 = A
+			LOCAL:2 = 3
+		;Aがそこそこ＆Bがヘタ
+		ELSEIF (!TALENT:A:요리치 && !TALENT:A:요리고수 && ABL:A:요리기능 >= 1 && ABL:A:요리기능 <= 3) && (TALENT:B:요리치 || (!ABL:B:요리기능 && !TALENT:A:요리고수))
+			LOCAL = A
+			LOCAL = B
+			LOCAL:2 = 5
+		;Aがヘタ＆Bが上손
+		ELSEIF (TALENT:A:요리치 || (!ABL:A:요리기능 && !TALENT:A:요리고수)) && (TALENT:B:요리고수 || (ABL:B:요리기능 >= 4 && !TALENT:B:요리치))
+			LOCAL = B
+			LOCAL:1 = A
+			LOCAL:2 = 4
+		;Aがヘタ＆Bがそこそこ
+		ELSE
+			LOCAL = B
+			LOCAL:1 = A
+			LOCAL:2 = 5
+		ENDIF
+	ENDIF
+	;パターン０　両方上손
+	IF !LOCAL:2
+		PRINTFORMW 台所を横切ると何やら良い匂いがしたので思わず立ち止まった
+		PRINTFORMW 中をのぞいてみると、%CALLNAME:A%と%CALLNAME:B%がお菓子を作っていた
+		PRINTFORML 料理が上손な二人は、お互いに得意なお菓子の作り方を教え合い
+		PRINTFORMW 技をさらに磨いていたようだ
+		PRINTFORMW 見事な손際に見惚れていると、それぞれが作ったお菓子の味見を勧めてくれた
+		PRINTFORMW ………
+		PRINTFORMW ……
+		PRINTFORMW …
+		PRINTFORMW 美味しい…
+		PRINTFORM そう言うと%CALLNAME:A%は
+		IF TALENT:A:무관심 || TALENT:A:감정부족
+			PRINTL いつもの淡々とした表情に隠しきれない嬉しさを滲ませ、
+		ELSEIF TALENT:A:반항적 || TALENT:A:프라이드높음 || TALENT:A:건방짐
+			PRINTL 得意げな笑いをこぼし、
+		ELSE
+			PRINTL 嬉しそうに頬を染め、
+		ENDIF
+		PRINTFORM %CALLNAME:B%は
+		IF TALENT:B:무관심 || TALENT:B:감정부족
+			PRINTW 珍しく顔をほころばせている
+		ELSEIF TALENT:B:솔직함 || TALENT:B:유치 || TALENT:B:유아／유아퇴행
+			PRINTFORMW 喜びに声を上げ%CALLNAME:MASTER%に抱きついてきた
+		ELSE
+			PRINTW ご機嫌で残りのお菓子も勧めてきた
+		ENDIF
+		PRINTFORMW 三人で楽しく談笑しながら残りのお菓子をいただいた…
+	;パターン１　両方ヘタ
+	ELSEIF LOCAL:2 == 1
+		PRINTFORMW 台所を横切ると何やら異臭がしたので思わず立ち止まった
+		PRINTFORMW 中をのぞいてみると、%CALLNAME:A%と%CALLNAME:B%が何かを作っているようだ
+		PRINTFORML 二人とも料理が上손とは言い難く……
+		PRINTFORMW 正直下손なので、台所に二人がいることに嫌な予感しかしない…
+		IF !RAND:2
+			PRINTFORMW この場に近付くのは危険すぎるだろうと判断し、そっと立ち去った
+			PRINTFORMW ……数時間후、%CALLNAME:MASTER%の部屋に%CALLNAME:A%と%CALLNAME:B%がやってきた
+		ELSE
+			PRINTFORMW しかしこのまま放っておくことも出来ないだろう…
+			PRINTFORML 意を決し二人に声をかけると、びっくりした顔でこちらを向いたが
+			PRINTFORMW %CALLNAME:MASTER%だと分かると笑顔になった
+		ENDIF
+		PRINTFORM そして、それぞれが作ったであろう
+		IF !RAND:3
+			PRINTL 黒焦げのかたまりと
+		ELSEIF !RAND:2
+			PRINTL 魚の腐ったような匂いのする半固体と
+		ELSE
+			PRINTL 甘ったるい匂いのする虹色に輝く固形物と
+		ENDIF
+		IF !RAND:3
+			PRINT ぶよぶよした緑色のかたまりを
+		ELSEIF !RAND:2
+			PRINT 生野菜の飛び出たドロドロの物体を
+		ELSE
+			PRINT 青とピンクのマーブルのかたまりを
+		ENDIF
+		PRINTW 差しだしてきた
+		PRINTFORMW ………二人から感じる無言の圧力に、覚悟を決めて입へと放り込んだ
+		PRINTFORMW ………
+		PRINTFORMW ……
+		PRINTFORMW …
+		PRINTFORMW ………………………………。
+	;パターン２　両方そこそこ
+	ELSEIF LOCAL:2 == 2
+		PRINTFORMW 台所を横切ると、%CALLNAME:A%が見えた
+		PRINTFORML 中に入ってみると%CALLNAME:B%もいた
+		PRINTFORMW 二人で試行錯誤しながらお菓子作りをしていたようだ
+		PRINTFORML %CALLNAME:MASTER%が声をかけると、二人はびっくりした顔でこちらを向いたが、
+		PRINTFORMW やってきたのが%CALLNAME:MASTER%だと分かると笑顔になった
+		PRINTFORMW そして、それぞれが作ったお菓子の味見を勧めてくれた
+		PRINTFORMW %CALLNAME:A%が勧めてくれたお菓子は見栄え良く仕上がっている
+		PRINTFORML %CALLNAME:B%のお菓子は見た目こそ少し崩れているが、
+		PRINTFORMW 甘さが%CALLNAME:MASTER%好みでちょうど良い
+		PRINTFORMW 二人にそう告げると、次はもっと美味しくなるように頑張ると張り切りだし、お菓子作りを再開した…
+	;パターン３　片方上손で片方そこそこ
+	ELSEIF LOCAL:2 == 3
+		PRINTFORML 台所を横切ると何やら良い匂いがしたので思わず立ち止まった
+		PRINTFORMW 中をのぞいてみると、%CALLNAME:LOCAL%が%CALLNAME:(LOCAL:1)%に色々と教えながらお菓子を作っていた
+		PRINTFORML 元々%CALLNAME:(LOCAL:1)%の料理は悪くないのだが、何か思うところがあるのだろう
+		PRINTFORMW %CALLNAME:LOCAL%のアドバイスに熱心に耳を傾け、なかなかの力作を作り上げようとしている
+		PRINTFORMW 声をかけると、二人ははびっくりした顔でこちらを向いたが、%CALLNAME:MASTER%だと分かると笑顔になった
+		PRINTFORMW そして、それぞれ先に作ったであろうお菓子を勧めてきたので、ありがたく頂戴することにした
+		PRINTFORMW ………
+		PRINTFORMW ……
+		PRINTFORMW …
+		PRINTFORMW 美味しい…
+		PRINTFORM 思わずそう입にすると%CALLNAME:(LOCAL:1)%は
+		IF TALENT:B:무관심 || TALENT:B:감정부족
+			PRINTL 珍しく顔をほころばせ、
+		ELSEIF TALENT:B:솔직함 || TALENT:B:유치 || TALENT:B:유아／유아퇴행
+			PRINTFORML 喜びに声を上げ%CALLNAME:MASTER%に抱きつき、
+		ELSE
+			PRINTL とびきりの笑顔を見せ、
+		ENDIF
+		PRINTFORM %CALLNAME:LOCAL%も
+		IF TALENT:A:무관심 || TALENT:A:감정부족
+			PRINTW いつもの淡々とした表情に隠しきれない嬉しさを滲ませている
+		ELSEIF TALENT:A:반항적 || TALENT:A:프라이드높음 || TALENT:A:건방짐
+			PRINTW 得意げな笑いをこぼしている
+		ELSE
+			PRINTFORMW 嬉しそうに笑いながら%CALLNAME:(LOCAL:1)%と喜びあっている
+		ENDIF
+		PRINTFORMW そして%CALLNAME:(LOCAL:1)%は%CALLNAME:LOCAL%に引き続きアドバイスを頼みお菓子作りを再開した
+		PRINTFORMW %CALLNAME:A%と%CALLNAME:B%が残りのお菓子を完成させるまで楽しみにまった
+		PRINTFORMW 残りのお菓子も完成したので三人で談笑しながらいただいた
+	;パターン４　片方上손で片方ヘタ
+	ELSEIF LOCAL:2 == 4
+		PRINTFORMW 台所を横切ると何やら良い匂いがしたので思わず立ち止まった
+		PRINTFORMW 中をのぞいてみると、%CALLNAME:LOCAL%が%CALLNAME:(LOCAL:1)%に色々と教えながらお菓子を作っていた
+		PRINTFORMW あまり料理の上손でない%CALLNAME:(LOCAL:1)%も熱心に%CALLNAME:LOCAL%のアドバイスを聞いて、試行錯誤している
+		PRINTFORMW 声をかけると、二人ははびっくりした顔でこちらを向いたが、%CALLNAME:MASTER%だと分かると笑顔になった
+		PRINTFORMW そして、%CALLNAME:LOCAL%が先に作ったであろうお菓子をにこやかに勧めてきたのでありがたく頂戴した
+		PRINTFORML ……%CALLNAME:LOCAL%のお菓子はとても美味しかった
+		PRINTFORMW そう言うと%CALLNAME:LOCAL%は嬉しそうにはにかんだ
+		PRINTFORML そして羨ましそうに見つめる%CALLNAME:(LOCAL:1)%をはげましながら、
+		PRINTFORMW %CALLNAME:LOCAL%は%CALLNAME:(LOCAL:1)%が作ったお菓子も食べてほしいと頼んできた
+		PRINTFORML %CALLNAME:(LOCAL:1)%も意を決したらしく、自分が作った…
+		PRINTFORMW すこし形が崩れたお菓子を%CALLNAME:MASTER%に食べてほしいと懇願した
+		PRINTFORMW 二人に頼まれ、無下にすることも出来ないだろうと意を決して食べてみることにした
+		PRINTFORMW 匂いは、わりと美味しそうだ…
+		PRINTFORMW 見た目は……本当に大丈夫だろうかこれは…
+		PRINTFORMW 二人の期待の視線が痛くなってきたので、目をつぶってお菓子を입の中に放り込んだ
+		PRINTFORMW ………
+		PRINTFORMW ……
+		PRINTFORMW …
+		PRINTFORMW 美味しい…
+		PRINTFORMW 思わずそう、입にすると、%CALLNAME:(LOCAL:1)%はとびきりの笑顔を見せた
+		PRINTFORML %CALLNAME:MASTER%に褒められた事がとてもうれしかったのだろう
+		PRINTFORMW これ以上ないくらい上機嫌でお菓子作りを再開した
+		PRINTFORMW %CALLNAME:MASTER%は%CALLNAME:A%と%CALLNAME:B%が残りのお菓子を完成させるまで楽しみに待つことにした
+		PRINTFORMW 残りのお菓子も完成したので三人で談笑しながらいただいた
+	;パターン５　片方そこそこで片方ヘタ
+	ELSE
+		PRINTFORML 台所を横切ると、%CALLNAME:LOCAL%と%CALLNAME:(LOCAL:1)%の姿が見えた
+		PRINTFORMW 中を覗くと、なんと二人でお菓子作りをしていた
+		PRINTFORML %CALLNAME:LOCAL%は特別料理が得意と言うわけでは無いのだが、それ以上に壊滅的な腕前の%CALLNAME:(LOCAL:1)%は、
+		PRINTFORMW 何とかアドバイスを수、少しでも上達しようと試行錯誤している
+		PRINTFORMW 声をかけると、二人ははびっくりした顔でこちらを向いたが、%CALLNAME:MASTER%だと分かると笑顔になった
+		PRINTFORMW そして、%CALLNAME:LOCAL%が先に作ったであろうお菓子を勧めてきたので一つ頂戴した
+		PRINTFORML ……なかなか悪くない味だ
+		PRINTFORMW そう言うと%CALLNAME:LOCAL%は、次は美味しいと言ってもらえるよう頑張る、と意気込んだ
+		PRINTFORML そして、少し緊張した様子の%CALLNAME:(LOCAL:1)%をはげましながら、
+		PRINTFORMW %CALLNAME:LOCAL%は%CALLNAME:(LOCAL:1)%が作ったお菓子も食べてほしいと頼んできた
+		PRINTFORML %CALLNAME:(LOCAL:1)%も意を決したらしく、自分が作った…
+		PRINTFORMW 形が崩れたお菓子を%CALLNAME:MASTER%に食べてほしいと懇願した
+		PRINTFORMW 一抹の不安を感じつつも、二人に頼まれ、無下にすることも出来ないだろうと意を決して食べてみることにした
+		PRINTFORMW 匂いは、わりと美味しそうだ…
+		PRINTFORMW 見た目は……本当に大丈夫だろうかこれは…
+		PRINTFORMW 二人の期待の視線が痛くなってきたので、目をつぶってお菓子を입の中に放り込んだ
+		PRINTFORMW ………
+		PRINTFORMW ……
+		PRINTFORMW …
+		PRINTFORMW 思ったより悪くない…
+		PRINTFORMW 思わずそう、입にすると、%CALLNAME:(LOCAL:1)%ははにかんだ笑顔を見せた
+		PRINTFORML けして褒めたわけではないのだが、誇らしげだ…
+		PRINTFORMW そして%CALLNAME:(LOCAL:1)%は上機嫌で%CALLNAME:LOCAL%に引き続きアドバイスを頼みお菓子作りを再開した
+		PRINTFORMW %CALLNAME:MASTER%は二人に頑張れと声をかけ、台所を후にした
+	ENDIF
+	EXP:MASTER:애정경험 += 5
+	EXP:A:애정경험 += 5
+	EXP:B:애정경험 += 5
+	PRINTFORML %CALLNAME:MASTER%と%CALLNAME:B%と%CALLNAME:A%の애정경험 ＋５
+	EXP:A:가사경험 += 5
+	EXP:B:가사경험 += 5
+	PRINTFORMW %CALLNAME:B%と%CALLNAME:A%の가사경험 ＋５
+;１人でお菓子作り
+ELSE
+	;요리고수
+	IF TALENT:A:요리고수 || (ABL:A:요리기능 >= 4 && !TALENT:A:요리치)
+		PRINTFORMW 台所を横切ると何やら良い匂いがしたので思わず立ち止まった
+		PRINTFORML 中をのぞいてみると、%CALLNAME:A%がお菓子を作っていた
+		PRINTFORMW 良い匂いの正体はこれだったのだろう
+		PRINTFORML %CALLNAME:MASTER%の存在に気づいた%CALLNAME:A%は、
+		PRINTFORMW はにかみながら先に作ったのであろうお菓子を勧めた
+		PRINTFORML ……%CALLNAME:A%のお菓子はとても美味しかった
+		PRINTFORMW そう言うと、%CALLNAME:A%は満발そうにうなずき、お菓子作りを再開した
+	;ヘタ
+	ELSEIF TALENT:A:요리치 || (!ABL:A:요리기능 && !TALENT:A:요리고수)
+		PRINTFORMW 台所を横切ると、%CALLNAME:A%が見えた
+		PRINTFORMW 中へ入ってみると、%CALLNAME:A%は熱心にお菓子作りをしていた
+		PRINTFORMW %CALLNAME:A%はこちらに気付くと、作ったお菓子の味見を勧めてきた
+		PRINTFORML %CALLNAME:A%の料理の腕は知っているので不安になったが、
+		PRINTFORMW 今日は台所を爆発させてもいないし、見た目もあり得ないほどではないし、何よりほのかにいい香りがする
+		PRINTFORMW 意を決して입に放り込んだ
+		PRINTFORMW ……悪くない
+		PRINTFORML そう告げると、%CALLNAME:A%は嬉しそうにはにかみ、
+		PRINTFORMW 次は美味しいと言ってもらえるように頑張ると意気込んで、お菓子作りを再開した
+	;そこそこ
+	ELSE
+		PRINTFORML 台所を横切ると、%CALLNAME:A%が見えた
+		PRINTFORMW 中へ入ってみると、%CALLNAME:A%は熱心にお菓子作りをしていた
+		PRINTFORMW %CALLNAME:MASTER%の存在に気づいた%CALLNAME:A%は、照れた様子で微笑みを返した
+		PRINTFORML すでにできているお菓子を一つ味見してもいいかと聞いてみた
+		PRINTFORMW 少々形が崩れているためか、%CALLNAME:A%は恥ずかしがりつつも、はっきりとうなずいた
+		PRINTFORMW ……悪くない出来だ
+		PRINTFORML そう告げると、%CALLNAME:A%は嬉しそうにはにかみ、
+		PRINTFORMW 次は美味しいと言ってもらえるように頑張ると意気込んで、お菓子作りを再開した
+	ENDIF
+	;A→主人
+	IF CFLAG:A:41 == NO:MASTER
+		PRINTFORMW 残りのお菓子も完成したら部屋にまで持ってきてくれるとの事なので、部屋で楽しみに待っていよう
+		PRINTFORML 少し時間がたった頃に、%CALLNAME:A%がお菓子を携えて部屋に訪れたので、
+		PRINTFORMW 二人でお菓子を食べながら楽しい時間を過ごした…
+		EXP:MASTER:애정경험 += 5
+		EXP:A:애정경험 += 5
+		PRINTFORML %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+	;A→その他
+	ELSEIF CFLAG:A:41 > -1
+		PRINTFORML そんなに沢山お菓子を作ってどうするのかと思いきや、
+		PRINTFORMW 今作っている分は%CALLNAME:C%の所に持っていくのだと言う
+		PRINTFORML きっと%CALLNAME:C%はおいしいと言ってくれる、と励ますと
+		PRINTFORMW %CALLNAME:A%は喜んで、先に作った分のお菓子をくれた…
+		EXP:A:애정경험 += 5
+		EXP:B:애정경험 += 5
+		PRINTFORML %CALLNAME:B%と%CALLNAME:A%の애정경험 ＋５
+	ENDIF
+	EXP:A:가사경험 += 3
+	PRINTFORMW %CALLNAME:A%の가사경험 ＋３
+ENDIF
+
+;-------------------------------------------------
+;嫁との一時/仮眠
+;-------------------------------------------------
+@DAILY_LIFE_144
+PRINTFORMW 調教を休みにしたので%CALLNAME:MASTER%は仮眠を取ろうと寝る準備をした
+PRINTFORML するとそこに%CALLNAME:A%がやってきた
+PRINTFORMW どうやら%CALLNAME:A%は%CALLNAME:MASTER%と一緒に過ごしたかったらしい…
+IF !RAND:2
+	PRINTFORML %CALLNAME:MASTER%が今から仮眠をとる事を伝えると、
+	PRINTFORMW %CALLNAME:A%は少し考えた후膝枕を使うことを提案してきた
+	PRINTFORMW せっかくなので%CALLNAME:A%の申し出どおり、膝枕をしてもらって寝ることにした
+	PRINTFORML ………%CALLNAME:A%の膝枕は予想以上に心地よい
+	PRINTFORMW 自然と安らかな気分になっていく
+	PRINTFORMW 膝枕をしている%CALLNAME:A%も安らかな表情をしている
+	IF ABL:A:가창기능 >= 3 && !RAND:2
+		PRINTFORML %CALLNAME:MASTER%があまりにも心地よい膝枕を堪能していると、
+		PRINTFORMW %CALLNAME:A%が聴く者を安心させるような優しい子守唄を歌い始めた
+		PRINTFORMW この場を包む優しい雰囲気に、だんだんゆっくりと瞼が降りていき
+		PRINTFORMW ………数時間후%CALLNAME:A%に優しく起こされた
+	ELSE
+		PRINTFORMW あまりの心地よさにうっとりしていたらいつの間にか眠りについていた
+		PRINTFORML 数時間후、%CALLNAME:MASTER%が目を覚ますと、%CALLNAME:A%もすうすうと寝息を立てていた
+		PRINTFORMW どうやらあの후、%CALLNAME:A%も眠ってしまってしまったらしい
+		PRINTFORML %CALLNAME:MASTER%は苦笑すると、%CALLNAME:A%を起こさないようにそっと膝から頭をよけ、
+		PRINTFORMW %CALLNAME:A%を肌掛けで優しく包んだ
+	ENDIF
+ELSE
+	PRINTFORML %CALLNAME:MASTER%が今から仮眠をとる事を伝えると、
+	PRINTFORMW %CALLNAME:A%が一緒に寝たいと言い出してきた
+	PRINTFORML 特に%CALLNAME:A%を断る理由もないので許可すると、
+	PRINTFORMW %CALLNAME:A%はすぐに用意すると言って大急ぎで駆け出して行った
+	PRINTFORMW 数分もたたない内に準備をすました%CALLNAME:A%を迎え、仮眠をとった…
+	IF !RAND:2
+		PRINTFORML いつもと違う状況で仮眠をとっているため、中々眠気が来ずに目だけ瞑っていると、
+		PRINTFORMW 横で早々に寝ついた%CALLNAME:A%から寝言が聞こえる
+		PRINTFORML 甘えるような声で%CALLNAME:MASTER%の事を呼び、
+		PRINTFORMW 好き…好き…と連呼する%CALLNAME:A%に愛しさを感じ、思わず抱きしめた
+		PRINTFORML 抱きしめられると更に表情が緩んだ%CALLNAME:A%をしばらく見つめ、
+		PRINTFORMW %CALLNAME:MASTER%も次第にまどろみに身をゆだねた…
+	ELSE
+		PRINTFORMW %CALLNAME:A%の温もりがとても心地よい
+		PRINTFORML しばらく温もりを堪能していたが、%CALLNAME:A%が寝ぼけたのか
+		PRINTFORMW 不意に%CALLNAME:MASTER%に抱きついてきた
+		PRINTFORMW %CALLNAME:A%から独特の良い香りがする
+		PRINTFORML %CALLNAME:A%に抱きしめられる形となり少々窮屈だが、決して불쾌というわけではない
+		PRINTFORMW %CALLNAME:MASTER%はなんだか安らかな気分となってゆっくりと瞼を降ろしていった…
+	ENDIF
+ENDIF
+EXP:A:애정경험 += 5
+EXP:MASTER:애정경험 += 5
+PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;嫁との一時/くつろぎ
+;-------------------------------------------------
+@DAILY_LIFE_145
+PRINTFORMW %CALLNAME:MASTER%が部屋でくつろいでいると、%CALLNAME:A%がやってきた
+IF !RAND:3
+	PRINTFORML ソファーでくつろいでいた%CALLNAME:MASTER%の横に座り、
+	PRINTFORMW 腕に손を絡めてしなだれかかってきたので、軽く頭を撫でてあげると嬉しそうに目を細めた
+	IF !TIME
+		PRINTFORMW 昼食をとるまでの間、%CALLNAME:A%と談笑しながら幸せなひと時を過ごした
+	ELSE
+		PRINTFORMW 夕食をとるまでの間、%CALLNAME:A%と他愛もない회화を交わしながら幸せなひと時を過ごした
+	ENDIF
+ELSEIF !RAND:2
+	PRINTFORML 何か用事があったのかと尋ねてみると、%CALLNAME:A%は特に用事はないけど…とはにかみながら言葉を濁した
+	PRINTFORMW どうやら純粋に%CALLNAME:MASTER%と過ごしたかったようだ
+	PRINTFORML %CALLNAME:A%とくつろぐのも悪くないと思い、손で誘って招き入れると、
+	PRINTFORMW 素敵な笑顔を見せて嬉しそうに抱きついてきた
+	PRINTFORMW %CALLNAME:MASTER%もどこか安らぎを感じつつ、%CALLNAME:A%と幸せなひと時を堪能した…
+ELSE
+	PRINTFORML 一緒に過ごしたいと言う%CALLNAME:A%に、返答の代わりに近づいて肩に손を置き、
+	PRINTFORMW そのままソファーへ向かい一緒に座った
+	PRINTFORMW %CALLNAME:A%は幸せそうに顔を綻ばせ、%CALLNAME:MASTER%にそっとしなだれかかってきた
+	PRINTFORMW %CALLNAME:A%の心地よい香りを堪能しながら二人きりの時間を楽しんだ…
+ENDIF
+EXP:A:애정경험 += 5
+EXP:MASTER:애정경험 += 5
+PRINTFORMW %CALLNAME:MASTER%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;剣の손入れ
+;-------------------------------------------------
+@DAILY_LIFE_150
+PRINTFORML %CALLNAME:A%の部屋の前を通りすがると、
+PRINTFORML 中で%CALLNAME:A%が剣の손入れをしているのが見えた
+PRINTFORML 丁寧に刀身を拭い、傷がないか丹念にチェックしている…
+PRINTFORML 邪魔をしないように、そっとその場を立ち去った
+
+;-------------------------------------------------
+;剣の稽古／１人で
+;-------------------------------------------------
+@DAILY_LIFE_151
+PRINTFORML %CALLNAME:A%が庭で竹刀を振っているところに通りすがった
+IF RAND:2 == 0
+	PRINTFORML 新技の練習をしているらしい
+	SIF TALENT:A:습득느림 || ABL:A:기교 < 3
+		PRINTFORML だが上손くいっていないのか、その表情は硬い…
+ELSE
+	PRINTFORML どうやら、型の稽古をしているらしい
+	SIF TALENT:A:습득빠름 || ABL:A:기교 >= 3
+		PRINTFORML 流れるような動作で剣を繰り出し、表情も清々しい
+ENDIF
+IF TALENT:A:친애 || TALENT:A:연모 || TALENT:A:창부
+	PRINTFORML %CALLNAME:MASTER%が見ていることに気付くと、にっこりと笑顔を向けてきた
+	PRINTFORML そろそろ休憩を取るつもりだったというので、二人で一緒にお茶を飲みました…
+ELSE
+	PRINTFORML 随分と熱心に練習しているようで、邪魔をするのも申し訳ない
+	PRINTFORML 縁側にタオルを置いてやり、そっとその場を立ち去った…
+ENDIF
+
+;-------------------------------------------------
+;剣の稽古／みんなと一緒
+;-------------------------------------------------
+@DAILY_LIFE_152
+;出場キャラを１人検索
+B = DAILYLIFE_GETCHARA(1)
+
+;血縁判定
+LOCAL = RELATIONS2(A, B)
+;0=血縁無し1=兄弟2=兄弟？3=姉弟4=兄妹5=姉妹6=親子7=爺孫8=同派9=同一人物
+SELECTCASE LOCAL
+	CASE 1
+		LOCALS = 兄弟
+	CASE 2
+		LOCALS = 兄弟？
+	CASE 3
+		LOCALS = 姉弟
+	CASE 4
+		LOCALS = 兄妹
+	CASE 5
+		LOCALS = 姉妹
+	CASE 6
+		LOCALS = 親子
+	CASE 7
+		LOCALS = 爺孫
+	CASE 8
+		LOCALS = 同派
+	CASE 9
+		LOCALS = 同一人物
+ENDSELECT
+
+LOCAL:4 = NO:B + 2099
+
+LOCAL:5 = NO:A + 1099
+LOCAL:6 = NO:B + 1099
+
+;面識があるか判定
+LOCAL:1 = 0
+;0=ない1=あったことはある3=結構あってる
+IF CFLAG:A:(LOCAL:4)
+	LOCAL:1 = 1
+	SIF CFLAG:A:(LOCAL:6) + CFLAG:B:(LOCAL:5) >= 1000
+		LOCAL:1 = 3
+ENDIF
+;血縁があるとき、最低でも会ったことがある
+SIF LOCAL && !LOCAL:1
+	LOCAL:1 = 1
+
+;話は弾むか？
+LOCAL:2 = 0
+;0=全然1=あんまり2=そこそこ3=弾むよ4=仲良し
+IF RELATION:A:(NO:B) > 100 && RELATION:B:(NO:A) > 100
+	LOCAL:2 = 3 + RAND:2
+ELSEIF (RELATION:A:(NO:B) > 100 && !RELATION:B:(NO:A)) || (RELATION:B:(NO:A) > 100 && !RELATION:A:(NO:B))
+	LOCAL:2 = 2 + RAND:2
+ELSEIF !RELATION:A:(NO:B) && !RELATION:B:(NO:A)
+	LOCAL:2 = 1 + RAND:2
+ELSEIF RELATION:A:(NO:B) > 100 || RELATION:B:(NO:A) > 100
+	LOCAL:2 = 1
+ENDIF
+
+;好感度が高い方をAに入れ替え
+IF RELATION:B:(NO:A) > RELATION:A:(NO:B)
+	LOCAL:3 = B
+	B = A
+	A = LOCAL:3
+ENDIF
+
+PRINTFORML 縁側を歩いていると、庭で何かのぶつかり合う音がする
+PRINTFORML %CALLNAME:A%と%CALLNAME:B%が、剣の稽古をしているようだ
+;A→B、B→A共に100以上
+IF RELATION:A:(NO:B) > 100 && RELATION:B:(NO:A) > 100
+	PRINTFORMW それにしても、二人は\@ LOCAL ? %LOCALS%だけあって # \@仲が良い
+	PRINTFORMW 稽古も順調のようだ
+	LOCAL:1 = 4
+;A→B、B→A共に100未満
+ELSEIF RELATION:A:(NO:B) < 100 && RELATION:B:(NO:A) < 100
+	PRINTFORML この二人が一緒に稽古とは、珍しい光景だ
+	PRINTFORMW %CALLNAME:A%と%CALLNAME:B%は、\@ LOCAL ? %LOCALS%でありながら # \@お互いに苦손意識を持っていたはずだ…
+	LOCAL:1 = 0
+;A→BかB→A、どちらかのみが100以上
+ELSEIF (RELATION:A:(NO:B) > 100 || RELATION:B:(NO:A) > 100) && (RELATION:A:(NO:B) < 100 || RELATION:B:(NO:A) < 100)
+	PRINTFORMW しかし、この二人の組み合わせは珍しい気がする
+	IF RELATION:A:(NO:B) > 100
+		PRINTFORMW %CALLNAME:A%が、%CALLNAME:B%を稽古に誘ったのだろうか
+		LOCAL:1 = 3
+	ELSE
+		PRINTFORMW %CALLNAME:B%が、%CALLNAME:A%を稽古に誘ったのだろうか
+		LOCAL:1 = 0
+	ENDIF
+ENDIF
+
+;회화は弾む？
+SELECTCASE LOCAL:2
+	;全然
+	CASE 0
+		PRINTFORMW だがそれでも、稽古は白熱しているらしい
+		PRINTFORMW ……というよりも、ほとんど殺し合いの形相だ……
+		PRINTFORMW 止めた方がいいものか、しばらくその場をおろおろとさまよった…
+	;あんまり
+	CASE 1
+		PRINTFORMW だがそれでも稽古は白熱しているらしく、二人が%CALLNAME:MASTER%に気付く様子はない…
+		PRINTFORMW 放っておいても問題なさそうなので、%CALLNAME:MASTER%はその場を후にした…
+	;そこそこ
+	CASE 2
+		PRINTFORMW 二人は稽古に熱中しているらしく、%CALLNAME:MASTER%に気付く様子はない
+		PRINTFORMW %CALLNAME:MASTER%は頭をかいて、その場を후にした…
+	;弾むよ
+	CASE 3
+		PRINTFORMW お互いに声を掛け合い、稽古をする様子は微笑ましい
+		PRINTFORMW しばらく眺めてから、差し入れでもしてやることにした…
+	;仲良し
+	CASEELSE
+		PRINTFORMW 楽しそうに稽古を続ける二人を見ていると、なんだか嬉しくなってきた
+		PRINTFORMW 微笑ましい気持ちで、2人が休憩を取ると言いだすまで、稽古の様子を眺めて過ごした…
+ENDSELECT
+
+
+;-------------------------------------------------
+;調教者変更機能/アプローチ
+;-------------------------------------------------
+@DAILY_LIFE_180
+;対象の思慕・畏怖対象をBに入れる
+SIF CFLAG:A:41 > -1
+	B = NO2(CFLAG:A:41)
+PRINTFORML %CALLNAME:B%の部屋の前を通りすがると、%CALLNAME:A%の声が聞こえた
+PRINTFORMW どうやら、%CALLNAME:B%に
+IF CFLAG:A:39 == 3 || CFLAG:A:39 == 6
+	PRINTW 振り向いてもらおうと頑張っているらしい
+ELSE
+	PRINTW 奉仕しようと頑張っているらしい
+ENDIF
+LOCAL = 1
+SIF TALENT:A:솔직함 || TALENT:A:소악마 || TALENT:A:스킨십선호
+	LOCAL += 1
+SIF TALENT:A:헌신적 || TALENT:A:모성
+	LOCAL += 1
+SIF TALENT:A:프라이드높음 || TALENT:A:츤데레 || TALENT:A:스킨십불편
+	LOCAL += 1
+SIF TALENT:A:요리고수 || ABL:A:요리기능 >= 4
+	LOCAL += 1
+
+IF (TALENT:A:솔직함 || TALENT:A:소악마 || TALENT:A:스킨십선호) && LOCAL >= 2
+	IF RAND:LOCAL == 0
+		PRINT 積극的な
+		LOCAL = 0
+	ELSE
+		LOCAL -= 1
+	ENDIF
+ENDIF
+IF (TALENT:A:헌신적 || TALENT:A:모성) && LOCAL >= 2
+	IF RAND:LOCAL == 0
+		PRINT 甲斐甲斐しい
+		LOCAL = 0
+	ELSE
+		LOCAL -= 1
+	ENDIF
+ENDIF
+IF (TALENT:A:프라이드높음 || TALENT:A:츤데레 || TALENT:A:스킨십불편) && LOCAL >= 2
+	IF RAND:LOCAL == 0
+		PRINT 솔직함になりきれないながらも一生懸命な
+		LOCAL = 0
+	ELSE
+		LOCAL -= 1
+	ENDIF
+ENDIF
+IF (TALENT:A:요리고수 || ABL:A:요리기능 >= 4) && LOCAL >= 2
+	IF RAND:LOCAL == 0
+		PRINT 自慢の손料理を駆使した
+		LOCAL = 0
+	ELSE
+		LOCAL -= 1
+	ENDIF
+ENDIF
+SIF LOCAL == 1
+	PRINT 一生懸命な
+PRINTFORMW %CALLNAME:A%のアプローチに、%CALLNAME:B%もまんざらではないようだ…
+EXP:A:애정경험 += 5
+EXP:B:애정경험 += 5
+PRINTFORMW %CALLNAME:B%と%CALLNAME:A%の애정경험 ＋５
+
+;-------------------------------------------------
+;調教者変更機能/二人でお昼寝
+;-------------------------------------------------
+@DAILY_LIFE_181
+;対象の思慕・畏怖対象をBに入れる
+SIF CFLAG:A:41 > -1
+	B = NO2(CFLAG:A:41)
+IF RAND:6 == 0
+	PRINTFORMW %CALLNAME:MASTER%が%CALLNAME:A%の部屋の近くを通りかかると
+	PRINTFORMW %CALLNAME:A%が、%CALLNAME:B%の枕になっているところに遭遇した……
+	PRINTFORMW すっかり寝入ってしまっている%CALLNAME:B%を気遣ってか、%CALLNAME:A%は微動だにもしないで%CALLNAME:B%の寝顔を眺めている
+	PRINTW 下손にのろけを聞くよりあてられる光景だ……
+ELSEIF RAND:5 == 0
+	PRINTFORMW %CALLNAME:A%と%CALLNAME:B%が二人で一冊の本を読んでいる
+	PRINTFORMW どう見ても読み辛そうなのだが、二人はまったく気にしていないようだ
+	PRINTFORMW ぴったりと寄り添いながらページを捲っている……
+	PRINTW ちょっかいを掛けられるはずもなく、そっとその場を立ち去った
+ELSEIF RAND:4 == 0
+	PRINTFORMW %CALLNAME:A%が風呂の用意をしているようだ
+	PRINTFORMW 機嫌がいいのか鼻歌が聞こえてくる
+	PRINTFORMW 率先して가사をしてくれることに礼を言おうとした
+	PRINTFORMW ……が、%CALLNAME:A%は風呂場を飛び出すやいなや%CALLNAME:B%を呼んだ
+	PRINTFORMW なるほど、そういうことか……
+	PRINTW ……風呂で喋るとよく響くんだと후で教えてやろう……
+ELSEIF RAND:3 == 0
+	PRINTFORMW 庭先に%CALLNAME:A%と%CALLNAME:B%が居るのが窓越しに見えた
+	PRINTFORMW 声は聞こえないが、仲睦まじい様子は一目見ただけで分かった
+	PRINTW 敷地内とはいえ、外でいちゃつくのはちょっと自重してほしい……
+ELSEIF RAND:2 == 0
+	PRINTFORMW %CALLNAME:B%が%CALLNAME:A%に何か教えているようだ
+	PRINTFORMW 向かい合って손を取り合って、발踏みの仕方を指導している
+	PRINTFORMW ワルツのステップがどうこう、ターンはどうするだの講釈を垂れているようだ
+	PRINTFORMW なぜダンスの練習を……？
+	PRINTW 楽しそうなので放っておきました
+ELSE
+	PRINTFORMW %CALLNAME:A%と%CALLNAME:B%が外出しようとしている
+	PRINTFORMW 二人で散歩に行くらしい
+	PRINTW …………… 
+	PRINTFORMW %CALLNAME:A%と%CALLNAME:B%が帰ってきた
+	PRINTFORMW 小一時間そこらをぶらぶらして来ただけなのに、やたら満발げだ
+	PRINTW それにしても、出掛ける時からずっと繋ぎっぱなしの손はいつ離すつもりなのだろうか……
+ENDIF
+LOCAL = RAND:3 + 3
+EXP:A:애정경험 += LOCAL
+EXP:B:애정경험 += LOCAL
+PRINTL 
+PRINTFORML %CALLNAME:A%の애정경험＋{LOCAL}
+PRINTFORMW %CALLNAME:B%の애정경험＋{LOCAL}
+
+

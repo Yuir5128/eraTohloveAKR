@@ -1,0 +1,771 @@
+﻿
+;====================================================================
+;主人が料理を作った
+;====================================================================
+@LUNCH_SELF
+;-------------------------------------------------
+;K = 料理の種類
+;L = 料理の値段の補正を決定
+;M = 料理の値段
+;N = 料理の値段の基礎
+;O = 습득の珠増加量
+;P = 乱数処理用
+;-------------------------------------------------
+
+L = 0
+M = 0
+N = 0
+O = 0
+
+;料理の出来栄え判定
+CALL LUNCH_RESULT(MASTER)
+
+PRINTFORML 
+PRINTFORMW %CALLNAME:MASTER%は自分で料理を作った
+PRINTFORML 
+PRINTFORML 　　　･
+PRINTFORML 　　　･
+PRINTFORML 　　　･
+PRINTFORML 　　　！
+PRINTFORMW 
+PRINTFORMW %CALLNAME:MASTER%は%LUNCH_NAME_DETAIL(MASTER)%を作った。
+PRINTFORML 　　　･
+PRINTFORML 　　　･
+PRINTFORML 　　　･
+PRINTFORML 
+;ターゲットがいる
+IF TARGET >= 0
+	PRINTL さて……折角の料理だ
+	PRINTW 売って小銭を稼ぐか、それともここで一緒に食事をとるか…
+	PRINTL （どうする？）
+	DRAWLINE
+	
+	PRINTFORML [0] - %CALLNAME%に食べさせる
+	PRINTFORML [1] - 料理を売る
+	
+	DRAWLINE
+	PRINTL 
+	$INPUT_LOOP
+	INPUT
+	;-------------------------------------------------
+	;%CALLNAME%に食べさせる
+	;-------------------------------------------------
+	IF RESULT == 0
+		K = 3
+		;イベント입上呼び出し
+		TFLAG:13 = 26
+		CALL KOJO_MESSAGE_EVENT
+		IF P > 0
+			PRINTFORML 　　　･
+			PRINTFORML 　　　･
+			PRINTFORML 　　　･
+			BASE:체력 += P
+			;체력が上限を超えたら最大値に
+			SIF BASE:체력 > MAXBASE:체력
+				BASE:체력 = MAXBASE:체력
+			PRINTFORML %CALLNAME%の체력が回復した。
+			JUEL:순종 += P * 4
+			PRINTFORMW %PALAMNAME:5%の珠＋{P*4}
+		ENDIF
+	;-------------------------------------------------
+	;料理を売る
+	;-------------------------------------------------
+	ELSEIF RESULT == 1
+		PRINTFORML %CALLNAME:MASTER%が作った料理には{M}の買値が付いた
+		MONEY += M
+		PRINTFORMW 所持甲州金 {M}増加
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+;ターゲットがいない場合は売るだけ
+ELSE
+	PRINTFORML %CALLNAME:MASTER%が作った料理には{M}の買値が付いた。
+	MONEY += M
+	PRINTFORMW 所持甲州金 {M}増加
+ENDIF
+
+M = 0
+O = ABL:MASTER:요리기능 + (1 + RAND:5)
+PRINTFORML %CALLNAME:MASTER%の%EXPNAME:61%＋{O}
+EXP:MASTER:가사경험 += O
+
+IF ABL:MASTER:요리기능 == 4 && EXP:MASTER:가사경험 >= 1000
+	M = 1
+ELSEIF ABL:MASTER:요리기능 == 3 && EXP:MASTER:가사경험 >= 400
+	M = 1
+ELSEIF ABL:MASTER:요리기능 == 2 && EXP:MASTER:가사경험 >= 100
+	M = 1
+ELSEIF ABL:MASTER:요리기능 == 1 && EXP:MASTER:가사경험 >= 20
+	M = 1
+ELSEIF ABL:MASTER:요리기능 == 0 && EXP:MASTER:가사경험 >= 5
+	M = 1
+ENDIF
+IF M == 1
+	ABL:MASTER:요리기능 += 1
+	PRINTFORMW %CALLNAME:MASTER%の%ABLNAME:12%のレベルが{ABL:MASTER:요리기능}になりました。
+ENDIF
+
+;食후の運動イベント
+IF TFLAG:14 == 1 && ABL:욕망 > 0
+	B = TARGET
+	CALL LUNCH_EXERCISE
+ELSE
+	TFLAG:14 = 0
+ENDIF
+
+;休憩フラグを立てる
+FLAG:0 = 1
+BEGIN TURNEND
+RETURN 1
+
+
+
+
+;====================================================================
+;奴隷に料理を作らせた
+;====================================================================
+@LUNCH_SALE
+;-------------------------------------------------
+;弁当を作らせて売る、もしくは自分で食べるオプション。
+;定食포장마차より儲けは少なめ。イチャイチャ二人でご飯食べさせたい人向け
+;もしくは毒を盛られてみたい人向け
+;K = 料理の種類
+;L = 料理の値段の補正を決定
+;M = 料理の値段
+;N = 料理の値段の基礎
+;O = 습득の珠増加量
+;P = 固有料理の種類、乱数処理用
+;-------------------------------------------------
+A = 0
+B = TARGET
+K = 0
+L = 0
+M = 0
+N = 0
+
+;料理の出来栄え判定
+CALL LUNCH_RESULT(TARGET)
+
+PRINTL 
+PRINTFORMW %CALLNAME%に料理を作らせた
+PRINTL 
+
+
+IF (TALENT:연모 || TALENT:친애 || TALENT:음란 || TALENT:창부) && !TALENT:무관심
+	PRINTFORML   「♪～」
+	PRINTFORML  「♪♪～」
+	PRINTFORML 「♪～♪～」
+	PRINTFORML      !
+ELSE
+	PRINTFORML 　　　･
+	PRINTFORML 　　　･
+	PRINTFORML 　　　･
+	PRINTFORML 　　　！
+ENDIF
+PRINTW 
+PRINTFORM %CALLNAME%は
+SIF TALENT:친애
+	PRINTFORM 愛情たっぷりの
+IF ITEM:41 > 0 && (((TALENT:음란 || TALENT:창부) && !RAND:2) || ((KANRAKU(TARGET) >= 1 && KANRAKU(TARGET) <= 3) && !RAND:4))
+	ITEM:41 -= 1
+	TFLAG:14 = 1
+	PRINTFORM 甘い香りがするピンク色のスープ
+ELSE
+	PRINTFORM %LUNCH_NAME_DETAIL(TARGET)%
+ENDIF
+PRINTW を作った
+PRINTFORML 　　　･
+PRINTFORML 　　　･
+PRINTFORML 　　　･
+PRINTW 
+
+IF (TALENT:연모 == 0 || TALENT:친애 == 0) && (MARK:반발각인 >= 2 || ABL:순종 < 5)
+	K = 1
+	
+	;입上はEVENT_Mで管理した方がよさそうな気がしたので
+	TFLAG:13 = 26
+	CALL KOJO_MESSAGE_EVENT
+	
+	IF P > 0
+		PRINTFORML 　　　･
+		PRINTFORML 　　　･
+		PRINTFORML 　　　･
+		BASE:체력 += P
+		;체력が上限を超えたら最大値に
+		SIF BASE:체력 > MAXBASE:체력
+			BASE:체력 = MAXBASE:체력
+		PRINTFORML %CALLNAME%の체력が回復した。
+		JUEL:순종 += P * 4
+		PRINTFORMW %PALAMNAME:5%の珠＋{P*4}
+	ENDIF
+ELSE
+	PRINTL さて……折角の料理だ。
+	PRINTW 売って小金を稼ぐか、それともここで二人一緒に食事をとるか……
+	PRINTL （どうする？）
+	DRAWLINE
+	IF TALENT:친애
+		PRINTL [0] - 二人で一緒に食べる
+		PRINTL [1] - 料理を売る
+	ELSE
+		PRINTL [0] - 折角だから二人で食べる
+		PRINTL [1] - 料理を売る
+	ENDIF
+	DRAWLINE
+	PRINTL 
+	$INPUT_LOOP
+	INPUT
+	;-------------------------------------------------
+	;一緒に食べる
+	;-------------------------------------------------
+	IF RESULT == 0
+		K = 2
+		TFLAG:13 = 26
+		CALL KOJO_MESSAGE_EVENT
+		
+		IF P > 0
+			PRINTFORML 　　　･
+			PRINTFORML 　　　･
+			PRINTFORML 　　　･
+			BASE:체력 += P
+			;체력が上限を超えたら最大値に
+			SIF BASE:체력 > MAXBASE:체력
+				BASE:체력 = MAXBASE:체력
+			PRINTFORML %CALLNAME%の체력が回復した。
+			JUEL:순종 += P * 4
+			PRINTFORMW %PALAMNAME:5%の珠＋{P*4}
+		ENDIF
+	;-------------------------------------------------
+	;売る
+	;-------------------------------------------------
+	ELSEIF RESULT == 1
+		PRINTFORM %CALLNAME%が
+		IF (TALENT:연모 || TALENT:친애)
+			PRINTFORM 愛を込めて
+			TIMES M , 1.50
+		ENDIF
+		PRINTFORML 作った料理には{M}の買値が付いた。
+		MONEY += M
+		PRINTFORMW 所持甲州金 {M}増加
+		TFLAG:14 = 0
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ENDIF
+
+;가사경험
+O = ABL:요리기능 + (1 + RAND:5)
+PRINTFORML %EXPNAME:61%＋{O}
+EXP:가사경험 += O
+
+;친애、상사상애持ちかつ食후のイベント発生確定時は애정경험が入る
+;また、食후のイベントで押し倒すことを選ぶと봉사쾌락경험が入るようになる
+IF TFLAG:14 == 1 && (TALENT:연모 || TALENT:친애)
+	PRINTFORML %EXPNAME:23% ＋2
+	EXP:애정경험 += 2
+	TFLAG:14 = 2
+;복종持ちのときは食후のイベントで押し倒すことを選ぶと봉사쾌락경험が入るようになる
+ELSEIF TFLAG:14 == 1 && (TALENT:복종 || TALENT:예속)
+	TFLAG:14 = 2
+ENDIF
+WAIT
+
+;食후の運動イベント
+IF (TFLAG:14 >= 1 && TFLAG:14 <= 2) && ABL:욕망 > 0
+	CALL LUNCH_EXERCISE
+ELSE
+	TFLAG:14 = 0
+ENDIF
+
+;休憩フラグを立てる
+FLAG:0 = 1
+BEGIN TURNEND
+RETURN 1
+
+
+
+
+;====================================================================
+;食후の運動イベント
+;====================================================================
+
+@LUNCH_EXERCISE
+;SELF.ERBを基に作成。
+
+S = 0
+;V感覚
+IF ABL:V감각 == 1
+	S = 1
+ELSEIF ABL:V감각 == 2 || ABL:V감각 == 3
+	S = 2
+ELSEIF ABL:V감각 >= 4
+	S = 3
+ENDIF
+
+;A感覚
+IF ABL:A감각 == 1
+	S = 1
+ELSEIF ABL:A감각 == 2 || ABL:A감각 == 3
+	S = 2
+ELSEIF ABL:A감각 >= 5
+	S = 3
+ENDIF
+
+;욕망と봉사정신によるボーナス
+IF ABL:욕망 == 4 && ABL:봉사정신 >= 4
+	S += 2
+ELSEIF ABL:욕망 >= 5 && ABL:봉사정신 >= 4
+	S += 3
+ENDIF
+
+;욕망ＬＶ３でもSに+1する
+IF ABL:욕망 == 3 && ABL:V감각 >= 3 && ABL:봉사정신 >= 5
+	S += 1
+ENDIF
+
+;쾌감에솔직、쾌감을부정、음란、발정기
+IF TALENT:쾌감에솔직 && S
+	S += 1
+ELSEIF TALENT:쾌감을부정 && S
+	S -= 2
+ENDIF
+IF (TALENT:음란 || TALENT:창부) && S
+	S += 1
+ENDIF
+IF TALENT:발정기 && S
+	S += 1
+ENDIF
+
+;昼の場合は夜までｷｬｯｷｬｳﾌﾌ
+IF TIME == 0 && S > 3
+	TIME += 1
+	S += 2
+ENDIF
+
+;반발각인があると実行しにくくなる。また、연모なし반발3では発生せず
+IF MARK:반발각인 && S
+	IF MARK:반발각인 && (!TALENT:연모 || !TALENT:친애)
+		S = 0
+	ELSE
+		S /= 1+MARK:반발각인
+		S -= MARK:반발각인
+	ENDIF
+ENDIF
+
+IF S > 0
+	DRAWLINE
+	PRINTFORML 　　　･
+	PRINTFORML 　　　･
+	PRINTFORML 　　　･
+	PRINTFORMW 　　　！
+	PRINTFORML 料理を食べた%CALLNAME:MASTER%と%CALLNAME%は、なんとも言えない感覚に襲われた
+	PRINTFORMW なんだか、体が火照っているようだ…
+	PRINTFORML [0] - 今日はやめておく
+	PRINTFORML [1] - %CALLNAME%を押し倒す
+	DRAWLINE
+	$SELECT_POINT_EXERCISE
+	INPUT
+	;-------------------------------------------------
+	;押し倒さない
+	;-------------------------------------------------
+	IF RESULT == 0
+		PRINTFORMW %CALLNAME:MASTER%は渦巻く욕망を抑え込み、%CALLNAME%を残して自分の部屋へと向かった…
+		PRINTFORML 
+		WAIT
+		;욕망
+		SIF ABL:욕망
+			S += ABL:욕망
+		;자위중독
+		SIF ABL:자위중독
+			S += ABL:자위중독
+		;음란
+		SIF TALENT:음란 || TALENT:창부
+			S += 1
+		;자제심
+		SIF TALENT:자제심
+			S -= 2
+		;快楽の부정
+		SIF TALENT:쾌감을부정
+			S -= 3
+		;반발각인
+		SIF MARK:반발각인
+			S -= MARK:반발각인
+		S /= 2
+		S -= 3
+		SIF TFLAG:14 == 2
+			S += 5
+		IF S > 0
+			PRINTFORM 部屋に一人残された%CALLNAME%は堪え切れず
+			IF TEQUIP:속옷（아래） == 5
+				PRINTL 자위をしようとしたが、
+				PRINTFORML 下半身を覆う정조대に阻まれ、苦しい思いをしたようだ…
+			ELSE
+				PRINT 、
+				PRINTV S
+				PRINTL 回자위をしたようだ…
+				PRINTFORML %EXPNAME:10%＋{S}
+				PRINTFORML %PALAMNAME:0%の珠＋{S*100}
+				PRINTFORML %PALAMNAME:5%の珠＋{S*50}
+				PRINTFORMW %PALAMNAME:6%の珠＋{S*100}
+				EXP:자위경험 += S
+				JUEL:쾌C += S*100
+				JUEL:순종 += S*50
+				JUEL:욕정 += S*100
+			ENDIF
+			SIF TEQUIP:속옷（아래） == 5
+				CFLAG:602 += 5
+		ENDIF
+	;-------------------------------------------------
+	;押し倒す
+	;-------------------------------------------------
+	ELSEIF RESULT == 1
+		SIF TFLAG:14 == 2
+			S += 2
+		K = 4
+		;イベント입上呼び出し
+		TFLAG:13 = 26
+		CALL KOJO_MESSAGE_EVENT
+		PRINTL 
+		WAIT
+		TFLAG:130 = 4
+		;정조대
+		IF TEQUIP:속옷（아래） != 5
+			PRINTFORML %EXPNAME:4%＋{S}
+			EXP:성교경험 += S
+			EXP:MASTER:삽입경험 += S
+		ENDIF
+		;상사상애・복종を持っていた場合봉사쾌락경험が入る
+		IF TFLAG:14 == 2
+			PRINTFORML %EXPNAME:21% ＋2
+			EXP:봉사쾌락경험 += 2
+		ENDIF
+		PRINTFORML %PALAMNAME:5%の珠＋{S*100}
+		PRINTFORML %PALAMNAME:6%の珠＋{S*300}
+		JUEL:순종 += S*100
+		JUEL:욕정 += S*300
+		;처녀のとき
+		IF TALENT:처녀 && TEQUIP:속옷（아래） != 5
+			JUEL:순종 += S*250
+			PRINTFORML %PALAMNAME:5%の珠＋{S*250}
+			PRINTL 
+			PRINTL 
+			IF TALENT:연모 || TALENT:친애
+				PRINTFORML %CALLNAME%は、%CALLNAME:MASTER%に純潔を捧げたことに幸福を感じているようだ…
+			ELSEIF TALENT:복종 || TALENT:예속
+				PRINTFORML %CALLNAME%は%CALLNAME:MASTER%に純潔を捧げたことに悦楽を感じているようだ…
+			ELSE
+				PRINTFORML %CALLNAME%の秘唇から滲み出た破瓜の血がシーツを汚すも、
+				PRINTFORML 性交に夢中だった二人は、気づくことなく宴を続けた……
+			ENDIF
+			TALENT:처녀 = 0
+		ENDIF
+		SIF TEQUIP:속옷（아래） == 5
+			CFLAG:602 += 5
+	ELSE
+		GOTO SELECT_POINT_EXERCISE
+	ENDIF
+ENDIF
+TFLAG:14 = 0
+S = 0
+
+
+
+
+;====================================================================
+;毒を盛られるイベント
+;====================================================================
+@POISONED_LUNCH
+;-------------------------------------------------
+;K = 料理の種類
+;L = 毒の種類
+;M = 毒の見抜きにくさ補正
+;N = 見破り補正
+;O = 습득の珠増加量
+;P = 固有料理の種類、乱数処理用
+;-------------------------------------------------
+K = RAND:16
+L = RAND:7
+M = 0
+N = 0
+
+;ABL:기교をみる
+IF ABL:기교 == 0
+	M = 1
+ELSE
+	M = ABL:기교 + 1
+ENDIF
+
+;ABL:요리기능をみる
+IF ABL:요리기능 == 0
+	TIMES M , 1.00
+ELSEIF ABL:요리기능 == 1
+	TIMES M , 1.10
+ELSEIF ABL:요리기능 == 2
+	TIMES M , 1.20
+ELSEIF ABL:요리기능 == 3
+	TIMES M , 1.30
+ELSEIF ABL:요리기능 == 4
+	TIMES M , 1.40
+ELSE
+	TIMES M , 1.50
+ENDIF
+
+;EXP:調理経験をみる
+IF EXP:가사경험 < EXPLV:1
+	TIMES M , 1.00
+ELSEIF EXP:가사경험 < EXPLV:2
+	TIMES M , 1.20
+ELSEIF EXP:가사경험 < EXPLV:3
+	TIMES M , 1.40
+ELSEIF EXP:가사경험 < EXPLV:4
+	TIMES M , 1.60
+ELSEIF EXP:가사경험 < EXPLV:5
+	TIMES M , 1.80
+ELSE
+	TIMES M , 2.00
+ENDIF
+
+PRINTFORML 　　　･
+PRINTFORML 　　　･
+PRINTFORML 　　　･
+PRINTFORML 　　　！
+PRINTW 
+PRINTFORM %CALLNAME%は
+IF K == 0
+	PRINTL おにぎり
+	M += 12
+ELSEIF K == 1 || K == 15
+	PRINT カレー
+	M += 10
+ELSEIF K == 2 || K == 14
+	PRINT シチュー
+	M += 8
+ELSEIF K == 3 || K == 13
+	PRINT お菓子
+	M += 6
+ELSEIF K == 4 || K == 12
+	PRINT パン
+	M += 6
+ELSEIF K == 5 || K == 11
+	IF NO:TARGET == 5
+		PRINT 新鮮野菜の
+		M += 1
+	ENDIF
+	PRINT サラダ
+	M += 4
+ELSEIF K == 6 || K == 10
+	PRINT 弁当
+	M += 4
+ELSE
+	PRINT スープ
+	M += 2
+ENDIF
+M += RAND:4
+
+SIF TALENT:MASTER:조제지식
+	TIMES M , 2.00
+SIF TALENT:MASTER:독약내성
+	TIMES M , 2.00
+
+SIF MARK:반발각인
+	M *= MARK:반발각인
+SIF MARK:굴복각인
+	M /= MARK:굴복각인
+SIF ABL:B감각
+	M -= ABL:B감각
+SIF ABL:순종
+	M -= ABL:순종
+
+SIF M <= 4
+	M = 4
+
+PRINTFORMW を作った
+PRINTFORML 　　　･
+PRINTFORML 　　　･
+PRINTFORML 　　　･
+PRINTFORML さて…折角の料理だ
+PRINTFORMW ありがたく頂くとしよう…
+
+;-------------------------------------------------
+;조제지식、독약내성持ちまたは一定確率で引っかからない
+;-------------------------------------------------
+IF TALENT:MASTER:조제지식 == 0 && TALENT:MASTER:독약내성 == 0 && RAND:M > 2
+	K = 5
+	TFLAG:13 = 26
+	CALL KOJO_MESSAGE_EVENT
+	PRINTL …
+	PRINTL ……
+	PRINTL …………。
+	;금지된지식ロスト
+	IF L == 0 && TALENT:MASTER:금지된지식
+		PRINTFORMW %NAME:MASTER%は【금단의지식】を失った
+		TALENT:MASTER:금지된지식 = 0
+	;새드消滅
+	ELSEIF L == 1 && TALENT:MASTER:새드
+		PRINTFORMW %NAME:MASTER%は【새드】を失った
+		TALENT:MASTER:새드 = 0
+	;조루消滅
+	ELSEIF L == 2 && TALENT:MASTER:절륜
+		PRINTFORMW %NAME:MASTER%は【절륜】を失った
+		TALENT:MASTER:절륜 = 0
+	;더러움무시消滅
+	ELSEIF L == 3 && TALENT:MASTER:더러움무시
+		PRINTFORMW %NAME:MASTER%は【더러움무시】を失った
+		TALENT:MASTER:더러움무시 = 0
+	;광기付加
+	ELSEIF L == 4 && TALENT:MASTER:광기 == 0
+		PRINTFORMW %NAME:MASTER%は【광기】を得た
+		TALENT:MASTER:광기 = 1
+	;매력減少
+	ELSEIF L == 5 && FLAG:30 > 0
+		IF FLAG:30 >= 5
+			PRINTFORMW %NAME:MASTER%の매력が下がった
+			FLAG:30 = 4
+			IF TALENT:MASTER:수수께끼의매력
+				PRINTFORMW %NAME:MASTER%は【수수께끼의매력】を失った
+				TALENT:MASTER:수수께끼의매력 = 0
+			ENDIF
+		ELSE
+			PRINTFORMW %NAME:MASTER%の매력が下がった
+			FLAG:30 -= 1
+		ENDIF
+	;기교減少
+	ELSEIF L == 6 && ABL:MASTER:기교 > 0
+		PRINTFORMW %NAME:MASTER%の기교が下がった
+		ABL:MASTER:기교 -= 1 + RAND:2
+		SIF ABL:MASTER:기교 < 0
+			ABL:MASTER:기교 = 0
+	;체력減少
+	ELSE
+		PRINTFORM %NAME:MASTER%は체력を
+		SIF K >= 4
+			PRINT 大きく
+		PRINTW 消耗した
+		BASE:MASTER:체력 -= 200 * (M/3)
+	ENDIF
+	IF NO:TARGET == 33
+		BASE:MASTER:체력 /= 2
+		BASE:MASTER:체력 -= 75 * (RAND:5 + 1)
+	ELSE
+		BASE:MASTER:체력 -= 75 * (RAND:5 + 1)
+	ENDIF
+;-------------------------------------------------
+;毒を見抜く
+;-------------------------------------------------
+ELSE
+	PRINTFORML 　　　･
+	PRINTFORML 　　　･
+	PRINTFORML 　　　･
+	PRINTFORML 　　　！
+	PRINTFORMW %NAME:MASTER%は出された食べ物に毒が盛られていることを見抜いた
+	;약점잡힘を握るイベント発生判定用
+	B = 0
+	C = 0
+	REPEAT CHARANUM
+		;MASTERは除外
+		SIF COUNT == MASTER
+			CONTINUE
+		;労役中などこの場にいないなら除外
+		SIF CFLAG:COUNT:12 >= 1
+			CONTINUE
+		;助손可能、순종Lv4以上、굴복각인Lv3、약점잡힘、연모系素質のどれかを持っている必要がある
+		SIF ABL:COUNT:순종 < 4 && MARK:COUNT:굴복각인 < 3 && TALENT:COUNT:약점잡힘 == 0 && TALENT:COUNT:질투 == 0 && TALENT:COUNT:맹신 == 0
+			CONTINUE
+		;上の条件を満たすキャラを奴隷の中からピックアップし、調教対象との相性を見比べる
+		;ここで調教対象と相性のいいキャラがピックアップされ、2/3の確率で
+		;(鬼畜な主人によって)調教対象の毒入り料理を食べさせるように仕向けられる
+		A = NO:COUNT
+		SIF RELATION:A < 100
+			CONTINUE
+		IF RELATION:A > RELATION:TARGET && (C == 0 || RAND:3 > 0)
+			B = NO:COUNT
+			C = COUNT
+		ENDIF
+	REND
+	IF C > 0 && RAND:3 > 0
+		K = 6
+		TFLAG:13 = 26
+		CALL KOJO_MESSAGE_EVENT
+
+		M += 12
+		IF TALENT:약점잡힘 == 0
+			IF RAND:3 == 0
+				PRINTFORMW %NAME:TARGET%の【약점잡힘】を握ることに成功した
+				TALENT:약점잡힘 = 1
+				TIMES M , 2.00
+			ENDIF
+		ENDIF
+		JUEL:욕정 += M*8
+		PRINTFORML %PALAMNAME:7%の珠＋{M*8}
+		SIF TALENT:겁쟁이
+			M *= 2
+		SIF TALENT:낙관적
+			M -= 5
+		SIF TALENT:비관적
+			M += 10
+		SIF TALENT:감정부족
+			M /= 2
+		SIF M <= 0
+			M = 0
+		IF M > 0
+			PRINTFORML %PALAMNAME:100%の珠＋{M*30}
+			JUEL:부정 += M*30
+		ENDIF
+	ELSE
+		K = 7
+		TFLAG:13 = 26
+		CALL KOJO_MESSAGE_EVENT
+
+		JUEL:욕정 += M*5
+		PRINTFORML %PALAMNAME:7%の珠＋{M*5}
+		SIF TALENT:겁쟁이
+			M *= 2
+		SIF TALENT:낙관적
+			M -= 5
+		SIF TALENT:비관적
+			M += 10
+		SIF TALENT:감정부족
+			M /= 2
+		SIF M <= 0
+			M = 0
+		IF M > 0
+			PRINTFORML %PALAMNAME:100%の珠＋{M*20}
+			JUEL:부정 += M*20
+		ENDIF
+	ENDIF
+ENDIF
+
+
+;料理経験
+O = ABL:요리기능 + (1 + RAND:5)
+PRINTFORML %EXPNAME:61%＋{O}
+EXP:가사경험 += O
+WAIT
+
+IF BASE:MASTER:체력 <= 0
+	CALL ENDING_POISONED
+ENDIF
+
+;休憩フラグを立てる
+FLAG:0 = 1
+BEGIN TURNEND
+RETURN 1
+
+
+
+;-------------------------------------------------
+;毒殺エンド
+;-------------------------------------------------
+@ENDING_POISONED
+DRAWLINE
+PRINTFORMW ―――%NAME:MASTER%の체력が尽きました―――
+PRINTL …………
+PRINTL ………
+PRINTL ……
+
+K = 8
+TFLAG:13 = 26
+CALL KOJO_MESSAGE_EVENT
+
+QUIT
+
+

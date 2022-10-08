@@ -1,0 +1,423 @@
+﻿;-------------------------------------------------
+;요도벌룬
+;Ｕ系コマンド
+;-------------------------------------------------
+@COM61
+
+PRINTL 요도벌룬
+STR:0 = 요도벌룬
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;着脱の処理
+IF TEQUIP:요도벌룬 == 0
+	TEQUIP:요도벌룬 = 1
+ELSE
+	TEQUIP:요도벌룬 = 0
+ENDIF
+
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 80
+LOSEBASE:기력 += 150
+
+IF ABL:C감각 == 0
+	SOURCE:쾌C += 80
+ELSEIF ABL:C감각 == 1
+	SOURCE:쾌C += 250
+ELSEIF ABL:C감각 == 2
+	SOURCE:쾌C += 600
+ELSEIF ABL:C감각 == 3
+	SOURCE:쾌C += 1000
+ELSEIF ABL:C감각 == 4
+	SOURCE:쾌C += 1300
+ELSE
+	SOURCE:쾌C += 1700
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:쾌C , 0.40
+	SOURCE:통증 += 1600
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:쾌C , 0.80
+	SOURCE:통증 += 1000
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:쾌C , 1.00
+	SOURCE:통증 += 600
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:쾌C , 1.40
+	SOURCE:통증 += 250
+ELSE
+	TIMES SOURCE:쾌C , 1.80
+	SOURCE:통증 += 120
+ENDIF
+
+;PALAM:욕정をみる
+IF PALAM:욕정 < PALAMLV:1
+	TIMES SOURCE:쾌C , 0.80
+	TIMES SOURCE:굴복 , 0.60
+ELSEIF PALAM:욕정 < PALAMLV:2
+	TIMES SOURCE:쾌C , 0.90
+	TIMES SOURCE:굴복 , 0.80
+ELSEIF PALAM:욕정 < PALAMLV:3
+	TIMES SOURCE:쾌C , 1.00
+	TIMES SOURCE:굴복 , 1.00
+ELSEIF PALAM:욕정 < PALAMLV:4
+	TIMES SOURCE:쾌C , 1.10
+	TIMES SOURCE:굴복 , 1.20
+ELSE
+	TIMES SOURCE:쾌C , 1.20
+	TIMES SOURCE:굴복 , 1.40
+ENDIF
+
+;ABL:순종をみる
+IF ABL:순종 == 0
+	TIMES SOURCE:쾌C , 0.80
+ELSEIF ABL:순종 == 1
+	TIMES SOURCE:쾌C , 0.90
+ELSEIF ABL:순종 == 2
+	TIMES SOURCE:쾌C , 1.00
+ELSEIF ABL:순종 == 3
+	TIMES SOURCE:쾌C , 1.10
+ELSEIF ABL:순종 == 4
+	TIMES SOURCE:쾌C , 1.20
+ELSE
+	TIMES SOURCE:쾌C , 1.30
+ENDIF
+
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 600
+
+A = 160
+
+;EXP:U확장경험をみる
+IF EXP:U확장경험 < EXPLV:1
+	TIMES A , 3.00
+ELSEIF EXP:U확장경험 < EXPLV:2
+	TIMES A , 2.50
+ELSEIF EXP:U확장경험 < EXPLV:3
+	TIMES A , 2.00
+ELSEIF EXP:U확장경험 < EXPLV:4
+	TIMES A , 1.00
+ELSEIF EXP:U확장경험 < EXPLV:5
+	TIMES A , 0.80
+ELSE
+	TIMES A , 0.60
+ENDIF
+
+;겁쟁이
+SIF TALENT:겁쟁이
+	TIMES A , 2.00
+;감정부족
+SIF TALENT:감정부족
+	TIMES A , 0.60
+;小人体形
+SIF TALENT:소인체형
+	TIMES A , 2.00
+
+LOSEBASE:체력 += A
+LOSEBASE:기력 += A * 2
+
+SOURCE:노출 += 800
+SOURCE:중독충족 += 500
+SOURCE:일탈 += 1000
+
+;ABL:C감각をみる
+IF ABL:C감각 == 0
+	SOURCE:굴복 += 300
+ELSEIF ABL:C감각 == 1
+	SOURCE:굴복 += 800
+ELSEIF ABL:C감각 == 2
+	SOURCE:굴복 += 1400
+ELSEIF ABL:C감각 == 3
+	SOURCE:굴복 += 1800
+ELSEIF ABL:C감각 == 4
+	SOURCE:굴복 += 2100
+ELSE
+	SOURCE:굴복 += 2400
+ENDIF
+
+;ABL:마조끼をみる
+IF ABL:마조끼 == 0
+	SOURCE:통증 += 2000
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 200
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 2000
+ELSEIF ABL:마조끼 == 1
+	SOURCE:통증 += 1600
+	SOURCE:불결 += 2000	
+	SOURCE:굴복 += 500
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 1000
+ELSEIF ABL:마조끼 == 2
+	SOURCE:통증 += 1200
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 800
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 500
+ELSEIF ABL:마조끼 == 3
+	SOURCE:통증 += 800
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 1200
+	SOURCE:일탈 += 500
+	SOURCE:반발 += 100
+ELSEIF ABL:마조끼 == 4
+	SOURCE:통증 += 600
+	SOURCE:불결 += 1000	
+	SOURCE:굴복 += 1500
+	SOURCE:일탈 += 100
+	SOURCE:반발 += 0
+ELSE
+	SOURCE:통증 += 400
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 2000
+	SOURCE:일탈 += 50
+	SOURCE:반발 += 0
+ENDIF
+
+;EXP:U경험をみる
+IF EXP:U경험 < EXPLV:1
+	TIMES SOURCE:쾌C , 0.20
+	SOURCE:통증 += 8000
+ELSEIF EXP:U경험 < EXPLV:2
+	TIMES SOURCE:쾌C , 0.60
+	SOURCE:통증 += 3600
+ELSEIF EXP:U경험 < EXPLV:3
+	TIMES SOURCE:쾌C , 1.00
+	SOURCE:통증 += 1200
+ELSEIF EXP:U경험 < EXPLV:4
+	TIMES SOURCE:쾌C , 1.20
+	SOURCE:통증 += 300
+ELSEIF EXP:U경험 < EXPLV:5
+	TIMES SOURCE:쾌C , 1.40
+	SOURCE:통증 += 30
+ELSE
+	TIMES SOURCE:쾌C , 1.60
+	SOURCE:통증 += 0
+ENDIF
+
+;남자
+SIF TALENT:남자
+	TIMES SOURCE:통증 , 4.50
+;후타나리
+SIF TALENT:후타나리
+	TIMES SOURCE:통증 , 4.50
+;반음반양
+SIF TALENT:반음반양
+	TIMES SOURCE:통증 , 4.50
+;쉬메일
+SIF TALENT:쉬메일
+	TIMES SOURCE:통증 , 4.50
+;小人体形
+SIF TALENT:소인체형
+	TIMES SOURCE:통증 , 2.00
+
+
+;C민감、鈍感をみる
+;쾌C自体のチェックは후でまとめてやる
+IF TALENT:C둔감
+	TIMES SOURCE:통증 , 1.50
+	TIMES SOURCE:굴복 , 1.50
+	TIMES SOURCE:일탈 , 1.50
+ELSEIF TALENT:C민감
+	TIMES SOURCE:통증 , 0.60
+	TIMES SOURCE:굴복 , 0.60
+	TIMES SOURCE:일탈 , 0.60
+ENDIF
+
+;처녀で정조관념
+SIF TALENT:처녀 == 1 && TALENT:정조관념
+	SOURCE:굴복 /= 3
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+EXP:U경험 += 3
+PRINTFORML U경험＋３
+
+EXP:U확장경험 += 2
+PRINTFORML U확장경험＋２
+
+;촉수소환時、촉수경험のリセットをする
+SIF TEQUIP:촉수 == 1
+	T = 0
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+
+
+
+;--------------------------------------------------
+;요도벌룬挿入中
+;--------------------------------------------------
+@EQUIP_COM61
+PRINTL ＜요도벌룬挿入中＞
+
+LOSEBASE:체력 += 30
+LOSEBASE:기력 += 60
+
+;ABL:C감각をみる
+IF ABL:C감각 == 0
+	A = 80
+	B = 300
+ELSEIF ABL:C감각 == 1
+	A = 250
+	B = 800
+ELSEIF ABL:C감각 == 2
+	A = 600
+	B = 1400
+ELSEIF ABL:C감각 == 3
+	A = 1000
+	B = 1800
+ELSEIF ABL:C감각 == 4
+	A = 1300
+	B = 2100
+ELSE
+	A = 1700
+	B = 2400
+ENDIF
+
+;EXP:尿道経験をみる
+IF EXP:U경험 < EXPLV:1
+	TIMES A , 0.50
+	C = 2000
+ELSEIF EXP:U경험 < EXPLV:2
+	TIMES A , 1.00
+	C = 300
+ELSEIF EXP:U경험 < EXPLV:3
+	TIMES A , 1.10
+	C = 50
+ELSEIF EXP:U경험 < EXPLV:4
+	TIMES A , 1.20
+	C = 10
+ELSEIF EXP:U경험 < EXPLV:5
+	TIMES A , 1.40
+	C = 0
+ELSE
+	TIMES A , 1.60
+	C = 0
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES A , 0.40
+	C += 800
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES A , 0.80
+	C += 500
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES A , 1.00
+	C += 300
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES A , 1.40
+	C += 120
+ELSE
+	TIMES A , 1.80
+	C += 100
+ENDIF
+
+;PALAM:욕정をみる
+IF PALAM:욕정 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:욕정 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:욕정 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:욕정 < PALAMLV:4
+	TIMES A , 1.10
+ELSE
+	TIMES A , 1.20
+ENDIF
+
+;ABL:순종をみる
+IF ABL:순종 == 0
+	TIMES A , 0.80
+ELSEIF ABL:순종 == 1
+	TIMES A , 0.90
+ELSEIF ABL:순종 == 2
+	TIMES A , 1.00
+ELSEIF ABL:순종 == 3
+	TIMES A , 1.10
+ELSEIF ABL:순종 == 4
+	TIMES A , 1.20
+ELSE
+	TIMES A , 1.30
+ENDIF
+
+;남자
+SIF TALENT:남자
+	TIMES C , 4.50
+;후타나리
+SIF TALENT:후타나리
+	TIMES C , 4.50	
+;小人体形
+SIF TALENT:소인체형
+	TIMES C , 2.00
+
+;C민감、鈍感をみる
+;쾌C自体のチェックは후でまとめてやる
+IF TALENT:C둔감
+	TIMES A , 1.50
+	TIMES B , 1.50
+	TIMES C , 1.50
+ELSEIF TALENT:C민감
+	TIMES A , 0.60
+	TIMES B , 0.60
+	TIMES C , 0.60
+ENDIF
+
+;처녀で정조관념
+SIF TALENT:처녀 == 1 && TALENT:정조관념
+	B /= 3
+
+SOURCE:쾌C += A
+SOURCE:굴복 += B
+SOURCE:통증 += C
+SOURCE:일탈 += B
+
+
+EXP:U경험 += 2
+PRINTFORML U경험＋２
+EXP:U확장경험 += 1
+PRINTFORML U확장경험＋１
+
+;게이경험とか加算
+CALL COM_EXP(1)
+
+SIF TEQUIP:촉수
+	T += 2
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+	
+RETURN 1
+
+

@@ -1,0 +1,126 @@
+﻿;-------------------------------------------------
+;촛불責め
+;ＳＭ系コマンド
+;-------------------------------------------------
+@COM144
+
+PRINTL 촛불責め
+STR:0 = 촛불責め
+CALL KOJO_MESSAGE_COM
+
+;使ったアイテム減らす
+ITEM:46 -= 1
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;性器
+IF TFLAG:56 == 1
+	IF TEQUIP:지하실
+		;消費체력、기력
+		LOSEBASE:체력 += 100
+		LOSEBASE:기력 += 125
+		
+		SOURCE:통증 += 4000
+	ELSE
+		;消費체력、기력
+		LOSEBASE:체력 += 75
+		LOSEBASE:기력 += 100
+		
+		SOURCE:통증 += 2500
+	ENDIF
+	SOURCE:쾌C += 100
+;舌
+ELSEIF TFLAG:56 == 3
+	IF TEQUIP:지하실
+		;消費체력、기력
+		LOSEBASE:체력 += 75
+		LOSEBASE:기력 += 100
+		
+		SOURCE:통증 += 2500
+	ELSE
+		;消費체력、기력
+		LOSEBASE:체력 += 50
+		LOSEBASE:기력 += 80
+		
+		SOURCE:통증 += 2000
+	ENDIF
+;乳首
+ELSEIF TFLAG:56 == 2
+	IF TEQUIP:지하실
+		;消費체력、기력
+		LOSEBASE:체력 += 50
+		LOSEBASE:기력 += 80
+		
+		SOURCE:통증 += 2500
+	ELSE
+		;消費체력、기력
+		LOSEBASE:체력 += 30
+		LOSEBASE:기력 += 50
+		
+		SOURCE:통증 += 1000
+	ENDIF
+	SOURCE:쾌B += 100
+ELSE
+	IF TEQUIP:지하실
+		;消費체력、기력
+		LOSEBASE:체력 += 30
+		LOSEBASE:기력 += 50
+		
+		SOURCE:통증 += 1000
+	ELSE
+		;消費체력、기력
+		LOSEBASE:체력 += 10
+		LOSEBASE:기력 += 30
+		
+		SOURCE:통증 += 700
+	ENDIF
+ENDIF
+
+SOURCE:두려움 += 700
+;지하실にいると두려움のソース追加
+SIF TEQUIP:지하실
+	TIMES SOURCE:두려움 , 1.50
+
+SOURCE:일탈 += 150
+SOURCE:반발 += 700
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;고통のパラメータによる고통のソース増加は先に処理しておく
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증 , 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증 , 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증 , 3.00
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;게이경험とか加算
+CALL COM_EXP(2)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+

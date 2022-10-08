@@ -1,0 +1,336 @@
+﻿;-------------------------------------------------
+;駅弁
+;派生系コマンド
+;-------------------------------------------------
+@COM510
+
+;대면좌위からの派生の場合
+IF SELECTCOM == 104
+	TFLAG:705 = 0
+	STR:0 = 駅弁
+;대면좌위애널からの派生の場合
+ELSEIF SELECTCOM == 114
+	TFLAG:705 = 1
+	STR:0 = 애널駅弁
+ENDIF
+SELECTCOM = 510
+PRINTFORML %STR:0%
+
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;派生元を見る
+;대면좌위からの派生の場合
+IF TFLAG:705 == 0
+	;V経験を伴うコマンドのフラグ(처녀膜再生対応)
+	TFLAG:19 = 1
+	
+	;主人による처녀喪失
+	SIF TALENT:처녀 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0
+		TFLAG:20 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;사정ゲージチェック
+;-------------------------------------------------
+B = 600
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 120
+LOSEBASE:기력 += 80
+
+SOURCE:애정 += 200
+
+;스킨십선호だと애정のソース追加
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+SOURCE:성취감 += 500
+SOURCE:통증 += 300
+SOURCE:중독충족 += 500
+SOURCE:노출 += 500
+SOURCE:반발 += 400
+
+;上のほうで計算した汚れデータ
+SOURCE:불결 += Y*10 + 60
+
+;前回대면입위ならＶ、대면입위애널ならＡ
+IF TFLAG:705 == 0
+	SOURCE:쾌V += 250
+	SOURCE:중독충족 += 100
+ELSE
+	SOURCE:쾌A += 250
+	SOURCE:통증 += 100
+ENDIF
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 300
+
+;정조관념持ちで연모、친애持ち以外には常に반발のソースを追加する（セックス系のみ）
+SIF TALENT:정조관념 && (TALENT:연모 == 0 && TALENT:친애 == 0)
+	SOURCE:반발 += 1000
+	
+IF TFLAG:705 == 0
+	;Vへの고통は先に処理しておく
+	;EXP:V경험をみる
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증 , 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증 , 0.80
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증 , 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증 , 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증 , 0.00
+	ENDIF
+	;소인체형で調教者が거근か말자지の場合、고통と공포のソースを追加
+	IF TALENT:소인체형
+		IF TALENT:PLAYER:거근
+			SOURCE:통증 += 200
+			SOURCE:두려움 += 500
+		ELSEIF TALENT:PLAYER:말자지
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+
+	;調教者が말자지の場合
+	IF TALENT:PLAYER:말자지
+		;V확장경험一定以上で중독충족のソースを追加
+		IF EXP:V확장경험 >= 20
+			SOURCE:중독충족 += 500
+		;V확장경험一定以下で고통と공포のソースを追加
+		ELSE
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+ELSE
+	;Aへの고통は先に処理しておく
+	;EXP:A경험をみる
+	IF EXP:A경험 < EXPLV:1
+		TIMES SOURCE:통증 , 3.00
+		TIMES SOURCE:반발 , 3.00
+	ELSEIF EXP:A경험 < EXPLV:2
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:반발 , 2.00
+	ELSEIF EXP:A경험 < EXPLV:3
+		TIMES SOURCE:통증 , 0.80
+		TIMES SOURCE:반발 , 1.50
+	ELSEIF EXP:A경험 < EXPLV:4
+		TIMES SOURCE:통증 , 0.60
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF EXP:A경험 < EXPLV:5
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF EXP:A경험 >= EXPLV:5
+		TIMES SOURCE:통증 , 0.20
+	ENDIF
+	;소인체형で調教者が거근か말자지の場合、고통と공포のソースを追加
+	IF TALENT:소인체형
+		IF TALENT:PLAYER:거근
+			SOURCE:통증 += 200
+			SOURCE:두려움 += 500
+		ELSEIF TALENT:PLAYER:말자지
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+	
+	;調教者が말자지の場合
+	IF TALENT:PLAYER:말자지
+		;A확장경험一定以上で중독충족のソースを追加
+		IF EXP:A확장경험 >= 20
+			SOURCE:중독충족 += 500
+		;A확장경험一定以下で고통と공포のソースを追加
+		ELSE
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.00
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+;中毒による중독충족のソースは先に処理しておく
+;섹스중독を見る
+IF ABL:섹스중독 == 1
+	TIMES SOURCE:중독충족 , 0.00
+ELSEIF ABL:섹스중독 == 2
+	TIMES SOURCE:중독충족 , 0.30
+ELSEIF ABL:섹스중독 == 3
+	TIMES SOURCE:중독충족 , 0.60
+ELSEIF ABL:섹스중독 == 4
+	TIMES SOURCE:중독충족 , 0.90
+ELSEIF ABL:섹스중독 == 5
+	TIMES SOURCE:중독충족 , 1.20
+ELSEIF ABL:섹스중독 == 6
+	TIMES SOURCE:중독충족 , 1.50
+ELSEIF ABL:섹스중독 == 7
+	TIMES SOURCE:중독충족 , 1.80
+ELSEIF ABL:섹스중독 == 8
+	TIMES SOURCE:중독충족 , 2.30
+ELSEIF ABL:섹스중독 == 9
+	TIMES SOURCE:중독충족 , 3.00
+ELSEIF ABL:섹스중독 >= 10
+	TIMES SOURCE:중독충족 , 5.00
+ENDIF
+
+
+;-------------------------------------------------
+;사정チェック
+;-------------------------------------------------
+CALL SAMEN_CHECK(PLAYER,1)
+
+;사정時の処理
+IF E >= 1
+	;사정先タイプの設定
+	IF TFLAG:705 == 0
+		TFLAG:703 = 1
+	ELSE
+		TFLAG:703 = 2
+	ENDIF
+	;사정先選択の可・不可
+	TFLAG:704 = 0
+	;汎用的な処理はこの関数で行う
+	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;페니스밴드を使う場合、汚れは移動しない
+IF !PENIS(PLAYER)
+
+;Ｖ系
+ELSEIF TFLAG:705 == 0
+	;처녀の場合、Ｖと질내に破瓜の血の汚れを付加
+	IF TALENT:처녀 == 1 || TALENT:재생처녀 == 1
+		STAIN:질내 |= 64
+		STAIN:바기나 |= 64
+	ENDIF
+	
+	;奴隷のＶと질내⇔調教者のＣの汚れが移動
+	STAIN:질내 |= STAIN:PLAYER:페니스
+	STAIN:PLAYER:페니스 |= STAIN:질내
+	STAIN:바기나 |= STAIN:PLAYER:페니스
+	STAIN:PLAYER:페니스 |= STAIN:바기나
+;Ａ系
+ELSE
+	
+	;奴隷のＡと장내⇔調教者のＣの汚れが移動
+	STAIN:장내 |= STAIN:PLAYER:페니스
+	STAIN:PLAYER:페니스 |= STAIN:장내
+	STAIN:애널 |= STAIN:PLAYER:페니스
+	STAIN:PLAYER:페니스 |= STAIN:애널
+ENDIF
+
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;Ｖ系
+IF TFLAG:705 == 0
+	;V経験
+	EXP:V경험 += 2
+	PRINTL V경험＋２
+	
+	;調教者が말자지で奴隷が소인체형だった場合、V확장경험
+	IF TALENT:소인체형 && TALENT:PLAYER:말자지
+		IF EXP:V확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTL Ｖ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:V확장경험 += 1
+		PRINTL V확장경험＋１
+	ENDIF
+;Ａ系
+ELSE
+	;A経験
+	EXP:A경험 += 2
+	PRINTL A경험＋２
+	
+	;調教者が말자지で奴隷が소인체형だった場合、A확장경험
+	IF TALENT:소인체형 && TALENT:PLAYER:말자지
+		IF EXP:A확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTL Ａ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:A확장경험 += 1
+		PRINTL A확장경험＋１
+	ENDIF
+ENDIF
+
+;성교경험
+EXP:PLAYER:성교경험 += 1
+EXP:성교경험 += 1
+PRINTL 성교경험＋１
+
+;삽입경험
+EXP:PLAYER:삽입경험 += 1
+
+;게이경험とか加算
+CALL COM_EXP(4)
+
+;애정경험
+IF TALENT:연모 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +1
+	EXP:애정경험 += 1
+ELSEIF TALENT:친애 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +2
+	EXP:애정경험 += 2
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+

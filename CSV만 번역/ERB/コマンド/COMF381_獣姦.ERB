@@ -1,0 +1,226 @@
+﻿;-------------------------------------------------
+;수간
+;人外系コマンド
+;-------------------------------------------------
+@COM381
+
+PRINTL 수간
+STR:0 = 수간
+
+CALL KOJO_MESSAGE_COM
+
+;ＡとＶ両方開いていない
+IF (TEQUIP:정조대 || TEQUIP:바이브 && ABL:V감각 <= 5 || TALENT:남자) && (TEQUIP:애널바이브 && ABL:A감각 <= 5 || TEQUIP:애널비즈 || TEQUIP:확장벌룬)
+	TFLAG:705 = 4
+;Ｖが埋まっているか남자の場合、Ａを使う
+ELSEIF TEQUIP:정조대 || TEQUIP:바이브 && ABL:V감각 <= 5 || TALENT:남자
+	SIF TALENT:백버진
+		TFLAG:161 |= 1
+	TFLAG:705 = 1
+;Ａ開発済でもＶが空いていればＶに挿入
+ELSEIF (!TEQUIP:정조대 || !TEQUIP:바이브) && TEQUIP:애널바이브 && ABL:A감각 >= 6
+	;V経験を伴うコマンドのフラグ(처녀膜再生対応)
+	SIF TALENT:처녀 || TALENT:재생처녀
+		TFLAG:19 |= 1
+	TFLAG:705 = 0
+;Ｖが埋まっていてＡが開発済の場合、Ａを使う
+ELSEIF (TEQUIP:정조대 || TEQUIP:바이브) && TEQUIP:애널바이브 && ABL:A감각 >= 6
+	SIF TALENT:백버진
+		TFLAG:161 |= 1
+	TFLAG:705 = 1
+;その他はＶに挿入
+ELSE
+	;V経験を伴うコマンドのフラグ(처녀膜再生対応)
+	SIF TALENT:처녀 || TALENT:재생처녀
+		TFLAG:19 |= 1
+	TFLAG:705 = 0
+ENDIF
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 100
+LOSEBASE:기력 += 250
+
+SOURCE:통증 += 700
+SOURCE:두려움 += 1000
+SOURCE:굴복 += 1200
+SOURCE:불결 += 800
+SOURCE:일탈 += 1000
+SOURCE:반발 += 1000
+
+;下半身着衣、又はＡとＶ両方開いていない
+IF TFLAG:705 == 4
+;남자、又はＶに道具挿入
+ELSEIF TFLAG:705 == 1
+	SOURCE:쾌A += 200
+	SOURCE:통증 += 400
+	SOURCE:두려움 += 400
+ELSEIF TFLAG:705 == 0
+	SOURCE:쾌V += 200
+	SOURCE:통증 += 400
+	SOURCE:두려움 += 400
+ENDIF
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;ＡとＶ両方開いていない
+IF TFLAG:705 == 4
+;남자、又はＶに道具挿入
+ELSEIF TFLAG:705 == 1
+	;Aへの고통は先に処理しておく
+	;EXP:A경험をみる
+	IF EXP:A경험 < EXPLV:1
+		TIMES SOURCE:통증 , 3.00
+		TIMES SOURCE:반발 , 3.00
+	ELSEIF EXP:A경험 < EXPLV:2
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:반발 , 2.00
+	ELSEIF EXP:A경험 < EXPLV:3
+		TIMES SOURCE:통증 , 0.80
+		TIMES SOURCE:반발 , 1.50
+	ELSEIF EXP:A경험 < EXPLV:4
+		TIMES SOURCE:통증 , 0.60
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF EXP:A경험 < EXPLV:5
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF EXP:A경험 >= EXPLV:5
+		TIMES SOURCE:통증 , 0.20
+	ENDIF
+
+	;PALAM:윤활をみる
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:반발 , 2.00
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증 , 1.00
+		TIMES SOURCE:반발 , 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증 , 0.60
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증 , 0.30
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증 , 0.20
+	ENDIF
+ELSEIF TFLAG:705 == 0
+	;처녀だった場合は、고통のソースと반발のソースを追加する
+	IF TALENT:처녀
+		SOURCE:통증 += 5000
+		SOURCE:반발 += 3000
+	;재생처녀だった場合は、고통のソースと반발のソースを追加する
+	ELSEIF TALENT:재생처녀
+		SOURCE:통증 += 5000
+		SOURCE:반발 += 1000
+	ENDIF
+	
+	;Vへの고통は先に処理しておく
+	;EXP:V경험をみる（처녀の반감は別途処理済みなので省略）
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증 , 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증 , 0.80
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증 , 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증 , 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증 , 0.00
+	ENDIF
+	
+	;PALAM:윤활をみる
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:반발 , 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증 , 0.70
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증 , 0.10
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증 , 0.10
+	ENDIF
+ENDIF
+
+;特にハードなコマンドでは、이상경험に応じて効果を減らす
+IF EXP:이상경험 < EXPLV:1
+	TIMES SOURCE:두려움 , 1.20
+	TIMES SOURCE:일탈 , 1.20
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:이상경험 < EXPLV:2
+	TIMES SOURCE:두려움 , 0.90
+	TIMES SOURCE:일탈 , 0.90
+	TIMES SOURCE:반발 , 0.90
+ELSEIF EXP:이상경험 < EXPLV:3
+	TIMES SOURCE:두려움 , 0.80
+	TIMES SOURCE:일탈 , 0.80
+	TIMES SOURCE:반발 , 0.80
+ELSEIF EXP:이상경험 < EXPLV:4
+	TIMES SOURCE:두려움 , 0.70
+	TIMES SOURCE:일탈 , 0.70
+	TIMES SOURCE:반발 , 0.70
+ELSEIF EXP:이상경험 < EXPLV:5
+	TIMES SOURCE:두려움 , 0.60
+	TIMES SOURCE:일탈 , 0.60
+	TIMES SOURCE:반발 , 0.60
+ELSE
+	TIMES SOURCE:두려움 , 0.50
+	TIMES SOURCE:일탈 , 0.50
+	TIMES SOURCE:반발 , 0.50
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;汚れの処理
+;-------------------------------------------------
+;ＡとＶ両方開いていない
+IF TFLAG:705 == 4
+;남자、又はＶに道具挿入
+ELSEIF TFLAG:705 == 1
+	EXP:A경험 += 2
+	PRINTL A경험＋２
+	STAIN:장내 = 32
+	STAIN:애널 = 32
+ELSEIF TFLAG:705 == 0
+	IF TALENT:처녀 == 1 || TALENT:재생처녀 == 1
+		STAIN:질내 |= 64
+		STAIN:바기나 |= 64
+	ENDIF
+	EXP:V경험 += 2
+	PRINTL V경험＋２
+	STAIN:질내 = 32
+	STAIN:바기나 = 32
+ENDIF
+
+;수간初体験により이상경험
+IF EXP:수간경험 == 0
+	EXP:이상경험 += 1
+	PRINTL 수간初経験で이상경험＋１
+ENDIF
+EXP:수간경험 += 1
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+

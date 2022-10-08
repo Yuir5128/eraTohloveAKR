@@ -1,0 +1,253 @@
+﻿;-------------------------------------------------
+;매도당한다
+;主人마조系コマンド
+;-------------------------------------------------
+@COM281
+
+PRINTL 매도당한다
+STR:0 = 매도당한다
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;すべての命令に共通の要素を考慮
+;(순종が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;実行判定操作
+CALL KOJO_DENIAL_PLUS
+
+;合計を表示(15以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 15
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+;実行不可입上/実行判定操作
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;実行者が奴隷であるフラグ
+TFLAG:28 = 1
+
+;-------------------------------------------------
+;사정ゲージチェック（主人）
+;-------------------------------------------------
+B = 50
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 50
+
+SOURCE:성행동 += 100
+SOURCE:성취감 += 50
+SOURCE:두려움 += 500
+SOURCE:굴복 += 50
+SOURCE:일탈 += 400
+SOURCE:반발 += 500
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;새드끼及び새드の処理は先にしておく
+;새드끼を見る
+IF ABL:10 == 0
+	TIMES SOURCE:굴복 , 0.80
+	SOURCE:액체 += 0
+	SOURCE:욕정 += 0
+ELSEIF ABL:새드끼 == 1
+	TIMES SOURCE:굴복 , 1.00
+	SOURCE:액체 += 20
+	SOURCE:욕정 += 30
+	SOURCE:중독충족 += 20
+ELSEIF ABL:새드끼 == 2
+	TIMES SOURCE:굴복 , 1.20
+	SOURCE:액체 += 40
+	SOURCE:욕정 += 70
+	SOURCE:중독충족 += 50
+ELSEIF ABL:새드끼 == 3
+	TIMES SOURCE:굴복 , 1.40
+	SOURCE:액체 += 70
+	SOURCE:욕정 += 120
+	SOURCE:중독충족 += 90
+ELSEIF ABL:새드끼 == 4
+	TIMES SOURCE:굴복 , 1.50
+	SOURCE:액체 += 110
+	SOURCE:욕정 += 180
+	SOURCE:중독충족 += 120
+ELSEIF ABL:새드끼 == 5
+	TIMES SOURCE:굴복 , 1.70
+	SOURCE:액체 += 150
+	SOURCE:욕정 += 250
+	SOURCE:중독충족 += 160
+ELSEIF ABL:새드끼 == 6
+	TIMES SOURCE:굴복 , 1.90
+	SOURCE:액체 += 200
+	SOURCE:욕정 += 300
+	SOURCE:중독충족 += 200
+ELSEIF ABL:새드끼 == 7
+	TIMES SOURCE:굴복 , 2.10
+	SOURCE:액체 += 250
+	SOURCE:욕정 += 350
+	SOURCE:중독충족 += 300
+ELSEIF ABL:새드끼 == 8
+	TIMES SOURCE:굴복 , 2.30
+	SOURCE:액체 += 300
+	SOURCE:욕정 += 400
+	SOURCE:중독충족 += 350
+ELSEIF ABL:새드끼 == 9
+	TIMES SOURCE:굴복 , 2.50
+	SOURCE:액체 += 350
+	SOURCE:욕정 += 450
+	SOURCE:중독충족 += 400
+ELSEIF ABL:새드끼 >= 10
+	TIMES SOURCE:굴복 , 3.00
+	SOURCE:액체 += 500
+	SOURCE:욕정 += 500
+	SOURCE:중독충족 += 500
+ENDIF
+
+;새드を見る
+IF TALENT:새드
+	TIMES SOURCE:성행동 , 2.50
+	TIMES SOURCE:액체 , 1.20
+	TIMES SOURCE:욕정 , 1.20
+ENDIF
+
+;TALENT:솔직함をみる
+IF TALENT:솔직함 == 1
+	TIMES SOURCE:굴복 , 0.75
+	TIMES SOURCE:일탈 , 0.75
+	TIMES SOURCE:반발 , 0.75
+ENDIF
+
+;TALENT:프라이드높음をみる
+IF TALENT:프라이드높음 == 1
+	TIMES SOURCE:성취감 , 1.50
+ENDIF
+
+;TALENT:츤데레をみる
+IF TALENT:츤데레 == 1
+	TIMES SOURCE:성취감 , 0.80
+	TIMES SOURCE:중독충족 , 0.80
+	TIMES SOURCE:울굴 , 1.80
+ENDIF
+
+;TALENT:겁쟁이をみる
+IF TALENT:겁쟁이 == 1
+	TIMES SOURCE:울굴 , 1.50
+	TIMES SOURCE:성취감 , 0.75
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;게이경험とか加算
+CALL COM_EXP(1)
+
+;새드끼に応じて가학쾌락경험
+E = 1
+L = 0
+IF ABL:새드끼 == 0
+	E += 0
+	L += 0
+ELSEIF ABL:새드끼 == 1
+	E += 1
+	L += 1
+ELSEIF ABL:새드끼 == 2
+	E += 3
+	L += 2
+ELSEIF ABL:새드끼 == 3
+	E += 5
+	L += 3
+ELSEIF ABL:새드끼 == 4
+	E += 7
+	L += 4
+ELSEIF ABL:새드끼 >= 5
+	E += 9
+	L += 5
+ENDIF
+;調教者の마조끼で가학쾌락경험
+IF ABL:PLAYER:9 == 0
+	E += 0
+	L += 0
+ELSEIF ABL:PLAYER:9 == 1
+	E += 1
+	L += 1
+ELSEIF ABL:PLAYER:9 == 2
+	E += 2
+	L += 3
+ELSEIF ABL:PLAYER:9 == 3
+	E += 3
+	L += 5
+ELSEIF ABL:PLAYER:9 == 4
+	E += 4
+	L += 7
+ELSEIF ABL:PLAYER:9 >= 5
+	E += 5
+	L += 9
+ENDIF
+PRINT 가학쾌락경험+
+PRINTVL E
+EXP:가학쾌락경험 += E
+IF L > 0
+	PRINTFORM %CALLNAME:PLAYER%の
+	PRINT 고통쾌락경험+
+	PRINTVL L
+	EXP:PLAYER:고통쾌락경험 += L
+	TFLAG:27 = L
+ENDIF
+
+;애정경험(減少）
+IF (TALENT:연모 == 1 || TALENT:친애 == 1) && ASSIPLAY == 0 && EXP:애정경험 > 0
+	PRINTS EXPNAME:23
+	PRINTL -1
+	EXP:애정경험 -= 1
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+

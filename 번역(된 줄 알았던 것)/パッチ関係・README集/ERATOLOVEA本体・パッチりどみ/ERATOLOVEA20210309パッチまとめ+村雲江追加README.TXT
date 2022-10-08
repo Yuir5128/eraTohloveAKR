@@ -51,10 +51,10 @@
 ·eraToloveA20210207 패치
 (【도검 난무】eraTolove를 말하는 스레 252보다)
 
-·eraToLoveA02 하세베입상
+·eraToLoveA02 하세베대사
 (【도검 난무】eraTolove를 말하는 스레 242보다)
 
-·eraToLoveA02장 도리 ver1. 1입상
+·eraToLoveA02장 도리 ver1. 1대사
 (【도검 난무】eraTolove를 말하는 스레 244보다)
 
 ----------------------------------------------------

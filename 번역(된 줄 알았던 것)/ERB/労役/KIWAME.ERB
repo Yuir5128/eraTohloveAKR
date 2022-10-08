@@ -69,11 +69,11 @@ CFLAG:TOKU:12 = 6
 ;귀환 일시를 보유 해 둔다
 CFLAG:TOKU:13 = DAY + 4
 
-;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+;지문, 대사 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
 LOCAL = TARGET
 TARGET = TOKU
 TFLAG:13 = 86
-;이벤트입상(수행 출발시)
+;이벤트대사(수행 출발시)
 CALL KOJO_MESSAGE_EVENT
 TARGET = LOCAL
 
@@ -107,12 +107,12 @@ DRAWLINE
 PRINTFORMW %CALLNAME:TOKU%의 수행이 종료했습니다
 
 
-;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+;지문, 대사 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
 LOCAL = TARGET
 TARGET = TOKU
 TFLAG:13 = 86
-;이벤트입상의 표시(수행 귀환시)
-;여기서 불리는입상은 특남사의 것이 불린다
+;이벤트대사의 표시(수행 귀환시)
+;여기서 불리는대사은 특남사의 것이 불린다
 ;지장이 있는 것 같으면극남사의 것 부르도록(듯이) 처리 바꿉니다
 TFLAG:13 = 87
 CALL KOJO_MESSAGE_EVENT

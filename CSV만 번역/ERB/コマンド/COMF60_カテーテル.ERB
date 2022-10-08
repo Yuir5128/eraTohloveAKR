@@ -1,0 +1,363 @@
+﻿;-------------------------------------------------
+;카테터
+;Ｕ系コマンド
+;-------------------------------------------------
+@COM60
+
+IF TEQUIP:촉수
+	PRINTL 촉수尿道삽입
+	STR:0 = 촉수尿道삽입
+	SELECTCOM = 365
+ELSE
+	PRINTL 카테터
+	STR:0 = 카테터
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;着脱の処理
+IF TEQUIP:카테터 == 0
+	TEQUIP:카테터 = 1
+ELSE
+	TEQUIP:카테터 = 0
+ENDIF
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 50
+LOSEBASE:기력 += 100
+
+IF ABL:C감각 == 0
+	SOURCE:쾌C += 80
+ELSEIF ABL:C감각 == 1
+	SOURCE:쾌C += 200
+ELSEIF ABL:C감각 == 2
+	SOURCE:쾌C += 350
+ELSEIF ABL:C감각 == 3
+	SOURCE:쾌C += 500
+ELSEIF ABL:C감각 == 4
+	SOURCE:쾌C += 800
+ELSE
+	SOURCE:쾌C += 1000
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:쾌C , 0.40
+	SOURCE:통증 += 1200
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:쾌C , 0.80
+	SOURCE:통증 += 800
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:쾌C , 1.00
+	SOURCE:통증 += 500
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:쾌C , 1.40
+	SOURCE:통증 += 250
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:쾌C , 1.80
+	SOURCE:통증 += 120
+ENDIF
+
+;PALAM:욕정をみる
+IF PALAM:욕정 < PALAMLV:1
+	TIMES SOURCE:쾌C , 0.80
+ELSEIF PALAM:욕정 < PALAMLV:2
+	TIMES SOURCE:쾌C , 0.90
+ELSEIF PALAM:욕정 < PALAMLV:3
+	TIMES SOURCE:쾌C , 1.00
+ELSEIF PALAM:욕정 < PALAMLV:4
+	TIMES SOURCE:쾌C , 1.10
+ELSEIF PALAM:욕정 >= PALAMLV:4
+	TIMES SOURCE:쾌C , 1.20
+ENDIF
+
+;ABL:순종をみる
+IF ABL:순종 == 0
+	TIMES SOURCE:쾌C , 0.80
+ELSEIF ABL:순종 == 1
+	TIMES SOURCE:쾌C , 0.90
+ELSEIF ABL:순종 == 2
+	TIMES SOURCE:쾌C , 1.00
+ELSEIF ABL:순종 == 3
+	TIMES SOURCE:쾌C , 1.10
+ELSEIF ABL:순종 == 4
+	TIMES SOURCE:쾌C , 1.20
+ELSE
+	TIMES SOURCE:쾌C , 1.30
+ENDIF
+
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;지하실にいると고통のソース追加
+SIF TEQUIP:지하실
+	TIMES SOURCE:통증 , 1.50
+
+
+;ABL8,마조끼をみる
+IF ABL:마조끼 < 1
+	SOURCE:통증 += 2000
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 200
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 2000
+ELSEIF ABL:마조끼 <2
+	SOURCE:통증 += 1600
+	SOURCE:불결 += 2000
+	SOURCE:굴복 += 500
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 1000
+ELSEIF ABL:마조끼 < 3
+	SOURCE:통증 += 1200
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 800
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 500
+ELSEIF ABL:마조끼 < 4
+	SOURCE:통증 += 800
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 1200
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 100
+ELSEIF ABL:마조끼 < 5
+	SOURCE:통증 += 600
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 1500
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 0
+ELSE
+	SOURCE:통증 += 400
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 2000
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 0
+ENDIF
+
+;小人体形
+SIF TALENT:소인체형
+	TIMES SOURCE:통증 , 2.00
+
+;C민감、鈍感をみる
+;쾌C自体のチェックは후でまとめてやる
+IF TALENT:C둔감
+	TIMES SOURCE:통증 , 1.50
+	TIMES SOURCE:굴복 , 1.50
+	TIMES SOURCE:일탈 , 1.50
+ELSEIF TALENT:C민감
+	TIMES SOURCE:통증 , 0.60
+	TIMES SOURCE:굴복 , 0.60
+	TIMES SOURCE:일탈 , 0.60
+ENDIF
+
+;처녀で정조관념
+SIF TALENT:처녀 == 1 && TALENT:정조관념
+	SOURCE:굴복 /= 3
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+CALL COM_STAIN
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+EXP:U경험 += 1
+PRINTL U경험＋１
+
+;U확장경험を伴う調教により이상경험
+IF EXP:U확장경험 == 0
+	EXP:이상경험 += 1
+	PRINTL Ｕ拡張初経験で이상경험＋１
+ENDIF
+EXP:U확장경험 += 1
+PRINTL U확장경험＋１
+
+
+
+;挿入するとき、뇨의があれば放尿する
+SIF TEQUIP:카테터 && BASE:뇨의 >= 60
+	CALL DEFECATION_CHECK3
+
+;촉수소환時、촉수경험のリセットをする
+SIF TEQUIP:촉수 == 1
+	T = 0
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM60
+;尿道카테터
+IF TEQUIP:촉수
+	PRINTL ＜촉수尿道삽입中＞
+ELSE
+	PRINTL ＜카테터挿入中＞
+ENDIF
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 250
+
+LOSEBASE:체력 += 20
+LOSEBASE:기력 += 40
+
+;ABL:C감각をみる
+IF ABL:순종 == 0
+	A = 80
+	B = 300
+ELSEIF ABL:순종 == 1
+	A = 250
+	B = 800
+ELSEIF ABL:순종 == 2
+	A = 600
+	B = 1400
+ELSEIF ABL:순종 == 3
+	A = 1000
+	B = 1800
+ELSEIF ABL:순종 == 4
+	A = 1300
+	B = 2100
+ELSE
+	A = 1700
+	B = 2400
+ENDIF
+
+;EXP:U경험をみる
+IF EXP:U경험 < EXPLV:1
+	TIMES A , 0.50
+	C = 2000
+ELSEIF EXP:U경험 < EXPLV:2
+	TIMES A , 1.00
+	C = 300
+ELSEIF EXP:U경험 < EXPLV:3
+	TIMES A , 1.10
+	C = 50
+ELSEIF EXP:U경험 < EXPLV:4
+	TIMES A , 1.20
+	C = 10
+ELSEIF EXP:U경험 < EXPLV:5
+	TIMES A , 1.40
+	C = 0
+ELSE
+	TIMES A , 1.60
+	C = 0
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES A , 0.40
+	C += 800
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES A , 0.80
+	C += 500
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES A , 1.00
+	C += 300
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES A , 1.40
+	C += 120
+ELSE
+	TIMES A , 1.80
+	C += 100
+ENDIF
+
+;PALAM:욕정をみる
+IF PALAM:욕정 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:욕정 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:욕정 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:욕정 < PALAMLV:4
+	TIMES A , 1.10
+ELSE
+	TIMES A , 1.20
+ENDIF
+
+;ABL:순종をみる
+IF ABL:순종 == 0
+	TIMES A , 0.80
+ELSEIF ABL:순종 == 1
+	TIMES A , 0.90
+ELSEIF ABL:순종 == 2
+	TIMES A , 1.00
+ELSEIF ABL:순종 == 3
+	TIMES A , 1.10
+ELSEIF ABL:순종 == 4
+	TIMES A , 1.20
+ELSE
+	TIMES A , 1.30
+ENDIF
+
+;小人体形
+SIF TALENT:소인체형
+	TIMES C , 2.00
+
+;C민감、鈍感をみる
+;쾌C自体のチェックは후でまとめてやる
+IF TALENT:C둔감
+	TIMES A , 1.50
+	TIMES B , 1.50
+	TIMES C , 1.50
+ELSEIF TALENT:C민감
+	TIMES A , 0.60
+	TIMES B , 0.60
+	TIMES C , 0.60
+ENDIF
+
+;처녀で정조관념
+SIF TALENT:처녀 == 1 && TALENT:정조관념
+	B /= 3
+
+SOURCE:쾌C += A
+SOURCE:굴복 += B
+SOURCE:성취감 += C
+SOURCE:일탈 += B
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+
+EXP:U경험 += 2
+PRINTL U경험＋２
+
+IF TEQUIP:촉수 == 0
+	;게이경험とか加算
+	CALL COM_EXP(1)
+ENDIF
+
+SIF TEQUIP:촉수
+	T += 1
+
+
+RETURN 1
+

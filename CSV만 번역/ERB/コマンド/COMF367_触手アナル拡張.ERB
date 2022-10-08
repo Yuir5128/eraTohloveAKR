@@ -1,0 +1,232 @@
+﻿;-------------------------------------------------
+;촉수애널확장
+;촉수系コマンド
+;-------------------------------------------------
+@COM367
+
+PRINTL 촉수애널확장
+STR:0 = 촉수애널확장
+
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 200
+LOSEBASE:기력 += 300
+
+IF EXP:촉수경험 < EXPLV:1
+	TIMES LOSEBASE:체력 , 1.10
+	TIMES LOSEBASE:기력 , 2.00
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES LOSEBASE:체력 , 0.90
+	TIMES LOSEBASE:기력 , 1.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES LOSEBASE:체력 , 0.80
+	TIMES LOSEBASE:기력 , 1.50
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES LOSEBASE:체력 , 0.70
+	TIMES LOSEBASE:기력 , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES LOSEBASE:체력 , 0.60
+	TIMES LOSEBASE:기력 , 1.00
+ELSE
+	TIMES LOSEBASE:체력 , 0.50
+	TIMES LOSEBASE:기력 , 0.50
+ENDIF
+
+;ABL:A감각をみる
+IF ABL:A감각 == 0
+	SOURCE:쾌A += 10
+ELSEIF ABL:A감각 == 1
+	SOURCE:쾌A += 30
+ELSEIF ABL:A감각 == 2
+	SOURCE:쾌A += 500
+ELSEIF ABL:A감각 == 3
+	SOURCE:쾌A += 1000
+ELSEIF ABL:A감각 == 4
+	SOURCE:쾌A += 1700
+ELSE
+	SOURCE:쾌A += 2200
+ENDIF
+
+;EXP:A경험をみる
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:쾌A , 0.10
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:쾌A , 0.30
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:쾌A , 0.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:쾌A , 1.00
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:쾌A , 1.40
+ELSE
+	TIMES SOURCE:쾌A , 1.60
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:쾌A , 0.40
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:쾌A , 0.80
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:쾌A , 1.00
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:쾌A , 1.40
+ELSE
+	TIMES SOURCE:쾌A , 1.80
+ENDIF
+
+SOURCE:통증 += 1200
+SOURCE:노출 += 1200
+SOURCE:굴복 += 1200
+SOURCE:일탈 += 2200
+SOURCE:두려움 += 1100
+
+;ABL:A감각をみる
+IF ABL:A감각 == 0
+	SOURCE:굴복 += 100
+ELSEIF ABL:A감각 == 1
+	SOURCE:굴복 += 700
+ELSEIF ABL:A감각 == 2
+	SOURCE:굴복 += 1500
+ELSEIF ABL:A감각 == 3
+	SOURCE:굴복 += 3000
+ELSEIF ABL:A감각 == 4
+	SOURCE:굴복 += 5000
+ELSE
+	SOURCE:굴복 += 8000
+ENDIF
+
+;EXP:A경험をみる
+IF EXP:A경험 < EXPLV:1
+	SOURCE:통증 += 20000
+ELSEIF EXP:A경험 < EXPLV:2
+	SOURCE:통증 += 12000
+ELSEIF EXP:A경험 < EXPLV:3
+	SOURCE:통증 += 5000
+ELSEIF EXP:A경험 < EXPLV:4
+	SOURCE:통증 += 1800
+ELSEIF EXP:A경험 < EXPLV:5
+	SOURCE:통증 += 1000
+ELSE
+	SOURCE:통증 += 600
+ENDIF
+
+;촉수경험を見る
+IF EXP:촉수경험 < EXPLV:1
+	SOURCE:통증 += 1000
+ELSEIF EXP:촉수경험 < EXPLV:2
+	SOURCE:통증 += 800
+ELSEIF EXP:촉수경험 < EXPLV:3
+	SOURCE:통증 += 500
+ELSEIF EXP:촉수경험 < EXPLV:4
+	SOURCE:통증 += 100
+ELSEIF EXP:촉수경험 < EXPLV:5
+	SOURCE:통증 += 50
+ENDIF
+
+;촉수경험を見る
+IF EXP:촉수경험 < EXPLV:1
+	SOURCE:중독충족 += 1500
+	TIMES SOURCE:두려움 , 0.50
+ELSEIF EXP:촉수경험 < EXPLV:2
+	SOURCE:중독충족 += 1700
+	TIMES SOURCE:두려움 , 0.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	SOURCE:중독충족 += 2000
+ELSEIF EXP:촉수경험 < EXPLV:4
+	SOURCE:중독충족 += 2500
+	TIMES A , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	SOURCE:중독충족 += 3300
+	TIMES SOURCE:두려움 , 1.50
+ELSE
+	SOURCE:중독충족 += 4200
+	TIMES SOURCE:두려움 , 1.80
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	SOURCE:통증 += 10000
+ELSEIF PALAM:윤활 < PALAMLV:2
+	SOURCE:통증 += 3600
+ELSEIF PALAM:윤활 < PALAMLV:3
+	SOURCE:통증 += 1200
+ELSEIF PALAM:윤활 < PALAMLV:4
+	SOURCE:통증 += 200
+ELSE
+	SOURCE:통증 += 100
+ENDIF
+
+;PALAM:욕정をみる
+IF PALAM:욕정 < PALAMLV:1
+	TIMES SOURCE:굴복 , 0.60
+ELSEIF PALAM:욕정 < PALAMLV:2
+	TIMES SOURCE:굴복 , 0.80
+ELSEIF PALAM:욕정 < PALAMLV:3
+	TIMES SOURCE:굴복 , 1.00
+ELSEIF PALAM:욕정 < PALAMLV:4
+	TIMES SOURCE:굴복 , 1.20
+ELSE
+	TIMES SOURCE:굴복 , 1.40
+ENDIF
+
+;小人体形
+SIF TALENT:소인체형
+	TIMES SOURCE:통증 , 2.00
+
+;A민감、鈍感をみる
+;쾌A自体のチェックは후でまとめてやる
+IF TALENT:A둔감
+	TIMES SOURCE:통증 , 1.50
+	TIMES SOURCE:굴복 , 1.50
+	TIMES SOURCE:일탈 , 1.50
+ELSEIF TALENT:A민감
+	TIMES SOURCE:통증 , 0.60
+	TIMES SOURCE:굴복 , 0.60
+	TIMES SOURCE:일탈 , 0.60
+ENDIF
+
+;처녀で정조관념
+SIF TALENT:처녀 == 1 && TALENT:정조관념
+	SOURCE:굴복 /= 3
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;汚れ処理
+STAIN:애널 |= 32
+STAIN:장내 |= 32
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF EXP:A확장경험 == 0
+	EXP:이상경험 += 1
+	PRINTL Ａ拡張初経験で이상경험＋1
+ENDIF
+EXP:A경험 += 25
+PRINTL A경험＋25
+EXP:A확장경험 += 1
+PRINTL A확장경험＋1
+
+T = 1
+
+;촉수装着中は依存度ベクトル強制変更
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2　強制変更なので、これまでの数値をリセット）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 = 4
+ENDIF
+
+RETURN 1
+

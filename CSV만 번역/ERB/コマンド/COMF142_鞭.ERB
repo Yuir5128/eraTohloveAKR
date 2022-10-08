@@ -1,0 +1,131 @@
+﻿;-------------------------------------------------
+;채찍で打つ
+;ＳＭ系コマンド
+;-------------------------------------------------
+@COM142
+
+PRINTL 채찍で打つ
+STR:0 = 채찍で打つ
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+IF TFLAG:56 == 1
+	IF TEQUIP:지하실
+		;消費체력、기력
+		LOSEBASE:체력 += 125
+		LOSEBASE:기력 += 80
+		
+		SOURCE:통증 += 6000
+	ELSE
+		;消費체력、기력
+		LOSEBASE:체력 += 100
+		LOSEBASE:기력 += 50
+		
+		SOURCE:통증 += 4000
+	ENDIF
+	SOURCE:쾌C += 100
+ELSEIF TFLAG:56 == 2
+	IF TEQUIP:지하실
+		;消費체력、기력
+		LOSEBASE:체력 += 100
+		LOSEBASE:기력 += 50
+		
+		SOURCE:통증 += 3500
+	ELSE
+		;消費체력、기력
+		LOSEBASE:체력 += 75
+		LOSEBASE:기력 += 35
+		
+		SOURCE:통증 += 1500
+	ENDIF
+	SOURCE:쾌B += 100
+ELSE
+	IF TEQUIP:지하실
+		;消費체력、기력
+		LOSEBASE:체력 += 75
+		LOSEBASE:기력 += 35
+		
+		SOURCE:통증 += 1500
+	ELSE
+		;消費체력、기력
+		LOSEBASE:체력 += 50
+		LOSEBASE:기력 += 20
+		
+		SOURCE:통증 += 1000
+	ENDIF
+ENDIF
+
+;着衣のとき、服によって통증軽減
+IF TFLAG:56 == 1
+	IF BOTTOMS(TARGET) >= 4
+		TIMES SOURCE:통증 , 0.70
+		TIMES SOURCE:쾌C , 0.70
+	ELSEIF TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5
+		TIMES SOURCE:통증 , 0.90
+		TIMES SOURCE:쾌C , 0.90
+	ENDIF
+ELSEIF TFLAG:56 == 2
+	IF TOPS(TARGET) > 1
+		TIMES SOURCE:통증 , 0.70
+		TIMES SOURCE:쾌B , 0.70
+	ELSEIF TEQUIP:속옷（위）
+		TIMES SOURCE:통증 , 0.90
+		TIMES SOURCE:쾌B , 0.90
+	ENDIF
+ELSE
+	IF TEQUIP:전신상의 || TEQUIP:상의 || TEQUIP:하의
+		TIMES SOURCE:통증 , 0.70
+	ELSEIF TEQUIP:속옷（위） || (TEQUIP:속옷（아래） && TEQUIP:속옷（아래） != 5)
+		TIMES SOURCE:통증 , 0.90
+	ENDIF
+ENDIF
+
+SOURCE:두려움 += 1000
+;지하실にいると두려움のソース追加
+SIF TEQUIP:지하실
+	TIMES SOURCE:두려움 , 1.50
+
+SOURCE:일탈 += 100
+SOURCE:반발 += 600
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;고통のパラメータによる고통のソース増加は先に処理しておく
+IF PALAM:고통 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.00
+ELSEIF PALAM:고통 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.50
+ELSEIF PALAM:고통 < PALAMLV:3
+	TIMES SOURCE:통증 , 2.00
+ELSEIF PALAM:고통 < PALAMLV:4
+	TIMES SOURCE:통증 , 2.50
+ELSEIF PALAM:고통 >= PALAMLV:4
+	TIMES SOURCE:통증 , 3.00
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;게이경험とか加算
+CALL COM_EXP(2)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+
+

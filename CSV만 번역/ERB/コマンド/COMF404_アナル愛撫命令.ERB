@@ -1,0 +1,109 @@
+﻿;-------------------------------------------------
+;애널애무명령
+;助손命令系コマンド
+;-------------------------------------------------
+@COM404
+
+PRINTL 애널애무명령
+STR:0 = 애널애무명령
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 50
+
+SOURCE:쾌A += 80
+SIF ABL:ASSI:기교
+	SOURCE:쾌A += 10*ABL:ASSI:기교
+
+SOURCE:노출 += 50
+SOURCE:굴복 += 50
+SOURCE:일탈 += 50
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 70
+;助손の기교により쾌Aソース追加、下손すぎると통증のソース追加
+IF ABL:ASSI:2 == 0
+	SOURCE:통증 += 100
+ELSEIF ABL:ASSI:2 == 1
+	SOURCE:통증 += 50
+ENDIF
+;助손が소인체형で、調教対象が소인체형でなく도착적でもないと일탈のソース追加
+SIF TALENT:소인체형 == 0 && TALENT:ASSI:소인체형 && TALENT:도착적
+	SOURCE:일탈 += 50	
+;Aへの고통は先に処理しておく
+;EXP:A경험をみる
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:통증 , 3.00
+	TIMES SOURCE:반발 , 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:통증 , 0.80
+	TIMES SOURCE:반발 , 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:통증 , 0.60
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:통증 , 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.00
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;奴隷のＡ⇔助손の손の汚れが移動
+STAIN:애널 |= STAIN:ASSI:손
+STAIN:ASSI:손 |= STAIN:애널
+STAIN:장내 |= STAIN:ASSI:손
+STAIN:ASSI:손 |= STAIN:장내
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;A経験
+EXP:A경험 += 1
+PRINTL A경험＋１
+
+;게이경험とか加算
+CALL COM_EXP(3)
+
+;依存度ベクトル
+TFLAG:33 = 3
+
+
+RETURN 1
+
+

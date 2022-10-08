@@ -1,0 +1,127 @@
+﻿;-------------------------------------------------
+;발을핥는다
+;主人마조系コマンド
+;-------------------------------------------------
+@COM282
+
+IF TEQUIP:신발
+	PRINTL 신발を舐める
+	STR:0 = 신발を舐める
+ELSE
+	PRINTL 발을핥는다
+	STR:0 = 발을핥는다
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;사정ゲージチェック（主人）
+;-------------------------------------------------
+B = 50
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 0
+LOSEBASE:기력 += 30
+
+SOURCE:욕정 =20
+SOURCE:노출 += 150
+SOURCE:불결 += 300
+SOURCE:일탈 += 100
+SOURCE:반발 += 100
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 200
+;신발を履いていると불결・일탈ソース追加
+IF TEQUIP:신발 > 0
+	SOURCE:불결 += 100
+	SOURCE:일탈 += 100
+ENDIF
+;새드끼を見る
+IF ABL:	10 == 0
+	TIMES SOURCE:불결 , 1.00
+ELSEIF ABL:새드끼 == 1
+	TIMES SOURCE:불결 , 0.95
+	SOURCE:욕정 += 30
+ELSEIF ABL:새드끼 == 2
+	TIMES SOURCE:불결 , 0.80
+	SOURCE:욕정 += 50
+ELSEIF ABL:새드끼 == 3
+	TIMES SOURCE:불결 , 0.75
+	SOURCE:욕정 += 80
+ELSEIF ABL:새드끼 == 4
+	TIMES SOURCE:불결 , 0.60
+	SOURCE:욕정 += 100
+ELSEIF ABL:새드끼 == 5
+	TIMES SOURCE:불결 , 0.50
+	SOURCE:욕정 += 150
+ELSEIF ABL:새드끼 == 6
+	TIMES SOURCE:불결 , 0.45
+	SOURCE:욕정 += 200
+ELSEIF ABL:새드끼 == 7
+	TIMES SOURCE:불결 , 0.40
+	SOURCE:욕정 += 250
+ELSEIF ABL:새드끼 == 8
+	TIMES SOURCE:불결 , 0.35
+	SOURCE:욕정 += 300
+ELSEIF ABL:새드끼 == 9
+	TIMES SOURCE:불결 , 0.30
+	SOURCE:욕정 += 350
+ELSEIF ABL:새드끼 >= 10
+	TIMES SOURCE:불결 , 0.20
+	SOURCE:욕정 += 400
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+CALL COM_STAIN
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;게이경험とか加算
+CALL COM_EXP(4)
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+;依存度補正値(主人かつ연모、친애で2。복종、예속で３）
+IF (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF (TALENT:복종 ||TALENT:예속) && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+A = 0
+;새드持ちは가학쾌락경험も入れる
+IF TALENT:새드
+	A += 2
+	;신발履いてるならさらに入れる
+	SIF TEQUIP:신발
+		A += 3
+	;それがピンヒールならさらに入れる
+	SIF TEQUIP:신발 == 4
+		A += 1
+	PRINTFORML %EXPNAME:32%+{A}
+	EXP:가학쾌락경험 += A
+ENDIF
+
+RETURN 1
+

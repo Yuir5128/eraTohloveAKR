@@ -1,0 +1,156 @@
+﻿
+;----------------------------------------------------------------
+;ドライオーガズム関連の処理
+;やっぱ要るかなって思って作った。テスト段階。
+;精飲絶頂辺りの処理を参考にしました。
+
+;基本、ＢＶA감각が高いときに、各箇所に強い刺激を수ると一定確率でドライに達します。
+;初めてドライに達した후は、드라이경험によりその確率がさらに上がり、
+;드라이경험が上がるにつれ、ＢＶＡを弄ったときの사정感が上がりづらくなります。
+;空사정は、堰き止められるなど出せない状態での사정であって、ドライオーガズムは別物です。
+;----------------------------------------------------------------
+@SHOOT_DRY_CHECK
+
+;ＡＢV절정していなければ処理しない
+SIF !A && !B && !V
+	RETURN 0
+
+;A절정したけどA감각低ければ処理しない
+SIF A && ABL:A감각 < 4
+	RETURN 0
+;B절정したけど感覚低ければ処理しない
+SIF B && ABL:B감각 < 4
+	RETURN 0
+;V절정したけど感覚低ければ処理しない
+SIF B && ABL:V감각 < 4
+	RETURN 0
+
+
+;規定の回数
+P = 50
+
+;奴隷の素質により規定回数を増減する
+;꿋꿋함
+SIF TALENT:꿋꿋함 == 1
+	P += 2
+;프라이드높음
+SIF TALENT:프라이드높음 == 1
+	P += 5
+;보수적
+SIF TALENT:보수적 == 1
+	P += 2
+;낙관적
+SIF TALENT:낙관적 == 1
+	P -= 2
+;비관적
+SIF TALENT:비관적 == 1
+	P += 5
+;일선을넘지않음
+SIF TALENT:일선을넘지않음 == 1
+	P += 5
+;억압
+SIF TALENT:억압 == 1
+	P += 5
+;해방
+SIF TALENT:해방 == 1
+	P -= 2
+;독약내성
+SIF TALENT:독약내성 == 1
+	P += 2
+;더러움무시
+SIF TALENT:더러움무시 == 1
+	P -= 3
+;악취둔감
+SIF TALENT:악취둔감 == 1
+	P -= 2
+;악취민감
+SIF TALENT:악취민감 == 1
+	P += 2
+;쾌감에솔직
+SIF TALENT:쾌감에솔직 == 1
+	P -= 2
+;쾌감을부정
+SIF TALENT:쾌감을부정 == 1
+	P += 5
+;중독되기쉬움
+SIF TALENT:중독되기쉬움 == 1
+	P -= 5
+;도착적
+SIF TALENT:도착적 == 1
+	P -= 2
+;남자혐오
+SIF TALENT:남자혐오 == 1
+	P += 2
+
+
+IF TALENT:아이사이즈 || !CFLAG:11
+	P = 0
+ELSEIF TALENT:창부 || TALENT:친애 || TALENT:예속
+	P /= 3
+ELSEIF TALENT:음란 || TALENT:연모 || TALENT:복종
+	P /= 2
+ENDIF
+
+
+;드라이경험が規定値に達してればドライ絶頂
+;아이사이즈、사정限界も含まれる
+IF EXP:드라이경험 >= P && (A || B || V)
+	TFLAG:165 = 7
+ELSE
+	IF A
+		IF ABL:A감각 >= 8
+			SIF !RAND:3
+			TFLAG:165 = 7
+		ELSEIF ABL:A감각 == 7
+			SIF !RAND:5
+			TFLAG:165 = 7
+		ELSEIF ABL:A감각 == 6
+			SIF !RAND:10
+			TFLAG:165 = 7
+		ELSEIF ABL:A감각 == 5
+			SIF !RAND:20
+			TFLAG:165 = 7
+		ELSEIF ABL:A감각 >= 3
+			SIF !RAND:50
+			TFLAG:165 = 7
+		ENDIF
+	ENDIF
+	IF B
+		IF ABL:B감각 >= 8
+			SIF !RAND:3
+			TFLAG:165 = 7
+		ELSEIF ABL:B감각 == 7
+			SIF !RAND:5
+			TFLAG:165 = 7
+		ELSEIF ABL:B감각 == 6
+			SIF !RAND:10
+			TFLAG:165 = 7
+		ELSEIF ABL:B감각 == 5
+			SIF !RAND:20
+			TFLAG:165 = 7
+		ELSEIF ABL:B감각 >= 3
+			SIF !RAND:50
+			TFLAG:165 = 7
+		ENDIF
+	ENDIF
+	IF V
+		IF ABL:V감각 >= 8
+			SIF !RAND:3
+			TFLAG:165 = 7
+		ELSEIF ABL:V감각 == 7
+			SIF !RAND:5
+			TFLAG:165 = 7
+		ELSEIF ABL:V감각 == 6
+			SIF !RAND:10
+			TFLAG:165 = 7
+		ELSEIF ABL:V감각 == 5
+			SIF !RAND:20
+			TFLAG:165 = 7
+		ELSEIF ABL:V감각 >= 3
+			SIF !RAND:50
+			TFLAG:165 = 7
+		ENDIF
+	ENDIF
+ENDIF
+
+

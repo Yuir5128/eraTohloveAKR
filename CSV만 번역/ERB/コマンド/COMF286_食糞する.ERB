@@ -1,0 +1,200 @@
+﻿;-------------------------------------------------
+;식분한다
+;主人마조系コマンド
+;-------------------------------------------------
+@COM286
+
+PRINTL 식분한다
+STR:0 = 식분한다
+;애널자극からの派生の場合
+SIF SELECTCOM == 50
+	TFLAG:56 = 1
+
+SELECTCOM = 286
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 150
+
+;애널자극からの派生の場合
+SIF TFLAG:56 == 1
+	SOURCE:쾌A += 30
+
+SOURCE:두려움 += 20
+SOURCE:노출 += 400
+SOURCE:불결 += 500
+SOURCE:일탈 += 400
+SOURCE:반발 += 300
+
+;애널자극からの派生の場合
+IF TFLAG:56 == 1
+	SOURCE:노출 += 700
+	SOURCE:굴복 += 800
+	SOURCE:불결 += 400
+	SOURCE:일탈 += 700
+	SOURCE:반발 += 800
+ENDIF
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 200
+
+;陥落素質によって일탈のソースが上下
+IF TALENT:연모
+	TIMES SOURCE:일탈 , 0.70
+ELSEIF TALENT:친애
+	TIMES SOURCE:일탈 , 0.30
+ELSEIF TALENT:음란 || TALENT:창부
+	TIMES SOURCE:일탈 , 0.50
+ELSEIF TALENT:복종 || TALENT:예속
+	TIMES SOURCE:일탈 , 0.30
+ENDIF
+
+;새드끼を見る
+IF ABL:새드끼 == 0
+	TIMES SOURCE:불결 , 1.00
+ELSEIF ABL:새드끼 == 1
+	TIMES SOURCE:불결 , 0.95
+	SOURCE:욕정 += 30
+ELSEIF ABL:새드끼 == 2
+	TIMES SOURCE:불결 , 0.80
+	SOURCE:욕정 += 50
+ELSEIF ABL:새드끼 == 3
+	TIMES SOURCE:불결 , 0.75
+	SOURCE:욕정 += 80
+ELSEIF ABL:새드끼 == 4
+	TIMES SOURCE:불결 , 0.60
+	SOURCE:욕정 += 100
+ELSEIF ABL:새드끼 == 5
+	TIMES SOURCE:불결 , 0.50
+	SOURCE:욕정 += 150
+ELSEIF ABL:새드끼 == 6
+	TIMES SOURCE:불결 , 0.45
+	SOURCE:욕정 += 200
+ELSEIF ABL:새드끼 == 7
+	TIMES SOURCE:불결 , 0.40
+	SOURCE:욕정 += 250
+ELSEIF ABL:새드끼 == 8
+	TIMES SOURCE:불결 , 0.35
+	SOURCE:욕정 += 300
+ELSEIF ABL:새드끼 == 9
+	TIMES SOURCE:불결 , 0.30
+	SOURCE:욕정 += 350
+ELSEIF ABL:새드끼 >= 10
+	TIMES SOURCE:불결 , 0.20
+	SOURCE:욕정 += 400
+ENDIF
+
+;스캇중독で욕정増、반발減
+IF ABL:스캇중독 == 0
+	TIMES SOURCE:일탈 , 1.50
+ELSEIF ABL:스캇중독 == 1
+	SOURCE:중독충족 += 100
+	TIMES SOURCE:일탈 , 1.00
+ELSEIF ABL:스캇중독 == 2
+	SOURCE:중독충족 += 200
+	TIMES SOURCE:일탈 , 0.70
+ELSEIF ABL:스캇중독 == 3
+	SOURCE:중독충족 += 800
+	TIMES SOURCE:일탈 , 0.30
+ELSEIF ABL:스캇중독 == 4
+	SOURCE:중독충족 += 1000
+	TIMES SOURCE:일탈 , 0.20
+ELSE
+	SOURCE:중독충족 += 1500
+	TIMES SOURCE:일탈 , 0.10
+ENDIF
+
+;애널자극からの派生の場合
+IF TFLAG:56 == 1
+	;調教者のTALENT:혀놀림をみる
+	SIF TALENT:PLAYER:혀놀림
+		TIMES SOURCE:쾌A , 1.50
+		
+	;調教者のTALENT:고양이혀をみる
+	SIF TALENT:PLAYER:고양이혀
+		TIMES SOURCE:쾌A , 0.75
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+CALL COM_STAIN
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;애널자극からの派生の場合
+IF TFLAG:56 == 1
+	;배변경험
+	PRINTL 식분경험＋２
+	EXP:배변경험 += 2
+
+	;調教者が고양이혀持ちの場合は、調教者に가학쾌락경험を追加
+	IF TALENT:PLAYER:고양이혀
+		EXP:PLAYER:가학쾌락경험 += 1
+		PRINTFORML %CALLNAME:PLAYER%の%EXPNAME:32%＋１
+	ENDIF
+ENDIF
+
+;식분경험なければ이상경험
+IF EXP:PLAYER:식분경험 == 0
+	EXP:PLAYER:이상경험 += 1
+	PRINTFORML 食糞初経験で%CALLNAME:PLAYER%に이상경험＋１
+ENDIF
+EXP:PLAYER:식분경험 += 1
+
+;게이경험とか加算
+CALL COM_EXP(4)
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(主人かつ연모、친애で2。복종、예속で３）
+IF (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF (TALENT:복종 ||TALENT:예속) && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+;初스캇경험のとき이상경험
+IF EXP:스캇경험 == 0
+	EXP:이상경험 += 1
+	PRINTL スカトロ初経験で이상경험＋１
+ENDIF
+EXP:스캇경험 += 1
+PRINTL 스캇경험＋１
+
+;調教者に스캇경험
+IF EXP:PLAYER:스캇경험 == 0
+	EXP:PLAYER:이상경험 += 1
+	PRINTFORML スカトロ初経験で%CALLNAME:PLAYER%に이상경험＋１
+ENDIF
+EXP:PLAYER:스캇경험 += 1
+PRINTFORML %CALLNAME:PLAYER%に스캇경험＋１
+
+;스캇중독４以上なら全部食べる
+IF ABL:PLAYER:스캇중독 >= 4
+	;변의ゲージを０に
+	BASE:변의 = 0
+	
+	;애널자극からの派生でない場合
+	SIF TFLAG:56 != 1
+		TFLAG:57 = 0
+ELSE
+	;애널자극からの派生の場合
+	SIF TFLAG:56 == 1
+		CALL DEFECATION_CHECK2
+ENDIF
+
+RETURN 1
+
+

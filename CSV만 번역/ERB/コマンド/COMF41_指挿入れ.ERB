@@ -1,0 +1,137 @@
+﻿;-------------------------------------------------
+;손가락삽입
+;Ｖ系調教コマンド
+;-------------------------------------------------
+@COM41
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教が손가락삽입、Ｇスポット刺激だとＧスポット刺激に
+	IF PREVCOM == 41 || PREVCOM == 500
+		CALL COM_ABLE500
+		SIF RESULT == 1
+			JUMP COM500
+	ENDIF
+ENDIF
+
+PRINTL 손가락삽입
+STR:0 = 손가락삽입
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 50
+
+SOURCE:쾌V += 80
+IF PREVCOM == 77
+	SOURCE:통증 += 5
+ELSE
+	SOURCE:통증 += 10
+ENDIF
+SOURCE:노출 += 10
+SOURCE:일탈 += 20
+SOURCE:반발 += 20
+
+IF TEQUIP:로터삽입 || TEQUIP:바이브
+	SIF TEQUIP:바이브
+		TIMES SOURCE:쾌V , 1.50
+	SIF TEQUIP:로터삽입
+		TIMES SOURCE:쾌V , 1.20
+
+	SIF TEQUIP:바이브
+		SOURCE:통증 += 50
+	SIF TEQUIP:로터삽입
+		SOURCE:통증 += 20
+ENDIF
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+IF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 20
+	;처녀
+	SIF TALENT:처녀
+		SOURCE:울굴 += 10
+ENDIF
+
+;스킨십선호だと애정のソース追加
+SIF TALENT:스킨십선호 && !TEQUIP:로터삽입 && !TEQUIP:바이브
+	SOURCE:애정 += 50
+
+;Vへの고통は先に処理しておく
+;EXP:V경험をみる（처녀の반감は別途処理済みなので省略）
+IF EXP:V경험 < EXPLV:1
+	TIMES SOURCE:통증 , 2.50
+ELSEIF EXP:V경험 < EXPLV:2
+	TIMES SOURCE:통증 , 0.80
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:V경험 < EXPLV:3
+	TIMES SOURCE:통증 , 0.40
+ELSEIF EXP:V경험 < EXPLV:4
+	TIMES SOURCE:통증 , 0.10
+ELSEIF EXP:V경험 < EXPLV:5
+	TIMES SOURCE:통증 , 0.00
+ELSEIF EXP:V경험 >= EXPLV:5
+	TIMES SOURCE:통증 , 0.00
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 0.70
+	TIMES SOURCE:반발 , 1.20
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 0.40
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 0.10
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 0.10
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;調教者の손⇔奴隷のＶ질내の汚れが移動
+;道具を使用する場合は汚れは移動しない
+IF TEQUIP:로터삽입 || TEQUIP:바이브
+ELSE
+	CALL COM_STAIN
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;V경험
+EXP:V경험 += 1
+PRINTL V경험＋１
+
+;게이경험とか加算
+CALL COM_EXP(1)
+
+;依存度ベクトル
+IF TALENT:처녀
+	TFLAG:33 = 3
+ELSE
+	TFLAG:33 = 1
+ENDIF
+
+
+RETURN 1
+
+

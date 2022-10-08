@@ -97,7 +97,7 @@ ENDIF
 CFLAG:UMA_A:12 = 5
 CFLAG:UMA_B:12 = 5
 
-;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+;지문, 대사 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
 LOCAL = TARGET
 TFLAG:13 = 84
 
@@ -107,12 +107,12 @@ UCHIBAN_B = UMA_B
 ;현재가 기수일눈이라면 UCHIBAN_A의 (분)편을 부른다
 IF DAY % 2 == 1
 	TARGET = UMA_A
-	;이벤트입상(내번개시시);지문과 A의입상
+	;이벤트대사(내번개시시);지문과 A의대사
 	CALL KOJO_MESSAGE_EVENT
 ;현재가 짝수 일째라면 UCHIBAN_B의 (분)편을 부른다
 ELSE
 	TARGET = UMA_B
-	;이벤트입상(내번개시시);B의입상
+	;이벤트대사(내번개시시);B의대사
 	CALL KOJO_MESSAGE_EVENT
 ENDIF
 
@@ -148,7 +148,7 @@ REND
 
 DRAWLINE
 
-;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+;지문, 대사 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
 LOCAL = TARGET
 TFLAG:13 = 85
 
@@ -156,17 +156,17 @@ UCHIBAN_A = UMA_A
 UCHIBAN_B = UMA_B
 
 
-;필연적으로, 내번개시시에 불리지 않았던 (분)편의 지문과입상이 불립니다
+;필연적으로, 내번개시시에 불리지 않았던 (분)편의 지문과대사이 불립니다
 
 ;현재가 기수일눈이라면 UCHIBAN_A의 (분)편을 부른다
 IF DAY % 2 == 1
 	TARGET = UMA_A
-	;이벤트입상(내번종료시);지문과 A의입상
+	;이벤트대사(내번종료시);지문과 A의대사
 	CALL KOJO_MESSAGE_EVENT
 ;현재가 짝수 일째라면 UCHIBAN_B의 (분)편을 부른다
 ELSE
 	TARGET = UMA_B
-	;이벤트입상(내번종료시);지문과 B의입상
+	;이벤트대사(내번종료시);지문과 B의대사
 	CALL KOJO_MESSAGE_EVENT
 ENDIF
 

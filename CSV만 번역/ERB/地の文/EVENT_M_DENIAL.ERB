@@ -1,0 +1,90 @@
+﻿;実行判定不可のときのテキスト
+;-------------------------------------------------
+;地の文呼び出し
+;-------------------------------------------------
+@DENIAL_MESSAGE
+RESULT = 0
+TRYCALLFORM DENIAL_MESSAGE_{SELECTCOM}
+SIF !RESULT
+	CALL DENIAL_MESSAGE_EX
+
+;-------------------------------------------------
+;汎用
+;-------------------------------------------------
+@DENIAL_MESSAGE_EX
+LOCALS = 
+SELECTCASE SELECTCOM
+	CASE 1
+		LOCALS = %CALLNAME%に키스한다
+	CASE 3
+		LOCALS = %CALLNAME%に비패개장させる
+	CASE 4
+		LOCALS = %CALLNAME%に자위させる
+	CASE 5
+		LOCALS = %CALLNAME%に가슴자위させる
+	CASE 6
+		LOCALS = %CALLNAME%に자위させる
+	CASE 7
+		LOCALS = %CALLNAME%に항문자위させる
+	;수음、펠라치오、파이즈리、세로파이즈리、파이즈리펠라、손가락츄파、풋잡、겨드랑이잡、授乳손コキ
+	CASE 70,71,73,74,75,77,80,82,528
+		LOCALS = %CALLNAME%に%STR:0%させる
+	CASE 85
+		LOCALS = %CALLNAME%に발舐めさせる
+	CASE 86
+		LOCALS = %CALLNAME%に玉揉みさせる
+	CASE 87
+		LOCALS = %CALLNAME%に玉舐めさせる
+	;セックス、Ａセックス
+	CASE 100 TO 116
+		LOCALS = %CALLNAME%に%STR:0%させる
+	CASE 150
+		LOCALS = %CALLNAME%を가구로한다
+	CASE 181
+		LOCALS = %CALLNAME%を육변기にする
+	;음뇨시킨다、식분시킨다
+	CASE 184,185
+		LOCALS = %CALLNAME%に%STR:0%
+	CASE 206
+		LOCALS = %CALLNAME%に선물시킨다
+	;애무시킨다、가슴을주무르게한다、손가락삽입시킨다、애널애무시킨다
+	CASE 220,221,223,225
+		LOCALS = %CALLNAME%に%STR:0%
+	CASE 222
+		LOCALS = %CALLNAME%に커닐링구스させる
+	CASE 224
+		LOCALS = %CALLNAME%に애널자극させる
+	;가슴을비빈다、조개비비기、장대비비기
+	CASE 243,244,245
+		LOCALS = %CALLNAME%と%STR:0%する
+	;主人수セックス
+	CASE 260 TO 265
+		LOCALS = %CALLNAME%に%STR:0%
+	;이라마치오시킨다、매도당한다、얻어맞는다、채찍으로맞는다
+	CASE 280,281,283,284
+		LOCALS = %CALLNAME%に%STR:0%
+	CASE 314
+		LOCALS = %CALLNAME%の털を剃る
+	CASE 317
+		LOCALS = %CALLNAME%に거품비비기させる
+	;더블펠라、더블파이즈리、더블스마타
+	CASE 420 TO 422
+		LOCALS = %CALLNAME%に%STR:0%させる
+	;조수를범하게시킨다
+	CASE 430,431
+		LOCALS = %CALLNAME%に%STR:0%
+	CASEELSE 
+		LOCALS = %CALLNAME%に%STR:0%
+ENDSELECT
+
+IF STRLENS(LOCALS)
+	PRINTFORML %LOCALS%には、もう少し調教が必要なようだ
+ELSE
+	PRINTFORML %CALLNAME%に%STR:0%させるには、もう少し調教が必要なようだ
+ENDIF
+
+
+
+;-------------------------------------------------
+;自分用メモ　実行判定のあるコマンド一覧
+;-------------------------------------------------

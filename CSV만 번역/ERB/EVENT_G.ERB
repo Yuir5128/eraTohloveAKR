@@ -1,0 +1,111 @@
+﻿;=============================================================================
+;체력・기력の最大値上昇処理
+;=============================================================================
+;調教終了후それぞれ2/5の確率で체력・기력の最大値が上昇。이상경험の値で上昇する数値が増加します
+;ただし増加する値はそれぞれ＋４０が限度かつ、性別(及び처녀性)によって
+;체력、기력それぞれにある値を超えるとそれ以上は成長しない限界値というものが設定されています。
+;また、체력・기력を減らしすぎた場合は上昇しないよう条件を変えました。
+@EVENT_GROWTH
+A = MAXBASE:체력-BASE:체력
+B = MAXBASE:기력-BASE:기력
+C = RAND:4
+D = 1
+G = EXP:이상경험
+SIF G > 10
+	G = 10
+H = G*2
+
+;調教対象の性別、처녀性によって成長限界が変化(남자は限界値がかなり高く設定されている)
+IF TALENT:남자
+	I = 9000
+	J = 5000
+ELSE
+	I = 5000
+	IF TALENT:처녀 && EXP:V경험 == 0 && ABL:V감각 == 0
+		J = 4000
+	ELSEIF TALENT:처녀 && EXP:V경험 == 0
+		J = 3500
+	ELSE
+		J = 3000
+	ENDIF
+ENDIF
+
+;체력が大きい場合は기력が、기력が大きい場合は체력が成長する確率が上昇
+IF C == 1 && MAXBASE:체력 > MAXBASE:기력 && RAND:3 == 0
+	C = 2
+ELSEIF C == 2 && MAXBASE:기력 > MAXBASE:체력 && RAND:3 == 0
+	C = 1
+ENDIF
+
+IF C <= 1 && A != 0 && BASE:체력 >= 300 && MAXBASE:체력 < I
+	SIF A > 0 && A <= 500
+		D = 250
+	SIF A > 500 && A <= 1000
+		D = 300
+	SIF A > 1000 && A <= 1500
+		D = 350
+	SIF A > 1500 && A <= 2000
+		D = 400
+	SIF A > 2000 && A <= 2500
+		D = 450
+	SIF A > 2500
+		D = 500
+	SIF BASE:체력 < 500
+		D = 750
+	IF MAXBASE:체력 < 1300
+		TIMES D , 0.40
+	ELSEIF MAXBASE:체력 < 1500
+		TIMES D , 0.60
+	ELSEIF MAXBASE:체력 < 2000
+		TIMES D , 0.80
+	ENDIF
+	E = (A/D)
+	SIF E > 20
+		E = 20
+	SIF !TALENT:연모 && !TALENT:친애 && !TALENT:예속
+		E /= 2
+	IF (E+H) > 0
+		MAXBASE:체력 += E+H
+		PRINTFORML 激しい調教によって%CALLNAME%は我慢することの快感を知った。
+		PRINTFORMW %CALLNAME%の체력の最大値が{E+H}上がりました。
+	ENDIF
+ELSEIF C <= 1 && A != 0 && BASE:체력 >= 300 && MAXBASE:체력 >= I
+	C = 0
+ENDIF
+
+IF (C == 0 || C == 2) && B != 0 && BASE:기력 >= 100 && MAXBASE:기력 < J
+	SIF B > 0 && B <= 300
+		D = 200
+	SIF B > 300 && B <= 500
+		D = 250
+		SIF B > 500 && B <= 1000
+			D = 300
+	SIF B > 1000 && B <= 1500
+		D = 350
+	SIF B > 1500 && B <= 2000
+		D = 400
+	SIF B > 2000 && B <= 2500
+		D = 450
+	SIF B > 2500
+		D = 500
+	SIF BASE:기력 < 500
+		D = 750
+	IF MAXBASE:기력 < 800
+		TIMES D , 0.40
+	ELSEIF MAXBASE:기력 < 1000
+		TIMES D , 0.60
+	ELSEIF MAXBASE:기력 < 1200
+		TIMES D , 0.80
+	ENDIF
+	F = (B/D)
+	SIF F > 20
+		F = 20
+	SIF !TALENT:연모 && !TALENT:친애 && !TALENT:예속
+		F /= 2
+	IF (F+H) > 0
+		MAXBASE:기력 += F+H
+		PRINTFORML 激しい調教によって%CALLNAME%の意志は強くなった。
+		PRINTFORMW %CALLNAME%の기력の最大値が{F+H}上がりました。
+	ENDIF
+ENDIF
+

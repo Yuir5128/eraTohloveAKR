@@ -1,0 +1,651 @@
+﻿;----------------------------------------------------------------------
+;○○汎用喘ぎ
+;----------------------------------------------------------------------
+;입が塞がってる(볼개그・촉수입虐中以外)
+;----------------------------------------------------------------------
+@PANT_VOICE_A_KX1
+;個別汎用喘ぎを使用する時は下の行を削除してください
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;고통がある
+	IF (D & 12582912) != 0
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	;任意奉仕系
+	ELSEIF (D & 16777216) != 0
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	;その他
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+P = RAND:3
+	IF P == 0
+		PRINT 
+	ELSEIF P == 1
+		PRINT 
+	ELSE
+		PRINT 
+	ENDIF
+PRINTW 」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;고통LV2
+;----------------------------------------------------------------------
+@PANT_VOICE_B_KX1
+;個別汎用喘ぎを使用する時は下の行を削除してください
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그か촉수입虐中
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	;마조持ち用
+	ELSEIF TALENT:84
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	;普通の人用
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+;締め
+P = RAND:3
+	;볼개그か촉수입虐中
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ENDIF
+PRINTW 」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;고통LV1
+;----------------------------------------------------------------------
+@PANT_VOICE_C_KX1
+;個別汎用喘ぎを使用する時は下の行を削除してください
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그か촉수입虐中
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	;마조持ちか마조ッ気3以上あり
+	ELSEIF TALENT:84 || ABL:9 > 2
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	;普通の人
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+;締め
+P = RAND:3
+	;볼개그か촉수입虐中
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	;마조持ちか마조ッ気あり
+	ELSEIF TALENT:84 || ABL:9 > 2
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	;普通の人
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ENDIF
+PRINTW 」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;快感LV4
+;----------------------------------------------------------------------
+@PANT_VOICE_D_KX1
+;個別汎用喘ぎを使用する時は下の行を削除してください
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그か촉수입虐中
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+;締め
+P = RAND:3
+	;볼개그か촉수입虐中
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ENDIF
+PRINTW 」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;快感LV3
+;----------------------------------------------------------------------
+@PANT_VOICE_E_KX1
+;個別汎用喘ぎを使用する時は下の行を削除してください
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그か촉수입虐中
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+;締め
+P = RAND:3
+	;볼개그か촉수입虐中
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ENDIF
+	ENDIF
+PRINTW 」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;快感LV2
+;----------------------------------------------------------------------
+@PANT_VOICE_F_KX1
+;個別汎用喘ぎを使用する時は下の行を削除してください
+RETURN 0
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	;볼개그か촉수입虐中
+	IF TEQUIP:20 || TEQUIP:36
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P  ==  9
+			PRINT 
+		ENDIF
+	ELSE
+		IF P == 0
+			PRINT 
+		ELSEIF P == 1
+			PRINT 
+		ELSEIF P == 2
+			PRINT 
+		ELSEIF P == 3
+			PRINT 
+		ELSEIF P == 4
+			PRINT 
+		ELSEIF P == 5
+			PRINT 
+		ELSEIF P == 6
+			PRINT 
+		ELSEIF P == 7
+			PRINT 
+		ELSEIF P == 8
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ELSEIF P == 9
+			PRINT 
+		ENDIF
+	ENDIF
+	P:1 = P
+REND
+;締め
+P = RAND:3
+	IF P == 0
+		PRINT 
+	ELSEIF P == 1
+		PRINT 
+	ELSEIF P == 2
+		PRINT 
+	ENDIF
+PRINTW 」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+
+;----------------------------------------------------------------------
+;弱快感
+;----------------------------------------------------------------------
+@PANT_VOICE_G_KX1
+;個別汎用喘ぎを使用する時は下の行を削除してください
+RETURN 0
+;B = 繰り返し回数
+PRINT 「
+REPEAT B
+	P:2 = 10
+	CALL VOICE_RENZOKU
+	IF P == 0
+		PRINT 
+	ELSEIF P == 1
+		PRINT 
+	ELSEIF P == 2
+		PRINT 
+	ELSEIF P == 3
+		PRINT 
+	ELSEIF P == 4
+		PRINT 
+	ELSEIF P == 5
+		PRINT 
+	ELSEIF P == 6
+		PRINT 
+	ELSEIF P == 7
+		PRINT 
+	ELSEIF P == 8
+		PRINT 
+	ELSEIF P == 9
+		PRINT 
+	ENDIF
+	P:1 = P
+REND
+;締め
+P = RAND:3
+	IF P == 0
+		PRINT 
+	ELSEIF P == 1
+		PRINT 
+	ELSEIF P == 2
+		PRINT 
+	ENDIF
+PRINTW 」
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+G = 0
+RETURN 0
+

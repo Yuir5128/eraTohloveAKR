@@ -1,0 +1,1423 @@
+﻿;--------------------------------------------------------------------------------------------
+;このファイル内ではアイテム・ネタばれＱ＆Ａ・
+;ゲームモード・エンディング条件・拡張機能の記述があります。
+;--------------------------------------------------------------------------------------------
+;=============================================================================
+;用語辞典――アイテム
+;=============================================================================
+;--------------------------------------------------
+;アイテム解説メインページ
+;--------------------------------------------------
+@DICTIONARY_ITEM_MAIN
+P = 0
+FLAG:45 = 0
+$PRINT_LIST
+DRAWLINE
+PRINTFORML 「アイテム」に関する大まかな説明です。(※現段階ではまだ未完成です)
+PRINTFORML ＜page.{P+1}/2＞
+DRAWLINE
+;各ページを表示
+FOR LOCAL:1, 0, 50
+	LOCAL = LOCAL:1 + P*50
+	Q:LOCAL = 0
+	STRLENS ITEMNAME:LOCAL
+	IF RESULT > 0
+		PRINTFORMLC [{LOCAL, 2}] %ITEMNAME:LOCAL%
+		CALL CHECK_NEWLINE
+		Q:LOCAL = 1
+	ENDIF
+NEXT
+PRINTL 
+DRAWLINE
+PRINTFORMLC \@(P <= 0) ? %" " * 16% # [1001]前のページ\@
+PRINTLC [1000]戻る
+PRINTFORMLC \@(P >= 1) ? %" " * 16% # [1009]次のページ\@
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+	GOTO PRINT_LIST
+ELSEIF RESULT == 1009 && P < 2
+	P += 1
+	GOTO PRINT_LIST
+ELSE
+	SIF Q:RESULT == 0
+		GOTO INPUT_LOOP
+	PRINTFORML 【%ITEMNAME:RESULT%】
+	TRYCALLFORM DICTIONARY_ITEM_{RESULT}
+	PRINTW 
+	GOTO PRINT_LIST
+ENDIF
+
+;--------------------------------------------------
+;アイテム解説
+;--------------------------------------------------
+;로터
+@DICTIONARY_ITEM_0
+PRINTL 初心者にも安心な、かわいい卵型をした로터のお買い得セット。
+PRINTL 秘部に当てて、挿入して、振動することで快感を与える性具。
+PRINTL 防水加工もバッチリなので、水に濡れても大丈夫。
+PRINTL 小さいので、奴隷の처녀膜を破ってしまう心配もない。
+PRINTL 로터を使用するコマンドに必須。
+
+;진동마사지기
+@DICTIONARY_ITEM_1
+PRINTL 電動マッサージ器とも呼ばれるマッサージ器具……を、性具に改良したもの。
+PRINTL 로터よりも強い刺激を与えるが、大きいので挿入はできない。
+PRINTL コマンド「진동마사지기」には必須。
+
+;클리캡
+@DICTIONARY_ITEM_2
+PRINTL クリトリスに吸いつかせ、快感を与える性具。装着型。
+PRINTL 吸引式のため、통증はほとんど与えない。
+PRINTL コマンド「클리캡」に必須。
+
+;전동오나홀
+@DICTIONARY_ITEM_3
+PRINTL シリコン製の筒を페니스に被せ、快感を与える性具。装着型。
+PRINTL 電動式なので、なにもしなくても気持ちいい。
+PRINTL コマンド「전동오나홀」に必須。
+
+;바이브
+@DICTIONARY_ITEM_4
+PRINTL 바기나に挿入できる、一般的な바이브。装着型。
+PRINTL そこそこのサイズがあるため、奴隷の[처녀]を破ってしまう。
+PRINTL コマンド「바이브」に必須。
+
+;애널바이브
+@DICTIONARY_ITEM_5
+PRINTL 애널に挿入できる、애널用の바이브。装着型。
+PRINTL 男のバージンは概念なので、玩具で破る心配はないですよ。
+PRINTL コマンド「애널바이브」に必須。
+
+;애널비즈
+@DICTIONARY_ITEM_6
+PRINTL 애널に挿入できる、複数の玉を繋げた形をした性具。装着型。
+PRINTL 入れるときより、抜くときの方が気持ちいいらしい。
+PRINTL コマンド「애널비즈」に必須。
+
+;바디클립
+@DICTIONARY_ITEM_7
+PRINTL 様々な個所に使用可能なクリップセット。装着型。
+PRINTL バネは弱めだが、挟まれればもちろん痛い。
+PRINTL コマンド「유두클립」「음핵클립」に必須。
+
+;확장벌룬
+@DICTIONARY_ITEM_8
+PRINTL 風船と空気を送り込む器具のセット。装着型。
+PRINTL 基本的には애널用だが、とある器具とセットで尿道にも使用可能。
+PRINTL コマンド「확장벌룬」に必須。
+
+;관장도구세트
+@DICTIONARY_ITEM_9
+PRINTL 奴隷に관장を行うための、医療用の관장도구세트。
+PRINTL 관장された奴隷は「변의」を催す。
+PRINTL コマンド「관장」に必須。
+
+
+;니틀캡
+@DICTIONARY_ITEM_10
+PRINTL 乳首に吸いつかせ、快感を与える性具。装着型。
+PRINTL 吸引式のため、통증はほとんど与えない。
+PRINTL コマンド「니틀캡」に必須。
+
+;착유기
+@DICTIONARY_ITEM_11
+PRINTL 搾乳するために乳房に装着する器具。装着型。
+PRINTL 奴隷が[모유체질]でないと使えない。
+PRINTL コマンド「착유기」に必須。
+
+;페니스밴드
+@DICTIONARY_ITEM_12
+PRINTL 페니스のない人間が腰につけて使う疑似페니스。
+PRINTL 相손に挿入するセックス系コマンドが使用可能になるが、当然、사정機能はない。
+
+;채찍
+@DICTIONARY_ITEM_13
+PRINTL 奴隷を打ち据えるための채찍。
+PRINTL バラ채찍や一本채찍、長いものから短いものまで、その種類は豊富。
+PRINTL バラ채찍って実はあんまり痛くないの知ってた？
+PRINTL コマンド「채찍」「채찍으로맞는다」に必須。
+
+;바늘
+@DICTIONARY_ITEM_14
+PRINTL 鋭く尖った普通の바늘。セットでたくさん入ってるお買い得品。
+PRINTL 人体に使用する場合、消毒は忘れずに。
+PRINTL コマンド「바늘」に必須。
+
+;아이마스크
+@DICTIONARY_ITEM_15
+PRINTL 視界を覆い隠す아이마스크。装着型。
+PRINTL コマンド「아이마스크」に必須。
+
+;밧줄
+@DICTIONARY_ITEM_16
+PRINTL 奴隷を縛り、その動きを封じるための밧줄。装着型。
+PRINTL 長さも強度も十分、奴隷に傷をつけることもない優れ物。
+PRINTL コマンド「밧줄」に必須。
+
+;볼개그
+@DICTIONARY_ITEM_17
+PRINTL 奴隷の입を封じる拘束具。装着型。
+PRINTL 噛ませるボール部分には穴が開いており、呼吸を阻害しない。
+PRINTL コマンド「볼개그」に必須。
+
+;비디오카메라
+@DICTIONARY_ITEM_18
+PRINTL 奴隷を비디오촬영するための비디오카메라。
+PRINTL 記録するための비디오테이프がないと使えない他、
+PRINTL テープの残量がなくなった場合には、自動で撮影が終了される。
+PRINTL 撮ったビデオは손元に残すことも、売却することもできる。
+PRINTL コマンド「비디오촬영」に必須。
+
+;카메라
+@DICTIONARY_ITEM_19
+PRINTL 사진촬영するための카메라。필름がないと使えない。
+PRINTL 撮った写真は売却し、お金に換えることができる。
+PRINTL コマンド「사진촬영」に必須。
+
+;플레이매트
+@DICTIONARY_ITEM_20
+PRINTL 목욕탕でプレイの幅が広がる、大きな플레이매트。
+PRINTL 목욕탕は滑りやすいので、これがないとほとんどのプレイは実行不可。
+
+;대거울
+@DICTIONARY_ITEM_21
+PRINTL 奴隷の姿を映す、大きな鏡。수치플레이が可能になる。
+PRINTL 曇り防止加工付きなので、목욕탕でも使える。
+PRINTL コマンド「수치플레이」に必須。
+
+;목걸이＋리드
+@DICTIONARY_ITEM_22
+PRINTL 奴隷を繋ぎ、外に連れ出すためのお散歩セット。
+PRINTL コマンド「야외플레이」に必須。
+
+;전극플레이키트
+@DICTIONARY_ITEM_23
+PRINTL 様々な個所に使用できる、電극と電源のセット。
+PRINTL 電気プレイはなかなか上級者向けと思います。
+PRINTL 電극を使ったコマンド各種に必須。
+
+;리본
+@DICTIONARY_ITEM_24
+PRINTL 사정관리が可能になる。きつく巻いても安心。装着型。
+PRINTL 정조대のアタッチメントとしても使える。
+PRINTL コマンド「사정관리」に必須。
+
+;카테터
+@DICTIONARY_ITEM_25
+PRINTL 尿道開発用の카테터と洗浄液のセット。装着型。
+PRINTL 筒状になっているため、これを挿されても奴隷は放尿が可能。
+PRINTL 電극やバルーンと組み合わせることで、プレイの幅が広がる。
+PRINTL コマンド「카테터」に必須。
+
+;삼각목마
+@DICTIONARY_ITEM_26
+PRINTL 奴隷を乗せて使う、調教用の삼각목마。装着型。
+PRINTL 怪我などしないように、背は若干幅をつけた構造になっているが、
+PRINTL 全体重が秘部にかかるその고통は相当のもの。
+PRINTL コマンド「삼각목마」に必須。
+
+;정조대
+@DICTIONARY_ITEM_30
+PRINTL 奴隷の貞操を守る、施錠可能な特殊な下着。装着型。
+PRINTL Ｃ、Ｖを塞ぎ、奴隷の자위を防止することができるが、主人も触れない。
+PRINTL 常時装着しても平気なように、尿道付近とお尻部分は開いているため、
+PRINTL 放尿させたり、Ａ調教を行うことは可能。
+PRINTL 「리본」を併用することで사정관리の効果も期待できる。
+PRINTL コマンド「정조대」に必須。
+
+;네코미미
+@DICTIONARY_ITEM_31
+PRINTL その名の通りの猫の耳。装着型。
+PRINTL 猫の種類はご想像にお任せ。
+PRINTL 동물귀を装着中、애널바이브が動物の尻尾を模した形に変化する。
+
+;이누미미
+@DICTIONARY_ITEM_32
+PRINTL その名の通りの犬の耳。装着型。
+PRINTL 犬の種類はご想像にお任せ。
+PRINTL 동물귀を装着中、애널바이브が動物の尻尾を模した形に変化する。
+
+;우사미미
+@DICTIONARY_ITEM_33
+PRINTL その名の通りのウサギの耳。装着型。
+PRINTL ウサギの種類はご想像にお任せ。
+PRINTL 동물귀を装着中、애널바이브が動物の尻尾を模した形に変化する。
+
+;헤드셋
+@DICTIONARY_ITEM_34
+PRINTL マイク付きの헤드셋。装着型。
+
+;스타킹
+@DICTIONARY_ITEM_36
+PRINTL 何の変哲もない스타킹。びりびりして楽しむ。使い捨て。
+
+;타이츠
+@DICTIONARY_ITEM_37
+PRINTL 何の変哲もない타이츠。びりびりして楽しむ。使い捨て。
+
+;에이프런
+@DICTIONARY_ITEM_38
+PRINTL 何の変哲もない에이프런。装着型。
+PRINTL 「ご飯にする？ お風呂にする？ それとも……」っていうのができる。
+PRINTL コマンド「신혼부부플레이」に必須。
+
+;ウェディングセット
+@DICTIONARY_ITEM_39
+PRINTL 結婚式に着る衣装とヴェールのセット。
+PRINTL ウェディングドレスはかわいい方が着るもの、と古今東西相場が決まっている。
+
+;로션
+@DICTIONARY_ITEM_40
+PRINTL 奴隷の윤활を上げるための윤활剤。使い捨て。
+PRINTL 人体に優しい成分でできているため、입に入れても大丈夫。
+PRINTL コマンド「로션」に必須。
+
+;미약
+@DICTIONARY_ITEM_41
+PRINTL 性的な興奮を促すお薬。依存性はないので安心。使い捨て。
+PRINTL コマンド「미약」に必須。
+
+;이뇨제
+@DICTIONARY_ITEM_42
+PRINTL 뇨의を促すお薬。使い捨て。
+PRINTL コマンド「이뇨제」に必須。
+
+;비디오테이프
+@DICTIONARY_ITEM_43
+PRINTL 비디오카메라の使用に必要な비디오테이프。使い捨て。
+PRINTL コマンド「비디오촬영」に必須。
+
+;필름
+@DICTIONARY_ITEM_44
+PRINTL 사진촬영には必須の필름。使い捨て。
+PRINTL コマンド「사진촬영」に必須。
+
+;콘돔
+@DICTIONARY_ITEM_45
+PRINTL 定番の避妊具。避妊には十分だが、使い捨て。
+PRINTL 中にためた精液を、奴隷や助손に飲ませることもできる。
+
+;저온초
+@DICTIONARY_ITEM_46
+PRINTL 촛불プレイに必要。素肌を傷つけない優れもの。高い値段の割に使い捨て。
+PRINTL 촛불プレイは日本人考案で、昔はバーナーが一般的だったんですって。
+PRINTL コマンド「촛불」に必須。
+
+;강정신약
+@DICTIONARY_ITEM_47
+PRINTL とある特殊な効果を持った謎の白い粉。使い捨て。
+PRINTL 依存性？　そんなものないない。ないったら！
+PRINTL コマンド「강정신약」に必須。
+
+;구토제
+@DICTIONARY_ITEM_48
+PRINTL 변의を促すお薬。要するに下剤である。使い捨て。
+PRINTL コマンド「구토제」に必須。
+
+;가려움증약
+@DICTIONARY_ITEM_49
+PRINTL 塗った部分がとっても痒くなるお薬。使い捨て。
+PRINTL 奴隷の性感に塗ることで、가려움を感じるようになる。
+PRINTL コマンド「가려움증약」に必須。
+
+;더러움무시
+@DICTIONARY_ITEM_50
+PRINTL TALENT【더러움무시】を付与する事ができる。
+
+;조제지식
+@DICTIONARY_ITEM_51
+PRINTL TALENT【조제지식】を付与する事ができる。
+
+;금지된지식
+@DICTIONARY_ITEM_52
+PRINTL TALENT【금단의지식】を付与する事ができる。
+
+;천리안
+@DICTIONARY_ITEM_53
+PRINTL TALENT【천리안】を付与する事ができる。
+
+;절륜
+@DICTIONARY_ITEM_54
+PRINTL TALENT【절륜】を付与する事ができる。
+
+;수
+@DICTIONARY_ITEM_55
+PRINTL 対象を【수】にする。
+
+;공
+@DICTIONARY_ITEM_56
+PRINTL 対象を【공】にする。
+
+;촉수사역술
+@DICTIONARY_ITEM_57
+PRINTL 촉수を使役できるようになるための謎の力。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+PRINTL あらゆる촉수系調教に必須である。
+
+;진화의비법
+@DICTIONARY_ITEM_58
+PRINTL 촉수を進化させるよ！
+PRINTL より紳士的かつハイレベルな촉수調教を行えるようになる。
+PRINTL すでに촉수を扱えるようになっていなければ、買うことができない。
+
+;오메가
+@DICTIONARY_ITEM_59
+PRINTL 対象を【오메가】にする。
+
+;河童の妙薬
+@DICTIONARY_ITEM_60
+PRINTL 체력を回復する。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+PRINTL [독약내성]持ちには効きが鈍いので注意。
+
+;薬の材料（双）
+@DICTIONARY_ITEM_61
+PRINTL 후타나리にする。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;薬の材料（消）
+@DICTIONARY_ITEM_62
+PRINTL 후타나리を消去する。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;푸른환약
+@DICTIONARY_ITEM_63
+PRINTL 모유체질になる。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;붉은환약
+@DICTIONARY_ITEM_64
+PRINTL 体が若返る丸薬。처녀膜が再生する。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;풍유환
+@DICTIONARY_ITEM_65
+PRINTL 가슴の大きさを1段階上げる。폭유使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;축유환
+@DICTIONARY_ITEM_66
+PRINTL 가슴の大きさを1段階下げる。절벽使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;抑プロラクチン剤
+@DICTIONARY_ITEM_67
+PRINTL 모유が出なくなる。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;3환계항우울제
+@DICTIONARY_ITEM_68
+PRINTL お漏らし癖が直る。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;절반성전환약
+@DICTIONARY_ITEM_69
+PRINTL 投与した対象の下半身の性別を逆転させる。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;성전환약
+@DICTIONARY_ITEM_70
+PRINTL 投与した対象の性別を逆転させる。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;천사의기적
+@DICTIONARY_ITEM_71
+PRINTL 体の大きさを1段階下げる。소인체형には使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;악마의저주
+@DICTIONARY_ITEM_72
+PRINTL 体の大きさを1段階上げる。大柄体系には使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;풍근환
+@DICTIONARY_ITEM_73
+PRINTL 페니스の大きさを一段階上げる。말자지使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;축근환
+@DICTIONARY_ITEM_74
+PRINTL 페니스の大きさを1段階下げる。아이사이즈使用不可。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;포근환
+@DICTIONARY_ITEM_75
+PRINTL 対象の페니스を【포경】にする。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;기억소거제
+@DICTIONARY_ITEM_80
+PRINTL 처녀、후타나리、모유체질、経験、感覚の変化を残した状態で、
+PRINTL 残りのパラメータを全て初期化する。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;되감기약
+@DICTIONARY_ITEM_81
+PRINTL 記憶はそのまま、身体だけを調教前に戻す薬。
+PRINTL 陥落素質、変化した素質、刻印、フラグなどを残した状態で、
+PRINTL 残りのパラメータを全て初期化する。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;배란유발제
+@DICTIONARY_ITEM_82
+PRINTL 排卵を誘発する薬剤。使い捨て。
+PRINTL 敢えて孕ませる場合に使う。
+
+;고성능피임구
+@DICTIONARY_ITEM_83
+PRINTL 임신を阻害する為の避妊具。使い捨て。
+PRINTL 子宮内に結界を張る고성능피임구で、快感も損なわないが、一日しか持たない。
+
+;노란환약
+@DICTIONARY_ITEM_84
+PRINTL 임신中に使うと産卵し、임신を失う。
+PRINTL 임신キャンセルが可能だが、ハイリスク。
+PRINTL 普通は購入できないが、主人に特殊な知識があればショップに並ぶようになる。
+
+;긴급피임약
+@DICTIONARY_ITEM_85
+PRINTL モーニングアフターピルのこと。
+PRINTL 中出ししたいけど임신は嫌だというワガママさん向け。
+PRINTL 確実な効果ができるかと言われるとちょっと不安。
+
+;감주
+@DICTIONARY_ITEM_86
+PRINTL 감주。度数が低いため、알콜쓰레기でも安心して飲める。
+PRINTL コマンド「꽐라플레이」に必須。
+
+;맥주
+@DICTIONARY_ITEM_87
+PRINTL 麦を発酵させたお酒。
+PRINTL コマンド「꽐라플레이」に必須。
+
+;사케
+@DICTIONARY_ITEM_88
+PRINTL お酒。度数が強いため、酔いが回りやすい。
+PRINTL コマンド「꽐라플레이」に必須。
+
+;수술도구세트
+@DICTIONARY_ITEM_90
+PRINTL 손術を行うために必要な道具セット。
+PRINTL 切除손術や발치손術に必要。광기を感じる。
+
+;우리
+@DICTIONARY_ITEM_91
+PRINTL 獣を捕まえてくることができる。獣の種類はご想像にお任せ。
+PRINTL コマンド「수간」に必須。
+
+;포장마차
+@DICTIONARY_ITEM_92
+PRINTL 労役「定食포장마차」を行うための포장마차を作る。
+PRINTL サポートをつけるためには、포장마차・증축が必要。
+
+;포장마차・증축
+@DICTIONARY_ITEM_93
+PRINTL 労役「定食포장마차」を行うための포장마차を増築する。
+PRINTL 広くなるので、サポートをつけることができるようになる。
+
+;플랜카드
+@DICTIONARY_ITEM_94
+PRINTL 労役「公衆便所」をさせるために必要な플랜카드。
+PRINTL 値段などを書き、奴隷に持たせて使う。
+
+;부적
+@DICTIONARY_ITEM_96
+PRINTL 奴隷に装備させる事のできる부적。
+PRINTL 装備していると１度だけ【破壊】を防止してくれる。
+
+;부적・극
+@DICTIONARY_ITEM_97
+PRINTL 「부적」の、さらに効果を高めたもの。
+PRINTL 装備していると１度だけ【破壊】を防止し、ストレスも回復してくれる。
+
+
+;=============================================================================
+;ネタばれＱ＆Ａ
+;=============================================================================
+;システム関係のネタばれを入れる
+;とりあえず作成といった程度。具体的に何を載せるかは未定
+@DICTIONARY_NETABARE_QA
+;現在のページを示す
+P = 0
+;最大ページ数を示す
+LOCAL = 1
+;LOCAL = 8
+$NETABARE_QA_HELP
+DRAWLINE
+PRINTL 以下eraToLoveA02私家版のシステム等に関するＱ＆Ａです。
+PRINTFORML 内容を知りたい項目の番号を入力してください。 ＜page.{P+1}/{LOCAL+1}＞
+PRINTL ※いずれの項目も重度のネタばれを含みます。見る場合はそのつもりで。
+PRINTL 　当然ながら未完成です。
+DRAWLINE
+IF P == 0
+	PRINTL [ 0] Ｑ.奴隷を「売却」する
+	PRINTL [ 1] Ｑ.奴隷を「助손」として働かせる
+	PRINTL [ 2] Ｑ.奴隷を「陥落」させる
+	PRINTL [ 3] Ｑ.奴隷に「部位開発系素質」を取得させる
+	PRINTL [ 4] Ｑ.「特殊性癖素質」を取得する
+	PRINTL [ 5] Ｑ.「혀놀림」を取得する
+	PRINTL [ 6] Ｑ.「수수께끼의매력」を取得する
+	PRINTL [ 7] Ｑ.「절륜」を取得する
+	PRINTL [ 8] Ｑ.「임신」「出産」について
+	PRINTL [ 9] Ｑ.「이상경험」を取得するタイミング
+ELSEIF P == 1
+	PRINTL [10] Ｑ.主人から奴隷に「執着」を向ける
+	PRINTL [11] Ｑ.「周回プレイ」について
+	PRINTL [12] Ｑ.「共犯者」について
+	PRINTL [13] Ｑ.「特別な선물」について
+	PRINTL [14] Ｑ.「刀剣雷舞」の「部隊結成」について
+;	PRINTL [15] Ｑ.（未定義）
+;	PRINTL [16] Ｑ.（未定義）
+;	PRINTL [17] Ｑ.（未定義）
+;	PRINTL [18] Ｑ.（未定義）
+;	PRINTL [19] Ｑ.（未定義）
+ENDIF
+DRAWLINE
+PRINTFORMLC \@(P <= 0) ? %" " * 18% # [1001]前のページ\@
+PRINTLC [1000]戻る
+PRINTFORMLC \@(P >= LOCAL) ? %" " * 18% # [1009]후ろのページ\@
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+	GOTO NETABARE_QA_HELP
+ELSEIF RESULT == 1009 && P < LOCAL
+	P += 1
+	GOTO NETABARE_QA_HELP
+ELSEIF RESULT >= 0 && RESULT <= (LOCAL+1) * 10
+	TRYCALLFORM DICTIONARY_NETABARE_Q{RESULT}
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+GOTO NETABARE_QA_HELP
+
+;売却可能な条件
+@DICTIONARY_NETABARE_Q0
+PRINTL 【奴隷を「売却」する】
+PRINTL 以下の条件を全て満たしていると売却することが可能になります
+PRINTL ※素質[낙인]や[상사상애]が付いたキャラは、原則として売却出来ない
+PRINTL 
+PRINTL ・순종と욕망のLv合計が6以上である
+PRINTL ※ただし、복종・예속陥落以外の素質[반항적]を持つキャラ
+PRINTL [꿋꿋함]のを持つキャラは순종がLv4以上、
+PRINTL 　素質[억압]、[저항]、[자제심]のいずれかを持つキャラは욕망がLv4以上が必要
+PRINTL 
+PRINTL ・次の1～6のいずれかを満たす
+PRINTL 　1：기교がLv3以上である
+PRINTL 　2：봉사정신がLv3以上である
+PRINTL 　3：마조끼がLv3以上である
+PRINTL 　4：순종がLv5である
+PRINTL 　5：욕망がLv5である
+PRINTW 　6：C감각、V감각、A감각、B감각の合計が13以上
+
+;助손可能な条件
+@DICTIONARY_NETABARE_Q1
+PRINTL 【奴隷を「助손」として働かせる】
+PRINTL 以下の条件を全て満たしていると調教の助손（主人の代わりに調教できる）をさせることが可能になります
+PRINTL 
+PRINTL ・순종と욕망のLv合計が6以上である
+PRINTL ※ただし、복종・예속陥落以外の素質[반항적]を持つキャラ
+PRINTL [꿋꿋함]のを持つキャラは순종がLv4以上、
+PRINTL 　素質[억압]、[저항]、[자제심]のいずれかを持つキャラは욕망がLv4以上が必要
+PRINTL 
+PRINTL ・次の1～6のいずれかを満たす
+PRINTL 　1：기교がLv3以上である
+PRINTL 　2：봉사정신がLv3以上である
+PRINTL 　3：마조끼がLv3以上である
+PRINTL 　4：순종がLv5である
+PRINTL 　5：욕망がLv5である
+PRINTL 　6：C감각、V감각、A감각、B감각の合計が13以上
+PRINTL 
+PRINTL ・次の1～2のいずれかを満たす
+PRINTL 　1：순종・욕망・기교・C감각・레즈끼・게이끼のレベルの合計が12以上である
+PRINTW 　2：순종がLv5かつ、욕망がLv4以上である
+
+;陥落条件
+@DICTIONARY_NETABARE_Q2
+PRINTL 【奴隷を「陥落」させる】
+PRINTL 一定の条件を満たすと、奴隷は主人に対して「陥落」します。
+PRINTL 陥落には「下位陥落」と「上位陥落」の２種類があり、条件を満たす毎に、
+PRINTL 「未陥落」→「下位陥落」→「上位陥落」と、順番に取得していく事になります。
+PRINTL 
+PRINTL 取得条件を確認したい陥落素質を選択して下さい
+PRINTL [ 0] 연모（下位陥落）
+PRINTL [ 1] 음란（下位陥落）
+PRINTL [ 2] 복종（下位陥落）
+PRINTL [ 3] 친애（上位陥落）
+PRINTL [ 4] 창부（上位陥落）
+PRINTL [ 5] 예속（上位陥落）
+PRINTL [ 6] 상사상애（特殊）
+PRINTL 
+PRINTL [99] 戻る
+$INPUT_LOOP
+INPUT
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT == 0
+	CLEARLINE 1
+	PRINTFORML 【연모陥落の条件】
+	PRINTFORML 
+	PRINTFORML 1：「　　　　순종」Lv3以上
+	PRINTFORML 2：「　　봉사정신」Lv3以上
+	PRINTFORML 3：「봉사쾌락경험」200以上
+	PRINTFORML 4：「　　이상경험」2未満
+	PRINTFORML 5：「　　굴복각인」Lv3
+	PRINTFORML 6：「　　반발각인」Lv0
+	PRINTFORML 7：「　　　依存度」1000以上
+	PRINTFORML 8：「現在の主人からの被조교경험」1000以上
+ELSEIF RESULT == 1
+	CLEARLINE 1
+	PRINTFORML 【음란陥落の条件】
+	PRINTFORML 
+	PRINTFORML 前提条件として、未陥落の奴隷が以下の条件を満たしている
+	PRINTFORML 1：「　　　　욕망」Lv3以上
+	PRINTFORML 2：「 C/V/A/B感覚」Lv合計が10以上
+	PRINTFORML 3：「　　절정경험」50以上
+	PRINTFORML 4：「　　쾌락각인」Lv3
+	PRINTFORML 5：「　　굴복각인」Lv3
+	PRINTFORML 6：「　　반발각인」Lv0
+	PRINTFORML 
+	PRINTFORML かつ、以下の条件のどれかを満たす必要がある。
+	PRINTFORML 1：「　　이상경험」3以上
+	PRINTFORML 2：「　　이상경험」1以上＋「助손조교경험」1000以上
+	PRINTFORMW 3：「助손조교경험」2000以上
+ELSEIF RESULT == 2
+	CLEARLINE 1
+	PRINTFORML 【복종陥落の条件】
+	PRINTFORML 
+	PRINTFORML 1：「　　　　순종」Lv3以上
+	PRINTFORML 2：「 C/V/A/B感覚」Lv合計が10未満
+	PRINTFORML 3：「　　마조끼」Lv3以上
+	PRINTFORML 4：「고통쾌락경험」＋「속박경험」合計が200以上
+	PRINTFORML 5：「　　이상경험」2以上
+	PRINTFORML 6：「　　굴복각인」Lv3
+	PRINTFORML 7：「　　반발각인」Lv0
+	PRINTFORMW 8：「　　　依存度」マイナス1000以下
+ELSEIF RESULT == 3
+	CLEARLINE 1
+	PRINTFORML 【친애陥落の条件】
+	PRINTFORML 
+	PRINTFORML 1：「　　　　순종」Lv5以上
+	PRINTFORML 2：「　　봉사정신」Lv5以上
+	PRINTFORML 3：「　　애정경험」200以上
+	PRINTFORML 4：「봉사쾌락경험」400以上
+	PRINTFORML 5：「　　이상경험」5未満
+	PRINTFORML 6：「　　반발각인」Lv0
+	PRINTFORML 7：「　　　依存度」3000以上
+	PRINTFORML 8：「現在の主人からの被조교경험」1500以上
+ELSEIF RESULT == 4
+	CLEARLINE 1
+	PRINTFORML 【창부陥落の条件】
+	PRINTFORML 
+	PRINTFORML 前提条件として、未陥落の奴隷が以下の条件を満たしており、
+	PRINTFORML 1：「　　　　욕망」Lv5以上
+	PRINTFORML 2：「 C/V/A/B感覚」Lv合計が20以上
+	PRINTFORML 3：「　　절정경험」200以上
+	PRINTFORML 4：「　　반발각인」Lv0
+	PRINTFORML 
+	PRINTFORML かつ、以下の条件のどれかを満たす必要がある。
+	PRINTFORML 1：「　　이상경험」6以上
+	PRINTFORML 2：「　　이상경험」4以上＋「助손조교경험」2000以上
+	PRINTFORMW 3：「　　이상경험」3以上＋「助손조교경험」3000以上
+ELSEIF RESULT == 5
+	CLEARLINE 1
+	PRINTFORML 【예속陥落の条件】
+	PRINTFORML 
+	PRINTFORML 1：「　　　　순종」Lv5以上
+	PRINTFORML 2：「 C/V/A/B感覚」Lv合計が15未満
+	PRINTFORML 3：「　　마조끼」Lv5以上
+	PRINTFORML 4：「고통쾌락경험」＋「속박경험」500以上
+	PRINTFORML 5：「　　이상경험」5以上
+	PRINTFORML 6：「　　반발각인」Lv0
+	PRINTFORMW 7：「　　　依存度」マイナス3000以下
+ELSEIF RESULT == 6
+	CLEARLINE 1
+	PRINTFORML 【상사상애取得の条件】
+	PRINTFORML 
+	PRINTFORML 相互に「친애陥落」したキャラクターがいる場合、素質が変化します。
+	PRINTFORML 
+	PRINTFORML 最初に選択した主人を調教することはできませんが、
+	PRINTFORML 自分に対して「친애陥落」したキャラクターに「執着」を向けることで、
+	PRINTFORMW 主人も「상사상애」素質を入손することが可能です。
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+PRINTL 
+RESTART
+
+;음란系(部位開発系)素質取得条件
+@DICTIONARY_NETABARE_Q3
+PRINTL 【奴隷に「部位開発系素質」を取得させる】
+PRINTL 奴隷の能力が一定値に達すると、以下の素質のいずれかを取得します。
+PRINTL 同時に複数の条件を満たした場合は数字の若いものから優先されるため、
+PRINTL 一度のプレイで、重複して取得させることは不可能です。
+PRINTL ただし、周回プレイで前周までに取得した素質は、重複取得が可能になります。
+PRINTL 
+PRINTL 取得条件を確認したい陥落素質を選択して下さい
+PRINTL [ 0] 섹스광
+PRINTL [ 1] 자위광
+PRINTL [ 2] 음란구멍
+PRINTL [ 3] 항문광
+PRINTL [ 4] 음란가슴
+PRINTL [10] 즉각함락
+PRINTL 
+PRINTL [99] 戻る
+$INPUT_LOOP
+INPUT
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT == 0
+	CLEARLINE 1
+	PRINTFORML 【섹스광】
+	PRINTFORML 
+	PRINTFORML ：「섹스중독」Lv4以上
+	PRINTFORML ：「　　성교경험」250以上
+	PRINTFORMW ：「　　절정경험」200以上
+ELSEIF RESULT == 1
+	CLEARLINE 1
+	PRINTFORML 【자위광】
+	PRINTFORML 
+	PRINTFORML ：「　　　C감각」Lv5以上
+	PRINTFORML ：「조교자위경험」＋「자위경험」合計が300以上
+	PRINTFORMW ：「　　절정경험」200以上
+ELSEIF RESULT == 2
+	CLEARLINE 1
+	PRINTFORML 【음란구멍】
+	PRINTFORML 
+	PRINTFORML ：「　V감각」Lv5以上
+	PRINTFORML ：「　V경험」400以上
+	PRINTFORMW ：「절정경험」200以上
+ELSEIF RESULT == 3
+	CLEARLINE 1
+	PRINTFORML 【항문광】
+	PRINTFORML 
+	PRINTFORML ：「　A감각」Lv5以上
+	PRINTFORML ：「　A경험」400以上
+	PRINTFORMW ：「절정경험」200以上
+ELSEIF RESULT == 4
+	CLEARLINE 1
+	PRINTFORML 【음란가슴】
+	PRINTFORML 
+	PRINTFORML ：「　B감각」Lv5以上
+	PRINTFORML ：「분유경험」+「Ｂ사정경험」150以上
+	PRINTFORMW ：「절정경험」200以上
+ELSEIF RESULT == 10
+	CLEARLINE 1
+	PRINTFORML 【즉각함락】
+	PRINTFORML 
+	PRINTFORML 「섹스광」「자위광」「음란구멍」「항문광」「음란가슴」
+	PRINTFORMW 　以上の全ての素質を取得する。
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+PRINTL 
+RESTART
+
+
+;特殊性癖素質取得条件
+@DICTIONARY_NETABARE_Q4
+PRINTL 【「特殊性癖素質」を取得する】
+PRINTL どのキャラクターも、一定の条件を満たすと、「새드」や「마조」、
+PRINTL またはそれぞれの上位素質である「ドＳ」や「ドＭ」の素質を取得します。
+PRINTL 条件さえ満たせば、重複取得が可能な素質です。
+PRINTL 
+PRINTL [새드]
+PRINTL ：「　　새드끼」Lv5以上
+PRINTL ：「가학쾌락경험」300以上
+PRINTL [ドＳ]
+PRINTL ：「　　새드끼」Lv8以上
+PRINTL ：「가학쾌락경험」800以上
+PRINTL 
+PRINTL [마조]
+PRINTL ：「　　마조끼」Lv5以上
+PRINTL ：「고통쾌락경험」300以上
+PRINTL [ドＭ]
+PRINTL ：「　　마조끼」Lv8以上
+PRINTW ：「고통쾌락경험」800以上
+
+;[혀놀림]取得条件
+@DICTIONARY_NETABARE_Q5
+PRINTL 【「혀놀림」を取得する】
+PRINTL 以下の両方の条件を満たすと、「혀놀림」を取得します。
+PRINTL 1：펠라경험200以上
+PRINTW 2：정음절정경험50以上、または정액중독Lv4以上
+
+;[수수께끼의매력]取得条件
+@DICTIONARY_NETABARE_Q6
+PRINTL 【「수수께끼의매력」を取得する】
+PRINTL 
+PRINTL この素質は、主人しか取得することができません。
+PRINTL 「연모系」もしくは「복종系」陥落者の累計が5人以上になると、調教終了時に取得します。
+PRINTW 「음란系」の陥落者数は数に入らないので注意して下さい。
+
+;[절륜]取得条件
+@DICTIONARY_NETABARE_Q7
+PRINTL 【「절륜」を取得する】
+PRINTL 
+PRINTL この素質は主人しか取得することができません。
+PRINTW 남자を持つ主人の「사정경험」が200以上になると、調教終了時に取得します。
+
+;임신・出産
+@DICTIONARY_NETABARE_Q8
+PRINTL 【「임신」「出産」について】
+PRINTL 
+PRINTL 「女性」「후타나리」は、膣射によりランダムで임신することがあります。
+PRINTL また오메가を持つ「남자」「반음반양」「컨트보이」は腸射によりランダムで임신することがあります。
+PRINTL ※「반음반양」「컨트보이」は바기나があっても임신することはありません。
+PRINTL 
+PRINTL 임신すると、５０日程度の期間を経て出産、さらに２０日の育児期間후、
+PRINTL 아이を「独立」させるか、奴隷として「調教」するか選択することができます。
+PRINTL 아이キャラは誰の아이かにかかわらず、１０人までしか持てません。
+PRINTL 
+PRINTL 実際の임신から임신発覚までは若干のタイムラグがあり、
+PRINTW その期間に「ある薬」を使うことで、처녀懐胎させることができます。
+
+;이상경험取得条件
+@DICTIONARY_NETABARE_Q9
+$DECTIONARY_NETABARE_IJOU
+PRINTL 【이상경험取得条件】
+PRINTL [ 0] 異常な調教の初体験時、調教対象に＋１
+PRINTL [ 1] 拡張系初経験時に＋１
+PRINTL [ 2] 異常な처녀・동정・백버진喪失時、喪失した対象に＋１
+PRINTL [ 3] その他＋１
+PRINTL 
+PRINTL [99] 戻る
+$INPUT_LOOP_IJOU
+INPUT
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTL 【異常な調教の初体験時、調教対象に＋１】
+	PRINTL 
+	PRINTL ・공개자위をさせる　※음란陥落時を除く
+	PRINTL ・U확장경험を伴う調教
+	PRINTL ・Ｍ拡張経験を伴う調教
+	PRINTL ・스캇경험を伴う調教
+	PRINTL ・관장
+	PRINTL ・食糞
+	PRINTL ・전극경험を伴う調教
+	PRINTL ・윤간
+	PRINTL ・수간
+	PRINTL ・뱀장어탕
+	PRINTL ・곤충탕
+	PRINTL ・낙인
+	PRINTL ・촉수소환
+	PRINTL ・촉수관통
+	PRINTL ・촉수뇌간
+	PRINTL ・최면촉수
+	PRINTW ・産卵
+ELSEIF RESULT == 1
+	PRINTL 【拡張系初経験時に＋１】
+	PRINTL 
+	PRINTL ・フィスト系・二輪挿し系・촉수拡張系コマンド実行時（入れられる側）
+	PRINTL ・セックス系コマンドで入れる側が【말자지】、かつ入れられる側が【소인체형】のとき（入れられる側）
+	PRINTL ・기승위한다・기승위애널한다コマンドで入れる側が【말자지】、かつ入れられる側が【소인체형】のとき（奴隷）
+	PRINTW ・조수를범하게시킨다・조수의A를범하게시킨다コマンドで入れる側が【말자지】、かつ入れられる側が【소인체형】のとき（奴隷）
+ELSEIF RESULT == 2
+	PRINTL 【異常な처녀・동정・백버진喪失時、喪失した対象に＋１】
+	PRINTL 
+	PRINTL ・바이브で처녀喪失
+	PRINTL ・기승위で처녀喪失
+	PRINTL ・남자以外に기승위で처녀喪失
+	PRINTL ・助손がいるときに、기승위で처녀喪失
+	PRINTL ・기승위한다で처녀喪失（調教者）
+	PRINTL ・기승위애널で백버진喪失
+	PRINTL ・남자以外に기승위애널で백버진喪失
+	PRINTL ・助손がいるときに、기승위애널で백버진喪失
+	PRINTL ・기승위애널한다で백버진喪失（調教者）
+	PRINTL ・육변기で백버진喪失
+	PRINTL ・육변기で동정喪失（調教者）
+	PRINTL ・남자に기승위애널한다をされて동정喪失
+	PRINTL ・윤간・뱀장어탕・수간・촉수・首を絞められながら처녀・백버진喪失
+	PRINTL ・３Ｐ系コマンドで처녀・동정・백버진喪失
+	PRINTL ・비디오촬영中に처녀・동정・백버진喪失
+	PRINTL ・目・입・身体が拘束された状態で처녀・동정・백버진喪失
+	PRINTL ・娼館、奴隷ショー、公衆便所プレイ、奴隷のレンタルで처녀・동정・백버진喪失
+	PRINTL ・自分自身が相손で처녀・동정・백버진喪失　※特と극など
+	PRINTL ・奴隷→主人の相性が100以上かつ、촉수에범하게시킨다コマンドで主人が처녀喪失したとき（奴隷）
+	PRINTL ・奴隷→主人の相性が100以上かつ、촉수에A를범하게시킨다コマンドで主人が처녀喪失したとき（奴隷）
+	PRINTL ・奴隷→助손の相性が100以上かつ、조수를범한다コマンドで助손が처녀喪失したとき（奴隷）
+	PRINTL ・奴隷→助손の相性が100以上かつ、조수의A를범한다コマンドで助손が처녀喪失したとき（奴隷）
+	PRINTL ・奴隷→助손の相性が100以上かつ、조수를범하게시킨다コマンドで助손が처녀喪失したとき（奴隷）
+	PRINTL ・助손→奴隷の相性が100以上かつ、조수를범하게시킨다コマンドで助손が처녀喪失したとき（助손）
+	PRINTL ・奴隷→助손の相性が100以上かつ、조수의A를범하게시킨다コマンドで助손が처녀喪失したとき（奴隷）
+	PRINTW ・助손→奴隷の相性が100以上かつ、조수의A를범하게시킨다コマンドで助손が처녀喪失したとき（助손）
+ELSEIF RESULT == 3
+	PRINTL 【その他＋１】
+	PRINTL 
+	PRINTL ・初めて기절したとき
+	PRINTL ・남자でないとき初사정
+	PRINTL ・모성も임신も無いとき初噴乳
+	PRINTL ・精飲絶頂が可能になったとき
+	PRINTL ・고통각인３取得
+	PRINTL ・고통각인３取得時に、調教者が【새드】を持っている
+	PRINTL 　もしくは고통각인３取得時に、바늘コマンド実行で調教者が【바느질잘함】を持っているとき
+	PRINTL ・출산경험がない場合に노란환약使用時　※＋２
+	PRINTW ・한쪽팔절단、片발切断、발치を実行したとき
+ELSE
+	GOTO INPUT_LOOP_IJOU
+ENDIF
+GOTO DECTIONARY_NETABARE_IJOU
+
+;主人から奴隷に「執着」を向ける
+@DICTIONARY_NETABARE_10
+PRINTL 【前提条件】
+PRINTL 主人の「조교경험」が1000以上
+PRINTL 
+PRINTL 【執着心の芽生え】
+PRINTL 主人の「조교경험」の内、対象の奴隷に対する「조교경험」が7割以上になると、
+PRINTL 主人が奴隷の事を気にかけ始める瞬間があります。
+PRINTL そのときに自分の気持ちを認めると、奴隷に対する「執着」が芽生えます。
+PRINTL 
+PRINTL さらに「執着」を向けた奴隷が主人に対し「친애陥落」していれば、
+PRINTL その奴隷と主人は、「상사상애」の関係となります。
+PRINTL 
+PRINTL 【執着心の喪失】
+PRINTL 絶対的な「陥落」とは違い、「執着」はあくまで一時的なものです。
+PRINTL 他の奴隷にばかりかまけていると、執着は徐々に薄れていくことになります。
+PRINTL 
+PRINTL 主人の「조교경험」の内、対象の奴隷に対する「조교경험」が5割以下になると、
+PRINTL 主人は奴隷への「執着」を失うことになります。
+PRINTL 
+PRINTL しかし、「執着」を持った期間中、その奴隷に「プロミスリング」を渡し、
+PRINTW 수取ってもらうことができたなら、その気持ちは永遠のものとなるでしょう。
+
+
+;周回プレイについて
+@DICTIONARY_NETABARE_Q11
+PRINTL 【「周回プレイ」について】
+PRINTL "START"モードでゲームを始め、期限内に目標を達成してクリアすると、
+PRINTL そのままゲームを継続するか、終了するかを選ぶことができます。
+PRINTL ゲームを継続する事で、「強くてニューゲーム（周回プレイ）」が選択可能になります。
+PRINTL 
+PRINTL ゲームをクリアすることで得た「BP(ボーナスポイント)」を使えば、
+PRINTL 様々な特典を得た状態で、新しい調教生活を始めることができます。
+PRINTL また、周回プレイ開始時には、主人と難易度を選び直せます。
+PRINTL 
+PRINTL 周回プレイで得られるボーナスは、以下の通りです。
+PRINTL 
+PRINTL 1：「主人(あなた)」の素質選択で選択できる素質が増える（BP消費無し）
+PRINTL 2：「部位開発系素質」の重複取得が可能になる（BP消費無し）
+PRINTL 3：主人の「기교」を３上昇させる（BP１）
+PRINTL 4：「共犯者」を呼ぶことができる（１人につきBP１）
+PRINTL 5：「금지된지식」を身につけることができる（BP１）
+PRINTL 6：「조제지식」を身につけることができる（BP１）
+PRINTL 7：「새드」を身につけることができる（BP１）
+PRINTL 8：「마조」を身につけることができる（BP１）
+PRINTL 9：「수수께끼의매력」を身につけることができる（BP１）
+PRINTL 
+PRINTW ボーナスポイントは周回ごとに累積するため、何度もプレイして効率化を図りましょう。
+
+
+;「共犯者」について
+@DICTIONARY_NETABARE_Q12
+PRINTL 【「共犯者」について】
+PRINTL 「共犯者」とは、主人(あなた)と志を同じくするものであり、いわば、第二の主人です。
+PRINTL 最初から助손として奴隷を調教する事ができるため、
+PRINTL 初期にはなかなか上げづらい「助손조교경험」等を上げるのに役立ってくれるでしょう。
+PRINTL 
+PRINTL しかしゲーム内ではあくまで助손扱いであり、主人(あなた)に比べると制限が多いです。
+PRINTW また、「共犯者」を奴隷として調教したり、労役を行わせることはできません。
+
+;特別な선물出現条件
+@DICTIONARY_NETABARE_Q13
+PRINTL 【「特別な선물」について】
+PRINTL 以下の条件を満たすと、[201]선물コマンドを選択した際、
+PRINTL 선물メニューに[特別な선물]が出現し、渡すことができるようになります。
+PRINTL 
+PRINTL この선물は「プロミスリング」とも呼ばれ、
+PRINTL 主人と、これを贈った奴隷との関係を約束するものです。
+PRINTL 失いたくない相손がいるのなら、勇気を持って渡してみる事をおすすめします。
+PRINTL 
+PRINTL （特別な선물の出現条件）
+PRINTL ・主人が対象の奴隷に対し「執着」を抱いている、
+PRINTL 　もしくは、主人が対象の奴隷に対し「친애陥落」済みである
+PRINTL 
+PRINTL ※同じ主人から、複数の奴隷に「プロミスリング」を贈ることはできません。
+PRINTW ※一度渡して、수取ってもらった指輪を返してもらうことはできません。
+
+;「刀剣雷舞」の「部隊結成」について
+@DICTIONARY_NETABARE_Q14
+PRINTL 【「刀剣雷舞」の「部隊結成」について】
+$DICTIONARY_Q12_LIST
+DRAWLINE
+PRINTFORML 労役コマンド「刀剣雷舞」では、一定の条件を満たすと、
+PRINTFORML 奴隷が他の奴隷と「部隊」を組んでライブを行う場合があります。
+PRINTFORML 現状、「部隊」を組むことによるメリットは特にありませんが、
+PRINTFORMW 입上が用意されていれば、「部隊」限定のイベントが発生するかも……
+
+
+
+
+;=============================================================================
+;用語辞典――ゲームモード
+;=============================================================================
+;--------------------------------------------------
+;ゲームモード解説メインページ
+;--------------------------------------------------
+@DICTIONARY_GAMEMODE_MAIN
+$PRINT_LIST
+DRAWLINE
+PRINTFORML eraToLoveA02私家版に用意されたゲームモードに関する大まかな説明です。
+PRINTFORML ゲームモードを変更するにはゲームそのものをやり直すしかありません。
+DRAWLINE
+PRINTL [ 0] STARTモード
+PRINTL [ 1] FREE MISSIONモード（※現在未実装）
+PRINTL [ 2] EXTRAモード
+DRAWLINE
+PRINTLC [1000]戻る
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT > 8
+	GOTO INPUT_LOOP
+ENDIF
+Q = RESULT
+TRYCALLFORM DICTIONARY_GAMEMODE_{Q}
+GOTO PRINT_LIST
+
+;--------------------------------------------------
+;ゲームモード解説
+;--------------------------------------------------
+;startモード
+@DICTIONARY_GAMEMODE_0
+PRINTL “STARTモード”
+PRINTL eraToLoveA02私家版の主力モードで一番基本的なゲームモードです。
+PRINTL 主人の「あなた」、または選択した戦勇。キャラクターが
+PRINTL 期限内に設定された目標を達成すべく頑張るものです。
+PRINTL 「あなた」の素質を選択し、女主人や마조主人を作ることも可能です。
+PRINTL 期限内に目標を達成したあとも継続することができ、
+PRINTL その후、「強くてニューゲーム」を選択すると、クリアした回数や
+PRINTW 見たエンドに応じたボーナスを得て周回プレイをすることが出来ます。
+
+;FREEモード
+@DICTIONARY_GAMEMODE_1
+PRINTL “FREE MISSIONモード”
+PRINTL 通称ミッションモードです。
+PRINTW 期限内に設定された特殊な目標を達成すべく頑張るものです。
+
+;EXTRAモード
+@DICTIONARY_GAMEMODE_2
+PRINTL “EXTRAモード”
+PRINTL 主人、共犯者を自由に選ぶことができる期限のないゲームモードです。
+PRINTL ゲーム開始時に奴隷を１人もらうことができます。
+PRINTL eraToLoveA02私家版のもう一つの主力モードであり、このモードだけの特殊要素も存在します。
+PRINTL 基本的にバッドエンド以外のエンディングは存在しませんが、
+PRINTW 입上によっては、それに近いものが用意されている場合もあります。
+
+
+
+
+;=============================================================================
+;用語辞典――エンディング条件
+;=============================================================================
+;--------------------------------------------------
+;エンディング条件解説メインページ
+;--------------------------------------------------
+@DICTIONARY_ENDING_MAIN
+P = 0
+$PRINT_LIST
+DRAWLINE
+PRINTFORML ストーリーを進めている内、一定の条件を満たすとエンディングが発生します。
+PRINTFORML 通常は、設定金額の「納金」を行うことでエンディングとなり、
+PRINTFORML 複数のエンディング条件を同時に満たした場合は、そのいずれかを選択できますが、
+PRINTFORML 逆に条件を満たせずバッドエンドとなる場合は、有無を言わさずゲームが終了します。
+PRINTFORML 
+PRINTFORML また、“EXTRAモード”や、“STARTモード”クリア후の継続プレイでは、
+PRINTFORML バッドエンド以外のエンディングは発生しません。
+PRINTFORML ただし、입上側でエンディングが用意されている場合、
+PRINTFORML 条件さえ満たせば、どのモードであってもエンディングが発生します。
+PRINTFORML 
+PRINTFORML 内容を知りたい項目の番号を入力してください。
+PRINTFORML ※以下はネタバレ要素が多いため、閲覧にはご注意ください。
+;PRINTFORML 内容を知りたい項目の番号を入力してください。 ＜page.{P+1}/2＞
+DRAWLINE
+IF P == 0
+	PRINTL [ 1] ノーマルエンド
+	PRINTL [ 2] 上位陥落エンド
+	PRINTL [ 3] ハーレムエンド
+;	PRINTL [ 4] （枠確保）
+;	PRINTL [ 5] （枠確保）
+;	PRINTL [ 6] （枠確保）
+;	PRINTL [ 7] （枠確保）
+;	PRINTL [ 8] （枠確保）
+;	PRINTL [ 9] （枠確保）
+;ELSE
+ENDIF
+DRAWLINE
+;PRINTFORMLC \@(P <= 0) ? %" " * 18% # [1001]前のページ\@
+PRINTLC [1000]戻る
+;PRINTFORMLC \@(P >= 1) ? %" " * 18% # [1009]후ろのページ\@
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+	GOTO PRINT_LIST
+ELSEIF RESULT == 1009 && P < 1
+	P += 1
+	GOTO PRINT_LIST
+ELSEIF RESULT < 1 || RESULT > 68
+	GOTO INPUT_LOOP
+ENDIF
+Q = RESULT
+TRYCALLFORM DICTIONARY_ENDING_{Q}
+GOTO PRINT_LIST
+
+
+;--------------------------------------------------
+;エンディング条件解説解説
+;--------------------------------------------------
+;ノーマルエンド
+@DICTIONARY_ENDING_1
+PRINTL 〔ノーマルエンド〕
+PRINTL 연모、음란、복종のいずれかに陥落した奴隷がいる場合、
+PRINTL 最も基本的なエンディングを見ることができます。
+PRINTL 
+PRINTL 「上位陥落エンド」の条件を満たしている場合でも、
+PRINTL 納金額を「直接納める」ことで、「ノーマルエンド」を見ることができます。
+PRINTL 
+PRINTL （ノーマルエンド達成条件）
+PRINTW 1：期間内に、目標額以上の金額を所持し、納金額を「直接納める」。
+
+;上位陥落エンド
+@DICTIONARY_ENDING_2
+PRINTL 〔上位陥落エンド〕
+PRINTL 친애、창부、예속のいずれかに陥落した奴隷がいる場合、
+PRINTL それぞれに対応したアイテムを購入することで、
+PRINTL 「ノーマルエンド」よりもキャラに寄ったエンディングを見ることができます。
+PRINTL 
+PRINTL 陥落済みの奴隷が複数いる場合は、現在調教中の奴隷が選択されるため、
+PRINTL 特定の奴隷のエンディングが見たいなら、先に「調教対象」を変更しておきましょう。
+PRINTL 
+PRINTL 입上側で個別の「上位陥落エンド」が設定されている場合は、
+PRINTL エンディングの内容が変化します。
+PRINTL 
+PRINTL （上位陥落エンド達成条件）
+PRINTL 1：期間内に、目標額以上の金額を所持している。
+PRINTL 2：奴隷が「친애」「창부」「예속」のいずれかに陥落している。
+PRINTL 3：1～2を満たした上で「納金」を選択し、対応したアイテムを購入する。
+PRINTL ※それぞれの対応アイテム
+PRINTW 　「친애」＝指輪、「창부」＝바이브、「예속」＝首輪
+
+;ハーレムエンド
+@DICTIONARY_ENDING_3
+PRINTL 〔ハーレムエンド〕
+PRINTL たくさんの奴隷を陥落させ、ハーレムを作った場合に出現するエンディングです。
+PRINTL 
+PRINTL 입上側で「特殊ハーレムエンド」が設定されており、
+PRINTL そちらの条件を満たしている場合、「特殊ハーレムエンド」が優先されます。
+PRINTL 
+PRINTL （ハーレムエンド達成条件）
+PRINTL 1：期間内に、目標額以上の金額を所持している。
+PRINTL 2：陥落済みの奴隷が、５人以上存在する。
+PRINTL 3：陥落済みの奴隷の内、１人以上が上位陥落である。
+PRINTW 4：1～3を満たした上で「納金」を選択し、「館の権利書を買う」。
+
+
+;=============================================================================
+;コンフィグ説明
+;=============================================================================
+;--------------------------------------------------
+;コンフィグ解説メインページ
+;--------------------------------------------------
+@DICTIONARY_EXPANSION
+$PRINT_LIST
+DRAWLINE
+PRINTFORML [600]コンフィグで設定できる各種機能の解説です。
+PRINTFORML 内容を知りたい項目の番号を入力してください。
+DRAWLINE
+PRINTL [ 0] テキスト表示
+PRINTL [ 1] 사정箇所設定
+PRINTL [ 2] 着衣初期設定
+PRINTL [ 3] ステータス表示設定
+PRINTL [ 4] キャラ입上
+PRINTL [ 5] 汎用喘ぎ使用設定
+PRINTL [ 6] 拡張- 猟奇なコマンド
+PRINTL [ 7] 拡張- デート時노출プレイ
+PRINTL [ 8] 拡張- 労役オプション
+PRINTL [ 9] 拡張- 남자모유取得可否
+PRINTL [20] 個体差設定
+PRINTL [30] 消耗品自動補充設定
+PRINTL [70]セーブデータ名変更
+PRINTL [80] コマンドフィルタ設定
+PRINTL [90] PALAM獲得アニメーション設定
+PRINTL 
+PRINTL [100]戻る
+DRAWLINE
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSE
+	TRYCALLFORM DICTIONARY_EXPANSION_{RESULT}
+	GOTO PRINT_LIST
+ENDIF
+
+@DICTIONARY_EXPANSION_0
+PRINTL 〔テキスト表示〕
+PRINTL 
+PRINTL ・입上テキスト（常に表示）＋情景テキスト
+PRINTL 　キャラクターの입上が用意されている場合、その입上と、
+PRINTL 　基本的なキャラクターの行動などを描く地の文を、両方表示します。
+PRINTL 　입上側で地の文の表示がカットされている場合、地の文は表示されません。
+PRINTL 　
+PRINTL ・情景テキストのみ
+PRINTL 　キャラクターの입上の有る無しに関わらず、입上は表示されず、
+PRINTL 　基本的なキャラクターの行動などを描く地の文のみが表示されます。
+PRINTL 　입上側で設定されている個別イベントなども発生しなくなります。
+PRINTL 　
+PRINTL ・テキストを表示しない
+PRINTW 　キャラクターの입上、地の文の両方が表示されません。
+
+@DICTIONARY_EXPANSION_1
+PRINTL 〔사정箇所設定〕
+PRINTL 　主人が사정するとき、奴隷のどこを狙うかが選択できます。
+PRINTL 　基本的には見たままなので、詳細な説明を省きます。
+PRINTL 　
+PRINTL ・そのまま사정
+PRINTL 　調教時に行っていたコマンドによって、사정箇所が異なります。
+PRINTL 　たとえばSEX系調教中なら질내へ、펠라치오なら입、といった具合です。
+PRINTL 　特にぶっかけへのこだわりがない場合、これを選んでおくとよいでしょう。
+PRINTL 　
+PRINTL ・その都度選択
+PRINTL 　사정しそうになる度、奴隷のどこを狙うかが選択可能になります。
+PRINTW 　しかし、実行中のコマンドによっては、狙いをつけられない場合もあります。
+
+@DICTIONARY_EXPANSION_2
+PRINTL 〔着衣初期設定〕
+PRINTL 　調教開始時の、奴隷の着衣状態を設定することができます。
+PRINTL 　いちいち服を脱がせるのが面倒な人は設定しておくとよいでしょう。
+PRINTL 　
+PRINTL 　設定を「前回終了時」にして、「정조대」を履かせたまま調教を終了すると、
+PRINTW 　主人の見ていないところで、奴隷が勝손に자위をするのを防ぐことができます。
+
+@DICTIONARY_EXPANSION_3
+PRINTL 〔ステータス表示設定〕
+PRINTL 　メインメニュー画面にて、カレンダーに則したスケジュールや、
+PRINTW 　現在の奴隷の状態を表すステータスを、表示するかどうかを選択できます。
+
+
+@DICTIONARY_EXPANSION_4
+PRINTL 〔キャラ입上〕
+PRINTL 　キャラクター입上を「カラー」「デフォルト色」のどちらで表示するかを選択できます。
+PRINTW 　입上側で色が設定されていない場合、設定に関わらずデフォルト色で表示されます。
+
+@DICTIONARY_EXPANSION_5
+PRINTL 〔汎用喘ぎ使用設定〕
+PRINTL 　専用입上の無いキャラを調教する際、汎用입上を表示するかどうかを選択できます。
+PRINTW 　簡単な喘ぎ声や부정文など、ある程度しゃべるようになります。
+
+@DICTIONARY_EXPANSION_6
+PRINTL 〔猟奇コマンド拡張〕
+PRINTL 　ＯＮにすると、지하실への扉が開かれます。
+PRINTL 　지하실は拷問のための部屋であり、지하실にいると一部コマンドで
+PRINTL 　調教の内容がハードになる他、奴隷に낙인を押したりと、特殊な行為が可能になります。
+PRINTL 　逆に、快楽のみを与えるようなコマンドは実行できなくなります。
+PRINTW 　「수술도구세트」と「ある素質」があれば、人体改造にも손を出せるかも…？
+
+@DICTIONARY_EXPANSION_7
+PRINTL 〔デート時노출プレイ拡張〕
+PRINTL 　ＯＮにして一定の条件を満たすと、デート時に노출プレイが行えるようになります。
+PRINTW 　健全なデートのみを楽しみたい人は、ＯＦＦにしておくとよいでしょう。
+
+@DICTIONARY_EXPANSION_8
+PRINTL 〔労役オプション〕
+PRINTL 　労役コマンドには、それぞれ独立したオプションプレイが存在し、
+PRINTL 　ＯＮにすることで、関連するプレイを行わせることができるようになります。
+PRINTL 　ゲーム開始時点では全てＯＦＦになっていますので、お好みに設定してください。
+PRINTL 　たとえば[처녀]や[백버진]を労役で散らせたくない、という場合には、
+PRINTL 　貫通オプションをＯＦＦにしておくとよいでしょう。
+PRINTL 　
+PRINTW 　「定食포장마차」「野外ライブ」の「昼の部」には、オプションが適用されません。
+
+@DICTIONARY_EXPANSION_9
+PRINTL 〔남자모유取得可否〕
+PRINTL 　ＯＮにすることで、[남자][반음반양][컨트보이]を持つキャラでも
+PRINTW 　모유체질を取得するようになります。
+
+@DICTIONARY_EXPANSION_20
+PRINTL 〔個体差設定〕
+PRINTL 　ＯＮにすることで、キャラを購入した場合に
+PRINTL 　ＣＳＶでついている素質とは別に、素質が追加されることがあります。
+PRINTL 　追加される素質は項目ごとにＯＮとＯＦＦが選べるので、
+PRINTL 　適宜選択してください。
+PRINTW 　また、元のＣＳＶと相反する素質をつけることも可能です。
+
+@DICTIONARY_EXPANSION_30
+PRINTL 〔消耗品自動補充設定〕
+PRINTL 　複数所持可能なアイテムの所持基準数を設定することができます。
+PRINTL 　所持基準数に満たないアイテムは自動で購入されます。
+PRINTL 　所持甲州金が발りない場合は、可能な限り購入されます。
+PRINTL 　対象となるアイテムは、로션・비디오테이프・필름・콘돔です。
+PRINTW 　デフォルトの所持基準数は、全て0個です。
+
+@DICTIONARY_EXPANSION_70
+PRINTL 〔セーブデータ名変更〕
+PRINTL 　セーブデータ名を任意のものに変更できます。
+
+@DICTIONARY_EXPANSION_80
+PRINTL 〔コマンドフィルタ設定〕
+PRINTL 　調教時、表示されるコマンドにフィルタをかけることができます。
+PRINTL 　表示コマンドが多すぎて見辛いときや、
+PRINTW 　間違っても選択したくないコマンドがある場合に使用してください。
+
+@DICTIONARY_EXPANSION_90
+PRINTL 〔PALAM獲得アニメーション設定〕
+PRINTL 　奴隷のパラメータ変化時、変化した値がアニメーションで表示されるようになります。
+PRINTW 　動作が重くなる場合にはＯＦＦを設定してください。
+
+;=============================================================================
+;コンフィグ説明
+;=============================================================================
+;--------------------------------------------------
+;コンフィグ解説メインページ
+;--------------------------------------------------
+@DICTIONARY_CHARA_EXPANSION
+$PRINT_LIST
+DRAWLINE
+PRINTFORML [610]キャラコンフィグで設定できる各種機能の解説です。
+PRINTFORML 内容を知りたい項目の番号を入力してください。
+DRAWLINE
+PRINTL [ 0] あだ名設定
+PRINTL [ 1] 衣装の独自設定
+PRINTL [ 2] 汎用喘ぎ設定
+PRINTL 
+PRINTL [100]戻る
+DRAWLINE
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSE
+	TRYCALLFORM DICTIONARY_CHARA_EXPANSION_{RESULT}
+	GOTO PRINT_LIST
+ENDIF
+
+@DICTIONARY_CHARA_EXPANSION_0
+PRINTL 〔あだ名設定〕
+PRINTL 　キャラクターのあだ名を変更することができます。
+PRINTW 　変更した場合は地の文や各種項目で表示される名前が変更されます。
+
+@DICTIONARY_CHARA_EXPANSION_1
+PRINTL 〔衣装の独自設定〕
+PRINTL 　キャラクターの衣装設定を変更することができます。
+PRINTL 　衣装設定を「独自衣装」に設定することで反映されます。
+PRINTW 　仕様上、全裸には設定できません。
+
+@DICTIONARY_CHARA_EXPANSION_2
+PRINTL 〔汎用喘ぎ設定〕
+PRINTL 　キャラクターの汎用입上の입調などを変更することができます。
+PRINTW 　この項目は、調教画面にも表示されています。
+

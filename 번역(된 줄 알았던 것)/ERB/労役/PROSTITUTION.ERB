@@ -1166,7 +1166,7 @@ IF RESULT == 0
 	T = TARGET
 	TARGET = A
 	TFLAG:13 = 16
-	;이벤트입상(나갈 때)
+	;이벤트대사(나갈 때)
 	CALL KOJO_MESSAGE_EVENT
 	TARGET = T
 	SIF A == TARGET
@@ -1543,7 +1543,7 @@ PRINTFORML %CALLNAME:A%가 돌아왔다
 B = CFLAG:A:18
 S = CFLAG:A:19
 
-;이벤트입상의 표시
+;이벤트대사의 표시
 T = TARGET
 TARGET = A
 TFLAG:13 = 69

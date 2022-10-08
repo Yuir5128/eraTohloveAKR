@@ -1,0 +1,4480 @@
+﻿;-------------------------------------------------
+;○○입上（キャラクターの名前を入れる、下にコンセプトなど一言あれば入れる）
+;
+;-------------------------------------------------
+
+;-------------------------------------------------
+;eratohoA及びeratohoA系列専用음란分割版입上テンプレート
+;X1とX2をキャラ番号に置換し、Y1を助손のキャラ番号に置換してください
+;ただし、キャラ番号が一桁のキャラの場合、X1,Y1は1、X2は01のように変えてください
+;陥落후の입上を呼ぶベースでもあるため、BASEとLOVE、LEWD、OBEYはセットで使用してください
+;そしてコマンド内の適当な条件の下のPRINTFORMWの후ろに半角スペースを置いてセリフを追加してください
+;입上を追加しないコマンドは無記入でも構いませんが、CFLAG:XXXの頭に『;』をつけてコメントアウトすると尚良いでしょう
+;エキストラ構文など、コメントアウトされている構文を使う際には、『;』を外してコメントアウトを解除する必要があります
+;最후にread meにも目を通しておくことをお勧めします
+;-------------------------------------------------
+;--------------------------------------------------
+;分割입上ファイルの存在判定
+;--------------------------------------------------
+@EVENTTRAIN
+SIF CFLAG:215 == 0
+	CFLAG:215 = 1
+;-------------------------------------------------
+;調教開始時（一回のみ） CFLAG201
+;-------------------------------------------------
+@EVENTTRAIN_KX1_LEWD
+DRAWLINE
+;陥落
+IF CFLAG:201 < 5
+	PRINTFORMW 
+	CFLAG:201 = 5
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;簡易助손입上（Y1を助손のキャラ番号に置換、X1をキャラ番号に変更する) CFLAG203
+;掛け合いをするキャラを増やす場合は、構文をコピー＆ペーストをして、CFLAGの数を204、205と増やす
+;-------------------------------------------------
+;助손の有無をチェック（いない場合は二回目以降へ飛ぶ）
+IF ASSI < 0 
+	CALL EVENTTRAIN_SECOND_KX1_LEWD
+;助손
+;ELSEIF NO:ASSI == Y1
+	;初めて
+;	IF CFLAG:203 == 0
+;		PRINTFORMW 
+;		CFLAG:203 = 1
+	;二回目以降
+;	ELSEIF CFLAG:203 < 2 || FLAG:7 ==2
+;		PRINTFORMW 
+;		CFLAG:203 = 2
+;	ENDIF
+;입上のある助손が居ない場合は、通常の二回目以降の입上へ飛ぶ
+ELSE
+	CALL EVENTTRAIN_SECOND_KX1_LEWD
+ENDIF
+
+;-------------------------------------------------
+;調教開始時（2回目以降、X1をキャラ番号に変更する）
+;-------------------------------------------------
+@EVENTTRAIN_SECOND_KX1_LEWD
+;음란
+IF TALENT:4 && (CFLAG:202 < 5 || FLAG:7 == 2)
+	;ランダムで입上が変化する（使わない場合はすべて同じにすればよい）
+	K:1 = RAND:3
+	IF K:1 == 0
+		PRINTFORMW 
+	ELSEIF K:1 == 1
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:202 = 5
+;창부
+ELSEIF TALENT:7 && (CFLAG:202 < 6 || FLAG:7 == 2)
+	;ランダムで입上が変化する（使わない場合はすべて同じにすればよい）
+	K:1 = RAND:3
+	IF K:1 == 0
+		PRINTFORMW 
+	ELSEIF K:1 == 1
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:202 = 6
+ENDIF
+RETURN 0
+
+;-------------------------------------------------
+;EVENTEND関係（X1をキャラ番号に置換）
+;調教終了時のセリフ
+;-------------------------------------------------
+@EVENTEND_KX1_LEWD
+;--------------------------------------------------
+;調教終了時のセリフ
+;--------------------------------------------------
+DRAWLINE
+;陥落済み＋체력500未満
+IF BASE:0 < 500 && (CFLAG:218 < 1 || FLAG:7 == 2)
+	;음란
+	IF TALENT:4
+		PRINTFORMW 
+	;창부
+	ELSEIF TALENT:7
+		PRINTFORMW 
+	ENDIF
+	CFLAG:218 = 1
+;陥落済み
+ELSEIF CFLAG:219 < 4 || FLAG:7 == 2
+	;음란
+	IF TALENT:4
+		PRINTFORMW 
+	;창부
+	ELSEIF TALENT:7
+		PRINTFORMW 
+	ENDIF
+	CFLAG:219 = 4
+ENDIF
+RETURN 0
+
+;--------------------------------------------------
+;@KOJO_MESSAGE_COM関係（X1をキャラ番号に置換）
+;コマンド実行時に出力されます
+;--------------------------------------------------
+@KOJO_MESSAGE_COM_KX1_LEWD
+;-------------------------------------------------
+;コマンド実行時のセリフ CFLAG 300～500
+;-------------------------------------------------
+;=================================================
+;애무系コマンド
+;=================================================
+;-------------------------------------------------
+;0,애무
+;-------------------------------------------------
+IF SELECTCOM == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:300 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:300 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:300 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:300 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;1,커닐링구스
+;-------------------------------------------------
+IF SELECTCOM == 1
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:301 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:301 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:301 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:301 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;2,펠라한다
+;-------------------------------------------------
+IF SELECTCOM == 2
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:302 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:302 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:302 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:302 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;3,손가락삽입
+;-------------------------------------------------
+IF SELECTCOM == 3
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:303 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:303 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:303 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:303 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;4,애널자극
+;-------------------------------------------------
+IF SELECTCOM == 4
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:304 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:304 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:304 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:304 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;5,애널애무
+;-------------------------------------------------
+IF SELECTCOM == 5
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:305 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:305 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:305 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:305 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;6,가슴주무르기
+;-------------------------------------------------
+IF SELECTCOM == 6
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:306 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:306 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:306 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:306 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;7,유두고문
+;-------------------------------------------------
+IF SELECTCOM == 7
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:307 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:307 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:307 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:307 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;8,가슴애무
+;-------------------------------------------------
+IF SELECTCOM == 8
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:308 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:308 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:308 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:308 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;9,비패개장
+;-------------------------------------------------
+IF SELECTCOM == 9
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:309 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:309 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:309 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:309 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;10,가슴자위
+;-------------------------------------------------
+IF SELECTCOM == 10
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:310 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:310 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:310 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:310 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;11,자위
+;-------------------------------------------------
+IF SELECTCOM == 11
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:311 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:311 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:311 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:311 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;12,くるん애무 CFLAG:420 
+;-------------------------------------------------
+IF SELECTCOM == 12
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:420 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:420 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:420 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:420 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;13,수음한다 CFLAG:446 
+;-------------------------------------------------
+IF SELECTCOM == 13
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:446 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:446 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:446 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:446 = 4
+	ENDIF
+ENDIF
+
+;=================================================
+;コミュニケーション系コマンド
+;=================================================
+;-------------------------------------------------
+;20,키스한다
+;-------------------------------------------------
+IF SELECTCOM == 20
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:312 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:312 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:312 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:312 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;21,아무것도안한다
+;-------------------------------------------------
+IF SELECTCOM == 21
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:313 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:313 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:313 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:313 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;28,罵倒
+;-------------------------------------------------
+IF SELECTCOM == 28
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:320 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:320 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:320 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:320 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;29,비디오감상　陥落済みのみ
+;-------------------------------------------------
+IF SELECTCOM == 29
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:321 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:321 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:321 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:321 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;30,暴力を振るう CFLAG:473
+;-------------------------------------------------
+IF SELECTCOM == 30
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:473 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:473 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:473 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:473 = 4
+	ENDIF
+ENDIF
+
+;=================================================
+;道具使用コマンド
+;=================================================
+;40,로터
+;-------------------------------------------------
+IF SELECTCOM == 40
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:322 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:322 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:322 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:322 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;41,진동마사지기
+;-------------------------------------------------
+IF SELECTCOM == 41
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:323 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:323 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:323 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:323 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;42,클리캡
+;-------------------------------------------------
+IF SELECTCOM == 42 && TEQUIP:11 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:324 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:324 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:324 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:324 = 4
+	ENDIF
+ELSEIF SELECTCOM == 42 && TEQUIP:11 == 1
+	IF CFLAG:324 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:324 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;43,オナホール
+;-------------------------------------------------
+IF SELECTCOM == 43 && TEQUIP:12 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:325 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:325 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:325 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:325 = 4
+	ENDIF
+ELSEIF SELECTCOM == 43 && TEQUIP:12 == 1
+	IF CFLAG:325 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:325 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;44,바이브
+;-------------------------------------------------
+IF SELECTCOM == 44 && TEQUIP:13 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:326 < 6 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:326 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:326 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:326 = 4
+	ENDIF
+ELSEIF SELECTCOM == 44 && TEQUIP:13 == 1
+	IF CFLAG:326 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:326 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;45,애널바이브
+;-------------------------------------------------
+IF SELECTCOM == 45 && TEQUIP:14 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:327 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:327 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:327 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:327 = 4
+	ENDIF
+ELSEIF SELECTCOM == 45 && TEQUIP:14 == 1
+	IF CFLAG:327 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:327 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;46,애널비즈
+;-------------------------------------------------
+IF SELECTCOM == 46 && TEQUIP:15 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:328 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:328 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:328 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:328 = 4
+	ENDIF
+ELSEIF SELECTCOM == 46 && TEQUIP:15 == 1
+	IF CFLAG:328 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:328 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;47,니플캡
+;-------------------------------------------------
+IF SELECTCOM == 47 && TEQUIP:16 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:329 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:329 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:329 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:329 = 4
+	ENDIF
+ELSEIF SELECTCOM == 47 && TEQUIP:16 == 1
+	IF CFLAG:329 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:329 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;48,유두로터
+;-------------------------------------------------
+IF SELECTCOM == 48
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:330 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:330 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:330 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:330 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;49,착유기
+;-------------------------------------------------
+IF SELECTCOM == 49 && TEQUIP:17 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:331 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:331 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:331 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:331 = 4
+	ENDIF
+ELSEIF SELECTCOM == 49 && TEQUIP:17 == 1
+	IF CFLAG:331 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:331 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;50,카테터　CFLAG:447
+;-------------------------------------------------
+IF SELECTCOM == 50 && TEQUIP:38 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:447 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:447 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:447 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:447 = 4
+	ENDIF
+ELSEIF SELECTCOM == 50 && TEQUIP:38 == 1
+	IF CFLAG:447 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+;=================================================
+;セックス系コマンド
+;=================================================
+;-------------------------------------------------
+;60,정상위
+;-------------------------------------------------
+IF SELECTCOM == 60
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:332 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:332 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:332 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:332 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;61,후배위
+;-------------------------------------------------
+IF SELECTCOM == 61
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:333 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:333 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:333 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:333 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;62,정상위애널
+;-------------------------------------------------
+IF SELECTCOM == 62
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:334 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:334 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:334 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:334 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;63,후배위애널
+;-------------------------------------------------
+IF SELECTCOM == 63
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:335 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:335 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:335 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:335 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;64,기승위한다
+;-------------------------------------------------
+IF SELECTCOM == 64
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:336 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:336 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:336 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:336 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;65,니플퍽
+;-------------------------------------------------
+IF SELECTCOM == 65
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:337 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:337 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:337 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:337 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;66,기승위
+;-------------------------------------------------
+IF SELECTCOM == 66
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:338 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:338 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:338 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:338 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;67,기승위애널
+;-------------------------------------------------
+IF SELECTCOM == 67
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:339 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:339 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:339 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:339 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;68,대면좌위
+;-------------------------------------------------
+IF SELECTCOM == 68
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:340 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:340 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:340 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:340 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;69,배면좌위
+;-------------------------------------------------
+IF SELECTCOM == 69
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:341 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:341 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:341 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:341 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;70,대면좌위애널
+;-------------------------------------------------
+IF SELECTCOM == 70
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:342 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:342 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:342 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:342 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;71,배면좌위애널
+;-------------------------------------------------
+IF SELECTCOM == 71
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:343 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:343 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:343 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:343 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;72,下着ずらし挿入 CFLAG:421 
+;-------------------------------------------------
+IF SELECTCOM == 72
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:421 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:421 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:421 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:421 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;73,下着ずらし挿入애널 CFLAG:422 
+;-------------------------------------------------
+IF SELECTCOM == 73
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:422 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:422 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:422 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:422 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;74,대면입위 CFLAG:439 
+;-------------------------------------------------
+IF SELECTCOM == 74
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:439 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:439 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:439 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:439 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;75,대면입위애널 CFLAG:440 
+;-------------------------------------------------
+IF SELECTCOM == 75
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:440 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:440 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:440 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:440 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;76,배면입위 CFLAG:441 
+;-------------------------------------------------
+IF SELECTCOM == 7
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:441 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:441 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:441 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:441 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;77,배면입위애널 CFLAG:442 
+;-------------------------------------------------
+IF SELECTCOM == 77
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:442 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:442 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:442 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:442 = 4
+	ENDIF
+ENDIF
+
+;=================================================
+;奉仕系コマンド
+;=================================================
+;-------------------------------------------------
+;80,수음
+;-------------------------------------------------
+IF SELECTCOM == 80
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:344 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:344 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:344 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:344 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;81,펠라치오
+;-------------------------------------------------
+IF SELECTCOM == 81
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:345 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:345 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:345 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:345 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;82,파이즈리
+;-------------------------------------------------
+IF SELECTCOM == 82
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:346 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:346 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:346 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:346 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;83,스마타
+;-------------------------------------------------
+IF SELECTCOM == 83
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:347 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:347 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:347 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:347 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;84,거품비비기
+;-------------------------------------------------
+IF SELECTCOM == 84
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:348 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:348 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:348 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:348 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;85,발扱き
+;-------------------------------------------------
+IF SELECTCOM == 85
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:349 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:349 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:349 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:349 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;86,발핥기강제
+;-------------------------------------------------
+IF SELECTCOM == 86
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:350 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:350 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:350 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:350 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;87,세로파이즈리
+;-------------------------------------------------
+IF SELECTCOM == 87
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:351 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:351 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:351 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:351 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;88,파이즈리펠라
+;-------------------------------------------------
+IF SELECTCOM == 88
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:352 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:352 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:352 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:352 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;89,모유마시기　陥落済みのみ
+;-------------------------------------------------
+IF SELECTCOM == 89
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:353 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:353 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:353 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:353 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;90,머리카락扱き
+;-------------------------------------------------
+IF SELECTCOM == 90
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:471 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:471 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:471 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:471 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;91,손가락츄파
+;-------------------------------------------------
+IF SELECTCOM == 91
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:472 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:472 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:472 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:472 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;92,腋扱き CFLAG:474
+;-------------------------------------------------
+IF SELECTCOM == 92
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:474 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:474 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:474 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:474 = 4
+	ENDIF
+ENDIF
+
+;=================================================
+;SM系コマンド
+;=================================================
+;-------------------------------------------------
+;100,스팽킹
+;-------------------------------------------------
+IF SELECTCOM == 100
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:354 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:354 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:354 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:354 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;101,젖스팽킹
+;-------------------------------------------------
+IF SELECTCOM == 101
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:355 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:355 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:355 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:355 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;102,채찍
+;-------------------------------------------------
+IF SELECTCOM == 102
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:356 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:356 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:356 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:356 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;103,촛불
+;-------------------------------------------------
+IF SELECTCOM == 103
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:357 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:357 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:357 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:357 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;104,바늘
+;-------------------------------------------------
+IF SELECTCOM == 104
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:358 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:358 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:358 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:358 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;105,아이마스크
+;-------------------------------------------------
+IF SELECTCOM == 105 && TEQUIP:18 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:359 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:359 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:359 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:359 = 4
+	ENDIF
+ELSEIF SELECTCOM == 105 && TEQUIP:18 == 1
+	IF CFLAG:359 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:359 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;106,밧줄
+;-------------------------------------------------
+IF SELECTCOM == 106 && TEQUIP:19 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:360 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:360 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:360 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:360 = 4
+	ENDIF
+ELSEIF SELECTCOM == 106 && TEQUIP:19 == 1
+	IF CFLAG:360 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:360 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;107,볼개그
+;-------------------------------------------------
+IF SELECTCOM == 107 && TEQUIP:20 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:361 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:361 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:361 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:361 = 4
+	ENDIF
+ELSEIF SELECTCOM == 107 && TEQUIP:20 == 1
+	IF CFLAG:361 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:361 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;108,拷問　CFLAG:419　
+;-------------------------------------------------
+IF SELECTCOM == 108
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:419 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:419 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:419 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:419 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;110,가구로한다　CFLAG:438　
+;-------------------------------------------------
+IF SELECTCOM == 110
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:438 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:438 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:438 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:438 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;111,제모　CFLAG:475
+;-------------------------------------------------
+IF SELECTCOM == 111
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:475 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:475 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:475 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:475 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;112,목조르기　CFLAG:476　
+;-------------------------------------------------
+IF SELECTCOM == 112
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:476 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:476 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:476 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:476 = 4
+	ENDIF
+ENDIF
+
+;=================================================
+;助손によるコマンド、及びレズプレイ
+;=================================================
+;-------------------------------------------------
+;120,커닐링구스강제
+;-------------------------------------------------
+IF SELECTCOM == 120
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:362 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:362 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:362 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:362 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;121,貝あわせ
+;-------------------------------------------------
+IF SELECTCOM == 121
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:363 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:363 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:363 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:363 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;122,조수를범하게시킨다
+;-------------------------------------------------
+IF SELECTCOM == 122
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:364 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:364 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:364 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:364 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;123,풋잡한다
+;-------------------------------------------------
+IF SELECTCOM == 123
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:365 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:365 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:365 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:365 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;124,더블펠라
+;-------------------------------------------------
+IF SELECTCOM == 124
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:366 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:366 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:366 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:366 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;125,더블파이즈리
+;-------------------------------------------------
+IF SELECTCOM == 125
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:367 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:367 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:367 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:367 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;126,가슴을비빈다
+;-------------------------------------------------
+IF SELECTCOM == 126
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:368 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:368 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:368 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:368 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;127,장대비비기	CFLAG:434
+;-------------------------------------------------
+IF SELECTCOM == 127
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:434 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:434 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:434 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:434 = 4
+	ENDIF
+ENDIF
+
+;=================================================
+;ハードな調教コマンド
+;=================================================
+;-------------------------------------------------
+;140,이라마치오
+;-------------------------------------------------
+IF SELECTCOM == 140
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:369 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:369 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:369 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:369 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;144,放尿
+;-------------------------------------------------
+IF SELECTCOM == 144
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:373 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:373 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:373 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:373 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;145,애널奉仕強制
+;-------------------------------------------------
+IF SELECTCOM == 145
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:374 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:374 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:374 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:374 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;146,관장器＋プラグ
+;-------------------------------------------------
+IF SELECTCOM == 146 && TEQUIP:21 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:375 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:375 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:375 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:375 = 4
+	ENDIF
+ELSEIF SELECTCOM == 146 && TEQUIP:21 == 1
+	IF CFLAG:375 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:375 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;147,空気관장
+;-------------------------------------------------
+IF SELECTCOM == 147
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:376 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:376 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:376 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:376 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;148,확장벌룬
+;-------------------------------------------------
+IF SELECTCOM == 148 && TEQUIP:22 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:377 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:377 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:377 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:377 = 4
+	ENDIF
+ELSEIF SELECTCOM == 148 && TEQUIP:22 == 1
+	IF CFLAG:377 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:377 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;153,요도벌룬	CFLAG:435
+;-------------------------------------------------
+IF SELECTCOM == 153
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:435 == 0
+		PRINTFORMW 
+		CFLAG:435 = 1
+	;二回目以降
+	ELSEIF CFLAG:435 < 2 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:435 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;156,낙인　CFLAG:448
+;R = 0なにもしない、R = 1傷痕、R = 2ピアス、R = 3刺青、 R = 4焼き印
+;-------------------------------------------------
+IF SELECTCOM == 156
+	CALL TRAIN_MESSAGE
+	;初めて
+	IF CFLAG:448 == 0
+		PRINTFORMW 
+		CFLAG:448 = 1
+	;二回目以降
+	ELSE
+		;창부
+		IF TALENT:7 && (CFLAG:448 < 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:448 = 5
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:448 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:448 = 4
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;157,飲尿　CFLAG:477
+;-------------------------------------------------
+IF SELECTCOM == 157
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:477 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:477 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:477 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:477 = 4
+	ENDIF
+ENDIF
+
+;=================================================
+;촉수系コマンド
+;=================================================
+;-------------------------------------------------
+;160,촉수소환
+;-------------------------------------------------
+IF SELECTCOM == 160 && TEQUIP:25 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:382 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:382 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:382 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:382 = 4
+	ENDIF
+ELSEIF SELECTCOM == 160 && TEQUIP:25 == 1
+	IF CFLAG:382 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:382 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;161,촉수삽입
+;-------------------------------------------------
+IF SELECTCOM == 161
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:383 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:383 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:383 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:383 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;162,애널촉수
+;-------------------------------------------------
+IF SELECTCOM == 162
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:384 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:384 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:384 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:384 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;163,촉수클리고문
+;-------------------------------------------------
+IF SELECTCOM == 163
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:385 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:385 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:385 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:385 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;164,촉수유두고문
+;-------------------------------------------------
+IF SELECTCOM == 164
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:386 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:386 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:386 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:386 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;165,촉수착유
+;-------------------------------------------------
+IF SELECTCOM == 165
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:387 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:387 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:387 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:387 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;166,촉수구속
+;-------------------------------------------------
+IF SELECTCOM == 166
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:388 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:388 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:388 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:388 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;167,촉수관장
+;-------------------------------------------------
+IF SELECTCOM == 167
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:389 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:389 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:389 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:389 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;168,촉수구욕
+;-------------------------------------------------
+IF SELECTCOM == 168 && TEQUIP:36 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:390 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:390 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:390 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:390 = 4
+	ENDIF
+ELSEIF SELECTCOM == 168 && TEQUIP:36 == 1
+	IF CFLAG:390 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:390 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;169,촉수페니스고문
+;-------------------------------------------------
+IF SELECTCOM == 169
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:391 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:391 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:391 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:391 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;170,촉수尿道삽입 CFLAG:449
+;-------------------------------------------------
+IF SELECTCOM == 170 && TEQUIP:38 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:449 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:449 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:449 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:449 = 4
+	ENDIF
+ELSEIF SELECTCOM == 170 && TEQUIP:38 == 1
+	IF CFLAG:449 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+;=================================================
+;特殊コマンド
+;=================================================
+;-------------------------------------------------
+;180,로션,
+;-------------------------------------------------
+IF SELECTCOM == 180
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:392 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:392 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:392 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:392 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;181,미약,
+;-------------------------------------------------
+IF SELECTCOM == 181
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:393 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:393 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:393 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:393 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;182,이뇨제,
+;-------------------------------------------------
+IF SELECTCOM == 182
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:394 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:394 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:394 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:394 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;183,비디오카메라,
+;-------------------------------------------------
+IF SELECTCOM == 183 && TEQUIP:28 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:395 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:395 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:395 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:395 = 4
+	ENDIF
+ELSEIF SELECTCOM == 183 && TEQUIP:28 == 1
+	IF CFLAG:395 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:395 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;184,야외플레이,
+;-------------------------------------------------
+IF SELECTCOM == 184 && TEQUIP:29 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:396 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:396 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:396 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:396 = 4
+	ENDIF
+ELSEIF SELECTCOM == 184 && TEQUIP:29 == 1
+	IF CFLAG:396 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:396 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;185,조수를범한다,
+;-------------------------------------------------
+IF SELECTCOM == 185
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:397 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:397 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:397 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:397 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;186,수치플레이,
+;-------------------------------------------------
+IF SELECTCOM == 186 && TEQUIP:30 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:398 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:398 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:398 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:398 = 4
+	ENDIF
+ELSEIF SELECTCOM == 186 && TEQUIP:30 == 1
+	IF CFLAG:398 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:398 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;187,목욕탕플레이,
+;-------------------------------------------------
+IF SELECTCOM == 187 && TEQUIP:31 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:399 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:399 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:399 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:399 = 4
+	ENDIF
+ELSEIF SELECTCOM == 187 && TEQUIP:31 == 1
+	IF CFLAG:399 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:399 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;188,샤워,
+;-------------------------------------------------
+IF SELECTCOM == 188 && TEQUIP:32 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:400 < 6 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:400 = 6
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:400 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:400 = 4
+	ENDIF
+ELSEIF SELECTCOM == 188 && TEQUIP:32 == 1
+	IF CFLAG:400 == 4 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+		CFLAG:400 = 5
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;190,사진촬영,
+;-------------------------------------------------
+IF SELECTCOM == 190
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:402 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:402 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:402 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:402 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;191,강정신약,
+;-------------------------------------------------
+IF SELECTCOM == 191 
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:403 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:403 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:403 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:403 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;192,콘돔精飲（奴隷）
+;-------------------------------------------------
+IF SELECTCOM == 192
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:404 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:404 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:404 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:404 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;193,콘돔精飲（助손）
+;-------------------------------------------------
+IF SELECTCOM == 193
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:405 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:405 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:405 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:405 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;194,정액키스
+;-------------------------------------------------
+IF SELECTCOM == 194
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:406 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:406 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:406 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:406 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;195,데이트간다 CFLAG:423 
+;-------------------------------------------------
+IF SELECTCOM == 195
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:423 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:423 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:423 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:423 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;196,벗겨낸다
+;-------------------------------------------------
+IF SELECTCOM == 196
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:482 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:482 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:482 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:482 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;197,버터견 CFLAG:483
+;-------------------------------------------------
+IF SELECTCOM == 197
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:483 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:483 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:483 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:483 = 4
+	ENDIF
+ENDIF
+;=================================================
+;200番台,역조교系コマンド
+;=================================================
+;-------------------------------------------------
+;200,자위みせつけ CFLAG:424 
+;-------------------------------------------------
+IF SELECTCOM == 200
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:424 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:424 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:424 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:424 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;201,가슴을주무르게한다 CFLAG:425 
+;-------------------------------------------------
+IF SELECTCOM == 201
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:425 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:425 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:425 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:425 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;202,애무시킨다 CFLAG:426 
+;-------------------------------------------------
+IF SELECTCOM == 202
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:426 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:426 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:426 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:426 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;203,罵倒させる CFLAG:427 
+;-------------------------------------------------
+IF SELECTCOM == 203
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:427 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:427 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:427 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:427 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;204,선물시킨다 CFLAG:428 
+;-------------------------------------------------
+IF SELECTCOM == 204
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:428 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:428 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:428 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:428 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;205,정상위시킨다 CFLAG:429 
+;-------------------------------------------------
+IF SELECTCOM == 205
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:429 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:429 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:429 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:429 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;206,후배위시킨다 CFLAG:430 
+;-------------------------------------------------
+IF SELECTCOM == 206
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:430 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:430 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:430 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:430 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;207,스팽킹させる CFLAG:431 
+;-------------------------------------------------
+IF SELECTCOM == 207
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:431 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:431 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:431 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:431 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;208,채찍打たせる CFLAG:432 
+;-------------------------------------------------
+IF SELECTCOM == 208
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:432 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:432 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:432 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:432 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;209,イマラチオする CFLAG:433 
+;-------------------------------------------------
+IF SELECTCOM == 209
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:433 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:433 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:433 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:433 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;210, 발을핥는다CFLAG:450 
+;-------------------------------------------------
+IF SELECTCOM == 210
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:450 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:450 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:450 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:450 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;211,기승위한다 CFLAG:451 
+;-------------------------------------------------
+IF SELECTCOM == 211
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:451 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:451 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:451 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:451 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;212,기승위애널한다 CFLAG:452 
+;-------------------------------------------------
+IF SELECTCOM == 212
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:452 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:452 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:452 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:452 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;213,정상위애널시킨다 CFLAG:453 
+;-------------------------------------------------
+IF SELECTCOM == 213
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:453 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:453 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:453 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:453 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;214,후배위애널시킨다 CFLAG:454 
+;-------------------------------------------------
+IF SELECTCOM == 214
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:454 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:454 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:454 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:454 = 4
+	ENDIF
+ENDIF
+
+;=================================================
+;220番台,助손命令コマンド
+;=================================================
+;-------------------------------------------------
+;220,클리토리스애무명령 CFLAG:455
+;-------------------------------------------------
+IF SELECTCOM == 220 && TEQUIP:49 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:455 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:455 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:455 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:455 = 4
+	ENDIF
+ELSEIF SELECTCOM == 220 && TEQUIP:49 == 1
+	IF CFLAG:455 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;221,페니스애무명령 CFLAG:456
+;-------------------------------------------------
+IF SELECTCOM == 221 && TEQUIP:49 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:456 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:456 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:456 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:456 = 4
+	ENDIF
+ELSEIF SELECTCOM == 221 && TEQUIP:49 == 1
+	IF CFLAG:456 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;222,가슴애무명령 CFLAG:457
+;-------------------------------------------------
+IF SELECTCOM == 222 && TEQUIP:44 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:457 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:457 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:457 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:457 = 4
+	ENDIF
+ELSEIF SELECTCOM == 222 && TEQUIP:44 == 1
+	IF CFLAG:457 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;223,손가락삽입명령 CFLAG:458
+;-------------------------------------------------
+IF SELECTCOM == 223 && TEQUIP:45 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:458 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:458 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:458 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:458 = 4
+	ENDIF
+ELSEIF SELECTCOM == 223 && TEQUIP:45 == 1
+	IF CFLAG:458 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;224,애널애무명령 CFLAG:459
+;-------------------------------------------------
+IF SELECTCOM == 224 && TEQUIP:46 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:459 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:459 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:459 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:459 = 4
+	ENDIF
+ELSEIF SELECTCOM == 224 && TEQUIP:46 == 1
+	IF CFLAG:459 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;225,삽입명령 CFLAG:460
+;-------------------------------------------------
+IF SELECTCOM == 225 && TEQUIP:47 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:460 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:460 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:460 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:460 = 4
+	ENDIF
+ELSEIF SELECTCOM == 225 && TEQUIP:47 == 1
+	IF CFLAG:460 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;226,애널삽입명령 CFLAG:461
+;-------------------------------------------------
+IF SELECTCOM == 226 && TEQUIP:48 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:461 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:461 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:461 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:461 = 4
+	ENDIF
+ELSEIF SELECTCOM == 226 && TEQUIP:48 == 1
+	IF CFLAG:461 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;=================================================
+;300番台,拡張촉수コマンド
+;=================================================
+;-------------------------------------------------
+;300,촉수유선고문 CFLAG:462
+;-------------------------------------------------
+IF SELECTCOM == 300
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:462 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:462 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:462 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:462 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;301,촉수G스팟고문 CFLAG:463
+;-------------------------------------------------
+IF SELECTCOM == 301
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:463 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:463 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:463 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:463 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;302,촉수자궁고문 CFLAG:464
+;-------------------------------------------------
+IF SELECTCOM == 302
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:464 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:464 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:464 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:464 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;303,촉수前立腺責め CFLAG:465
+;-------------------------------------------------
+IF SELECTCOM == 303
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:465 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:465 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:465 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:465 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;304,촉수바기나확장 CFLAG:466
+;-------------------------------------------------
+IF SELECTCOM == 304
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:466 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:466 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:466 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:466 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;305,촉수애널확장 CFLAG:467
+;-------------------------------------------------
+IF SELECTCOM == 305
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:467 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:467 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:467 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:467 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;306,촉수양구멍확장 CFLAG:468
+;-------------------------------------------------
+IF SELECTCOM == 306
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:468 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:468 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:468 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:468 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;307,촉수산란 CFLAG:469
+;-------------------------------------------------
+IF SELECTCOM == 307 && TEQUIP:41 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:469 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:469 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:469 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:469 = 4
+	ENDIF
+ELSEIF SELECTCOM == 307 && TEQUIP:41 == 1
+	IF CFLAG:469 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;308,촉수애널산란 CFLAG:470
+;-------------------------------------------------
+IF SELECTCOM == 308 && TEQUIP:42 == 0
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:470 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:470 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:470 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:470 = 4
+	ENDIF
+ELSEIF SELECTCOM == 308 && TEQUIP:42 == 1
+	IF CFLAG:470 == 1 || FLAG:7 == 2
+		CALL TRAIN_MESSAGE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;=================================================
+;500番台,派生コマンド
+;=================================================
+;-------------------------------------------------
+;500,３Ｐ
+;-------------------------------------------------
+IF SELECTCOM == 500
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:407 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:407 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:407 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:407 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;501,シックスナイン
+;-------------------------------------------------
+IF SELECTCOM == 501
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:408 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:408 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:408 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:408 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;502,岩清水
+;-------------------------------------------------
+IF SELECTCOM == 502
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:409 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:409 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:409 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:409 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;503,Gスポット刺激
+;-------------------------------------------------
+IF SELECTCOM == 503
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:410 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:410 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:410 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:410 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;504,乱れ牡丹
+;-------------------------------------------------
+IF SELECTCOM == 504
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:411 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:411 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:411 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:411 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;505,騎乗乳房자위
+;-------------------------------------------------
+IF SELECTCOM == 505
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:412 < 5 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:412 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:412 < 4 || FLAG:7 == 2)
+		;처녀
+		IF TALENT:0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:412 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;506,挿入Ｇスポ責め
+;-------------------------------------------------
+IF SELECTCOM == 506
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:413 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:413 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:413 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:413 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;507,挿入子宮입責め
+;-------------------------------------------------
+IF SELECTCOM == 507
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:414 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:414 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:414 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:414 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;508,６９파이즈리
+;-------------------------------------------------
+IF SELECTCOM == 508
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:415 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:415 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:415 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:415 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;509,搾乳
+;-------------------------------------------------
+IF SELECTCOM == 509
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:416 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:416 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:416 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:416 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;510,더블스마타
+;-------------------------------------------------
+IF SELECTCOM == 510
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:417 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:417 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:417 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:417 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;511,二本フェラ
+;-------------------------------------------------
+IF SELECTCOM == 511
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:418 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:418 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:418 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:418 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;512,二輪刺し CFLAG:443
+;-------------------------------------------------
+IF SELECTCOM == 512
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:443 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:443 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:443 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:443 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;513,二輪刺し애널 CFLAG:444
+;-------------------------------------------------
+IF SELECTCOM == 513
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:444 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:444 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:444 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:444 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;514,駅弁 CFLAG:445
+;-------------------------------------------------
+IF SELECTCOM == 514
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:445 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:445 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:445 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:445 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;515,스팽킹セックス　CFLAG:478
+;-------------------------------------------------
+IF SELECTCOM == 515
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:478 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:478 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:478 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:478 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;516,스팽킹애널　CFLAG:479
+;-------------------------------------------------
+IF SELECTCOM == 516
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:479 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:479 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:479 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:479 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;517,목조르기セックス　CFLAG:480
+;-------------------------------------------------
+IF SELECTCOM == 517
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:480 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:480 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:480 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:480 = 4
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;518,목조르기애널　CFLAG:481
+;-------------------------------------------------
+IF SELECTCOM == 518
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:481 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:481 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:481 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:481 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;590,前立腺刺激　CFLAG:484
+;-------------------------------------------------
+IF SELECTCOM == 590
+	CALL TRAIN_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:484 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:484 = 5
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:484 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:484 = 4
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;@KOJO_MESSAGE_PALAMCNG関係（X1をキャラ番号に置換）
+;パラメータ変化などをトリガーにした입上　CFLAG 221～260を使用
+;-------------------------------------------------
+;-------------------------------------------------
+;@KOJO_MESSAGE_PALAMCNG_A（X1をキャラ番号に置換）
+;調教者の사정をトリガーにした입上
+;-------------------------------------------------
+@KOJO_MESSAGE_PALAMCNG_A_KX1_LEWD
+;-------------------------------------------------
+;調教者の사정時のテキスト
+;-------------------------------------------------
+;-------------------------------------------------
+;사정箇所変更時のテキスト　有効時はここで関数終了
+;-------------------------------------------------
+IF CFLAG:106
+	CALL PALAM_MESSAGE_A
+	;머리카락
+	IF CFLAG:106 == 1
+		;창부
+		IF TALENT:7 && (CFLAG:221 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:221 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:221 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:221 = 3
+		ENDIF
+	;顔
+	ELSEIF CFLAG:106 == 2
+		;창부
+		IF TALENT:7 && (CFLAG:222 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:222 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:222 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:222 = 3
+		ENDIF
+	;가슴
+	ELSEIF CFLAG:106 == 3
+		;창부
+		IF TALENT:7 && (CFLAG:223 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:223 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:223 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:223 = 3
+		ENDIF
+	;腹
+	ELSEIF CFLAG:106 == 4
+		;창부
+		IF TALENT:7 && (CFLAG:224 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:224 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:224 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:224 = 3
+		ENDIF
+	;腋
+	ELSEIF CFLAG:106 == 5
+		;창부
+		IF TALENT:7 && (CFLAG:225 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:225 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:225 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:225 = 3
+		ENDIF
+	;太腿
+	ELSEIF CFLAG:106 == 6
+		;창부
+		IF TALENT:7 && (CFLAG:226 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:226 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:226 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:226 = 3
+		ENDIF
+	;割れ目
+	ELSEIF CFLAG:106 == 7
+		;창부
+		IF TALENT:7 && (CFLAG:227 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:227 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:227 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:227 = 3
+		ENDIF
+	;尻
+	ELSEIF CFLAG:106 == 8
+		;창부
+		IF TALENT:7 && (CFLAG:228 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:228 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:228 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:228 = 3
+		ENDIF
+	;발CFLAG:254
+	ELSEIF CFLAG:106 == 8
+		;창부
+		IF TALENT:7 && (CFLAG:254 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:254 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:254 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:254 = 3
+		ENDIF
+	;ゴム
+	ELSEIF CFLAG:106 == 9
+		;セックスで사정かつ、애널セックス以外を実行時
+		IF TFLAG:2 > 0 && SELECTCOM != 62 && SELECTCOM != 63 && SELECTCOM != 67 && SELECTCOM != 70 && SELECTCOM != 71 && SELECTCOM != 73 && SELECTCOM != 75 && SELECTCOM != 77
+			;창부
+			IF TALENT:7 && (CFLAG:229 < 4 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:229 = 4
+			;음란
+			ELSEIF TALENT:4 && (CFLAG:229 < 3 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:229 = 3
+			ENDIF
+		ELSE
+			;창부
+			IF TALENT:7 && (CFLAG:230 < 4 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:230 = 4
+			;음란
+			ELSEIF TALENT:4 && (CFLAG:230 < 3 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:230 = 3
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;손、입以外で사정
+;対応コマンドはキス、스마타、풋잡、애널強制奉仕、더블스마타
+;-------------------------------------------------
+IF TFLAG:9 == 1
+	CALL PALAM_MESSAGE_A
+	;창부
+	IF TALENT:7 && (CFLAG:231 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:231 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:231 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:231 = 3
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;조수를범한다で사정
+;-------------------------------------------------
+IF TFLAG:7 > 0
+	CALL PALAM_MESSAGE_A
+	;창부
+	IF TALENT:7 && (CFLAG:232 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:232 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:232 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:232 = 3
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;입で사정
+;-------------------------------------------------
+IF TFLAG:0 > 0
+	CALL PALAM_MESSAGE_A
+	;창부
+	IF TALENT:7 && (CFLAG:233 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:233 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:233 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:233 = 3
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;손で사정
+;-------------------------------------------------
+IF TFLAG:1 > 0
+	CALL PALAM_MESSAGE_A
+	;창부
+	IF TALENT:7 && (CFLAG:234 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:234 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:234 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:234 = 3
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;가슴で사정
+;-------------------------------------------------
+IF TFLAG:34 > 0
+	CALL PALAM_MESSAGE_A
+	;창부
+	IF TALENT:7 && (CFLAG:235 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:235 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:235 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:235 = 3
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;발で사정
+;-------------------------------------------------
+IF TFLAG:16 > 0
+	CALL PALAM_MESSAGE_A
+	;창부
+	IF TALENT:7 && (CFLAG:236 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:236 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:236 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:236 = 3
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;セックスで사정
+;-------------------------------------------------
+IF TFLAG:2 > 0
+	CALL PALAM_MESSAGE_A
+	;애널セックス系
+	IF SELECTCOM == 62 || SELECTCOM == 63 || SELECTCOM == 67 || SELECTCOM == 70 || SELECTCOM == 71 || SELECTCOM == 73 || SELECTCOM == 75 || SELECTCOM == 77
+		;창부
+		IF TALENT:7 && (CFLAG:237 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:237 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:237 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:237 = 3
+		ENDIF
+	;セックス系
+	ELSE
+		;창부
+		IF TALENT:7 && (CFLAG:238 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:238 = 4
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:238 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:238 = 3
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;逆セックスで사정させた
+;-------------------------------------------------
+IF (SELECTCOM == 64 || SELECTCOM == 205 || SELECTCOM == 206 || SELECTCOM == 211 || SELECTCOM == 212 || SELECTCOM == 213 || SELECTCOM == 214) && TFLAG:10 > 0
+	CALL PALAM_MESSAGE_A
+	;창부
+	IF TALENT:7 && (CFLAG:239 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:239 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:239 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:239 = 3
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;調教者の空사정 CFLAG:255
+;-------------------------------------------------
+;調教者空사정
+IF TFLAG:164
+	CALL PALAM_MESSAGE_A
+	;창부
+	IF TALENT:7 && (CFLAG:255 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:255 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:255 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:255 = 3
+	ENDIF
+	TFLAG:164 = 0
+ENDIF
+
+;-------------------------------------------------
+;@KOJO_MESSAGE_PALAMCNG_E（X1をキャラ番号に置換）
+;촉수の사정をトリガーにした입上
+;-------------------------------------------------
+@KOJO_MESSAGE_PALAMCNG_E_KX1_LEWD
+;-------------------------------------------------
+;촉수の사정時のテキスト
+;-------------------------------------------------
+;-------------------------------------------------
+;촉수が사정
+;-------------------------------------------------
+IF TFLAG:15 >0
+	CALL PALAM_MESSAGE_E
+	;창부
+	IF TALENT:7 && (CFLAG:240 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:240 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:240 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:240 = 3
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;@KOJO_MESSAGE_PALAMCNG_B関係（X1をキャラ番号に置換）
+;奴隷の絶頂をトリガーにした입上
+;-------------------------------------------------
+@KOJO_MESSAGE_PALAMCNG_B_KX1_LEWD
+;-------------------------------------------------
+;奴隷の絶頂時のテキスト
+;-------------------------------------------------
+;-------------------------------------------------
+;初めてC絶頂
+;-------------------------------------------------
+IF NOWEX:0 > 0 && CFLAG:241 == 0
+	PRINTFORMW 
+	CFLAG:241 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてV絶頂
+;-------------------------------------------------
+IF NOWEX:1 > 0 && CFLAG:242 == 0
+	PRINTFORMW 
+	CFLAG:242 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてA絶頂
+;-------------------------------------------------
+IF NOWEX:2 > 0 && CFLAG:243 == 0
+	PRINTFORMW 
+	CFLAG:243 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてB絶頂
+;-------------------------------------------------
+IF NOWEX:3 > 0 && CFLAG:244 == 0
+	PRINTFORMW 
+	CFLAG:244 = 1
+ENDIF
+
+;-------------------------------------------------
+;絶頂
+;-------------------------------------------------
+IF TFLAG:29 > 0
+	CALL PALAM_MESSAGE_B
+	IF TALENT:7 && (CFLAG:245 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:245 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:245 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:245 = 3
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;사정
+;-------------------------------------------------
+;사정している
+IF TFLAG:10 > 0
+	IF TALENT:7 && (CFLAG:246 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:246 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:246 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:246 = 3
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;空사정　※리본パッチによる追加
+;-------------------------------------------------
+;空사정している
+IF NOWEX:40
+	CALL PALAM_MESSAGE_A2
+	;아이사이즈
+	IF TALENT:114
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;사정관리解除で사정　※리본パッチによる追加
+;-------------------------------------------------
+;사정관리解除で사정
+IF SELECTCOM == 109 && TEQUIP:37 == 0 && TFLAG:10 > 0
+	CALL PALAM_MESSAGE_A
+ENDIF
+
+;-------------------------------------------------
+;噴乳
+;-------------------------------------------------
+;噴乳している
+IF TFLAG:11 > 0
+	IF TALENT:7 && (CFLAG:27 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:247 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:247 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:247 = 3
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;放尿
+;-------------------------------------------------
+;放尿している
+IF TFLAG:29 > 0 && (TEQUIP:27 || TALENT:57)
+	;창부
+	IF TALENT:7 && (CFLAG:248 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:248 = 4
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:248 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:248 = 3
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;@KOJO_MESSAGE_PALAMCNG_C関係（X1をキャラ番号に置換）
+;調教후の変化をトリガーにした입上
+;-------------------------------------------------
+@KOJO_MESSAGE_PALAMCNG_C_KX1_LEWD
+;-------------------------------------------------
+;調教후のテキスト
+;-------------------------------------------------
+;-------------------------------------------------
+;처녀喪失(처녀のみ)
+;-------------------------------------------------
+IF TFLAG:3 > 0
+	CALL PALAM_MESSAGE_C
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;동정喪失
+;-------------------------------------------------
+IF TFLAG:160 == 1
+	CALL PALAM_MESSAGE_C
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;백버진喪失
+;-------------------------------------------------
+IF TFLAG:161 == 1
+	CALL PALAM_MESSAGE_C
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;@KOJO_MESSAGE_PALAMCNG_D関係（X1をキャラ番号に置換）
+;パラメータ変化をトリガーにした입上
+;-------------------------------------------------
+@KOJO_MESSAGE_PALAMCNG_D_KX1_LEWD
+;-------------------------------------------------
+;パラメータ変化時のテキスト
+;-------------------------------------------------
+;-------------------------------------------------
+;初めて윤활がLV3超えた
+;-------------------------------------------------
+P = PALAM:4 + UP:4
+IF P > PALAMLV:3 && CFLAG:245 == 0
+	CALL PALAM_MESSAGE_D
+	;로션を使った場合
+	IF SELECTCOM == 180
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:245 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて욕정がLV2超えた
+;-------------------------------------------------
+P = PALAM:6 + UP:6
+IF P > PALAMLV:2 && CFLAG:246 == 0
+	CALL PALAM_MESSAGE_D
+	;미약を使った場合
+	IF SELECTCOM == 181
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:246 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて굴복がLV3超えた
+;-------------------------------------------------
+P = PALAM:7 + UP:7
+IF P > PALAMLV:3 && CFLAG:247 == 0
+	CALL PALAM_MESSAGE_D
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+	CFLAG:247 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて순종がLV3超えた
+;-------------------------------------------------
+P = PALAM:5 + UP:5
+IF P > PALAMLV:3 && CFLAG:248 == 0
+	CALL PALAM_MESSAGE_D
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+	CFLAG:248 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて공포がLV3超えた
+;-------------------------------------------------
+P = PALAM:11 + UP:11
+IF P > PALAMLV:3 && CFLAG:249 == 0
+	CALL PALAM_MESSAGE_D
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+	CFLAG:249 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;@KOJO_MESSAGE_MARKCNG関係（X1をキャラ番号に置換）
+;刻印変動をトリガーにした입上
+;刻印変動후に입上を発動します
+;-------------------------------------------------
+@KOJO_MESSAGE_MARKCNG_KX1_LEWD
+;-------------------------------------------------
+;고통각인Lv3
+;-------------------------------------------------
+IF TFLAG:22 == 3
+	CALL MARK_MESSAGE_A
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;쾌락각인Lv3
+;-------------------------------------------------
+IF TFLAG:23 == 3
+	CALL MARK_MESSAGE_P
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;굴복각인Lv3
+;-------------------------------------------------
+IF TFLAG:24 == 13 || TFLAG:24 == 23 || TFLAG:24 == 33
+	CALL MARK_MESSAGE_S
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;반발각인Lv3
+;-------------------------------------------------
+IF TFLAG:21 == 3
+	CALL MARK_MESSAGE_R
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;イベント입上集（X1、X2をキャラ番号に置換する） CFLAG 261～299を使用
+;-------------------------------------------------
+@KOJO_MESSAGE_EVENT_KX1_LEWD
+;-------------------------------------------------
+;朝フェラ
+;-------------------------------------------------
+IF TFLAG:13 == 1
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:261 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:261 = 2
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:261 < 1 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:261 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;朝파이즈리
+;-------------------------------------------------
+IF TFLAG:13 == 2
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:262 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:262 = 2
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:262 < 1 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:262 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;朝기승위
+;-------------------------------------------------
+IF TFLAG:13 == 3
+	CALL EVENT_MESSAGE
+	;貞操対帯あり
+	IF TEQUIP:2 == 5
+		PRINTFORML 
+	ELSE
+		;창부
+		IF TALENT:7 && (CFLAG:263 < 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:263 = 2
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:263 < 1 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:263 = 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;調教후レズプレイ
+;-------------------------------------------------
+IF TFLAG:13 == 4
+	CALL EVENT_MESSAGE
+	;貞操対帯あり
+	IF TEQUIP:2 == 5
+		PRINTFORML 
+	ELSE
+		;창부
+		IF TALENT:7 && (CFLAG:264 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:264 = 3
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:264 < 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:264 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;調教후セックス
+;-------------------------------------------------
+IF TFLAG:13 == 5
+	CALL EVENT_MESSAGE
+	;貞操対帯あり
+	IF TEQUIP:2 == 5
+		PRINTFORML 
+	ELSE
+		;창부
+		IF TALENT:7 && (CFLAG:265 < 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:265 = 2
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:265 < 1 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:265 = 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;강정신약の反動
+;-------------------------------------------------
+IF TFLAG:13 == 6
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:266 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:266 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:266 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:266 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;調教후搾乳
+;-------------------------------------------------
+IF TFLAG:13 == 7
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:267 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:267 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:267 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:267 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;調教후자위
+;-------------------------------------------------
+IF TFLAG:13 == 8
+	CALL EVENT_MESSAGE
+	;貞操対帯あり
+	IF TEQUIP:2 == 5
+		PRINTFORML 
+	ELSE
+		;창부
+		IF TALENT:7 && (CFLAG:268 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:268 = 3
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:268 < 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:268 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;調教후夜這い
+;-------------------------------------------------
+IF TFLAG:13 == 9
+	CALL EVENT_MESSAGE
+	;貞操対帯あり
+	IF TEQUIP:2 == 5
+		PRINTFORML 
+	ELSE
+		;창부
+		IF TALENT:7 && (CFLAG:269 < 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:269 = 2
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:269 < 1 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:269 = 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;黄色のキャンディ使用時
+;-------------------------------------------------
+IF TFLAG:13 == 10
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:270 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:270 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:270 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:270 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;임신発覚時
+;-------------------------------------------------
+IF TFLAG:13 == 11
+	SIF CFLAG:271 >= 1 && FLAG:7 != 2
+		RETURN 0
+	CALL EVENT_MESSAGE
+	;임신対象をTARGETに格納し、父親は奴隷はV、助손はWとする
+	;붕괴してしまった場合
+	IF TALENT:9 == 1
+		PRINTFORMW 
+	;父親が奴隷か助손で母親が음란か창부持ち
+	ELSEIF (TALENT:4 || TALENT:7) && (CFLAG:102 == 2 || CFLAG:102 == 3)
+		;父親(助손）との相性が100より大きい場合
+		IF CFLAG:102 == 2 && RELATION:W > 100
+			PRINTFORMW 
+	 	;父親(奴隷）との相性が100より大きい場合
+		ELSEIF CFLAG:102 == 3 && RELATION:V > 100
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+	CFLAG:271 = 1
+ENDIF
+
+;-------------------------------------------------
+;出産時
+;-------------------------------------------------
+IF TFLAG:13 == 12
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:271 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:271 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:271 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:271 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;育児室
+;-------------------------------------------------
+IF TFLAG:13 == 13
+	CALL EVENT_MESSAGE
+	;出産前
+	IF TALENT:153
+		;창부
+		IF TALENT:7 && (CFLAG:272 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:272 = 3
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:272 < 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:272 = 2
+		ENDIF
+	;出産후
+	ELSE
+		;창부
+		IF TALENT:7 && (CFLAG:273 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:273 = 3
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:273 < 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:273 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;親離れ時
+;-------------------------------------------------
+IF TFLAG:13 == 14
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:274 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:274 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:274 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:274 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;娼館でバイト時
+;-------------------------------------------------
+IF TFLAG:13 == 16
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:276 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:276 = 2
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:276 < 1 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:276 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;レンタル時
+;-------------------------------------------------
+IF TFLAG:13 == 17
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:277 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:277 = 2
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:277 < 1 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:277 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;売却時
+;-------------------------------------------------
+IF TFLAG:13 == 18
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:4
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;ビデオ売却時
+;-------------------------------------------------
+IF TFLAG:13 == 19
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:278 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:278 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:278 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:278 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;乱交ライブ時
+;-------------------------------------------------
+IF TFLAG:13 == 21
+	CALL EVENT_MESSAGE
+	;初めて
+	IF CFLAG:280 == 0
+		PRINTFORMW 
+		CFLAG:280 = 1
+	;それ以外
+	ELSEIF CFLAG:280 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:280 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;調教후夜這い수 CFLAG:284
+;-------------------------------------------------
+IF TFLAG:13 == 27
+	CALL EVENT_MESSAGE
+	;貞操対帯あり
+	IF TEQUIP:2 == 5
+		PRINTFORML 
+	ELSE
+		;창부
+		IF TALENT:7 && (CFLAG:284 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:284 = 3
+		;음란
+		ELSEIF TALENT:4 && (CFLAG:284 < 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:284 = 2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;朝풋잡 CFLAG:285 
+;-------------------------------------------------
+IF TFLAG:13 == 30
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:285 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:285 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:285 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:285 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;朝風呂 CFLAG:287 
+;-------------------------------------------------
+IF TFLAG:13 == 32
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:287 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:287 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:287 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:287 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;朝３Ｐ CFLAG:288 
+;-------------------------------------------------
+IF TFLAG:13 == 33
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:288 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:288 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:288 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:288 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;朝飲尿 CFLAG:289
+;-------------------------------------------------
+IF TFLAG:13 == 34
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:289 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:289 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:289 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:289 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;夜添い寝 CFLAG:291　연모以外は체력５００以下のときだけ
+;-------------------------------------------------
+IF TFLAG:13 == 36
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:291 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:291 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:291 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:291 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;夜Ｍプレイ CFLAG:292
+;地の文はK:5==1스팽킹 =2채찍打ち =3발舐め =4主人Ｓで逆襲Ｍプレイ
+;-------------------------------------------------
+IF TFLAG:13 == 37
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:292 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:292 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:292 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:292 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;夜Ｓプレイ CFLAG:293
+;地の文はK:5==1스팽킹 =2채찍打ち =3발舐め =4主人Ｍでご奉仕Ｓプレイ
+;-------------------------------------------------
+IF TFLAG:13 == 38
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:293 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:293 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:293 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:293 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;夜レズプレイ CFLAG:294　突っこまずにいちゃいちゃ
+;-------------------------------------------------
+IF TFLAG:13 == 39
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:294 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:294 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:294 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:294 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;夜睡眠中 CFLAG:296　
+;-------------------------------------------------
+IF TFLAG:13 == 41
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:296 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:296 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:296 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:296 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;夜３Ｐ CFLAG:298 
+;-------------------------------------------------
+IF TFLAG:13 == 43
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:298 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:298 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:298 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:298 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;夜자위 CFLAG:299　
+;-------------------------------------------------
+IF TFLAG:13 == 44
+	CALL EVENT_MESSAGE
+	;창부
+	IF TALENT:7 && (CFLAG:299 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:299 = 3
+	;음란
+	ELSEIF TALENT:4 && (CFLAG:299 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:299 = 2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;衣装変更時 CFLAG:283（を適当に適用） 
+;T:A = Y　　　　着脱する衣装を限定する時
+;A = X　　　　　着脱部位全体を示す時
+;TEQUIP:A = Y　 今何を着ているか（着てない場合は0）
+;を組み合わせます。分かりにくくてスマン。
+;脱がす、着せるに関わらず、特定の組み合わせの衣装になったときの記述例に裸신발下とセーラー入れておきます。
+;水兵服＋スカートのように、最후に「Y != 0」をつければ着せたときだけ表示される組み合わせ입上になります。
+;コメントアウトしてあるので、ご使用の際は解除を行って下さい。（下から2番目のENDIFも解除するのを忘れずに）
+;-------------------------------------------------
+IF TFLAG:13 == 25
+	CALL EVENT_MESSAGE
+	;신발下or발袋だけにしたとき。
+;	IF TEQUIP:1 && TEQUIP:0 == 0 && TEQUIP:2 == 0 && TEQUIP:3 == 0 && TEQUIP:4 == 0 && TEQUIP:5 == 0 && TEQUIP:6 == 0
+;		PRINTFORMW 
+;	;水兵服＋スカート
+;	ELSEIF TEQUIP:4 == 1 && TEQUIP:5 == 2 && Y != 0
+;		PRINTFORMW 
+;	ELSE
+		;脱がしたときの입上
+		IF  Y == 0 && CFLAG:283 == 0 || FLAG:7 == 2
+			PRINTFORML 
+			CFLAG:283 = 1
+		;着せた時の입上
+		ELSEIF CFLAG:283 < 2 || FLAG:7 == 2
+			PRINTFORML 
+			CFLAG:283 = 2
+		ENDIF
+;	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;朝料理イベント時 CFLAG:284 を、使用できるように確保してみる
+;書きかえたい場所の「CALL EVENT_MESSAGE」を消してごっそり変えてもいいかも
+;表示される基本の地の文はEVENT_M.ERBを参照にして下さい
+;-------------------------------------------------
+IF TFLAG:13 == 26
+	;最初から弁当を食べる時
+	IF K == 1
+		CALL EVENT_MESSAGE
+		PRINTFORM 
+	;売るのをやめて食べる時
+	ELSEIF K == 2
+		CALL EVENT_MESSAGE
+		PRINTFORM 
+	;主人が弁当を作るとき
+	ELSEIF K == 3
+		CALL EVENT_MESSAGE
+		PRINTFORM 
+	;食후の運動(性的な意味で)直前
+	ELSEIF K == 4
+		CALL EVENT_MESSAGE
+		PRINTFORM 
+	;毒を盛られた
+	ELSEIF K == 5
+		CALL EVENT_MESSAGE
+		PRINTFORM 
+	;毒を見抜いたので弱みを握るイベント（相性のいい子に食べさせるver）
+	ELSEIF K == 6
+		CALL EVENT_MESSAGE
+		PRINTFORM 
+	;毒を見抜いたので弱みを握るイベント（問い詰めるver）
+	ELSEIF K == 7
+		CALL EVENT_MESSAGE
+		PRINTFORM 
+	;毒殺された
+	ELSEIF K == 8
+		CALL EVENT_MESSAGE
+		PRINTFORM 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;@KOJO_MESSAGE_ENDING関係(X1、X2をキャラ番号に置換する)
+;-------------------------------------------------
+;-------------------------------------------------
+;条件設定
+;-------------------------------------------------
+@EVENTTURNEND
+#LATER
+SIF TARGET < 0
+	RETURN 0
+SIF NO:TARGET != X1
+	RETURN 0
+;単体エンド用分岐フラグ、単体エンドのある上位陥落素質のみコメントアウトを解除する
+;SIF TALENT:7
+;	CFLAG:21 = 1
+;-------------------------------------------------
+;エンド本文
+;-------------------------------------------------
+@KOJO_MESSAGE_ENDING_KX1_LEWD
+;음란単体エンド
+;IF TALENT:7 && CFLAG:21 == 1
+	;DRAWLINE
+	;PRINTFORMW …………
+	;PRINTFORMW ………
+	;PRINTFORMW ……
+	;PRINTFORMW 
+
+	;PRINTFORMW 
+	;PRINTFORMW 　　　　　　　　―― Ending No.1X2B (○○エンド)
+;ENDIF
+
+;CALL GAME_CONTINUE
+;RETURN 0
+

@@ -1,0 +1,419 @@
+﻿;-------------------------------------------------
+;촉수애널산란
+;촉수系コマンド
+;-------------------------------------------------
+@COM370
+
+PRINTL 촉수애널산란
+STR:0 = 촉수애널산란
+
+;着脱の処理
+IF TEQUIP:촉수장내산란 == 0
+	TFLAG:56 = 2
+	TEQUIP:애널바이브 = 1
+	TEQUIP:촉수장내산란 += 1
+ELSE
+	PRINTL どうしますか？
+	;A확장경험が少ないと卵は追加不可能
+	IF EXP:A확장경험 >= 500 && TEQUIP:촉수장내산란 < 6
+		PRINTL [0] さらに卵を産ませる
+	ELSEIF EXP:A확장경험 >= 200 && TEQUIP:촉수장내산란 < 5
+		PRINTL [0] さらに卵を産ませる
+	ELSEIF EXP:A확장경험 >= 50 && TEQUIP:촉수장내산란 < 4
+		PRINTL [0] さらに卵を産ませる
+	ELSEIF EXP:A확장경험 >= 20 && TEQUIP:촉수장내산란 < 3
+		PRINTL [0] さらに卵を産ませる
+	ELSEIF EXP:A확장경험 >= 4 && TEQUIP:촉수장내산란 < 2
+		PRINTL [0] さらに卵を産ませる
+	ENDIF
+	IF TEQUIP:촉수장내산란 && TEQUIP:촉수질내산란
+		PRINTL [1] 애널栓だけ抜いてやる
+		PRINTL [2] 両方の栓を抜いてやる
+	ELSE
+		PRINTL [1] 抜いてやる
+	ENDIF
+	$INPUT_LOOP_enema
+	INPUT
+	;さらに卵を産ませる
+	IF RESULT == 0
+		TFLAG:56 = 3
+		TEQUIP:촉수장내산란 += 1
+	;片方だけ抜いてやる
+	ELSEIF RESULT == 1
+		IF TEQUIP:촉수장내산란 && TEQUIP:촉수질내산란
+			TFLAG:56 = 1
+		ELSE
+			TFLAG:56 = 0
+		ENDIF
+	;両方の栓を抜いてやる
+	ELSEIF RESULT == 2
+		TFLAG:56 = 0
+	ELSE
+		GOTO INPUT_LOOP_enema
+	ENDIF
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+;消費체력、기력
+LOSEBASE:체력 += 100
+LOSEBASE:기력 += 150
+
+IF EXP:촉수경험 < EXPLV:1
+	TIMES LOSEBASE:체력 , 1.10
+	TIMES LOSEBASE:기력 , 2.00
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES LOSEBASE:체력 , 0.90
+	TIMES LOSEBASE:기력 , 1.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES LOSEBASE:체력 , 0.80
+	TIMES LOSEBASE:기력 , 1.50
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES LOSEBASE:체력 , 0.70
+	TIMES LOSEBASE:기력 , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES LOSEBASE:체력 , 0.60
+	TIMES LOSEBASE:기력 , 1.00
+ELSE
+	TIMES LOSEBASE:체력 , 0.50
+	TIMES LOSEBASE:기력 , 0.50
+ENDIF
+
+;ABL:A감각をみる
+IF ABL:A감각 == 0
+	SOURCE:쾌A += 80
+ELSEIF ABL:A감각 == 1
+	SOURCE:쾌A += 250
+ELSEIF ABL:A감각 == 2
+	SOURCE:쾌A += 600
+ELSEIF ABL:A감각 == 3
+	SOURCE:쾌A += 1000
+ELSEIF ABL:A감각 == 4
+	SOURCE:쾌A += 1300
+ELSE
+	SOURCE:쾌A += 1700
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:쾌A , 0.40
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:쾌A , 0.80
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:쾌A , 1.00
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:쾌A , 1.40
+ELSE
+	TIMES SOURCE:쾌A , 1.80
+ENDIF
+
+;ABL:A감각をみる
+IF ABL:A감각 == 0
+	SOURCE:굴복 += 300
+ELSEIF ABL:A감각 == 1
+	SOURCE:굴복 += 800
+ELSEIF ABL:A감각 == 2
+	SOURCE:굴복 += 1400
+ELSEIF ABL:A감각 == 3
+	SOURCE:굴복 += 1800
+ELSEIF ABL:A감각 == 4
+	SOURCE:굴복 += 2100
+ELSE
+	SOURCE:굴복 += 2400
+ENDIF
+
+;ABL:마조끼をみる
+IF ABL:마조끼 < 1
+	SOURCE:통증 += 2000
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 200
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 2000
+ELSEIF ABL:마조끼 <2
+	SOURCE:통증 += 1600
+	SOURCE:불결 += 2000
+	SOURCE:굴복 += 500
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 1000
+ELSEIF ABL:마조끼 < 3
+	SOURCE:통증 += 1200
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 800
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 500
+ELSEIF ABL:마조끼 < 4
+	SOURCE:통증 += 800
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 1200
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 100
+ELSEIF ABL:마조끼 < 5
+	SOURCE:통증 += 600
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 1500
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 0
+ELSE
+	SOURCE:통증 += 400
+	SOURCE:불결 += 1000
+	SOURCE:굴복 += 2000
+	SOURCE:일탈 += 1000
+	SOURCE:반발 += 0
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	SOURCE:통증 += 800
+ELSEIF PALAM:윤활 < PALAMLV:2
+	SOURCE:통증 += 500
+ELSEIF PALAM:윤활 < PALAMLV:3
+	SOURCE:통증 += 300
+ELSEIF PALAM:윤활 < PALAMLV:4
+	SOURCE:통증 += 120
+ELSE
+	SOURCE:통증 += 100
+ENDIF
+
+;小人体形
+SIF TALENT:소인체형
+	TIMES SOURCE:통증 , 2.00
+
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;정조관념持ちで연모、친애持ち以外には常に반발のソースを追加する（セックス系のみ）
+SIF TALENT:정조관념 && (TALENT:연모 == 0 && TALENT:친애 == 0)
+	SOURCE:반발 += 1000
+
+;A민감、鈍感をみる
+;쾌A自体のチェックは후でまとめてやる
+IF TALENT:A둔감
+	TIMES SOURCE:통증 , 1.50
+	TIMES SOURCE:굴복 , 1.50
+	TIMES SOURCE:일탈 , 1.50
+ELSEIF TALENT:A민감
+	TIMES SOURCE:통증 , 0.60
+	TIMES SOURCE:굴복 , 0.60
+	TIMES SOURCE:일탈 , 0.60
+ENDIF
+
+SOURCE:두려움 += SOURCE:굴복
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+STAIN:장내 |= 32
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+EXP:A경험 += 15
+PRINTL A경험＋15
+T = 1
+
+
+RETURN 1
+
+
+;--------------------------------------------------
+;촉수장내산란中
+;--------------------------------------------------
+@EQUIP_COM370
+PRINTL ＜촉수장내산란中＞
+CALL EQUIP_MESSAGE_COM308
+
+LOSEBASE:체력 += 30
+LOSEBASE:기력 += 50
+
+A = 120
+B = 100
+
+;촉수경험
+IF EXP:촉수경험 < EXPLV:1
+	TIMES A , 1.00
+	TIMES B , 1.40
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES A , 0.90
+	TIMES B , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES A , 0.80
+	TIMES B , 1.00
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES A , 0.70
+	TIMES B , 0.80
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES A , 0.60
+	TIMES B , 0.60
+ELSE
+	TIMES A , 0.50
+	TIMES B , 0.40
+ENDIF
+
+;ABL:A감각をみる
+IF ABL:A감각 == 0
+	A = 80
+	B = 300
+ELSEIF ABL:A감각 == 1
+	A = 250
+	B = 800
+ELSEIF ABL:A감각 == 2
+	A = 600
+	B = 1400
+ELSEIF ABL:A감각 == 3
+	A = 1000
+	B = 1800
+ELSEIF ABL:A감각 == 4
+	A = 1300
+	B = 2100
+ELSE
+	A = 1700
+	B = 2400
+ENDIF
+
+;EXP:A경험をみる
+IF EXP:A경험 < EXPLV:1
+	TIMES A , 0.50
+	C = 2000
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES A , 1.00
+	C = 300
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES A , 1.10
+	C = 50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES A , 1.20
+	C = 10
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES A , 1.40
+	C = 0
+ELSE
+	TIMES A , 1.60
+	C = 0
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES A , 0.40
+	C += 800
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES A , 0.80
+	C += 500
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES A , 1.00
+	C += 300
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES A , 1.40
+	C += 120
+ELSE
+	TIMES A , 1.80
+	C += 100
+ENDIF
+
+;PALAM:욕정をみる
+IF PALAM:욕정 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:욕정 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:욕정 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:욕정 < PALAMLV:4
+	TIMES A , 1.10
+ELSE
+	TIMES A , 1.20
+ENDIF
+
+;ABL:순종をみる
+IF ABL:순종 == 0
+	TIMES A , 0.80
+ELSEIF ABL:순종 == 1
+	TIMES A , 0.90
+ELSEIF ABL:순종 == 2
+	TIMES A , 1.00
+ELSEIF ABL:순종 == 3
+	TIMES A , 1.10
+ELSEIF ABL:순종 == 4
+	TIMES A , 1.20
+ELSE
+	TIMES A , 1.30
+ENDIF
+
+;小人体形
+SIF TALENT:소인체형
+	TIMES C , 2.00
+
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;정조관념持ちで연모、친애持ち以外には常に반발のソースを追加する（セックス系のみ）
+SIF TALENT:정조관념 && (TALENT:연모 == 0 && TALENT:친애 == 0)
+	SOURCE:반발 += 1000
+
+;A민감、鈍感をみる
+;쾌A自体のチェックは후でまとめてやる
+IF TALENT:A둔감
+	TIMES SOURCE:통증 , 1.50
+	TIMES SOURCE:굴복 , 1.50
+	TIMES SOURCE:일탈 , 1.50
+ELSEIF TALENT:A민감
+	TIMES SOURCE:통증 , 0.60
+	TIMES SOURCE:굴복 , 0.60
+	TIMES SOURCE:일탈 , 0.60
+ENDIF
+
+SOURCE:쾌A += A
+SOURCE:굴복 += B
+SOURCE:통증 += C
+SOURCE:일탈 += B*2
+SOURCE:두려움 += B
+
+EXP:A경험 += 3
+PRINTL A경험＋3
+SIF TEQUIP:촉수
+	T += 1
+
+;촉수装着中は依存度ベクトル強制変更
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2　強制変更なので、これまでの数値をリセット）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 = 4
+ENDIF
+
+
+;--------------------------------------------------
+;装着時メッセージ
+;--------------------------------------------------
+@EQUIP_MESSAGE_COM308
+SIF FLAG:6 == 0
+	RETURN 0
+
+PRINTL 
+PRINTFORML %CALLNAME%は菊門から촉수の卵を押し込まれ、栓をされた状態で責め続けられている
+PRINTL 
+IF ABL:마조끼 == 0
+	PRINTFORMW %CALLNAME%は장내の異物感に顔を真っ青にしている…
+ELSEIF ABL:마조끼 == 1
+	PRINTFORM %CALLNAME%は脂汗を浮かべながらも異物感を誤魔化す為か、しきりに
+	IF TEQUIP:밧줄
+		PRINTW 腰を左右に振っている
+	ELSE
+		PRINTW 尻部を撫でている
+	ENDIF
+ELSEIF ABL:마조끼 == 2
+	PRINTFORMW %CALLNAME%は苦しそうな表情をしながらも、顔を紅潮させもじもじとお尻を振っている
+ELSEIF ABL:마조끼 == 3
+	PRINTFORMW %CALLNAME%は排泄感に苛まれながらも、時折恍惚とした表情を浮かべている
+ELSEIF ABL:마조끼 == 4
+	PRINTFORMW %CALLNAME%はうっとりした表情を浮かべ、時々卵が장내の壁に当たっている刺激を愉しんでいる
+ELSE
+	PRINTFORML %CALLNAME%は排泄感を心ゆくまで味わっているようだ
+	PRINTFORMW %CALLNAME%は背徳感を湛えた笑みを浮かべ、何かを期待するような眼で%CALLNAME:MASTER%を見上げている
+ENDIF
+

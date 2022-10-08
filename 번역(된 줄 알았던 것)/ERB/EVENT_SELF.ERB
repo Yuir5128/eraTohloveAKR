@@ -302,7 +302,7 @@ IF MALE2(TARGET) || ABL:V감각 < ABL:A감각
 	IF ABL:A감각 < 3 || TALENT:백버진
 		;V를 사용할 수 있으면 V를 사용하려고 한다
 		IF VAGINA(TARGET) && !TALENT:처녀 && !TALENT:재생처녀 && ABL:V감각 >= 3
-			;그 위에서 V도정조대로 메워지고 있으면정조대입상을 불러낸다
+			;그 위에서 V도정조대로 메워지고 있으면정조대대사을 불러낸다
 			IF TEQUIP:속옷（아래） == 5
 				TFLAG:67 = 0
 			;메워지지 않으면 V를 사용한다
@@ -318,7 +318,7 @@ IF MALE2(TARGET) || ABL:V감각 < ABL:A감각
 ELSE
 	;정조대가 있는 경우, A의 사용 가부를 본다
 	IF TEQUIP:속옷（아래） == 5
-		;A도 사용할 수 없으면, 정조대입상을 불러낸다
+		;A도 사용할 수 없으면, 정조대대사을 불러낸다
 		IF ABL:A감각 < 3 || TALENT:백버진
 			TFLAG:67 = 0
 		;A를 사용할 수 있으면 A를 사용한다
@@ -538,7 +538,7 @@ SIF A < 1
 DRAWLINE
 
 
-;입상의 호출
+;대사의 호출
 TFLAG:13 = 30
 CALL KOJO_MESSAGE_EVENT
 
@@ -625,7 +625,7 @@ SIF A < 1
 
 DRAWLINE
 
-;입상 호출
+;대사 호출
 TFLAG:13 = 31
 CALL KOJO_MESSAGE_EVENT
 
@@ -679,7 +679,7 @@ SIF MARK:반발각인 > 0
 SIF A < 1
 	RETURN 0
 
-;입상 호출
+;대사 호출
 TFLAG:13 = 32
 CALL KOJO_MESSAGE_EVENT
 
@@ -766,7 +766,7 @@ SIF A == 1
 
 DRAWLINE
 
-;입상의 호출
+;대사의 호출
 TFLAG:13 = 33
 CALL KOJO_MESSAGE_EVENT
 
@@ -1007,7 +1007,7 @@ ENDIF
 
 ;레즈비언 플레이
 @SELF_CHECK1
-;이벤트입상 호출
+;이벤트대사 호출
 DRAWLINE
 TFLAG:13 = 4
 CALL KOJO_MESSAGE_EVENT
@@ -1180,7 +1180,7 @@ JUEL:욕정 += N*200
 
 ;조교후섹스
 @SELF_CHECK2
-;이벤트입상 호출
+;이벤트대사 호출
 DRAWLINE
 TFLAG:13 = 5
 CALL KOJO_MESSAGE_EVENT
@@ -1293,7 +1293,7 @@ PRINTFORMW %PALAMNAME:6%의 구슬＋{S*400}
 
 
 @SELF_CHECK3
-;이벤트입상 호출
+;이벤트대사 호출
 DRAWLINE
 TFLAG:13 = 6
 CALL KOJO_MESSAGE_EVENT
@@ -1349,7 +1349,7 @@ ENDIF
 
 ;조교후섹스 주인수
 @SELF_CHECK7
-;이벤트입상 호출
+;이벤트대사 호출
 DRAWLINE
 TFLAG:13 = 5
 CALL KOJO_MESSAGE_EVENT
@@ -1419,7 +1419,7 @@ PRINTW
 
 @AFTER_S_CHECK
 ;자위체크  ---------------------------------09/10/09
-;입상 플래그
+;대사 플래그
 TFLAG:13 = 8
 CALL KOJO_MESSAGE_EVENT
 ;정조대로 가드
@@ -1494,7 +1494,7 @@ ELSE
 		
 	;자위회수가 0이상의 처리
 	IF A > 0
-	;조교후자위입상의 분기 플래그로서 이용해 주세요
+	;조교후자위대사의 분기 플래그로서 이용해 주세요
 	;할 수 있으면 전용 함수나 플래그 추가 추천
 	Z = 0
 		;쾌감에솔직, 쾌감을부정, 음란화

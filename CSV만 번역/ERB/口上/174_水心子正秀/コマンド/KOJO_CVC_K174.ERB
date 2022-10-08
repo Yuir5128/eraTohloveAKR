@@ -1,0 +1,488 @@
+﻿;==================================================
+;性交時の처녀と백버진喪失時の前입上
+;목조르기セックス/목조르기애널は一旦保留
+;==================================================
+@VIRGIN_174_LOST_SEX_BEFORE
+#DIM DYNAMIC FIRST_VIRGIN = 0
+#DIM DYNAMIC KIJOI = 0
+;-------------------------------------------------
+;記入チェック（=0, 非表示、1, 表示）
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	;前か후ろかで初姦通
+	SIF (EXP:성교경험 - EXP:삽입경험) == 0
+		FIRST_VIRGIN = 1
+	
+	;;기승위、기승위애널
+	SIF SELECTCOM == 106 || SELECTCOM == 116
+		KIJOI = 1
+
+	;さよならエンド既読　もしくは반발3+기승위
+	IF (CFLAG:5001 & 64) || (MARK:반발각인 >= 3 && KIJOI)
+		PRINTFORML 「……恥知らずが」
+		PRINTFORMW %CALLNAME%は冷たくそう言い放った
+		PRINTL 
+	;반발3
+	ELSEIF MARK:반발각인 >= 3
+		PRINTFORML 「やめろ！　おい、聞いているのか！　はなせ！」
+		PRINTFORMW %CALLNAME%は必死にもがいて저항している
+		PRINTFORM それを無理やり押さえつけて、
+	;未陥落　굴복3　기승위
+	ELSEIF !KANRAKU(TARGET) && MARK:굴복각인 >= 3 && KIJOI
+		PRINTFORML 「自分で、入れるのか？　……ああ、清麿が言うなら」
+		PRINTL 
+		;真友ルート
+		SIF (CFLAG:5001 & 2)
+			PRINTFORM どこか虚ろな目の
+	;未陥落　굴복3
+	ELSEIF !KANRAKU(TARGET) && MARK:굴복각인 >= 3
+		PRINTFORML 「清磨　本当に、するのか……？」
+		PRINTFORMW %CALLNAME%は不安そうな顔をしている
+		PRINTL 
+	;未陥落　기승위
+	ELSEIF !KANRAKU(TARGET) && KIJOI
+		PRINTFORML 「っ、い…やだ……　こんなことしたくない……」
+		PRINTFORML 「いやだ　やだ　やだ……！」
+		PRINTFORM 首を振って拒否する%CALLNAME%を無理やり押さえつけて、
+	;未陥落
+	ELSEIF !KANRAKU(TARGET)
+		PRINTFORML 「清磨　こんな馬鹿な真似はやめろ」
+		PRINTFORML 「おい、聞いているのか　ちょっと、聞いてよ……！」
+		PRINTFORMW %CALLNAME%は顔面蒼白になっている
+		PRINTFORM それを無視して
+	ELSEIF TALENT:연모 || TALENT:친애
+		;ハートフル　기승위
+		IF (CFLAG:5001 & 1) && KIJOI
+			PRINTFORMW 「じ、自分で！？」
+			PRINTFORMW %CALLNAME%は当然のごとく拒否するが、%CALLNAME:MASTER%が頼み込むと渋々了承した
+			PRINTFORMW 「清麿がどうしてもと言うから、特別だぞ」
+			PRINTFORMW 「……いくぞ」
+			PRINTL 
+			PRINTFORM 羞恥に顔を赤くした
+		;ハートフル　연모
+		ELSEIF (CFLAG:5001 & 1) && TALENT:연모
+			PRINTFORMW %CALLNAME:MASTER%が中に入れたいと言うと、%CALLNAME%は顔を赤くした
+			PRINTFORMW 「清麿がどうしてもと言うなら、いいが……」
+			PRINTFORMW 「え？　べ、別に嫌とは言ってないだろう！」
+			PRINTFORMW 「だから、早く入れてくれ」
+			PRINTL 
+		;ハートフル　친애
+		ELSEIF (CFLAG:5001 & 1) && TALENT:친애
+			PRINTFORML 「清麿　キス、していいか？」
+			PRINTFORML %CALLNAME:MASTER%が応えて顔を寄せてやると、%CALLNAME%はそっと唇を重ねた
+			PRINTFORM そのまま
+		;真友ルート　연모　기승위
+		ELSEIF (CFLAG:5001 & 2) && TALENT:연모 && KIJOI
+			PRINTFORMW 「ああ、清磨が言うなら」
+			PRINTFORMW %CALLNAME%は固い面持ちでうなずいた
+			PRINTFORMW その様子に%CALLNAME:MASTER%が無理をする必要はないと助け舟を出す
+			;妄執연모
+			IF (CFLAG:5001 & 8)
+				PRINTFORMW 「だ、大丈夫だよ　問題ない　……いくぞ」
+			ELSE
+				PRINTFORMW 「だ、大丈夫だよ　ちゃんと君のこと、수止めてみせる　……いくぞ」
+			ENDIF
+			PRINTFORML %CALLNAME%はぎこちなく笑ってみせるが、顔には隠しきれない不安が滲んでいた
+			PRINTL 
+		;真友ルート　연모
+		ELSEIF (CFLAG:5001 & 2) && TALENT:연모
+			;妄執연모
+			IF (CFLAG:5001 & 8)
+				PRINTFORML 「ひっ……」
+				PRINTFORMW %CALLNAME%の\@ SEXPLAY(TARGET) == 1 ?秘部#애널\@に陰茎をあてがうと、%CALLNAME%は小さく悲鳴を上げた
+			ELSE
+				PRINTFORML 「っ……」
+				PRINTFORMW %CALLNAME%の\@ SEXPLAY(TARGET) == 1 ?秘部#애널\@に陰茎をあてがうと、%CALLNAME%は身をこわばらせた
+			ENDIF
+			PRINTFORMW その反応に%CALLNAME:MASTER%がためらいを見せると、%CALLNAME%は慌てて取り繕う
+			PRINTFORMW 「だ、大丈夫だ　少し驚いただけ……」
+			PRINTFORMW %CALLNAME%は笑ってみせるが、顔には隠しきれない不安が滲んでいた
+			;妄執연모
+			IF (CFLAG:5001 & 8)
+				PRINTFORMW 「僕は大丈夫だ　ほら、来て　清磨」
+			;반발3取得済みではない
+			ELSEIF (CFLAG:5002 & 8) == 0
+				PRINTFORMW 「大丈夫　ちゃんと君のこと、수止めてみせる」
+				PRINTFORMW 「来て　清麿」
+			ENDIF
+			PRINTL 
+		;真友ルート　친애　기승위
+		ELSEIF (CFLAG:5001 & 2) && TALENT:친애 && KIJOI
+			PRINTFORMW 「自分で？　ああ、分かった」
+			PRINTFORMW あまりにためらいのない様子に、%CALLNAME:MASTER%は少々戸惑う
+			PRINTFORMW 「？　清麿と一番深くで繋がることができるんだ　何をためらう必要がある？」
+			PRINTFORMW 「……もちろん、恥ずかしくないと言ったら嘘になるけど」
+			PRINTFORMW そう言って笑う%CALLNAME%の頬は少し赤い
+			;妄執친애
+			IF (CFLAG:5001 & 8)
+				PRINTFORMW 「……僕の全部、清麿にあげるよ」
+				PRINTFORMW 「だから、ずっと一緒にいて欲しい」
+			;初姦通　반발3取得済みでない
+			ELSEIF FIRST_VIRGIN && (CFLAG:5002 & 8) == 0
+				PRINTFORMW 「でも、君の全部を수止める覚悟はできてる」
+				PRINTFORMW 「……いくぞ　清磨」
+			ENDIF
+			PRINTFORMW 
+		;妄執친애
+		ELSEIF (CFLAG:5001 & 8) && TALENT:친애
+			PRINTFORML 「清麿　抱きしめてくれないか？」
+			PRINTFORMW %CALLNAME:MASTER%は応えて抱きしめてやると、%CALLNAME%は嬉しそうにはにかんだ
+			;初姦通
+			IF FIRST_VIRGIN
+				PRINTFORMW 「僕の全部、清麿にあげるよ」
+				PRINTFORMW 「だから、ずっと一緒にいて欲しい」
+			ENDIF
+			PRINTL 
+		;真友ルート　친애
+		ELSEIF (CFLAG:5001 & 2) && TALENT:친애
+			PRINTFORML 「清麿　キス、していいか？」
+			PRINTFORML %CALLNAME:MASTER%が応えて顔を寄せてやると、%CALLNAME%はそっと唇を重ねた
+			;初姦通　반발3取得済みでない
+			IF FIRST_VIRGIN && (CFLAG:5002 & 8) == 0
+				PRINTFORMW 「……君の全部、수止める覚悟はできてる」
+				PRINTFORMW 「だから、来い　清麿」
+			ENDIF
+			PRINTW 
+		ENDIF
+	ELSEIF TALENT:음란 || TALENT:창부
+		;ハートフル　음란
+		IF (CFLAG:5001 & 1) && TALENT:음란
+			PRINTFORML %CALLNAME:MASTER%が中に\@ KIJOI ?入れて欲しい#入れたい\@と言うと、%CALLNAME%は顔を赤くした
+			PRINTFORMW 「どうしてもと言うなら、いいが……」
+			PRINTFORMW 「え？　べ、別に嫌とは言ってないだろう！」
+			IF KIJOI
+				PRINTFORML 「……いくぞ」
+			ELSE
+				PRINTFORML 「いいから、さっさと来い」
+			ENDIF
+			PRINTW 
+		;それ以外
+		ELSE
+			PRINTFORML 「っ……」
+			PRINTFORML %CALLNAME%は生唾を飲み込んで、待ち수る快感に身震いしている
+			PRINTW 
+		ENDIF
+	ELSEIF TALENT:복종 || TALENT:예속
+		;真友ルート　복종
+		IF (CFLAG:5001 & 2) && TALENT:복종
+			PRINTFORML 「ひっ……」
+			IF KIJOI
+				PRINTFORMW %CALLNAME:MASTER%の陰茎を%CALLNAME%は自身の\@ SEXPLAY(TARGET) == 1 ?秘部#애널\@にあてがうと、小さく悲鳴を上げた
+				PRINTFORMW その反応に%CALLNAME:MASTER%が不思議そうな顔をすると、%CALLNAME%は慌てて取り繕う
+			ELSE
+				PRINTFORMW %CALLNAME%の\@ SEXPLAY(TARGET) == 1 ?秘部#애널\@に陰茎をあてがうと、%CALLNAME%は小さく悲鳴を上げた
+				PRINTFORMW その反応に%CALLNAME:MASTER%が動きを止めると、%CALLNAME%は慌てて取り繕う
+			ENDIF
+			PRINTFORMW しかし、%CALLNAME%の顔には隠しきれない不安が滲んでいた
+			PRINTFORMW 「あ、　だ、大丈夫　少し驚いただけ……」
+			PRINTFORMW 「僕、清麿をちゃんと満발させてみせるから……」
+			PRINTL 
+		;それ以外
+		ELSE
+			PRINTFORML 「っ……」
+			PRINTFORMW %CALLNAME%は生唾を飲み込んで、待ち수る快感に身震いしている
+			PRINTL 
+		ENDIF
+	ENDIF
+ENDIF
+RETURN LOCAL
+
+;==================================================
+;性交時の처녀と백버진喪失時の후입上
+;==================================================
+@VIRGIN_174_LOST_SEX_AFTER
+#DIM DYNAMIC FIRST_VIRGIN = 0
+#DIM DYNAMIC SEX_COM = 0
+;-------------------------------------------------
+;記入チェック（=0, 非表示、1, 表示）
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	;前か후ろかで初姦通
+	SIF (EXP:성교경험 - EXP:삽입경험) == 1
+		FIRST_VIRGIN = 1
+	
+	;セックスで喪失(목조르기セックス/목조르기애널/스팽킹セックス/스팽킹애널含む)
+		;以下コマンドは含まない
+		;3P系、바이브(처녀のみ)、윤간、촉수삽입、촉수拡張、수간、육변기(백버진)、뱀장어탕(처녀のみ)
+	SIF (SELECTCOM >= 100 && SELECTCOM <= 119) || (SELECTCOM >= 511 && SELECTCOM <= 514)
+		SEX_COM = 1
+
+	;음란창부陥落　복종예속陥落　PLAYERを問わず
+	IF KANRAKU2(TARGET) == 2 || KANRAKU2(TARGET) == 3
+		PRINTFORML 「あ、はじめて……、ん、ぁ…っ、っ……」
+		PRINTFORML %CALLNAME%は恍惚とした様子で、快感に身をゆだねている
+	;未陥落　もしくは연모친애陥落で思慕対象以外　もしくは연모친애陥落でセックス以外で喪失
+	ELSEIF !KANRAKU(TARGET) || KANRAKU(TARGET) == 4 || (KANRAKU(TARGET) == 1 && SEX_COM == 0)
+		PRINTFORML 「は、はは……　こんなの嘘だ…　嘘に決まって……　うそ…、……」
+		PRINTFORML %CALLNAME%は呆然とした面持ちをしている…
+		CFLAG:10 += 1
+		
+		SIF NO:PLAYER == 176 && (CFLAG:5001 & 2)
+			CFLAG:5004 |= 1
+	;陥落済み반발3
+	ELSEIF MARK:반발각인 >= 3
+		;リアクションなし
+		PRINTL
+	ELSEIF (TALENT:연모 || TALENT:친애) && SEX_COM
+		;목조르기セックス/목조르기애널
+		IF SELECTCOM == 513 || SELECTCOM == 514
+			;地の文と食い違いますが、強制的にストレス値追加
+			CFLAG:10 += 1
+			;中田氏
+			IF TFLAG:2 > 0
+				PRINTFORM \@SELECTCOM == 513?血液と愛液#腸液\@と精液とを
+			ELSE
+				PRINTFORM \@SELECTCOM == 513?血液と愛液#腸液\@を
+			ENDIF
+			PRINTFORM \@SELECTCOM == 513?股#애널\@から垂れ流しながら、
+			PRINTFORML %CALLNAME%は呆然とした面持ちをしている
+			SIF TALENT:PLAYER:새드
+				PRINTFORML また、その首には%CALLNAME:PLAYER%の掌の跡がまざまざと残っている
+			;強制的に怯えオン
+			CFLAG:5005 |= 64
+		;真友ルート　연모　初姦通
+		ELSEIF (CFLAG:5001 & 2) && TALENT:연모 && FIRST_VIRGIN
+			;地の文と食い違いますが、強制的にストレス値追加
+			CFLAG:10 += 1
+			PRINTFORML 「あは、……　ぼくの、はじめて、……、もう……」
+			PRINTFORML %CALLNAME%は呆然とした面持ちをしている…
+			;強制的に怯えオン
+			CFLAG:5005 |= 64
+		;それ以外の연모
+		ELSEIF TALENT:연모
+			PRINTFORML 「あ、ぁ……　はっ、ぁあ…　あっ…」
+			PRINTFORML %CALLNAME%はいっぱいいっぱいの様子で、快感に打ち震えている…
+		;妄執친애
+		ELSEIF (CFLAG:5001 & 8) && TALENT:친애
+			PRINTFORML 「あは、……はじめて、っ、ん…もらって、っ……」
+			PRINTFORML %CALLNAME%は陶酔しきった顔をしている…
+		;それ以外の친애
+		ELSEIF TALENT:친애
+			PRINTFORML 「はっ、ぁ……なんだか、가슴がいっぱいだ……」
+			PRINTFORML %CALLNAME%はいっぱいいっぱいになりながらも、顔を綻ばせていた
+			PRINTFORML その瞳には涙が潤んでいる…
+		ENDIF
+	ENDIF
+	PRINTW 
+ENDIF
+RETURN LOCAL
+
+;==================================================
+;性交時の喘ぎ입上
+;日本語喋るときと喋らないときの差が激しい
+;==================================================
+@SEX_COM_174_PANT
+;-------------------------------------------------
+;記入チェック（=0, 非表示、1, 表示）
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL
+	;怯え
+	IF (CFLAG:5005 & 64)
+		SELECTCASE RAND:4
+			CASE 3
+				PRINTFORML 「、んっ、ひ…ぃ……、もっ…、やめ……っ、ぇ…ぐ…っ…」
+			CASE 2
+				PRINTFORML 「ぐ……、やっ…ぁ、ん、っ……ひ、…やめ……」
+			CASE 1
+				PRINTFORML 「ひっ…、ぁ、ぐ……、ぁ、ぁ…っ、やっ、…やだ……っ…」
+			CASE 0
+				PRINTFORML 「ぁ…っ、あっ、ぁ、ぃ……やめ…、ぁ、ん…やっ……」
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;반발蕩け　기승위
+	IF (CFLAG:5005 & 128) && (SELECTCOM == 106 || SELECTCOM == 116)
+		SELECTCASE RAND:3
+			CASE 2
+				PRINTFORML 「やっ、やめ……、こっ、こんな、こと…　ん、ぁ……っ…」
+			CASE 1
+				PRINTFORML 「ぐ、…っ…んん…、やめっ…、っ、ぁ……」
+			CASE 0
+				PRINTFORML 「ぁ…っ……、ど、して…、っ、ん、ぁ……こんな、…ぁっ…」
+		ENDSELECT
+		PRINTFORML %CALLNAME%は快楽と屈辱の混ざり合った顔で%CALLNAME:PLAYER%を睨みつけている
+		RETURN LOCAL
+	ENDIF
+	
+	;반발　기승위
+	IF (CFLAG:5005 & 32) && (SELECTCOM == 106 || SELECTCOM == 116)
+		SELECTCASE RAND:3
+			CASE 3
+				PRINTFORML 「こん、ん…っな…、こと…っ、……」
+			CASE 2
+				PRINTFORML 「この……、大馬鹿者…っ…、ん…」
+			CASE 1
+				PRINTFORML 「ん…っ、ぐ…、っ、どうして、こんなこと……」
+			CASE 0
+				PRINTFORML 「ぅ……、っ…恥知らず…が…っ…、ぁ……」
+		ENDSELECT
+		PRINTFORML %CALLNAME%は屈辱にまみれた顔で%CALLNAME:PLAYER%を睨みつけている
+		RETURN LOCAL
+	ENDIF
+	
+	;반발　반발蕩け
+	IF (CFLAG:5005 & 128) || (CFLAG:5005 & 32)
+		SELECTCASE RAND:4
+			CASE 3
+				PRINTFORML 「やめ、ろ……　やっ…、ぁ、ああっ、ぐ、…ぅ、ん……　っあ、あ」
+			CASE 2
+				PRINTFORML 「はなっ、せ……、やめっ、っひ、…　ぬけ、ぇ……っ…」
+			CASE 1
+				PRINTFORML 「ぐ、…っ…んん…、やめっ…、っ、ぎ……」
+			CASE 0
+				PRINTFORML 「おい…っ……、やめ…ろ、とっ、ぁ……言って、…っ…」
+		ENDSELECT
+		SIF (CFLAG:5005 & 128)
+			PRINT 快感に身体を震わせながらも、
+		PRINTFORML %CALLNAME%は必死にもがいて저항している
+		RETURN LOCAL
+	ENDIF
+	
+	;蕩け強
+	IF (CFLAG:5005 & 16)
+		SELECTCASE RAND:8
+			CASE 7
+				PRINTFORML 「ぃ…あ……っ、ああ…っぐりぐり…、や、め…っぇ……っ…」
+			CASE 6
+				;배면좌위/배면좌위애널：103/113
+				IF SELECTCOM == 103 | SELECTCOM == 113
+					PRINTFORML 「ぁ、おく…　っあ…っ……、ぁ…っ、や、ぁ…」
+				;후배위/후배위애널：101/111　배면입위/배면입위애널：105/115
+				ELSEIF SELECTCOM % 2 == 1
+					PRINTFORML 「っ、ひ…ぁ……　こん、なケモノみたいな…っ、ぁ、ああっ…」
+				ELSE
+					PRINTFORML 「ぁ、やだ…　み、るなぁ…っ……、ぁ…っ、や、ぁ…」
+					PRINTFORML %CALLNAME%は羞恥からか顔を必死で背けている
+				ENDIF
+			CASE 5
+				PRINTFORML 「っ…ぁ、あ……　そこ…、やっ、ぁっ……や…、ぇ……、ん、ぃ…」
+			CASE 4
+				PRINTFORML 「ぁあ、清麿の、…っ、ぁは……はいって、ぇ……」
+				IF TALENT:달마 || TALENT:양팔결손 || TEQUIP:밧줄
+					PRINTFORML %CALLNAME%は恍惚とした様子で、快感に身をゆだねている
+				ELSE
+					PRINTFORML %CALLNAME%は恍惚とした様子で、下腹部に손を当てている
+				ENDIF
+			CASE 3
+				PRINTFORML 「や…っ、ぁ　なか…っ、おく、っ、あぁ…ぃ……、っ」
+			CASE 2
+				PRINTFORML 「清麿……、ぁ、あっ、は…ぁ、ぁああ……　ん、きもち、ぃ…」
+			CASE 1
+				PRINTFORML 「ぁ…、ぅ…ぁあっ…　やっぁ……あ、んっ、ぃ……」
+			CASE 0
+				PRINTFORML 「っ、清麿…っ……　ぎゅって、し、っぃ、ぁあ……！」
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;該当するものがなければ汎用喘ぎへ
+	CALL PANT_VOICE_EX
+	
+ENDIF
+RETURN LOCAL
+
+;==================================================
+;性交時の中田氏입上
+;==================================================
+@SEX_EVENT_174_PALAMCNG_A_K174_17_18
+#DIM DYNAMIC PREGNANCY_ABLE = 0
+;-------------------------------------------------
+;記入チェック（=0, 非表示、1, 表示）
+LOCAL = 1
+;-------------------------------------------------
+IF LOCAL 
+	;임신可能な場合
+	;オンナ、후타나리の場合にＶ中田氏　남자、반음반양、컨트보이　かつ오메가の場合にＡ中田氏
+	SIF (MALE(TARGET) == 0 && VAGINA(TARGET) && SEXPLAY(TARGET) == 1) || (MALE(TARGET) == 1 && TALENT:오메가 && SEXPLAY(TARGET) == 2)
+		PREGNANCY_ABLE = 1
+	
+	;妄執　임신可能
+	IF (CFLAG:5005 & 4) && PREGNANCY_ABLE
+		SELECTCASE RAND:3
+			CASE 2
+				PRINTFORML 「ぁ、っ　ね、ぇ……おく　っ…だして……、お、く…ぅっ…、ん、んん…っ……」
+			CASE 1
+				PRINTFORML 「なか…っ、なか　ほし…、い…っ　ん、ぁ、あっあぁああっ…　ぁ…っあ……っ…」
+			CASE 0
+				PRINTFORML 「ちょうだい、っ　なか　ったくさん、だ、して…っ……　んっ、ぃ、ぁああ…っ！」
+		ENDSELECT
+		;정상위　대면좌위　대면입위　駅弁　かつ両발ともある
+		SIF (SELECTCOM == 100 || SELECTCOM == 102 || SELECTCOM == 104 || SELECTCOM == 510) && (TALENT:양다리결손 == 0 && TALENT:한다리결손 == 0)
+			PRINTFORML %CALLNAME%は%CALLNAME:PLAYER%に발を絡め、しがみついている
+		RETURN LOCAL
+	ENDIF
+	
+	;怯え　임신可能
+	IF (CFLAG:5005 & 64) && PREGNANCY_ABLE
+		SELECTCASE RAND:2
+			CASE 1
+				PRINTFORML 「っ、や、ぁ…っ　まって　なかは…っ　っ、ひ…っ、ぐ…、ぁ……」
+			CASE 0
+				PRINTFORML 「あ…、やめっ……　やめ、やだっ　おく…っでてっ、ぅ…っ……」
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;怯え
+	IF (CFLAG:5005 & 64)
+		SELECTCASE RAND:2
+			CASE 1
+				PRINTFORML 「ぁ、っ、う…ぁ……　な、なか…っ…ぁ……　っん、んん…ぅ……」
+			CASE 0
+				PRINTFORML 「ん…っ、ぁ……あ　っ、ひ…　ぁ、ぅ…んっ　ぐ……」
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;반발　임신可能
+	IF (CFLAG:5005 & 32) && PREGNANCY_ABLE
+		SELECTCASE RAND:2
+			CASE 1
+				PRINTFORML 「まって…っ、まって、！　ぁ、なか、は…ぁっ…やめ……っ、ぁ」
+			CASE 0
+				PRINTFORML 「ぁ……っ、っやめ　なかは…っ、や、やだ…っ……」
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;반발
+	IF (CFLAG:5005 & 32)
+		SELECTCASE RAND:2
+			CASE 1
+				PRINTFORML 「っ、ぐ…ぁ……　ぁ…やめ…っんん、ぅ…っ……　なかに…っ……」
+			CASE 0
+				PRINTFORML 「くっ…、ん、んぐ…　なか…っ…や…　め……ぅ、ぁ…」
+		ENDSELECT
+	ENDIF
+	
+	;蕩け強
+	IF (CFLAG:5005 & 16)
+		SELECTCASE RAND:2
+			CASE 1
+				PRINTFORML 「ぁっ、ん……　おく、ぉ…　どくどく　でてっ…ぁ、んん…っ　あ、ぇ……」
+			CASE 0
+				IF TALENT:임신
+					PRINTFORML 「っ、あ、ぁ…なか　ぁ、っ……　こども、いるのに…ぁ…、ぅ、ん……」
+				ELSEIF PREGNANCY_ABLE
+					PRINTFORML 「っ、あ、ぁ…なか　ぁ、っ……　こども、できちゃ…ぁ…、ぅ、ん……」
+				ELSE
+					PRINTFORML 「っ、あ、ぁ…なか　ぁ、っ……　おく、にでて…ぇ…、ぁ…ぅ……、ん……」
+				ENDIF
+		ENDSELECT
+		RETURN LOCAL
+	ENDIF
+	
+	;それ以外
+	SELECTCASE RAND:2
+		CASE 1
+			PRINTFORML 「は…っ、ぁ……　ぁ、ぁあ…っ、なか…ぁ、でて…っ……」
+		CASE 0
+			PRINTFORML 「んっ…、ぅ　あっ　あっ、ぁああ…おく…っ…ん、ぁ…っ…」
+	ENDSELECT
+
+ENDIF
+

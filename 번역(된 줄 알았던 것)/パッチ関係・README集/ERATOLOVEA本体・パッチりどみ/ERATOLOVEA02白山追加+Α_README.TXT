@@ -39,7 +39,7 @@ eraToLoveA02용 패치 통계 20190410
 CSV＞Item.csv 109행째~
 　빠져 있던 캐릭터를 추가. 사용하고 있는 모습은 없지만 일단
 
-ERB＞입상＞KOJO_FUNCTION.ERB 98행째~
+ERB＞대사＞KOJO_FUNCTION.ERB 98행째~
 　장머리카락판정 함수에 빠져 있던 캐릭터를 추가
 
 ERB＞일상 이벤트＞DAILY_LIFE_COMMON.ERB 373행째~

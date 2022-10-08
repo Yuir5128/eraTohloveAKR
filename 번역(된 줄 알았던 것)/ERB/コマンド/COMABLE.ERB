@@ -329,7 +329,7 @@ SIF TEQUIP:지하실 || TEQUIP:촉수
 RETURN 1
 
 ;-------------------------------------------------
-;13, 니틀캡
+;13, 니플캡
 @COM_ABLE13
 ;-------------------------------------------------
 ;일괄관리
@@ -344,7 +344,7 @@ SIF TEQUIP:속옷（위） || TOPS(TARGET)
 SIF ITEM:니플캡 == 0 && NOITEM == 0
 	RETURN 0
 ;해제는 언제라도 가능
-SIF TEQUIP:니틀캡
+SIF TEQUIP:니플캡
 	RETURN 1
 
 ;조교자가양팔결손, 달마라면 불가
@@ -411,7 +411,7 @@ SIF TEQUIP:유두클립
 	RETURN 1
 
 ;B계 도구 사용중은 불가
-SIF TEQUIP:니틀캡 || TEQUIP:착유기
+SIF TEQUIP:니플캡 || TEQUIP:착유기
 	RETURN 0
 
 ;촉수조교중은 안돼
@@ -484,7 +484,7 @@ SIF TALENT:모유체질 == 0
 	RETURN 0
 
 ;B계 도구 사용중은 불가
-SIF TEQUIP:니틀캡 || TEQUIP:유두클립
+SIF TEQUIP:니플캡 || TEQUIP:유두클립
 	RETURN 0
 ;샤워중은 안돼
 SIF TEQUIP:샤워
@@ -4452,7 +4452,7 @@ SIF GLOBAL_COMABLE(229)
 RETURN 1
 
 ;-------------------------------------------------
-;230, 역니틀캡
+;230, 역니플캡
 @COM_ABLE230
 ;-------------------------------------------------
 ;일괄관리
@@ -4494,7 +4494,7 @@ SIF TALENT:PLAYER:모유체질 == 0
 	RETURN 0
 
 ;B계 도구 사용중은 불가
-SIF TEQUIP:PLAYER:니틀캡 || TEQUIP:PLAYER:유두클립 || TEQUIP:PLAYER:착유기
+SIF TEQUIP:PLAYER:니플캡 || TEQUIP:PLAYER:유두클립 || TEQUIP:PLAYER:착유기
 	RETURN 0
 
 ;지하실/촉수조교중은 안돼
@@ -8357,7 +8357,7 @@ SIF TEQUIP:속옷（위） || TEQUIP:상의 || TOPS(TARGET)
 	RETURN 0
 
 ;B계 도구 사용중은 불가
-SIF TEQUIP:니틀캡 || TEQUIP:유두클립
+SIF TEQUIP:니플캡 || TEQUIP:유두클립
 	RETURN 0
 
 ;지하실/촉수조교중은 안돼

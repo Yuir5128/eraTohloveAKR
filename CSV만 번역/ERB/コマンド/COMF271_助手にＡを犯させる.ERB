@@ -1,0 +1,309 @@
+﻿;-------------------------------------------------
+;촉수에A를범하게시킨다
+;主人애널수系コマンド
+;-------------------------------------------------
+@COM271
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;奴隷が助손を犯していると「連結（主人←助손←奴隷）」
+	IF PREVCOM == 430 || PREVCOM == 431
+		CALL COM_ABLE519
+		IF RESULT == 1
+			TFLAG:40 = 0
+			IF PREVCOM == 430
+				TFLAG:49 = 11
+			ELSE
+				TFLAG:49 = 12
+			ENDIF
+			TFLAG:41 = 7
+			JUMP COM519
+		ENDIF
+	;主人が奴隷を犯していると「連結（奴隷←主人←助손）」
+	ELSEIF PREVCOM == 100 || PREVCOM == 101 || PREVCOM == 104 || PREVCOM == 105 || PREVCOM == 110 || PREVCOM == 111 || PREVCOM == 114 || PREVCOM == 115
+		CALL COM_ABLE519
+		IF RESULT == 1
+			IF PREVCOM == 100 || PREVCOM == 101 || PREVCOM == 104 || PREVCOM == 105
+				TFLAG:40 = 1
+			ELSE
+				TFLAG:40 = 2
+			ENDIF
+			TFLAG:41 = 7
+			TFLAG:49 = 0
+			JUMP COM519
+		ENDIF
+	;両方Ａ挿入していると「二輪挿し애널させる」
+	ELSEIF PREVCOM == 265
+		CALL COM_ABLE523
+		IF RESULT == 1
+			TFLAG:40 = 0
+			TFLAG:41 = 7
+			TFLAG:49 = 7
+			JUMP COM523
+		ENDIF
+	;奴隷を입奉仕していると「サンドイッチさせる」
+	ELSEIF PREVCOM == 31 || PREVCOM == 40 || PREVCOM == 280
+		CALL COM_ABLE520
+		IF RESULT == 1
+			IF PREVCOM == 31
+				TFLAG:40 = 3
+			ELSEIF PREVCOM == 40
+				TFLAG:40 = 4
+			ELSEIF PREVCOM == 280
+				TFLAG:40 = 5
+			ENDIF
+			TFLAG:41 = 7
+			TFLAG:49 = 0
+			JUMP COM520
+		ENDIF
+	;前回コマンドも３Ｐ系
+	ELSEIF PREVCOM == 519 || PREVCOM == 520 || PREVCOM == 523
+		;奴隷に입奉仕してれば「サンドイッチさせる」
+		IF TFLAG:40 == 3 || TFLAG:40 == 4 || TFLAG:40 == 5
+			CALL COM_ABLE520
+			IF RESULT == 1
+				TFLAG:41 = 7
+				TFLAG:49 = 0
+				JUMP COM520
+			ENDIF
+		;主人が奴隷を犯していると「連結（奴隷←主人←助손）」
+		ELSEIF TFLAG:40 == 1 || TFLAG:40 == 2
+			CALL COM_ABLE519
+			IF RESULT == 1
+				TFLAG:41 = 7
+				TFLAG:49 = 0
+				JUMP COM519
+			ENDIF
+		;両方Ａ挿入していると「二輪挿し애널させる」
+		ELSEIF TFLAG:49 == 7
+			CALL COM_ABLE523
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:41 = 7
+				JUMP COM523
+			ENDIF
+		;奴隷が助손を犯していると「連結（主人←助손←奴隷）」
+		ELSEIF TFLAG:49 == 11 || TFLAG:49 == 12
+			CALL COM_ABLE519
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:41 = 7
+				JUMP COM519
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;何も読まずにこっちに来たときはフラグ解除
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 촉수에A를범하게시킨다
+STR:0 = 촉수에A를범하게시킨다
+
+CALL KOJO_MESSAGE_COM
+
+;調教者が백버진だった場合の喪失フラグ
+SIF TALENT:PLAYER:백버진
+	TFLAG:161 |= 2
+
+;助손が동정だった場合の喪失フラグ
+SIF TALENT:ASSI:동정
+	TFLAG:160 |= 3
+
+
+;挿入個所判定フラグ
+TFLAG:705 = 1
+;-------------------------------------------------
+;사정ゲージチェック（主人）
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_MA1
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+
+;-------------------------------------------------
+;사정ゲージチェック(助손)
+;-------------------------------------------------
+B = 1350
+
+CALL SHOOT_GAUGE_CHECK_MA2
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:ASSI:9 > 0
+	B /= 20
+
+SIF PENIS(ASSI)
+	BASE:ASSI:사정 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 0
+LOSEBASE:기력 += 100
+
+SOURCE:액체 += 100
+SOURCE:굴복 += 1500
+SOURCE:일탈 += 700
+SOURCE:반발 += 700
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 700
+
+;助손と奴隷の相性によって、全体のソースが変化
+T = NO:TARGET
+A = NO:ASSI
+SOURCE:액체 *= RELATION:A
+SOURCE:굴복 *= RELATION:A
+SOURCE:울굴 *= RELATION:A
+SOURCE:일탈 *= RELATION:A
+SOURCE:반발 *= RELATION:A
+SOURCE:액체 /= 100
+SOURCE:굴복 /= 100
+SOURCE:울굴 /= 100
+SOURCE:일탈 /= 100
+SOURCE:반발 /= 100
+
+
+;-------------------------------------------------
+;사정チェック（主人）
+;-------------------------------------------------
+CALL SAMEN_CHECK(MASTER,1)
+
+;사정時の処理
+IF E >= 1
+	;사정先タイプの設定
+	TFLAG:703 = 9
+	;사정先選択の可・不可
+	TFLAG:704 = 0
+	;汎用的な処理はこの関数で行う
+	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;촉수에범하게시킨다で主人が사정したフラグ
+IF E == 2
+	TFLAG:7 = 4
+ELSEIF E == 1
+	TFLAG:7 = 3
+ENDIF
+
+;-------------------------------------------------
+;사정チェック（助손）
+;-------------------------------------------------
+CALL SAMEN_CHECK(ASSI)
+IF E >= 1
+	;사정先タイプの設定
+	TFLAG:703 = 6
+	;사정先選択の可・不可
+	TFLAG:704 = 0
+	;汎用的な処理はこの関数で行う
+	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;助손のＣ⇔主人のＡと장내の汚れが移動
+;페니스밴드を使う場合、汚れは移動しない
+SIF PENIS(ASSI)
+	CALL COM_STAIN
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;主人が백버진かつ애널挿入だった場合の喪失
+IF TALENT:PLAYER:백버진
+	PRINTFORMW %CALLNAME:PLAYER%が백버진喪失
+	TALENT:PLAYER:백버진 = 0
+	EXP:PLAYER:이상경험 += 1
+	PRINTFORML %CALLNAME:PLAYER%の이상경험＋１
+	;異常な状態での후처녀喪失で이상경험を加算する
+	;후처녀喪失の相손がにょたかちびの自分
+		;にょたちびサーチ
+		R = NO:PLAYER
+		L = NO:ASSI
+		CALL GET_JIBUN
+		IF A
+			PRINTFORML %CALLNAME:ASSI%相손に백버진喪失で이상경험＋１
+			EXP:PLAYER:이상경험 += 1
+		ENDIF
+	;후처녀喪失を撮影された
+	IF TEQUIP:비디오카메라
+		PRINTL 비디오촬영中に백버진喪失で이상경험＋１
+		EXP:PLAYER:이상경험 += 1
+	ENDIF
+	IF (CFLAG:99 & 4) == 0
+		IF RELATION:(NO:PLAYER) > 100
+			EXP:이상경험 += 1
+			PRINTFORML %CALLNAME%に이상경험＋１
+		ENDIF
+		CFLAG:99 |= 4
+	ENDIF
+	;へたくしょん用面識判定の更新
+	G = (2099 + NO:ASSI)
+	H = (2099 + NO:PLAYER)
+	CFLAG:ASSI:H |= 256
+	CFLAG:PLAYER:G |= 512
+	;백버진喪失相손の記録
+	CSTR:MASTER:12 = %CALLNAME:ASSI%
+ENDIF
+
+EXP:PLAYER:A경험 += 1
+
+;主人が소인체형で助손が말자지だった場合
+IF TALENT:PLAYER:소인체형 && TALENT:ASSI:말자지
+	IF EXP:PLAYER:A확장경험 == 0
+		EXP:PLAYER:이상경험 += 1
+		PRINTFORML Ａ拡張初経験で%CALLNAME:PLAYER%の이상경험＋１
+	ENDIF
+	EXP:PLAYER:A확장경험 += 1
+	PRINTFORML %CALLNAME:PLAYER%のA확장경험＋１
+ENDIF
+
+;성교경험
+EXP:ASSI:성교경험 += 1
+EXP:MASTER:성교경험 += 1
+PRINTS EXPNAME:4
+PRINTL +1
+
+;삽입경험
+EXP:ASSI:삽입경험 += 1
+
+;게이경험とか加算
+CALL COM_EXP(10)
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+T = NO:TARGET
+A = NO:ASSI
+;依存度補正値(助손との相性100↑かつ음란で1、창부で2）
+IF TALENT:음란 && RELATION:A > 100
+	TFLAG:30 += 1
+ELSEIF TALENT:창부 && RELATION:A > 100
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+

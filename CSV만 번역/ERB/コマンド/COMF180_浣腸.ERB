@@ -1,0 +1,129 @@
+﻿;-------------------------------------------------
+;관장器＋プラグ
+;スカ系コマンド
+;-------------------------------------------------
+@COM180
+
+IF TEQUIP:촉수
+	PRINTL 촉수관장
+	STR:0 = 촉수관장
+	SELECTCOM = 352
+ELSE
+	PRINTL 관장
+	STR:0 = 관장
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 50
+
+SOURCE:쾌A += 50
+
+SOURCE:통증 += 100
+;지하실にいると고통のソース追加
+SIF TEQUIP:지하실
+	TIMES SOURCE:통증 , 1.50
+
+SOURCE:두려움 += 200
+
+SOURCE:노출 += 300
+SOURCE:굴복 += 100
+SOURCE:불결 += 500
+SOURCE:일탈 += 500
+SOURCE:반발 += 500
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;Aへの고통は先に処理しておく
+;EXP:A경험をみる
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:통증 , 3.00
+	TIMES SOURCE:반발 , 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:통증 , 0.80
+	TIMES SOURCE:반발 , 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:통증 , 0.60
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:통증 , 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.00
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;촉수がいる場合は촉수の汚れを追加
+SIF TEQUIP:촉수
+	CALL COM_STAIN
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;A경험
+EXP:A경험 += 5
+PRINTL A경험＋5
+
+IF EXP:관장경험 == 0
+	EXP:이상경험 += 1
+	PRINTFORML 初관장で이상경험＋１
+ENDIF
+EXP:관장경험 += 1
+
+IF BASE:변의 >= 60
+	BASE:변의 += 20
+ELSE
+	BASE:변의 += 60
+ENDIF
+
+;게이경험とか加算
+CALL COM_EXP(1)
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+

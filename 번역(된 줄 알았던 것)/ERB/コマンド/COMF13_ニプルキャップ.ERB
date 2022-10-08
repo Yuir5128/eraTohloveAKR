@@ -1,5 +1,5 @@
 ﻿;-------------------------------------------------
-;니틀캡
+;니플캡
 ;B계 조교 커맨드
 ;-------------------------------------------------
 @COM13
@@ -9,18 +9,18 @@ IF TEQUIP:촉수
 	STR:0 = 촉수유두고문
 	SELECTCOM = 341
 ELSE
-	PRINTL 니틀캡
-	STR:0 = 니틀캡
+	PRINTL 니플캡
+	STR:0 = 니플캡
 ENDIF
 
 CALL KOJO_MESSAGE_COM
 
 
 ;착탈의 처리
-IF TEQUIP:니틀캡 == 0
-	TEQUIP:니틀캡 = 1
+IF TEQUIP:니플캡 == 0
+	TEQUIP:니플캡 = 1
 ELSE
-	TEQUIP:니틀캡 = 0
+	TEQUIP:니플캡 = 0
 ENDIF
 
 

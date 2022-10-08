@@ -1,0 +1,168 @@
+﻿;-------------------------------------------------
+;촉수관통
+;촉수-拷問系コマンド
+;-------------------------------------------------
+@COM371
+
+PRINTL 촉수관통
+STR:0 = 촉수관통
+
+CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 800
+LOSEBASE:기력 += 800
+
+IF EXP:촉수경험 < EXPLV:1
+	TIMES LOSEBASE:체력 , 1.10
+	TIMES LOSEBASE:기력 , 2.00
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES LOSEBASE:체력 , 0.90
+	TIMES LOSEBASE:기력 , 1.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES LOSEBASE:체력 , 0.80
+	TIMES LOSEBASE:기력 , 1.50
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES LOSEBASE:체력 , 0.70
+	TIMES LOSEBASE:기력 , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES LOSEBASE:체력 , 0.60
+	TIMES LOSEBASE:기력 , 1.00
+ELSE
+	TIMES LOSEBASE:체력 , 0.50
+	TIMES LOSEBASE:기력 , 0.50
+ENDIF
+
+IF EXP:관통경험 < EXPLV:1
+	TIMES LOSEBASE:체력 , 1.10
+	TIMES LOSEBASE:기력 , 2.00
+ELSEIF EXP:관통경험 < EXPLV:2
+	TIMES LOSEBASE:체력 , 0.90
+	TIMES LOSEBASE:기력 , 1.80
+ELSEIF EXP:관통경험 < EXPLV:3
+	TIMES LOSEBASE:체력 , 0.80
+	TIMES LOSEBASE:기력 , 1.50
+ELSEIF EXP:관통경험 < EXPLV:4
+	TIMES LOSEBASE:체력 , 0.70
+	TIMES LOSEBASE:기력 , 1.20
+ELSEIF EXP:관통경험 < EXPLV:5
+	TIMES LOSEBASE:체력 , 0.60
+	TIMES LOSEBASE:기력 , 1.00
+ELSE
+	TIMES LOSEBASE:체력 , 0.50
+	TIMES LOSEBASE:기력 , 0.50
+ENDIF
+
+;ABL:A감각をみる
+IF ABL:A감각 == 0
+	SOURCE:쾌A += 50
+ELSEIF ABL:A감각 == 1
+	SOURCE:쾌A += 150
+ELSEIF ABL:A감각 == 2
+	SOURCE:쾌A += 300
+ELSEIF ABL:A감각 == 3
+	SOURCE:쾌A += 600
+ELSEIF ABL:A감각 == 4
+	SOURCE:쾌A += 800
+ELSE
+	SOURCE:쾌A += 1000
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:쾌A , 0.40
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:쾌A , 0.80
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:쾌A , 1.00
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:쾌A , 1.40
+ELSE
+	TIMES SOURCE:쾌A , 1.80
+ENDIF
+
+SOURCE:통증 += 8000
+SOURCE:두려움 += 16500
+
+SOURCE:노출 += 1000
+SOURCE:굴복 += 3000
+SOURCE:일탈 += 5600
+
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;촉수경험を見る
+IF EXP:촉수경험 < EXPLV:1
+	SOURCE:통증 += 1000
+ELSEIF EXP:촉수경험 < EXPLV:2
+	SOURCE:통증 += 800
+ELSEIF EXP:촉수경험 < EXPLV:3
+	SOURCE:통증 += 500
+ELSEIF EXP:촉수경험 < EXPLV:4
+	SOURCE:통증 += 100
+ELSEIF EXP:촉수경험 < EXPLV:5
+	SOURCE:통증 += 50
+ENDIF
+
+;관통경험を見る
+IF EXP:관통경험 < EXPLV:1
+	SOURCE:중독충족 += 1500
+	TIMES SOURCE:두려움 , 1.80
+ELSEIF EXP:관통경험 < EXPLV:2
+	SOURCE:중독충족 += 1700
+	TIMES SOURCE:두려움 , 1.50
+ELSEIF EXP:관통경험 < EXPLV:3
+	SOURCE:중독충족 += 2000
+	TIMES SOURCE:두려움 , 1.20
+ELSEIF EXP:관통경험 < EXPLV:4
+	SOURCE:중독충족 += 2500
+ELSEIF EXP:관통경험 < EXPLV:5
+	SOURCE:중독충족 += 3300
+	TIMES SOURCE:두려움 , 0.80
+ELSE
+	SOURCE:중독충족 += 4200
+	TIMES SOURCE:두려움 , 0.50
+ENDIF
+
+;ストレスいっぱい増加
+CFLAG:10 += RAND:50
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;汚れ処理
+STAIN:애널 |= 32
+STAIN:장내 |= 32
+STAIN:입 |= 32
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF EXP:관통경험 == 0
+	EXP:이상경험 += 1
+	PRINTL 貫通初経験で이상경험＋1
+ENDIF
+
+EXP:A경험 += 25
+PRINTL A경험＋25
+
+T = 1
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 = 4
+ENDIF
+
+RETURN 1
+

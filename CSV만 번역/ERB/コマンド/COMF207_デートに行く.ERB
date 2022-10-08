@@ -1,0 +1,83 @@
+﻿;-------------------------------------------------
+;데이트간다
+;コミュニケーション系コマンド
+;-------------------------------------------------
+@COM207
+
+PRINTL 데이트간다
+STR:0 = 데이트간다
+
+;普通のデート
+TFLAG:17 = 1
+
+;노출デートは２。입上側で立てることができる。
+;TFLAG:17 = 2
+
+CALL KOJO_MESSAGE_COM
+
+;行かなかった場合は戻る
+SIF TFLAG:17 == 99
+	RETURN 0
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 200
+LOSEBASE:기력 += 50
+
+IF TFLAG:17 == 2
+	SOURCE:애정 += 200
+	SOURCE:성취감 += 300
+	SOURCE:순종 += 300
+	SOURCE:노출 += 600
+
+	;노출低いと逆に増加
+	SIF ABL:노출벽 < 2
+		CFLAG:TARGET:10 += 3
+ELSE
+	SOURCE:애정 += 200
+	SOURCE:성취감 += 300
+	SOURCE:순종 += 300
+	;ストレス減少処理
+	CFLAG:TARGET:10 -= 3
+	;연모系だとさらに減少
+	SIF TALENT:연모 || TALENT:친애
+		CFLAG:TARGET:10 -= 5
+ENDIF
+
+SIF TALENT:친애 || TALENT:연모
+	TIMES SOURCE:애정 , 1.50
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF TFLAG:17 == 2 && ABL:노출벽 >= 3
+	PRINTFORML %EXPNAME:23%＋３
+	EXP:애정경험 += 3
+ELSE
+	PRINTFORML %EXPNAME:23%＋３
+	EXP:애정경험 += 3
+ENDIF
+
+;移動時に尿・便存在をクリア
+TFLAG:66 = 0
+TFLAG:57 = 0
+
+CALL COM_STAIN
+
+
+;依存度ベクトル
+TFLAG:33 = 4
+
+;依存度補正値(연모で3、친애で5）
+IF TALENT:연모 && ASSIPLAY == 0
+	TFLAG:30 += 3
+ELSEIF TALENT:친애 && ASSIPLAY == 0
+	TFLAG:30 += 5
+ENDIF
+
+RETURN 1
+
+
+

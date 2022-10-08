@@ -1,0 +1,124 @@
+﻿;-------------------------------------------------
+;사정관리
+;ＳＭ-拘束系コマンド
+;-------------------------------------------------
+@COM134
+
+PRINTL 사정관리
+STR:0 = 사정관리
+CALL KOJO_MESSAGE_COM
+
+;리본の着脱
+IF TEQUIP:사정관리
+	;せき止めた精液が사정ゲージに加算される
+	BASE:사정 += EX:2 * MAXBASE:사정
+	TEQUIP:사정관리 = 0
+ELSE
+	PRINTL 속박경험＋1
+	EXP:속박경험 += 1
+	TEQUIP:사정관리 = 1
+ENDIF
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 30
+
+SOURCE:쾌C += 50
+
+SOURCE:통증 += 100
+
+SOURCE:노출 += 100
+SOURCE:굴복 += 250
+SOURCE:일탈 += 500
+
+
+;PALAM:C감각をみる
+IF PALAM:쾌C < PALAMLV:1
+	SOURCE:통증 += 100
+ELSEIF PALAM:쾌C < PALAMLV:2
+	SOURCE:통증 += 110
+ELSEIF PALAM:쾌C < PALAMLV:3
+	SOURCE:통증 += 120
+ELSEIF PALAM:쾌C < PALAMLV:4
+	SOURCE:통증 += 130
+ELSE
+	SOURCE:통증 += 140
+ENDIF
+
+;PALAM:욕정をみる
+IF PALAM:욕정 < PALAMLV:1
+	SOURCE:욕정 += 100
+ELSEIF PALAM:욕정 < PALAMLV:2
+	SOURCE:욕정 += 110
+ELSEIF PALAM:욕정 < PALAMLV:3
+	SOURCE:욕정 += 120
+ELSEIF PALAM:욕정 < PALAMLV:4
+	SOURCE:욕정 += 130
+ELSE
+	SOURCE:욕정 += 140
+ENDIF
+
+;ABL:마조끼をみる
+IF ABL:게이중독 == 0
+	TIMES SOURCE:욕정 , 0.80
+ELSEIF ABL:마조끼 == 1
+	TIMES SOURCE:욕정 , 1.00
+ELSEIF ABL:마조끼 == 2
+	TIMES SOURCE:욕정 , 1.30
+ELSEIF ABL:마조끼 == 3
+	TIMES SOURCE:욕정 , 1.60
+ELSEIF ABL:마조끼 == 4
+	TIMES SOURCE:욕정 , 2.00
+ELSE
+	TIMES SOURCE:욕정 , 3.00
+ENDIF
+
+;도착적
+SIF TALENT:도착적
+	TIMES SOURCE:욕정 , 2.00
+;調教者が새드、새드끼3以上
+SIF TALENT:PLAYER:새드 || ABL:PLAYER:10 > 2
+	TIMES SOURCE:반발 , 1.20
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;依存度ベクトル
+TFLAG:33 = 3
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+
+
+;--------------------------------------------------
+;사정관리
+;--------------------------------------------------
+@EQUIP_COM134
+PRINTL ＜사정抑制中＞
+
+LOSEBASE:체력 += 0
+LOSEBASE:기력 += 10
+
+SOURCE:성취감 += 20
+
+EXP:속박경험 += 1
+PRINTL 속박경험＋１
+
+

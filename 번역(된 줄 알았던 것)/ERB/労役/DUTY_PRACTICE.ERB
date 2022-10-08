@@ -124,9 +124,9 @@ ENDIF
 CFLAG:A:12 = 3
 CFLAG:B:12 = 3
 
-;2회KOJO_MESSAGE_EVENT 하는 것으로 억지로입상표 가리키게 한다
+;2회KOJO_MESSAGE_EVENT 하는 것으로 억지로대사표 가리키게 한다
 
-;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+;지문, 대사 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
 LOCAL = TARGET
 
 TFLAG:13 = 74
@@ -135,11 +135,11 @@ UCHIBAN_A = A
 UCHIBAN_B = B
 
 TARGET = A
-;이벤트입상(내번개시시);지문과 A의입상
+;이벤트대사(내번개시시);지문과 A의대사
 CALL KOJO_MESSAGE_EVENT
 
 TARGET = B
-;이벤트입상(내번개시시);B의입상
+;이벤트대사(내번개시시);B의대사
 CALL KOJO_MESSAGE_EVENT
 
 TARGET = LOCAL
@@ -179,8 +179,8 @@ REND
 DRAWLINE
 PRINTFORMW %CALLNAME:A%과 %CALLNAME:B%의손 맞추고 가 종료되었습니다
 
-;2회KOJO_MESSAGE_EVENT 하는 것으로 억지로입상표 가리키게 한다
-;지문, 입상 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
+;2회KOJO_MESSAGE_EVENT 하는 것으로 억지로대사표 가리키게 한다
+;지문, 대사 호출을 위해서(때문에) 일시적으로 현재의 조교 대상을 퇴피
 LOCAL = TARGET
 TFLAG:13 = 75
 
@@ -188,11 +188,11 @@ UCHIBAN_A = A
 UCHIBAN_B = B
 
 TARGET = A
-;이벤트입상(내번종료시);지문과 A의입상
+;이벤트대사(내번종료시);지문과 A의대사
 CALL KOJO_MESSAGE_EVENT
 
 TARGET = B
-;이벤트입상(내번종료시);B의입상
+;이벤트대사(내번종료시);B의대사
 CALL KOJO_MESSAGE_EVENT
 TARGET = LOCAL
 

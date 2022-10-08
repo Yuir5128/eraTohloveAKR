@@ -1,0 +1,643 @@
+﻿;-------------------------------------------------
+;関数名:DAILYLIFE_GETJUEL
+;概　要:ランダムで珠の取得をする関数
+;引　数:ARG:0…珠増加対象
+;　　　:ARG:1…珠の種類
+;      :ARG:2…増加基本値（ここから+-50%で増加）
+;戻り値:
+;備　考:日常イベントで使用
+;-------------------------------------------------
+@DAILYLIFE_GETJUEL(ARG, ARG:1, ARG:2)
+LOCAL = ARG:2 - (ARG:2 / 2) + RAND:(ARG:2)
+JUEL:ARG:(ARG:1) += LOCAL
+PRINTFORML %CALLNAME:ARG%の%PALAMNAME:(ARG:1)%＋{LOCAL}
+
+
+;-------------------------------------------------
+;関数名:DAILYLIFE_GETCHARA
+;概　要:日常イベントに登場できるキャラからランダムに選択する関数
+;引　数:ARG…1にすると未陥落/실의を除く
+;戻り値:選択されたキャラのキャラ登録番号、存在しなければ-1を返す
+;備　考:文中関数
+;-------------------------------------------------
+@DAILYLIFE_GETCHARA(ARG)
+#FUNCTION
+VARSET LOCAL
+FOR LOCAL, 0, CHARANUM
+	;主人は除く
+	SIF LOCAL == MASTER
+		CONTINUE
+	;日常イベントに登場不可
+	SIF !DAILYLIFE_CHARA(LOCAL, ARG)
+		CONTINUE
+	;既に登場しているキャラと被っていたら不可
+	SIF LOCAL == A || LOCAL == B || LOCAL == C
+		CONTINUE
+	;登場確率の操作
+	LOCAL:4 = 1
+	;반발３
+	IF MARK:LOCAL:반발각인 >= 3
+	;共犯者
+	ELSEIF CFLAG:LOCAL:1 == 3
+		IF !RAND:2
+			CONTINUE
+		ENDIF
+	;연모
+	ELSEIF CFLAG:LOCAL:39 == 3 || CFLAG:LOCAL:39 == 6 || CFLAG:LOCAL:39 == 165
+		LOCAL:4 = 3
+	;음란、복종
+	ELSEIF CFLAG:LOCAL:39 == 5 || CFLAG:LOCAL:39 == 8 || TALENT:LOCAL:음란 || TALENT:LOCAL:창부
+		LOCAL:4 = 2
+	ENDIF
+	FOR LOCAL:5, 0, LOCAL:4
+		LOCAL:(10 + LOCAL:1) = LOCAL
+		LOCAL:1++
+	NEXT
+NEXT
+LOCAL:3 = -1
+;条件に当てはまるキャラからランダムで１人選択する
+IF LOCAL:1
+	LOCAL:2 = RAND:(LOCAL:1)
+	LOCAL:3 = LOCAL:(10 + LOCAL:2)
+ENDIF
+RETURNF LOCAL:3
+
+;-------------------------------------------------
+;関数名:DAILYLIFE_GETTALENT_1
+;概　要:キャラの中から特定の素質のいずれかを持ったキャラ１人をピックアップする関数
+;引　数:素質番号(１０種類まで)
+;戻り値:ピックアップしたキャラの登録番号、不在であれば-1を返す
+;備　考:文中関数
+;-------------------------------------------------
+@DAILYLIFE_GETTALENT_1(ARG,ARG:1,ARG:2,ARG:3,ARG:4,ARG:5,ARG:6,ARG:7,ARG:8,ARG:9)
+#FUNCTION
+VARSET LOCAL
+FOR LOCAL, 0, CHARANUM
+	;主人は除く
+	SIF LOCAL == MASTER
+		CONTINUE
+	;日常イベントに登場不可
+	SIF !DAILYLIFE_CHARA(LOCAL)
+		CONTINUE
+	;該当素質を持っていない
+	SIF !TALENT:LOCAL:ARG || (ARG:1 && !TALENT:LOCAL:(ARG:1)) || (ARG:2 && !TALENT:LOCAL:(ARG:2)) || (ARG:3 && !TALENT:LOCAL:(ARG:3)) || (ARG:4 && !TALENT:LOCAL:(ARG:4)) || (ARG:5 && !TALENT:LOCAL:(ARG:5)) || (ARG:6 && !TALENT:LOCAL:(ARG:6)) || (ARG:7 && !TALENT:LOCAL:(ARG:7)) || (ARG:8 && !TALENT:LOCAL:(ARG:8)) || (ARG:9 && !TALENT:LOCAL:(ARG:9))
+		CONTINUE
+	;既に登場しているキャラと被っていたら不可
+	SIF LOCAL == A || LOCAL == B || LOCAL == C
+		CONTINUE
+	LOCAL:(10 + LOCAL:1) = LOCAL
+	LOCAL:1++
+NEXT
+LOCAL:3 = -1
+;条件に当てはまるキャラからランダムで１人選択する
+IF LOCAL:1
+	LOCAL:2 = RAND:(LOCAL:1)
+	LOCAL:3 = LOCAL:(10 + LOCAL:2)
+ENDIF
+RETURNF LOCAL:3
+
+
+;-------------------------------------------------
+;関数名:DAILYLIFE_GETTALENT_2
+;概　要:キャラの中から特定の素質を全て持ったキャラ１人をピックアップする関数
+;引　数:素質番号(１０種類まで)
+;戻り値:ピックアップしたキャラの登録番号、不在であれば-1を返す
+;備　考:文中関数
+;-------------------------------------------------
+@DAILYLIFE_GETTALENT_2(ARG,ARG:1,ARG:2,ARG:3,ARG:4,ARG:5,ARG:6,ARG:7,ARG:8,ARG:9)
+#FUNCTION
+VARSET LOCAL
+FOR LOCAL, 0, CHARANUM
+	;主人は除く
+	SIF LOCAL == MASTER
+		CONTINUE
+	;日常イベントに登場不可
+	SIF !DAILYLIFE_CHARA(LOCAL)
+		CONTINUE
+	;該当素質を持っていない
+	SIF !TALENT:LOCAL:ARG || (ARG:1 && !TALENT:LOCAL:(ARG:1)) || (ARG:2 && !TALENT:LOCAL:(ARG:2)) || (ARG:3 && !TALENT:LOCAL:(ARG:3)) || (ARG:4 && !TALENT:LOCAL:(ARG:4)) || (ARG:5 && !TALENT:LOCAL:(ARG:5)) || (ARG:6 && !TALENT:LOCAL:(ARG:6)) || (ARG:7 && !TALENT:LOCAL:(ARG:7)) || (ARG:8 && !TALENT:LOCAL:(ARG:8)) || (ARG:9 && !TALENT:LOCAL:(ARG:9))
+		CONTINUE
+	;既に登場しているキャラと被っていたら不可
+	SIF LOCAL == A || LOCAL == B || LOCAL == C
+		CONTINUE
+	LOCAL:(10 + LOCAL:1) = LOCAL
+	LOCAL:1++
+NEXT
+LOCAL:3 = -1
+;条件に当てはまるキャラからランダムで１人選択する
+IF LOCAL:1
+	LOCAL:2 = RAND:(LOCAL:1)
+	LOCAL:3 = LOCAL:(10 + LOCAL:2)
+ENDIF
+RETURNF LOCAL:3
+
+
+;-------------------------------------------------
+;関数名:NUMBER_OF_ABSENTEES
+;概　要:その場にいないキャラの数を数える関数
+;戻り値:その場に居ないキャラの数
+;備　考:
+;-------------------------------------------------
+@NUMBER_OF_ABSENTEES
+#FUNCTION
+VARSET LOCAL
+FOR LOCAL, 0, CHARANUM
+	SIF LOCAL == MASTER
+		CONTINUE
+	SIF DAILYLIFE_CHARA(LOCAL)
+		CONTINUE
+	LOCAL:1++
+NEXT
+RETURNF LOCAL:1
+
+;-------------------------------------------------
+;関数名:DAILYLIFE_CHARA
+;概　要:キャラが日常イベント出現できるか判定関数
+;引　数:ARG:0…キャラ登録番号
+;		ARG:1…1なら未陥落/실의状態で不可
+;戻り値:イベント出現できれば1、不可なら0
+;備　考:文中関数
+;-------------------------------------------------
+@DAILYLIFE_CHARA(ARG, ARG:1)
+#FUNCTION
+LOCAL = 1
+;主人は飛ばす
+SIF ARG == MASTER
+	LOCAL = 0
+;対象が労役中なら除外
+SIF CFLAG:ARG:12 > 0
+	LOCAL = 0
+;育児室に居るときは駄目
+SIF (TALENT:ARG:임신 && CFLAG:ARG:110 - 3 <= DAY) || TALENT:ARG:육아중
+	LOCAL = 0
+;발정기は駄目
+SIF TALENT:ARG:발정기
+	LOCAL = 0
+;붕괴は駄目
+SIF TALENT:ARG:붕괴
+	LOCAL = 0
+;기절は駄目
+SIF TALENT:ARG:기절
+	LOCAL = 0
+;初調教입上が表示されていない＋依存度が0（調教が行われていないことの代用）のキャラをチェック
+SIF CFLAG:ARG:120 == 0 && CFLAG:ARG:2 == 0
+	LOCAL = 0
+;ARG:1があるとき未陥落/실의状態ならダメ
+SIF ARG:1 && (!KANRAKU(ARG) || TALENT:ARG:실의)
+	LOCAL = 0
+RETURNF LOCAL
+
+;-------------------------------------------------
+;関数名:DAILYLIFE_NOCHARA
+;概　要:特定のキャラが日常イベント出現できるか判定関数
+;引　数:ARG:0…キャラ固有番号
+;		ARG:1…1なら未陥落/실의状態で不可
+;戻り値:イベント出現できればキャラ登録番号、不可なら-1
+;備　考:文中関数
+;-------------------------------------------------
+@DAILYLIFE_NOCHARA(ARG, ARG:1)
+#FUNCTION
+;そのキャラが存在するか
+GETCHARA ARG
+SIF RESULT == -1
+	RETURNF -1
+SIF ARG:1 && (!KANRAKU(RESULT) || TALENT:RESULT:실의)
+	RETURNF -1
+;すでに登場しているキャラと被っていたら不可
+SIF RESULT == A || RESULT == B || RESULT == C
+	RETURNF -1
+;日常イベント出場は可能か
+IF DAILYLIFE_CHARA(RESULT)
+	LOCAL = NO2(ARG)
+	RETURNF LOCAL
+ELSE
+	RETURNF -1
+ENDIF
+
+;-------------------------------------------------
+;体型判定用
+;-------------------------------------------------
+@BUILD
+S = 0
+;体型イメージ
+;남자　：大柄＞普通＞　小柄　＞小人
+;それ以外：　　大柄＞普通＞小柄＞小人
+;よって調教者が大きい＞同じくらい＞調教者が小さい 3 > 0 > -3
+;大柄＋男
+IF TALENT:PLAYER:큰체구 && MALE(PLAYER)
+	IF TALENT:큰체구 && MALE(TARGET)
+		S = 0
+	ELSEIF TALENT:큰체구
+		S = 1
+	ELSEIF TALENT:소인체형 || TALENT:작은체구
+		S = 3
+	ELSE
+		S = 2
+	ENDIF
+;大柄
+ELSEIF TALENT:PLAYER:큰체구
+	IF TALENT:큰체구 && MALE(TARGET)
+		S = -1
+	ELSEIF TALENT:큰체구 || MALE(TARGET)
+		S = 0
+	ELSEIF TALENT:소인체형 || TALENT:작은체구
+		S = 2
+	ELSE
+		S = 1
+	ENDIF
+;小柄
+ELSEIF TALENT:PLAYER:작은체구
+	IF TALENT:큰체구 && MALE(TARGET)
+		S = -2
+	ELSEIF TALENT:소인체형
+		S = 1
+	ELSEIF TALENT:작은체구
+		S = 0
+	ELSE
+		S = -1
+	ENDIF
+;小人
+ELSEIF TALENT:PLAYER:소인체형
+	IF TALENT:큰체구 && MALE(TARGET)
+		S = -3
+	ELSEIF TALENT:소인체형
+		S = 0
+	ELSEIF TALENT:작은체구
+		S = -1
+	ELSE
+		S = -2
+	ENDIF
+;普通体型の男
+ELSEIF MALE(PLAYER)
+	IF TALENT:큰체구 && MALE(TARGET)
+		S = -1
+	ELSEIF TALENT:소인체형 || TALENT:작은체구
+		S = 2
+	ELSEIF TALENT:큰체구 || MALE(TARGET)
+		S = 0
+	ELSE
+		S = 1
+	ENDIF
+;普通体型
+ELSE
+	IF TALENT:큰체구 && MALE(TARGET)
+		S = -2
+	ELSEIF TALENT:소인체형 || TALENT:작은체구
+		S = 1
+	ELSEIF TALENT:큰체구 || MALE(TARGET)
+		S = -1
+	ELSE
+		S = 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;関数名:BUILD2
+;概　要:体型判定関数、調教対象と調教者以外も判定できるようにしたもの
+;引　数:ARG:0…キャラ１の登録番号
+;		ARG:1…キャラ２の登録番号
+;戻り値:体型判定値
+;備　考:文中関数
+;남자　：大柄＞普通＞　小柄　＞小人
+;それ以外：　　大柄＞普通＞小柄＞小人
+;よって、キャラ２と比較してキャラ１が大きい＞同じくらい＞キャラ１が小さい 3 > 0 > -3
+;-------------------------------------------------
+@BUILD2(ARG, ARG:1)
+#FUNCTION
+;大柄＋男
+IF TALENT:ARG:큰체구 && MALE(ARG)
+	IF TALENT:(ARG:1):큰체구 && MALE(ARG:1)
+		LOCAL = 0
+	ELSEIF TALENT:(ARG:1):큰체구
+		LOCAL = 1
+	ELSEIF TALENT:(ARG:1):소인체형 || TALENT:(ARG:1):작은체구
+		LOCAL = 3
+	ELSE
+		LOCAL = 2
+	ENDIF
+;大柄
+ELSEIF TALENT:ARG:큰체구
+	IF TALENT:(ARG:1):큰체구 && MALE(ARG:1)
+		LOCAL = -1
+	ELSEIF TALENT:(ARG:1):큰체구 || MALE(ARG:1)
+		LOCAL = 0
+	ELSEIF TALENT:(ARG:1):소인체형 || TALENT:(ARG:1):작은체구
+		LOCAL = 2
+	ELSE
+		LOCAL = 1
+	ENDIF
+;小柄
+ELSEIF TALENT:ARG:작은체구
+	IF TALENT:(ARG:1):큰체구 && MALE(ARG:1)
+		LOCAL = -2
+	ELSEIF TALENT:(ARG:1):소인체형
+		LOCAL = 1
+	ELSEIF TALENT:(ARG:1):작은체구
+		LOCAL = 0
+	ELSE
+		LOCAL = -1
+	ENDIF
+;小人
+ELSEIF TALENT:ARG:소인체형
+	IF TALENT:(ARG:1):큰체구 && MALE(ARG:1)
+		LOCAL = -3
+	ELSEIF TALENT:(ARG:1):소인체형
+		LOCAL = 0
+	ELSEIF TALENT:(ARG:1):작은체구
+		LOCAL = -1
+	ELSE
+		LOCAL = -2
+	ENDIF
+;普通体型の男
+ELSEIF MALE(ARG)
+	IF TALENT:(ARG:1):큰체구 && MALE(ARG:1)
+		LOCAL = -1
+	ELSEIF TALENT:(ARG:1):소인체형 || TALENT:(ARG:1):작은체구
+		LOCAL = 2
+	ELSEIF TALENT:(ARG:1):큰체구 || MALE(ARG:1)
+		LOCAL = 0
+	ELSE
+		LOCAL = 1
+	ENDIF
+;普通体型
+ELSE
+	IF TALENT:(ARG:1):큰체구 && MALE(ARG:1)
+		LOCAL = -2
+	ELSEIF TALENT:(ARG:1):소인체형 || TALENT:(ARG:1):작은체구
+		LOCAL = 1
+	ELSEIF TALENT:(ARG:1):큰체구 || MALE(ARG:1)
+		LOCAL = -1
+	ELSE
+		LOCAL = 0
+	ENDIF
+ENDIF
+RETURNF LOCAL
+
+;-------------------------------------------------
+;関数名:RELATIONS2
+;概　要:関係判定関数
+;引　数:ARG:0…キャラ１の登録番号
+;		ARG:1…キャラ２の登録番号
+;戻り値:関係
+;備　考:文中関数
+;0=血縁無し1=兄弟2=兄弟？3=姉弟4=兄妹5=姉妹6=親子7=爺孫8=同派9=同一人物
+;
+;CFLAG:31　도파フラグ
+;1=三条　2=三池　3=青江　4=粟田입　5=古備前　6=来　7=村正　8=貞宗　9=長船
+;10=左文字　11=兼定　12=堀川　13=虎徹　14=虎徹…？　15=江　16=正宗　17=福岡一文字　18=豊후国行平
+;-------------------------------------------------
+@RELATIONS2(ARG, ARG:1)
+#FUNCTION
+
+;９,同一人物（特と극）
+SIF SAME_TOKEN(ARG:0, ARG:1, 0) == 1
+	RETURNF 9
+
+;도파なし兄弟
+;太郎と次郎
+IF (NO:ARG == 132 || NO:ARG == 134) && (NO:(ARG:1) == 132 || NO:(ARG:1) == 134)
+	RETURNF 1
+ENDIF
+
+;히게키리と히자마루
+IF (NO:ARG == 107 || NO:ARG == 111 || NO:ARG == 112 || NO:ARG == 115) && (NO:(ARG:1) == 107 || NO:(ARG:1) == 111 || NO:(ARG:1) == 112 || NO:(ARG:1) == 115)
+	RETURNF 1
+ENDIF
+
+;三条（基本は「8同派」）
+IF CFLAG:ARG:31 == 1 && CFLAG:(ARG:1):31 == 1
+	;三日月と이마노츠루기だけ「7爺孫」
+	IF (NO:ARG == 3 || NO:ARG == 11 || NO:ARG == 12) && (NO:(ARG:1) == 3 || NO:(ARG:1) == 11 || NO:(ARG:1) == 12)
+		RETURNF 7
+	;それ以外
+	ELSE
+		RETURNF 8
+	ENDIF
+ENDIF
+
+;三池
+IF CFLAG:ARG:31 == 2 && CFLAG:(ARG:1):31 == 2
+	RETURNF 1
+ENDIF
+
+;青江
+IF CFLAG:ARG:31 == 3 && CFLAG:(ARG:1):31 == 3
+	RETURNF 8
+ENDIF
+
+;粟田입（ほとんどは「1兄弟」）
+IF CFLAG:ARG:31 == 4 && CFLAG:(ARG:1):31 == 4
+	;오니마루 쿠니츠나と、他の子達の組み合わせ「8同派」
+	IF NO:ARG == 21 || NO:(ARG:1) == 21
+		RETURNF 8
+	;나키키츠네と、他の子達の組み合わせ「8同派」
+	ELSEIF (NO:ARG == 23 || NO:(ARG:1) == 23) || (NO:ARG == 24 || NO:(ARG:1) == 24)
+		RETURNF 8
+	ELSE
+		RETURNF 1
+	ENDIF
+ENDIF
+
+
+;古備前
+IF CFLAG:ARG:31 == 5 && CFLAG:(ARG:1):31 == 5
+	RETURNF 8
+ENDIF
+
+;来（基本は「8同派」）
+IF CFLAG:ARG:31 == 6 && CFLAG:(ARG:1):31 == 6
+	RETURNF 8
+ENDIF
+
+;村正
+IF CFLAG:ARG:31 == 7 && CFLAG:(ARG:1):31 == 7
+	RETURNF 8
+ENDIF
+
+;貞宗
+IF CFLAG:ARG:31 == 8 && CFLAG:(ARG:1):31 == 8
+	RETURNF 8
+ENDIF
+
+;長船
+IF CFLAG:ARG:31 == 9 && CFLAG:(ARG:1):31 == 9
+	;光忠
+	IF (NO:ARG == 73 || NO:ARG == 204) && (NO:(ARG:1) == 73 || NO:(ARG:1) == 204)
+		RETURNF 1
+	;ゲームでは兄弟扱いされてない？ので、一応コメントアウト
+	;長光
+	;ELSEIF (NO:ARG == 75 || NO:ARG == 148) && (NO:(ARG:1) == 75 || NO:(ARG:1) == 148)
+		;RETURNF 1
+	;景光
+	;ELSEIF (NO:ARG == 77 || NO:ARG == 146) && (NO:(ARG:1) == 77 || NO:(ARG:1) == 146)
+		;RETURNF 1
+	ELSE
+		RETURNF 8
+	ENDIF
+ENDIF
+
+;左文字（基本は「1兄弟」）
+IF CFLAG:ARG:31 == 10 && CFLAG:(ARG:1):31 == 10
+	RETURNF 1
+ENDIF
+
+;兼定
+IF CFLAG:ARG:31 == 11 && CFLAG:(ARG:1):31 == 11
+	RETURNF 8
+ENDIF
+
+;堀川
+IF CFLAG:ARG:31 == 12 && CFLAG:(ARG:1):31 == 12
+	RETURNF 8
+ENDIF
+
+;虎徹
+IF CFLAG:ARG:31 == 13 && CFLAG:(ARG:1):31 == 13
+	RETURNF 1
+ENDIF
+
+;虎徹…？
+IF (CFLAG:ARG:31 == 13 && CFLAG:(ARG:1):31 == 14) || (CFLAG:ARG:31 == 14 && CFLAG:(ARG:1):31 == 13)
+	RETURNF 2
+ENDIF
+
+;江
+IF CFLAG:ARG:31 == 15 && CFLAG:(ARG:1):31 == 15
+	RETURNF 8
+ENDIF
+
+;正宗（まだいない）
+;IF CFLAG:ARG:31 == 16 && CFLAG:(ARG:1):31 == 16
+;	RETURNF 
+;ENDIF
+
+;福岡一文字
+IF CFLAG:ARG:31 == 17 && CFLAG:(ARG:1):31 == 17
+	RETURNF 8
+	;南泉から日光への呼称が「日光の兄貴」だが、実の兄弟か兄貴分と弟分か判断つかないので保留
+ENDIF
+
+;豊후国行平
+IF CFLAG:ARG:31 == 18 && CFLAG:(ARG:1):31 == 18
+	RETURNF 8
+ENDIF
+
+;琉球
+IF (NO:ARG == 156 || NO:ARG == 157 || NO:ARG == 170 || NO:ARG == 186) && (NO:(ARG:1) == 156 || NO:(ARG:1) == 157 || NO:(ARG:1) == 170 || NO:(ARG:1) == 186)
+	RETURNF 1
+ENDIF
+
+;長曽祢と清麿は同一刀剣と言えるのでは…？（デフォではコメントアウト）
+;SIF (NO:ARG == 105 || NO:ARG == 106 || NO:ARG == 176) && (NO:(ARG:1) == 105 || NO:(ARG:1) == 106 || NO:(ARG:1) == 176)
+;	RETURNF 9
+
+
+
+
+;CFLAGでみると"あなた"が親(祖父母)の判定ができないので、CSTRに名前が入っている=親(祖父母)が居る
+;親子
+SIF (STRLENS(CSTR:ARG:2) && CFLAG:ARG:1000 == NO:(ARG:1)) || (STRLENS(CSTR:ARG:3) && CFLAG:ARG:1001 == NO:(ARG:1)) || (STRLENS(CSTR:(ARG:1):2) && CFLAG:(ARG:1):1000 == NO:ARG) || (STRLENS(CSTR:(ARG:1):3) && CFLAG:(ARG:1):1001 == NO:ARG)
+	RETURNF 6
+;爺孫
+SIF (STRLENS(CSTR:ARG:4) && CFLAG:ARG:1002 == NO:(ARG:1)) || (STRLENS(CSTR:ARG:6) && CFLAG:ARG:1004 == NO:(ARG:1)) || (STRLENS(CSTR:(ARG:1):4) && CFLAG:(ARG:1):1002 == NO:ARG) || (STRLENS(CSTR:(ARG:1):6) && CFLAG:(ARG:1):1004 == NO:ARG)
+	RETURNF 7
+;同派
+SIF (STRLENS(CSTR:ARG:5) && CFLAG:ARG:1003 == NO:(ARG:1)) || (STRLENS(CSTR:ARG:7) && CFLAG:ARG:1005 == NO:(ARG:1)) || (STRLENS(CSTR:(ARG:1):5) && CFLAG:(ARG:1):1003 == NO:ARG) || (STRLENS(CSTR:(ARG:1):7) && CFLAG:(ARG:1):1005 == NO:ARG)
+	RETURNF 8
+;キャラ１、キャラ２とも아이
+IF STRLENS(CSTR:ARG:3) && STRLENS(CSTR:(ARG:1):3)
+	IF CFLAG:ARG:1000 == CFLAG:(ARG:1):1000 || CFLAG:ARG:1000 == CFLAG:(ARG:1):1001 || CFLAG:ARG:1001 == CFLAG:(ARG:1):1000 || CFLAG:ARG:1001 == CFLAG:(ARG:1):1001
+		;キャラ１の方が年上
+		IF ARG > ARG:1
+			;キャラ１が男性
+			IF MALE(ARG)
+				;キャラ２が男性
+				IF MALE(ARG:1)
+					;兄弟
+					RETURNF 1
+				;キャラ２が女性
+				ELSE
+					;兄妹
+					RETURNF 4
+				ENDIF
+			;キャラ１が女性
+			ELSE
+				;キャラ２が男性
+				IF MALE(ARG:1)
+					;姉弟
+					RETURNF 3
+				;キャラ２が女性
+				ELSE
+					;姉妹
+					RETURNF 5
+				ENDIF
+			ENDIF
+		;キャラ２の方が年上
+		ELSE
+			;キャラ１が男性
+			IF MALE(ARG)
+				;キャラ２が男性
+				IF MALE(ARG:1)
+					;兄弟
+					RETURNF 1
+				;キャラ２が女性
+				ELSE
+					;姉弟
+					RETURNF 3
+				ENDIF
+			;キャラ１が女性
+			ELSE
+				;キャラ２が男性
+				IF MALE(ARG:1)
+					;兄妹
+					RETURNF 4
+				;キャラ２が女性
+				ELSE
+					;姉妹
+					RETURNF 5
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURNF 0
+
+;-------------------------------------------------
+;関数名:DAILY_MENSIKI
+;概　要:面識セット関数
+;引　数:順番にMASTER,A,B,C
+;戻り値:
+;備　考:
+;-------------------------------------------------
+@DAILY_MENSIKI(ARG, ARG:1, ARG:2, ARG:3)
+SIF ARG:1 > -1
+	CFLAG:(ARG:1):(2099 + NO:ARG) |= 1
+SIF ARG:2 > -1
+	CFLAG:(ARG:2):(2099 + NO:ARG) |= 1
+SIF ARG:3 > -1
+	CFLAG:(ARG:3):(2099 + NO:ARG) |= 1
+IF ARG:1 > -1
+	CFLAG:ARG:(2099 + NO:(ARG:1)) |= 1
+	SIF ARG:2 > -1
+		CFLAG:(ARG:2):(2099 + NO:(ARG:1)) |= 1
+	SIF ARG:3 > -1
+		CFLAG:(ARG:3):(2099 + NO:(ARG:1)) |= 1
+ENDIF
+IF ARG:2 > -1
+	CFLAG:ARG:(2099 + NO:(ARG:2)) |= 1
+	SIF ARG:1 > -1
+		CFLAG:(ARG:1):(2099 + NO:(ARG:2)) |= 1
+	SIF ARG:3 > -1
+		CFLAG:(ARG:3):(2099 + NO:(ARG:2)) |= 1
+ENDIF
+IF ARG:3 > -1
+	CFLAG:ARG:(2099 + NO:(ARG:3)) |= 1
+	SIF ARG:1 > -1
+		CFLAG:(ARG:1):(2099 + NO:(ARG:3)) |= 1
+	SIF ARG:2 > -1
+		CFLAG:(ARG:2):(2099 + NO:(ARG:3)) |= 1
+ENDIF
+
+
+

@@ -1,0 +1,152 @@
+﻿;-------------------------------------------------
+;본체간
+;ＳＭ-拷問系コマンド
+;-------------------------------------------------
+@COM163
+
+PRINTL 본체간
+STR:0 = 본체간
+
+;エロいイメージ
+IF RAND:3 == 0
+	TFLAG:56 = 1
+;怖いイメージ
+ELSEIF RAND:2 == 0
+	TFLAG:56 = 2
+;幸福なイメージ
+ELSE
+	TFLAG:56 = 3
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 1000
+LOSEBASE:기력 += 1000
+
+IF EXP:뇌간경험 < EXPLV:1
+	TIMES LOSEBASE:체력 , 1.10
+	TIMES LOSEBASE:기력 , 2.00
+ELSEIF EXP:뇌간경험 < EXPLV:2
+	TIMES LOSEBASE:체력 , 0.90
+	TIMES LOSEBASE:기력 , 1.80
+ELSEIF EXP:뇌간경험 < EXPLV:3
+	TIMES LOSEBASE:체력 , 0.80
+	TIMES LOSEBASE:기력 , 1.50
+ELSEIF EXP:뇌간경험 < EXPLV:4
+	TIMES LOSEBASE:체력 , 0.70
+	TIMES LOSEBASE:기력 , 1.20
+ELSEIF EXP:뇌간경험 < EXPLV:5
+	TIMES LOSEBASE:체력 , 0.60
+	TIMES LOSEBASE:기력 , 1.00
+ELSE
+	TIMES LOSEBASE:체력 , 0.50
+	TIMES LOSEBASE:기력 , 0.50
+ENDIF
+
+;エロいイメージ
+IF TFLAG:56 == 1
+	IF ABL:B감각 == 0
+		SOURCE:쾌B += 500
+	ELSEIF ABL:B감각 == 1
+		SOURCE:쾌B += 800
+	ELSEIF ABL:B감각 >= 2
+		LOCAL = ABL:B감각 * 500
+		SOURCE:쾌B += LOCAL
+	ENDIF
+	
+	IF ABL:C감각 == 0
+		SOURCE:쾌C += 500
+	ELSEIF ABL:C감각 == 1
+		SOURCE:쾌C += 800
+	ELSEIF ABL:C감각 >= 2
+		LOCAL = ABL:C감각 * 500
+		SOURCE:쾌C += LOCAL
+	ENDIF
+	
+	IF VAGINA(TARGET) && ABL:V감각 == 0
+		SOURCE:쾌V += 500
+	ELSEIF VAGINA(TARGET) && ABL:V감각 == 1
+		SOURCE:쾌V += 800
+	ELSEIF VAGINA(TARGET) && ABL:V감각 >= 2
+		LOCAL = ABL:V감각 * 500
+		SOURCE:쾌V += LOCAL
+	ENDIF
+	
+	IF ABL:A감각 == 0
+		SOURCE:쾌A += 500
+	ELSEIF ABL:A감각 == 1
+		SOURCE:쾌A += 800
+	ELSEIF ABL:A감각 >= 2
+		LOCAL = ABL:A감각 * 500
+		SOURCE:쾌A += LOCAL
+	ENDIF
+	
+	SOURCE:성행동 += 750
+	SOURCE:성취감 += 1000
+	SOURCE:중독충족 += 1000
+	SOURCE:액체 += 2500
+	SOURCE:욕정 += 3000
+;怖いイメージ
+ELSEIF TFLAG:56 == 2
+	SOURCE:통증 += 3000
+	SOURCE:두려움 += 2000
+	SOURCE:욕정 += 2000
+	SOURCE:노출 += 1500
+	SOURCE:굴복 += 3000
+;幸福なイメージ
+ELSEIF TFLAG:56 == 3
+	SOURCE:애정 += 2000
+	SOURCE:성행동 += 500
+	SOURCE:성취감 += 800
+	SOURCE:중독충족 += 500
+	SOURCE:액체 += 1200
+	SOURCE:욕정 += 2000
+	SOURCE:순종 += 3000
+ENDIF
+
+SOURCE:굴복 += 2000
+SOURCE:일탈 += 1200
+SOURCE:반발 += 1500
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 1200
+
+;마조を見る
+IF TALENT:마조
+	TIMES SOURCE:욕정 , 1.50
+	TIMES SOURCE:반발 , 0.80
+ENDIF
+
+;ストレスいっぱい増加　10-45（幸福なイメージの場合は15-50）加算
+CFLAG:10 += 10
+
+SIF TFLAG:56 == 3
+	CFLAG:10 += 5
+
+CFLAG:10 += RAND:36
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF EXP:뇌간경험 == 0
+	EXP:이상경험 += 1
+	PRINTL 脳姦初経験で이상경험＋1
+ENDIF
+
+EXP:뇌간경험 += 1
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+RETURN 1
+

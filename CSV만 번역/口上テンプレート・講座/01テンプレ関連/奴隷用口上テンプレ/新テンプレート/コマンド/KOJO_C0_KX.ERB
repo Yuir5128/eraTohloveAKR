@@ -1,0 +1,147 @@
+﻿;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+;eraeraA新입上テンプレートv1.00
+;X1をキャラ番号に置換して使用してください(フェリシアーノなら1、アルフレッドなら10)
+;≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+;==================================================
+;○○입上
+;==================================================
+;・コマンド입上の直前に呼ばれる
+;・RETURN 1すると입上が表示されなくなり、地の文だけ表示される
+;・個別に設定したい場合はこの関数内でスキップする/しないの判定を行う
+;-------------------------------------------------
+@KOJO_TRAIN_MESSAGE_SKIP_KX1
+
+;装備品補完입上を使用しない
+;TFLAG:59 = 1
+
+;볼개그付き、촉수구욕中の場合は地の文のみ
+;SIF TEQUIP:볼개그 || TEQUIP:촉수구욕
+;	RETURN 1
+;붕괴している場合は地の文のみ
+;SIF TALENT:붕괴
+;	RETURN 1
+
+
+;==================================================
+;特定の条件を満たしている場合、コマンドを実行する度にソースが追加
+;노출벽とか마조끼とか趣味に合ったコマンドや状態で체력・기력回復する仕様に。
+;마조끼くそ高いのにすぐ기절するのなんとかしたかったんでテスト。
+;==================================================
+;奉仕系のコマンド実行時に체력／기력回復。
+IF ABL:봉사정신 >= 3
+	SELECTCASE SELECTCOM
+		;수身奉仕は체력回復
+		CASE 70,71,73 TO 80,85 TO 87,317,420,421,422
+			BASE:체력 += ABL:봉사정신*2
+		;공奉仕は기력回復
+		CASE 220 TO 225,260,261,263,264,318
+			BASE:기력 += ABL:봉사정신*2
+		;체력기력両方回復する
+		CASE 243 TO 245,319,503,504
+			BASE:체력 += ABL:봉사정신*2
+			BASE:기력 += ABL:봉사정신*2
+	ENDSELECT
+ENDIF
+
+;服を着てないと기력回復、노출プレイ中は체력回復。
+IF ABL:노출벽 >= 3
+	;全裸ルート
+	IF !TEQUIP:전신상의 && !TEQUIP:상의 && !TEQUIP:하의 && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래） && !TEQUIP:특수2 && !TEQUIP:특수1
+		BASE:기력 += ABL:노출벽*2
+	;半裸ルート
+	ELSEIF (TEQUIP:전신상의 || (TEQUIP:상의 && TEQUIP:하의)) && !TEQUIP:속옷（위） && !TEQUIP:속옷（아래）
+		BASE:기력 += ABL:노출벽*2
+	ENDIF
+	SIF TEQUIP:비디오카메라 || TEQUIP:야외플레이 || TEQUIP:수치플레이 || SELECTCOM == 3
+		BASE:체력 += ABL:노출벽*2
+ENDIF
+
+;拘束されてると기력回復。
+;고통コマンド実行時に체력回復。
+IF ABL:마조끼 >= 3
+	SIF TEQUIP:밧줄 || TEQUIP:아이마스크 || TEQUIP:볼개그 || TEQUIP:정조대 || TEQUIP:사정관리 || TEQUIP:전신상의 == 9
+		BASE:기력 += ABL:마조끼*2
+	SELECTCASE SELECTCOM
+		CASE 16,25,44,56,62,140 TO 155
+			BASE:체력 += ABL:마조끼*2
+	ENDSELECT
+ENDIF
+
+;奴隷공コマンド実行時に체력／기력回復。
+IF ABL:새드끼 >= 3
+	SIF TEQUIP:신발 > 0 && SELECTCOM == 80
+		BASE:체력 += ABL:새드끼*2
+	SIF ABL:PLAYER:마조끼 >= 3 && (SELECTCOM == 226 || SELECTCOM == 227)
+		BASE:체력 += ABL:새드끼*2
+		BASE:기력 += ABL:새드끼*2
+	SIF SELECTCOM >= 226 && SELECTCOM <= 227
+		BASE:기력 += ABL:새드끼*2
+ENDIF
+
+;자위をすると체력・기력回復。
+IF ABL:자위중독 >= 3
+	SELECTCASE SELECTCOM
+		CASE 4,5,6,7
+			BASE:기력 += ABL:자위중독*2
+	ENDSELECT
+ENDIF
+
+;精液飲んで체력回復。
+;精液がもらえそうなコマンド実行時は기력回復。
+IF ABL:정액중독 >= 3
+	SIF TFLAG:0 == 0 && TFLAG:43 == 13
+		BASE:체력 += ABL:정액중독*2
+	SELECTCASE SELECTCOM
+		CASE 70 TO 75,226,227,407,420,421,516
+			BASE:기력 += ABL:정액중독*2
+		CASE 410,412
+			BASE:체력 += ABL:정액중독*2
+	ENDSELECT
+ENDIF
+
+;セックスすると체력・기력回復。음란√なら特殊セックスでも回復。
+IF ABL:섹스중독 >= 3
+	IF TALENT:음란 || TALENT:창부
+		SELECTCASE SELECTCOM
+			CASE 322,381,405,406,430,431,511 TO 515,517 TO 525
+				BASE:체력 += ABL:섹스중독*2
+				BASE:기력 += ABL:섹스중독*2
+		ENDSELECT
+	ENDIF
+	SELECTCASE SELECTCOM
+		CASE 100 TO 116,260 TO 265,507 TO 510,526
+			BASE:체력 += ABL:섹스중독*2
+			BASE:기력 += ABL:섹스중독*2
+	ENDSELECT
+ENDIF
+
+;スカ系コマンド実行で체력回復。
+;변의／뇨의のあるときに기력回復。
+IF ABL:스캇중독 >= 3
+	SIF BASE:뇨의 >= 60 || BASE:변의 >= 60
+		BASE:기력 += ABL:스캇중독*2
+	SELECTCASE SELECTCOM
+		CASE 182 TO 185,285,286,302,304
+			BASE:체력 += ABL:스캇중독*2
+	ENDSELECT
+	;動くかわからんけど一応入れてみる
+	SIF TFLAG:58 == 1 || TFLAG:68 == 1
+		BASE:체력 += ABL:스캇중독*2
+ENDIF
+
+
+;==================================================
+;ランダム小입上
+;==================================================
+;絶頂回数
+IF (EX:0 + EX:1 + EX:2 + EX:3 >= 20)
+	PRINTFORMW 二十回以上の絶頂を経て、%CALLNAME%は頭のネジが飛んでしまったようだ
+	PRINTFORMW だらしなく顔を緩ませ、呂律の回らない입調で品の無い喘ぎを洩らしている
+ELSEIF (EX:0 + EX:1 + EX:2 + EX:3 >= 10) && (EX:0 + EX:1 + EX:2 + EX:3 < 20)  && MARK:반발각인 != 3
+	PRINTFORMW 絶頂を何度も味あわされ、%CALLNAME%は息も絶え絶えに喘いでいる
+ENDIF
+
+RETURN 0
+
+
+

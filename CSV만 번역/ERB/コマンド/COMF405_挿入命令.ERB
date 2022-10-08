@@ -1,0 +1,370 @@
+﻿;-------------------------------------------------
+;삽입명령
+;助손命令系コマンド
+;-------------------------------------------------
+@COM405
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;両方挿入してると「二輪挿し」
+	IF PREVCOM == 102 || PREVCOM == 103 || PREVCOM == 104 || PREVCOM == 105 || PREVCOM == 106
+		CALL COM_ABLE517
+		IF RESULT == 1
+			TFLAG:40 = 1
+			TFLAG:41 = 1
+			TFLAG:49 = 0
+			JUMP COM517
+		ENDIF
+	;主人が助손を犯してると「連結（奴隷←助손←主人）」
+	ELSEIF PREVCOM == 440 || PREVCOM == 441
+		CALL COM_ABLE519
+		IF RESULT == 1
+			IF PREVCOM == 440
+				TFLAG:40 = 11
+			ELSE
+				TFLAG:40 = 12
+			ENDIF
+			TFLAG:41 = 1
+			TFLAG:49 = 0
+			JUMP COM519
+		ENDIF
+	;奴隷が主人を犯してると「連結（主人←奴隷←助손）」
+	ELSEIF PREVCOM == 260 || PREVCOM == 261 || PREVCOM == 263 || PREVCOM == 264
+		CALL COM_ABLE519
+		IF RESULT == 1
+			IF PREVCOM == 260 || PREVCOM == 261
+				TFLAG:49 = 6
+			ELSE
+				TFLAG:49 = 7
+			ENDIF 
+			TFLAG:41 = 1
+			TFLAG:40 = 0
+			JUMP COM519
+		ENDIF
+	;主人が挿入してると「サンドイッチ（二穴挿入）」
+	ELSEIF PREVCOM == 113 || PREVCOM == 115
+		CALL COM_ABLE515
+		IF RESULT == 1
+			TFLAG:40 = 2
+			TFLAG:41 = 1
+			TFLAG:49 = 0
+			JUMP COM515
+		ENDIF
+	;主人が입奉仕してると「サンドイッチ」
+	ELSEIF PREVCOM == 31 || PREVCOM == 40 || PREVCOM == 280
+		CALL COM_ABLE515
+		IF RESULT == 1
+			IF PREVCOM == 31
+				TFLAG:40 = 3
+			ELSEIF PREVCOM == 40
+				TFLAG:40 = 4
+			ELSEIF PREVCOM == 280
+				TFLAG:40 = 5
+			ENDIF
+			TFLAG:41 = 1
+			TFLAG:49 = 0
+			JUMP COM515
+		ENDIF
+	;奴隷が입奉仕させられてると「サンドイッチ」
+	ELSEIF PREVCOM == 71 || PREVCOM == 72 || PREVCOM == 222
+		CALL COM_ABLE515
+		IF RESULT == 1
+			TFLAG:40 = 0
+			TFLAG:41 = 1
+			IF PREVCOM == 71
+				TFLAG:49 = 8
+			ELSEIF PREVCOM == 72
+				TFLAG:49 = 10
+			ELSEIF PREVCOM == 222
+				TFLAG:49 = 9
+			ENDIF
+			JUMP COM515
+		ENDIF
+	;前回コマンドが「サンドイッチ」「連結」「二輪挿し」
+	ELSEIF PREVCOM == 515 || PREVCOM == 519 || PREVCOM == 517
+		;両方挿入してると「二輪挿し」
+		IF TFLAG:40 == 1
+			CALL COM_ABLE517
+			IF RESULT == 1
+				TFLAG:41 = 1
+				TFLAG:49 = 0
+				JUMP COM517
+			ENDIF
+		;主人が挿入してると「サンドイッチ（二穴挿入）」
+		ELSEIF TFLAG:40 == 2
+			CALL COM_ABLE515
+			IF RESULT == 1
+				TFLAG:41 = 1
+				TFLAG:49 = 0
+				JUMP COM515
+			ENDIF
+		;主人が助손を犯してると「連結（奴隷←助손←主人）」
+		ELSEIF TFLAG:40 == 11 || TFLAG:40 == 12
+			CALL COM_ABLE519
+			IF RESULT == 1
+				TFLAG:41 = 1
+				TFLAG:49 = 0
+				JUMP COM519
+			ENDIF
+		;主人が입奉仕してると「サンドイッチ」
+		ELSEIF TFLAG:40 == 3 || TFLAG:40 == 4 || TFLAG:40 == 5
+			CALL COM_ABLE515
+			IF RESULT == 1
+				TFLAG:41 = 1
+				TFLAG:49 = 0
+				JUMP COM515
+			ENDIF
+		;奴隷が主人を犯してると「連結（主人←奴隷←助손）」
+		ELSEIF TFLAG:49 == 6 || TFLAG:49 == 7
+			CALL COM_ABLE519
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:41 = 1
+				JUMP COM519
+			ENDIF
+		;奴隷が입奉仕させられてると「サンドイッチ」
+		ELSEIF TFLAG:49 == 8 || TFLAG:49 == 9 || TFLAG:49 == 10
+			CALL COM_ABLE515
+			IF RESULT == 1
+				TFLAG:40 = 0
+				TFLAG:41 = 1
+				JUMP COM515
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;何も読まずにこっちに来たときはフラグ解除
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 삽입명령
+STR:0 = 삽입명령
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;すべての命令に共通の要素を考慮
+;(순종が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;実行判定操作
+CALL KOJO_DENIAL_PLUS
+
+;合計を表示(25以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 25
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+;実行不可입上/実行判定操作
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;처녀喪失フラグ
+SIF TALENT:처녀 || TALENT:재생처녀
+	TFLAG:19 |= 1
+
+;調教者が동정だった場合の喪失フラグ
+SIF TALENT:ASSI:동정
+	TFLAG:160 |= 3
+
+
+;-------------------------------------------------
+;사정ゲージチェック（助손）
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_AT
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:ASSI:9 > 0
+	B /= 20
+
+SIF PENIS(ASSI)
+	BASE:ASSI:사정 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 50
+LOSEBASE:기력 += 100
+
+SOURCE:쾌V += 200
+SIF ABL:ASSI:기교
+	SOURCE:쾌V += 10*ABL:ASSI:기교
+
+SOURCE:통증 += 50
+SOURCE:노출 += 20
+SOURCE:일탈 += 40
+SOURCE:반발 += 40
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 40
+
+;처녀だった場合は、고통のソースと반발のソースを追加する
+IF TALENT:처녀 == 1
+	SOURCE:통증 += 2000
+	SOURCE:반발 += 3000
+ENDIF
+
+;재생처녀だった場合は、고통のソースと반발のソースを追加する
+IF TALENT:재생처녀 == 1
+	SOURCE:통증 += 500
+	SOURCE:반발 += 1000
+ENDIF
+
+;소인체형で助손が거근か말자지の場合、고통と공포のソースを追加
+IF TALENT:소인체형
+	IF TALENT:ASSI:거근
+		SOURCE:통증 += 200
+		SOURCE:두려움 += 500
+	ELSEIF TALENT:ASSI:말자지
+		SOURCE:통증 += 500
+		SOURCE:두려움 += 1000
+	ENDIF
+ENDIF
+
+;助손が말자지の場合
+IF TALENT:ASSI:말자지
+	;V확장경험一定以上で중독충족のソースを追加
+	IF EXP:V확장경험 >= 20
+		SOURCE:중독충족 += 500
+	;V확장경험一定以下で고통と공포のソースを追加
+	ELSE
+		SOURCE:통증 += 500
+		SOURCE:두려움 += 1000
+	ENDIF
+ENDIF
+
+;助손の기교により쾌Vソース追加、下손すぎると통증のソース追加
+IF ABL:ASSI:2 == 0
+	SOURCE:통증 += 100
+ELSEIF ABL:ASSI:2 == 1
+	SOURCE:통증 += 50
+ENDIF
+;助손が소인체형で、調教対象が소인체형でなく도착적でもないと일탈のソース追加
+SIF TALENT:소인체형 == 0 && TALENT:ASSI:소인체형 && TALENT:도착적
+	SOURCE:일탈 += 50	
+;Vへの고통は先に処理しておく
+;EXP:V경험をみる（처녀の반감は別途処理済みなので省略）
+IF EXP:V경험 < EXPLV:1
+	TIMES SOURCE:통증 , 2.50
+ELSEIF EXP:V경험 < EXPLV:2
+	TIMES SOURCE:통증 , 0.80
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:V경험 < EXPLV:3
+	TIMES SOURCE:통증 , 0.40
+ELSEIF EXP:V경험 < EXPLV:4
+	TIMES SOURCE:통증 , 0.10
+ELSEIF EXP:V경험 < EXPLV:5
+	TIMES SOURCE:통증 , 0.00
+ELSEIF EXP:V경험 >= EXPLV:5
+	TIMES SOURCE:통증 , 0.00
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 0.70
+	TIMES SOURCE:반발 , 1.20
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 0.40
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 0.10
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 0.10
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;奴隷のＶ⇔助손の페니스の汚れが移動
+;페니스밴드を使う場合、汚れは移動しない
+IF PENIS(ASSI)
+	STAIN:바기나 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:바기나
+	STAIN:질내 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:질내
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;V経験
+EXP:V경험 += 1
+PRINTL V경험＋１
+
+;助손が말자지で奴隷が소인체형だった場合、V확장경험
+IF TALENT:소인체형 && TALENT:ASSI:말자지
+	IF EXP:V확장경험 == 0
+		EXP:이상경험 += 1
+		PRINTL Ｖ拡張初経験で이상경험＋１
+	ENDIF
+	EXP:V확장경험 += 1
+	PRINTL V확장경험＋１
+ENDIF
+
+;奴隷と助손に성교경험
+EXP:성교경험 += 1
+EXP:ASSI:성교경험 += 1
+
+;삽입경험
+EXP:ASSI:삽입경험 += 1
+
+;助손に쾌C・습득・순종・부정の珠
+JUEL:ASSI:쾌C += 100
+JUEL:ASSI:순종 += 100
+JUEL:ASSI:습득 += 100
+JUEL:ASSI:부정 += 100
+PRINTFORML %CALLNAME:ASSI%に%PALAMNAME:0%の珠＋100
+PRINTFORML %CALLNAME:ASSI%に%PALAMNAME:5%の珠＋100
+PRINTFORMW %CALLNAME:ASSI%に%PALAMNAME:8%の珠＋100
+PRINTFORMW %CALLNAME:ASSI%に%PALAMNAME:100%の珠＋100
+
+;게이경험とか加算
+CALL COM_EXP(5)
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+
+RETURN 1
+
+
+

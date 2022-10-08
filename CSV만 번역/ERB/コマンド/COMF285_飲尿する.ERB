@@ -1,0 +1,163 @@
+﻿;-------------------------------------------------
+;음뇨한다
+;主人마조系コマンド
+;-------------------------------------------------
+@COM285
+
+PRINTL 음뇨한다
+STR:0 = 음뇨한다
+;펠라한다からの派生の場合
+IF SELECTCOM == 31
+	TFLAG:56 = 1
+;커닐링구스からの派生の場合
+ELSEIF SELECTCOM == 40
+	TFLAG:56 = 2
+ENDIF
+
+SELECTCOM = 285
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 100
+
+SIF TFLAG:56
+	SOURCE:쾌C += 30
+
+SOURCE:두려움 += 20
+SOURCE:노출 += 400
+SOURCE:불결 += 500
+SOURCE:일탈 += 400
+SOURCE:반발 += 300
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 200
+
+;陥落素質によって일탈のソースが上下
+IF TALENT:연모
+	TIMES SOURCE:일탈 , 0.70
+ELSEIF TALENT:친애
+	TIMES SOURCE:일탈 , 0.30
+ELSEIF TALENT:음란 || TALENT:창부
+	TIMES SOURCE:일탈 , 0.50
+ELSEIF TALENT:복종 || TALENT:예속
+	TIMES SOURCE:일탈 , 0.30
+ENDIF
+
+;새드끼を見る
+IF ABL:	10 == 0
+	TIMES SOURCE:불결 , 1.00
+ELSEIF ABL:새드끼 == 1
+	TIMES SOURCE:불결 , 0.95
+	SOURCE:욕정 += 30
+ELSEIF ABL:새드끼 == 2
+	TIMES SOURCE:불결 , 0.80
+	SOURCE:욕정 += 50
+ELSEIF ABL:새드끼 == 3
+	TIMES SOURCE:불결 , 0.75
+	SOURCE:욕정 += 80
+ELSEIF ABL:새드끼 == 4
+	TIMES SOURCE:불결 , 0.60
+	SOURCE:욕정 += 100
+ELSEIF ABL:새드끼 == 5
+	TIMES SOURCE:불결 , 0.50
+	SOURCE:욕정 += 150
+ELSEIF ABL:새드끼 == 6
+	TIMES SOURCE:불결 , 0.45
+	SOURCE:욕정 += 200
+ELSEIF ABL:새드끼 == 7
+	TIMES SOURCE:불결 , 0.40
+	SOURCE:욕정 += 250
+ELSEIF ABL:새드끼 == 8
+	TIMES SOURCE:불결 , 0.35
+	SOURCE:욕정 += 300
+ELSEIF ABL:새드끼 == 9
+	TIMES SOURCE:불결 , 0.30
+	SOURCE:욕정 += 350
+ELSEIF ABL:새드끼 >= 10
+	TIMES SOURCE:불결 , 0.20
+	SOURCE:욕정 += 400
+ENDIF
+
+;스캇중독で욕정増、반발減
+IF ABL:스캇중독 == 0
+	TIMES SOURCE:일탈 , 1.50
+ELSEIF ABL:스캇중독 == 1
+	SOURCE:중독충족 += 100
+	TIMES SOURCE:일탈 , 1.00
+ELSEIF ABL:스캇중독 == 2
+	SOURCE:중독충족 += 300
+	TIMES SOURCE:일탈 , 0.70
+ELSEIF ABL:스캇중독 == 3
+	SOURCE:중독충족 += 600
+	TIMES SOURCE:일탈 , 0.30
+ELSEIF ABL:스캇중독 == 4
+	SOURCE:중독충족 += 800
+	TIMES SOURCE:일탈 , 0.20
+ELSE
+	SOURCE:중독충족 += 1000
+	TIMES SOURCE:일탈 , 0.10
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;調教者の입に奴隷のＣorＶと尿汚れが移動
+;奴隷のＣorＶの汚れは綺麗になる
+CALL COM_STAIN
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;게이경험とか加算
+CALL COM_EXP(4)
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(主人かつ연모、친애で2。복종、예속で３）
+IF (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF (TALENT:복종 ||TALENT:예속) && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+;배뇨경험
+PRINTL 배뇨경험＋２
+EXP:배뇨경험 += 2
+
+;初스캇경험のとき이상경험
+IF EXP:스캇경험 == 0
+	EXP:이상경험 += 1
+	PRINTL スカトロ初経験で이상경험＋１
+ENDIF
+EXP:스캇경험 += 1
+PRINTL 스캇경험＋１
+
+;調教者に스캇경험
+IF EXP:PLAYER:스캇경험 == 0
+	EXP:PLAYER:이상경험 += 1
+	PRINTFORML スカトロ初経験で%CALLNAME:PLAYER%に이상경험＋１
+ENDIF
+EXP:PLAYER:스캇경험 += 1
+PRINTFORML %CALLNAME:PLAYER%に스캇경험＋１
+;調教者に음뇨경험
+EXP:PLAYER:음뇨경험 += 1
+PRINTFORML %CALLNAME:PLAYER%に음뇨경험＋１
+
+;이뇨제解除
+IF TEQUIP:이뇨제
+	TEQUIP:이뇨제 = 0
+ENDIF
+
+RETURN 1
+
+

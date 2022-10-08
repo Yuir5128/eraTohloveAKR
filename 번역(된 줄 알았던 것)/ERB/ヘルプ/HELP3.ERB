@@ -162,11 +162,11 @@ ELSEIF RESULT == 12
 	PRINTL 옷을 입고 있는 경우는 옷 위로부터 맞혀, 주는 쾌감이 감소한다.
 	PRINTW 아이템[로터]필수.
 ELSEIF RESULT == 13
-	PRINTL 【니틀캡】
-	PRINTL 노예의 유두에, 니틀캡를 달라붙게 한다.
+	PRINTL 【니플캡】
+	PRINTL 노예의 유두에, 니플캡를 달라붙게 한다.
 	PRINTL 의복이나, 장착계의 도구 따위로 유두가 숨어 있으면 실행 할 수 없다.
 	PRINTL 장착중에 재차 선택하면, 제외할 수가 있다.
-	PRINTW 아이템[니틀캡]필수.
+	PRINTW 아이템[니플캡]필수.
 ELSEIF RESULT == 14
 	PRINTL 【유두고문】
 	PRINTL 노예의 유두를, 집거나 이끌거나 해 꾸짖는다.
@@ -697,7 +697,7 @@ ELSEIF RESULT == 150
 	PRINTW 어느 정도 조교가 진행된 노예가 아니면 실행 시킬 수 없다.
 ELSEIF RESULT == 152
 	PRINTL 【매도한다】
-	PRINTL 노예를입 더럽게 매도한다. 입상에 따라서는, 말고문으로도 될지도.
+	PRINTL 노예를입 더럽게 매도한다. 대사에 따라서는, 말고문으로도 될지도.
 	PRINTW 조교자에게 어느 정도의새드끼가 없으면 매도할 수 없다.
 ELSEIF RESULT == 153
 	PRINTL 【발로 밟는다】
@@ -1651,7 +1651,7 @@ ELSEIF RESULT == 808
 	PRINTW 주인이사정 할 때, 자동으로 노예의 어디를 노리는지 선택한다.
 ELSEIF RESULT == 809
 	PRINTL 【범용 허덕여 설정】
-	PRINTW 범용입상의입조 따위를 설정할 수 있다.
+	PRINTW 범용대사의입조 따위를 설정할 수 있다.
 ELSEIF RESULT == 900
 	PRINTL 【마스터와 교대/조수와 교대】
 	PRINTL 조교자를 교대한다.
@@ -1676,7 +1676,7 @@ ELSEIF RESULT == 993
 ELSEIF RESULT == 999
 	PRINTL 【조교 종료】
 	PRINTL 이번 조교를 종료한다.
-	PRINTW 그 때의 상황이나입상에 따라서는, 조교후이벤트가 있거나 한다.
+	PRINTW 그 때의 상황이나대사에 따라서는, 조교후이벤트가 있거나 한다.
 ELSE
 	GOTO INPUT_LOOP
 ENDIF

@@ -1,0 +1,429 @@
+﻿;=============================================================================
+;キャラ図鑑と素質検索
+;=============================================================================
+@CHARA_DICTIONARY_MENU
+DRAWLINE
+PRINTLC [ 1] キャラ図鑑
+PRINTLC [ 2] 素質検索
+PRINTL 
+PRINTL [100]やめる
+DRAWLINE
+$INPUT_LOOP
+INPUT
+IF RESULT == 100
+	RETURN 0
+ELSEIF RESULT == 1
+	CALL CHARA_DICTIONARY_LIST
+ELSEIF RESULT == 2
+	CALL DICTIONARY_SEARCH_TALENT
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+
+;=============================================================================
+;キャラ図鑑
+;=============================================================================
+;--------------------------------------------------
+;表示するキャラクターの選択
+;--------------------------------------------------
+@CHARA_DICTIONARY_LIST
+VARSET Y, 0, 0, FLAG:44
+;現在ページ
+P = 0
+;表示キャラ数
+Q = 0
+FOR COUNT, 0, FLAG:44
+	;CSVが存在しないキャラは除外
+	SIF !EXISTCSV(COUNT, 0)
+		CONTINUE
+	;아이は除外
+	SIF GROUPMATCH(CSVNAME(COUNT, 0), "아이1", "아이2", "아이3", "아이4", "아이5", "아이6", "아이7", "아이8", "아이9", "아이10")
+		CONTINUE
+	;キャラごとの表示可否
+	Y:COUNT = 1
+	;何番目が誰か
+	X:Q = COUNT
+	Q +=1
+NEXT
+;最終ページ数
+P:1 = Q / 60
+;ページをめくったときなどはここから
+$PRINT_LIST_PAGE
+DRAWLINE
+PRINTFORML 選択したキャラの初期能力を閲覧できます。 ＜page.{P+1}/{P:1+1}＞
+DRAWLINE
+U = 0
+FOR COUNT, 0, Q
+	SIF COUNT == 0 && P
+		COUNT = P * 60
+	SIF COUNT >= (P + 1) * 60
+		BREAK
+	S = STRLENS(CSVNAME(X:COUNT, 0)) + 6
+	IF U >= 5 || (U >= 3 && S > 26 + 13) || (U >= 4 && S > 26)
+		PRINTL 
+		U = 0
+	ENDIF
+	IF S <= 26
+		PRINTFORM [{X:COUNT, 3}] %CSVNAME(X:COUNT, 0), 20, LEFT%
+		U += 2
+	ELSEIF S <= 26 + 13
+		PRINTFORM [{X:COUNT, 3}] %CSVNAME(X:COUNT, 0), 20 + 13, LEFT%
+		U += 3
+	ELSEIF S <= 26 + 26
+		PRINTFORM [{X:COUNT, 3}] %CSVNAME(X:COUNT, 0), 20 + 26, LEFT%
+		U += 4
+	ELSE
+		PRINTFORM [{X:COUNT, 3}] %CSVNAME(X:COUNT, 0)%
+		U += 6
+	ENDIF
+NEXT
+PRINTL 
+DRAWLINE
+PRINTFORMLC \@(P <= 0) ? %" " * 16% # [1001]前のページ\@
+PRINTLC [1000]戻る
+PRINTFORMLC \@(P >= P:1) ? %" " * 16% # [1009]次のページ\@
+PRINTL 
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+ELSEIF RESULT == 1009 && P < P:1
+	P += 1
+ELSEIF RESULT < 0 || RESULT > FLAG:44 || !Y:RESULT
+	GOTO INPUT_LOOP
+ELSE
+	;キャラ図鑑能力表示部の関数へ
+	CALL CHARA_DICTIONARY_MAIN, RESULT
+ENDIF
+
+GOTO PRINT_LIST_PAGE
+
+;--------------------------------------------------
+;キャラ図鑑能力表示部
+;--------------------------------------------------
+@CHARA_DICTIONARY_MAIN, ARG
+$PRINT_PAGE
+;存在しないキャラの場合、戻る
+SIF !EXISTCSV(ARG , 0)
+	RETURN 0
+
+DRAWLINE
+DRAWLINE
+CALL CHARA_MANUAL(ARG, 2)
+DRAWLINE
+
+PRINTFORM キャラ番号：{ARG}　名前：%CSVNAME(ARG, 0)% \@ CSVNAME(ARG, 0) != CSVCALLNAME(ARG, 0) ? （%CSVCALLNAME(ARG, 0)%） # \@　
+;PRINTFORML 性別：\@((CSVTALENT(ARG, 140, 0)) || (CSVTALENT(ARG, 137, 0))) ? ♂ # ♀\@　%SHOW_RACE(ARG)%
+PRINTFORML 체력：{CSVBASE(ARG, 0, 0), 4}　기력：{CSVBASE(ARG, 1, 0), 4}
+
+DRAWLINE
+;初期素質
+CALL DICTIONARY_CHARA_TALENT, ARG
+;初期能力
+CALL DICTIONARY_CHARA_ABL, ARG
+;初期経験
+CALL DICTIONARY_CHARA_EXP, ARG
+;初期相性
+CALL DICTIONARY_CHARA_RELATION, ARG
+
+$INPUT_LOOP
+PRINTL [998]初期衣装を表示する　　　　[999]他キャラからの初期相性を表示する
+PRINTFORMLC \@(ARG > 0 && EXISTCSV(ARG-1, 0) > 0) ? [1001]前のページ # %" " * 16%\@
+PRINTLC [1000]リストに戻る
+PRINTFORMLC \@(ARG < 199 && EXISTCSV(ARG+1, 0) > 0) ? [1009]次のページ # %" " * 16%\@
+PRINTL 
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 998
+	CALL DICTIONARY_CHARA_CLOTHES, ARG
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 999
+	CALL DICTIONARY_CHARA_BACK_RELATION, ARG
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 1001 && ARG > 0 && EXISTCSV(ARG-1, 0) > 0
+	ARG = ARG - 1
+ELSEIF RESULT == 1009 && ARG < FLAG:44 && EXISTCSV(ARG+1, 0) > 0
+	ARG = ARG + 1
+ELSE
+	CLEARLINE 3
+	GOTO INPUT_LOOP
+ENDIF
+GOTO PRINT_PAGE
+
+;………………………………………………
+;初期能力
+;………………………………………………
+@DICTIONARY_CHARA_ABL, ARG
+PRINTL □ 初期能力
+U = 0
+REPEAT VARSIZE("ABL")
+	SIF ABLNAME:COUNT == ""
+		CONTINUE
+	SIF !CSVABL(ARG, COUNT, 0)
+		CONTINUE
+	PRINTFORM %ABLNAME:COUNT, 12%：LV{CSVABL(ARG, COUNT, 0), 2}　
+	;改行
+	SIF U++ % 5 == 4
+		PRINTL 
+REND
+
+IF U == 0
+	PRINTL なし
+;最후のループで改行してなかったら、ここで改行しておく
+ELSEIF U % 5 != 0
+	PRINTL 
+ENDIF
+DRAWLINE
+
+;………………………………………………
+;初期経験
+;………………………………………………
+@DICTIONARY_CHARA_EXP, ARG
+PRINTL □ 初期経験
+U = 0
+REPEAT VARSIZE("EXP")
+	SIF EXPNAME:COUNT == ""
+		CONTINUE
+	SIF !CSVEXP(ARG, COUNT, 0)
+		CONTINUE
+	PRINTFORM %EXPNAME:COUNT, 12%：{CSVEXP(ARG, COUNT, 0), 8}　
+	;改行
+	SIF U++ % 3 == 2
+		PRINTL 
+REND
+
+IF U == 0
+	PRINTL なし
+;最후のループで改行してなかったら、ここで改行しておく
+ELSEIF U % 3 != 0
+	PRINTL 
+ENDIF
+DRAWLINE
+
+;………………………………………………
+;初期素質
+;………………………………………………
+@DICTIONARY_CHARA_TALENT, ARG
+PRINTL □ 初期素質
+FOR COUNT, 0, VARSIZE("TALENT")
+	SIF TALENTNAME:COUNT == ""
+		CONTINUE
+	SIF !CSVTALENT(ARG, COUNT, 0)
+		CONTINUE
+	PRINTFORM [%TALENTNAME:COUNT%] 
+NEXT
+PRINTL 
+DRAWLINE
+
+;………………………………………………
+;初期相性
+;………………………………………………
+@DICTIONARY_CHARA_RELATION, ARG
+#LOCALSSIZE 10
+PRINTL □ 初期相性
+U = 0
+REPEAT FLAG:44
+	SIF !EXISTCSV(COUNT, 0)
+		CONTINUE
+	SIF !CSVRELATION(ARG, COUNT, 0)
+		CONTINUE
+	PRINTFORM %CSVCALLNAME(COUNT, 0), 16%×{CSVRELATION(ARG, COUNT, 0), 3}％　
+	SIF U++ % 3 == 2
+		PRINTL 
+REND
+IF U == 0
+	PRINTL 特になし
+ELSEIF U % 3 != 0
+	PRINTL 
+ENDIF
+DRAWLINE
+
+;………………………………………………
+;初期衣装
+;………………………………………………
+@DICTIONARY_CHARA_CLOTHES, ARG
+
+;一時的にキャラ追加して終わったら削除する
+C = ARG
+VARSET T, 0, 0, 11
+ADDCHARA ARG
+
+;現在の着衣設定を退避
+LOCAL = FLAG:1
+
+;全着
+FLAG:1 = 0
+CALL CLOTHES_SET(CHARANUM - 1)
+PRINTL
+PRINTL □ 初期着衣(通常)
+CALL DICTIONARY_CHARA_CLOTHES_PRINT
+
+;内番
+FLAG:1 = 10
+CALL CLOTHES_SET3(CHARANUM - 1)
+PRINTL
+PRINTL □ 初期着衣(内番)
+CALL DICTIONARY_CHARA_CLOTHES_PRINT
+
+;軽装
+FLAG:1 = 9
+CALL CLOTHES_SET4(CHARANUM - 1)
+PRINTL
+PRINTL □ 初期着衣(軽装)
+CALL DICTIONARY_CHARA_CLOTHES_PRINT
+
+;現在の着衣設定を戻す
+FLAG:1 = LOCAL
+
+DELCHARA CHARANUM - 1
+
+PRINTL 
+DRAWLINE
+
+
+;着衣設定表示用
+@DICTIONARY_CHARA_CLOTHES_PRINT
+;着衣を表示
+REPEAT 10
+	IF COUNT < 7
+		A = 6 - COUNT
+	ELSE
+		A = COUNT
+	ENDIF
+	IF T:A
+		PRINT [
+		CALL CLOTHES_NAME(CHARANUM - 1)
+		PRINT ]
+	ENDIF
+REND
+;악세사리を表示
+REPEAT 11
+	A = COUNT + 1
+	IF GETBIT(T:10, COUNT)
+		PRINT [
+		CALL ACCESSORY_NAME
+		PRINT ]
+	ENDIF
+REND
+
+;………………………………………………
+;他キャラからの初期相性
+;………………………………………………
+@DICTIONARY_CHARA_BACK_RELATION, ARG
+PRINTL
+PRINTL □ 他キャラからの初期相性
+U = 0
+REPEAT FLAG:44
+	SIF !EXISTCSV(COUNT, 0)
+		CONTINUE
+	SIF !CSVRELATION(COUNT, ARG, 0)
+		CONTINUE
+	PRINTFORM %CSVCALLNAME(COUNT, 0), 20%→○○：{CSVRELATION(COUNT, ARG, 0), 3}％　
+	SIF U++ % 2 == 1
+		PRINTL 
+REND
+IF U == 0
+	PRINTL 特になし
+;最후のループで改行してなかったら、ここで改行しておく
+ELSEIF U % 2 != 0
+	PRINTL 
+ENDIF
+DRAWLINE
+
+
+;=============================================================================
+;調教辞典――素質検索
+;=============================================================================
+;--------------------------------------------------
+;素質検索メイン
+;--------------------------------------------------
+@DICTIONARY_SEARCH_TALENT
+P = 0
+Q = 0
+VARSET Y, 0, 0, 300
+;表示させる素質を抽出
+FOR COUNT, 0, 300
+	;存在しない素質は排除
+	SIF TALENTNAME:COUNT == ""
+		CONTINUE
+	SELECTCASE COUNT
+		;재생처녀、各種陥落素質、部位開発系素質、両性具有系、수공낙인임신육아중실의기절欠損は非表示に
+		CASE 1, 3 TO 9, 73 TO 78, 137 TO 139, 146, 153 TO 154, 157 TO 159, 162 TO 165, 200 TO 205
+			CONTINUE
+		CASEELSE
+			;表示可否
+			Y:COUNT = 1
+			;何番目が何か
+			X:Q = COUNT
+			Q +=1
+	ENDSELECT
+NEXT
+P:1 = Q / 60
+
+$PRINT_LIST
+DRAWLINE
+PRINTFORML どの素質を初期で所有するキャラを検索しますか？ ＜page.{P+1}/{P:1+1}＞
+DRAWLINE
+;各ページを表示
+FOR COUNT, 0, Q
+	SIF COUNT == 0 && P
+		COUNT = P * 60
+	SIF COUNT >= (P + 1) * 60
+		BREAK
+	PRINTFORM [{X:COUNT, 3}] %TALENTNAME:(X:COUNT), 18, LEFT%
+	;改行
+	SIF COUNT % 3 == 2
+		PRINTL 
+NEXT
+PRINTL 
+DRAWLINE
+PRINTFORMLC \@(P <= 0) ? %" " * 16% # [1001]前のページ\@
+PRINTLC [1000]戻る
+PRINTFORMLC \@(P >= P:1) ? %" " * 16% # [1009]次のページ\@
+PRINTL 
+$INPUT_LOOP
+INPUT
+IF RESULT == 1000
+	RETURN 0
+ELSEIF RESULT == 1001 && P > 0
+	P -= 1
+	GOTO PRINT_LIST
+ELSEIF RESULT == 1009 && P < P:1
+	P += 1
+	GOTO PRINT_LIST
+ELSEIF RESULT < 0 || RESULT >= 300 || Y:RESULT == 0
+	GOTO INPUT_LOOP
+ENDIF
+CALL SEARCH_CHARA_TALENT, RESULT
+GOTO PRINT_LIST
+
+;--------------------------------------------------
+;検索結果表示処理
+;--------------------------------------------------
+@SEARCH_CHARA_TALENT, ARG
+U = 0
+PRINTFORML 【%TALENTNAME:ARG%】を持つキャラ
+PRINTL 
+FOR COUNT, 0, FLAG:44
+	;CSVが存在しないキャラは除外
+	SIF !EXISTCSV(COUNT, 0)
+		CONTINUE
+	;아이は除外
+	SIF GROUPMATCH(CSVNAME(COUNT, 0), "아이1", "아이2", "아이3", "아이4", "아이5", "아이6", "아이7", "아이8", "아이9", "아이10")
+		CONTINUE
+	;その素質を持たない場合は飛ばす
+	SIF !CSVTALENT(COUNT, ARG, 0)
+		CONTINUE
+	PRINTFORM %CSVCALLNAME(COUNT,0), 18, LEFT%　
+	SIF U++ % 4 == 3
+		PRINTL 
+NEXT
+SIF U % 4 != 0
+	PRINTL 
+PRINTL 
+PRINTFORMW \@ U ? 以上の{U}人が初期段階で[%TALENTNAME:ARG%]を保有しています # 初期状態で保有しているキャラはいません\@
+

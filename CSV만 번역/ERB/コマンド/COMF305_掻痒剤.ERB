@@ -1,0 +1,107 @@
+﻿;-------------------------------------------------
+;가려움증약
+;薬品系コマンド
+;-------------------------------------------------
+@COM305
+
+IF TEQUIP:촉수
+	PRINTL 촉수가려움증약
+	STR:0 = 촉수가려움증약
+ELSE
+	PRINTL 가려움증약
+	STR:0 = 가려움증약
+ENDIF
+
+;場所選択は촉수がいないときだけ
+IF !TEQUIP:촉수
+	;どこに塗るか
+	PRINTL どこに塗りますか？
+	PRINTL [ 0] - 가슴
+	IF PENIS(TARGET) && !TEQUIP:정조대
+		PRINTL [ 1] - 페니스
+	ELSEIF !TEQUIP:정조대
+		PRINTL [ 1] - クリトリス
+	ENDIF
+	PRINTL [ 2] - 애널
+	SIF VAGINA(TARGET)
+		PRINTL [ 3] - 질내
+	PRINTL [10] - 全身に塗りたくる
+	SIF !TALENT:PLAYER:양팔결손 && !TALENT:PLAYER:달마
+		PRINTL [99] - 自分の指につける
+	
+	$INPUT_LOOP
+	INPUT
+	
+	IF RESULT == 99 && !TALENT:PLAYER:양팔결손 && !TALENT:PLAYER:달마
+		TFLAG:56 = 99
+	ELSEIF RESULT == 0
+			TFLAG:56 = 0
+	ELSEIF RESULT == 1
+		TFLAG:56 = 1
+	ELSEIF RESULT == 2
+		TFLAG:56 = 2
+	ELSEIF RESULT == 3 && VAGINA(TARGET)
+		TFLAG:56 = 3
+	ELSEIF RESULT == 10
+		TFLAG:56 = 10
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+;使ったアイテム減らす
+ITEM:49 -= 1
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 0
+LOSEBASE:기력 += 50
+
+IF !TEQUIP:촉수
+	;가슴
+	IF TFLAG:56 == 0
+		SOURCE:쾌B += 10
+	;ＰorＶ
+	ELSEIF TFLAG:56 == 1
+		SOURCE:쾌C += 10
+	;애널
+	ELSEIF TFLAG:56 == 2
+		SOURCE:쾌A += 10
+	;바기나
+	ELSEIF TFLAG:56 == 3
+		SOURCE:쾌V += 10
+	;塗れるとこ全部
+	ELSEIF TFLAG:56 == 10
+		SOURCE:쾌B += 10
+		SIF !TEQUIP:정조대
+			SOURCE:쾌C += 10
+		SOURCE:쾌A += 10
+		SIF VAGINA(TARGET)
+			SOURCE:쾌V += 10
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+CALL COM_STAIN
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+
+;게이경험とか加算
+CALL COM_EXP(1)
+
+;依存度ベクトル
+TFLAG:33 = 0
+
+RETURN 1
+
+
+
+

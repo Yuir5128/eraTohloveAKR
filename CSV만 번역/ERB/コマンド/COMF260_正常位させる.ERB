@@ -1,0 +1,258 @@
+﻿;-------------------------------------------------
+;정상위시킨다
+;主人수系コマンド
+;-------------------------------------------------
+@COM260
+
+;-------------------------------------------------
+;特殊派生処理
+;-------------------------------------------------
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;奴隷に助손が挿入してると「連結（主人←奴隷←助손）」
+	IF PREVCOM == 405 || PREVCOM == 406
+		CALL COM_ABLE519
+		IF RESULT == 1
+			TFLAG:40 = 0
+			IF PREVCOM == 405
+				TFLAG:41 = 1
+			ELSE
+				TFLAG:41 = 2
+			ENDIF
+			TFLAG:49 = 6
+			JUMP COM519
+		ENDIF
+	;前回コマンドが連結で、助손が挿入してる
+	ELSEIF PREVCOM == 519 && (TFLAG:41 == 1 || TFLAG:41 == 2)
+		CALL COM_ABLE519
+		IF RESULT == 1
+			TFLAG:40 = 0
+			TFLAG:49 = 6
+			JUMP COM519
+		ENDIF
+	ENDIF
+ENDIF
+
+;何も読まずにこっちに来たときはフラグ解除
+TFLAG:40 = 0
+TFLAG:41 = 0
+TFLAG:49 = 0
+TFLAG:42 = 0
+
+PRINTL 정상위시킨다
+STR:0 = 정상위시킨다
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;すべての命令に共通の要素を考慮
+;(순종が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;実行判定操作
+CALL KOJO_DENIAL_PLUS
+
+;合計を表示(24以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 24
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+;実行不可입上/実行判定操作
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+;스타킹脱がせる
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TEQUIP:특수2 = 0
+	TEQUIP:특수2 = 0
+ENDIF
+
+;調教者が처녀だった場合の喪失フラグ(처녀膜再生対応)
+TFLAG:19 |= 2
+
+;奴隷が동정だった場合の喪失フラグ
+SIF TALENT:동정
+	TFLAG:160 |= 1
+;主人によるセックスで동정喪失
+SIF TALENT:동정 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0
+	TFLAG:162 = 1
+
+;実行者が奴隷であるフラグ
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;사정ゲージチェック
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_MT
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:PLAYER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:PLAYER:사정 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+LOSEBASE:체력 += 100
+LOSEBASE:기력 += 50
+
+SOURCE:쾌C += 300
+
+SOURCE:애정 += 200
+
+;스킨십선호だと애정のソース追加
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+
+SOURCE:성행동 += 500
+SOURCE:중독충족 += 200
+SOURCE:노출 += 50
+SOURCE:굴복 += 400
+SOURCE:반발 += 200
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 300
+	
+;정조관념持ちで연모、친애持ち以外には常に반발のソースを追加する（セックス系のみ）
+SIF TALENT:정조관념 && (TALENT:연모 == 0 && TALENT:친애 == 0)
+	SOURCE:반발 += 1000
+
+;中毒による중독충족のソースは先に処理しておく
+;섹스중독を見る
+IF ABL:섹스중독 == 1
+	TIMES SOURCE:중독충족 , 0.00
+ELSEIF ABL:섹스중독 == 2
+	TIMES SOURCE:중독충족 , 0.30
+ELSEIF ABL:섹스중독 == 3
+	TIMES SOURCE:중독충족 , 0.60
+ELSEIF ABL:섹스중독 == 4
+	TIMES SOURCE:중독충족 , 0.90
+ELSEIF ABL:섹스중독 == 5
+	TIMES SOURCE:중독충족 , 1.20
+ELSEIF ABL:섹스중독 == 6
+	TIMES SOURCE:중독충족 , 1.50
+ELSEIF ABL:섹스중독 == 7
+	TIMES SOURCE:중독충족 , 1.80
+ELSEIF ABL:섹스중독 == 8
+	TIMES SOURCE:중독충족 , 2.30
+ELSEIF ABL:섹스중독 == 9
+	TIMES SOURCE:중독충족 , 3.00
+ELSEIF ABL:섹스중독 >= 10
+	TIMES SOURCE:중독충족 , 5.00
+ENDIF
+
+;말자지持ちで、調教者が소인체형だった場合、일탈ソース追加
+IF TALENT:PLAYER:소인체형 && TALENT:말자지
+	SOURCE:일탈 += 500
+ENDIF
+
+
+;-------------------------------------------------
+;사정チェック
+;-------------------------------------------------
+CALL SAMEN_CHECK(PLAYER,1)
+
+;사정時の処理
+IF E >= 1
+	;사정先タイプの設定
+	TFLAG:703 = 9
+	;사정先選択の可・不可
+	TFLAG:704 = 0
+	;汎用的な処理はこの関数で行う
+	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;奴隷のＣ⇔調教者のＶと질내の汚れが移動
+;페니스밴드を使う場合、汚れは移動しない
+SIF PENIS(TARGET)
+	CALL COM_STAIN
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;調教者のV経験
+EXP:PLAYER:V경험 += 1
+
+;調教者が소인체형で奴隷が말자지だった場合
+IF TALENT:PLAYER:소인체형 && TALENT:말자지
+	IF EXP:PLAYER:V확장경험 == 0
+		EXP:PLAYER:이상경험 += 1
+		PRINTFORML Ｖ拡張初経験で%CALLNAME:PLAYER%の이상경험＋１
+	ENDIF
+	EXP:PLAYER:V확장경험 += 1
+	PRINTFORML %CALLNAME:PLAYER%のV확장경험＋１
+ENDIF
+
+;성교경험
+EXP:PLAYER:성교경험 += 1
+EXP:성교경험 += 1
+PRINTS EXPNAME:4
+PRINTL +1
+
+;삽입경험
+EXP:삽입경험 += 1
+PRINTS EXPNAME:17
+PRINTL +1
+
+;게이경험とか加算
+CALL COM_EXP(4)
+
+;애정경험
+IF TALENT:연모 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +2
+	EXP:애정경험 += 2
+ELSEIF TALENT:친애 == 1 && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +4
+	EXP:애정경험 += 4
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+;依存度補正値(연모で1、친애で2）
+IF TALENT:연모 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:친애 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+;奉仕快楽フラグ
+TFLAG:100 = 1
+
+RETURN 1
+

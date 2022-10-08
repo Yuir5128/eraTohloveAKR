@@ -1,0 +1,210 @@
+﻿;----------------------------------------------------------------
+;精飲絶頂関連の処理の始動
+;----------------------------------------------------------------
+@SEIIN_START
+;입で사정させていなければ処理しない
+IF TFLAG:0 == 0 && TFLAG:43 != 13
+	RETURN
+ENDIF
+
+;調教者でない方だけが사정した場合、一時的にPLAYERに入れる
+IF TFLAG:0 == 0 && TFLAG:43 == 13
+	M = PLAYER
+	PLAYER = ASSIPLAY ? MASTER # ASSI
+ENDIF
+
+;강제정음절정の回数（通称：パブロフカウンター）をチェックする
+CALL SEIIN_CHECK
+
+;PLAYERを戻す
+SIF TFLAG:0 == 0 && TFLAG:43 == 13
+	PLAYER = M
+
+
+;----------------------------------------------------------------
+;강제정음절정の回数（パブロフカウンター）チェック
+;パブロフカウンター+1回で精飲絶頂へ
+;パブロフカウンターが발りない場合
+;器具や파이즈리などで絶頂していれば
+;강제정음절정へ
+;----------------------------------------------------------------
+@SEIIN_CHECK
+
+;規定の回数
+P = 20
+;창부、음란は基本15
+SIF TALENT:음란 == 1 || TALENT:창부 == 1
+	P = 15
+
+;奴隷の素質により規定回数を増減する
+;꿋꿋함
+SIF TALENT:꿋꿋함 == 1
+	P += 2
+;프라이드높음
+SIF TALENT:프라이드높음 == 1
+	P += 5
+;보수적
+SIF TALENT:보수적 == 1
+	P += 2
+;낙관적
+SIF TALENT:낙관적 == 1
+	P -= 2
+;비관적
+SIF TALENT:비관적 == 1
+	P += 2
+;일선을넘지않음
+SIF TALENT:일선을넘지않음 == 1
+	P += 5
+;억압
+SIF TALENT:억압 == 1
+	P += 2
+;해방
+SIF TALENT:해방 == 1
+	P -= 2
+;독약내성
+SIF TALENT:독약내성 == 1
+	P += 2
+;더러움무시
+SIF TALENT:더러움무시 == 1
+	P -= 3
+;악취둔감
+SIF TALENT:악취둔감 == 1
+	P -= 2
+;악취민감
+SIF TALENT:악취민감 == 1
+	P += 2
+;쾌감에솔직
+SIF TALENT:쾌감에솔직 == 1
+	P -= 2
+;쾌감을부정
+SIF TALENT:쾌감을부정 == 1
+	P += 2
+;중독되기쉬움
+SIF TALENT:중독되기쉬움 == 1
+	P -= 5
+;도착적
+SIF TALENT:도착적 == 1
+	P -= 2
+;남자혐오
+SIF TALENT:남자혐오 == 1
+	P += 2
+
+IF EXP:강제정음절정 >= P
+	CALL SEIIN_ORGASM
+ELSEIF TFLAG:29 > 0
+	CALL SEIIN_COMPULSION_ORGASM
+ENDIF
+
+;----------------------------------------------------------------
+;精飲絶頂の処理
+;----------------------------------------------------------------
+@SEIIN_ORGASM
+
+;정음절정경험の回数追加
+EX:13 += 1
+EXP:정음절정경험 += 1
+
+;정음절정경험の処理
+;経験の回数によって処理が変化
+IF EXP:정음절정경험 == 1
+	PRINTFORML 
+	PRINTFORMW %CALLNAME%の様子がおかしい…
+	PRINTFORML %CALLNAME:PLAYER%が%CALLNAME%の입に사정した瞬間、
+	;通常の絶頂の有無によって地の文が変化
+	IF TFLAG:29 > 0
+		PRINTFORMW %CALLNAME%はいつもよりも大きく身体を震わせた…
+	ELSE
+		PRINTFORML %CALLNAME%は性的な刺激が無いにも関わらず
+		PRINTFORMW 精液を飲んだだけでイってしまったようだ……
+	ENDIF
+	PRINTFORML 
+	PRINTFORMW %CALLNAME%は입内사정に過剰に反応するようになりました
+	;정액중독がLV3に上がる
+	IF ABL:정액중독 < 3
+		PRINTFORMW %CALLNAME%の%ABLNAME:16%が3に上がりました
+		ABL:정액중독 = 3
+	ENDIF
+	PRINTFORMW %EXPNAME:50%＋1
+	EXP:이상경험 += 1
+	
+	;素質の変化
+	;악취민감がなくなり、약점잡힘を握る
+	SIF TALENT:악취민감 == 1
+		PRINTFORMW %CALLNAME%は%TALENTNAME:62%でなくなりました
+		TALENT:악취민감 = 0
+	SIF TALENT:약점잡힘 == 0
+		PRINTFORMW %CALLNAME:MASTER%は%CALLNAME%の%TALENTNAME:37%を握りました
+	PRINTL 
+	TALENT:약점잡힘 = 1
+ELSE
+	PRINTFORML %CALLNAME:PLAYER%の사정と同時に
+	PRINTFORML 페니스をくわえ込んでいた%CALLNAME%はくぐもった声をあげ、
+	PRINTFORML ピクッと肩を小さく震わせて絶頂に達した…
+ENDIF
+
+PRINTFORML 정음절정경험＋1
+
+;パラメーター増減
+;基本ソース　노출、욕정、윤활、굴복、반발
+SOURCE:액체 += 500
+SOURCE:욕정 += 2000
+SOURCE:노출 += 1000
+SOURCE:굴복 += 3000
+SOURCE:반발 += 800
+
+IF EXP:정음절정경험 == 1
+	TIMES SOURCE:노출 , 1.50
+	TIMES SOURCE:굴복 , 2.00
+	TIMES SOURCE:반발 , 1.50
+ELSEIF ABL:정액중독 == 5
+	TIMES SOURCE:굴복 , 1.20
+ELSEIF ABL:정액중독 == 8
+	TIMES SOURCE:욕정 , 1.50
+	TIMES SOURCE:반발 , 0.80
+	TIMES SOURCE:굴복 , 1.50
+ELSEIF ABL:정액중독 == 10
+	TIMES SOURCE:욕정 , 2.00
+	TIMES SOURCE:굴복 , 2.00
+	TIMES SOURCE:반발 , 0.50
+ENDIF
+
+
+;----------------------------------------------------------------
+;강제정음절정の処理
+;강제정음절정の経験回数をCFLAG:4000に格納
+;----------------------------------------------------------------
+@SEIIN_COMPULSION_ORGASM
+
+EXP:강제정음절정 += 1
+
+;강제정음절정の経験回数によって処理を分岐
+IF EXP:강제정음절정 == 1
+	PRINTFORML 
+	PRINTFORML %CALLNAME%は%CALLNAME:PLAYER%が放った精液を飲み下しながら
+	PRINTFORML 与えられ続ける刺激によって
+	PRINTFORML 強制的にイかされてしまっている…
+ELSEIF EXP:강제정음절정 == P
+	PRINTFORML 
+	PRINTFORML %CALLNAME%はすっかり
+	PRINTFORML 精液の味を覚えこんでしまったようだ…
+ELSE
+	PRINTFORML 강제정음절정
+	PRINTL 
+ENDIF
+
+;パラメーター増減
+;基本ソース
+;굴복、두려움、울굴、반발
+SOURCE:두려움 += 500
+SOURCE:굴복 += 1000
+SOURCE:울굴 += 200
+SOURCE:반발 += 300
+
+IF EXP:강제정음절정 == 1
+	TIMES SOURCE:두려움 , 1.50
+	TIMES SOURCE:굴복 , 1.50
+	TIMES SOURCE:울굴 , 1.50
+	TIMES SOURCE:반발 , 1.50
+ELSEIF EXP:강제정음절정 == P
+	SOURCE:욕정 = 1000
+ENDIF

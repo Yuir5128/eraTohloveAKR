@@ -1,0 +1,353 @@
+﻿;-------------------------------------------------
+;評定関数　監査官プレイ用
+;キャラの입上の、コマンド実行時のファイルで@SCORING_COM
+;絶頂時のファイルで@SCORING_PALAMCNGを呼び出してください
+;-------------------------------------------------
+;-------------------------------------------------
+;コマンド毎に呼び出す関数
+;-------------------------------------------------
+@SCORING_COM
+#DIM DYNAMIC ADD_SCORE = 0
+
+
+;汎用喘ぎ用のコマンド分類関数を使う
+CALL COMMON_KOJO_EX
+LOCAL = RESULT
+
+;セックス関連だけ
+;ＡかＶかを先に判定してLOCALの値を変更
+IF LOCAL == 5
+	SIF SEXPLAY(TARGET) == 1
+		LOCAL = 2
+	SIF SEXPLAY(TARGET) == 2
+		LOCAL = 3
+ENDIF
+
+SELECTCASE LOCAL
+	;Ｃ快感
+	CASE 1
+		SIF TALENT:C민감
+			ADD_SCORE += 1
+		SIF TALENT:자위광
+			ADD_SCORE += 1
+		
+		IF ABL:C감각 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:C감각 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:C감각 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;Ｖ快感　Ｖセックス
+	CASE 2
+		SIF TALENT:V민감
+			ADD_SCORE += 1
+		SIF TALENT:음란구멍
+			ADD_SCORE += 1
+		
+		IF ABL:V감각 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:V감각 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:V감각 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;Ａ快感　Ａセックス
+	CASE 3
+		SIF TALENT:A민감
+			ADD_SCORE += 1
+		SIF TALENT:항문광
+			ADD_SCORE += 1
+		
+		IF ABL:A감각 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:A감각 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:A감각 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;Ｂ快感
+	CASE 4
+		SIF TALENT:B민감
+			ADD_SCORE += 1
+		SIF TALENT:함몰유두
+			ADD_SCORE += 1
+		SIF TALENT:음란가슴
+			ADD_SCORE += 1
+		
+		IF ABL:B감각 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:B감각 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:B감각 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;羞恥
+	CASE 7
+		SIF TALENT:부끄럼쟁이
+			ADD_SCORE += 1
+		SIF TALENT:마조
+			ADD_SCORE += 1
+		
+		IF ABL:마조끼 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:마조끼 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:마조끼 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;加虐　고통快楽　屈辱
+	CASE 8,10,17
+		SIF TALENT:마조
+			ADD_SCORE += 1
+		SIF TALENT:프라이드높음
+			ADD_SCORE += 1
+		
+		IF ABL:마조끼 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:마조끼 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:마조끼 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;奉仕快楽　奉仕
+	CASE 9,20
+		SIF TALENT:헌신적
+			ADD_SCORE += 1
+		
+		IF ABL:봉사정신 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:봉사정신 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:봉사정신 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;主人마조
+	CASE 14
+		SIF TALENT:새드
+			ADD_SCORE += 1
+		
+		IF ABL:새드끼 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:새드끼 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:새드끼 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;スカ
+	CASE 15
+		IF ABL:스캇중독 >= 5
+			ADD_SCORE += 3
+		ELSEIF ABL:스캇중독 >= 4
+			ADD_SCORE += 2
+		ELSEIF ABL:스캇중독 >= 3
+			ADD_SCORE += 1
+		ENDIF
+ENDSELECT
+
+;以下は細かい条件別
+;緊縛
+IF BIND_CHECK_A(TARGET)
+	IF EXP:속박경험 >= EXPLV:5
+		ADD_SCORE += 3
+	ELSEIF EXP:속박경험 >= EXPLV:4
+		ADD_SCORE += 2
+	ELSEIF EXP:속박경험 >= EXPLV:3
+		ADD_SCORE += 1
+	ENDIF
+ENDIF
+
+;노출　羞恥　撮影　鑑賞
+IF TEQUIP:비디오카메라 || TEQUIP:야외플레이 || TEQUIP:수치플레이 || (SELECTCOM == 311 || SELECTCOM == 312)
+	SIF TALENT:부끄럼쟁이
+		ADD_SCORE += 1
+	
+	IF ABL:노출벽 >= 8
+		ADD_SCORE += 3
+	ELSEIF ABL:노출벽 >= 5
+		ADD_SCORE += 2
+	ELSEIF ABL:노출벽 >= 3
+		ADD_SCORE += 1
+	ENDIF
+ENDIF
+
+;セックス系　逆セックス系
+SELECTCASE SELECTCOM
+	CASE 100 TO 119,260 TO 265,430,431,506 TO 523,526
+		SIF TALENT:섹스광
+			ADD_SCORE += 1
+		SIF TALENT:정조관념
+			ADD_SCORE += 1
+		
+		
+		IF ABL:섹스중독 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:섹스중독 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:섹스중독 >= 3
+			ADD_SCORE += 1
+		ENDIF
+ENDSELECT
+
+SELECTCASE SELECTCOM
+	;精液系
+	CASE 71,72,75,86,87,410,412,420,503,504
+		SIF TALENT:악취민감
+			CFLAG:506 += 1
+		SIF TALENT:요리고수
+			ADD_SCORE += 1
+			
+		IF ABL:정액중독 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:정액중독 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:정액중독 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;자위系
+	CASE 3 TO 8,509
+		SIF TALENT:자위하기쉬움
+			ADD_SCORE += 1
+		SIF  TALENT:자위광
+			ADD_SCORE += 1
+		SIF TALENT:프라이드높음
+			ADD_SCORE += 1
+		
+		IF ABL:자위중독 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:자위중독 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:자위중독 >= 3
+			ADD_SCORE += 1
+		ENDIF
+	;모유系
+	CASE 17,18
+		SIF TALENT:모유체질
+			ADD_SCORE += 1
+		SIF TALENT:모성
+			ADD_SCORE += 1
+		
+		IF ABL:착유중독 >= 8
+			ADD_SCORE += 3
+		ELSEIF ABL:착유중독 >= 5
+			ADD_SCORE += 2
+		ELSEIF ABL:착유중독 >= 3
+			ADD_SCORE += 1
+		ENDIF
+ENDSELECT
+
+;陥落素質別に加点（独断と偏見でざっくり分類）
+SELECTCASE SELECTCOM
+	;연모　친애　調教者が思慕対象でない場合を含む
+	;奉仕系　コミュニケーション系　イチャイチャしているコマンド
+	CASE 0,1,70,71,73 TO 77,200 TO 207,317 TO 319
+		SIF CFLAG:39 == 6 || CFLAG:39 == 165
+			ADD_SCORE += 2
+		SIF CFLAG:39 == 3
+			ADD_SCORE += 1
+	
+	;음란　창부
+	;Ｂ　Ｃ　Ｖ　Ａ　セックス系　気持ちいい系のコマンド
+	CASE 10 TO 59,100 TO 119,500 TO 510
+		SIF CFLAG:39 == 7
+			ADD_SCORE += 2
+		SIF CFLAG:39 == 4
+			ADD_SCORE += 1
+	
+	;복종　예속　調教者が思慕対象でない場合を含む
+	;ＳＭ系　ハードな奉仕系　ハードなセックス系　とりあえずハードなコマンド
+	CASE 80 TO 87,130 TO 162,380 TO 383,511 TO 514
+		SIF CFLAG:39 == 8
+			ADD_SCORE += 2
+		SIF CFLAG:39 == 5
+			ADD_SCORE += 1
+	
+ENDSELECT
+
+RETURN ADD_SCORE
+
+;-------------------------------------------------
+;絶頂時などに呼び出す関数
+;-------------------------------------------------
+@SCORING_PALAMCNG
+#DIM DYNAMIC ADD_SCORE
+
+;今どれだけ絶頂しているか　CVAB　0～32？点が加点
+ADD_SCORE += NOWEX:0 + NOWEX:1 + NOWEX:2 + NOWEX:3
+
+;噴乳　사정　강제정음절정　空사정　ドライオーガニズム
+ADD_SCORE += NOWEX:4 + NOWEX:5 + NOWEX:13 + NOWEX:40 + NOWEX:41
+
+;素質別で加点
+;部位開発系素質があり　かつ　そこで絶頂　0～4点が加点
+SIF TALENT:자위광 && NOWEX:0
+	ADD_SCORE += 1
+
+SIF TALENT:음란구멍 && NOWEX:1
+	ADD_SCORE += 1
+	
+SIF TALENT:항문광 && NOWEX:2
+	ADD_SCORE += 1
+
+SIF TALENT:음란가슴 && NOWEX:3
+	ADD_SCORE += 1
+
+;섹스광はセックスでの絶頂で加点
+SIF TALENT:섹스광 && ((SEXPLAY(TARGET) == 1 && NOWEX:0 )|| (SEXPLAY(TARGET) == 2 && NOWEX:2) || (SEXPLAY(TARGET) > 2 && NOWEX:1))
+	ADD_SCORE += 1
+
+;즉각함락はCVABのどこかで絶頂で加点
+SIF TALENT:즉각함락 && (NOWEX:0 || NOWEX:1 || NOWEX:2 || NOWEX:3)
+	ADD_SCORE += 1
+
+;V민감かつそこで絶頂で加点
+SIF TALENT:V민감 && NOWEX:0
+	ADD_SCORE += 1
+
+;C민감かつそこで絶頂で加点
+SIF TALENT:C민감 && NOWEX:1
+	ADD_SCORE += 1
+
+;A민감かつそこで絶頂で加点
+SIF TALENT:A민감 && NOWEX:2
+	ADD_SCORE += 1
+
+;B민감かつそこで絶頂で加点
+SIF TALENT:B민감 && NOWEX:3
+	ADD_SCORE += 1
+
+;악취민감かつ강제정음절정で加点
+SIF TALENT:악취민감 && NOWEX:13
+	ADD_SCORE += 1
+
+;마조かつ空사정かドライオーガニズムで加点　ドMならさらに加点
+SIF TALENT:마조 && (NOWEX:40 || NOWEX:41)
+	ADD_SCORE += TALENT:마조
+
+;모성かつ噴乳　もしくは　모성かつB絶頂で加点
+SIF TALENT:모성 && (NOWEX:3 || NOWEX:4)
+	ADD_SCORE += 1
+
+;임신かつVAセックスでのVA絶頂で加点
+SIF TALENT:임신 && ((SEXPLAY(TARGET) == 1 && NOWEX:0 )|| (SEXPLAY(TARGET) == 2 && NOWEX:2))
+	ADD_SCORE += 1
+
+;能力別条件
+;今のところなし
+
+;経験別条件
+;その部位で初絶頂
+SIF NOWEX:0 > 0 && CFLAG:241 == 0
+	ADD_SCORE += NOWEX:0
+
+SIF NOWEX:1 > 0 && CFLAG:242 == 0
+	ADD_SCORE += NOWEX:1
+
+SIF NOWEX:2 > 0 && CFLAG:243 == 0
+	ADD_SCORE += NOWEX:2
+
+SIF NOWEX:3 > 0 && CFLAG:244 == 0
+	ADD_SCORE += NOWEX:3
+
+RETURN ADD_SCORE
+

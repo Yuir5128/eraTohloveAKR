@@ -1,0 +1,1012 @@
+﻿;사정関係の処理
+
+;TFLAG:703　～　デフォルト사정先設定一時変数
+;1=질내사정、2=애널사정、3=수음関係、4=フェラ・파이즈리、5=손と입以外（스마타など）、
+;6=助손사정、7=커닐링구스、9=기승위한다
+;TFLAG:704　～　사정箇所選択可能か否か
+;0=不可、1=可
+
+;---------------------------------------------------------
+;eraheta用変更
+;---------------------------------------------------------
+;사정関連処理が色々おかしかったので色々と손を加えた(変えすぎて変更点が上げられない…)
+
+;基本的にコマンド内の사정処理は調教者側です
+;奴隷用はTRACHECKで行われてますが、膣射・腸射だけはここで制御してるので注意
+;PLAYER以外が사정するようなコマンドの場合も注意が必要（3Pを参考にして下さい）
+
+;---------------------------------------------------------
+;사정するかのチェック
+;コマンドファイル内でチェックした사정ゲージを反映。사정していればEを返す。
+;---------------------------------------------------------
+@SAMEN_CHECK(ARG,ARG:1)
+;汎用的な関数なので、将来的にはすべての調教コマンドの사정チェックをここでやることも可能
+S = BASE:ARG:사정
+EJAC = MAXBASE:ARG:사정
+
+SIF TALENT:ARG:조루
+	TIMES S ,1.50
+SIF TALENT:ARG:지루
+	TIMES S , 0.70
+;동정喪失時の사정ゲージボーナス
+SIF TALENT:ARG:동정 && TFLAG:160 == 2
+	S += 5000
+;사정限界が来ている場合は、사정ゲージは強制的に0にする
+IF CFLAG:ARG:11 == 0
+	S = 0
+	BASE:ARG:사정 = 0
+ENDIF
+
+IF S > EJAC * 2
+	;調教者以外の사정フラグ
+	TFLAG:6 = 2
+	E = 2
+ELSEIF S > EJAC
+	;調教者以外の사정フラグ
+	TFLAG:6 = 2
+	E = 1
+ELSE
+	E = 0
+ENDIF
+SIF ARG:1
+	TFLAG:6 = 0
+
+
+;さらにコマンドファイル内にて、Eがあれば사정時の処理を行う。
+;このコマンドではどこに사정するのが普通か（セックスなら膣、フェラなら입など）を判定
+;オプションで사정先を「都度選択する」に設定している場合、選択する事ができるか否かを判定
+;사정時の処理
+;IF E >= 1
+;	;사정先タイプの設定
+;	TFLAG:703 = 4
+;	;사정先選択の可・不可
+;	TFLAG:704 = 1
+;	;汎用的な処理はこの関数で行う
+;	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+;	CALL SAMEN_SHOOT
+;ENDIF
+
+
+;---------------------------------------------------------
+;사정場所選択
+;---------------------------------------------------------
+@SAMEN_SHOOT
+;ぶっかけ選択
+;[0] 머리카락 손コキ区分
+;[1] 顔	손コキ区分
+;[2] 가슴	フェラ・파이즈리区分
+;[3] 腹	フェラ・파이즈리区分
+;[4] 腋 フェラ・파이즈리2区分
+;[5] 腿 セックス2区分
+;[6] 割れ目 セックス2区分
+;[7] 발　フェラ・파이즈리区分
+;[8] ゴム射・中田氏
+
+;各コマンド中で사정の判定に使われる変数Eを使用する。
+;これまでの사정の処理をここに持たせ、各コマンド内で使わないようにする。
+;よってここでEを初期化し、各COMFに処理を返す（E == 0ならば各コマンド内で사정の処理は行われない）
+
+;사정した人物の設定
+IF TFLAG:6
+	P = ASSIPLAY ? MASTER # ASSI
+ELSE
+	P = PLAYER
+ENDIF
+
+;사정する対象の設定
+IF (SELECTCOM == 270 || SELECTCOM == 271) && TFLAG:703 != 6
+	T = MASTER
+ELSEIF ((SELECTCOM == 440 || SELECTCOM == 441) && TFLAG:703 != 6) || (SELECTCOM == 270 || SELECTCOM == 271)
+	T = ASSI
+ELSE
+	T = TARGET
+ENDIF
+
+;まずぶっかけ場所判別フラグを初期化(調教者以外の사정のときはフラグを保存)
+SIF TFLAG:6
+	F = CFLAG:T:106
+CFLAG:T:106 = 0
+
+;追加部分、사정箇所選択機能をOFFにした際に콘돔を含めた通常の사정処理を行う
+;また、状況的に사정箇所の選択を行えないであろうコマンドの場合もここで通常処理に飛ばす
+
+$INPUT_LOOP
+;아이は사정できない。
+IF TALENT:P:아이사이즈
+	CALL KARA_SHOOT_CHECK
+	RETURN 0
+;オプションで「そのまま사정」が選択されている、もしくはコマンド内の사정箇所選択が不可の場合
+ELSEIF FLAG:99 == 8 || TFLAG:704 == 0
+	;콘돔装備中は、そのまま콘돔사정へ。
+	IF TEQUIP:P:콘돔 == 1
+		CFLAG:T:106 = 9
+	;通常사정
+	ELSE
+		;コマンドファイル内で設定されている、基本的な箇所を確認する処理へ飛ばす。
+		CALL COMMAND_CHECK
+		RETURN 0
+	ENDIF
+;オプションで「都度選択」を設定していて、사정箇所選択可能な場合
+ELSEIF FLAG:99 == 9 && P == PLAYER
+	PRINTFORMW %CALLNAME:P%の페니스は限界まで膨張し、もう사정寸前だ……
+	PRINTFORMW 　
+	PRINTFORMW %CALLNAME:T%のどこに사정しますか？
+	PRINTL [0] 「머리카락」
+	PRINTL [1] 「顔」
+	PRINTL [2] 「가슴」
+	PRINTL [3] 「腹」
+	PRINTL [4] 「腋」
+	PRINTL [5] 「太もも」
+	PRINTL [6] 「割れ目」
+	PRINTL [7] 「尻」
+	PRINTL [8] 「발」
+	IF TEQUIP:P:콘돔
+		PRINTL [9] 「콘돔に사정する」
+	ELSE
+		PRINTL [9] 「そのまま사정する」
+	ENDIF
+	INPUT
+	IF RESULT == 0
+		CFLAG:T:106 = 1
+	ELSEIF RESULT == 1
+		CFLAG:T:106 = 2
+	ELSEIF RESULT == 2
+		CFLAG:T:106 = 3
+	ELSEIF RESULT == 3
+		CFLAG:T:106 = 4
+	ELSEIF RESULT == 4
+		CFLAG:T:106 = 5
+	ELSEIF RESULT == 5
+		CFLAG:T:106 = 6
+	ELSEIF RESULT == 6
+		CFLAG:T:106 = 7
+	ELSEIF RESULT == 7
+		CFLAG:T:106 = 8
+	ELSEIF RESULT == 8
+		CFLAG:T:106 = 10
+	ELSEIF RESULT == 9
+		;콘돔付きの場合
+		IF TEQUIP:P:콘돔 == 1
+			CFLAG:T:106 = 9
+		ELSE
+			;コマンドファイル内で設定されている、基本的な箇所を確認する処理へ飛ばす。
+			CALL COMMAND_CHECK
+			RETURN 0
+		ENDIF
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+;オプションで「基本的な箇所選択」がされていれば、それぞれの処理へ飛ばす。
+ELSE
+	IF FLAG:99 == 0
+		CFLAG:T:106 = 1
+	ELSEIF FLAG:99 == 1
+		CFLAG:T:106 = 2
+	ELSEIF FLAG:99 == 2
+		CFLAG:T:106 = 3
+	ELSEIF FLAG:99 == 3
+		CFLAG:T:106 = 4
+	ELSEIF FLAG:99 == 4
+		CFLAG:T:106 = 5
+	ELSEIF FLAG:99 == 5
+		CFLAG:T:106 = 6
+	ELSEIF FLAG:99 == 6
+		CFLAG:T:106 = 7
+	ELSEIF FLAG:99 == 7
+		CFLAG:T:106 = 8
+	ENDIF
+ENDIF
+
+;上の処理を抜けてきた場合、設定された箇所へ사정する処理へ飛ばす。
+CALL CHECK_CFLAG106
+
+
+
+;---------------------------------------------------------
+;사정処理関数その１　コマンド毎に設定された、基本사정箇所に사정する場合。
+;---------------------------------------------------------
+@COMMAND_CHECK
+;そのまま사정時の処理の分岐
+;コマンドによる処理ターゲットの確認と分岐
+IF TFLAG:703 == 1
+	;질내사정
+	CALL SAMEN_SHOOT_OLD_SEX
+	CALL IN_VAGINA_CHECK
+ELSEIF TFLAG:703 == 2
+	;애널사정
+	CALL SAMEN_SHOOT_OLD_SEX2
+	CALL IN_VAGINA_CHECK
+ELSEIF TFLAG:703 == 3
+	;수음
+	CALL SAMEN_SHOOT_OLD_FINGER
+ELSEIF TFLAG:703 == 4
+	;フェラ・파이즈리
+	CALL SAMEN_SHOOT_OLD_ORAL
+ELSEIF TFLAG:703 == 5
+	;손と입以外（스마타など）
+	CALL SAMEN_SHOOT_OLD_SUMATA
+ELSEIF TFLAG:703 == 6
+	;助손사정
+	CALL SAMEN_SHOOT_OLD_ASSISTANT
+ELSEIF TFLAG:703 == 7
+	;커닐링구스강제
+	CALL SAMEN_SHOOT_OLD_PUSSY
+ELSEIF TFLAG:703 == 9
+	;기승위한다
+	CALL SAMEN_SHOOT_OLD_RAPED
+ENDIF
+
+
+;---------------------------------------------------------
+;사정処理関数その２
+;実際に사정を行うため、汚れもここで判定。
+;---------------------------------------------------------
+;CFLAG:106 = ぶっかけ場所判別フラグ
+@CHECK_CFLAG106
+;머리카락
+IF CFLAG:T:106 == 1
+	IF TEQUIP:T:머리장식 >= 5
+		STAIN:T:머리장식 |= 4
+	ELSE
+		STAIN:T:머리카락 |= 4
+	ENDIF
+;顔
+ELSEIF CFLAG:T:106 == 2
+	SIF TEQUIP:T:특수3
+		STAIN:T:눈장식 |= 4
+;가슴、腹、腋
+ELSEIF CFLAG:T:106 == 3 || CFLAG:T:106 == 4 || CFLAG:T:106 == 5
+	;가슴の場合、着衣はまくらない。前開きの服にはつかない。
+	IF CFLAG:T:106 == 3
+		IF TOPS(T)
+			STAIN:T:전신상의 |= 4
+		ELSEIF TEQUIP:T:상의
+			STAIN:T:상의 |= 4
+		ELSEIF TEQUIP:T:속옷（위）
+			STAIN:T:속옷（위） |= 4
+		ELSE
+			STAIN:T:가슴 |= 4
+		ENDIF
+	;腋の場合、전신상의、상의はまくらない。下着に精液汚れは付着しない。
+	ELSEIF CFLAG:T:106 == 5 
+		IF TEQUIP:T:전신상의
+			STAIN:T:전신상의 |= 4
+		ELSEIF TEQUIP:T:상의
+			STAIN:T:상의 |= 4
+		ENDIF
+	ENDIF
+;太もも、割れ目、尻
+ELSEIF CFLAG:T:106 == 6 || CFLAG:T:106 == 7 || CFLAG:T:106 == 8
+	;着衣の場合（スカート系はまくるので先に排除しておく）
+	IF BOTTOMS(T) >= 4 || TEQUIP:T:속옷（아래）
+		;太ももの場合、ハーフパンツ系、ショートパンツ系、下着なら地肌に사정できる。
+		IF CFLAG:T:106 == 6 && (BOTTOMS(T) == 4 || TEQUIP:T:속옷（아래）)
+		;スカート以外の着衣は、着衣に汚れが付く
+		ELSEIF TEQUIP:T:하의
+			STAIN:T:하의 |= 4
+		;下着に関して
+		ELSEIF TEQUIP:T:속옷（아래）
+			;尻の場合、정조대は関与しない
+			IF CFLAG:T:106 == 8 && TEQUIP:T:정조대
+			;それ以外は全て下着に汚れが付く
+			ELSE
+				STAIN:T:속옷（아래） |= 4
+			ENDIF
+		ENDIF
+	ENDIF
+;발
+ELSEIF CFLAG:T:106 == 10
+	IF TEQUIP:T:신발
+		STAIN:T:신발 |= 4
+	ELSEIF TEQUIP:T:특수2
+		STAIN:T:발장식 |= 4
+	ELSE
+		STAIN:T:발 |= 4
+	ENDIF
+ENDIF
+
+IF CFLAG:T:106 == 0
+	CALL COMMAND_CHECK
+ELSEIF CFLAG:T:106 <= 2
+	CALL SAMEN_SHOOT_OLD_FINGER
+ELSEIF CFLAG:T:106 <= 5
+	CALL SAMEN_SHOOT_OLD_ORAL
+ELSEIF CFLAG:T:106 <= 8
+	CALL SAMEN_SHOOT_OLD_SEX3
+ELSEIF CFLAG:T:106 == 9
+	CALL IN_VAGINA_CHECK
+ELSEIF CFLAG:T:106 == 10
+	CALL SAMEN_SHOOT_OLD_ORAL
+ENDIF
+
+;調教者以外の사정のときは사정箇所をTFLAG:43に記録してフラグを戻す
+IF TFLAG:6
+	TFLAG:43 = CFLAG:T:106
+	CFLAG:T:106 = F
+ENDIF
+
+
+;---------------------------------------------------------
+@KARA_SHOOT_CHECK
+;---------------------------------------------------------
+;調教者以外の사정は別フラグ
+IF TFLAG:6
+	TFLAG:43 = 21
+;コマンドによる処理ターゲットの確認と分岐
+ELSEIF TFLAG:703 == 1
+	;질내사정
+	TFLAG:164 = 1
+ELSEIF TFLAG:703 == 2
+	;애널사정
+	TFLAG:164 = 2
+ELSEIF TFLAG:703 == 3
+	;수음
+	TFLAG:164 = 3
+ELSEIF TFLAG:703 == 4
+	;フェラ・파이즈리
+	TFLAG:164 = 4
+ELSEIF TFLAG:703 == 5
+	;손と입以外（스마타など）
+	TFLAG:164 = 5
+ELSEIF TFLAG:703 == 6
+	;助손사정
+	TFLAG:164 = 6
+ELSEIF TFLAG:703 == 7
+	;커닐링구스강제
+	TFLAG:164 = 7
+ELSEIF TFLAG:703 == 9
+	;기승위한다
+	TFLAG:164 = 8
+ENDIF
+;아이の場合사정できない
+CALL SAMEN_SHOOT_KARA
+
+
+
+;---------------------------------------------------------
+;プレイや及び助손の各コマンドでの中田氏チェック
+;---------------------------------------------------------
+@IN_VAGINA_CHECK
+;各コマンドへの影響を小さくするのが目的（関数を呼ぶ、もしくはオミットするだけで良い）
+;TFLAG:2（中田氏）とTEQUIP:콘돔（콘돔）を条件に膣射・腸射を増やす処理を持つ
+
+;コマンドごとの分岐
+;まず콘돔で分岐
+IF TEQUIP:P:콘돔 == 1
+	IF !TFLAG:6
+		CFLAG:T:106 = 9
+	ELSE
+		TFLAG:43 = 9
+	ENDIF
+	IF NO:P == 0
+		PRINT 主人
+	ELSE
+		PRINTFORM %CALLNAME:P%
+	ENDIF
+	PRINTL 　콘돔사정
+	CALL SAMEN_SHOOT_CONDOM
+;콘돔をしてないかつＶ系なら中出し
+ELSEIF TFLAG:703 == 1 || TFLAG:703 == 6
+	SIF P == MASTER
+		A = 102
+	SIF P == ASSI
+		A = 103
+	;セックスで사정、助손が사정、조수를범한다で사정
+	IF TFLAG:2 == 2 || TFLAG:6 == 2 || TFLAG:7 == 2
+		IF NO:P == 0
+			PRINT 主人
+		ELSE
+			PRINTFORM %CALLNAME:P%
+		ENDIF
+		PRINTL 　질내大量사정
+		TFLAG:38 = 2
+		IF CFLAG:T:108
+			PRINTL <避妊結界>
+		ELSE
+			PRINTFORML %CALLNAME:T%の질내사정경험+２
+			EXP:T:질내사정경험 += 2
+			CFLAG:T:A += 2
+			;中田氏時の공포判定等
+			SIF T == TARGET
+				CALL SAMEN_SHOOT_SOURCE
+		ENDIF
+	;セックスで사정、助손が사정、조수를범한다で사정
+	ELSEIF TFLAG:2 == 1 || TFLAG:6 == 1 || TFLAG:7 == 1
+		IF NO:P == 0
+			PRINT 主人
+		ELSE
+			PRINTFORM %CALLNAME:P%
+		ENDIF
+		PRINTL 　질내사정
+		TFLAG:38 = 1
+		IF CFLAG:T:108
+			PRINTL <避妊結界>
+		ELSE
+			PRINTFORML %CALLNAME:T%の질내사정경험+１
+			EXP:T:질내사정경험 += 1
+			CFLAG:T:A += 1
+			;中田氏時の공포判定等
+			SIF T == TARGET
+				CALL SAMEN_SHOOT_SOURCE
+		ENDIF
+	ENDIF
+;콘돔してないかつＡ系なら腸射
+ELSEIF TFLAG:703 == 2 || TFLAG:703 == 6
+	SIF P == MASTER
+		A = 702
+	SIF P == ASSI
+		A = 703
+	;セックスで사정、助손が사정。조수의A를범한다で사정
+	IF TFLAG:2 == 2 || TFLAG:6 == 2 || TFLAG:7 == 2
+		IF NO:P == 0
+			PRINT 主人
+		ELSE
+			PRINTFORM %CALLNAME:P%
+		ENDIF
+		PRINTL 장내大量사정
+		TFLAG:138 = 2
+		IF CFLAG:T:108
+			PRINTL 〈避妊結界〉
+		ELSE
+			PRINTFORML %CALLNAME:T%の장내사정경험＋２
+			EXP:T:장내사정경험 += 2
+			CFLAG:T:A += 2
+			;中田氏時の공포判定等
+			SIF T == TARGET
+				CALL SAMEN_SHOOT_SOURCE
+		ENDIF
+	
+	;セックスで사정、助손が사정。조수의A를범한다で사정
+	ELSEIF TFLAG:2 == 1 || TFLAG:6 == 1 || TFLAG:7 == 1
+		IF NO:P == 0
+			PRINT 主人
+		ELSE
+			PRINTFORM %CALLNAME:P%
+		ENDIF
+		PRINTL 장내사정
+		TFLAG:138 = 1
+		IF CFLAG:T:108
+			PRINTL 〈避妊結界〉
+		ELSE
+			PRINTFORML %CALLNAME:T%の장내사정경험＋１
+			EXP:T:장내사정경험 += 1
+			CFLAG:T:A += 1
+			;中田氏時の공포判定等
+			SIF T == TARGET
+				CALL SAMEN_SHOOT_SOURCE
+		ENDIF
+	ENDIF
+ENDIF
+
+@IN_VAGINA_CHECK_T
+;奴隷の各コマンドでの中田氏チェック
+;各コマンドへの影響を小さくするのが目的（関数を呼ぶ、もしくはオミットするだけで良い）
+
+;奴隷공系コマンド（조수를범하게시킨다、逆セックス系）の場合
+IF (SELECTCOM == 430 || SELECTCOM == 431) || SEXPLAY(TARGET) >= 3
+	;사정した人物の設定
+	P = TARGET
+
+	;사정する対象の設定
+	IF (SELECTCOM == 430 || SELECTCOM == 431)
+		T = ASSI
+	ELSE
+		T = PLAYER
+	ENDIF
+
+	;Ｖ系フラグ
+	V = 0
+	SIF ((SELECTCOM == 430 || SELECTCOM == 431) && TFLAG:705 == 0) || SEXPLAY(TARGET) == 3
+		V = 1
+	
+	;まず콘돔で分岐
+	IF TEQUIP:P:콘돔 == 1
+		PRINTFORML %CALLNAME:P%　콘돔사정
+		CALL SAMEN_SHOOT_CONDOM
+	;콘돔をしてないかつＶ系なら中出し
+	ELSEIF V
+		IF E == 2
+			PRINTFORML %CALLNAME:P%　질내大量사정
+			IF CFLAG:T:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTFORML %CALLNAME:T%の질내사정경험+２
+				EXP:T:질내사정경험 += 2
+				CFLAG:T:104 += 2
+			ENDIF
+		ELSEIF E == 1
+			PRINTFORML %CALLNAME:P%　질내사정
+			IF CFLAG:T:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTFORML %CALLNAME:T%の질내사정경험+１
+				EXP:T:질내사정경험 += 1
+				CFLAG:T:104 += 1
+			ENDIF
+		ENDIF
+	;콘돔をしてないかつＡ系なら腸中出し
+	ELSEIF V == 0
+		IF E == 2
+			PRINTFORML %CALLNAME:P%　장내大量사정
+			IF CFLAG:T:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTFORML %CALLNAME:T%の장내사정경험+２
+				EXP:T:장내사정경험 += 2
+				CFLAG:T:704 += 2
+			ENDIF
+		ELSEIF E == 1
+			PRINTFORML %CALLNAME:P%　장내사정
+			IF CFLAG:T:108
+				PRINTL <避妊結界>
+			ELSE
+				PRINTFORML %CALLNAME:T%の장내사정경험+１
+				EXP:T:장내사정경험 += 1
+				CFLAG:T:704 += 1
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+
+;---------------------------------------------------------
+;各사정タイプごとの処理関数
+;---------------------------------------------------------
+;今후はCOMF内では処理せず、必要に応じてここから呼び出す。
+;汚れ移動等の処理は各COMF内でやってくれるので移動の必要無し
+
+@SAMEN_SHOOT_CONDOM
+;ゴム사정の処理
+;ほとんど他の사정と一緒だが、TFLAGを立てず（膣射・腸射阻止）、정액경험も増やさない
+;콘돔関連のフラグもできるだけここで扱う。
+
+CALL SAMEN_SHOOT_CALC
+
+;콘돔が脱げる
+TEQUIP:P:콘돔 = 0
+
+SIF P == MASTER
+	S = 4
+SIF P == ASSI
+	S = 2
+SIF P == TARGET
+	S = 1
+;콘돔に精液溜まる(誰の精液かビットで格納)
+CFLAG:107 |= S
+
+;콘돔自動装着処理
+IF FLAG:98 & S && ITEM:45 <= 0
+	PRINT <콘돔が無くなったので、自動装着を解除します>
+	FLAG:98 = 0
+ELSEIF FLAG:98 & S
+		ITEM:45 -= 1
+		TEQUIP:P:콘돔 = 1
+ENDIF
+
+;반감が多少減少
+SOURCE:반발 -= 500
+
+
+@SAMEN_SHOOT_OLD_SEX
+;これまでCOMF内で使用されていたセックス사정の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET
+	RETURN 0
+
+;大量사정
+IF E == 2
+	EXP:정액경험 += 1
+	PRINTL 정액경험＋１
+
+	;セックスで사정フラグ
+	IF !TFLAG:6
+		TFLAG:2 = 2
+	ELSE
+		TFLAG:43 = 18
+	ENDIF
+;通常の사정
+ELSEIF E == 1
+	;セックスで사정フラグ
+	IF !TFLAG:6
+		TFLAG:2 = 1
+	ELSE
+		TFLAG:43 = 18
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_SEX2
+;これまでCOMF内で使用されていたセックス사정の処理を改造。
+;애널セックス系コマンドに使用する。
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量사정
+IF E == 2
+	EXP:정액경험 += 2
+	PRINTL 정액경험＋２
+	;セックスで사정フラグ
+	IF !TFLAG:6
+		TFLAG:2 = 2
+	ELSE
+		TFLAG:43 = 17
+	ENDIF
+ELSEIF E == 1
+	IF SELECTCOM == 116
+		EXP:정액경험 += 1
+		PRINTL 정액경험＋１
+	ENDIF
+	;セックスで사정フラグ
+	IF !TFLAG:6
+		TFLAG:2 = 1
+	ELSE
+		TFLAG:43 = 17
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_SEX3
+;これまでCOMF内で使用されていたセックス사정の処理を改造。
+;太もも、割れ目、尻に使用する。
+;정액경험は増えるがセックス사정のフラグは立てない（立てると中田氏입上が出たり질내사정경험・장내사정경험が増えてしまう）
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量사정
+IF E == 2
+	IF SELECTCOM == 116
+		EXP:정액경험 += 2
+		PRINTL 정액경험＋２
+	ELSE
+		EXP:정액경험 += 1
+		PRINTL 정액경험＋１
+	ENDIF
+ELSEIF E == 1
+	IF SELECTCOM == 116
+		EXP:정액경험 += 1
+		PRINTL 정액경험＋１
+	ENDIF
+ENDIF
+
+;着衣だと汚れ追加
+IF E > 0
+	IF TEQUIP:하의
+		STAIN:하의 |= 4
+	ELSEIF TEQUIP:속옷（아래）
+		STAIN:속옷（아래） |= 4
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_FINGER
+;これまでCOMF内で使用されていた손コキ사정の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量사정
+IF E == 2
+	EXP:정액경험 += 3
+	PRINTL 정액경험＋３
+	;손で사정させたフラグ
+	TFLAG:1 = 2
+;通常の사정
+ELSEIF E == 1
+	EXP:정액경험 += 1
+	PRINTL 정액경험＋１
+	;손で사정させたフラグ
+	TFLAG:1 = 1
+ENDIF
+
+;着衣だと汚れ追加
+IF E > 0
+	IF TEQUIP:특수1 == 1
+		STAIN:장갑 |= 4
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_ORAL
+;これまでCOMF内で使用されていたフェラ・파이즈리사정の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量사정
+IF E == 2
+	EXP:정액경험 += 9
+	PRINTL 정액경험＋９
+	IF SELECTCOM == 317 || SELECTCOM == 74
+		;가슴で사정させたフラグ
+		TFLAG:34 = 2
+	ELSE
+		;입で사정させたフラグ
+		IF !TFLAG:6
+			TFLAG:0 = 2
+		ELSE
+			TFLAG:43 = 13
+		ENDIF
+	ENDIF
+;通常の사정
+ELSEIF E == 1
+	EXP:정액경험 += 3
+	PRINTL 정액경험＋３
+	IF SELECTCOM == 317 || SELECTCOM == 74
+		;가슴で사정させたフラグ
+		TFLAG:34 = 1
+	ELSE
+		;입で사정させたフラグ
+		IF !TFLAG:6
+			TFLAG:0 = 1
+		ELSE
+			TFLAG:43 = 13
+		ENDIF
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_SUMATA
+;これまでCOMF内で使用されていた손と입以外（스마타など）사정の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量사정
+IF E == 2
+	EXP:정액경험 += 2
+	PRINTL 정액경험＋２
+	IF SELECTCOM == 80
+		;발で사정させたフラグ
+		TFLAG:16 = 2
+	ELSE
+		;손と입以外（스마타など）で사정させたフラグ
+		TFLAG:9 = 2
+	ENDIF
+;通常の사정
+ELSEIF E == 1
+	EXP:정액경험 += 1
+	PRINTL 정액경험＋１
+	IF SELECTCOM == 80
+		;발で사정させたフラグ
+		TFLAG:16 = 1
+	ELSEIF SELECTCOM == 73 || SELECTCOM == 74 || SELECTCOM == 421 || SELECTCOM == 504
+		;가슴で사정
+		TFLAG:34 = 1
+	ELSE
+		;손と입以外（스마타など）で사정させたフラグ
+		TFLAG:9 = 1
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_ASSISTANT
+;これまでCOMF内で使用されていた助손の사정の処理
+
+CALL SAMEN_SHOOT_CALC
+
+IF E
+	;촉수에범하게시킨다コマンドのとき主人に정액경험
+	IF SELECTCOM == 270 || SELECTCOM == 271
+		EXP:MASTER:정액경험 += 1
+		PRINTFORML %CALLNAME:MASTER%に정액경험＋１
+		TFLAG:43 = 12
+	ELSE
+		EXP:정액경험 += 1
+		PRINTL 정액경험＋１
+		;조수를범한다
+		IF SELECTCOM == 440 || SELECTCOM == 441
+			TFLAG:43 = 12
+		;조수를범하게시킨다
+		ELSEIF SELECTCOM == 430 || SELECTCOM == 431
+			TFLAG:43 = 20
+		ENDIF
+	ENDIF
+ENDIF
+
+@SAMEN_SHOOT_OLD_PUSSY
+;これまでCOMF内で使用されていた커닐링구스강제時の사정の処理
+
+CALL SAMEN_SHOOT_CALC
+
+SIF T != TARGET 
+	RETURN 0
+
+;大量사정
+IF E == 2
+	EXP:정액경험 += 4
+	PRINTL 정액경험＋４
+	;커닐링구스で사정させたフラグ
+	TFLAG:5 = 2
+;通常の사정
+ELSEIF E == 1
+	EXP:정액경험 += 1
+	PRINTL 정액경험＋１
+	;커닐링구스で사정させたフラグ
+	TFLAG:5 = 1
+ENDIF
+
+@SAMEN_SHOOT_OLD_RAPED
+;これまでCOMF内で使用されていた기승위한다で사정の時の処理
+
+CALL SAMEN_SHOOT_CALC
+
+IF E == 2
+	EXP:T:정액경험 += 1
+	PRINTL 정액경험＋１
+	;기승위한다で사정させたフラグ
+	TFLAG:12 = 2
+;通常の사정
+ELSEIF E == 1
+	;기승위한다で사정させたフラグ
+	TFLAG:12 = 1
+ENDIF
+
+@SAMEN_SHOOT_CALC
+;사정時の共通処理
+;精液汚れの設定
+STAIN:P:페니스 |= 4
+
+;大量사정
+IF E == 2
+	IF NO:P == 0
+		PRINT 主人
+	ELSE
+		PRINTFORM %CALLNAME:P%
+	ENDIF
+	PRINTL 　大量사정
+
+	EXP:P:사정경험 += 2
+	BASE:P:사정 -= EJAC*2
+	SIF BASE:P:사정 >= EJAC
+		BASE:P:사정 = EJAC-1
+;通常の사정
+ELSEIF E == 1
+	IF NO:P == 0
+		PRINT 主人
+	ELSE
+		PRINTFORM %CALLNAME:P%
+	ENDIF
+	PRINTL 　사정
+
+	EXP:P:사정경험 += 1
+	BASE:P:사정 -= EJAC
+	SIF BASE:P:사정 >= EJAC
+		BASE:P:사정 = EJAC-1
+ENDIF
+
+;사정時に중독충족のソースを追加
+;通常사정時
+SIF E == 1
+	A = 200
+;大量사정時
+SIF E == 2
+	A = 500
+
+IF E > 0
+	;정액중독を見る
+	IF ABL:정액중독 == 1
+		TIMES A , 0.00
+	ELSEIF ABL:정액중독 == 2
+		TIMES A , 0.30
+	ELSEIF ABL:정액중독 == 3
+		TIMES A , 0.60
+	ELSEIF ABL:정액중독 == 4
+		TIMES A , 0.90
+	ELSEIF ABL:정액중독 == 5
+		TIMES A , 1.20
+	ELSEIF ABL:정액중독 == 6
+		TIMES A , 1.50
+	ELSEIF ABL:정액중독 == 7
+		TIMES A , 1.80
+	ELSEIF ABL:정액중독 == 8
+		TIMES A , 2.30
+	ELSEIF ABL:정액중독 == 9
+		TIMES A , 3.00
+	ELSEIF ABL:정액중독 == 10
+		TIMES A , 5.00
+	ENDIF
+ENDIF
+
+;ゴム射フラグがあったら중독충족しない
+SIF CFLAG:T:106 != 9
+	SOURCE:중독충족 += A
+
+;사정후は再装填の時間を設ける
+;通常사정時
+SIF E == 1
+	CFLAG:P:9 = 3
+;大量사정時
+SIF E == 2
+	CFLAG:P:9 = 5
+CFLAG:P:11 -= 1
+
+
+;-------------------------------------------------
+;空사정
+;-------------------------------------------------
+@SAMEN_SHOOT_KARA
+
+;強空사정
+IF E == 2
+	IF NO:P == 0
+		PRINT 主人
+	ELSE
+		PRINTFORM %CALLNAME:P%
+	ENDIF
+	PRINTL 　強空사정
+
+	BASE:P:사정 -= EJAC*2
+	SIF BASE:P:사정 >= EJAC
+		BASE:P:사정 = EJAC-1
+;空사정
+ELSEIF E == 1
+	IF NO:P == 0
+		PRINT 主人
+	ELSE
+		PRINTFORM %CALLNAME:P%
+	ENDIF
+	PRINTL 　空사정
+
+	BASE:P:사정 -= EJAC
+	SIF BASE:P:사정 >= EJAC
+		BASE:P:사정 = EJAC-1
+ENDIF
+
+
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+@SAMEN_SHOOT_SOURCE
+;性転換している場合に備えて元の性別を見る
+;男性なら１　女性なら０
+LOCAL = MALE2(TARGET)
+
+;元が女の場合
+IF LOCAL == 0
+	;未陥落の場合반발、공포
+	IF !KANRAKU(TARGET)
+		SOURCE:반발 += 1000
+		;임신してないかつ孕む可能性がある（腸）中出し
+		SIF TALENT:임신 == 0 && ((TFLAG:38 && MALE(TARGET) == 0) || (TFLAG:138 && TALENT:오메가))
+			SOURCE:두려움 += 1000
+	;연모ルートは성취감のソースが増加する
+	ELSEIF KANRAKU(TARGET) == 1
+		SOURCE:성취감 += 1500
+	;연모以外の陥落は순종
+	ELSE
+		SOURCE:순종 += 500
+	ENDIF
+;元が남자の場合
+ELSE
+	;未陥落の場合반발、공포
+	IF !KANRAKU(TARGET)
+		SOURCE:반발 += 2000
+		;임신してないかつ孕む可能性がある（腸）中出し
+		SIF TALENT:임신 == 0 && ((TFLAG:38 && MALE(TARGET) == 0) || (TFLAG:138 && TALENT:오메가))
+			SOURCE:두려움 += 2000
+	;연모ルートは순종、공포
+	ELSEIF KANRAKU(TARGET) == 1
+		SOURCE:순종 += 1000
+		;임신してないかつ孕む可能性がある（腸）中出し
+		SIF TALENT:임신 == 0 && ((TFLAG:38 && MALE(TARGET) == 0) || (TFLAG:138 && TALENT:오메가))
+			SOURCE:두려움 += 500
+	;연모以外の陥落は순종＋굴복＋공포
+	ELSE
+		SOURCE:순종 += 300
+		;임신してないかつ孕む可能性がある（腸）中出し
+		IF TALENT:임신 == 0 && ((TFLAG:38 && MALE(TARGET) == 0) || (TFLAG:138 && TALENT:오메가))
+			SOURCE:두려움 += 1000
+			SOURCE:굴복 += 300
+		ENDIF
+	ENDIF
+ENDIF
+

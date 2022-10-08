@@ -52,7 +52,7 @@ IF TARGET >= 0
 	;-------------------------------------------------
 	IF RESULT == 0
 		K = 3
-		;이벤트입상 호출
+		;이벤트대사 호출
 		TFLAG:13 = 26
 		CALL KOJO_MESSAGE_EVENT
 		IF P > 0
@@ -182,7 +182,7 @@ PRINTW
 IF (TALENT:연모 == 0 || TALENT:친애 == 0) && (MARK:반발각인 >= 2 || ABL:순종 < 5)
 	K = 1
 	
-	;입상은 EVENT_M로 관리하는 것이 좋은 것 같은 생각이 들었으므로
+	;대사은 EVENT_M로 관리하는 것이 좋은 것 같은 생각이 들었으므로
 	TFLAG:13 = 26
 	CALL KOJO_MESSAGE_EVENT
 	
@@ -421,7 +421,7 @@ IF S > 0
 		SIF TFLAG:14 == 2
 			S += 2
 		K = 4
-		;이벤트입상 호출
+		;이벤트대사 호출
 		TFLAG:13 = 26
 		CALL KOJO_MESSAGE_EVENT
 		PRINTL 

@@ -1,0 +1,244 @@
+﻿;-------------------------------------------------
+;뱀장어탕
+;人外系コマンド
+;-------------------------------------------------
+@COM382
+
+PRINTL 뱀장어탕
+STR:0 = 뱀장어탕
+
+CALL KOJO_MESSAGE_COM
+
+F = 1
+R = 1
+;Vに道具を挿入している場合
+SIF TALENT:남자 || TEQUIP:바이브 || TEQUIP:정조대
+	F = 0
+
+;Aに道具を挿入している場合
+SIF TEQUIP:애널바이브 || TEQUIP:애널비즈 || TEQUIP:확장벌룬
+	R = 0
+
+;V経験を伴うコマンドのフラグ(처녀膜再生対応)
+SIF F && (TALENT:처녀 || TALENT:재생처녀)
+	TFLAG:19 |= 1
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 400
+LOSEBASE:기력 += 650
+
+SOURCE:쾌C += 100
+SOURCE:쾌B += 100
+SOURCE:통증 += 1000
+SOURCE:두려움 += 2000
+SOURCE:굴복 += 1200
+SOURCE:불결 += 800
+SOURCE:일탈 += 1500
+SOURCE:반발 += 1500
+;Vに道具を挿入していない場合
+IF F
+	SOURCE:쾌V += 350
+	SOURCE:통증 += 500
+	SOURCE:두려움 += 500
+ENDIF
+;Aに道具を挿入していない場合
+IF R
+	SOURCE:쾌A += 350
+	SOURCE:통증 += 500
+	SOURCE:두려움 += 500
+ENDIF
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;Vに道具を挿入していない場合のみ見る
+IF F
+	;Vへの고통は先に処理しておく
+	;EXP:V경험をみる（처녀の반감は別途処理済みなので省略）
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증 , 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증 , 0.80
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증 , 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증 , 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증 , 0.00
+	ENDIF
+
+	;PALAM:윤활をみる
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:반발 , 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증 , 0.70
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증 , 0.10
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증 , 0.10
+	ENDIF
+ENDIF
+
+;Aに道具を挿入していない場合のみ見る
+IF R
+	;Aへの고통は先に処理しておく
+	;EXP:A경험をみる
+	IF EXP:A경험 < EXPLV:1
+		TIMES SOURCE:통증 , 3.00
+		TIMES SOURCE:반발 , 3.00
+	ELSEIF EXP:A경험 < EXPLV:2
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:반발 , 2.00
+	ELSEIF EXP:A경험 < EXPLV:3
+		TIMES SOURCE:통증 , 0.80
+		TIMES SOURCE:반발 , 1.50
+	ELSEIF EXP:A경험 < EXPLV:4
+		TIMES SOURCE:통증 , 0.60
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF EXP:A경험 < EXPLV:5
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF EXP:A경험 >= EXPLV:5
+		TIMES SOURCE:통증 , 0.20
+	ENDIF
+
+	;PALAM:윤활をみる
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:반발 , 2.00
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증 , 1.00
+		TIMES SOURCE:반발 , 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증 , 0.60
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증 , 0.30
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증 , 0.20
+	ENDIF
+ENDIF
+
+;特にハードなコマンドでは、이상경험に応じて効果を減らす
+IF EXP:이상경험 < EXPLV:1
+	TIMES SOURCE:두려움 , 1.20
+	TIMES SOURCE:일탈 , 1.20
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:이상경험 < EXPLV:2
+	TIMES SOURCE:두려움 , 0.90
+	TIMES SOURCE:일탈 , 0.90
+	TIMES SOURCE:반발 , 0.90
+ELSEIF EXP:이상경험 < EXPLV:3
+	TIMES SOURCE:두려움 , 0.80
+	TIMES SOURCE:일탈 , 0.80
+	TIMES SOURCE:반발 , 0.80
+ELSEIF EXP:이상경험 < EXPLV:4
+	TIMES SOURCE:두려움 , 0.70
+	TIMES SOURCE:일탈 , 0.70
+	TIMES SOURCE:반발 , 0.70
+ELSEIF EXP:이상경험 < EXPLV:5
+	TIMES SOURCE:두려움 , 0.60
+	TIMES SOURCE:일탈 , 0.60
+	TIMES SOURCE:반발 , 0.60
+ELSE
+	TIMES SOURCE:두려움 , 0.50
+	TIMES SOURCE:일탈 , 0.50
+	TIMES SOURCE:반발 , 0.50
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;粘液の汚れ
+IF TEQUIP:머리장식
+	STAIN:머리장식 = 32
+	STAIN:머리장식 = 128
+ENDIF
+IF TEQUIP:특수3
+	STAIN:눈장식 = 32
+	STAIN:눈장식 = 128
+ENDIF
+
+STAIN:머리카락 = 32
+STAIN:머리카락 = 128
+STAIN:입 = 32
+
+IF TEQUIP:특수1 == 1
+	STAIN:장갑 = 32
+	STAIN:장갑 = 128
+ELSE
+	STAIN:손 = 32
+ENDIF
+
+STAIN:가슴 = 32
+STAIN:페니스 = 32
+STAIN:바기나 = 32
+IF F
+	STAIN:바기나 = 32
+	STAIN:질내 = 32
+	;질내に破瓜の血の汚れを付加
+	SIF TALENT:처녀 == 1 || TALENT:재생처녀 == 1
+		STAIN:질내 |= 64
+ENDIF
+STAIN:애널 = 32
+SIF R
+	STAIN:장내 = 32
+STAIN:발 = 32
+IF TEQUIP:특수2
+	STAIN:발장식 = 32
+	STAIN:발장식 = 128
+ENDIF
+
+
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;V経験
+IF F > 0
+	EXP:V경험 += 2
+	PRINTL V경험＋２
+ENDIF
+
+;A経験
+IF R > 0
+	EXP:A경험 += 2
+	PRINTL A경험＋２
+ENDIF
+
+;뱀장어탕初経験のとき、이상경험追加
+IF EXP:뱀장어탕경험 == 0
+	EXP:이상경험 += 1
+	PRINTL 뱀장어탕初経験で이상경험＋１
+ENDIF
+EXP:뱀장어탕경험 += 1
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+

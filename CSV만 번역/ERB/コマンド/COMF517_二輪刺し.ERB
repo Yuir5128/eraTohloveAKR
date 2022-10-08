@@ -1,0 +1,296 @@
+﻿;-------------------------------------------------
+;二輪挿し
+;派生系コマンド
+;-------------------------------------------------
+@COM517
+
+PRINTL 二輪挿し
+STR:0 = 二輪挿し
+
+SELECTCOM = 517
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;처녀喪失フラグ
+SIF TALENT:처녀 || TALENT:재생처녀
+	TFLAG:19 |= 1
+
+;調教者が동정だった場合の喪失フラグ
+SIF TALENT:PLAYER:동정
+	TFLAG:160 |= 2
+
+;調教者が동정だった場合の喪失フラグ
+SIF TALENT:ASSI:동정
+	TFLAG:160 |= 3
+
+
+;-------------------------------------------------
+;사정ゲージチェック（主人）
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_3PM
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:MASTER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:MASTER:사정 += B
+
+;-------------------------------------------------
+;사정ゲージチェック（助손）
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_3PA
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:ASSI:9 > 0
+	B /= 20
+
+SIF PENIS(ASSI)
+	BASE:ASSI:사정 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 300
+LOSEBASE:기력 += 200
+
+SOURCE:쾌V += 500
+
+;V拡張経験を見る
+IF EXP:V확장경험 >= 50
+	TIMES SOURCE:쾌V , 2.00
+ELSEIF EXP:V확장경험 > 40
+	TIMES SOURCE:쾌V , 1.80
+ELSEIF EXP:V확장경험 > 30
+	TIMES SOURCE:쾌V , 1.50
+ELSEIF EXP:V확장경험 > 20
+	TIMES SOURCE:쾌V , 1.20
+ENDIF
+
+SOURCE:애정 += 300
+;스킨십선호だと애정のソース追加
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+SOURCE:성행동 += 250
+SOURCE:통증 += 1000
+SOURCE:중독충족 += 500
+SOURCE:노출 += 500
+SOURCE:굴복 += 500
+SOURCE:일탈 += 800
+SOURCE:반발 += 500
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;정조관념持ちで연모、친애持ち以外には常に반발のソースを追加する（セックス系のみ）
+SIF TALENT:정조관념 && (TALENT:연모 == 0 && TALENT:친애 == 0)
+	SOURCE:반발 += 1000
+	
+;처녀だった場合は、고통のソースと반발のソースを追加する
+IF TALENT:처녀 == 1
+	SOURCE:통증 += 5500
+	SOURCE:반발 += 3000
+ENDIF
+
+;재생처녀だった場合は、고통のソースと반발のソースを追加する
+IF TALENT:재생처녀 == 1
+	SOURCE:통증 += 5500
+	SOURCE:반발 += 1000
+ENDIF
+
+;Vへの大きな고통は先に処理しておく
+;EXP:V경험をみる
+IF EXP:V경험 < EXPLV:1
+	TIMES SOURCE:통증 , 2.50
+	TIMES SOURCE:반발 , 4.00
+ELSEIF EXP:V경험 < EXPLV:2
+	TIMES SOURCE:통증 , 2.00
+	TIMES SOURCE:반발 , 3.50
+ELSEIF EXP:V경험 < EXPLV:3
+	TIMES SOURCE:통증 , 1.80
+	TIMES SOURCE:반발 , 3.00
+ELSEIF EXP:V경험 < EXPLV:4
+	TIMES SOURCE:통증 , 1.60
+	TIMES SOURCE:반발 , 2.50
+ELSEIF EXP:V경험 < EXPLV:5
+	TIMES SOURCE:통증 , 1.40
+	TIMES SOURCE:반발 , 2.00
+ELSEIF EXP:V경험 >= EXPLV:5
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 3.00
+	TIMES SOURCE:반발 , 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 2.50
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 2.00
+	TIMES SOURCE:반발 , 1.20
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 1.50
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 1.00
+ENDIF
+
+
+;섹스중독を見る
+IF ABL:섹스중독 == 1
+	TIMES SOURCE:중독충족 , 0.00
+ELSEIF ABL:섹스중독 == 2
+	TIMES SOURCE:중독충족 , 0.30
+ELSEIF ABL:섹스중독 == 3
+	TIMES SOURCE:중독충족 , 0.60
+ELSEIF ABL:섹스중독 == 4
+	TIMES SOURCE:중독충족 , 0.90
+ELSEIF ABL:섹스중독 == 5
+	TIMES SOURCE:중독충족 , 1.20
+ELSEIF ABL:섹스중독 == 6
+	TIMES SOURCE:중독충족 , 1.50
+ELSEIF ABL:섹스중독 == 7
+	TIMES SOURCE:중독충족 , 1.80
+ELSEIF ABL:섹스중독 == 8
+	TIMES SOURCE:중독충족 , 2.30
+ELSEIF ABL:섹스중독 == 9
+	TIMES SOURCE:중독충족 , 3.00
+ELSEIF ABL:섹스중독 >= 10
+	TIMES SOURCE:중독충족 , 5.00
+ENDIF
+
+;-------------------------------------------------
+;사정チェック１（主人）
+;-------------------------------------------------
+CALL SAMEN_CHECK(MASTER,1)
+
+;사정時の処理
+IF E >= 1
+	;사정先タイプの設定
+	TFLAG:703 = 1
+	;사정先選択の可・不可
+	TFLAG:704 = 1
+	;汎用的な処理はこの関数で行う
+	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;사정チェック２（助손）
+;-------------------------------------------------
+CALL SAMEN_CHECK(ASSI)
+
+;사정時の処理
+IF E >= 1
+	;사정先タイプの設定
+	TFLAG:703 = 1
+	;사정先選択の可・不可
+	TFLAG:704 = 0
+	;汎用的な処理はこの関数で行う
+	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;처녀の場合、Ｖと질내に破瓜の血の汚れを付加（ありえないと思うけど一応入れとく）
+IF TALENT:처녀 || TALENT:재생처녀
+	STAIN:질내 |= 64
+	STAIN:바기나 |= 64
+ENDIF
+
+;奴隷のＶと질내⇔調教者のＣの汚れが移動
+;페니스밴드を使う場合、汚れは移動しない
+IF PENIS(PLAYER)
+	STAIN:질내 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:질내
+	STAIN:바기나 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:바기나
+ENDIF
+
+;奴隷のＶ⇔助손の페니스の汚れが移動
+;페니스밴드を使う場合、汚れは移動しない
+IF PENIS(ASSI)
+	STAIN:바기나 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:바기나
+	STAIN:질내 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:질내
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;V経験
+EXP:V경험 += 10
+PRINTL V경험＋１０
+
+;V拡張経験
+IF EXP:V확장경험 == 0
+	EXP:이상경험 += 1
+	PRINTL Ｖ拡張初経験で이상경험＋１
+ENDIF
+EXP:V확장경험 += 2
+PRINTL V확장경험＋2
+
+;성교경험
+EXP:MASTER:성교경험 += 1
+EXP:ASSI:성교경험 += 1
+EXP:성교경험 += 2
+PRINTS EXPNAME:4
+PRINTL +2
+
+;삽입경험
+EXP:MASTER:삽입경험 += 1
+EXP:ASSI:삽입경험 += 1
+
+;레즈경험
+A = 5
+B = NO:MASTER + 1099
+C = NO:ASSI + 1099
+D = 8
+
+IF MALE(TARGET) == 0 && MALE(MASTER) == 0 && MALE(ASSI) == 0
+	PRINTFORML %EXPNAME:40%+{D}
+	EXP:레즈경험 += D
+ELSEIF MALE(TARGET) == 0 && MALE(MASTER) == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:레즈경험 += A
+ELSEIF MALE(TARGET) == 0 && MALE(ASSI) == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:레즈경험 += A
+ELSEIF MALE(TARGET) && MALE(MASTER) && MALE(ASSI)
+	PRINTFORML %EXPNAME:41%+{D}
+	EXP:게이경험 += D
+ELSEIF MALE(TARGET) && MALE(MASTER)
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:게이경험 += A
+ELSEIF MALE(TARGET) && MALE(ASSI)
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:게이경험 += A
+ENDIF
+;調教者を記録
+CFLAG:B += A
+CFLAG:C += A
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+RETURN 1
+
+

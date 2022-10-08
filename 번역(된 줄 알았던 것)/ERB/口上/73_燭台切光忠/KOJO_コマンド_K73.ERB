@@ -4,17 +4,17 @@
 ;커맨드 실행시에 출력됩니다
 ;==================================================
 @KOJO_MESSAGE_COM_K73
-;조수가 조교했을 때에입상을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
+;조수가 조교했을 때에대사을 스킵 한다(기호에 응해 사용하는,줄머리의 것;을 지우면 스킵 하게 된다)
 ;SIF ASSI >= 0 && ASSIPLAY
 ;	RETURN 0
-;볼개그착용시에는 지문을 표시해입상을 스킵 한다
+;볼개그착용시에는 지문을 표시해대사을 스킵 한다
 IF TEQUIP:볼개그 &&  SELECTCOM != 107
 	CALL TRAIN_MESSAGE
 	RETURN 0
 ENDIF
 
 ;--------------------------------------------------
-;특정조수,주인시에 특수조수입상을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
+;특정조수,주인시에 특수조수대사을 호출한다(Y1를 특정조수,Z를 주인의 캐릭터 번호에 치환)
 ;--------------------------------------------------
 ;IF NO:MASTER == Y1
 ;	CALL MESSAGE_COM_PY1_KZ
@@ -136,7 +136,7 @@ ENDIF
 
 
 ;==================================================
-;랜덤소입상
+;랜덤소대사
 ;==================================================
 ;절정 회수
 IF (EX:0 + EX:1 + EX:2 + EX:3 >= 20)
@@ -698,7 +698,7 @@ IF SELECTCOM == 10
 		ELSE
 			SELECTCASE RAND:2
 				CASE 0
-					IF PALAM:6 >= PALAMLV:3 && TEQUIP:착유기 == 0 && TEQUIP:니틀캡 == 0
+					IF PALAM:6 >= PALAMLV:3 && TEQUIP:착유기 == 0 && TEQUIP:니플캡 == 0
 						PRINTFORMW 「앗… 응읏,집으면 싫어…」
 					ELSE
 						PRINTFORMW 「후,응응… 좀 더 강하게 해도 괜찮아…?」
@@ -774,14 +774,14 @@ IF SELECTCOM == 12
 ENDIF
 
 ;-------------------------------------------------
-;13,니틀캡 CFLAG:311
+;13,니플캡 CFLAG:311
 ;-------------------------------------------------
 ;장착시
-IF SELECTCOM == 13 && TEQUIP:니틀캡 == 0
+IF SELECTCOM == 13 && TEQUIP:니플캡 == 0
 	CALL TRAIN_MESSAGE
 	CALL PANT_VOICE_EX
 ;제외했을 때의 반응
-ELSEIF SELECTCOM == 13 && TEQUIP:니틀캡
+ELSEIF SELECTCOM == 13 && TEQUIP:니플캡
 	CALL TRAIN_MESSAGE
 	CALL PANT_VOICE_EX
 ENDIF
@@ -3157,9 +3157,9 @@ IF SELECTCOM == 206
 		ELSEIF ABL:V감각 >= 3 && !TALENT:처녀 && ITEM:4 == 1
 			PRINTFORML 새로운바이브를선물 해 주었다
 			PRINTFORML 「이것으로 좀 더 기분이 좋은 일 하자?」
-		;B감각 3이상으로,니틀캡를 가지고 있다
+		;B감각 3이상으로,니플캡를 가지고 있다
 		ELSEIF ABL:B감각 >= 3 && ITEM:10 == 1
-			PRINTFORML 새로운니틀캡를선물 해 주었다
+			PRINTFORML 새로운니플캡를선물 해 주었다
 			PRINTFORML 「이것으로 좀 더 기분이 좋은 일 하자?」
 		;로터를 가지고 있다
 		ELSEIF ITEM:0 == 1
@@ -3776,11 +3776,11 @@ ENDIF
 ;341,촉수유두고문 CFLAG:459
 ;-------------------------------------------------
 ;장착시
-IF SELECTCOM == 341 && TEQUIP:니틀캡 == 0
+IF SELECTCOM == 341 && TEQUIP:니플캡 == 0
 	CALL TRAIN_MESSAGE
 	CALL PANT_VOICE_EX
 ;제외했을 때의 반응
-ELSEIF SELECTCOM == 341 && TEQUIP:니틀캡
+ELSEIF SELECTCOM == 341 && TEQUIP:니플캡
 	CALL TRAIN_MESSAGE
 	CALL PANT_VOICE_EX
 ENDIF

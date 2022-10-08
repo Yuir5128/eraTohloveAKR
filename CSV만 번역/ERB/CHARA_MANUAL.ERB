@@ -1,0 +1,827 @@
+﻿;キャラ購入時に解説を入れる
+;ARG:0=購入予定キャラ固有番号ARG:1=
+@CHARA_MANUAL(ARG:0, ARG:1)
+PRINT 奴隷番号00
+SIF ARG < 10
+	PRINT 0
+PRINTV ARG 
+PRINTL 
+IF ARG == 0
+	PRINTFORML 【あなた】
+	PRINTL 
+	PRINTFORML あなた。
+	PRINTFORML 名前から性別、素質までカスタマイズすることができる。
+	PRINTFORML 
+ELSE
+	IF ARG == 3
+		PRINTFORML 【미카즈키 무네치카】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 平安時代の刀工、三条宗近作の太刀。
+		PRINTFORML 天下五剣の一つで、その中でも最も美しいと評される。
+		PRINTFORML 刀剣男士としての姿も、平安貴族のような優雅さ。
+		PRINTFORML 器が大きいといえば聞こえは良いが、究극のマイペース。
+		PRINTFORML また率直な人柄故によく笑う。
+		PRINTFORML 全てに対して器が大きいため、少し抜けているようにも思える。
+		PRINTFORML 
+		PRINTFORML 世話をされるのが好きというだけあって、
+		PRINTFORML 触れられることにも特に저항はないようだ。
+		PRINTFORML だがその反面、物覚えに関しては微妙である。
+	ELSEIF ARG == 5
+		PRINTFORML 【코기츠네마루】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 平安時代の刀工、三条宗近作の太刀。
+		PRINTFORML 稲荷明神の援助によって作ったと伝わる太刀。
+		PRINTFORML 名は小여우だが、全然小さくない。
+		PRINTFORML 小さくはないが、主に構ってもらえるのは好き。
+		PRINTFORML 
+		PRINTFORML 全刀剣男士の中でも、特に珍しい天然の[동물귀]持ち。
+		PRINTFORML 基本的に솔직함で触れられることにも저항はないが、
+		PRINTFORML 獣の本能であるのか、やや攻撃的な一面があるようだ。
+	ELSEIF ARG == 7
+		PRINTFORML 【이시키리마루】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 石切劔箭神社に伝わる宝刀である大太刀。
+		PRINTFORML 四尺余りの太刀で、神社由来によれば三条宗近作という。
+		PRINTFORML 石切劔箭神社は腫れ物治癒の神様として有名で、
+		PRINTFORML 이시키리마루にもそのような効能があるようだ。
+		PRINTFORML 
+		PRINTFORML 大柄な体格で체력が高いが、その分回復に時間がかかる。
+		PRINTFORML 神社暮らしが長かったというだけあって、
+		PRINTFORML 自らを律する術に長けた、穏やかな性格をしている。
+	ELSEIF ARG == 9
+		PRINTFORML 【이와토오시】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 武蔵坊弁慶が使っていたことで有名な薙刀。
+		PRINTFORML 巨大さにおいて他を圧する。
+		PRINTFORML 性格は豪放磊楽。だが素性は良く、佇まいには品がある。
+		PRINTFORML 小さくてすばしっこいのが好きで、이마노츠루기を可愛がっている。
+		PRINTFORML 
+		PRINTFORML 見る者に위압感を与える、非常に大柄な体格。
+		PRINTFORML 成長速度は遅く、습득の部分にその影響が表れている。
+	ELSEIF ARG == 11
+		PRINTFORML 【이마노츠루기】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 平安時代の刀工、三条宗近作の短刀。
+		PRINTFORML 源義経の守り刀であり、義経が自刃した刀といわれている。
+		PRINTFORML 元気で良く跳ねる、건방짐な鞍馬の小天狗。
+		PRINTFORML 茶目っ気のある表情と、飛んだり跳ねたり良く動き回る彼は、
+		PRINTFORML 一緒にいるだけで、周りの空気をも明るくする。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+	ELSEIF ARG == 13
+		PRINTFORML 【오오덴타 미츠요】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 天下五剣のひとつで、三池典太光世作の太刀。
+		PRINTFORML 同時代の刀剣とは作風が隔絶しており、
+		PRINTFORML その異質さからか枕元に置けば病も治るとされた霊刀。
+		PRINTFORML 小鳥などの動物が두려움て近寄れないほどの強い霊力を持つ。
+		PRINTFORML 普段は厳重に蔵に仕舞われていた正真正銘の蔵入り息子。
+	ELSEIF ARG == 15
+		PRINTFORML 【소하야노츠루기】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 無銘であるが、三池典太光世作と伝わる太刀。
+		PRINTFORML 坂上田村麻呂の佩刀であった「ソハヤの剣」（坂上宝剣）の写し。
+		PRINTFORML 徳川家康が所持し、死후霊刀として一緒に葬られたと言われている。
+		PRINTFORML 強い霊力を持つために長く仕舞われていたことを少々根に持つ。
+	ELSEIF ARG == 17
+		PRINTFORML 【쥬즈마루 츠네츠구】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 天下五剣のひとつで、青江恒次作との説がある太刀。
+		PRINTFORML 鎌倉時代の僧、日蓮が護身用として所持していたと伝わり、
+		PRINTFORML 柄に数珠が巻かれていたことが名の由来ともされている。
+		PRINTFORML 
+		PRINTFORML その由来からか仏法に添った物言いが多い。
+		PRINTFORML 祈るように伏せられた眼差しから、その心の機微を読み解くことは難しい。
+	ELSEIF ARG == 19
+		PRINTFORML 【닛카리 아오에】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 備中青江派の刀工・青江貞次の作とされる大脇差。
+		PRINTFORML 元は大太刀だったためか、他の脇差に比べて
+		PRINTFORML 外見、性格共に大人びている。
+		PRINTFORML 名の由来は、にっかりと笑う女の幽霊を切りつけ翌朝見てみたら、
+		PRINTFORML 実は石塔を真っ二つにしていたという伝説による。
+		PRINTFORML 
+		PRINTFORML なにやらあらゆる意味で危うい台詞の多い刀剣男士。
+		PRINTFORML そういう趣味の持ち主なのだろうか…？
+	ELSEIF ARG == 21
+		PRINTFORML 【오니마루 쿠니츠나】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 天下五剣のひとつで、粟田입国綱作の太刀。鬼を探し、主人を探し彷徨っていた霊剣。
+		PRINTFORML 夢の中でお告げをしたり、ひとりでに動いて物を切ったりと霊妙な物語を持つ。
+		PRINTFORML 目的以外に関わることを嫌うが、感情移入もしやすい。
+	ELSEIF ARG == 23
+		PRINTFORML 【나키키츠네】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代の刀工、粟田입国吉作の内刀。
+		PRINTFORML 粟田입派ではあるが、藤四郎らとは作者が異なる。
+		PRINTFORML お供の여우を連れており、好き以外の感情表現のほとんどを여우が行う。
+		PRINTFORML それを見て周囲が驚くことを密かに喜んでいる。
+		PRINTFORML 
+		PRINTFORML 自分の感情を押し殺しているわけではなく、ただ単に
+		PRINTFORML 人付き合いが苦손なだけらしい。でもわかりづらい。
+		PRINTFORML お供の여우は本当に良く喋るが、本人は基本的に얌전함。
+	ELSEIF ARG == 25
+		PRINTFORML 【이치고히토후리】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 短刀の名손と呼ばれる粟田입吉光作の、唯一の太刀。
+		PRINTFORML 元は現在よりも大きかったものを、主であった豊臣秀吉が、
+		PRINTFORML 自らの体格に合わせて磨上げて今のサイズになった。
+		PRINTFORML 一度焼けているため、その頃の記憶がない。
+		PRINTFORML 
+		PRINTFORML 藤四郎らをはじめとするたくさんの弟たちの良き兄。
+		PRINTFORML 世話好きで、人当たりのよい性格はとても인기がある。
+	ELSEIF ARG == 27
+		PRINTFORML 【나마즈오 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の脇差。
+		PRINTFORML 元は小薙刀だったが、脇差へと磨上げられた。
+		PRINTFORML 主と共に焼かれてしまったことで一部記憶を失っているが、
+		PRINTFORML 過去は振り返らない、とまっすぐな性格をしている。
+		PRINTFORML 意思が強く、主が今度こそ焼かれぬよう、時に諌めることも。
+		PRINTFORML 
+		PRINTFORML 藤四郎兄弟のひとりで、特に호네바미 토시로を気にかけている。
+	ELSEIF ARG == 29
+		PRINTFORML 【호네바미 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の脇差。
+		PRINTFORML 元は薙刀だったが、脇差へと磨上げられた。
+		PRINTFORML 一度焼身となり、ほとんどの記憶を失った。
+		PRINTFORML 言葉数も少ないが、親身になって世話を焼いてくれる
+		PRINTFORML 나마즈오 토시로の事はとても信頼している。
+		PRINTFORML 
+		PRINTFORML 藤四郎兄弟のひとり。
+	ELSEIF ARG == 31
+		PRINTFORML 【히라노 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の短刀。
+		PRINTFORML 短刀の名物の筆頭とされる。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+		PRINTFORML 実践よりも警護やお付きとしての経験が長いせいか、
+		PRINTFORML 忠誠心に厚く、헌신적な性格。
+		PRINTFORML 同じ郎四郎兄弟の、마에다 토시로と良く似た容姿をしている。
+	ELSEIF ARG == 33
+		PRINTFORML 【아츠시 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の短刀。
+		PRINTFORML 刃がまっすぐ、かつ厚いのが特徴で、鎧通しと呼ばれる。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+		PRINTFORML 他の藤四郎兄弟に比べれば、若干お兄ちゃん寄りのようだが、
+		PRINTFORML 性格は솔직함で호기심も強いと、まだまだ아이らしくもある。
+	ELSEIF ARG == 35
+		PRINTFORML 【고토 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の短刀。
+		PRINTFORML 후藤庄三郎光次が所持していたことから名づけられたとされ、
+		PRINTFORML 후に尾張徳川家に伝わる。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+		PRINTFORML 藤四郎兄弟の中で身長は高めの部類に入るが、もっと大きくなりたいお年頃。
+	ELSEIF ARG == 37
+		PRINTFORML 【시나노 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の短刀。
+		PRINTFORML 藤四郎兄弟のひとり。永井信濃守尚政所持であったことが名の由来。
+		PRINTFORML 후に、庄内藩酒井家に伝来。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+		PRINTFORML 主の懐に入りたい、折り紙つきの秘蔵っ子。
+		PRINTFORML しかし、無事に出戻りはしたが一度盗難にあってたりする。
+	ELSEIF ARG == 39
+		PRINTFORML 【마에다 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の短刀。
+		PRINTFORML 前田家に伝来したことから、この名前で呼ばれる。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+		PRINTFORML 同じ郎四郎兄弟の、히라노 토시로と良く似た容姿をしている。
+	ELSEIF ARG == 41
+		PRINTFORML 【아키타 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の短刀。
+		PRINTFORML 長い間守り刀として在ったため、外の世界が珍しいらしい。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+		PRINTFORML 藤四郎兄弟のひとり。
+	ELSEIF ARG == 43
+		PRINTFORML 【하카타 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の短刀。
+		PRINTFORML 博多から出たため、하카타 토시로の異名がついたとされる。
+		PRINTFORML 筑前福岡城主 黒田忠之から小笠原忠真に贈られ、
+		PRINTFORML 以降小笠原家に伝来した。
+		PRINTFORML 博多の豪商から수継いだ商売人魂を持つ。
+		PRINTFORML 
+		PRINTFORML 藤四郎兄弟のひとり。
+	ELSEIF ARG == 45
+		PRINTFORML 【미다레 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の短刀。
+		PRINTFORML 乱れ刃だから미다레 토시로…なのだが、台詞が妙にエロい。
+		PRINTFORML 입調も見た目もまるで女の子。でもれっきとした男の娘。
+		PRINTFORML 소악마的な매력で主を翻弄する。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+		PRINTFORML 藤四郎兄弟のひとり。
+	ELSEIF ARG == 47
+		PRINTFORML 【고코타이】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の短刀。
+		PRINTFORML 上杉謙信が上洛した際に正親町天皇より拝領した。
+		PRINTFORML 발利義満の遣明使として明に向かった役人が、
+		PRINTFORML ５頭の虎に襲われた時、この短刀で追い払ったという謂れがある。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+		PRINTFORML 藤四郎兄弟のひとりで、겁쟁이な性格。
+	ELSEIF ARG == 49
+		PRINTFORML 【야겐 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の短刀。
+		PRINTFORML 織田信長の愛刀であったが、本能寺の変にて消失したとされる。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+		PRINTFORML 藤四郎兄弟のひとりだが、戦場育ち故か元来のものか、
+		PRINTFORML 他の兄弟たちに比べると非常に大人びた、男気溢れる性格。
+	ELSEIF ARG == 51
+		PRINTFORML 【호쵸 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 粟田입吉光作の短刀。藤四郎兄弟のひとり。
+		PRINTFORML 武家にとって吉光の短刀は最上級の贈物。
+		PRINTFORML それが徳川家康の元にひと時でもあったものとなれば更に意味は増す。
+		PRINTFORML そして、彼の嗜好が誰譲りのものかは言うまでもない。
+	ELSEIF ARG == 53
+		PRINTFORML 【오오카네히라】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 古備前派の刀工包平作の太刀。
+		PRINTFORML 共に刀剣の横綱といわれながら、天下五剣でもある童子切安綱をライバル視する。
+		PRINTFORML 歴史的な逸話や伝説にやや乏しく、池田輝政に見出されたという一説は彼の拠り所。
+		PRINTFORML 同郷の우구이스마루に観察されている。
+	ELSEIF ARG == 55
+		PRINTFORML 【우구이스마루】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 古備前派の刀工の太刀。
+		PRINTFORML 古備前派は古来から宝物として扱われることが多く、
+		PRINTFORML この우구이스마루も同様である。
+		PRINTFORML 
+		PRINTFORML のんびり茶を飲むのが好きな、マイペースな御仁。
+		PRINTFORML 他人の言葉を気にしない、というのが信条のようだ。
+		PRINTFORML 同郷で、かつ兄弟のようなものでもある오오카네히라の観察が趣味。
+	ELSEIF ARG == 57
+		PRINTFORML 【아카시 쿠니유키】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 来派の実質的な開祖、来国行作の太刀。
+		PRINTFORML 一応아이젠 쿠니토시と호타루마루の保護者だが、호타루마루贔屓の困った人物。
+		PRINTFORML やる気がないのが売りという言葉も語り입調もどこか訝しく、
+		PRINTFORML 彼の本心＝真実がどこにあるのかは掴めない。
+	ELSEIF ARG == 59
+		PRINTFORML 【호타루마루】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 来国俊の作、小さな体に大きな大太刀！
+		PRINTFORML 刃こぼれに蛍が集まる夢を見た후、
+		PRINTFORML それが実際に治っていたという伝説が名前の由来。
+		PRINTFORML 自由奔放な彼の振る舞いは、強さの表れ。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型だが、체력は申し分なく、
+		PRINTFORML その代わりに回復速度が遅い。
+		PRINTFORML 夜間は、蛍の力を借りて回復速度がアップする。
+	ELSEIF ARG == 61
+		PRINTFORML 【아이젠 쿠니토시】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 来派の二代、通称二字国俊が打った短刀。
+		PRINTFORML 愛染明王の彫り物があることからこの名がついた。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型で、체력は低いが回復は早い。
+		PRINTFORML 同じ来派の호타루마루とは兄弟のように仲が良い。
+	ELSEIF ARG == 63
+		PRINTFORML 【센고 무라마사】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 初代村正（센고 무라마사）の作で、恐ろしいほどの切れ味を持つ実戦向きの打刀。
+		PRINTFORML ミステリアスな立ち居振る舞いは、
+		PRINTFORML 長く妖刀として眼差しを向けられてきた彼の物語から来るものか。
+		PRINTFORML 同じ村正の一派である톤보키리の心配の種でもある。
+	ELSEIF ARG == 65
+		PRINTFORML 【톤보키리】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 天下三名槍と呼ばれた槍の１つ。
+		PRINTFORML 戦国時代の武将、本多忠勝が愛用した事で知られる。
+		PRINTFORML 戦場で槍を立てていたところに蜻蛉が飛んできて、
+		PRINTFORML 刃に触れた瞬間二つに切れた、ということからその名がついた。
+		PRINTFORML 
+		PRINTFORML 大柄な性格だが心根は優しく、헌신적な面も持ち合わせている。
+	ELSEIF ARG == 67
+		PRINTFORML 【모노요시 사다무네】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 相州貞宗作の脇差。
+		PRINTFORML 徳川家康の愛刀で、これを帯びて出陣すると必ず勝利を得たことから
+		PRINTFORML 「物吉」と名づけられたと伝わる。
+		PRINTFORML 
+		PRINTFORML 好きなことはお손伝い。戦慣れした幸運の王子。
+	ELSEIF ARG == 69
+		PRINTFORML 【타이코가네 사다무네】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 長く伊達家に在った、相州貞宗作の短刀。
+		PRINTFORML 쇼쿠다이키리 미츠타다とは「みっちゃん」「さだちゃん」と呼び合う仲で、
+		PRINTFORML 쇼쿠다이키리 미츠타다と同じく、派손好きでお洒落を尊ぶ伊達者。
+	ELSEIF ARG == 71
+		PRINTFORML 【킷코 사다무네】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 相州貞宗の作で、無銘の打刀。
+		PRINTFORML 茎に亀甲菊花文の彫物があることからこの名がついたとされる。
+		PRINTFORML 気品薫る貞宗の風格。白菊のごとき美青年。
+		PRINTFORML そして극まる、ご主人様至上主義。
+	ELSEIF ARG == 73
+		PRINTFORML 【쇼쿠다이키리 미츠타다】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 長船派の刀工の太刀。
+		PRINTFORML 元々は織田信長が愛用し、その후伊達正宗の손に渡った。
+		PRINTFORML 名前の由来は、人を斬った時にそばの燭台まで一緒に切れたから。
+		PRINTFORML 
+		PRINTFORML いつでも格好良くいることを心がけているが、
+		PRINTFORML 面倒見がいいからなのか、みんなのお母さん扱いを수ることが多い。
+	ELSEIF ARG == 75
+		PRINTFORML 【다이한냐 나가미츠】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 備前長船派の刀工、長光作の太刀。
+		PRINTFORML 名の由来は、室町時代の値打ち銭六百貫と大般若経六百巻をかけたもの。
+		PRINTFORML 美術品を好み、美しいものを愛で입説きものにするというのは
+		PRINTFORML 至극まっとうなことだと語る。
+		PRINTFORML が、普段は質素倹約がモットー。
+	ELSEIF ARG == 77
+		PRINTFORML 【코류 카게미츠】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 備前長船派の刀工、景光作の太刀。
+		PRINTFORML 名は、樋中に倶利伽羅竜が浮彫されていることからついたとされる。
+		PRINTFORML その他にも「楠公景光」や「覗き竜景光」など異名も多い。
+		PRINTFORML 真の主を探して延々と旅する風来坊。
+	ELSEIF ARG == 79
+		PRINTFORML 【코우세츠 사몬지】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 刀工左文字の作による太刀。
+		PRINTFORML 元の主の影響か和を重んじ、戦いを嫌う。
+		PRINTFORML 
+		PRINTFORML 左文字三兄弟はみな過去に不幸な目に合っており、
+		PRINTFORML それぞれ違ったベクトルで屈折している。
+		PRINTFORML 基本的には얌전함性格だが少し感情に乏しい部分もあり、
+		PRINTFORML 落とすのは決して楽な相손ではないだろう。
+	ELSEIF ARG == 81
+		PRINTFORML 【소우자 사몬지】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 天下人の손を渡り歩いた、傾国の刀。
+		PRINTFORML 元は武田家にあったものが織田信長の손に渡り、刻印を入れられる。
+		PRINTFORML その来歴故か、非常にネガティブが性格。
+		PRINTFORML 戦にもほとんど出ることがなかったため、통증への免疫は低い。
+		PRINTFORML 
+		PRINTFORML 左文字三兄弟のひとり。
+	ELSEIF ARG == 83
+		PRINTFORML 【사요 사몬지】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 左文字派の短刀。
+		PRINTFORML 不幸三兄弟、三男の사요 사몬지は「復讐」に生を見出した。
+		PRINTFORML 身なりはあまり良くないが、
+		PRINTFORML これはかつて山賊のものだったからである。
+		PRINTFORML 人を疑ってかかる性格故に、主のことも信用していない。
+		PRINTFORML 
+		PRINTFORML 非常に小柄な体型だが、他の短刀に比べると체력が高い。
+	ELSEIF ARG == 85
+		PRINTFORML 【카슈 키요미츠】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 新撰組、沖田総司が使用していたとされる打刀。
+		PRINTFORML 貧しい環境で生まれたせいか、汚れることを嫌い、
+		PRINTFORML 綺麗にしていれば主に可愛がってもらえると思っている。
+		PRINTFORML 야마토노카미 야스사다とは、正反対に見えて似た者同士の喧嘩仲間。
+		PRINTFORML 
+		PRINTFORML 現在実装済みの刀の中でも[멘헤라]持ちで、
+		PRINTFORML 依存度の変動値が、他に比べて大きい。
+	ELSEIF ARG == 87
+		PRINTFORML 【야마토노카미 야스사다】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 新撰組、沖田総司が使用していたとされる打刀。
+		PRINTFORML 카슈 키요미츠と同じく、扱いが難しく、使い손を選ぶ。
+		PRINTFORML そのため値は安かったとも言われている。
+		PRINTFORML 一見おとなしそうに見えるが戦闘となると豹変。
+		PRINTFORML かなり攻撃的な性格を内に秘めているようだ。
+		PRINTFORML 
+		PRINTFORML 前の主が忘れられないのか、初めは主人にもあまり懐かない。
+		PRINTFORML だが、一度懐けばその性格は一変するかも…？
+	ELSEIF ARG == 89
+		PRINTFORML 【카센 카네사다】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 持ち主だった細川忠輿が、36人の家臣を손討ちにしたことから、
+		PRINTFORML 三十六歌仙にちなんで、카센 카네사다と呼ばれる打刀。
+		PRINTFORML 文化人である彼は、何に対しても風流であることや雅なものを好む。
+		PRINTFORML ただしあくまで「自称」であり、その体つきはしっかりしており、
+		PRINTFORML 意外と肉体派の人物であることが窺える。
+		PRINTFORML ふと笑うと、とろけるような顔をするらしい。
+	ELSEIF ARG == 91
+		PRINTFORML 【이즈미노카미 카네사다】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 室町時代、東国随一の名工兼定の作であり、
+		PRINTFORML 新撰組副長、土方歳三が愛用したと言われる太刀。
+		PRINTFORML 美と実力の両立をテーマとして生きている。
+		PRINTFORML 気が短いのは元の持ち主のせい。実は泣き虫とかなんとか…？
+		PRINTFORML あまり손先の器用な方ではないようだ。
+	ELSEIF ARG == 93
+		PRINTFORML 【무츠노카미 요시유키】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 坂本龍馬が佩刀していたとされる打刀。
+		PRINTFORML 田舎くささは抜けきらないが、新しいもの好き。
+		PRINTFORML 自身の野心と主への忠誠心、どちらに対しても真っ直ぐ。
+		PRINTFORML 豪快かつ、剛直な性格。剣は時代遅れだと言い、銃も携えている。
+		PRINTFORML 装備は完璧だが、本来は戦を好まない優しい心の持ち主。
+	ELSEIF ARG == 95
+		PRINTFORML 【야만바기리 쿠니히로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 霊剣「山姥切」を模して造られたとされる打刀。
+		PRINTFORML オリジナルでないことがコンプレックス。
+		PRINTFORML 綺麗と言われることが嫌いで、わざわざみすぼらしい格好をしている。
+		PRINTFORML 色々とこじらせてしまっているが、
+		PRINTFORML 自分が偽物ではなく、国広第一の傑作であることには誇りを持っている。
+	ELSEIF ARG == 97
+		PRINTFORML 【야마부시 쿠니히로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 호리카와 쿠니히로が山伏修行をしていた頃に打ったとされる太刀。
+		PRINTFORML 常に修行をしているためか、その肉体はさすがの一言。
+		PRINTFORML 修行僧故か、その見た目とは裏腹に보수적で、자제심にも長けている。
+	ELSEIF ARG == 99
+		PRINTFORML 【호리카와 쿠니히로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 安土桃山時代に活躍した刀工、
+		PRINTFORML 호리카와 쿠니히로作（という説のある）の脇差。
+		PRINTFORML 新撰組副長、土方歳三が愛用していたと言われる。
+		PRINTFORML 가사や世話焼きが大好き。이즈미노카미 카네사다の事を兼さんと呼び、
+		PRINTFORML 相棒であり助손。……というより、押しかけ女房のような存在に。
+		PRINTFORML 礼儀正しく面倒見も良いが、가슴には熱い闘志を秘めている。
+	ELSEIF ARG == 101
+		PRINTFORML 【하치스카 코테츠】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 江戸時代に活躍した刀工、虎徹作の真刀である打刀。
+		PRINTFORML 凛々しさと美しさを兼ね備えた、虎徹三兄弟の次男。
+		PRINTFORML 弟の우라시마 코테츠は可愛がっているが、贋作である兄を蔑む。
+		PRINTFORML しかし本心では、兄の実力や無骨さに惹かれている一面もあるようだ。
+	ELSEIF ARG == 103
+		PRINTFORML 【우라시마 코테츠】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 江戸時代に活躍した刀工、虎徹作の脇差。
+		PRINTFORML 鳥取藩主の池田家に伝来した脇差で、浦島太郎の像が彫られている。
+		PRINTFORML 虎徹三兄弟の末っ子。
+		PRINTFORML 性格天真爛漫にて、誰とでも友達になれる。
+		PRINTFORML それこそ亀だろうが竜の王だろうがなんでもこい。
+	ELSEIF ARG == 105
+		PRINTFORML 【나가소네 코테츠】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 江戸時代に活躍した刀工、虎徹の贋作といわれている打刀。
+		PRINTFORML 新撰組局長・近藤勇を元主とする、虎徹三兄弟の長男。
+		PRINTFORML 体格に恵まれ、のびやかな性格。
+		PRINTFORML だが、自身の刀としての在り方に対しては厳しい一面も。
+	ELSEIF ARG == 107
+		PRINTFORML 【히게키리】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 源氏の重宝。
+		PRINTFORML 試し斬りで罪人の首を斬った際に、髭まで切れたことが名の由来とされる。
+		PRINTFORML その후、何度も改名される。
+		PRINTFORML 히게키리と히자마루は一具（一組）で、多田満仲が八幡大菩薩から賜った源氏重代の剣なので、
+		PRINTFORML 暫く分かれていたけれども遂に一か所に集まり頼朝の元に参上したのは実にめでたいことである。
+		PRINTFORML 
+		PRINTFORML 長い年月を経て大抵のことはどうでもよくなったとおおらかに語る。
+		PRINTFORML が、どうでもよくなってはいけないことまで忘れてしまっているような……。
+	ELSEIF ARG == 112
+		PRINTFORML 【히자마루】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 源氏の重宝。試し斬りで罪人を斬った際に、両膝まで一刀で断ったことが名の由来とされる。
+		PRINTFORML 
+		PRINTFORML 時折兄である히게키리に忘れられて絶望するが、すぐに立ち直る。
+		PRINTFORML 長い年月、실의を繰り返すとさすがに復帰も早いらしい。
+	ELSEIF ARG == 116
+		PRINTFORML 【오오쿠리카라】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 伊達家伝来の太刀で、相州廣光作。
+		PRINTFORML 刀身に倶利伽羅竜が彫られていることが銘の由来。
+		PRINTFORML 慣れ合うことを嫌う一匹狼で、基本誰に対しても반항적で、무관심。
+		PRINTFORML だが、かつての主の元で共に過ごした쇼쿠다이키리 미츠타다や、
+		PRINTFORML 츠루마루 쿠니나가に対しては、頭の上がらないこともあるようだ。
+	ELSEIF ARG == 118
+		PRINTFORML 【헤시키리 하세베】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 織田信長にまつわる打刀。
+		PRINTFORML 無礼を働いた茶坊主が棚の下に隠れたところ、激怒した信長が、
+		PRINTFORML その棚ごと茶坊主を「圧し斬った」ことからその名がついたという。
+		PRINTFORML 随所でかつての主である信長の名を出しており、
+		PRINTFORML その입ぶりからは、彼を憎んでいるようにも思えるが……。
+		PRINTFORML 
+		PRINTFORML 主人に対しては基本的にとても忠実で、逆らうことはない。
+		PRINTFORML だが、どこかで一線を引いているような節も見수られる。
+	ELSEIF ARG == 120
+		PRINTFORML 【후도 유키미츠】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉の刀工、藤三郎行光の作。織田信長の愛刀。森蘭丸が拝領、후に本能寺の変で焼け身になったとされる。
+		PRINTFORML 信長は酔うと膝を叩いて「후도 유키미츠、つくも머리카락、人には五郎左御座候」と歌ったという。
+		PRINTFORML 名は不動明王と矜羯羅童子、制多迦童子が浮彫されていたことに由来している。
+		PRINTFORML 
+		PRINTFORML 小柄な体型で체력は低いが回復は早い。
+	ELSEIF ARG == 122
+		PRINTFORML 【시시오】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 平安時代末期の大和刀工作の太刀。
+		PRINTFORML 老齢でも使えるようにと、細く軽く作ってある。
+		PRINTFORML それでいて拵は老将軍の誇りを損なわぬよう、立派に作られ、
+		PRINTFORML 勇ましくも心優しい、おじいちゃんっ子となった。
+		PRINTFORML 太刀にしては幼い容姿と性格で、
+		PRINTFORML なんにでも興味を持って動き回る、非常に明るい性格。
+	ELSEIF ARG == 124
+		PRINTFORML 【코가라스마루】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 古来、重宝として名高い太刀。
+		PRINTFORML 一説では日本の刀剣が日本刀と呼ばれる形になる成立過程にある一振り。
+		PRINTFORML 故に、烏の童子を想わせる姿で励起されるが、
+		PRINTFORML 他の刀剣たちは言わば我が子であり、自らはその父として振る舞う。
+	ELSEIF ARG == 128
+		PRINTFORML 【도다누키 마사쿠니】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 天覧兜割りの逸話で一躍有名になった打刀。
+		PRINTFORML 外見には一切気を使わず、パワー重視で、実践一辺倒。
+		PRINTFORML つっけんどんだが情に厚い、実はとても男らしい性格。
+		PRINTFORML だが代わりに性的なことにはかなり疎く、
+		PRINTFORML 보수적なため、難易度は高い。
+	ELSEIF ARG == 130
+		PRINTFORML 【츠루마루 쿠니나가】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 平安時代の刀工・五条国永作の太刀。
+		PRINTFORML 数々の主人の손を転々と渡り歩いてきた経歴を持つ。
+		PRINTFORML 飄々とした性格で、退屈が嫌いなのか、人を驚かすのが趣味。
+	ELSEIF ARG == 132
+		PRINTFORML 【타로타치】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 非常に大きく、扱える人間はいないとまで言われた大太刀。
+		PRINTFORML 刀剣男士としても特に大柄な体格で、その위압感はかなりのもの。
+		PRINTFORML 弟の지로타치とは違い、穏やかな性格。
+	ELSEIF ARG == 134
+		PRINTFORML 【지로타치】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 兄の타로타치の主人である真柄直隆の子、真柄隆基が用いたとされる太刀。
+		PRINTFORML 兄に比べれば小さいが、それでも巨体であることは変わらない。
+		PRINTFORML かなりの酒豪で、いつも酒を손に持っている。
+		PRINTFORML 「女形だけどオネエではない」らしい。
+	ELSEIF ARG == 136
+		PRINTFORML 【니혼고】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 天下三名槍のひとつで、「日の本一の槍」と称えられる。
+		PRINTFORML 黒田藩の重臣 母里太兵衛が、福島正則との呑み賭で勝ち取ったという伝承から、
+		PRINTFORML 別名「呑み取りの槍」とも呼ばれる。
+		PRINTFORML 槍でありながら正三位（しょうさんみ）の位持ち。
+	ELSEIF ARG == 138
+		PRINTFORML 【오테기네】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 天下三槍と呼ばれた名槍のひとつ。
+		PRINTFORML 突くことに特化しているため、
+		PRINTFORML 他の槍よりも支援してくれる脇差と仲が良い。
+		PRINTFORML 戦法のためかやや地味な印象を수るが……いい奴！
+		PRINTFORML 温和で茶目っ気のある性格。
+	ELSEIF ARG == 140
+		PRINTFORML 【토모에가타 나기나타】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 身幅が広く切先の反りが大きい、典礼用ともされる薙刀。
+		PRINTFORML 神格はより高く人としての意識は薄い。
+		PRINTFORML 主に対して過保護気味なところがあり、
+		PRINTFORML 審神者が映えるよう傍らに控えたり、世話をしたりする。
+	ELSEIF ARG == 142
+		PRINTFORML 【모리 토시로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 粟田입吉光作の短刀。藤四郎兄弟のひとり。
+		PRINTFORML 털利家にあったことが名の由来。
+		PRINTFORML 小柄なことを利用した変則的な戦い方を得意とする。
+		PRINTFORML 話を聞くことと、（自身の身長はさておき）小さい子が好き。
+	ELSEIF ARG == 144
+		PRINTFORML 【코테키리 고우】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 越中国の刀工、郷義弘作の脇差。
+		PRINTFORML 稲葉家と細川家を行き来した。
+		PRINTFORML 補佐役の気質は強く、主に対して如才なく振る舞う。
+		PRINTFORML 着付けが得意で、周囲のものを着飾ってくれる。
+	ELSEIF ARG == 146
+		PRINTFORML 【켄신 카게미츠】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 備前長船派の刀工、景光作の短刀。
+		PRINTFORML 名は、上杉謙信が身近に置いたことからついたとされる。
+		PRINTFORML 表には「秩父大菩薩」の文字、裏には大威徳明王を表す梵字が彫られている。
+		PRINTFORML がまんができる、つよいこ。
+	ELSEIF ARG == 148
+		PRINTFORML 【아즈키 나가미츠】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 上杉謙信の愛刀であったと伝わる太刀。
+		PRINTFORML 名の由来は諸説あるが、刃先に当たった小豆の粒が二つに割れていたため、と彼は語る。
+		PRINTFORML 保育士よろしく面倒見良く、且つすいーつ職人なのだが、
+		PRINTFORML お気に入りのえぷろんが似合わない。
+	ELSEIF ARG == 150
+		PRINTFORML 【휴가 마사무네】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 日本刀の代名詞とも言われる「正宗」の短刀。
+		PRINTFORML 正宗は昔から格の高い刀剣として贈物にされることが多かった。
+		PRINTFORML 彼の「惜しかった」は諦めの言葉ではない。きっと次があるという許容と感謝である。
+		PRINTFORML 紀州に在ったこともあり、梅干し作りが得意。
+	ELSEIF ARG == 152
+		PRINTFORML 【시즈카가타 나기나타】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 細身で反りが小さく、実戦用とされる薙刀。
+		PRINTFORML 戦場での武器の変遷からか、槍に対して対抗心が強い。
+		PRINTFORML 主に対して自身に近寄らないよう促すのは、
+		PRINTFORML 己の力で審神者を壊してしまわぬよう気を使っているため。
+	ELSEIF ARG == 154
+		PRINTFORML 【난센 이치몬지】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 福岡一文字派作、大磨上無銘の打刀。
+		PRINTFORML 触れた猫が真っ二つに斬れたという逸話と、
+		PRINTFORML 故事『南泉斬猫』を掛けてこの名がついたとされる。
+		PRINTFORML 本来であれば、自分はもっと背が高く泣く子も黙る恐るべき刀剣男士のはず
+		PRINTFORML ……全ては猫の呪いのせい。と主張する。
+	ELSEIF ARG == 156
+		PRINTFORML 【치요가네마루】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 琉球王国の王家に伝来した宝剣のひとつ。
+		PRINTFORML 刀身は日本製と思われるが、
+		PRINTFORML 片손打ちの柄など日本刀の形式とは異なる独特な造りを見ることができる。
+		PRINTFORML 寄せては返す波のような語り입に耳を傾ければ、ウチナータイムへ誘われる。
+	ELSEIF ARG == 158
+		PRINTFORML 【야만바기리 쵸우기】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 備前長船長義作の打刀。長義は長船派の主流とは別系統の刀工となる。
+		PRINTFORML 写しであると言われている야만바기리 쿠니히로と共に伯仲の出来。
+		PRINTFORML 美しいが高慢。
+		PRINTFORML より正確に言えば自分に自信があり、他に臆する事がない。
+	ELSEIF ARG == 160
+		PRINTFORML 【부젠 고우】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 越中国の刀工、郷義弘作の打刀。
+		PRINTFORML 郷義弘の刀剣は在銘作が現存せず、
+		PRINTFORML また「郷とお化けはみたことがない」と称されるほど目にすることができなかった。
+		PRINTFORML 彼は風を切り走る。疾さの、その先を目指して…… 
+	ELSEIF ARG == 162
+		PRINTFORML 【네네키리마루】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 獣を含めた山の頂点に君臨する、高位神格の大太刀。
+		PRINTFORML 妖怪「祢々」を斬ったという話も
+		PRINTFORML 山の治水に関する人々の祈りから来たものと考えられる。
+		PRINTFORML だいたいのことは温泉に入ればなんとかなる。
+	ELSEIF ARG == 164
+		PRINTFORML 【하쿠산 요시미츠】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 鎌倉時代に活躍した刀工、粟田입吉光作の剣（つるぎ）。
+		PRINTFORML 徳川家光の養女大姫が前田光高に嫁いだ際に持参され、その死후奉納された。
+		PRINTFORML 剣はより神の系譜となり、하쿠산 요시미츠は治癒の力を持つ。
+		PRINTFORML お供の白い여우を連れている。瓜が好き。
+	ELSEIF ARG == 166
+		PRINTFORML 【난카이 타로 쵸우손】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 武市半平太が使用していたとされる打刀。
+		PRINTFORML 学者然とした刀剣男士であり、知識で審神者を助ける。
+		PRINTFORML その一方で人斬りに相応しい刀でもあり、次々と敵を斬る。
+		PRINTFORML 実は알콜쓰레기。
+	ELSEIF ARG == 168
+		PRINTFORML 【히젠 타다히로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 岡田以蔵が使用していたとされる脇差。
+		PRINTFORML 粗暴で敵を斬ること以外興味のないように見えるが、
+		PRINTFORML 敵を斬ること以外に己の存在価値を見いだせずにいる、というのが真相。
+		PRINTFORML めしは食う専門。
+	ELSEIF ARG == 170
+		PRINTFORML 【챠탄나키리】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 琉球王国の王家に伝来した宝剣のひとつ。
+		PRINTFORML 琉球製の拵は、螺鈿や金が使用された豪華なもの。
+		PRINTFORML 短く先細りした刀身からは、大切に使われ손入れされてきた時を感じる。
+		PRINTFORML 花のように朗らかに、生活に寄り添う刀。
+	ELSEIF ARG == 172
+		PRINTFORML 【쿠와나 고우】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 越中国の刀工、郷義弘作の打刀。
+		PRINTFORML 伊勢桑名藩2代藩主、本多忠政が所持した。
+		PRINTFORML 農業は森羅万象全てと向き合える学問。
+		PRINTFORML 研究熱心な部分が時に理屈っぽい印象を与えているが、本人は全く自覚がない。
+	ELSEIF ARG == 174
+		PRINTFORML 【스이신시 마사히데】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 江戸を拠点とした名刀工「江戸三作」のひとり、스이신시 마사히데作の打刀。
+		PRINTFORML 新々刀の祖として相応しくあろうと、理想を掲げ努力を惜しまない。
+		PRINTFORML しかしまだ経験が浅く、隙をつかれると素が出てしまう。
+	ELSEIF ARG == 176
+		PRINTFORML 【미나모토 키요마로】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 江戸を拠点とした名刀工「江戸三作」のひとり、미나모토 키요마로作の打刀。
+		PRINTFORML 物腰は柔和な印象を与えるが、刀工自身の素養を引き継いでか戦闘力は高い。
+		PRINTFORML 親友である水心子を応援している。
+	ELSEIF ARG == 178
+		PRINTFORML 【마츠이 고우】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 越中国の刀工、郷義弘作の打刀。
+		PRINTFORML 一国一城令の例外となった八代城主、松井興長が所持した。
+		PRINTFORML 戦も実務も得意な万能さは、優秀な武将であった元主の影響からか。
+		PRINTFORML そして、血への執着も彼の刀としての物語から来るものか……
+	ELSEIF ARG == 180
+		PRINTFORML 【산쵸모】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 福岡一文字派の作とされている太刀。
+		PRINTFORML 指揮能力に長け、一文字一家を長として率いる。
+		PRINTFORML 様々に形容される華やかな刃文の神気は、炎のごとき刻印と真紅の瞳に現れる。
+		PRINTFORML 上杉家に大切にされ、数百年公開されず秘密のベールに包まれていた。
+	ELSEIF ARG == 182
+		PRINTFORML 【코킨덴쥬노타치】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 平安時代末期から鎌倉時代前期の刀工、豊후国行平の太刀。
+		PRINTFORML 地金はねっとりと潤みを帯び、大蛇（おろち）のごとし。
+		PRINTFORML 細川幽斎から烏丸光広へ古今伝授がなされた際、共に渡されたことが名の由来。
+		PRINTFORML 文化を愛し、愛される……この国の花。
+	ELSEIF ARG == 184
+		PRINTFORML 【지조 유키히라】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 平安時代末期から鎌倉時代前期の刀工、豊후国行平の打刀。
+		PRINTFORML 地蔵菩薩信仰が盛んだった頃に、지조 유키히라は複数本存在したと思われる。
+		PRINTFORML また、この時代の刀剣は大蛇（おろち）である。
+		PRINTFORML 地蔵と大蛇、対극の姿を与えられてなおすべてを救おうと彼はもがく。
+	ELSEIF ARG == 186
+		PRINTFORML 【치가네마루】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 琉球王国の王家に伝来した宝剣のひとつ。
+		PRINTFORML 山城生まれの琉球育ち。
+		PRINTFORML 拵は本土製だが、鍔と切羽は치요가네마루と同種のもので琉球で付けられたと思われる。
+		PRINTFORML 鳥のように舞う、沖밧줄武術「손（テイ）」の使い손。
+	ELSEIF ARG == 188
+		PRINTFORML 【닛코 이치몬지】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 福岡一文字派の作とされている太刀。
+		PRINTFORML 一文字一家の長、산쵸모の左腕。与えられた命は完遂する。
+		PRINTFORML 日光権現の宝刀であったことが名の由来。
+		PRINTFORML 北条家、黒田家などを伝わり「知」と「武」を備えた風体に歴代のそれが現れる。
+	ELSEIF ARG == 190
+		PRINTFORML 【타이코 사몬지】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 筑前の刀工、左文字の短刀。
+		PRINTFORML そして、彼もまた己の在り方を問う左文字の一振。悲しむ在り方も、楽しむ在り方も。
+		PRINTFORML 豊臣にまつわる名を授けられれば、それに応えようと励む。
+	ELSEIF ARG == 192
+		PRINTFORML 【사미다레 고우】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 越中国の刀工、郷義弘作の打刀。
+		PRINTFORML 景色を名に宿した名刀は華々しき来歴を辿るが、
+		PRINTFORML その言葉には同じ時代を生き、名を詠んでくれた俳人への思いが表れる。
+		PRINTFORML 行雲や犬のかけ尿(ばり)村時雨
+	ELSEIF ARG == 194
+		PRINTFORML 【오오치도리 쥬몬지야리】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 十文字槍のひとつで、槍身から両側に出た鎌が千鳥形をした槍。
+		PRINTFORML 日本一の兵と称された真田左衛門佐信繁の愛槍を名乗り、赤き傷を誉として掲げる。
+	ELSEIF ARG == 196
+		PRINTFORML 【한진】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 茎に金象嵌で「한진　真田左衛門帯之」とある真田左衛門佐信繁の脇差。
+		PRINTFORML 信繁の死후、紀州高野山から売りに出される。宇多国次の作で、「한진」とは異名。
+		PRINTFORML 오오치도리 쥬몬지야리と共に、真田のものとして戦場に立つ。
+	ELSEIF ARG == 198
+		PRINTFORML 【이치몬지 노리무네】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 福岡一文字派の作とされている太刀。
+		PRINTFORML 則宗は福岡一文字派の始祖であり、후鳥羽院番鍛冶の一人として名高い。
+		PRINTFORML 一文字一家の頭を산쵸모に譲った후は気ままな隠居ライフを送る。
+		PRINTFORML 歪な存在を、それ故に可愛がる。
+	ELSEIF ARG == 200
+		PRINTFORML 【무라쿠모 고우】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 越中国の刀工、郷義弘作の打刀。
+		PRINTFORML 景色を名に宿した名刀は華々しき来歴を辿るが、
+		PRINTFORML かつての主は悪役にされることが多かったり、自身は二束三文で売られることもあったり……。
+		PRINTFORML 負け犬の腹痛癒す五月雨(さつきあめ)
+	ELSEIF ARG == 202
+		PRINTFORML 【히메츠루 이치몬지】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 福岡一文字派の作とされている太刀。上杉景勝秘蔵の刀。
+		PRINTFORML 研師の夢にツルと名乗る姫君が現れ、磨り上げないよう嘆願した――という伝説が残る。
+		PRINTFORML 一文字一家のあれやこれやからは訳あって距離を置きたい、夢告げの鳥。
+	ELSEIF ARG == 204
+		PRINTFORML 【후쿠시마 미츠타다】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 備前長船派の事実上の祖といわれている刀工、光忠の作。
+		PRINTFORML 名は、元主である福島正則が由来。
+		PRINTFORML だが酒の失敗は倣いたくない。草花をアレンジして飾ったり、誰かに贈ることが好き。
+		PRINTFORML 쇼쿠다이키리 미츠타다には、お兄ちゃんと呼ばれたい。
+	ELSEIF ARG == 206
+		PRINTFORML 【칠성검】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 칠성검とは、刀身に北斗七星が刻まれた剣を指す。
+		PRINTFORML 北天に輝く七つ星はすなわち死を司る神、北斗星君。
+		PRINTFORML 災厄を祓い、あらゆる敵を打ち果たすという。
+		PRINTFORML その一입は聖徳太子佩用の伝承を持ち、安寧秩序を星に願う。
+	ELSEIF ARG == 210
+		PRINTFORML 【이나바 고우】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL 
+		PRINTFORML 越中国の刀工、郷義弘作の打刀。
+		PRINTFORML 名は、織田信長に馬廻として仕えた稲葉重通が所持したことにちなむ。
+		PRINTFORML 후に徳川家康、結城秀康へと渡るが、主が天下に届く瞬間に居合わせることはなかった。
+		PRINTFORML そして己が손を伸ばす。
+	ELSE
+		PRINTFORML 【%CSVNAME(ARG,0)%】　難易度：%CHARA_DIFFICULTY(ARG)% 売却値：%CHARA_SELLING_PRICE(ARG)%
+		PRINTL
+		PRINTL
+	ENDIF
+ENDIF
+PRINTFORML 
+
+

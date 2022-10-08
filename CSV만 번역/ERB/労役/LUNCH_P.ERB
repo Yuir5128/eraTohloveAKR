@@ -1,0 +1,564 @@
+﻿
+;====================================================================
+;奴隷に料理を作らせたとき、毒を盛られるかどうか判定
+;====================================================================
+@LUNCH_JUDGE
+TFLAG:14 = 0
+
+;主人との相性が良い、もしくは上位陥落奴隷は毒盛らない
+A = NO:MASTER
+IF RELATION:A > 100 || TALENT:친애 || TALENT:창부 || TALENT:예속
+	CALL LUNCH_SALE
+ELSE
+	IF !TALENT:연모 && (MARK:반발각인 >= 2 || ABL:순종 < 5)
+		IF TALENT:조제지식 && TALENT:약점잡힘 == 0
+			IF RAND:2 == 0
+				CALL POISONED_LUNCH
+			ELSE
+				CALL LUNCH_SALE
+			ENDIF
+		ELSEIF (TALENT:반항적 || TALENT:저항) && TALENT:약점잡힘 == 0
+			IF RAND:3 == 0
+				CALL POISONED_LUNCH
+			ELSE
+				CALL LUNCH_SALE
+			ENDIF
+		ELSEIF TALENT:조제지식 == 0 && TALENT:약점잡힘
+			IF RAND:6 == 0
+				CALL POISONED_LUNCH
+			ELSE
+				CALL LUNCH_SALE
+			ENDIF
+		ELSE
+			IF RAND:4 == 0
+				CALL POISONED_LUNCH
+			ELSE
+				CALL LUNCH_SALE
+			ENDIF
+		ENDIF
+	ELSE
+		CALL LUNCH_SALE
+	ENDIF
+ENDIF
+
+RETURN 0
+
+
+
+
+
+
+;====================================================================
+;作った料理の成否判定
+;どこでも誰にでも使える成否判定。ついでにお値段も判定。
+;Pが高いほど料理がうまい。F=1は成功、F=0は失敗。
+;====================================================================
+@LUNCH_RESULT(ARG)
+
+;요리기능（基礎値）
+IF ABL:ARG:요리기능
+	P = ABL:ARG:요리기능*12
+ELSE
+	P = 0
+ENDIF
+
+;EXP:調理経験をみる
+IF EXP:ARG:가사경험 >= EXPLV:5
+	P += 50
+ELSEIF EXP:ARG:가사경험 >= EXPLV:4
+	P += 40
+ELSEIF EXP:ARG:가사경험 >= EXPLV:3
+	P += 30
+ELSEIF EXP:ARG:가사경험 >= EXPLV:2
+	P += 20
+ELSEIF EXP:ARG:가사경험 >= EXPLV:1
+	P += 10
+ELSE
+	P += 0
+ENDIF
+
+;기교
+IF ABL:ARG:기교
+	P += ABL:ARG:기교*5
+ELSE
+	P += 0
+ENDIF
+
+;요리고수／요리치
+IF TALENT:ARG:요리고수
+	P += 50
+ELSEIF TALENT:ARG:요리치
+	P -= 100
+ENDIF
+
+;プロ級の腕前。失敗することはない。（成功10：失敗0）
+IF P >= 200
+	F = 1
+;かなりうまくなった。稀に失敗する。（成功9：失敗1）
+ELSEIF P >= 100
+	IF RAND:9 < 1
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;上達してきた。たまに失敗する。（成功6：失敗4）
+ELSEIF P >= 50
+	IF RAND:9 < 4
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;まだまだ素人。失敗が多い。（成功3：失敗7）
+ELSEIF P >= 0
+	IF RAND:9 < 7
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;요리치。どうにもならない。（成功0：失敗100）
+ELSE
+	F = 0
+ENDIF
+
+;値段の判定
+IF P > 0
+	M = P
+	SIF F
+		M *= 2
+ELSE
+	M = 10
+ENDIF
+
+
+
+;====================================================================
+;作った料理の名前を判定・２
+;どんな料理だったか若干細かく。でも種類まで。
+;====================================================================
+@LUNCH_NAME
+IF P >= 200
+	F = 1
+;かなりうまくなった。稀に失敗する。（成功9：失敗1）
+ELSEIF P >= 100
+	IF RAND:9 < 1
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;上達してきた。たまに失敗する。（成功6：失敗4）
+ELSEIF P >= 50
+	IF RAND:9 < 4
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;まだまだ素人。失敗が多い。（成功3：失敗7）
+ELSEIF P >= 0
+	IF RAND:9 < 7
+		F = 0
+	ELSE
+		F = 1
+	ENDIF
+;요리치。どうにもならない。（成功0：失敗100）
+ELSE
+	F = 0
+ENDIF
+
+SIF P < 0
+	PRINTFORM …？
+
+
+;====================================================================
+;作った料理の名前を判定・３
+;料理名まで細かく判定。キャラ毎の料理もここで。
+;====================================================================
+@LUNCH_NAME_DETAIL(ARG,ARG:1)
+#FUNCTIONS
+;テンプレ用
+;IF NO:ARG == 
+	;キャラ
+;	RETURNF "(料理名)"
+;ELSE
+	;サラダ
+	IF RAND:11 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:11
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:5
+		ELSE
+			K:1 = RAND:3
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "サラダ"
+			CASE 1
+				RETURNF "ポテトサラダ"
+			CASE 2
+				RETURNF "シーザーサラダ"
+			CASE 3
+				RETURNF "和風サラダ"
+			CASE 4
+				RETURNF "洋風サラダ"
+			CASE 5
+				RETURNF "コールスロー"
+			CASE 6
+				RETURNF "シーフードサラダ"
+			CASE 7
+				RETURNF "マカロニサラダ"
+			CASE 8
+				RETURNF "ホットサラダ"
+			CASE 9
+				RETURNF "マリネ"
+			CASE 10
+				RETURNF "カルパッチョ"
+		ENDSELECT
+	;ご飯もの
+	ELSEIF RAND:10 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:15
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:8
+		ELSE
+			K:1 = RAND:4
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "卵丼"
+			CASE 1
+				RETURNF "親子丼"
+			CASE 2
+				RETURNF "カツ丼"
+			CASE 3
+				RETURNF "チャーハン"
+			CASE 4
+				RETURNF "天丼"
+			CASE 5
+				RETURNF "海鮮丼"
+			CASE 6
+				RETURNF "牛丼"
+			CASE 7
+				RETURNF "オムライス"
+			CASE 8
+				RETURNF "混ぜご飯"
+			CASE 9
+				RETURNF "五目ご飯"
+			CASE 10
+				RETURNF "ピラフ"
+			CASE 11
+				RETURNF "リゾット"
+			CASE 12
+				RETURNF "ちらし寿司"
+			CASE 13
+				RETURNF "塩じゃけ定食"
+			CASE 14
+				RETURNF "寿司"
+		ENDSELECT
+	;パン
+	ELSEIF RAND:9 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:10
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:7
+		ELSE
+			K:1 = RAND:3
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "サンドイッチ"
+			CASE 1
+				RETURNF "フレンチトースト"
+			CASE 2
+				RETURNF "ガーリックトースト"
+			CASE 3
+				RETURNF "ハンバーガー"
+			CASE 4
+				RETURNF "ＢＬＴサンド"
+			CASE 5
+				RETURNF "カツサンド"
+			CASE 6
+				RETURNF "ホットドッグ"
+			CASE 7
+				RETURNF "ベーグルサンド"
+			CASE 8
+				RETURNF "スコーン"
+			CASE 9
+				RETURNF "ピザ"
+		ENDSELECT
+	;粉物、麺
+	ELSEIF RAND:8 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:13
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:8
+		ELSE
+			K:1 = RAND:5
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "うどん"
+			CASE 1
+				RETURNF "そば"
+			CASE 2
+				RETURNF "そうめん"
+			CASE 3
+				RETURNF "たぬきうどん"
+			CASE 4
+				RETURNF "キツネそば"
+			CASE 5
+				RETURNF "カレーうどん"
+			CASE 6
+				RETURNF "鍋焼きうどん"
+			CASE 7
+				RETURNF "焼きそば"
+			CASE 8
+				RETURNF "天ぷらそば"
+			CASE 9
+				RETURNF "ラーメン"
+			CASE 10
+				RETURNF "冷麺"
+			CASE 11
+				RETURNF "お好み焼き"
+			CASE 12
+				RETURNF "たこ焼き"
+		ENDSELECT
+	;肉料理
+	ELSEIF RAND:7 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:17
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:10
+		ELSE
+			K:1 = RAND:5
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "肉じゃが"
+			CASE 1
+				RETURNF "ハンバーグ"
+			CASE 2
+				RETURNF "とんかつ"
+			CASE 3
+				RETURNF "コロッケ"
+			CASE 4
+				RETURNF "豚の生姜焼き"
+			CASE 5
+				RETURNF "から揚げ"
+			CASE 6
+				RETURNF "すき焼き"
+			CASE 7
+				RETURNF "ポークソテー"
+			CASE 8
+				RETURNF "メンチカツ"
+			CASE 9
+				RETURNF "餃子"
+			CASE 10
+				RETURNF "ステーキ"
+			CASE 11
+				RETURNF "ローストビーフ"
+			CASE 12
+				RETURNF "酢豚"
+			CASE 13
+				RETURNF "豚の角煮"
+			CASE 14
+				RETURNF "シュウマイ"
+			CASE 15
+				RETURNF "モツ煮込み"
+			CASE 16
+				RETURNF "ロールキャベツ"
+		ENDSELECT
+	;魚料理
+	ELSEIF RAND:6 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:10
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:5
+		ELSE
+			K:1 = RAND:3
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "焼き魚"
+			CASE 1
+				RETURNF "お刺身"
+			CASE 2
+				RETURNF "焼鮭定食"
+			CASE 3
+				RETURNF "ブリ大根"
+			CASE 4
+				RETURNF "ムニエル"
+			CASE 5
+				RETURNF "サバの味噌煮"
+			CASE 6
+				RETURNF "カレイの煮付け"
+			CASE 7
+				RETURNF "ブリの照り焼き"
+			CASE 8
+				RETURNF "海老フライ"
+			CASE 9
+				RETURNF "カキフライ"
+		ENDSELECT
+	;シチュー、カレー
+	ELSEIF RAND:5 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:10
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:5
+		ELSE
+			K:1 = RAND:3
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "カレー"
+			CASE 1
+				RETURNF "クリームシチュー"
+			CASE 2
+				RETURNF "チキンカレー"
+			CASE 3
+				RETURNF "野菜カレー"
+			CASE 4
+				RETURNF "ドライカレー"
+			CASE 5
+				RETURNF "キーマカレー"
+			CASE 6
+				RETURNF "スープカレー"
+			CASE 7
+				RETURNF "ビーフシチュー"
+			CASE 8
+				RETURNF "ハンバーグカレー"
+			CASE 9
+				RETURNF "カツカレー"
+		ENDSELECT
+	;グラタン、ドリア、パスタ
+	ELSEIF RAND:4 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:11
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:7
+		ELSE
+			K:1 = RAND:3
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "グラタン"
+			CASE 1
+				RETURNF "ドリア"
+			CASE 2
+				RETURNF "パスタ"
+			CASE 3
+				RETURNF "ミートソーススパゲティ"
+			CASE 4
+				RETURNF "カルボナーラ"
+			CASE 5
+				RETURNF "ナポリタン"
+			CASE 6
+				RETURNF "ポテトグラタン"
+			CASE 7
+				RETURNF "マカロニグラタン"
+			CASE 8
+				RETURNF "ペペロンチーノ"
+			CASE 9
+				RETURNF "明太子パスタ"
+			CASE 10
+				RETURNF "グラスパ"
+		ENDSELECT
+	;卵料理
+	ELSEIF RAND:3 == 0
+		IF P:ARG >= 100
+			K:1 = RAND:6
+		ELSE
+			K:1 = RAND:2
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "卵焼き"
+			CASE 1
+				RETURNF "スクランブルエッグ"
+			CASE 2
+				RETURNF "オムレツ"
+			CASE 3
+				RETURNF "オムそば"
+			CASE 4
+				RETURNF "だし巻き卵"
+			CASE 5
+				RETURNF "茶碗蒸し"
+		ENDSELECT
+	;汁物、スープ
+	ELSEIF RAND:2 == 0
+		IF P:ARG >= 200
+			K:1 = RAND:14
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:8
+		ELSE
+			K:1 = RAND:4
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "鍋"
+			CASE 1
+				RETURNF "味噌汁"
+			CASE 2
+				RETURNF "コーンスープ"
+			CASE 3
+				RETURNF "お吸い物"
+			CASE 4
+				RETURNF "トマトスープ"
+			CASE 5
+				RETURNF "野菜スープ"
+			CASE 6
+				RETURNF "豚汁"
+			CASE 7
+				RETURNF "おでん"
+			CASE 8
+				RETURNF "ビシソワーズ"
+			CASE 9
+				RETURNF "ポトフ"
+			CASE 10
+				RETURNF "キムチ鍋"
+			CASE 11
+				RETURNF "クラムチャウダー"
+			CASE 12
+				RETURNF "ミネストローネ"
+			CASE 13
+				RETURNF "オニオングラタンスープ"
+		ENDSELECT
+	;デザート
+	ELSE
+		IF P:ARG >= 200
+			K:1 = RAND:13
+		ELSEIF P:ARG >= 100
+			K:1 = RAND:8
+		ELSE
+			K:1 = RAND:5
+		ENDIF
+		SELECTCASE K:1
+			CASE 0
+				RETURNF "餡団子"
+			CASE 1
+				RETURNF "チョコレートケーキ"
+			CASE 2
+				RETURNF "アイスクリーム"
+			CASE 3
+				RETURNF "チーズケーキ"
+			CASE 4
+				RETURNF "カップケーキ"
+			CASE 5
+				RETURNF "草団子"
+			CASE 6
+				RETURNF "みたらし団子"
+			CASE 7
+				RETURNF "三色団子"
+			CASE 8
+				RETURNF "パンケーキ"
+			CASE 9
+				RETURNF "クレープ"
+			CASE 10
+				RETURNF "季節のシャーベット"
+			CASE 11
+				RETURNF "たまごのタルト"
+			CASE 12
+				RETURNF "アップルパイ"
+		ENDSELECT
+	ENDIF
+;ENDIF
+
+

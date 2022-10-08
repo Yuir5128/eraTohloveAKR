@@ -1,0 +1,910 @@
+﻿;-------------------------------------------------
+;日常イベント実行判定
+;-------------------------------------------------
+;部屋にいる
+@DAILY_LIFE_ABLE_0
+;共犯者は不可
+SIF CFLAG:A:1 == 3
+	RETURN 0
+RETURN 1
+
+;노래연습
+@DAILY_LIFE_ABLE_1
+;가창기능がない
+SIF !ABL:A:가창기능
+	RETURN 0
+RETURN 1
+
+;
+;@DAILY_LIFE_ABLE_2
+;RETURN 1
+
+;魔法の研究をしている
+;@DAILY_LIFE_ABLE_3
+;未陥落は不可
+;SIF !KANRAKU(A)
+;	RETURN 0
+;[실의]は不可
+;SIF TALENT:A:실의
+;	RETURN 0
+;魔法が使える人だけ、かつ魔法の研究をしそうな人だけ
+;SELECTCASE NO:A
+;	;ライナ、シオン、ルーク、アルア、ペリア、ゾーラ、悪魔たん、ミルク、ピア、エステラ
+;	CASE 1, 3, 8, 24, 28, 29, 34, 9, 27, 32
+;	CASEELSE
+;		RETURN 0
+;ENDSELECT
+;両腕が無いと不可
+;SIF TALENT:A:양팔결손 || TALENT:A:달마
+;	RETURN 0
+;RETURN 1
+
+;実験っぽいことをしている
+@DAILY_LIFE_ABLE_4
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[조제지식を持っていない]
+SIF !TALENT:A:조제지식
+	RETURN 0
+;両腕が無いと不可
+SIF TALENT:A:양팔결손 || TALENT:A:달마
+	RETURN 0
+RETURN 1
+
+;読書
+@DAILY_LIFE_ABLE_5
+;共犯者は不可
+SIF CFLAG:A:1 == 3
+	RETURN 0
+RETURN 1
+
+;おもらし
+@DAILY_LIFE_ABLE_6
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[실금버릇]をもっていない
+SIF !TALENT:A:실금버릇
+	RETURN 0
+RETURN 1
+
+;庭でひなたぼっこ
+@DAILY_LIFE_ABLE_7
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;夜は駄目
+SIF TIME
+	RETURN 0
+RETURN 1
+
+;屋根の上で笑っている
+@DAILY_LIFE_ABLE_8
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[요호][매혹][수수께끼의매력]をどれももっていない
+SIF !TALENT:A:요호 && !TALENT:A:매혹 && !TALENT:A:수수께끼의매력
+	RETURN 0
+RETURN 1
+
+;동물귀/庭でふらふらしている
+@DAILY_LIFE_ABLE_9
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[동물귀]をもっていない
+SIF !TALENT:A:동물귀
+	RETURN 0
+;[유치]も[유아／유아퇴행]ももっていない
+SIF !TALENT:A:유치 && !TALENT:A:유아／유아퇴행
+	RETURN 0
+RETURN 1
+
+;縫物
+@DAILY_LIFE_ABLE_10
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;봉사정신４以下かつ[헌신적]が無いときは不可
+SIF ABL:A:봉사정신 <= 4 && !TALENT:A:헌신적
+	RETURN 0
+;両腕が無いと不可
+SIF TALENT:A:양팔결손 || TALENT:A:달마
+	RETURN 0
+RETURN 1
+
+;掃除
+@DAILY_LIFE_ABLE_11
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;봉사정신４以下かつ[헌신적]でないとき不可
+SIF ABL:A:봉사정신 <= 4 && !TALENT:A:헌신적
+	RETURN 0
+;[더러움무시]だとダメ
+SIF TALENT:A:더러움무시
+	RETURN 0
+RETURN 1
+
+;洗濯
+@DAILY_LIFE_ABLE_12
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;봉사정신４以下かつ[헌신적]でないとき不可
+SIF ABL:A:봉사정신 <= 4 && !TALENT:A:헌신적
+	RETURN 0
+;夜は駄目
+SIF TIME
+	RETURN 0
+RETURN 1
+
+;お祈り
+@DAILY_LIFE_ABLE_13
+;共犯者は不可
+SIF CFLAG:A:1 == 3
+	RETURN 0
+;してそうなキャラだけ
+SELECTCASE NO:A
+	;이시키리마루、이마노츠루기、鯰尾、骨喰、平野、厚、前田、秋田、乱、고코타이、愛染、江雪、宗三、国広、浦島
+	CASE 7,11,27,29,31,33,39,41,45,47,61,79,81,99,103
+	CASEELSE
+		RETURN 0
+ENDSELECT
+RETURN 1
+
+;ぼー
+@DAILY_LIFE_ABLE_14
+RETURN 1
+
+;ダンシング
+@DAILY_LIFE_ABLE_15
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[눈에띄고싶음]が無いと不可
+SIF !TALENT:A:눈에띄고싶음
+	RETURN 0
+RETURN 1
+
+;夜にトイレに
+@DAILY_LIFE_ABLE_16
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[유치][유아／유아퇴행]のどちらも持っていないとき不可
+SIF !TALENT:A:유치 || !TALENT:A:유아／유아퇴행
+	RETURN 0
+;主人が[겁쟁이][유치][유아／유아퇴행]のいずれかを持っているとき不可
+SIF TALENT:MASTER:겁쟁이 || TALENT:MASTER:유치 || TALENT:MASTER:유아／유아퇴행
+	RETURN 0
+;昼間は不可
+SIF !TIME
+	RETURN 0
+RETURN 1
+
+;木に登っている
+@DAILY_LIFE_ABLE_17
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;夜は駄目
+SIF TIME
+	RETURN 0
+;[눈에띄고싶음]か[낙관적]か[호기심]か[유치]か[유아／유아퇴행]が無いと不可
+SIF !TALENT:A:눈에띄고싶음 && !TALENT:A:낙관적 && !TALENT:A:호기심 && !TALENT:A:유치 && !TALENT:A:유아／유아퇴행
+	RETURN 0
+RETURN 1
+
+;손伝い
+@DAILY_LIFE_ABLE_18
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인２あると不可
+SIF MARK:A:반발각인 >= 2
+	RETURN 0
+;[솔직함][반항적]のいずれかを持っていなければ不可
+SIF !TALENT:A:솔직함 && !TALENT:A:반항적
+	RETURN 0
+RETURN 1
+
+;庭で遊んでいる
+@DAILY_LIFE_ABLE_19
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[유치][유아／유아퇴행]のいずれかを持っていなければ不可
+SIF !TALENT:A:유치 && !TALENT:A:유아／유아퇴행
+	RETURN 0
+RETURN 1
+
+;ビデオ観賞
+@DAILY_LIFE_ABLE_20
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;撮影したビデオを持っていない
+SIF !CFLAG:A:20
+	RETURN 0
+RETURN 1
+
+;風呂上がり
+@DAILY_LIFE_ABLE_21
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[수치심없음]を持っていない
+SIF !TALENT:A:수치심없음
+	RETURN 0
+RETURN 1
+
+;可愛いものを見ている
+@DAILY_LIFE_ABLE_22
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[호기심][유치][유아／유아퇴행]を持っていない
+SIF !TALENT:A:호기심 && !TALENT:A:유치 && !TALENT:A:유아／유아퇴행
+	RETURN 0
+RETURN 1
+
+;つまみぐい
+@DAILY_LIFE_ABLE_23
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[유치][유아／유아퇴행][호기심]のいずれかを持っていなければ不可
+SIF !TALENT:A:유치 && !TALENT:A:유아／유아퇴행 && !TALENT:A:호기심
+	RETURN 0
+RETURN 1
+
+;他の奴隷を慰めている
+@DAILY_LIFE_ABLE_24
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[낙관적][고무적]のいずれかを持っていなければ不可
+SIF !TALENT:A:낙관적 && !TALENT:A:고무적
+	RETURN 0
+;[비관적]か[실의]のいずれかを持つキャラがいなければ不可
+SIF DAILYLIFE_GETTALENT_1(26,162) < 0
+	RETURN 0
+RETURN 1
+
+;鼻歌ふふんふ
+@DAILY_LIFE_ABLE_25
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[낙관적]を持っていなければ不可
+SIF !TALENT:A:낙관적
+	RETURN 0
+RETURN 1
+
+;ため息ひとつ
+@DAILY_LIFE_ABLE_26
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의][비관적]のいずれかを持っていなければ不可
+SIF !TALENT:A:실의 && !TALENT:A:비관적
+	RETURN 0
+RETURN 1
+
+;食事当番
+@DAILY_LIFE_ABLE_27
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;요리기능も[요리고수]もないと不可
+SIF !ABL:A:요리기능 && TALENT:A:요리고수
+	RETURN 0
+RETURN 1
+
+;ナルシズム
+@DAILY_LIFE_ABLE_28
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[유아／유아퇴행]は不可
+SIF TALENT:A:유아／유아퇴행
+	RETURN 0
+;[무관심]は不可
+SIF TALENT:A:무관심
+	RETURN 0
+RETURN 1
+
+;普段の態度
+@DAILY_LIFE_ABLE_29
+;[실의][복종]か반발각인３以上のいずれかでないと不可
+SIF !TALENT:A:실의 && !TALENT:A:복종 && MARK:A:반발각인 < 3
+	RETURN 0
+RETURN 1
+
+;栄養剤
+@DAILY_LIFE_ABLE_30
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[조제지식]を持ってないと不可
+SIF !TALENT:A:조제지식
+	RETURN 0
+RETURN 1
+
+;部屋から連れだす
+@DAILY_LIFE_ABLE_31
+;복종陥落(相손問わず)でないと不可
+SIF CFLAG:A:39 != 5 && CFLAG:A:39 != 8
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[무관심][감정부족][비관적][얌전함]のどれも無い
+SIF !TALENT:A:무관심 && !TALENT:A:감정부족 && !TALENT:A:비관적 && !TALENT:A:얌전함
+	RETURN 0
+RETURN 1
+
+;유치な奴隷を励ます
+@DAILY_LIFE_ABLE_32
+;[유치][유아／유아퇴행]持ちがいない
+SIF DAILYLIFE_GETTALENT_1(150, 151) == -1
+	RETURN 0
+;[헌신적]が無く봉사정신４以下だと駄目
+SIF !TALENT:A:헌신적 && ABL:A:봉사정신 <= 4
+	RETURN 0
+;[유치]だと駄目
+SIF TALENT:A:유치
+	RETURN 0
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+RETURN 1
+
+;헌신적な掃除
+@DAILY_LIFE_ABLE_33
+;[헌신적]が無く봉사정신４以下だと駄目
+SIF !TALENT:A:헌신적 && ABL:A:봉사정신 <= 4
+	RETURN 0
+;[무관심]は봉사정신５以上ないと駄目
+SIF TALENT:A:무관심 && ABL:A:봉사정신 < 5
+	RETURN 0
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[더러움무시]だとダメ
+SIF TALENT:A:더러움무시
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;ドミノ倒し
+@DAILY_LIFE_ABLE_34
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[고무적][헌신적]が無いと不可
+SIF !TALENT:A:고무적 && !TALENT:A:헌신적
+	RETURN 0
+RETURN 1
+
+;いたずら/罠
+@DAILY_LIFE_ABLE_35
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[반항적][건방짐][유치][호기심]のいずれも無いと不可
+SIF !TALENT:A:반항적 && !TALENT:A:건방짐 && !TALENT:A:유치 && !TALENT:A:호기심
+	RETURN 0
+RETURN 1
+
+;いたずら/倉庫漁り
+@DAILY_LIFE_ABLE_36
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[호기심]が無いと不可
+SIF !TALENT:A:호기심
+	RETURN 0
+;[유아／유아퇴행][유치]のいずれも無いと不可
+SIF !TALENT:A:유아／유아퇴행 && !TALENT:A:유치
+	RETURN 0
+RETURN 1
+
+;유아／유아퇴행な奴隷を励ます
+@DAILY_LIFE_ABLE_37
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[유아／유아퇴행]がいない
+LOCAL = DAILYLIFE_GETTALENT_1(150)
+SIF LOCAL == -1
+	RETURN 0
+;[고무적]を持っていない
+SIF !TALENT:A:고무적
+	RETURN 0
+RETURN 1
+
+;フェ○ラの練習
+@DAILY_LIFE_ABLE_71
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;未陥落かつ정액중독が無く봉사정신２以下だと不可
+SIF !KANRAKU(A) && !ABL:A:정액중독 && ABL:A:봉사정신 <= 3
+	RETURN 0
+RETURN 1
+
+;イケナイコトの練習
+@DAILY_LIFE_ABLE_72
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;음란陥落でないと不可
+SIF TALENT:A:음란 || TALENT:A:창부
+	RETURN 0
+RETURN 1
+
+;ＳＭプレイの練習(밧줄)
+@DAILY_LIFE_ABLE_73
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;밧줄が無い
+SIF !ITEM:밧줄
+	RETURN 0
+;[새드]でない
+SIF !TALENT:A:새드
+	RETURN 0
+RETURN 1
+
+;ＳＭプレイの練習(애널責め)
+@DAILY_LIFE_ABLE_74
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;オナホールが無い
+SIF !ITEM:전동오나홀
+	RETURN 0
+;음란陥落でないと不可
+SIF TALENT:A:음란 || TALENT:A:창부
+	RETURN 0
+RETURN 1
+
+;ＳＭプレイの練習(채찍、스팽킹)
+@DAILY_LIFE_ABLE_75
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;[새드]でない
+SIF !TALENT:A:새드
+	RETURN 0
+RETURN 1
+
+;ちぎれ촉수
+@DAILY_LIFE_ABLE_76
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;現在の主人に[금지된지식]ないとダメ
+SIF !TALENT:MASTER:금지된지식
+	RETURN 0
+;촉수사역술が無いとダメ
+SIF !ITEM:촉수사역술
+	RETURN 0
+RETURN 1
+
+;みんなといっしょ/二人の회화１/반발・陥落素質
+@DAILY_LIFE_ABLE_100
+;他出場キャラがいない
+SIF DAILYLIFE_GETCHARA(1) == -1
+	RETURN 0
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;みんなといっしょ/お説教
+@DAILY_LIFE_ABLE_101
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;お説教してそうな人じゃない
+SELECTCASE NO:A
+	;이시키리마루、一にぃ、薬研ニキ、燭台切
+	CASE 7,25,49,73
+	CASEELSE
+		RETURN 0
+ENDSELECT
+RETURN 1
+
+;みんなといっしょ/二人の회화２/相性・兄弟
+@DAILY_LIFE_ABLE_102
+;他出場キャラがいない
+SIF DAILYLIFE_GETCHARA(1) == -1
+	RETURN 0
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;読書にドキッとする
+@DAILY_LIFE_ABLE_130
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[음란][창부][소악마]でなく、Aが主人の思慕対象でもない
+SIF !TALENT:A:음란 && !TALENT:A:창부 && !TALENT:A:소악마 && CFLAG:MASTER:41 != NO:A
+	RETURN 0
+RETURN 1
+
+;食事にドキッとする
+@DAILY_LIFE_ABLE_131
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[음란][창부][소악마]でなく、Aが主人の思慕対象でもない
+SIF !TALENT:A:음란 && !TALENT:A:창부 && !TALENT:A:소악마 && CFLAG:MASTER:41 != NO:A
+	RETURN 0
+RETURN 1
+
+;嫁との一時/買い物
+@DAILY_LIFE_ABLE_132
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;主人に対して연모陥落か예속
+SIF !TALENT:A:연모 && !TALENT:A:친애 && !TALENT:A:예속
+	RETURN 0
+RETURN 1
+
+;嫁との一時/耳掃除
+@DAILY_LIFE_ABLE_133
+;[친애]がないと不可
+SIF !TALENT:A:친애
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;両腕が無いと不可
+SIF TALENT:A:양팔결손 || TALENT:A:달마
+	RETURN 0
+RETURN 1
+
+;嫁との一時/お風呂
+@DAILY_LIFE_ABLE_134
+;[친애]がないと不可
+SIF !TALENT:A:친애
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;両腕が無いと不可
+SIF TALENT:A:양팔결손 || TALENT:A:달마
+	RETURN 0
+RETURN 1
+
+;嫁との一時/晩酌
+@DAILY_LIFE_ABLE_135
+;[친애]がないと不可
+SIF !TALENT:A:친애
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;両腕が無いと不可
+SIF TALENT:A:양팔결손 || TALENT:A:달마
+	RETURN 0
+;昼間は不可
+SIF !TIME
+	RETURN 0
+RETURN 1
+
+;嫁との一時/料理
+@DAILY_LIFE_ABLE_136
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;主人に対して연모陥落していないと不可
+SIF !TALENT:A:연모 && !TALENT:A:친애
+	RETURN 0
+RETURN 1
+
+;嫁との一時/デート
+@DAILY_LIFE_ABLE_137
+;반발각인３あると不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;指輪フラグがないと不可
+SIF !CFLAG:A:140
+	RETURN 0
+;[상사상애]がないと不可
+SIF !TALENT:A:상사상애
+	RETURN 0
+RETURN 1
+
+;嫁との一時/花嫁修業
+@DAILY_LIFE_ABLE_138
+;반발３以上だと不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]だと不可
+SIF TALENT:A:실의
+	RETURN 0
+;主人に対して연모陥落でないと駄目
+SIF !TALENT:A:연모 && !TALENT:A:친애
+	RETURN 0
+;[헌신적]でない
+SIF !TALENT:A:헌신적
+	RETURN 0
+RETURN 1
+
+;
+;@DAILY_LIFE_ABLE_139
+;RETURN 1
+
+;嫁との一時/妊婦を労わる
+@DAILY_LIFE_ABLE_140
+;[임신]でない
+SIF !TALENT:A:임신
+	RETURN 0
+;主人と[상사상애]でない
+SIF !TALENT:A:상사상애
+	RETURN 0
+;반발３以上だと不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+RETURN 1
+
+;嫁との一時/写真
+@DAILY_LIFE_ABLE_141
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;반발３以上だと不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]だと不可
+SIF TALENT:A:실의
+	RETURN 0
+;카메라と필름を持っていない
+SIF !ITEM:카메라 || !ITEM:필름
+	RETURN 0
+;主人の思慕対象がAでない
+SIF CFLAG:MASTER:41 != NO:A
+	RETURN 0
+RETURN 1
+
+;嫁との一時/差し入れ
+@DAILY_LIFE_ABLE_142
+;반발３以上だと不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]だと不可
+SIF TALENT:A:실의
+	RETURN 0
+;主人に対して연모・복종陥落でないと駄目
+SIF !TALENT:A:연모 && !TALENT:A:친애 && !TALENT:A:복종 && !TALENT:A:예속
+	RETURN 0
+RETURN 1
+
+;嫁との一時/お菓子作り
+@DAILY_LIFE_ABLE_143
+;반발３以上だと不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]だと不可
+SIF TALENT:A:실의
+	RETURN 0
+;主人に対して연모陥落でないと駄目
+SIF !TALENT:A:연모 && !TALENT:A:친애
+	RETURN 0
+RETURN 1
+
+;嫁との一時/仮眠
+@DAILY_LIFE_ABLE_144
+;반발３以上だと不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]だと不可
+SIF TALENT:A:실의
+	RETURN 0
+;[상사상애]でないと駄目
+SIF !TALENT:A:상사상애
+	RETURN 0
+RETURN 1
+
+;嫁との一時/くつろぎ
+@DAILY_LIFE_ABLE_145
+;반발３以上だと不可
+SIF MARK:A:반발각인 >= 3
+	RETURN 0
+;[실의]だと不可
+SIF TALENT:A:실의
+	RETURN 0
+;[상사상애]でないと駄目
+SIF !TALENT:A:상사상애
+	RETURN 0
+RETURN 1
+
+;剣の손入れ
+@DAILY_LIFE_ABLE_150
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;剣の稽古／１人で
+@DAILY_LIFE_ABLE_151
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;剣の稽古／みんなと一緒
+@DAILY_LIFE_ABLE_152
+;他出場キャラがいない
+SIF DAILYLIFE_GETCHARA(1) == -1
+	RETURN 0
+;未陥落は不可
+SIF !KANRAKU(A)
+	RETURN 0
+;[실의]は不可
+SIF TALENT:A:실의
+	RETURN 0
+RETURN 1
+
+;調教者変更機能/アプローチ
+@DAILY_LIFE_ABLE_180
+;対象に、主人以外の思慕・畏怖対象がいない、またはイベントに出られる状態でない
+SIF CFLAG:A:41 < 0 || CFLAG:A:41 == NO:MASTER
+	RETURN 0
+LOCAL = NO2(CFLAG:A:41)
+SIF !DAILYLIFE_CHARA(LOCAL)
+	RETURN 0
+RETURN 1
+
+;調教者変更機能/二人でお昼寝
+@DAILY_LIFE_ABLE_181
+;対象に、主人以外の思慕・畏怖対象がいない、またはイベントに出られる状態でない
+SIF CFLAG:A:41 < 0 || CFLAG:A:41 == NO:MASTER
+	RETURN 0
+LOCAL = NO2(CFLAG:A:41)
+SIF !DAILYLIFE_CHARA(LOCAL)
+	RETURN 0
+RETURN 1
+
+

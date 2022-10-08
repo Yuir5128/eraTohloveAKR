@@ -1,0 +1,566 @@
+﻿;-------------------------------------------------
+;촉수소환
+;촉수系コマンド
+;-------------------------------------------------
+@COM340
+
+PRINTL 촉수소환
+STR:0 = 촉수소환
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;着脱の処理
+IF TEQUIP:촉수 == 0
+	TEQUIP:촉수 = 1
+	;촉수系コマンドに影響する装備は外す（道具が촉수扱いになるため）
+	TEQUIP:니틀캡 = 0
+	TEQUIP:클리캡 = 0
+	TEQUIP:전동오나홀 = 0
+	TEQUIP:바이브 = 0
+	TEQUIP:애널바이브 = 0
+	TEQUIP:착유기 = 0
+	TEQUIP:밧줄 = 0
+	TEQUIP:볼개그 = 0
+	TEQUIP:카테터 = 0
+;촉수解除時はソース、経験の加算は行わず終了する
+ELSE
+	TEQUIP:촉수 = 0
+	;촉수系コマンドの装備も解除する
+	TEQUIP:니틀캡 = 0
+	TEQUIP:클리캡 = 0
+	TEQUIP:전동오나홀 = 0
+	TEQUIP:바이브 = 0
+	TEQUIP:애널바이브 = 0
+	TEQUIP:착유기 = 0
+	TEQUIP:밧줄 = 0
+	TEQUIP:촉수구욕 = 0
+	TEQUIP:카테터 = 0
+	RETURN 1
+ENDIF
+
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 10
+LOSEBASE:기력 += 150
+
+IF EXP:촉수경험 < EXPLV:1
+	TIMES LOSEBASE:체력 , 1.10
+	TIMES LOSEBASE:기력 , 2.00
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES LOSEBASE:체력 , 0.90
+	TIMES LOSEBASE:기력 , 1.80
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES LOSEBASE:체력 , 0.80
+	TIMES LOSEBASE:기력 , 1.50
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES LOSEBASE:체력 , 0.70
+	TIMES LOSEBASE:기력 , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES LOSEBASE:체력 , 0.60
+	TIMES LOSEBASE:기력 , 1.00
+ELSE
+	TIMES LOSEBASE:체력 , 0.50
+	TIMES LOSEBASE:기력 , 0.50
+ENDIF
+
+SOURCE:두려움 += 2500
+SOURCE:일탈 += 2500
+SOURCE:반발 += 2500
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;촉수경험は先に見ておく
+IF EXP:촉수경험 < EXPLV:1
+	TIMES SOURCE:두려움 , 1.20
+	TIMES SOURCE:일탈 , 1.20
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES SOURCE:두려움 , 0.90
+	TIMES SOURCE:일탈 , 0.90
+	TIMES SOURCE:반발 , 0.90
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES SOURCE:두려움 , 0.80
+	TIMES SOURCE:일탈 , 0.80
+	TIMES SOURCE:반발 , 0.80
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES SOURCE:두려움 , 0.70
+	TIMES SOURCE:일탈 , 0.70
+	TIMES SOURCE:반발 , 0.70
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES SOURCE:두려움 , 0.60
+	TIMES SOURCE:일탈 , 0.60
+	TIMES SOURCE:반발 , 0.60
+ELSE
+	TIMES SOURCE:두려움 , 0.50
+	TIMES SOURCE:일탈 , 0.50
+	TIMES SOURCE:반발 , 0.50
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+IF EXP:촉수경험 == 0
+	EXP:이상경험 += 1
+	PRINTL 촉수初経験で이상경험＋1
+ENDIF
+PRINT 촉수경험＋1
+EXP:촉수경험 += 1
+
+
+RETURN 1
+
+
+
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM340
+;촉수소환中
+PRINTL ＜촉수소환中＞
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 50
+
+SOURCE:두려움 += 1000
+SOURCE:일탈 += 1000
+SOURCE:반발 += 1000
+
+
+;-------------------------------------------------
+;사정チェック
+;-------------------------------------------------
+IF MAXBASE:MASTER:뇨의 != 0
+	B = 1000
+	;ABL:기교をみる
+	IF ABL:기교 == 0
+		TIMES B , 1.00
+	ELSEIF ABL:기교 == 1
+		TIMES B , 1.10
+	ELSEIF ABL:기교 == 2
+		TIMES B , 1.20
+	ELSEIF ABL:기교 == 3
+		TIMES B , 1.30
+	ELSEIF ABL:기교 == 4
+		TIMES B , 1.40
+	ELSE
+		TIMES B , 1.50
+	ENDIF
+
+	;ABL:순종をみる
+	IF ABL:순종 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:순종 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:순종 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:순종 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:순종 == 4
+		TIMES B , 1.20
+	ELSE
+		TIMES B , 1.30
+	ENDIF
+
+	;PALAM:욕정をみる
+	IF PALAM:욕정 < PALAMLV:1
+		TIMES B , 1.00
+	ELSEIF PALAM:욕정 < PALAMLV:2
+		TIMES B , 1.10
+	ELSEIF PALAM:욕정 < PALAMLV:3
+		TIMES B , 1.20
+	ELSEIF PALAM:욕정 < PALAMLV:4
+		TIMES B , 1.30
+	ELSEIF PALAM:욕정 < PALAMLV:5
+		TIMES B , 1.40
+	ELSE
+		TIMES B , 1.50
+	ENDIF
+
+	;촉수삽입
+	SIF TEQUIP:바이브
+		TIMES B , 1.50
+	;애널촉수
+	SIF TEQUIP:애널바이브
+		TIMES B , 1.50
+	;촉수클리고문
+	SIF TEQUIP:클리캡
+		TIMES B , 1.20
+	;촉수유두고문
+	SIF TEQUIP:니틀캡
+		TIMES B , 1.20
+	;촉수착유
+	SIF TEQUIP:착유기
+		TIMES B , 1.30
+	;촉수페니스고문
+	SIF TEQUIP:전동오나홀
+		TIMES B , 1.10
+	;촉수구속
+	SIF TEQUIP:밧줄
+		TIMES B , 1.20
+	;촉수구욕
+	SIF TEQUIP:촉수구욕
+		TIMES B , 1.50
+	;촉수尿道삽입
+	SIF TEQUIP:카테터
+		TIMES B , 1.50
+
+	BASE:MASTER:뇨의 += B
+ENDIF
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;촉수경험は先に見ておく
+IF EXP:촉수경험 < EXPLV:1
+	TIMES LOSEBASE:체력 , 1.20
+	TIMES LOSEBASE:기력 , 1.20
+	TIMES SOURCE:두려움 , 1.20
+	TIMES SOURCE:일탈 , 1.20
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:촉수경험 < EXPLV:2
+	TIMES LOSEBASE:체력 , 0.90
+	TIMES LOSEBASE:기력 , 0.90
+	TIMES SOURCE:두려움 , 0.90
+	TIMES SOURCE:일탈 , 0.90
+	TIMES SOURCE:반발 , 0.90
+ELSEIF EXP:촉수경험 < EXPLV:3
+	TIMES LOSEBASE:체력 , 0.80
+	TIMES LOSEBASE:기력 , 0.80
+	TIMES SOURCE:두려움 , 0.80
+	TIMES SOURCE:일탈 , 0.80
+	TIMES SOURCE:반발 , 0.80
+ELSEIF EXP:촉수경험 < EXPLV:4
+	TIMES LOSEBASE:체력 , 0.70
+	TIMES LOSEBASE:기력 , 0.70
+	TIMES SOURCE:두려움 , 0.70
+	TIMES SOURCE:일탈 , 0.70
+	TIMES SOURCE:반발 , 0.70
+ELSEIF EXP:촉수경험 < EXPLV:5
+	TIMES LOSEBASE:체력 , 0.60
+	TIMES LOSEBASE:기력 , 0.60
+	TIMES SOURCE:두려움 , 0.60
+	TIMES SOURCE:일탈 , 0.60
+	TIMES SOURCE:반발 , 0.60
+ELSE
+	TIMES LOSEBASE:체력 , 0.50
+	TIMES LOSEBASE:기력 , 0.50
+	TIMES SOURCE:두려움 , 0.50
+	TIMES SOURCE:일탈 , 0.50
+	TIMES SOURCE:반발 , 0.50
+ENDIF
+
+
+;-------------------------------------------------
+;사정チェック
+;-------------------------------------------------
+S = BASE:MASTER:뇨의
+EJAC = MAXBASE:MASTER:뇨의
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+;사정時に중독충족のソースを追加、なお촉수は사정の再装填は無し
+;通常사정時
+SIF E == 1
+	A = 200
+;大量사정時
+SIF E == 2
+	A = 500
+
+IF E > 0
+	;정액중독を見る
+	IF ABL:정액중독 == 1
+		TIMES A , 0.00
+	ELSEIF ABL:정액중독 == 2
+		TIMES A , 0.30
+	ELSEIF ABL:정액중독 == 3
+		TIMES A , 0.60
+	ELSEIF ABL:정액중독 == 4
+		TIMES A , 0.90
+	ELSEIF ABL:정액중독 == 5
+		TIMES A , 1.20
+	ELSEIF ABL:정액중독 == 6
+		TIMES A , 1.50
+	ELSEIF ABL:정액중독 == 7
+		TIMES A , 1.80
+	ELSEIF ABL:정액중독 == 8
+		TIMES A , 2.30
+	ELSEIF ABL:정액중독 == 9
+		TIMES A , 3.00
+	ELSEIF ABL:정액중독 >= 10
+		TIMES A , 5.00
+	ENDIF
+ENDIF
+
+SOURCE:중독충족 += A
+
+;사정時の処理
+;大量사정
+IF E == 2
+	EXP:정액경험 += 3
+	PRINTL 촉수大量사정
+	PRINTL 정액경험＋３
+	T += 1
+
+	BASE:MASTER:뇨의 -= EJAC*2
+	SIF BASE:MASTER:뇨의 >= EJAC
+		BASE:MASTER:뇨의 = EJAC-1
+
+;通常の사정
+ELSEIF E == 1
+	EXP:정액경험 += 1
+	PRINTL 촉수사정
+	PRINTL 정액경험＋１
+	T += 1
+
+	BASE:MASTER:뇨의 -= EJAC
+	SIF BASE:MASTER:뇨의 >= EJAC
+		BASE:MASTER:뇨의 = EJAC-1
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;촉수が사정した場合の粘液汚れ
+IF E > 0
+	;촉수삽입
+	IF TEQUIP:바이브
+		STAIN:질내 |= 32
+		STAIN:바기나 |= 32
+	ENDIF
+	;애널촉수
+	IF TEQUIP:애널바이브
+		STAIN:장내 |= 32
+		STAIN:애널 |= 32
+	ENDIF
+	;촉수클리고문
+	SIF TEQUIP:클리캡
+		STAIN:바기나 |= 32
+	;촉수유두고문、촉수착유
+	SIF TEQUIP:니틀캡 || TEQUIP:착유기
+		STAIN:가슴 |= 32
+	;촉수페니스고문
+	SIF TEQUIP:전동오나홀
+		STAIN:페니스 |= 32
+	;촉수구속（全身にぶっかけるイメージ）
+	IF TEQUIP:밧줄
+		STAIN:손 |= 32
+		;페니스があれば페니스、なければ바기나へ
+		IF PENIS(TARGET)
+			STAIN:페니스 |= 32
+		ELSE
+			STAIN:바기나 |= 32
+		ENDIF
+		STAIN:가슴 |= 32
+		STAIN:머리카락 |= 32
+	ENDIF
+	;촉수구욕
+	SIF TEQUIP:촉수구욕
+		STAIN:입 |= 32
+	;촉수尿道삽입
+	IF TEQUIP:카테터
+		;페니스があれば페니스、なければ바기나へ
+		IF PENIS(TARGET)
+			STAIN:페니스 |= 32
+		ELSE
+			STAIN:바기나 |= 32
+		ENDIF
+	ENDIF
+	
+	;服を着てたら全部汚しちゃいます
+	SIF TEQUIP:특수1 == 1
+		STAIN:장갑 |= 32
+	SIF TEQUIP:특수2
+		STAIN:발장식 |= 32
+	SIF TEQUIP:속옷（아래） == 5
+		STAIN:속옷（아래） |= 32
+	SIF TEQUIP:머리장식
+		STAIN:머리장식 |= 32
+	SIF TEQUIP:특수3
+		STAIN:눈장식 |= 32
+	SIF TEQUIP:신발
+		STAIN:신발 |= 32
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;各촉수派生コマンドから集めた촉수경험を一括処理
+T += 1
+PRINT 촉수경험＋
+PRINTVL T
+EXP:촉수경험 += T
+T = 0
+
+;촉수装着中は依存度ベクトル強制変更
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2　強制変更なので、これまでの数値をリセット）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 = 2
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 = 4
+ENDIF
+
+
+RETURN 1
+
+
+
+
+
+;-------------------------------------------------
+;派生コマンドの処理
+;-------------------------------------------------
+@COM341
+;촉수유두고문
+JUMP COM13
+RETURN 1
+
+
+@COM342
+;촉수클리고문
+JUMP COM22
+RETURN 1
+
+
+@COM343
+;촉수페니스고문
+JUMP COM32
+RETURN 1
+
+
+@COM344
+;촉수삽입
+JUMP COM43
+RETURN 1
+
+
+@COM345
+;촉수애널
+JUMP COM54
+RETURN 1
+
+
+@COM350
+;촉수구욕
+PRINTL 촉수구욕
+STR:0 = 촉수구욕
+SELECTCOM = 350
+CALL KOJO_MESSAGE_COM
+
+;着脱の処理
+IF TEQUIP:촉수구욕 == 0
+	TEQUIP:촉수구욕 = 1
+	
+	;汚れの付加
+	STAIN:입 |= 32
+ELSE
+	TEQUIP:촉수구욕 = 0
+ENDIF
+
+
+@COM351
+;촉수구속
+JUMP COM130
+RETURN 1
+
+
+@COM352
+;촉수관장
+JUMP COM180
+RETURN 1
+
+
+@COM360
+;촉수착유
+JUMP COM17
+RETURN 1
+
+
+@COM365
+;촉수尿道삽입
+JUMP COM60
+RETURN 1
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+LOSEBASE:체력 += 30
+LOSEBASE:기력 += 50
+
+SOURCE:성행동 += 200
+SOURCE:굴복 += 1000
+SOURCE:일탈 += 1000
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+SIF TEQUIP:촉수구욕 == 1
+	STAIN:입 |= 32
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;촉수경험のリセット
+T = 0
+
+;펠라경험
+EXP:펠라경험 += 1
+PRINTL 펠라경험＋１
+RETURN 1
+
+;-------------------------------------------------
+;装着継続の処理
+;-------------------------------------------------
+@EQUIP_COM350
+;촉수구욕中
+PRINTL ＜촉수구욕中＞
+
+LOSEBASE:체력 += 5
+LOSEBASE:기력 += 30
+
+SOURCE:성행동 += 100
+SOURCE:굴복 += 700
+SOURCE:일탈 += 700
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;펠라경험
+EXP:펠라경험 += 1
+PRINTL 펠라경험＋１
+
+;촉수경험加算
+T += 1
+
+
+RETURN 1
+
+

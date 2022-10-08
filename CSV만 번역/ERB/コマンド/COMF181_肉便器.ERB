@@ -1,0 +1,189 @@
+﻿;-------------------------------------------------
+;육변기
+;スカ系コマンド
+;-------------------------------------------------
+@COM181
+
+PRINTL 육변기
+STR:0 = 육변기
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;拘束されてなくて、体格差がある（主人が小さい）ときのみ実行判定を行う
+CALL BUILD
+IF !TEQUIP:밧줄 && S < 0
+	;すべての命令に共通の要素を考慮
+	;(순종が高いと命令に従いやすいなど)
+	CALL COM_ORDER
+
+	;実行判定操作
+	CALL KOJO_DENIAL_PLUS
+
+	;合計を表示(32以上で実行)
+	PRINT  = 
+	PRINTV A
+
+	V = 32
+	SIF A < V
+		PRINT  < 
+	SIF A == V
+		PRINT  = 
+	SIF A > V
+		PRINT  > 
+	PRINT 実行値
+	PRINTV V
+
+	;実行不可입上/実行判定操作
+	SIF A < V
+		CALL KOJO_DENIAL
+
+	WAIT
+
+	;実行できない
+	SIF A < V
+		RETURN 0
+ENDIF
+
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+;調教対象が백버진だった場合の喪失フラグ
+SIF TALENT:백버진
+	TFLAG:161 |= 1
+;主人のセックスによる백버진喪失
+SIF TALENT:백버진 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0
+	TFLAG:163 = 1
+
+;調教者が동정だった場合の喪失フラグ
+SIF TALENT:PLAYER:동정
+	TFLAG:160 |= 2
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 30
+LOSEBASE:기력 += 100
+
+SOURCE:쾌A += 200
+
+SOURCE:애정 += 50
+;스킨십선호だと애정のソース追加
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+;복종系陥落済みだと애정のソース追加
+SIF TALENT:복종 || TALENT:예속
+	TIMES SOURCE:애정 , 1.50
+
+SOURCE:통증 += 350
+SOURCE:두려움 += 200
+
+SOURCE:노출 += 200
+SOURCE:굴복 += 400
+SOURCE:불결 += 700
+SOURCE:일탈 += 500
+SOURCE:반발 += 500
+
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;Aへの고통は先に処理しておく
+;EXP:A경험をみる
+IF EXP:A경험 < EXPLV:1
+	TIMES SOURCE:통증 , 3.00
+	TIMES SOURCE:반발 , 3.00
+ELSEIF EXP:A경험 < EXPLV:2
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF EXP:A경험 < EXPLV:3
+	TIMES SOURCE:통증 , 0.80
+	TIMES SOURCE:반발 , 1.50
+ELSEIF EXP:A경험 < EXPLV:4
+	TIMES SOURCE:통증 , 0.60
+	TIMES SOURCE:반발 , 1.20
+ELSEIF EXP:A경험 < EXPLV:5
+	TIMES SOURCE:통증 , 0.40
+ELSEIF EXP:A경험 >= EXPLV:5
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+;PALAM:윤활をみる
+IF PALAM:윤활 < PALAMLV:1
+	TIMES SOURCE:통증 , 1.20
+	TIMES SOURCE:반발 , 2.00
+ELSEIF PALAM:윤활 < PALAMLV:2
+	TIMES SOURCE:통증 , 1.00
+	TIMES SOURCE:반발 , 1.50
+ELSEIF PALAM:윤활 < PALAMLV:3
+	TIMES SOURCE:통증 , 0.60
+ELSEIF PALAM:윤활 < PALAMLV:4
+	TIMES SOURCE:통증 , 0.30
+ELSEIF PALAM:윤활 >= PALAMLV:4
+	TIMES SOURCE:통증 , 0.20
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+CALL COM_STAIN
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;A경험
+EXP:A경험 += 5
+PRINTL A경험＋5
+
+;스캇경험を伴う調教による이상경험
+IF EXP:스캇경험 == 0
+	EXP:이상경험 += 1
+	PRINTL スカトロ初経験で이상경험＋１
+ENDIF
+EXP:스캇경험 += 1
+PRINTL 스캇경험＋１
+
+;調教者に스캇경험
+IF EXP:PLAYER:스캇경험 == 0
+	EXP:PLAYER:이상경험 += 1
+	PRINTFORML スカトロ初経験で%CALLNAME:PLAYER%に이상경험＋１
+ENDIF
+EXP:PLAYER:스캇경험 += 1
+PRINTFORML %CALLNAME:PLAYER%に스캇경험＋１
+
+;게이경험とか加算
+CALL COM_EXP(1)
+
+;변의ゲージに追加
+IF BASE:변의 >= 60
+	BASE:변의 += 30
+ELSE
+	BASE:변의 += 60
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 5
+
+;依存度補正値(복종で1、예속で2）
+IF TALENT:복종 && ASSIPLAY == 0
+	TFLAG:30 += 1
+ELSEIF TALENT:예속 && ASSIPLAY == 0
+	TFLAG:30 += 2
+ENDIF
+
+
+RETURN 1
+
+
+

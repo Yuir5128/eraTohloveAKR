@@ -1,0 +1,189 @@
+﻿;-------------------------------------------------
+;더블펠라
+;主人×（助손＋奴隷）系コマンド
+;-------------------------------------------------
+@COM420
+
+PRINTL 더블펠라
+STR:0 = 더블펠라
+
+;-------------------------------------------------
+;実行判定処理
+;-------------------------------------------------
+;すべての命令に共通の要素を考慮
+;(순종が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;実行判定操作
+CALL KOJO_DENIAL_PLUS
+
+;合計を表示(34以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 34
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 実行値
+PRINTV V
+
+;実行不可입上/実行判定操作
+SIF A < V
+	CALL KOJO_DENIAL
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+CALL KOJO_MESSAGE_COM
+
+
+;実行者が奴隷であるフラグ
+TFLAG:28 = 1
+
+
+;-------------------------------------------------
+;사정ゲージチェック
+;-------------------------------------------------
+B = 1300
+
+CALL SHOOT_GAUGE_CHECK_3PM
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:MASTER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:MASTER:사정 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;消費체력、기력
+LOSEBASE:체력 += 20
+LOSEBASE:기력 += 80
+
+SOURCE:애정 += 100
+
+;스킨십선호だと애정のソース追加
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+SOURCE:성행동 += 400
+SOURCE:성취감 += 200
+SOURCE:굴복 += 600
+SOURCE:일탈 += 200
+SOURCE:반발 += 200
+
+;上のほうで計算した汚れデータ
+SOURCE:불결 += Y*40 + 100
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 400
+
+
+;-------------------------------------------------
+;사정チェック
+;-------------------------------------------------
+;사정するのは主人なので専用の関数を呼ぶ
+CALL SAMEN_CHECK(MASTER,1)
+
+;사정時の処理
+IF E >= 1
+	;사정先タイプの設定
+	TFLAG:703 = 4
+	;사정先選択の可・不可
+	TFLAG:704 = 1
+	;汎用的な処理はこの関数で行う
+	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;調教者のＰの汚れが奴隷、助손の입に移動
+STAIN:입 |= STAIN:MASTER:페니스
+STAIN:ASSI:입 |= STAIN:MASTER:페니스
+
+STAIN:MASTER:페니스 = 2
+
+SIF E >= 1
+	TFLAG:8 = 2
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;사정に関係なく行われる処理はここから
+PRINTFORML %EXPNAME:22%＋１
+EXP:펠라경험 += 1
+
+;레즈경험
+A = 7
+B = NO:MASTER + 1099
+C = NO:ASSI + 1099
+D = 10
+
+IF MALE(TARGET) == 0 && MALE(MASTER) == 0 && MALE(ASSI) == 0
+	PRINTFORML %EXPNAME:40%+{D}
+	EXP:레즈경험 += D
+ELSEIF MALE(TARGET) == 0 && MALE(MASTER) == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:레즈경험 += A
+ELSEIF MALE(TARGET) == 0 && MALE(ASSI) == 0
+	PRINTFORML %EXPNAME:40%+{A}
+	EXP:레즈경험 += A
+ELSEIF MALE(TARGET) && MALE(MASTER) && MALE(ASSI)
+	PRINTFORML %EXPNAME:41%+{D}
+	EXP:게이경험 += D
+ELSEIF MALE(TARGET) && MALE(MASTER)
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:게이경험 += A
+ELSEIF MALE(TARGET) && MALE(ASSI)
+	PRINTFORML %EXPNAME:41%+{A}
+	EXP:게이경험 += A
+ENDIF
+;調教者を記録
+CFLAG:B += A
+CFLAG:C += A
+
+;奴隷が고양이혀持ちの場合は、調教者に가학쾌락경험を追加
+IF TALENT:고양이혀
+	EXP:가학쾌락경험 += 1
+	PRINTFORML %EXPNAME:32%＋１
+ENDIF
+
+;依存度ベクトル
+P = PLAYER
+IF RELATION:P > 100
+	TFLAG:33 = 2
+ELSEIF RELATION:P < 100
+	TFLAG:33 = 3
+ELSE
+	TFLAG:33 = 1
+ENDIF
+
+;依存度補正値(相性100↑かつ음란で1、창부で2）
+P = PLAYER
+IF TALENT:음란 && RELATION:P > 100
+	TFLAG:30 += 1
+ELSEIF TALENT:창부 && RELATION:P > 100
+	TFLAG:30 += 2
+ENDIF
+
+TFLAG:100 = 1
+
+
+RETURN 1
+
+

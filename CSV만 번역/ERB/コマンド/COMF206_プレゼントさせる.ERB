@@ -1,0 +1,80 @@
+﻿;-------------------------------------------------
+;선물시킨다
+;コミュニケーション系コマンド
+;-------------------------------------------------
+@COM206
+
+PRINTL 선물시킨다
+STR:0 = 선물시킨다
+
+CALL KOJO_MESSAGE_COM
+
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+;陥落済み
+IF TALENT:연모 || TALENT:음란 || TALENT:복종 || TALENT:친애 || TALENT:창부 || TALENT:예속
+	;消費체력、기력
+	LOSEBASE:체력 += 10
+	LOSEBASE:기력 += 30
+	
+	;연모、친애
+	IF TALENT:연모 || TALENT:친애
+		SOURCE:중독충족 += 60
+		SOURCE:순종 += 250
+		SOURCE:일탈 += 50
+	;음란、창부
+	ELSEIF TALENT:음란 || TALENT:창부
+		SOURCE:애정 += 60
+		SOURCE:성행동 += 250
+		SOURCE:중독충족 += 50
+		SOURCE:욕정 += 200
+		SOURCE:일탈 += 80
+	;복종、예속
+	ELSEIF TALENT:복종 || TALENT:예속
+		SOURCE:애정 += 60
+		SOURCE:성행동 += 250
+		SOURCE:두려움 += 50
+		SOURCE:중독충족 += 200
+		SOURCE:노출 += 80
+		SOURCE:굴복 += 200
+		SOURCE:일탈 += 80
+		SOURCE:반발 += 80
+	ENDIF
+ELSE
+	;消費체력、기력
+	LOSEBASE:체력 += 10
+	LOSEBASE:기력 += 50
+	
+	SOURCE:두려움 += 60
+	SOURCE:울굴 += 250
+	SOURCE:반발 += 50
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;애정경험
+IF (TALENT:연모 == 1 || TALENT:친애 == 1) && ASSIPLAY == 0
+	PRINTS EXPNAME:23
+	PRINTL +1
+	EXP:애정경험 += 1
+ENDIF
+
+;依存度ベクトル
+TFLAG:33 = 0
+
+;依存度補正値(연모で1、친애で2）
+IF TALENT:연모
+	TFLAG:30 += 1
+ELSEIF TALENT:친애
+	TFLAG:30 += 2
+ENDIF
+
+RETURN 1
+
+
+
+

@@ -1,0 +1,670 @@
+﻿;-------------------------------------------------
+;連結
+;派生系コマンド
+;
+; 1:奴隷Ｖに挿入	 2:奴隷Ａに挿入
+; 6:主人Ｖに挿入	 7:主人Ａに挿入
+;11:助손Ｖに挿入	12:助손Ａに挿入
+;-------------------------------------------------
+@COM519
+
+PRINTFORML 連結
+STR:0 = 連結
+SELECTCOM = 519
+CALL KOJO_MESSAGE_COM
+
+;스타킹びりびりフラグ
+IF TEQUIP:특수2 == 5 || TEQUIP:특수2 == 6
+	TFLAG:55 = 1
+ENDIF
+
+
+;처녀喪失フラグ
+SIF (TALENT:처녀 || TALENT:재생처녀) && (TFLAG:40 == 1 || TFLAG:41 == 1)
+	TFLAG:19 |= 1
+;主人による처녀喪失
+SIF TALENT:처녀 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0 && TFLAG:40 == 1
+	TFLAG:20 = 1
+;처녀喪失フラグ
+SIF TALENT:백버진 && (TFLAG:40 == 2 || TFLAG:41 == 2)
+	TFLAG:161 |= 1
+;主人による처녀喪失
+SIF TALENT:백버진 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0 && TFLAG:40 == 2
+	TFLAG:163 = 1
+
+;처녀喪失フラグ
+SIF (TALENT:MASTER:처녀 || TALENT:MASTER:재생처녀) && (TFLAG:49 == 6 || TFLAG:41 == 6)
+	TFLAG:19 |= 2
+;처녀喪失フラグ
+SIF TALENT:MASTER:백버진 && (TFLAG:49 == 7 || TFLAG:41 == 7)
+	TFLAG:161 |= 2
+
+;처녀喪失フラグ
+SIF (TALENT:ASSI:처녀 || TALENT:ASSI:재생처녀) && (TFLAG:40 == 11 || TFLAG:49 == 11)
+	TFLAG:19 |= 3
+;처녀喪失フラグ
+SIF TALENT:ASSI:백버진 && (TFLAG:40 == 12 || TFLAG:49 == 12)
+	TFLAG:161 |= 3
+
+
+;調教者が동정だった場合の喪失フラグ
+SIF TALENT:동정 && (TFLAG:49 == 6 || TFLAG:49 == 7 || TFLAG:49 == 11 || TFLAG:49 == 12)
+	TFLAG:160 |= 1
+;主人によるセックスで동정喪失
+SIF TALENT:동정 && (TALENT:연모 || TALENT:친애) && ASSIPLAY == 0 && (TFLAG:49 == 6 || TFLAG:49 == 7)
+	TFLAG:162 = 1
+
+;調教者が동정だった場合の喪失フラグ
+SIF TALENT:PLAYER:동정 && (TFLAG:40 == 1 || TFLAG:40 == 2 || TFLAG:40 == 11 || TFLAG:40 == 12)
+	TFLAG:160 |= 2
+
+;調教者が동정だった場合の喪失フラグ
+SIF TALENT:ASSI:동정 && (TFLAG:41 == 1 || TFLAG:41 == 2 || TFLAG:41 == 6 || TFLAG:41 == 7)
+	TFLAG:160 |= 3
+
+
+;-------------------------------------------------
+;사정ゲージチェック（主人）
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_3PM
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:MASTER:9 > 0
+	B /= 20
+
+SIF PENIS(PLAYER)
+	BASE:MASTER:사정 += B
+
+;-------------------------------------------------
+;사정ゲージチェック（助손）
+;-------------------------------------------------
+B = 1000
+
+CALL SHOOT_GAUGE_CHECK_3PA
+
+;再装填処理中は사정ゲージは20分の1に
+SIF CFLAG:ASSI:9 > 0
+	B /= 20
+
+SIF PENIS(ASSI)
+	BASE:ASSI:사정 += B
+
+;-------------------------------------------------
+;ソース追加処理
+;-------------------------------------------------
+LOSEBASE:체력 += 160
+LOSEBASE:기력 += 350
+
+;挿入している部位によって、ソースの数値が変化する
+;Vに挿入している場合
+IF TFLAG:40 == 1 || TFLAG:41 == 1
+	SOURCE:쾌V += 200
+	SOURCE:성행동 += 100
+	SOURCE:통증 += 500
+ENDIF
+;Aに挿入している場合
+IF TFLAG:40 == 2 || TFLAG:41 == 2
+	SOURCE:쾌A += 200
+	SOURCE:성행동 += 100
+	SOURCE:통증 += 800
+ENDIF
+;奴隷が挿入している場合
+IF TFLAG:49 == 6 || TFLAG:49 == 7 || TFLAG:49 == 11 || TFLAG:49 == 12
+	SOURCE:쾌C += 200
+	SOURCE:성행동 += 420
+	SOURCE:성취감 += 150
+ENDIF
+
+SOURCE:애정 += 100
+;스킨십선호だと애정のソース追加
+SIF TALENT:스킨십선호
+	SOURCE:애정 += 50
+
+SOURCE:성행동 += 100
+SOURCE:중독충족 += 500
+SOURCE:굴복 += 500
+SOURCE:일탈 += 500
+SOURCE:반발 += 500
+
+;-------------------------------------------------
+;特殊ソース処理
+;-------------------------------------------------
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+;억압、저항持ちには、억울ソース追加
+SIF TALENT:억압 || TALENT:저항
+	SOURCE:울굴 += 500
+
+;정조관념持ちで연모、친애持ち以外には常に반발のソースを追加する（セックス系のみ）
+SIF TALENT:정조관념 && (TALENT:연모 == 0 && TALENT:친애 == 0)
+	SOURCE:반발 += 1000
+
+;Vに挿入している場合
+IF TFLAG:40 == 1 || TFLAG:41 == 1
+	;처녀だった場合は、고통のソースと반발のソースを追加する
+	IF TALENT:처녀 == 1
+		SOURCE:통증 += 5500
+		SOURCE:반발 += 3000
+	ENDIF
+
+	;재생처녀だった場合は、고통のソースと반발のソースを追加する
+	IF TALENT:재생처녀 == 1
+		SOURCE:통증 += 5500
+		SOURCE:반발 += 1000
+	ENDIF
+	
+	;소인체형で調教者が거근か말자지の場合、고통と공포のソースを追加
+	IF TALENT:소인체형
+		IF (TALENT:MASTER:거근 && TFLAG:40 == 1) || (TALENT:ASSI:거근 && TFLAG:41 == 1)
+			SOURCE:통증 += 200
+			SOURCE:두려움 += 500
+		ELSEIF (TALENT:MASTER:말자지 && TFLAG:40 == 1) || (TALENT:ASSI:말자지 && TFLAG:41 == 1)
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+
+	;調教者が말자지の場合
+	IF (TALENT:MASTER:말자지 && TFLAG:40 == 1) || (TALENT:ASSI:말자지 && TFLAG:41 == 1)
+		;V확장경험一定以上で중독충족のソースを追加
+		IF EXP:V확장경험 >= 20
+			SOURCE:중독충족 += 500
+		;V확장경험一定以下で고통と공포のソースを追加
+		ELSE
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+	
+	;Vへの고통は先に処理しておく
+	;EXP:V경험をみる（처녀の반감は別途処理済みなので省略）
+	IF EXP:V경험 < EXPLV:1
+		TIMES SOURCE:통증 , 2.50
+	ELSEIF EXP:V경험 < EXPLV:2
+		TIMES SOURCE:통증 , 0.80
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF EXP:V경험 < EXPLV:3
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF EXP:V경험 < EXPLV:4
+		TIMES SOURCE:통증 , 0.10
+	ELSEIF EXP:V경험 < EXPLV:5
+		TIMES SOURCE:통증 , 0.00
+	ELSEIF EXP:V경험 >= EXPLV:5
+		TIMES SOURCE:통증 , 0.00
+	ENDIF
+
+	;PALAM:윤활をみる
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:반발 , 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증 , 0.70
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증 , 0.10
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증 , 0.10
+	ENDIF
+ENDIF
+
+;Aに挿入している場合
+IF TFLAG:40 == 2 || TFLAG:41 == 2
+	
+	;소인체형で調教者が거근か말자지の場合、고통と공포のソースを追加
+	IF TALENT:소인체형
+		IF (TALENT:MASTER:거근 && TFLAG:40 == 2) || (TALENT:ASSI:거근 && TFLAG:41 == 2)
+			SOURCE:통증 += 200
+			SOURCE:두려움 += 500
+		ELSEIF (TALENT:MASTER:말자지 && TFLAG:40 == 2) || (TALENT:ASSI:말자지 && TFLAG:41 == 2)
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+
+	;調教者が말자지の場合
+	IF (TALENT:MASTER:말자지 && TFLAG:40 == 2) || (TALENT:ASSI:말자지 && TFLAG:41 == 2)
+		;A확장경험一定以上で중독충족のソースを追加
+		IF EXP:A확장경험 >= 20
+			SOURCE:중독충족 += 500
+		;A확장경험一定以下で고통と공포のソースを追加
+		ELSE
+			SOURCE:통증 += 500
+			SOURCE:두려움 += 1000
+		ENDIF
+	ENDIF
+	
+	;Aへの고통は先に処理しておく
+	;EXP:A경험をみる
+	IF EXP:A경험 < EXPLV:1
+		TIMES SOURCE:통증 , 3.00
+		TIMES SOURCE:반발 , 3.00
+	ELSEIF EXP:A경험 < EXPLV:2
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:반발 , 2.00
+	ELSEIF EXP:A경험 < EXPLV:3
+		TIMES SOURCE:통증 , 0.80
+		TIMES SOURCE:반발 , 1.50
+	ELSEIF EXP:A경험 < EXPLV:4
+		TIMES SOURCE:통증 , 0.60
+		TIMES SOURCE:반발 , 1.20
+	ELSEIF EXP:A경험 < EXPLV:5
+		TIMES SOURCE:통증 , 0.40
+	ELSEIF EXP:A경험 >= EXPLV:5
+		TIMES SOURCE:통증 , 0.20
+	ENDIF
+
+	;PALAM:윤활をみる
+	IF PALAM:윤활 < PALAMLV:1
+		TIMES SOURCE:통증 , 1.20
+		TIMES SOURCE:반발 , 2.00
+	ELSEIF PALAM:윤활 < PALAMLV:2
+		TIMES SOURCE:통증 , 1.00
+		TIMES SOURCE:반발 , 1.50
+	ELSEIF PALAM:윤활 < PALAMLV:3
+		TIMES SOURCE:통증 , 0.60
+	ELSEIF PALAM:윤활 < PALAMLV:4
+		TIMES SOURCE:통증 , 0.30
+	ELSEIF PALAM:윤활 >= PALAMLV:4
+		TIMES SOURCE:통증 , 0.20
+	ENDIF
+ENDIF
+
+;섹스중독を見る
+IF ABL:섹스중독 == 1
+	TIMES SOURCE:중독충족 , 0.00
+ELSEIF ABL:섹스중독 == 2
+	TIMES SOURCE:중독충족 , 0.30
+ELSEIF ABL:섹스중독 == 3
+	TIMES SOURCE:중독충족 , 0.60
+ELSEIF ABL:섹스중독 == 4
+	TIMES SOURCE:중독충족 , 0.90
+ELSEIF ABL:섹스중독 == 5
+	TIMES SOURCE:중독충족 , 1.20
+ELSEIF ABL:섹스중독 == 6
+	TIMES SOURCE:중독충족 , 1.50
+ELSEIF ABL:섹스중독 == 7
+	TIMES SOURCE:중독충족 , 1.80
+ELSEIF ABL:섹스중독 == 8
+	TIMES SOURCE:중독충족 , 2.30
+ELSEIF ABL:섹스중독 == 9
+	TIMES SOURCE:중독충족 , 3.00
+ELSEIF ABL:섹스중독 >= 10
+	TIMES SOURCE:중독충족 , 5.00
+ENDIF
+
+
+;-------------------------------------------------
+;사정チェック１（主人）
+;-------------------------------------------------
+CALL SAMEN_CHECK(MASTER,1)
+
+;사정時の処理
+IF E >= 1
+	IF TFLAG:40 == 1 || TFLAG:40 == 11
+		;사정先タイプの設定
+		TFLAG:703 = 1
+		;사정先選択の可・不可
+		TFLAG:704 = 0
+	ELSEIF TFLAG:40 == 2 || TFLAG:40 == 12
+		;사정先タイプの設定
+		TFLAG:703 = 2
+		;사정先選択の可・不可
+		TFLAG:704 = 0
+	ELSE
+		;사정先タイプの設定
+		TFLAG:703 = 9
+		;사정先選択の可・不可
+		TFLAG:704 = 0
+	ENDIF
+	;汎用的な処理はこの関数で行う
+	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+;촉수에범하게시킨다で主人が사정したフラグ
+IF TFLAG:41 == 6 || TFLAG:41 == 7
+	IF E == 2
+		TFLAG:7 = 4
+	ELSEIF E == 1
+		TFLAG:7 = 3
+	ENDIF
+ENDIF
+
+;조수를범한다で사정したフラグ
+IF TFLAG:40 == 11 || TFLAG:40 == 12
+	IF E == 2
+		TFLAG:7 = 2
+	ELSEIF E == 1
+		TFLAG:7 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;사정チェック２（助손）
+;-------------------------------------------------
+CALL SAMEN_CHECK(ASSI)
+
+;사정時の処理
+IF E >= 1
+	IF TFLAG:41 == 1 || TFLAG:41 == 6
+		;사정先タイプの設定
+		TFLAG:703 = 1
+		;사정先選択の可・不可
+		TFLAG:704 = 0
+	ELSEIF TFLAG:41 == 2 || TFLAG:41 == 7
+		;사정先タイプの設定
+		TFLAG:703 = 2
+		;사정先選択の可・不可
+		TFLAG:704 = 0
+	ELSE
+		;사정先タイプの設定
+		TFLAG:703 = 6
+		;사정先選択の可・不可
+		TFLAG:704 = 0
+	ENDIF
+	;汎用的な処理はこの関数で行う
+	;（사정ゲージの再計算や사정경험の上昇と共通部分の表示）
+	CALL SAMEN_SHOOT
+ENDIF
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+IF TFLAG:40 == 1 || TFLAG:41 == 1
+	;처녀の場合、Ｖと질내に破瓜の血の汚れを付加
+	IF TALENT:처녀 || TALENT:재생처녀
+		STAIN:질내 |= 64
+		STAIN:바기나 |= 64
+	ENDIF
+ENDIF
+IF TFLAG:40 == 11 || TFLAG:49 == 11
+	;처녀の場合、Ｖと질내に破瓜の血の汚れを付加
+	IF TALENT:ASSI:처녀 || TALENT:ASSI:재생처녀
+		STAIN:ASSI:질내 |= 64
+		STAIN:ASSI:바기나 |= 64
+	ENDIF
+ENDIF
+IF TFLAG:40 == 6 || TFLAG:41 == 6
+	;처녀の場合、Ｖと질내に破瓜の血の汚れを付加
+	IF TALENT:MASTER:처녀 || TALENT:MASTER:재생처녀
+		STAIN:MASTER:질내 |= 64
+		STAIN:MASTER:바기나 |= 64
+	ENDIF
+ENDIF
+
+;主人が奴隷のＶに挿入
+IF TFLAG:40 == 1 && PENIS(PLAYER)
+	STAIN:질내 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:질내
+	STAIN:바기나 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:바기나
+ENDIF
+
+;主人が奴隷のＡに挿入
+IF TFLAG:40 == 2 && PENIS(PLAYER)
+	STAIN:장내 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:장내
+	STAIN:애널 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:애널
+ENDIF
+
+;助손が奴隷のＶに挿入
+IF TFLAG:41 == 1 && PENIS(ASSI)
+	STAIN:바기나 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:바기나
+	STAIN:질내 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:질내
+ENDIF
+
+;助손が奴隷のＡに挿入
+IF TFLAG:41 == 2 && PENIS(ASSI)
+	STAIN:애널 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:애널
+	STAIN:장내 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:장내
+ENDIF
+
+;主人が助손のＶに挿入
+IF TFLAG:40 == 11 && PENIS(PLAYER)
+	STAIN:MASTER:페니스 |= STAIN:ASSI:바기나
+	STAIN:ASSI:바기나 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:ASSI:질내
+	STAIN:ASSI:질내 |= STAIN:MASTER:페니스
+ENDIF
+
+;主人が助손のＡに挿入
+IF TFLAG:40 == 12 && PENIS(PLAYER)
+	STAIN:MASTER:페니스 |= STAIN:ASSI:애널
+	STAIN:ASSI:애널 |= STAIN:MASTER:페니스
+	STAIN:MASTER:페니스 |= STAIN:ASSI:장내
+	STAIN:ASSI:장내 |= STAIN:MASTER:페니스
+ENDIF
+
+;奴隷が助손のＶに挿入
+IF TFLAG:49 == 11 && PENIS(TARGET)
+	STAIN:페니스 |= STAIN:ASSI:바기나
+	STAIN:ASSI:바기나 |= STAIN:페니스
+	STAIN:페니스 |= STAIN:ASSI:질내
+	STAIN:ASSI:질내 |= STAIN:페니스
+ENDIF
+
+;奴隷が助손のＡに挿入
+IF TFLAG:49 == 12 && PENIS(TARGET)
+	STAIN:페니스 |= STAIN:ASSI:애널
+	STAIN:ASSI:애널 |= STAIN:페니스
+	STAIN:페니스 |= STAIN:ASSI:장내
+	STAIN:ASSI:장내 |= STAIN:페니스
+ENDIF
+
+;助손が主人のＶに挿入
+IF TFLAG:41 == 6 && PENIS(ASSI)
+	STAIN:ASSI:페니스 |= STAIN:MASTER:질내
+	STAIN:MASTER:질내 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:MASTER:바기나
+	STAIN:MASTER:바기나 |= STAIN:ASSI:페니스
+ENDIF
+
+;助손が主人のＡに挿入
+IF TFLAG:41 == 7 && PENIS(ASSI)
+	STAIN:ASSI:페니스 |= STAIN:MASTER:장내
+	STAIN:MASTER:장내 |= STAIN:ASSI:페니스
+	STAIN:ASSI:페니스 |= STAIN:MASTER:애널
+	STAIN:MASTER:애널 |= STAIN:ASSI:페니스
+ENDIF
+
+;奴隷が主人のＶに挿入
+IF TFLAG:49 == 6 && PENIS(TARGET)
+	STAIN:페니스 |= STAIN:MASTER:질내
+	STAIN:MASTER:질내 |= STAIN:페니스
+	STAIN:페니스 |= STAIN:MASTER:바기나
+	STAIN:MASTER:바기나 |= STAIN:페니스
+ENDIF
+
+;奴隷が主人のＡに挿入
+IF TFLAG:49 == 7 && PENIS(TARGET)
+	STAIN:페니스 |= STAIN:MASTER:장내
+	STAIN:MASTER:장내 |= STAIN:페니스
+	STAIN:페니스 |= STAIN:MASTER:애널
+	STAIN:MASTER:애널 |= STAIN:페니스
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;奴隷がＶに挿入されてる
+IF TFLAG:4 == 2 || TFLAG:4 == 1
+	;調教者が말자지で奴隷が소인체형だった場合、V확장경험
+	IF TALENT:소인체형 && TALENT:MASTER:말자지 && TFLAG:40 == 1
+		IF EXP:V확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTFORML Ｖ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:V확장경험 += 1
+		PRINTFORML V확장경험＋１
+	ENDIF
+	IF TALENT:소인체형 && TALENT:ASSI:말자지 && TFLAG:41 == 1
+		IF EXP:V확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTFORML Ｖ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:V확장경험 += 1
+		PRINTFORML V확장경험＋１
+	ENDIF
+	EXP:V경험 += 1
+	PRINTFORML V경험＋１
+ENDIF
+
+;奴隷がＡに挿入されてる
+IF TFLAG:4 == 2 || TFLAG:4 == 1
+	;調教者が말자지で奴隷が소인체형だった場合、A확장경험
+	IF TALENT:소인체형 && TALENT:MASTER:말자지 && TFLAG:40 == 2
+		IF EXP:A확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTFORML Ａ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:A확장경험 += 1
+		PRINTFORML A확장경험＋１
+	ENDIF
+	IF TALENT:소인체형 && TALENT:ASSI:말자지 && TFLAG:41 == 2
+		IF EXP:A확장경험 == 0
+			EXP:이상경험 += 1
+			PRINTFORML Ａ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:A확장경험 += 1
+		PRINTFORML A확장경험＋１
+	ENDIF
+	EXP:A경험 += 1
+	PRINTFORML A경험＋１
+ENDIF
+
+;助손がＶに挿入されてる
+IF TFLAG:4 == 11 || TFLAG:4 == 11
+	;調教者が말자지で奴隷が소인체형だった場合、V확장경험
+	IF TALENT:ASSI:소인체형 && TALENT:MASTER:말자지 && TFLAG:40 == 11
+		IF EXP:ASSI:V확장경험 == 0
+			EXP:ASSI:이상경험 += 1
+			PRINTFORML Ｖ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:ASSI:V확장경험 += 1
+		PRINTFORML V확장경험＋１
+	ENDIF
+	IF TALENT:ASSI:소인체형 && TALENT:말자지 && TFLAG:49 == 11
+		IF EXP:ASSI:V확장경험 == 0
+			EXP:ASSI:이상경험 += 1
+			PRINTFORML Ｖ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:ASSI:V확장경험 += 1
+		PRINTFORML V확장경험＋１
+	ENDIF
+	EXP:ASSI:V경험 += 1
+	PRINTFORML %CALLNAME:ASSI%のV경험＋１
+ENDIF
+
+;助손がＡに挿入されてる
+IF TFLAG:4 == 12 || TFLAG:4 == 12
+	;調教者が말자지で奴隷が소인체형だった場合、A확장경험
+	IF TALENT:ASSI:소인체형 && TALENT:MASTER:말자지 && TFLAG:40 == 12
+		IF EXP:ASSI:A확장경험 == 0
+			EXP:ASSI:이상경험 += 1
+			PRINTFORML Ａ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:ASSI:A확장경험 += 1
+		PRINTFORML A확장경험＋１
+	ENDIF
+	IF TALENT:ASSI:소인체형 && TALENT:말자지 && TFLAG:49 == 12
+		IF EXP:ASSI:A확장경험 == 0
+			EXP:ASSI:이상경험 += 1
+			PRINTFORML Ａ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:ASSI:A확장경험 += 1
+		PRINTFORML A확장경험＋１
+	ENDIF
+	EXP:ASSI:A경험 += 1
+	PRINTFORML %CALLNAME:ASSI%のA경험＋１
+ENDIF
+
+;主人がＶに挿入されてる
+IF TFLAG:4 == 6 || TFLAG:4 == 6
+	;調教者が말자지で奴隷が소인체형だった場合、V확장경험
+	IF TALENT:MASTER:소인체형 && TALENT:ASSI:말자지 && TFLAG:41 == 6
+		IF EXP:MASTER:V확장경험 == 0
+			EXP:MASTER:이상경험 += 1
+			PRINTFORML Ｖ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:MASTER:V확장경험 += 1
+		PRINTFORML V확장경험＋１
+	ENDIF
+	IF TALENT:MASTER:소인체형 && TALENT:말자지 && TFLAG:49 == 6
+		IF EXP:MASTER:V확장경험 == 0
+			EXP:MASTER:이상경험 += 1
+			PRINTFORML Ｖ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:MASTER:V확장경험 += 1
+		PRINTFORML V확장경험＋１
+	ENDIF
+	EXP:MASTER:V경험 += 1
+	PRINTFORML %CALLNAME:PLAYER%のV경험＋１
+ENDIF
+
+;主人がＡに挿入されてる
+IF TFLAG:4 == 7 || TFLAG:4 == 7
+	;調教者が말자지で奴隷が소인체형だった場合、A확장경험
+	IF TALENT:MASTER:소인체형 && TALENT:ASSI:말자지 && TFLAG:41 == 7
+		IF EXP:MASTER:A확장경험 == 0
+			EXP:MASTER:이상경험 += 1
+			PRINTFORML Ａ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:MASTER:A확장경험 += 1
+		PRINTFORML A확장경험＋１
+	ENDIF
+	IF TALENT:MASTER:소인체형 && TALENT:말자지 && TFLAG:49 == 6
+		IF EXP:MASTER:A확장경험 == 0
+			EXP:MASTER:이상경험 += 1
+			PRINTFORML Ａ拡張初経験で이상경험＋１
+		ENDIF
+		EXP:MASTER:A확장경험 += 1
+		PRINTFORML A확장경험＋１
+	ENDIF
+	EXP:MASTER:A경험 += 1
+	PRINTFORML %CALLNAME:PLAYER%のA경험＋１
+ENDIF
+
+;主人が奴隷か助손のＶかＡに挿入している
+SIF TFLAG:40 == 1 || TFLAG:40 == 2 || TFLAG:40 == 11 || TFLAG:40 == 12
+	EXP:MASTER:삽입경험 += 1
+	
+;助손が奴隷か主人のＶかＡに挿入している
+SIF TFLAG:41 == 1 || TFLAG:41 == 2 || TFLAG:41 == 6 || TFLAG:41 == 7
+	EXP:ASSI:삽입경험 += 1
+
+;奴隷が主人か助손のＶかＡに挿入している
+SIF TFLAG:49 == 6 || TFLAG:49 == 7 || TFLAG:49 == 11 || TFLAG:49 == 12
+	EXP:삽입경험 += 1
+
+
+EXP:성교경험 += 2
+PRINTFORML %CALLNAME%の성교경험＋2
+
+EXP:ASSI:성교경험 += 2
+PRINTFORML %CALLNAME:ASSI%の성교경험＋2
+
+EXP:MASTER:성교경험 += 2
+PRINTFORML %CALLNAME:PLAYER%の성교경험＋2
+
+
+;게이경험とか加算
+CALL COM_EXP(7)
+
+;依存度ベクトル
+TFLAG:33 = 1
+
+
+RETURN 1
+
+
